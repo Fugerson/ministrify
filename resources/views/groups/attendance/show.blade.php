@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Зустріч ' . $attendance->date->format('d.m.Y'))
+@section('title', __('app.group_meeting_title') . ' ' . $attendance->date->format('d.m.Y'))
 
 @section('actions')
 @can('update', $group)
@@ -9,7 +9,7 @@
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
         </svg>
-        Редагувати
+        {{ __('app.edit') }}
     </a>
     <button type="button"
             @click="ajaxDelete('{{ route('groups.attendance.destroy', [$group, $attendance]) }}', '{{ __('messages.confirm_delete_record') }}', null, '{{ route('groups.show', $group) }}')"
@@ -17,7 +17,7 @@
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
         </svg>
-        Видалити
+        {{ __('app.delete') }}
     </button>
 </div>
 @endcan
@@ -31,7 +31,7 @@
         <svg class="w-4 h-4 mx-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
         </svg>
-        <a href="{{ route('groups.attendance.index', $group) }}" class="hover:text-primary-600">Відвідуваність</a>
+        <a href="{{ route('groups.attendance.index', $group) }}" class="hover:text-primary-600">{{ __('app.attendance') }}</a>
         <svg class="w-4 h-4 mx-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
         </svg>
@@ -65,9 +65,9 @@
             </div>
             <div class="text-right">
                 <div class="text-3xl font-bold text-primary-600 dark:text-primary-400">{{ $attendance->members_present }}</div>
-                <div class="text-sm text-gray-500">з {{ $group->members->count() }} ({{ $attendance->attendance_rate }}%)</div>
+                <div class="text-sm text-gray-500">{{ __('app.group_of_total', ['total' => $group->members->count()]) }} ({{ $attendance->attendance_rate }}%)</div>
                 @if($attendance->guests_count > 0)
-                <div class="text-sm text-green-600 dark:text-green-400 mt-1">+{{ $attendance->guests_count }} гостей</div>
+                <div class="text-sm text-green-600 dark:text-green-400 mt-1">+{{ $attendance->guests_count }} {{ __('app.group_guests') }}</div>
                 @endif
             </div>
         </div>
@@ -80,7 +80,7 @@
 
         @if($attendance->recorder)
         <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 text-sm text-gray-500 dark:text-gray-400">
-            Записав: {{ $attendance->recorder->name }} • {{ $attendance->created_at->format('d.m.Y H:i') }}
+            {{ __('app.group_recorded_by') }}: {{ $attendance->recorder->name }} • {{ $attendance->created_at->format('d.m.Y H:i') }}
         </div>
         @endif
     </div>
@@ -88,7 +88,7 @@
     <!-- Attendance List -->
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
         <div class="p-4 border-b border-gray-200 dark:border-gray-700">
-            <h3 class="font-semibold text-gray-900 dark:text-white">Присутність</h3>
+            <h3 class="font-semibold text-gray-900 dark:text-white">{{ __('app.group_presence') }}</h3>
         </div>
         <div class="divide-y divide-gray-200 dark:divide-gray-700">
             @foreach($attendance->records->sortByDesc('present') as $record)
@@ -110,7 +110,7 @@
                     <div>
                         <p class="font-medium text-gray-900 dark:text-white">{{ $record->person->full_name }}</p>
                         @if($record->checked_in_at)
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Чек-ін о {{ $record->checked_in_at->format('H:i') }}</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.group_checkin_at') }} {{ $record->checked_in_at->format('H:i') }}</p>
                         @endif
                     </div>
                 </div>
@@ -120,14 +120,14 @@
                         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                         </svg>
-                        Присутній
+                        {{ __('app.group_present') }}
                     </span>
                     @else
                     <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-sm font-medium bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400">
                         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                         </svg>
-                        Відсутній
+                        {{ __('app.group_absent') }}
                     </span>
                     @endif
                 </div>

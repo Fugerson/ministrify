@@ -357,7 +357,7 @@
                                                 </div>
                                                 <div>
                                                     <p class="font-medium text-gray-900 dark:text-white text-sm" x-text="event.title"></p>
-                                                    <p class="text-xs text-gray-500 dark:text-gray-400" x-text="event.fullDate + ' о ' + event.time"></p>
+                                                    <p class="text-xs text-gray-500 dark:text-gray-400" x-text="event.fullDate + '{{ __('app.ministry_at_time') }}' + event.time"></p>
                                                 </div>
                                             </div>
                                             <div class="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
@@ -484,7 +484,7 @@
                                                                         <template x-if="song.key">
                                                                             <span class="text-xs text-gray-500 dark:text-gray-400" x-text="song.key"></span>
                                                                         </template>
-                                                                        <span class="text-xs text-blue-500" x-text="(new Set(song.team?.map(t => t.person_id) || [])).size + ' уч.'"></span>
+                                                                        <span class="text-xs text-blue-500" x-text="(new Set(song.team?.map(t => t.person_id) || [])).size + ' {{ __('app.ministry_participants_short') }}'"></span>
                                                                     </div>
                                                                 </div>
                                                                 @if($canEditEvent)
@@ -598,7 +598,7 @@
                                                             <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
                                                             </svg>
-                                                            Команда
+                                                            {{ __('app.ministry_team_label') }}
                                                         </h4>
                                                         <div class="flex-1 overflow-y-auto mb-3">
                                                             <template x-if="modalGeneralTeam.length > 0">
@@ -625,7 +625,7 @@
                                                                     <svg class="w-12 h-12 text-gray-300 dark:text-gray-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
                                                                     </svg>
-                                                                    <p class="text-sm text-gray-500 dark:text-gray-400">Оберіть пісню зліва,<br>щоб призначити команду</p>
+                                                                    <p class="text-sm text-gray-500 dark:text-gray-400">{!! __('app.ministry_select_song_hint') !!}</p>
                                                                 </div>
                                                             </template>
                                                         </div>
@@ -639,7 +639,7 @@
                                                             <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
                                                             </svg>
-                                                            Команда
+                                                            {{ __('app.ministry_team_label') }}
                                                         </h4>
 
                                                         <div class="flex-1 overflow-y-auto mb-3">
@@ -731,7 +731,7 @@
                                 isWorshipMinistry: {{ $ministry->is_worship_ministry ? 'true' : 'false' }},
                                 ministryId: {{ $ministry->id }},
                                 gridUrl: '{{ route('ministries.schedule-grid', $ministry) }}',
-                                monthNames: ['Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень', 'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'],
+                                monthNames: @json([__('app.january'), __('app.february'), __('app.march'), __('app.april'), __('app.may'), __('app.june'), __('app.july'), __('app.august'), __('app.september'), __('app.october'), __('app.november'), __('app.december')]),
 
                                 // Grid state
                                 gridView: new URL(window.location).searchParams.get('view') === 'grid',
@@ -813,7 +813,7 @@
                                 },
 
                                 updateSongSelect(el) {
-                                    let html = '<option value="">Оберіть пісню...</option>';
+                                    let html = '<option value="">{{ __('app.ministry_select_song_placeholder') }}</option>';
                                     this.modalAvailableSongs.filter(s => !s.inEvent).forEach(s => {
                                         html += '<option value="' + s.id + '">' + s.title + (s.key ? ' (' + s.key + ')' : '') + '</option>';
                                     });
@@ -821,7 +821,7 @@
                                 },
 
                                 updateMemberSelect(el) {
-                                    let html = '<option value="">Учасник...</option>';
+                                    let html = '<option value="">{{ __('app.ministry_member_placeholder') }}</option>';
                                     this.modalMembers.forEach(m => {
                                         html += '<option value="' + m.id + '">' + m.name + '</option>';
                                     });
@@ -829,7 +829,7 @@
                                 },
 
                                 updateRoleSelect(el) {
-                                    let html = '<option value="">Роль...</option>';
+                                    let html = '<option value="">{{ __('app.ministry_role_placeholder') }}</option>';
                                     this.modalRoles.forEach(r => {
                                         html += '<option value="' + r.id + '">' + r.name + '</option>';
                                     });
@@ -1316,7 +1316,7 @@
                                                 this.gridData = { ...this.gridData, grid: { ...this.gridData.grid } };
                                             }
                                         } else {
-                                            alert(result.message || 'Помилка');
+                                            alert(result.message || '{{ __('app.ministry_error_fallback') }}');
                                         }
                                     } catch (error) {
                                         console.error('Error sending notification:', error);
@@ -1349,10 +1349,10 @@
                           class="flex-1 min-w-0">
                         <div class="flex gap-2">
                             <div class="flex-1">
-                                <x-person-select name="person_id" :people="$availablePeople" placeholder="Додати учасника..." :required="true" :nullable="false" />
+                                <x-person-select name="person_id" :people="$availablePeople" placeholder="{{ __('app.ministry_add_member_placeholder') }}" :required="true" :nullable="false" />
                             </div>
                             <button type="submit" :disabled="saving" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg whitespace-nowrap text-sm">
-                                Додати
+                                {{ __('app.ministry_add_btn') }}
                             </button>
                         </div>
                     </form>
@@ -1367,17 +1367,17 @@
                     <div class="inline-flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg p-0.5">
                         <button @click="membersView = 'grid'" type="button"
                                 :class="membersView === 'grid' ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'"
-                                class="p-1.5 rounded-md transition-all" title="Сітка">
+                                class="p-1.5 rounded-md transition-all" title="{{ __('app.ministry_view_grid') }}">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
                         </button>
                         <button @click="membersView = 'list'" type="button"
                                 :class="membersView === 'list' ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'"
-                                class="p-1.5 rounded-md transition-all" title="Список">
+                                class="p-1.5 rounded-md transition-all" title="{{ __('app.ministry_view_list') }}">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
                         </button>
                         <button @click="membersView = 'compact'" type="button"
                                 :class="membersView === 'compact' ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'"
-                                class="p-1.5 rounded-md transition-all" title="Компактний">
+                                class="p-1.5 rounded-md transition-all" title="{{ __('app.ministry_view_compact') }}">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
                         </button>
                     </div>
@@ -1457,7 +1457,7 @@
                                                             'bg-primary-100 text-primary-800 dark:bg-primary-900/30 dark:text-primary-400 hover:bg-primary-200 dark:hover:bg-primary-900/50': role === 'co-leader',
                                                             'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600': role === 'member'
                                                         }">
-                                                    <span x-text="role === 'leader' ? 'Лідер' : (role === 'co-leader' ? 'Со-лідер' : 'Учасник')"></span>
+                                                    <span x-text="role === 'leader' ? '{{ __('app.ministry_role_leader') }}' : (role === 'co-leader' ? '{{ __('app.ministry_role_co_leader') }}' : '{{ __('app.ministry_role_member') }}')"></span>
                                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                                                 </button>
                                                 <div x-show="open" @click.away="open = false" x-transition
@@ -1465,26 +1465,26 @@
                                                     <button type="button" @click="setRole('leader')" :disabled="saving"
                                                             class="w-full text-left px-3 py-1.5 text-xs hover:bg-gray-50 dark:hover:bg-gray-600 flex items-center gap-2"
                                                             :class="role === 'leader' ? 'text-amber-700 dark:text-amber-400 font-semibold' : 'text-gray-700 dark:text-gray-300'">
-                                                        <span class="w-2 h-2 rounded-full bg-amber-400"></span> Лідер
+                                                        <span class="w-2 h-2 rounded-full bg-amber-400"></span> {{ __('app.ministry_role_leader') }}
                                                     </button>
                                                     <button type="button" @click="setRole('co-leader')" :disabled="saving"
                                                             class="w-full text-left px-3 py-1.5 text-xs hover:bg-gray-50 dark:hover:bg-gray-600 flex items-center gap-2"
                                                             :class="role === 'co-leader' ? 'text-primary-700 dark:text-primary-400 font-semibold' : 'text-gray-700 dark:text-gray-300'">
-                                                        <span class="w-2 h-2 rounded-full bg-primary-400"></span> Со-лідер
+                                                        <span class="w-2 h-2 rounded-full bg-primary-400"></span> {{ __('app.ministry_role_co_leader') }}
                                                     </button>
                                                     <button type="button" @click="setRole('member')" :disabled="saving"
                                                             class="w-full text-left px-3 py-1.5 text-xs hover:bg-gray-50 dark:hover:bg-gray-600 flex items-center gap-2"
                                                             :class="role === 'member' ? 'text-gray-900 dark:text-white font-semibold' : 'text-gray-700 dark:text-gray-300'">
-                                                        <span class="w-2 h-2 rounded-full bg-gray-400"></span> Учасник
+                                                        <span class="w-2 h-2 rounded-full bg-gray-400"></span> {{ __('app.ministry_role_member') }}
                                                     </button>
                                                 </div>
                                             </div>
                                             @else
                                             <template x-if="role === 'leader'">
-                                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">Лідер</span>
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">{{ __('app.ministry_role_leader') }}</span>
                                             </template>
                                             <template x-if="role === 'co-leader'">
-                                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800 dark:bg-primary-900/30 dark:text-primary-400">Со-лідер</span>
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800 dark:bg-primary-900/30 dark:text-primary-400">{{ __('app.ministry_role_co_leader') }}</span>
                                             </template>
                                             @endcan
                                         </div>
@@ -1606,7 +1606,7 @@
                                                         'bg-primary-100 text-primary-800 dark:bg-primary-900/30 dark:text-primary-400': role === 'co-leader',
                                                         'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400': role === 'member'
                                                     }">
-                                                <span x-text="role === 'leader' ? 'Лідер' : (role === 'co-leader' ? 'Со-лідер' : 'Учасник')"></span>
+                                                <span x-text="role === 'leader' ? '{{ __('app.ministry_role_leader') }}' : (role === 'co-leader' ? '{{ __('app.ministry_role_co_leader') }}' : '{{ __('app.ministry_role_member') }}')"></span>
                                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                                             </button>
                                             <div x-show="open" @click.away="open = false" x-transition
@@ -1705,7 +1705,7 @@
                                 </a>
 
                                 <span class="text-xs text-gray-400 dark:text-gray-500 shrink-0"
-                                      x-text="role === 'leader' ? 'Лідер' : (role === 'co-leader' ? 'Со-лідер' : '')"></span>
+                                      x-text="role === 'leader' ? '{{ __('app.ministry_role_leader') }}' : (role === 'co-leader' ? '{{ __('app.ministry_role_co_leader') }}' : '')"></span>
 
                                 <span class="flex-1"></span>
 

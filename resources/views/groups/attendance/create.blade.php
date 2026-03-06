@@ -64,7 +64,7 @@
                         <span class="ml-3 text-gray-900 dark:text-white">{{ $member->full_name }}</span>
                         @if($member->pivot->role !== 'member')
                         <span class="ml-auto text-xs text-gray-500 dark:text-gray-400">
-                            {{ $member->pivot->role === 'leader' ? 'Лідер' : 'Помічник' }}
+                            {{ $member->pivot->role === 'leader' ? __('app.leader') : __('app.assistant_role') }}
                         </span>
                         @endif
                     </label>
@@ -73,21 +73,21 @@
             </div>
 
             <div>
-                <label for="notes" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Нотатки</label>
+                <label for="notes" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.notes') }}</label>
                 <textarea name="notes" id="notes" rows="3"
-                          placeholder="Що обговорювали, молитовні потреби..."
+                          placeholder="{{ __('app.group_notes_placeholder') }}"
                           class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">{{ old('notes') }}</textarea>
             </div>
 
             <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
                 <a href="{{ route('groups.show', $group) }}" class="px-5 py-2.5 text-gray-700 dark:text-gray-300 hover:text-gray-900 font-medium">
-                    Скасувати
+                    {{ __('app.cancel') }}
                 </a>
                 <button type="submit" :disabled="saving" class="px-5 py-2.5 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 transition-colors disabled:opacity-50">
-                    <span x-show="!saving">Зберегти</span>
+                    <span x-show="!saving">{{ __('app.save') }}</span>
                     <span x-show="saving" class="inline-flex items-center gap-2">
                         <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
-                        Збереження...
+                        {{ __('app.saving') }}
                     </span>
                 </button>
             </div>

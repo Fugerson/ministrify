@@ -28,7 +28,7 @@
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6" x-data="eventEditor()">
         <div class="flex items-start justify-between gap-4">
             <div class="flex items-center flex-1">
-                <button onclick="history.back()" title="{{ __('Назад') }}"
+                <button onclick="history.back()" title="{{ __('app.schedule_back_to_schedule') }}"
                         class="w-10 h-10 mr-3 flex items-center justify-center rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 transition-colors shrink-0">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
@@ -66,7 +66,7 @@
                                     @click="ministryId = null; ministryColor = '#6b7280'; saveMinistry(); showDropdown = false"
                                     class="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
                                 <span class="w-3 h-3 rounded-full bg-gray-400"></span>
-                                <span class="text-gray-500 dark:text-gray-400">{{ __('Без команди') }}</span>
+                                <span class="text-gray-500 dark:text-gray-400">{{ __('app.schedule_without_team') }}</span>
                             </button>
                             <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
                             <template x-for="ministry in ministries" :key="ministry.id">
@@ -101,7 +101,7 @@
                             }
                         "
                                class="w-4 h-4 text-primary-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500">
-                        <span class="text-xs text-gray-600 dark:text-gray-400">{{ __('Весь день') }}</span>
+                        <span class="text-xs text-gray-600 dark:text-gray-400">{{ __('app.schedule_all_day') }}</span>
                     </label>
                 </div>
                 <input type="date" x-model="date" @change="saveField('date', date)"
@@ -110,7 +110,7 @@
                        class="text-gray-500 dark:text-gray-400 bg-transparent border-0 border-b border-transparent hover:border-gray-300 dark:hover:border-gray-600 focus:border-primary-500 focus:ring-0 p-0 pb-1 text-right block ml-auto cursor-pointer">
                 @else
                 <span class="text-xl font-bold text-gray-900 dark:text-white" x-text="date"></span>
-                <span class="text-gray-500 dark:text-gray-400 block text-right" x-text="time || '(весь день)'"></span>
+                <span class="text-gray-500 dark:text-gray-400 block text-right" x-text="time || '{{ __("app.schedule_all_day_parenthesis") }}'"></span>
                 @endif
                 @if($event->google_event_id)
                     <span class="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800">
@@ -129,7 +129,7 @@
         <div class="mt-4">
             @if($canEdit)
             <textarea x-model="notes" @change="saveField('notes', notes)"
-                      placeholder="Додати примітки..."
+                      placeholder="{{ __('app.schedule_add_notes') }}"
                       rows="2"
                       class="w-full px-3 py-2 text-sm text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-primary-500 focus:border-primary-500 resize-none"></textarea>
             @elseif($event->notes)
@@ -149,7 +149,7 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
                 </svg>
-                <span>{{ $confirmedResp }}/{{ $totalResp }} відповідальностей</span>
+                <span>{{ $confirmedResp }}/{{ $totalResp }} {{ __('app.schedule_responsibilities_count') }}</span>
             </div>
             @endif
             @if($event->checklist && $event->checklist->items->count() > 0)
@@ -157,7 +157,7 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
                     </svg>
-                    <span>Чеклист: {{ $event->checklist->progress }}%</span>
+                    <span>{{ __('app.schedule_checklist_progress') }}: {{ $event->checklist->progress }}%</span>
                 </div>
             @endif
         </div>
@@ -174,7 +174,7 @@
                             <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                             </svg>
-                            <h2 class="font-semibold text-gray-900 dark:text-white">План події</h2>
+                            <h2 class="font-semibold text-gray-900 dark:text-white">{{ __('app.schedule_event_plan') }}</h2>
                         </div>
                         <div class="flex items-center gap-2" x-data="planTemplatesManager()">
                             @if($canEdit)
@@ -182,7 +182,7 @@
                             <div class="relative" x-data="{ open: false }">
                                 <button @click="open = !open" type="button"
                                         class="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg flex items-center gap-1">
-                                    📋 Шаблон
+                                    📋 {{ __('app.schedule_template') }}
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                                     </svg>
@@ -191,9 +191,9 @@
                                      class="absolute right-0 mt-1 w-48 sm:w-56 max-w-[calc(100vw-2rem)] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-20">
                                     {{-- Custom templates --}}
                                     <div class="p-2">
-                                        <p class="text-xs text-gray-500 dark:text-gray-400 font-medium mb-1">Мої шаблони</p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 font-medium mb-1">{{ __('app.schedule_my_templates') }}</p>
                                         <template x-if="customTemplates.length === 0">
-                                            <p class="text-xs text-gray-400 dark:text-gray-500 py-1">Немає шаблонів</p>
+                                            <p class="text-xs text-gray-400 dark:text-gray-500 py-1">{{ __('app.schedule_no_templates') }}</p>
                                         </template>
                                         <template x-for="tpl in customTemplates" :key="tpl.id">
                                             <div class="flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 rounded">
@@ -203,7 +203,7 @@
                                                     <span class="text-xs text-gray-400" x-text="'(' + tpl.items_count + ')'"></span>
                                                 </button>
                                                 <button type="button" @click.stop="deleteTemplate(tpl.id)"
-                                                        class="p-1 text-gray-400 hover:text-red-500" title="Видалити">
+                                                        class="p-1 text-gray-400 hover:text-red-500" title="{{ __('app.schedule_delete') }}">
                                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                                     </svg>
@@ -216,14 +216,14 @@
 
                             {{-- Save as Template Button --}}
                             <button type="button" @click="showSaveModal = true"
-                                    class="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="Зберегти як шаблон">
-                                💾 Зберегти
+                                    class="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="{{ __('app.schedule_save_as_template') }}">
+                                💾 {{ __('app.schedule_save') }}
                             </button>
                             @endif
 
                             <a href="{{ route('events.plan.print', $event) }}" target="_blank"
-                               class="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="Друк">
-                                🖨️ Друк
+                               class="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="{{ __('app.schedule_print') }}">
+                                🖨️ {{ __('app.schedule_print') }}
                             </a>
 
                             {{-- Save Template Modal --}}
@@ -232,31 +232,31 @@
                                  @keydown.escape.window="showSaveModal = false">
                                 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md mx-4" @click.outside="showSaveModal = false">
                                     <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Зберегти план як шаблон</h3>
+                                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.schedule_save_plan_as_template') }}</h3>
                                     </div>
                                     <div class="p-6 space-y-4">
                                         <div>
-                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Назва шаблону</label>
-                                            <input type="text" x-model="templateName" placeholder="Наприклад: Недільне богослужіння"
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.schedule_template_name') }}</label>
+                                            <input type="text" x-model="templateName" placeholder="{{ __('app.schedule_template_name_placeholder') }}"
                                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-primary-500 focus:border-primary-500">
                                         </div>
                                         <div class="flex items-center gap-2">
                                             <input type="checkbox" id="includeResponsible" x-model="includeResponsible"
                                                    class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500">
                                             <label for="includeResponsible" class="text-sm text-gray-700 dark:text-gray-300">
-                                                Включити відповідальних
+                                                {{ __('app.schedule_include_responsible') }}
                                             </label>
                                         </div>
                                     </div>
                                     <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-2">
                                         <button type="button" @click="showSaveModal = false"
                                                 class="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-                                            Скасувати
+                                            {{ __('app.schedule_cancel') }}
                                         </button>
                                         <button type="button" @click="saveAsTemplate()"
                                                 :disabled="!templateName.trim()"
                                                 class="px-4 py-2 text-sm bg-primary-600 hover:bg-primary-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed">
-                                            Зберегти
+                                            {{ __('app.schedule_save') }}
                                         </button>
                                     </div>
                                 </div>
@@ -270,10 +270,10 @@
                         <thead class="bg-gray-50 dark:bg-gray-700/50 text-xs uppercase text-gray-500 dark:text-gray-400 sticky top-0 z-10">
                             <tr>
                                 <th class="px-1 py-4" style="width: 30px;"></th>
-                                <th class="px-3 py-4 text-left" style="width: 70px;">Час</th>
-                                <th class="px-3 py-4 text-left" style="width: 40%;">Що відбувається</th>
-                                <th class="px-3 py-4 text-left" style="width: 1px;">Відповідальний</th>
-                                <th class="px-3 py-4 text-left" style="width: 25%;">Коментарі</th>
+                                <th class="px-3 py-4 text-left" style="width: 70px;">{{ __('app.schedule_time_col') }}</th>
+                                <th class="px-3 py-4 text-left" style="width: 40%;">{{ __('app.schedule_what_happens') }}</th>
+                                <th class="px-3 py-4 text-left" style="width: 1px;">{{ __('app.schedule_responsible') }}</th>
+                                <th class="px-3 py-4 text-left" style="width: 25%;">{{ __('app.schedule_comments') }}</th>
                                 <th class="px-2 py-4" style="width: 40px;"></th>
                             </tr>
                         </thead>
@@ -321,7 +321,7 @@
                                                           @keydown.arrow-down.prevent="if(showSongs) songIndex = Math.min(songIndex + 1, filteredSongs().length - 1)"
                                                           @keydown.arrow-up.prevent="if(showSongs) songIndex = Math.max(songIndex - 1, 0)"
                                                           @keydown.enter.prevent="if(showSongs && filteredSongs().length) { insertSongLink(filteredSongs()[songIndex]); } else { saveTitle(); editing = false; }"
-                                                          placeholder="Текст... (введіть song- для пошуку пісні)"
+                                                          placeholder="{{ __('app.schedule_text_song_placeholder') }}"
                                                           rows="1"
                                                           class="w-full px-1 py-1 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-700 border border-primary-300 focus:ring-1 focus:ring-primary-500 rounded resize-none break-words"
                                                           style="word-wrap: break-word; overflow-wrap: break-word;"></textarea>
@@ -329,13 +329,13 @@
                                                      class="absolute left-0 right-0 top-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto">
                                                     <template x-if="SONGS_DATA.length === 0">
                                                         <div class="px-3 py-3 text-center text-gray-500 dark:text-gray-400 text-sm">
-                                                            Команда прославлення ще не обрала пісні.
+                                                            {{ __('app.schedule_worship_no_songs') }}
                                                             @if($event->service_type === 'sunday_service')
                                                                 @php
                                                                     $worshipMinistry = \App\Models\Ministry::where('church_id', $event->church_id)->where('is_worship_ministry', true)->first();
                                                                 @endphp
                                                                 @if($worshipMinistry)
-                                                                    <a href="{{ route('ministries.show', ['ministry' => $worshipMinistry, 'tab' => 'schedule']) }}" class="text-primary-600 hover:underline">Обрати пісні</a>
+                                                                    <a href="{{ route('ministries.show', ['ministry' => $worshipMinistry, 'tab' => 'schedule']) }}" class="text-primary-600 hover:underline">{{ __('app.schedule_choose_songs') }}</a>
                                                                 @endif
                                                             @endif
                                                         </div>
@@ -416,7 +416,7 @@
                                                             x-show="person.hasTelegram && (!person.status || person.status === 'declined')"
                                                             @click="askPerson(person, index)"
                                                             class="text-blue-500 hover:text-blue-700"
-                                                            :title="person.status === 'declined' ? 'Запитати ще раз' : 'Запитати в Telegram'">
+                                                            :title="person.status === 'declined' ? '{{ __("app.schedule_ask_again") }}' : '{{ __("app.schedule_ask_telegram") }}'">
                                                         <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
                                                             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .37z"/>
                                                         </svg>
@@ -427,14 +427,14 @@
                                                             x-show="person.hasTelegram && person.status === 'pending'"
                                                             @click="askPerson(person, index)"
                                                             class="text-yellow-600 hover:text-yellow-700"
-                                                            title="Нагадати">
+                                                            title="{{ __('app.schedule_remind') }}">
                                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
                                                         </svg>
                                                     </button>
 
                                                     {{-- No telegram indicator --}}
-                                                    <span x-show="person.id && !person.hasTelegram && !person.status" class="text-gray-400" title="Немає Telegram">
+                                                    <span x-show="person.id && !person.hasTelegram && !person.status" class="text-gray-400" title="{{ __('app.schedule_no_telegram') }}">
                                                         <svg class="w-3 h-3 opacity-50" fill="currentColor" viewBox="0 0 24 24">
                                                             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .37z"/>
                                                         </svg>
@@ -457,14 +457,14 @@
                                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                                     </svg>
-                                                    <span x-show="people.length === 0">Додати</span>
+                                                    <span x-show="people.length === 0">{{ __('app.schedule_add') }}</span>
                                                 </button>
 
                                                 {{-- Dropdown --}}
                                                 <div x-show="open" x-cloak @click.outside="open = false"
                                                      class="absolute z-50 left-0 mt-1 w-48 sm:w-56 max-w-[calc(100vw-2rem)] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
                                                     <div class="p-2 border-b border-gray-200 dark:border-gray-700">
-                                                        <input type="text" x-model="search" placeholder="Пошук..."
+                                                        <input type="text" x-model="search" placeholder="{{ __('app.schedule_search') }}"
                                                                class="w-full px-2 py-1 text-sm border border-gray-200 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                                                     </div>
                                                     <div class="max-h-48 overflow-y-auto">
@@ -496,7 +496,7 @@
                                     </td>
                                     {{-- Коментарі --}}
                                     <td class="px-3 py-3 border-r border-gray-200 dark:border-gray-700 align-top">
-                                        <textarea placeholder="Примітки..."
+                                        <textarea placeholder="{{ __('app.schedule_notes_placeholder') }}"
                                                   @change="updateField({{ $item->id }}, 'notes', $event.target.value)"
                                                   rows="1"
                                                   class="w-full px-1 py-1 text-sm text-gray-500 dark:text-gray-400 bg-transparent border-0 focus:ring-1 focus:ring-primary-500 rounded resize-none break-words"
@@ -509,7 +509,7 @@
                                         <button type="button"
                                                 @click="deleteItem({{ $item->id }})"
                                                 class="p-1 text-gray-400 hover:text-red-500 transition-colors"
-                                                title="Видалити">
+                                                title="{{ __('app.schedule_delete_item') }}">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                             </svg>
@@ -519,7 +519,7 @@
                             @empty
                                 <tr id="empty-row">
                                     <td colspan="6" class="px-4 py-8 text-center text-gray-400 text-sm">
-                                        Почніть додавати пункти плану нижче
+                                        {{ __('app.schedule_start_adding') }}
                                     </td>
                                 </tr>
                             @endforelse
@@ -542,26 +542,26 @@
                                    @keydown.arrow-down.prevent="if(showSongs) songIndex = Math.min(songIndex + 1, filteredSongsForNew().length - 1)"
                                    @keydown.arrow-up.prevent="if(showSongs) songIndex = Math.max(songIndex - 1, 0)"
                                    @keydown.enter.prevent="if(showSongs && filteredSongsForNew().length) { selectSongForNew(filteredSongsForNew()[songIndex]); } else { $el.form.requestSubmit(); }"
-                                   placeholder="Що відбувається... (song- для пісні)" required
+                                   placeholder="{{ __('app.schedule_what_happens_placeholder') }}" required
                                    class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">
                             <div x-show="showSongs" x-transition @click.away="showSongs = false"
                                  class="absolute left-0 right-0 top-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto">
                                 <template x-if="SONGS_DATA.length === 0">
                                     <div class="px-3 py-4 text-center text-gray-500 dark:text-gray-400 text-sm">
-                                        Команда прославлення ще не обрала пісні.
+                                        {{ __('app.schedule_worship_no_songs') }}
                                         @if($event->service_type === 'sunday_service')
                                             @php
                                                 $wm = \App\Models\Ministry::where('church_id', $event->church_id)->where('is_worship_ministry', true)->first();
                                             @endphp
                                             @if($wm)
-                                                <a href="{{ route('ministries.show', ['ministry' => $wm, 'tab' => 'schedule']) }}" class="text-primary-600 hover:underline">Обрати пісні</a>
+                                                <a href="{{ route('ministries.show', ['ministry' => $wm, 'tab' => 'schedule']) }}" class="text-primary-600 hover:underline">{{ __('app.schedule_choose_songs') }}</a>
                                             @endif
                                         @endif
                                     </div>
                                 </template>
                                 <template x-if="SONGS_DATA.length > 0 && filteredSongsForNew().length === 0">
                                     <div class="px-3 py-3 text-center text-gray-500 dark:text-gray-400 text-sm">
-                                        Нічого не знайдено
+                                        {{ __('app.schedule_nothing_found') }}
                                     </div>
                                 </template>
                                 <template x-for="(song, index) in filteredSongsForNew()" :key="song.id">
@@ -588,12 +588,12 @@
                                         </button>
                                     </span>
                                 </template>
-                                <span x-show="newResponsible.people.length === 0" class="text-sm text-gray-400">Відповідальний</span>
+                                <span x-show="newResponsible.people.length === 0" class="text-sm text-gray-400">{{ __('app.schedule_responsible') }}</span>
                             </div>
                             <div x-show="newResponsible.open" x-cloak @click.outside="newResponsible.open = false"
                                  class="absolute z-50 left-0 bottom-full mb-1 w-48 sm:w-56 max-w-[calc(100vw-2rem)] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
                                 <div class="p-2 border-b border-gray-200 dark:border-gray-700">
-                                    <input type="text" x-model="newResponsible.search" placeholder="Пошук..."
+                                    <input type="text" x-model="newResponsible.search" placeholder="{{ __('app.schedule_search') }}"
                                            @click.stop
                                            class="w-full px-2 py-1 text-sm border border-gray-200 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                                 </div>
@@ -608,10 +608,10 @@
                                 </div>
                             </div>
                         </div>
-                        <input type="text" x-model="newItem.notes" placeholder="Коментар"
+                        <input type="text" x-model="newItem.notes" placeholder="{{ __('app.schedule_comment_placeholder') }}"
                                class="w-32 px-2 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">
                         <button type="submit" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm rounded-lg font-medium">
-                            + Додати
+                            {{ __('app.schedule_add_btn') }}
                         </button>
                     </form>
                 </div>
@@ -633,7 +633,7 @@
                 // Position-based assignments
                 foreach ($event->assignments as $assignment) {
                     if (!$assignment->person || !$assignment->position) continue;
-                    $ministryName = $assignment->position->ministry?->name ?? __('Інше');
+                    $ministryName = $assignment->position->ministry?->name ?? __('app.schedule_other');
                     $ministryColor = $assignment->position->ministry?->color ?? '#6B7280';
                     $eventTeam->push((object)[
                         'ministry_name' => $ministryName,
@@ -648,7 +648,7 @@
                 // Role-based ministry teams
                 foreach ($event->ministryTeams as $member) {
                     if (!$member->person) continue;
-                    $ministryName = $member->ministry?->name ?? __('Інше');
+                    $ministryName = $member->ministry?->name ?? __('app.schedule_other');
                     $ministryColor = $member->ministry?->color ?? '#6B7280';
                     $eventTeam->push((object)[
                         'ministry_name' => $ministryName,

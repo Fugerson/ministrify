@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Чек-ін: ' . $group->name)
+@section('title', __('app.group_checkin') . ': ' . $group->name)
 
 @section('content')
 <div class="max-w-2xl mx-auto space-y-6">
@@ -21,8 +21,8 @@
     <!-- Members List -->
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
         <div class="p-4 border-b border-gray-200 dark:border-gray-700">
-            <h3 class="font-semibold text-gray-900 dark:text-white">Відмітити присутніх</h3>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Натисніть на учасника щоб відмітити</p>
+            <h3 class="font-semibold text-gray-900 dark:text-white">{{ __('app.group_mark_present') }}</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.group_tap_to_mark') }}</p>
         </div>
         <div class="divide-y divide-gray-200 dark:divide-gray-700">
             @foreach($group->members->sortBy('first_name') as $member)
@@ -51,11 +51,11 @@
                         <p class="font-medium text-gray-900 dark:text-white">{{ $member->full_name }}</p>
                         <p class="text-sm text-gray-500 dark:text-gray-400">
                             @if($member->pivot->role === 'leader')
-                            Лідер
+                            {{ __('app.leader') }}
                             @elseif($member->pivot->role === 'assistant')
-                            Помічник
+                            {{ __('app.assistant_role') }}
                             @else
-                            Учасник
+                            {{ __('app.member_role') }}
                             @endif
                         </p>
                     </div>
@@ -75,10 +75,10 @@
     <!-- Quick Actions -->
     <div class="flex gap-3">
         <button type="button" onclick="markAllPresent()" class="flex-1 px-4 py-3 bg-green-600 text-white rounded-xl font-medium hover:bg-green-700 transition-colors">
-            Усі присутні
+            {{ __('app.group_all_present') }}
         </button>
         <a href="{{ route('groups.show', $group) }}" class="flex-1 px-4 py-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-xl font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-center">
-            Готово
+            {{ __('app.group_done') }}
         </a>
     </div>
 </div>

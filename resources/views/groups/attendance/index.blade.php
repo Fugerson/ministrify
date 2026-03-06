@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Відвідуваність: ' . $group->name)
+@section('title', __('app.attendance') . ': ' . $group->name)
 
 @section('actions')
 @can('update', $group)
@@ -9,13 +9,13 @@
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
         </svg>
-        Чек-ін
+        {{ __('app.group_checkin') }}
     </a>
     <a href="{{ route('groups.attendance.create', $group) }}" class="inline-flex items-center px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-xl hover:bg-primary-700 transition-colors">
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
         </svg>
-        Записати
+        {{ __('app.group_record') }}
     </a>
 </div>
 @endcan
@@ -25,7 +25,7 @@
 <div class="space-y-6">
     <!-- Breadcrumb -->
     <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
-        <a href="{{ route('groups.index') }}" class="hover:text-primary-600">Групи</a>
+        <a href="{{ route('groups.index') }}" class="hover:text-primary-600">{{ __('app.groups') }}</a>
         <svg class="w-4 h-4 mx-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
         </svg>
@@ -33,33 +33,33 @@
         <svg class="w-4 h-4 mx-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
         </svg>
-        <span>Відвідуваність</span>
+        <span>{{ __('app.attendance') }}</span>
     </div>
 
     <!-- Stats -->
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
             <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $attendances->total() }}</div>
-            <div class="text-sm text-gray-500 dark:text-gray-400">Всього зустрічей</div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.group_total_meetings') }}</div>
         </div>
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
             <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $group->members->count() }}</div>
-            <div class="text-sm text-gray-500 dark:text-gray-400">Учасників</div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.members') }}</div>
         </div>
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
             <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ round($attendances->avg('members_present'), 1) }}</div>
-            <div class="text-sm text-gray-500 dark:text-gray-400">Сер. відвідуваність</div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.avg_attendance') }}</div>
         </div>
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
             <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $attendances->sum('guests_count') }}</div>
-            <div class="text-sm text-gray-500 dark:text-gray-400">Всього гостей</div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.group_total_guests') }}</div>
         </div>
     </div>
 
     <!-- Chart -->
     @if($chartData->count() > 1)
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-        <h3 class="font-semibold text-gray-900 dark:text-white mb-4">Тренд відвідуваності</h3>
+        <h3 class="font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.attendance_trend') }}</h3>
         <div class="h-48">
             <canvas id="attendanceChart"></canvas>
         </div>
@@ -69,7 +69,7 @@
     <!-- Attendance List -->
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
         <div class="p-4 border-b border-gray-200 dark:border-gray-700">
-            <h3 class="font-semibold text-gray-900 dark:text-white">Історія зустрічей</h3>
+            <h3 class="font-semibold text-gray-900 dark:text-white">{{ __('app.group_meetings_history') }}</h3>
         </div>
         <div class="divide-y divide-gray-200 dark:divide-gray-700">
             @forelse($attendances as $attendance)
@@ -96,7 +96,7 @@
                         <span class="text-gray-500 dark:text-gray-400">/ {{ $group->members->count() }}</span>
                     </div>
                     @if($attendance->guests_count > 0)
-                    <p class="text-sm text-gray-500">+{{ $attendance->guests_count }} гостей</p>
+                    <p class="text-sm text-gray-500">+{{ $attendance->guests_count }} {{ __('app.group_guests') }}</p>
                     @endif
                 </div>
             </a>
@@ -105,7 +105,7 @@
                 <svg class="w-12 h-12 mx-auto mb-3 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                 </svg>
-                <p>Немає записів відвідуваності</p>
+                <p>{{ __('app.no_attendance_records') }}</p>
             </div>
             @endforelse
         </div>
@@ -132,14 +132,14 @@ onPageReady(function() {
         data: {
             labels: chartData.map(d => d.date),
             datasets: [{
-                label: 'Учасники',
+                label: '{{ __('app.members') }}',
                 data: chartData.map(d => d.members),
                 borderColor: '#3b82f6',
                 backgroundColor: 'rgba(59, 130, 246, 0.1)',
                 fill: true,
                 tension: 0.3,
             }, {
-                label: 'Гості',
+                label: '{{ __('app.group_guests') }}',
                 data: chartData.map(d => d.guests),
                 borderColor: '#10b981',
                 backgroundColor: 'rgba(16, 185, 129, 0.1)',

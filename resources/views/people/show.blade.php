@@ -505,11 +505,11 @@
                         <div class="flex items-center justify-center min-h-screen p-4">
                             <div class="fixed inset-0 bg-black/50" @click="showCreateModal = false"></div>
                             <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full p-6">
-                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Надати доступ до системи</h3>
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.grant_system_access') }}</h3>
 
                                 <div class="space-y-4">
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email для входу</label>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.email_for_login') }}</label>
                                         <input type="email" x-model="newEmail"
                                                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-purple-500 dark:text-white"
                                                >
@@ -517,27 +517,27 @@
                                     </div>
 
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Рівень доступу</label>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.access_level') }}</label>
                                         <select x-model="newChurchRoleId"
                                                 class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-purple-500 text-gray-900 dark:text-white">
-                                            <option value="" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">Оберіть роль...</option>
+                                            <option value="" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">{{ __('app.select_role') }}</option>
                                             @foreach($churchRoles as $role)
                                             <option value="{{ $role->id }}" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
-                                                {{ $role->name }}@if($role->is_admin_role) (Повний доступ)@endif
+                                                {{ $role->name }}@if($role->is_admin_role) {{ __('app.full_access') }}@endif
                                             </option>
                                             @endforeach
                                         </select>
                                     </div>
 
                                     <p class="text-sm text-gray-500 dark:text-gray-400">
-                                        Користувач отримає доступ до системи. Пароль буде згенеровано автоматично.
+                                        {{ __('app.user_access_info') }}
                                     </p>
                                 </div>
 
                                 <div class="flex justify-end gap-3 mt-6">
                                     <button type="button" @click="showCreateModal = false"
                                             class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
-                                        Скасувати
+                                        {{ __('app.cancel') }}
                                     </button>
                                     <button type="button" @click="createAccount()"
                                             :disabled="creating || !newEmail || !newChurchRoleId"
@@ -546,7 +546,7 @@
                                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                         </svg>
-                                        <span x-text="creating ? 'Створення...' : 'Створити'"></span>
+                                        <span x-text="creating ? '{{ __('app.creating') }}' : '{{ __('app.create') }}'"></span>
                                     </button>
                                 </div>
                             </div>
@@ -567,14 +567,14 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                         </svg>
                                     </div>
-                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Запрошення надіслано</h3>
+                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">{{ __('app.invitation_sent') }}</h3>
                                     <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                                        Лист з посиланням для встановлення пароля надіслано на email користувача.
+                                        {{ __('app.password_link_sent') }}
                                     </p>
 
                                     <button type="button" @click="closePasswordModal()"
                                             class="w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium">
-                                        Готово
+                                        {{ __('app.ready') }}
                                     </button>
                                 </div>
                             </div>
@@ -598,7 +598,7 @@
                 </div>
                 <div>
                     <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['attendance_3_months'] }}</p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Відвідувань (3 міс.)</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.attendance_3months') }}</p>
                 </div>
             </div>
         </div>
@@ -612,7 +612,7 @@
                 </div>
                 <div>
                     <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['services_this_month'] }}</p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Подій цього місяця</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.events_this_month') }}</p>
                 </div>
             </div>
         </div>
@@ -626,7 +626,7 @@
                 </div>
                 <div>
                     <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['attendance_rate'] ?? 0 }}%</p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Відвідуваність (3 міс.)</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.attendance_rate_3months') }}</p>
                 </div>
             </div>
         </div>
@@ -640,7 +640,7 @@
                 </div>
                 <div>
                     <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['services_total'] }}</p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Всього подій</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.total_events') }}</p>
                 </div>
             </div>
         </div>
@@ -649,7 +649,7 @@
     @if($canEdit)
     <!-- Ministries (Admin editable) -->
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-5 mt-6">
-        <h2 class="font-semibold text-gray-900 dark:text-white mb-4">Команди</h2>
+        <h2 class="font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.teams') }}</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             @foreach($ministries as $ministry)
                 @php
@@ -696,7 +696,7 @@
             <!-- Ministries (View only for non-admins) -->
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
                 <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700">
-                    <h2 class="font-semibold text-gray-900 dark:text-white">Команди</h2>
+                    <h2 class="font-semibold text-gray-900 dark:text-white">{{ __('app.teams') }}</h2>
                 </div>
                 @if($person->ministries->count() > 0)
                     <div class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -739,7 +739,7 @@
                     </div>
                 @else
                     <div class="p-8 text-center text-gray-500 dark:text-gray-400">
-                        Не бере участь у командах
+                        {{ __('app.not_in_teams') }}
                     </div>
                 @endif
             </div>
@@ -749,7 +749,7 @@
             @if($person->groups->count() > 0)
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
                 <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700">
-                    <h2 class="font-semibold text-gray-900 dark:text-white">Групи</h2>
+                    <h2 class="font-semibold text-gray-900 dark:text-white">{{ __('app.groups') }}</h2>
                 </div>
                 <div class="divide-y divide-gray-200 dark:divide-gray-700">
                     @foreach($person->groups as $group)
@@ -764,7 +764,7 @@
                                     <p class="font-medium text-gray-900 dark:text-white">{{ $group->name }}</p>
                                     @if($group->meeting_day)
                                         <p class="text-sm text-gray-500 dark:text-gray-400">
-                                            {{ ['monday' => 'Понеділок', 'tuesday' => 'Вівторок', 'wednesday' => 'Середа', 'thursday' => 'Четвер', 'friday' => "П'ятниця", 'saturday' => 'Субота', 'sunday' => 'Неділя'][$group->meeting_day] ?? $group->meeting_day }}
+                                            {{ ['monday' => __('app.monday'), 'tuesday' => __('app.tuesday'), 'wednesday' => __('app.wednesday'), 'thursday' => __('app.thursday'), 'friday' => __('app.friday'), 'saturday' => __('app.saturday'), 'sunday' => __('app.sunday')][$group->meeting_day] ?? $group->meeting_day }}
                                             @if($group->meeting_time) {{ $group->meeting_time->format('H:i') }} @endif
                                         </p>
                                     @endif
@@ -786,7 +786,7 @@
                     <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
                     </svg>
-                    <h2 class="font-semibold text-gray-900 dark:text-white">Підопічні ({{ $person->sheep->count() }})</h2>
+                    <h2 class="font-semibold text-gray-900 dark:text-white">{{ __('app.sheep') }} ({{ $person->sheep->count() }})</h2>
                 </div>
                 <div class="divide-y divide-gray-200 dark:divide-gray-700">
                     @foreach($person->sheep as $sheep)
@@ -822,7 +822,7 @@
 
             <!-- Attendance Chart -->
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-5">
-                <h2 class="font-semibold text-gray-900 dark:text-white mb-4">Відвідуваність (12 тижнів)</h2>
+                <h2 class="font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.attendance_12weeks') }}</h2>
                 <div class="h-48">
                     <canvas id="attendanceChart"></canvas>
                 </div>
@@ -832,10 +832,10 @@
         <!-- Activity Timeline -->
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
             <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                <h2 class="font-semibold text-gray-900 dark:text-white">Активність</h2>
+                <h2 class="font-semibold text-gray-900 dark:text-white">{{ __('app.activity') }}</h2>
                 @if($stats['last_attended'])
                     <span class="text-xs text-gray-500 dark:text-gray-400">
-                        Останнє відвідування: {{ $stats['last_attended']->format('d.m.Y') }}
+                        {{ __('app.last_attended') }} {{ $stats['last_attended']->format('d.m.Y') }}
                     </span>
                 @endif
             </div>
@@ -857,7 +857,7 @@
                     </div>
                 @empty
                     <div class="p-8 text-center text-gray-500 dark:text-gray-400">
-                        Немає активності за останні 3 місяці
+                        {{ __('app.no_activity_3months') }}
                     </div>
                 @endforelse
             </div>
@@ -868,7 +868,7 @@
     @if($person->assignments->count() > 0)
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden mt-6">
         <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700">
-            <h2 class="font-semibold text-gray-900 dark:text-white">Останні призначення</h2>
+            <h2 class="font-semibold text-gray-900 dark:text-white">{{ __('app.recent_assignments') }}</h2>
         </div>
         <div class="divide-y divide-gray-200 dark:divide-gray-700">
             @foreach($person->assignments->take(10) as $assignment)
@@ -907,7 +907,7 @@
                 <svg class="w-5 h-5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
                 </svg>
-                <h2 class="font-semibold text-gray-900 dark:text-white">Сім'я</h2>
+                <h2 class="font-semibold text-gray-900 dark:text-white">{{ __('app.family') }}</h2>
             </div>
             @if($canEdit)
             <button @click="showAddModal = true" type="button"
@@ -915,7 +915,7 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
-                Додати
+                {{ __('app.add') }}
             </button>
             @endif
         </div>
@@ -954,9 +954,9 @@
                 <svg class="w-12 h-12 mx-auto mb-3 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
                 </svg>
-                <p>Немає зв'язаних членів сім'ї</p>
+                <p>{{ __('app.no_family_members') }}</p>
                 <button @click="showAddModal = true" type="button" class="mt-2 text-primary-600 dark:text-primary-400 text-sm hover:underline">
-                    Додати члена сім'ї
+                    {{ __('app.add_family_member') }}
                 </button>
             </div>
         </template>
@@ -1008,18 +1008,18 @@
                 <div class="flex items-center justify-center min-h-screen p-4">
                     <div class="fixed inset-0 bg-black/50" @click="showAddModal = false"></div>
                     <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full p-6">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Додати члена сім'ї</h3>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.add_family_member') }}</h3>
 
                         <div class="space-y-4">
                             <!-- Person Search -->
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Людина</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.person_label') }}</label>
                                 <div class="relative" x-data="{ inputFocused: false }">
                                     <input type="text" x-model="searchQuery"
                                            @input.debounce.300ms="searchPeople()"
                                            @focus="inputFocused = true; loadInitialPeople()"
                                            @blur="setTimeout(() => inputFocused = false, 200)"
-                                           placeholder="Пошук за ім'ям..."
+                                           placeholder="{{ __('app.search_by_name') }}"
                                            class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
 
                                     <!-- Selected person display -->
@@ -1054,14 +1054,14 @@
 
                             <!-- Relationship Type -->
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Тип зв'язку</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.relationship_type') }}</label>
                                 <select x-model="relationshipType"
                                         class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 text-gray-900 dark:text-white">
-                                    <option value="">-- Оберіть --</option>
-                                    <option value="spouse">Чоловік/Дружина</option>
-                                    <option value="child">Дитина</option>
-                                    <option value="parent">Батько/Мати</option>
-                                    <option value="sibling">Брат/Сестра</option>
+                                    <option value="">{{ __('app.select_option') }}</option>
+                                    <option value="spouse">{{ __('app.spouse') }}</option>
+                                    <option value="child">{{ __('app.child') }}</option>
+                                    <option value="parent">{{ __('app.parent') }}</option>
+                                    <option value="sibling">{{ __('app.sibling') }}</option>
                                 </select>
                             </div>
 
@@ -1071,7 +1071,7 @@
                         <div class="flex justify-end gap-3 mt-6">
                             <button type="button" @click="showAddModal = false"
                                     class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
-                                Скасувати
+                                {{ __('app.cancel') }}
                             </button>
                             <button type="button" @click="addFamilyMember()"
                                     :disabled="saving || !selectedPerson || !relationshipType"
@@ -1080,7 +1080,7 @@
                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                 </svg>
-                                <span x-text="saving ? 'Збереження...' : 'Додати'"></span>
+                                <span x-text="saving ? '{{ __('app.saving') }}...' : '{{ __('app.add') }}'"></span>
                             </button>
                         </div>
                     </div>
@@ -1092,15 +1092,15 @@
 
     <!-- Notes -->
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-5 mt-6">
-        <h2 class="font-semibold text-gray-900 dark:text-white mb-3">Нотатки</h2>
+        <h2 class="font-semibold text-gray-900 dark:text-white mb-3">{{ __('app.notes') }}</h2>
         @if($canEdit)
-            <textarea name="notes" rows="3" placeholder="Додаткова інформація про людину..."
+            <textarea name="notes" rows="3" placeholder="{{ __('app.notes_placeholder') }}"
                       class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-sm">{{ old('notes', $person->notes) }}</textarea>
         @else
             @if($person->notes)
                 <p class="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{{ $person->notes }}</p>
             @else
-                <p class="text-gray-500 dark:text-gray-400 text-sm">Немає нотаток</p>
+                <p class="text-gray-500 dark:text-gray-400 text-sm">{{ __('app.no_notes') }}</p>
             @endif
         @endif
     </div>
@@ -1115,14 +1115,14 @@
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
             </svg>
-            Назад до списку
+            {{ __('app.back_to_list') }}
         </a>
 
         @if(auth()->user()->canDelete('people'))
         <button type="button"
                 @click="ajaxDelete('{{ route('people.destroy', $person) }}', '{{ __('messages.confirm_delete_person') }}', null, '{{ route('people.index') }}')"
                 class="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-sm font-medium">
-            Видалити
+            {{ __('app.delete') }}
         </button>
         @endif
     </div>
@@ -1138,7 +1138,7 @@ function _accountCreatedUI(email) {
     }
     var btn = document.getElementById('create-account-btn');
     if (btn) {
-        btn.outerHTML = '\x3Cspan class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-lg text-sm font-medium">\x3Csvg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">\x3Cpath stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>\x3C/svg>Доступ надано\x3C/span>';
+        btn.outerHTML = '\x3Cspan class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-lg text-sm font-medium">\x3Csvg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">\x3Cpath stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>\x3C/svg>' + @json(__('app.access_granted')) + '\x3C/span>';
     }
 }
 
@@ -1219,7 +1219,7 @@ function userRoleManager() {
             const btn = document.getElementById('copyPasswordBtn');
             if (btn) {
                 const originalText = btn.textContent;
-                btn.textContent = 'Скопійовано!';
+                btn.textContent = @json(__('app.copied'));
                 setTimeout(() => btn.textContent = originalText, 1500);
             }
         },
@@ -1245,10 +1245,10 @@ function userRoleManager() {
                     this.generatedPassword = data.password;
                     this.showPasswordModal = true;
                 } else {
-                    alert(data.message || 'Помилка при скиданні пароля');
+                    alert(data.message || @json(__('app.reset_password_error')));
                 }
             } catch (error) {
-                alert('Помилка з\'єднання');
+                alert(@json(__('app.error_connection')));
             } finally {
                 this.resettingPassword = false;
             }
@@ -1273,11 +1273,11 @@ function userRoleManager() {
                 if (response.ok) {
                     this.editingEmail = false;
                 } else {
-                    alert(data.message || 'Помилка при оновленні email');
+                    alert(data.message || @json(__('app.update_email_error')));
                     this.userEmail = '{{ $person->user?->email ?? "" }}';
                 }
             } catch (error) {
-                alert('Помилка з\'єднання');
+                alert(@json(__('app.error_connection')));
                 this.userEmail = '{{ $person->user?->email ?? "" }}';
             }
         },
@@ -1348,10 +1348,10 @@ function userRoleManager() {
                     // Reload after showing password to update UI
                     this.userEmail = this.newEmail;
                 } else {
-                    this.createError = data.message || 'Помилка при створенні акаунту';
+                    this.createError = data.message || @json(__('app.create_account_error'));
                 }
             } catch (error) {
-                this.createError = 'Помилка з\'єднання';
+                this.createError = @json(__('app.error_connection'));
             } finally {
                 this.creating = false;
             }
@@ -1414,10 +1414,10 @@ function shepherdSearch() {
                     this.searchQuery = '';
                     this.isOpen = false;
                 } else {
-                    alert(data.message || 'Помилка');
+                    alert(data.message || @json(__('app.error_short')));
                 }
             } catch (error) {
-                alert('Помилка з\'єднання');
+                alert(@json(__('app.error_connection')));
             } finally {
                 this.updating = false;
             }
@@ -1441,10 +1441,10 @@ function shepherdSearch() {
                     this.searchQuery = '';
                     this.isOpen = false;
                 } else {
-                    alert(data.message || 'Помилка');
+                    alert(data.message || @json(__('app.error_short')));
                 }
             } catch (error) {
-                alert('Помилка з\'єднання');
+                alert(@json(__('app.error_connection')));
             } finally {
                 this.updating = false;
             }
@@ -1564,14 +1564,14 @@ function familyManager() {
                         this.selectedPerson = null;
                         this.searchQuery = '';
                         this.relationshipType = '';
-                        if (window.showGlobalToast) showGlobalToast('Члена сім\'ї додано', 'success');
+                        if (window.showGlobalToast) showGlobalToast(@json(__('app.family_member_added')), 'success');
                     }
                 } else {
                     const data = await response.json().catch(() => ({}));
-                    this.error = data.error || data.message || 'Помилка при збереженні';
+                    this.error = data.error || data.message || @json(__('app.save_error'));
                 }
             } catch (error) {
-                this.error = 'Помилка з\'єднання';
+                this.error = @json(__('app.error_connection'));
             } finally {
                 this.saving = false;
             }
@@ -1591,11 +1591,11 @@ function familyManager() {
 
                 if (response.ok) {
                     this.familyMembers = this.familyMembers.filter(m => m.relationship_id !== relationshipId);
-                    if (window.showGlobalToast) showGlobalToast('Зв\'язок видалено', 'success');
+                    if (window.showGlobalToast) showGlobalToast(@json(__('app.relationship_deleted')), 'success');
                 }
             } catch (error) {
                 console.error('Delete error:', error);
-                if (window.showGlobalToast) showGlobalToast('Помилка видалення', 'error');
+                if (window.showGlobalToast) showGlobalToast(@json(__('app.delete_error')), 'error');
             }
         }
     }
@@ -1616,7 +1616,7 @@ onPageReady(function() {
         data: {
             labels: @json(collect($attendanceChartData)->pluck('week')),
             datasets: [{
-                label: 'Відвідування',
+                label: @json(__('app.chart_attendance_label')),
                 data: @json(collect($attendanceChartData)->pluck('count')),
                 backgroundColor: '{{ $currentChurch->primary_color ?? "#3b82f6" }}80',
                 borderColor: '{{ $currentChurch->primary_color ?? "#3b82f6" }}',

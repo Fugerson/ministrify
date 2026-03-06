@@ -20,23 +20,23 @@
         <div class="flex items-center gap-2">
             @if(auth()->user()->canEdit('finances'))
             <button x-on:click="showCopyModal = true"
-                    title="Скопіювати всі бюджети команд на інший місяць"
+                    title="{{ __('app.finance_copy_all_budgets') }}"
                     class="inline-flex items-center gap-1.5 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                 </svg>
-                Копіювати
+                {{ __('app.finance_copy') }}
             </button>
             @endif
             <select x-model="month" x-on:change="updatePeriod()"
-                    title="Оберіть місяць для перегляду план/факт витрат"
+                    title="{{ __('app.finance_select_month') }}"
                     class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                @foreach([1 => 'Січень', 2 => 'Лютий', 3 => 'Березень', 4 => 'Квітень', 5 => 'Травень', 6 => 'Червень', 7 => 'Липень', 8 => 'Серпень', 9 => 'Вересень', 10 => 'Жовтень', 11 => 'Листопад', 12 => 'Грудень'] as $m => $name)
+                @foreach([1 => __('app.finance_month_jan'), 2 => __('app.finance_month_feb'), 3 => __('app.finance_month_mar'), 4 => __('app.finance_month_apr'), 5 => __('app.finance_month_may'), 6 => __('app.finance_month_jun'), 7 => __('app.finance_month_jul'), 8 => __('app.finance_month_aug'), 9 => __('app.finance_month_sep'), 10 => __('app.finance_month_oct'), 11 => __('app.finance_month_nov'), 12 => __('app.finance_month_dec')] as $m => $name)
                     <option value="{{ $m }}" {{ $month == $m ? 'selected' : '' }}>{{ $name }}</option>
                 @endforeach
             </select>
             <select x-model="year" x-on:change="updatePeriod()"
-                    title="Оберіть рік бюджету"
+                    title="{{ __('app.finance_select_budget_year') }}"
                     class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                 @for($y = now()->year + 1; $y >= 2020; $y--)
                     <option value="{{ $y }}" {{ $year == $y ? 'selected' : '' }}>{{ $y }}</option>
@@ -163,14 +163,14 @@
             $maxTrend = max(1, max(array_column($trendData, 'planned') ?: [1]), max(array_column($trendData, 'actual') ?: [1]));
         @endphp
         <div class="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700 mt-4">
-            <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">План vs Факт (6 місяців)</h3>
+            <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">{{ __('app.finance_plan_vs_fact') }}</h3>
             <div class="flex items-end justify-between gap-2 h-32">
                 @foreach($trendData as $td)
                 <div class="flex-1 flex flex-col items-center gap-1">
                     <div class="w-full flex gap-0.5 items-end" style="height: 96px;">
                         <div class="flex-1 bg-blue-200 dark:bg-blue-900/50 rounded-t transition-all"
                              style="height: {{ $maxTrend > 0 ? max(2, ($td['planned'] / $maxTrend) * 96) : 2 }}px;"
-                             title="План: {{ number_format($td['planned'], 0, ',', ' ') }} ₴"></div>
+                             title="{{ __('app.finance_plan_title') }}: {{ number_format($td['planned'], 0, ',', ' ') }} ₴"></div>
                         @php
                             $factColor = $td['actual'] > $td['planned'] && $td['planned'] > 0
                                 ? 'bg-red-400 dark:bg-red-600'
@@ -178,7 +178,7 @@
                         @endphp
                         <div class="flex-1 {{ $factColor }} rounded-t transition-all"
                              style="height: {{ $maxTrend > 0 ? max(2, ($td['actual'] / $maxTrend) * 96) : 2 }}px;"
-                             title="Факт: {{ number_format($td['actual'], 0, ',', ' ') }} ₴"></div>
+                             title="{{ __('app.finance_fact_title') }}: {{ number_format($td['actual'], 0, ',', ' ') }} ₴"></div>
                     </div>
                     <span class="text-[10px] text-gray-500 dark:text-gray-400 {{ $td['month'] == $month && $td['year'] == $year ? 'font-bold text-primary-600 dark:text-primary-400' : '' }}">
                         {{ $td['label'] }}
@@ -187,9 +187,9 @@
                 @endforeach
             </div>
             <div class="flex items-center gap-4 mt-3 text-xs text-gray-500 dark:text-gray-400">
-                <span class="flex items-center gap-1"><span class="w-3 h-3 bg-blue-200 dark:bg-blue-900/50 rounded"></span> План</span>
-                <span class="flex items-center gap-1"><span class="w-3 h-3 bg-emerald-400 dark:bg-emerald-600 rounded"></span> Факт</span>
-                <span class="flex items-center gap-1"><span class="w-3 h-3 bg-red-400 dark:bg-red-600 rounded"></span> Перевищено</span>
+                <span class="flex items-center gap-1"><span class="w-3 h-3 bg-blue-200 dark:bg-blue-900/50 rounded"></span> {{ __('app.finance_plan_title') }}</span>
+                <span class="flex items-center gap-1"><span class="w-3 h-3 bg-emerald-400 dark:bg-emerald-600 rounded"></span> {{ __('app.finance_fact_title') }}</span>
+                <span class="flex items-center gap-1"><span class="w-3 h-3 bg-red-400 dark:bg-red-600 rounded"></span> {{ __('app.finance_exceeded') }}</span>
             </div>
         </div>
     </div>
@@ -232,7 +232,7 @@
                                 <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('app.difference') }}</th>
                                 <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('app.annual_total') }}</th>
                                 @if(auth()->user()->canEdit('finances'))
-                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-24">Дії</th>
+                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-24">{{ __('app.finance_actions') }}</th>
                                 @endif
                             </tr>
                         </thead>
@@ -273,7 +273,7 @@
                             {{-- Totals --}}
                             @if(count($churchBudgetItems) > 0)
                             <tr class="bg-gray-100 dark:bg-gray-700/50 font-semibold">
-                                <td class="px-6 py-3 text-gray-900 dark:text-white">Всього</td>
+                                <td class="px-6 py-3 text-gray-900 dark:text-white">{{ __('app.finance_total') }}</td>
                                 <td class="px-6 py-3 text-right text-gray-900 dark:text-white">{{ number_format($churchBudgetTotals['planned'], 0, ',', ' ') }} ₴</td>
                                 <td class="px-6 py-3 text-right text-red-600 dark:text-red-400">{{ number_format($churchBudgetTotals['actual'], 0, ',', ' ') }} ₴</td>
                                 <td class="px-6 py-3 text-right {{ $churchBudgetTotals['difference'] >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">

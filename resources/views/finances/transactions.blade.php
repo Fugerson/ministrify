@@ -164,13 +164,13 @@ function exportButton() {
         </div>
         <!-- Balance After -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4" x-show="subFilter !== 'out'">
-            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase">Баланс на кінець</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase">{{ __('app.finance_balance_end') }}</p>
             <p class="text-xl font-bold" :class="periodStats.balanceAfter >= 0 ? 'text-primary-600 dark:text-primary-400' : 'text-red-600'"
                x-text="formatNumber(periodStats.balanceAfter) + ' ₴'"></p>
         </div>
         <!-- Count of transactions (shown in filtered modes) -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4" x-show="subFilter === 'in' || subFilter === 'out'">
-            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase">Кількість</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase">{{ __('app.finance_count') }}</p>
             <p class="text-xl font-bold text-gray-900 dark:text-white" x-text="displayedTransactions.length"></p>
         </div>
     </div>
@@ -182,21 +182,21 @@ function exportButton() {
                 <thead class="bg-gray-50 dark:bg-gray-900">
                     <tr>
                         <th @click="toggleSort('date')" class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-700 dark:hover:text-gray-200 select-none">
-                            <span class="inline-flex items-center gap-1">Дата <template x-if="sortColumn === 'date'"><svg class="w-3 h-3" :class="sortDir === 'asc' && 'rotate-180'" fill="currentColor" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg></template></span>
+                            <span class="inline-flex items-center gap-1">{{ __('app.finance_date_header') }} <template x-if="sortColumn === 'date'"><svg class="w-3 h-3" :class="sortDir === 'asc' && 'rotate-180'" fill="currentColor" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg></template></span>
                         </th>
                         <th @click="toggleSort('description')" class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-700 dark:hover:text-gray-200 select-none">
-                            <span class="inline-flex items-center gap-1">Опис <template x-if="sortColumn === 'description'"><svg class="w-3 h-3" :class="sortDir === 'asc' && 'rotate-180'" fill="currentColor" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg></template></span>
+                            <span class="inline-flex items-center gap-1">{{ __('app.finance_description_header') }} <template x-if="sortColumn === 'description'"><svg class="w-3 h-3" :class="sortDir === 'asc' && 'rotate-180'" fill="currentColor" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg></template></span>
                         </th>
                         <th @click="toggleSort('category')" class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-700 dark:hover:text-gray-200 select-none">
-                            <span class="inline-flex items-center gap-1">Категорія <template x-if="sortColumn === 'category'"><svg class="w-3 h-3" :class="sortDir === 'asc' && 'rotate-180'" fill="currentColor" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg></template></span>
+                            <span class="inline-flex items-center gap-1">{{ __('app.finance_category_header') }} <template x-if="sortColumn === 'category'"><svg class="w-3 h-3" :class="sortDir === 'asc' && 'rotate-180'" fill="currentColor" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg></template></span>
                         </th>
                         <th @click="toggleSort('ministry')" class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-700 dark:hover:text-gray-200 select-none">
-                            <span class="inline-flex items-center gap-1">Команда <template x-if="sortColumn === 'ministry'"><svg class="w-3 h-3" :class="sortDir === 'asc' && 'rotate-180'" fill="currentColor" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg></template></span>
+                            <span class="inline-flex items-center gap-1">{{ __('app.finance_team_header') }} <template x-if="sortColumn === 'ministry'"><svg class="w-3 h-3" :class="sortDir === 'asc' && 'rotate-180'" fill="currentColor" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg></template></span>
                         </th>
                         <th @click="toggleSort('amount')" class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-700 dark:hover:text-gray-200 select-none">
-                            <span class="inline-flex items-center justify-end gap-1">Сума <template x-if="sortColumn === 'amount'"><svg class="w-3 h-3" :class="sortDir === 'asc' && 'rotate-180'" fill="currentColor" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg></template></span>
+                            <span class="inline-flex items-center justify-end gap-1">{{ __('app.finance_amount_header') }} <template x-if="sortColumn === 'amount'"><svg class="w-3 h-3" :class="sortDir === 'asc' && 'rotate-180'" fill="currentColor" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg></template></span>
                         </th>
-                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider" x-show="subFilter === ''">Баланс</th>
+                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider" x-show="subFilter === ''">{{ __('app.finance_balance_header') }}</th>
                         <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-16"></th>
                     </tr>
                 </thead>
@@ -262,8 +262,8 @@ function exportButton() {
                             <svg class="w-12 h-12 mx-auto mb-4 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                             </svg>
-                            <p class="text-lg font-medium">Немає транзакцій</p>
-                            <p class="text-sm">за вибраний період з вказаними фільтрами</p>
+                            <p class="text-lg font-medium">{{ __('app.finance_no_transactions') }}</p>
+                            <p class="text-sm">{{ __('app.finance_for_selected_period') }}</p>
                         </td>
                     </tr>
                 </tbody>
@@ -272,7 +272,7 @@ function exportButton() {
 
         <!-- Results count -->
         <div class="px-4 py-3 border-t border-gray-200 dark:border-gray-700 text-sm text-gray-500 dark:text-gray-400" x-show="hasActiveFilters">
-            Знайдено: <span x-text="displayedTransactions.length"></span> з <span x-text="periodTransactions.length"></span>
+            {{ __('app.finance_found_count') }} <span x-text="displayedTransactions.length"></span> з <span x-text="periodTransactions.length"></span>
         </div>
     </div>
 
@@ -306,7 +306,7 @@ function exportButton() {
                 <div x-show="!loading && transaction" class="text-left">
                     <!-- Header -->
                     <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Деталі транзакції</h3>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.finance_transaction_details') }}</h3>
                         <button @click="showModal = false" class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -326,40 +326,40 @@ function exportButton() {
                         <!-- Details Grid -->
                         <div class="grid grid-cols-2 gap-4 text-sm">
                             <div>
-                                <span class="text-gray-500 dark:text-gray-400">Дата:</span>
+                                <span class="text-gray-500 dark:text-gray-400">{{ __('app.finance_date_colon') }}</span>
                                 <span class="ml-2 text-gray-900 dark:text-white" x-text="transaction?.date_formatted"></span>
                             </div>
                             <div>
-                                <span class="text-gray-500 dark:text-gray-400">Тип:</span>
-                                <span class="ml-2 text-gray-900 dark:text-white" x-text="transaction?.direction === 'in' ? 'Надходження' : 'Витрата'"></span>
+                                <span class="text-gray-500 dark:text-gray-400">{{ __('app.finance_type_colon') }}</span>
+                                <span class="ml-2 text-gray-900 dark:text-white" x-text="transaction?.direction === 'in' ? '{{ __('app.finance_type_income') }}' : '{{ __('app.finance_type_expense') }}'"></span>
                             </div>
                             <div>
-                                <span class="text-gray-500 dark:text-gray-400">Категорія:</span>
+                                <span class="text-gray-500 dark:text-gray-400">{{ __('app.finance_category_colon') }}</span>
                                 <span class="ml-2 text-gray-900 dark:text-white" x-text="transaction?.category?.name || '—'"></span>
                             </div>
                             <div>
-                                <span class="text-gray-500 dark:text-gray-400">Спосіб оплати:</span>
+                                <span class="text-gray-500 dark:text-gray-400">{{ __('app.finance_payment_method_colon') }}</span>
                                 <span class="ml-2 text-gray-900 dark:text-white" x-text="transaction?.payment_method_label || '—'"></span>
                             </div>
                             <div x-show="transaction?.ministry">
-                                <span class="text-gray-500 dark:text-gray-400">Команда:</span>
+                                <span class="text-gray-500 dark:text-gray-400">{{ __('app.finance_team_colon') }}</span>
                                 <span class="ml-2 text-gray-900 dark:text-white" x-text="transaction?.ministry?.name"></span>
                             </div>
                             <div x-show="transaction?.recorder">
-                                <span class="text-gray-500 dark:text-gray-400">Записав:</span>
+                                <span class="text-gray-500 dark:text-gray-400">{{ __('app.finance_recorded_by') }}</span>
                                 <span class="ml-2 text-gray-900 dark:text-white" x-text="transaction?.recorder?.name"></span>
                             </div>
                         </div>
 
                         <!-- Description -->
                         <div x-show="transaction?.description">
-                            <span class="text-gray-500 dark:text-gray-400 text-sm">Опис:</span>
+                            <span class="text-gray-500 dark:text-gray-400 text-sm">{{ __('app.finance_description_colon') }}</span>
                             <p class="mt-1 text-gray-900 dark:text-white" x-text="transaction?.description"></p>
                         </div>
 
                         <!-- Attachments -->
                         <div x-show="transaction?.attachments?.length > 0">
-                            <span class="text-gray-500 dark:text-gray-400 text-sm">Прикріплені файли:</span>
+                            <span class="text-gray-500 dark:text-gray-400 text-sm">{{ __('app.finance_attached_files') }}</span>
                             <div class="mt-2 grid grid-cols-2 gap-2">
                                 <template x-for="attachment in transaction?.attachments" :key="attachment.id">
                                     <div>
@@ -396,13 +396,13 @@ function exportButton() {
                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                             </svg>
-                            Редагувати
+                            {{ __('app.finance_edit') }}
                         </button>
                         @else
                         <div></div>
                         @endif
                         <button @click="showModal = false" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
-                            Закрити
+                            {{ __('app.finance_close') }}
                         </button>
                     </div>
                 </div>

@@ -1034,7 +1034,7 @@
                         <div x-show="showRollback" x-collapse class="mt-3 space-y-2">
                             <div class="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
                                 <p class="text-xs text-amber-700 dark:text-amber-300 mb-3">
-                                    Ці дії впливають на події, пов'язані з Google Calendar
+                                    {{ __('app.settings_gcal_actions_warning') }}
                                 </p>
                                 <div class="space-y-2">
                                     <!-- Unlink from Google -->
@@ -1045,8 +1045,8 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
                                         </svg>
                                         <div>
-                                            <p class="font-medium text-gray-700 dark:text-gray-300">Відв'язати від Google</p>
-                                            <p class="text-xs text-gray-500 dark:text-gray-400">Події залишаться, але зв'язок з Google буде видалено</p>
+                                            <p class="font-medium text-gray-700 dark:text-gray-300">{{ __('app.settings_unlink_google') }}</p>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.settings_unlink_google_desc') }}</p>
                                         </div>
                                     </button>
                                     <!-- Delete imported -->
@@ -1057,8 +1057,8 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                         </svg>
                                         <div>
-                                            <p class="font-medium text-red-600 dark:text-red-400">Видалити імпортовані події</p>
-                                            <p class="text-xs text-gray-500 dark:text-gray-400">Видалить з Ministrify всі події, які прийшли з Google</p>
+                                            <p class="font-medium text-red-600 dark:text-red-400">{{ __('app.settings_delete_imported_events') }}</p>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.settings_delete_imported_events_desc') }}</p>
                                         </div>
                                     </button>
                                 </div>
@@ -1079,9 +1079,9 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                         </svg>
                     </div>
-                    <h3 class="text-base font-medium text-gray-900 dark:text-white mb-1">Підключіть Google Calendar</h3>
+                    <h3 class="text-base font-medium text-gray-900 dark:text-white mb-1">{{ __('app.settings_connect_gcal') }}</h3>
                     <p class="text-sm text-gray-500 dark:text-gray-400 mb-5 max-w-sm mx-auto">
-                        Події будуть автоматично синхронізуватися між Ministrify та вашим Google Calendar кожні 15 хвилин
+                        {{ __('app.settings_connect_gcal_desc') }}
                     </p>
                     <a href="{{ route('settings.google-calendar.redirect') }}"
                        class="inline-flex items-center gap-2 px-6 py-3 bg-white border border-gray-300 dark:bg-gray-700 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-white font-medium rounded-xl transition-colors shadow-sm">
@@ -1091,7 +1091,7 @@
                             <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
                             <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
                         </svg>
-                        Підключити
+                        {{ __('app.settings_connect') }}
                     </a>
                 </div>
             @endif
@@ -1203,10 +1203,10 @@
                         })
                     });
                     const data = await res.json();
-                    mapping._message = data.message || (data.success ? 'Готово' : 'Помилка');
+                    mapping._message = data.message || (data.success ? '{{ __('app.settings_done') }}' : '{{ __('app.settings_error') }}');
                     mapping._success = data.success;
                 } catch (e) {
-                    mapping._message = 'Помилка з\'єднання';
+                    mapping._message = '{{ __('app.settings_connection_error') }}';
                     mapping._success = false;
                 }
                 mapping._syncing = false;
@@ -1226,10 +1226,10 @@
                         body: JSON.stringify({})
                     });
                     const data = await res.json();
-                    this.message = data.message || (data.success ? 'Синхронізацію завершено' : 'Помилка синхронізації');
+                    this.message = data.message || (data.success ? '{{ __('app.settings_sync_completed') }}' : '{{ __('app.settings_sync_error') }}');
                     this.success = data.success;
                 } catch (e) {
-                    this.message = 'Помилка з\'єднання';
+                    this.message = '{{ __('app.settings_connection_error') }}';
                     this.success = false;
                 }
                 this.loading = false;
@@ -1244,10 +1244,10 @@
                         headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' }
                     });
                     const data = await res.json();
-                    this.rollbackMessage = data.message || 'Готово';
+                    this.rollbackMessage = data.message || '{{ __('app.settings_done') }}';
                     this.rollbackSuccess = data.success;
                 } catch (e) {
-                    this.rollbackMessage = 'Помилка з\'єднання';
+                    this.rollbackMessage = '{{ __('app.settings_connection_error') }}';
                     this.rollbackSuccess = false;
                 }
                 this.rollbackLoading = false;
@@ -1263,10 +1263,10 @@
                         body: JSON.stringify({ scope: 'synced' })
                     });
                     const data = await res.json();
-                    this.rollbackMessage = data.message || 'Готово';
+                    this.rollbackMessage = data.message || '{{ __('app.settings_done') }}';
                     this.rollbackSuccess = data.success;
                 } catch (e) {
-                    this.rollbackMessage = 'Помилка з\'єднання';
+                    this.rollbackMessage = '{{ __('app.settings_connection_error') }}';
                     this.rollbackSuccess = false;
                 }
                 this.rollbackLoading = false;
@@ -1281,7 +1281,7 @@
     <!-- Ministries -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Команди</h2>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.settings_teams') }}</h2>
         </div>
 
         <div class="p-6">
@@ -1296,11 +1296,11 @@
                         </a>
                         <button @click="ajaxDelete('{{ route('settings.ministries.destroy', $ministry) }}', {{ Js::from(__('messages.confirm_delete_category')) }}, () => $el.closest('.flex.items-center.justify-between.p-3').remove())"
                                 class="text-red-600 hover:text-red-800 text-sm">
-                            Видалити
+                            {{ __('app.settings_delete') }}
                         </button>
                     </div>
                 @empty
-                    <p class="text-gray-500 dark:text-gray-400 text-sm">Команд ще немає</p>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">{{ __('app.settings_no_teams_yet') }}</p>
                 @endforelse
             </div>
 
@@ -1308,7 +1308,7 @@
                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
-                Додати команду
+                {{ __('app.settings_add_team') }}
             </a>
         </div>
     </div>
@@ -1317,14 +1317,14 @@
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700" x-data="{ showForm: false, editId: null, formType: 'income' }">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
             <div>
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Категорії фінансів</h2>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Категорії для надходжень та витрат</p>
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.settings_finance_categories') }}</h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.settings_finance_categories_desc') }}</p>
             </div>
             <button @click="showForm = !showForm; editId = null" class="inline-flex items-center text-primary-600 dark:text-primary-400 hover:text-primary-500 text-sm">
                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
-                Додати
+                {{ __('app.settings_add') }}
             </button>
         </div>
 
@@ -1334,18 +1334,18 @@
                   x-data="{ ...ajaxForm({ url: '{{ route('settings.transaction-categories.store') }}', method: 'POST', onSuccess: () => location.reload() }) }">
                 <div class="grid grid-cols-1 sm:grid-cols-5 gap-3">
                     <div>
-                        <input type="text" name="name" placeholder="Назва" required
+                        <input type="text" name="name" placeholder="{{ __('app.settings_name_placeholder') }}" required
                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500">
                     </div>
                     <div>
                         <select name="type" x-model="formType"
                                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500">
-                            <option value="income">Надходження</option>
-                            <option value="expense">Витрата</option>
+                            <option value="income">{{ __('app.settings_income') }}</option>
+                            <option value="expense">{{ __('app.settings_expense') }}</option>
                         </select>
                     </div>
                     <div>
-                        <input type="text" name="icon" placeholder="Емодзі" maxlength="10"
+                        <input type="text" name="icon" placeholder="{{ __('app.settings_emoji') }}" maxlength="10"
                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500">
                     </div>
                     <div>
@@ -1354,7 +1354,7 @@
                     </div>
                     <div class="flex gap-2">
                         <button type="submit" :disabled="saving" class="flex-1 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg text-sm transition-colors disabled:opacity-50">
-                            <span x-show="!saving">Додати</span>
+                            <span x-show="!saving">{{ __('app.settings_add') }}</span>
                             <span x-show="saving" x-cloak>...</span>
                         </button>
                         <button type="button" @click="showForm = false" class="px-4 py-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
@@ -1374,7 +1374,7 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                     </svg>
-                    Надходження
+                    {{ __('app.settings_income') }}
                 </h3>
                 <div class="space-y-2">
                     @foreach($transactionCategories->where('type', 'income') as $category)
@@ -1382,7 +1382,7 @@
                             <div x-show="!editing" class="flex items-center gap-3">
                                 <span class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: {{ $category->color }}"></span>
                                 <span class="text-gray-900 dark:text-white">{{ $category->name }}</span>
-                                <span class="text-xs text-gray-500">{{ $category->transactions_count }} записів</span>
+                                <span class="text-xs text-gray-500">{{ $category->transactions_count }} {{ __('app.settings_records') }}</span>
                             </div>
                             <div x-show="!editing" class="flex items-center gap-2">
                                 <button @click="editing = true" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
@@ -1406,13 +1406,13 @@
                                        class="flex-1 px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
                                 <input type="color" name="color" value="{{ $category->color }}"
                                        class="w-10 h-8 border border-gray-300 dark:border-gray-600 rounded cursor-pointer">
-                                <button type="submit" :disabled="saving" class="px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm disabled:opacity-50">Зберегти</button>
-                                <button type="button" @click="editing = false" class="text-gray-500 hover:text-gray-700 dark:text-gray-400">Скасувати</button>
+                                <button type="submit" :disabled="saving" class="px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm disabled:opacity-50">{{ __('app.save') }}</button>
+                                <button type="button" @click="editing = false" class="text-gray-500 hover:text-gray-700 dark:text-gray-400">{{ __('app.cancel') }}</button>
                             </form>
                         </div>
                     @endforeach
                     @if($transactionCategories->where('type', 'income')->isEmpty())
-                        <p class="text-gray-500 dark:text-gray-400 text-sm">Немає категорій надходжень</p>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">{{ __('app.settings_no_income_categories') }}</p>
                     @endif
                 </div>
             </div>
@@ -1423,7 +1423,7 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
                     </svg>
-                    Витрати
+                    {{ __('app.settings_expenses') }}
                 </h3>
                 <div class="space-y-2">
                     @foreach($transactionCategories->where('type', 'expense') as $category)
@@ -1431,7 +1431,7 @@
                             <div x-show="!editing" class="flex items-center gap-3">
                                 <span class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: {{ $category->color }}"></span>
                                 <span class="text-gray-900 dark:text-white">{{ $category->name }}</span>
-                                <span class="text-xs text-gray-500">{{ $category->transactions_count }} записів</span>
+                                <span class="text-xs text-gray-500">{{ $category->transactions_count }} {{ __('app.settings_records') }}</span>
                             </div>
                             <div x-show="!editing" class="flex items-center gap-2">
                                 <button @click="editing = true" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
@@ -1455,13 +1455,13 @@
                                        class="flex-1 px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
                                 <input type="color" name="color" value="{{ $category->color }}"
                                        class="w-10 h-8 border border-gray-300 dark:border-gray-600 rounded cursor-pointer">
-                                <button type="submit" :disabled="saving" class="px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm disabled:opacity-50">Зберегти</button>
-                                <button type="button" @click="editing = false" class="text-gray-500 hover:text-gray-700 dark:text-gray-400">Скасувати</button>
+                                <button type="submit" :disabled="saving" class="px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm disabled:opacity-50">{{ __('app.save') }}</button>
+                                <button type="button" @click="editing = false" class="text-gray-500 hover:text-gray-700 dark:text-gray-400">{{ __('app.cancel') }}</button>
                             </form>
                         </div>
                     @endforeach
                     @if($transactionCategories->where('type', 'expense')->isEmpty())
-                        <p class="text-gray-500 dark:text-gray-400 text-sm">Немає категорій витрат</p>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">{{ __('app.settings_no_expense_categories') }}</p>
                     @endif
                 </div>
             </div>
@@ -1479,8 +1479,8 @@
                     </svg>
                 </div>
                 <div>
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Церковні ролі</h2>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Налаштуйте ролі для членів церкви (пастор, диякон, пресвітер...)</p>
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.settings_church_roles') }}</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.settings_church_roles_desc') }}</p>
                 </div>
             </div>
             <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1500,8 +1500,8 @@
                     </svg>
                 </div>
                 <div>
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Опікуни</h2>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Призначайте духовних опікунів для членів церкви</p>
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.settings_shepherds') }}</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.settings_shepherds_desc') }}</p>
                 </div>
             </div>
             <div class="flex items-center gap-4">
@@ -1514,7 +1514,7 @@
                         }).finally(() => saving = false)"
                         :class="enabled ? 'bg-green-600' : 'bg-gray-200 dark:bg-gray-700'"
                         class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2">
-                    <span class="sr-only">Увімкнути опікунів</span>
+                    <span class="sr-only">{{ __('app.settings_enable_shepherds') }}</span>
                     <span :class="enabled ? 'translate-x-5' : 'translate-x-0'"
                           class="pointer-events-none relative inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out">
                     </span>
@@ -1540,8 +1540,8 @@
                     </svg>
                 </div>
                 <div>
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Відвідуваність богослужінь</h2>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Відстежуйте присутність на богослужіннях та подіях</p>
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.settings_attendance') }}</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.settings_attendance_desc') }}</p>
                 </div>
             </div>
             <div class="flex items-center gap-4">
@@ -1554,7 +1554,7 @@
                         }).finally(() => saving = false)"
                         :class="enabled ? 'bg-purple-600' : 'bg-gray-200 dark:bg-gray-700'"
                         class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2">
-                    <span class="sr-only">Увімкнути відвідуваність</span>
+                    <span class="sr-only">{{ __('app.settings_enable_attendance') }}</span>
                     <span :class="enabled ? 'translate-x-5' : 'translate-x-0'"
                           class="pointer-events-none relative inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out">
                     </span>
@@ -1572,7 +1572,7 @@
     <!-- Tags -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 mt-6">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Теги для людей</h2>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.settings_people_tags') }}</h2>
         </div>
 
         <div class="p-6">
@@ -1585,7 +1585,7 @@
                         </div>
                         <button @click="ajaxDelete('{{ route('tags.destroy', $tag) }}', {{ Js::from(__('messages.confirm_delete_tag')) }}, () => $el.closest('.flex.items-center.justify-between.p-3').remove())"
                                 class="text-red-600 hover:text-red-800 text-sm">
-                            Видалити
+                            {{ __('app.settings_delete') }}
                         </button>
                     </div>
                 @endforeach
@@ -1593,12 +1593,12 @@
 
             <form @submit.prevent="submit($refs.tagCreateForm)" x-ref="tagCreateForm" class="flex gap-2"
                   x-data="{ ...ajaxForm({ url: '{{ route('tags.store') }}', method: 'POST', onSuccess: () => location.reload() }) }">
-                <input type="text" name="name" placeholder="Новий тег" required
+                <input type="text" name="name" placeholder="{{ __('app.settings_new_tag') }}" required
                        class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                 <input type="color" name="color" value="#3b82f6"
                        class="w-12 h-10 border border-gray-300 dark:border-gray-600 rounded-lg">
                 <button type="submit" :disabled="saving" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg disabled:opacity-50">
-                    <span x-show="!saving">Додати</span>
+                    <span x-show="!saving">{{ __('app.settings_add') }}</span>
                     <span x-show="saving" x-cloak>...</span>
                 </button>
             </form>
@@ -1613,9 +1613,9 @@
             $enabledCurrenciesForBalance = $church->enabled_currencies ?? ['UAH'];
             $initialBalances = $church->initial_balances ?? [];
             $currencyInfo = [
-                'UAH' => ['symbol' => '₴', 'name' => 'Гривня', 'flag' => '🇺🇦'],
-                'USD' => ['symbol' => '$', 'name' => 'Долар', 'flag' => '🇺🇸'],
-                'EUR' => ['symbol' => '€', 'name' => 'Євро', 'flag' => '🇪🇺'],
+                'UAH' => ['symbol' => '₴', 'name' => __('app.settings_currency_uah'), 'flag' => '🇺🇦'],
+                'USD' => ['symbol' => '$', 'name' => __('app.settings_currency_usd'), 'flag' => '🇺🇸'],
+                'EUR' => ['symbol' => '€', 'name' => __('app.settings_currency_eur'), 'flag' => '🇪🇺'],
             ];
         @endphp
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700"
@@ -1670,13 +1670,13 @@
                             </svg>
                         </div>
                         <div>
-                            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Початковий баланс</h2>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Вкажіть баланс церкви на момент початку обліку</p>
+                            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.settings_initial_balance') }}</h2>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.settings_initial_balance_desc') }}</p>
                         </div>
                     </div>
                     <div>
-                        <span x-show="saved" x-transition class="text-sm text-green-600 dark:text-green-400">Збережено ✓</span>
-                        <span x-show="saving" class="text-sm text-gray-500 dark:text-gray-400">Збереження...</span>
+                        <span x-show="saved" x-transition class="text-sm text-green-600 dark:text-green-400">{{ __('app.saved_check') }}</span>
+                        <span x-show="saving" class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.saving') }}</span>
                     </div>
                 </div>
             </div>
@@ -1684,14 +1684,13 @@
             <div class="p-6 space-y-6">
                 <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
                     <p class="text-sm text-blue-800 dark:text-blue-300">
-                        <strong>Як це працює:</strong> Вкажіть суму в кожній валюті, яка була на рахунках церкви на певну дату.
-                        Баланс по кожній валюті ведеться окремо.
+                        <strong>{{ __('app.settings_how_it_works') }}</strong> {{ __('app.settings_initial_balance_info') }}
                     </p>
                 </div>
 
                 <!-- Date -->
                 <div class="max-w-xs">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Дата балансу *</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.settings_balance_date') }} *</label>
                     <input type="date" required
                            x-model="balanceDate" @change="save()"
                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
@@ -1724,9 +1723,9 @@
         @php
             $enabledCurrencies = $church->enabled_currencies ?? ['UAH'];
             $allCurrencies = [
-                'UAH' => ['symbol' => '₴', 'name' => 'Гривня (UAH)', 'flag' => '🇺🇦'],
-                'USD' => ['symbol' => '$', 'name' => 'Долар США (USD)', 'flag' => '🇺🇸'],
-                'EUR' => ['symbol' => '€', 'name' => 'Євро (EUR)', 'flag' => '🇪🇺'],
+                'UAH' => ['symbol' => '₴', 'name' => __('app.settings_currency_uah_full'), 'flag' => '🇺🇦'],
+                'USD' => ['symbol' => '$', 'name' => __('app.settings_currency_usd_full'), 'flag' => '🇺🇸'],
+                'EUR' => ['symbol' => '€', 'name' => __('app.settings_currency_eur_full'), 'flag' => '🇪🇺'],
             ];
             $rates = app(\App\Services\NbuExchangeRateService::class)->getCurrentRates();
         @endphp
@@ -1775,21 +1774,20 @@
                         </svg>
                     </div>
                     <div>
-                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Мультивалютність</h2>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Оберіть валюти для обліку доходів та витрат</p>
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.settings_multi_currency') }}</h2>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.settings_multi_currency_desc') }}</p>
                     </div>
                 </div>
                 <div>
-                    <span x-show="saved" x-transition class="text-sm text-green-600 dark:text-green-400">Збережено ✓</span>
-                    <span x-show="saving" class="text-sm text-gray-500 dark:text-gray-400">Збереження...</span>
+                    <span x-show="saved" x-transition class="text-sm text-green-600 dark:text-green-400">{{ __('app.saved_check') }}</span>
+                    <span x-show="saving" class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.saving') }}</span>
                 </div>
             </div>
 
             <div class="p-6 space-y-4">
                 <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
                     <p class="text-sm text-blue-800 dark:text-blue-300">
-                        <strong>Мультивалютний облік:</strong> Кошти зберігаються в тій валюті, в якій надійшли.
-                        Баланс відображається окремо по кожній валюті. Еквівалент в гривні — довідково.
+                        <strong>{{ __('app.settings_multi_currency_accounting') }}</strong> {{ __('app.settings_multi_currency_info') }}
                     </p>
                 </div>
 
@@ -1806,7 +1804,7 @@
                         <div class="ml-3 flex-1">
                             <span class="block text-sm font-medium text-gray-900 dark:text-white">{{ $currency['name'] }}</span>
                             @if($code === 'UAH')
-                                <span class="text-xs text-gray-500 dark:text-gray-400">Основна валюта (обов'язкова)</span>
+                                <span class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.settings_main_currency_required') }}</span>
                             @endif
                         </div>
                         <span class="text-xl font-semibold text-gray-400 dark:text-gray-500">{{ $currency['symbol'] }}</span>
@@ -1815,7 +1813,7 @@
                 </div>
 
                 <div class="mt-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg" x-show="currencies.length > 1">
-                    <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Поточні курси НБУ</h4>
+                    <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.settings_nbu_rates') }}</h4>
                     <div class="flex flex-wrap gap-4">
                         @foreach(['USD', 'EUR'] as $code)
                             @if(isset($rates[$code]))
@@ -1867,11 +1865,11 @@
              }">
             <div class="px-4 md:px-6 py-4 flex items-center justify-between">
                 <div class="flex-1">
-                    <h3 class="text-sm font-medium text-gray-900 dark:text-white">Самореєстрація учасників</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Дозволити людям самостійно реєструватися у вашій церкві</p>
+                    <h3 class="text-sm font-medium text-gray-900 dark:text-white">{{ __('app.settings_self_registration') }}</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.settings_self_registration_desc') }}</p>
                 </div>
                 <div class="flex items-center gap-2">
-                    <span x-show="saved" x-cloak x-transition.opacity class="text-xs text-green-600 dark:text-green-400">Збережено</span>
+                    <span x-show="saved" x-cloak x-transition.opacity class="text-xs text-green-600 dark:text-green-400">{{ __('app.saved_check') }}</span>
                     <span x-show="saving" x-cloak class="text-xs text-gray-400">
                         <svg class="animate-spin h-4 w-4 inline" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
                     </span>
@@ -1890,7 +1888,7 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
-                        Нові користувачі отримають базовий доступ. Ви можете призначити їм роль пізніше.
+                        {{ __('app.settings_self_registration_info') }}
                     </p>
                 </div>
             </div>
@@ -1911,15 +1909,15 @@
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
             <div class="px-4 md:px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div>
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Користувачі системи</h2>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ $users->count() }} {{ trans_choice('користувач|користувачі|користувачів', $users->count()) }}</p>
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.settings_system_users') }}</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ $users->count() }} {{ trans_choice(__('app.settings_users_count'), $users->count()) }}</p>
                 </div>
                 @if(auth()->user()->canEdit('settings'))
                 <a href="{{ route('settings.users.create') }}" class="inline-flex items-center justify-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 text-sm font-medium transition-colors">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                     </svg>
-                    Запросити
+                    {{ __('app.settings_invite') }}
                 </a>
                 @endif
             </div>
@@ -1928,11 +1926,11 @@
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead class="bg-gray-50 dark:bg-gray-700">
                         <tr>
-                            <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Ім'я</th>
+                            <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ __('app.settings_name') }}</th>
                             <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase hidden md:table-cell">Email</th>
-                            <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Роль</th>
-                            <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase hidden sm:table-cell">Статус</th>
-                            <th class="px-3 md:px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Дії</th>
+                            <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ __('app.settings_role') }}</th>
+                            <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase hidden sm:table-cell">{{ __('app.settings_status') }}</th>
+                            <th class="px-3 md:px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ __('app.settings_actions') }}</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -2009,7 +2007,7 @@
                                             });
                                             if (res.ok) {
                                                 const data = await res.json().catch(() => ({}));
-                                                showToast('success', data.message || 'Збережено!');
+                                                showToast('success', data.message || '{{ __('app.saved_check') }}');
                                                 if (roleName && badge) {
                                                     const svg = badge.querySelector('svg')?.outerHTML || '';
                                                     badge.innerHTML = roleName + ' ' + svg;
@@ -2032,17 +2030,17 @@
                                     @if($user->churchRole)
                                     <button @click="editing = true" class="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full cursor-pointer hover:opacity-80 transition-opacity"
                                             style="background-color: {{ $user->churchRole->color }}30; color: {{ $user->churchRole->color }}"
-                                            title="Натисніть щоб змінити роль">
+                                            title="{{ __('app.settings_click_to_change_role') }}">
                                         {{ $user->churchRole->name }}
                                         <svg class="w-3 h-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                                     </button>
                                     @else
                                     <button @click="editing = true" class="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 cursor-pointer hover:opacity-80 transition-opacity"
-                                            title="Натисніть щоб призначити роль">
+                                            title="{{ __('app.settings_click_to_assign_role') }}">
                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                         </svg>
-                                        Очікує
+                                        {{ __('app.settings_pending') }}
                                         <svg class="w-3 h-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                                     </button>
                                     @endif
@@ -2050,7 +2048,7 @@
                                 <div x-show="editing" x-cloak>
                                     <div class="flex items-center gap-1">
                                         <select x-model="selectedRoleId" class="text-xs rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white py-1 pl-2 pr-7">
-                                            <option value="">Без ролі</option>
+                                            <option value="">{{ __('app.settings_no_role') }}</option>
                                             @foreach($churchRoles as $role)
                                             <option value="{{ $role->id }}">{{ $role->name }}</option>
                                             @endforeach
@@ -2137,7 +2135,7 @@
                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                     </svg>
-                                    Очікує
+                                    {{ __('app.settings_pending') }}
                                 </span>
                                 @endif
                                 @endif
@@ -2364,7 +2362,7 @@
                             </div>
                         </div>
                     </div>
-                    <button @click="openUserModal({{ $u->id }}, @js($u->name), @js($u->churchRole?->name ?? 'Без ролі'))"
+                    <button @click="openUserModal({{ $u->id }}, @js($u->name), @js($u->churchRole?->name ?? '{{ __('app.settings_no_role') }}'))"
                             class="flex-shrink-0 px-3 py-1.5 text-sm font-medium text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-900/30 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/50 transition-colors">
                         Налаштувати
                     </button>

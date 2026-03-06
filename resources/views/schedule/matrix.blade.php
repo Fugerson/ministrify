@@ -23,10 +23,10 @@
             <div class="flex items-center gap-1.5 sm:gap-2">
                 <a href="{{ route('schedule') }}"
                    class="px-3 sm:px-4 py-2 text-sm font-medium rounded-xl whitespace-nowrap text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
-                    {{ __('Календар') }}
+                    {{ __('app.schedule_calendar') }}
                 </a>
                 <span class="px-3 sm:px-4 py-2 text-sm font-medium rounded-xl whitespace-nowrap bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300">
-                    {{ __('Призначення') }}
+                    {{ __('app.schedule_assignments') }}
                 </span>
             </div>
 
@@ -41,9 +41,9 @@
 
                 <select x-model="weeks" @change="loadData()"
                         class="rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 text-sm py-2">
-                    <option value="4">4 {{ __('тижні') }}</option>
-                    <option value="8">8 {{ __('тижнів') }}</option>
-                    <option value="12">12 {{ __('тижнів') }}</option>
+                    <option value="4">4 {{ __('app.schedule_weeks_label') }}</option>
+                    <option value="8">8 {{ __('app.schedule_weeks_label') }}</option>
+                    <option value="12">12 {{ __('app.schedule_weeks_label') }}</option>
                 </select>
 
                 <div class="flex items-center gap-0.5">
@@ -80,16 +80,16 @@
             <svg class="w-16 h-16 mx-auto text-gray-300 dark:text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
             </svg>
-            <p class="text-gray-500 dark:text-gray-400 text-lg">{{ __('Немає подій за цей період') }}</p>
-            <p class="text-gray-400 dark:text-gray-500 text-sm mt-1">{{ __('Спробуйте обрати інший тип служіння або період') }}</p>
+            <p class="text-gray-500 dark:text-gray-400 text-lg">{{ __('app.schedule_no_events_period') }}</p>
+            <p class="text-gray-400 dark:text-gray-500 text-sm mt-1">{{ __('app.schedule_try_other') }}</p>
         </div>
     </template>
 
     {{-- Empty Ministries --}}
     <template x-if="!loading && events.length > 0 && ministries.length === 0">
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-12 text-center">
-            <p class="text-gray-500 dark:text-gray-400 text-lg">{{ __('Немає команд для відображення') }}</p>
-            <p class="text-gray-400 dark:text-gray-500 text-sm mt-1">{{ __('Позначте команди як "Частина недільного служіння" в налаштуваннях') }}</p>
+            <p class="text-gray-500 dark:text-gray-400 text-lg">{{ __('app.schedule_no_teams_display') }}</p>
+            <p class="text-gray-400 dark:text-gray-500 text-sm mt-1">{{ __('app.schedule_mark_teams_hint') }}</p>
         </div>
     </template>
 
@@ -102,7 +102,7 @@
                     <thead>
                         <tr class="bg-gray-50 dark:bg-gray-700">
                             <th class="sticky left-0 z-20 bg-gray-50 dark:bg-gray-700 px-3 sm:px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-r border-gray-200 dark:border-gray-600 w-[160px] sm:w-[200px] min-w-[160px] sm:min-w-[200px]">
-                                {{ __('Команда / Роль') }}
+                                {{ __('app.schedule_team_role') }}
                             </th>
                             <template x-for="event in events" :key="event.id">
                                 <th class="px-2 py-3 text-center border-b border-gray-200 dark:border-gray-600 min-w-[140px]"
@@ -196,16 +196,16 @@
             <div class="px-4 py-2.5 border-t border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-700/25">
                 <div class="flex flex-wrap items-center gap-x-5 gap-y-1 text-xs text-gray-500 dark:text-gray-400">
                     <span class="flex items-center gap-1.5">
-                        <span class="w-2 h-2 rounded-full bg-green-500"></span> {{ __('Підтверджено') }}
+                        <span class="w-2 h-2 rounded-full bg-green-500"></span> {{ __('app.schedule_confirmed_legend') }}
                     </span>
                     <span class="flex items-center gap-1.5">
-                        <span class="w-2 h-2 rounded-full bg-amber-500"></span> {{ __('Очікує') }}
+                        <span class="w-2 h-2 rounded-full bg-amber-500"></span> {{ __('app.schedule_pending_legend') }}
                     </span>
                     <span class="flex items-center gap-1.5">
-                        <span class="w-2 h-2 rounded-full bg-red-500"></span> {{ __('Відхилено') }}
+                        <span class="w-2 h-2 rounded-full bg-red-500"></span> {{ __('app.schedule_declined_legend') }}
                     </span>
                     <span class="flex items-center gap-1.5">
-                        <span class="w-2 h-2 rounded-full bg-gray-400"></span> {{ __('Не підтверджено') }}
+                        <span class="w-2 h-2 rounded-full bg-gray-400"></span> {{ __('app.schedule_unconfirmed_legend') }}
                     </span>
                 </div>
             </div>
@@ -266,7 +266,7 @@
                             <template x-if="person.has_telegram && person.source !== 'assignment'">
                                 <button @click.stop="notifyPerson(person)"
                                     class="p-1.5 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20"
-                                    :title="'{{ __('Надіслати в Telegram') }}'">
+                                    :title="'{{ __("app.schedule_send_telegram") }}'">
                                     <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
                                         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
                                     </svg>
@@ -274,7 +274,7 @@
                             </template>
                             <button @click.stop="removePerson(person)"
                                 class="p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20"
-                                :title="'{{ __('Видалити') }}'">
+                                :title="'{{ __("app.schedule_delete") }}'">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                 </svg>
@@ -291,18 +291,18 @@
                 <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
                 </svg>
-                <span class="text-[11px] text-gray-500 dark:text-gray-400 font-medium">{{ __('Примітка до позиції') }}</span>
+                <span class="text-[11px] text-gray-500 dark:text-gray-400 font-medium">{{ __('app.schedule_position_note') }}</span>
             </div>
             <input type="text" :value="dropdown.cellNotes || ''"
                    @input.debounce.600ms="saveCellNotes($event.target.value)"
-                   placeholder="{{ __('Примітка...') }}"
+                   placeholder="{{ __('app.schedule_note_placeholder') }}"
                    class="w-full px-2 py-1.5 text-xs rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 dark:text-gray-200 focus:ring-primary-500 focus:border-primary-500 placeholder-gray-400 dark:placeholder-gray-500">
         </div>
 
         {{-- Add member search --}}
         <div class="p-2">
             <input type="text" x-model="dropdown.search" x-ref="dropdownSearch"
-                   placeholder="{{ __('Пошук учасника...') }}"
+                   placeholder="{{ __('app.schedule_search_member') }}"
                    class="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 dark:text-gray-200 focus:ring-primary-500 focus:border-primary-500 placeholder-gray-400 dark:placeholder-gray-500"
                    @keydown.escape="dropdown.open = false">
         </div>
@@ -318,12 +318,12 @@
             </template>
             <template x-if="filteredMembers().length === 0 && dropdown.search">
                 <div class="px-3 py-3 text-sm text-gray-400 dark:text-gray-500 text-center">
-                    {{ __('Нікого не знайдено') }}
+                    {{ __('app.schedule_no_one_found') }}
                 </div>
             </template>
             <template x-if="filteredMembers().length === 0 && !dropdown.search && dropdown.persons.length > 0">
                 <div class="px-3 py-3 text-sm text-gray-400 dark:text-gray-500 text-center">
-                    {{ __('Всі учасники призначені') }}
+                    {{ __('app.schedule_all_assigned_legend') }}
                 </div>
             </template>
         </div>
@@ -395,7 +395,7 @@ function matrixView() {
         },
 
         updatePeriodLabel() {
-            const months = ['січ', 'лют', 'бер', 'кві', 'тра', 'чер', 'лип', 'сер', 'вер', 'жов', 'лис', 'гру'];
+            const months = '{{ __("app.schedule_months_short") }}'.split(',');
             const end = new Date(this.startDate);
             end.setDate(end.getDate() + this.weeks * 7 - 1);
 
@@ -471,7 +471,7 @@ function matrixView() {
                 this.findNearestEvent();
             } catch (e) {
                 console.error('Matrix load error:', e);
-                this.showToast('Помилка завантаження', 'error');
+                this.showToast('{{ __("app.schedule_load_error") }}', 'error');
             } finally {
                 this.loading = false;
             }
@@ -540,10 +540,10 @@ function matrixView() {
 
         statusLabel(status) {
             const labels = {
-                confirmed: '{{ __("Так") }}',
-                pending: '{{ __("Очікує") }}',
-                declined: '{{ __("Ні") }}',
-                attended: '{{ __("Був") }}',
+                confirmed: '{{ __("app.schedule_yes_label") }}',
+                pending: '{{ __("app.schedule_pending_label") }}',
+                declined: '{{ __("app.schedule_no_label") }}',
+                attended: '{{ __("app.schedule_was_label") }}',
             };
             return labels[status] || '—';
         },
@@ -653,7 +653,7 @@ function matrixView() {
                     });
 
                     this.dropdown.persons = this.grid[mKey][rKey][eKey];
-                    this.showToast((member.short_name || member.name) + ' — ' + '{{ __("призначено") }}');
+                    this.showToast((member.short_name || member.name) + ' — ' + '{{ __("app.schedule_assigned_toast") }}');
 
                     // Auto-close if no more available members
                     if (this.filteredMembers().length === 0) {
@@ -661,11 +661,11 @@ function matrixView() {
                     }
                 } else {
                     const err = await resp.json().catch(() => ({}));
-                    this.showToast(err.error || err.message || '{{ __("Помилка при призначенні") }}', 'error');
+                    this.showToast(err.error || err.message || '{{ __("app.schedule_assign_error") }}', 'error');
                 }
             } catch (e) {
                 console.error('Assign error:', e);
-                this.showToast('{{ __("Помилка при призначенні") }}', 'error');
+                this.showToast('{{ __("app.schedule_assign_error") }}', 'error');
             } finally {
                 this.busy = false;
             }
@@ -702,7 +702,7 @@ function matrixView() {
                         this.grid[mKey][rKey][eKey] = this.grid[mKey][rKey][eKey].filter(p => p.id !== person.id);
                     }
                     this.dropdown.persons = this.grid[mKey]?.[rKey]?.[eKey] || [];
-                    this.showToast(person.person_name + ' — ' + '{{ __("видалено") }}');
+                    this.showToast(person.person_name + ' — ' + '{{ __("app.schedule_removed_toast") }}');
 
                     // Auto-close if empty
                     if (this.dropdown.persons.length === 0) {
@@ -711,7 +711,7 @@ function matrixView() {
                 }
             } catch (e) {
                 console.error('Remove error:', e);
-                this.showToast('{{ __("Помилка") }}', 'error');
+                this.showToast('{{ __("app.schedule_error") }}', 'error');
             } finally {
                 this.busy = false;
             }
@@ -753,10 +753,10 @@ function matrixView() {
                 if (this.grid[mKey]?.[rKey]?.[eKey]) {
                     this.grid[mKey][rKey][eKey].forEach(p => p.notes = notes);
                 }
-                this.showToast('{{ __("Примітку збережено") }}');
+                this.showToast('{{ __("app.schedule_note_saved") }}');
             } catch (e) {
                 console.error('Save cell notes error:', e);
-                this.showToast('{{ __("Помилка") }}', 'error');
+                this.showToast('{{ __("app.schedule_error") }}', 'error');
             }
         },
 
@@ -785,13 +785,13 @@ function matrixView() {
                         if (p) p.status = 'pending';
                     }
                     this.dropdown.persons = [...(this.grid[mKey]?.[rKey]?.[eKey] || [])];
-                    this.showToast('{{ __("Повідомлення надіслано") }}');
+                    this.showToast('{{ __("app.schedule_notification_sent") }}');
                 } else {
-                    this.showToast(data.message || '{{ __("Не вдалося надіслати") }}', 'error');
+                    this.showToast(data.message || '{{ __("app.schedule_notification_failed") }}', 'error');
                 }
             } catch (e) {
                 console.error('Notify error:', e);
-                this.showToast('{{ __("Помилка") }}', 'error');
+                this.showToast('{{ __("app.schedule_error") }}', 'error');
             }
         },
     };
