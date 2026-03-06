@@ -2407,15 +2407,15 @@
                                     <span class="w-4 h-4 rounded bg-green-100 dark:bg-green-900/40 border border-green-300 dark:border-green-700 flex items-center justify-center">
                                         <svg class="w-3 h-3 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
                                     </span>
-                                    Від ролі
+                                    {{ __('app.settings_from_role') }}
                                 </span>
                                 <span class="inline-flex items-center gap-1">
                                     <span class="w-4 h-4 rounded bg-purple-100 dark:bg-purple-900/40 border-2 border-purple-400 dark:border-purple-500"></span>
-                                    Додатково
+                                    {{ __('app.settings_additional') }}
                                 </span>
                                 <span class="inline-flex items-center gap-1">
                                     <span class="w-4 h-4 rounded bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-300 dark:text-gray-600">&mdash;</span>
-                                    Недоступно
+                                    {{ __('app.settings_unavailable') }}
                                 </span>
                             </div>
 
@@ -2424,7 +2424,7 @@
                                 <table class="w-full text-sm">
                                     <thead>
                                         <tr class="border-b border-gray-200 dark:border-gray-700">
-                                            <th class="text-left py-2 pr-4 font-medium text-gray-600 dark:text-gray-400">Модуль</th>
+                                            <th class="text-left py-2 pr-4 font-medium text-gray-600 dark:text-gray-400">{{ __('app.settings_module') }}</th>
                                             @foreach($permissionActions as $actKey => $actLabel)
                                             <th class="text-center py-2 px-2 font-medium text-gray-600 dark:text-gray-400 w-20">{{ mb_substr($actLabel, 0, 6) }}.</th>
                                             @endforeach
@@ -2470,13 +2470,13 @@
                         <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 flex items-center justify-end gap-3">
                             <button type="button" @click="showModal = false"
                                     class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
-                                Скасувати
+                                {{ __('app.cancel') }}
                             </button>
                             <button type="button" @click="saveUserOverrides()"
                                     :disabled="savingUser"
                                     class="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-xl hover:bg-purple-700 disabled:opacity-50 transition-colors">
-                                <span x-show="!savingUser">Зберегти</span>
-                                <span x-show="savingUser" x-cloak>Збереження...</span>
+                                <span x-show="!savingUser">{{ __('app.save') }}</span>
+                                <span x-show="savingUser" x-cloak>{{ __('app.saving') }}</span>
                             </button>
                         </div>
                     </div>
@@ -2492,12 +2492,12 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
                 <div class="text-sm text-blue-800 dark:text-blue-200">
-                    <p class="font-medium mb-1">Як працюють права доступу</p>
+                    <p class="font-medium mb-1">{{ __('app.settings_how_permissions_work') }}</p>
                     <ul class="list-disc list-inside space-y-1 text-blue-700 dark:text-blue-300">
-                        <li>Ролі з <strong>повним доступом</strong> (позначені щитом) мають доступ до всіх функцій</li>
-                        <li>Для інших ролей налаштуйте окремі права для кожного модуля</li>
-                        <li><strong>Персональні права</strong> — додаткові дозволи для конкретних користувачів понад їхню роль</li>
-                        <li><a href="{{ route('settings.church-roles.index') }}" class="underline">Керувати ролями</a> можна на сторінці "Церковні ролі"</li>
+                        <li>{{ __('app.settings_perm_info_1') }}</li>
+                        <li>{{ __('app.settings_perm_info_2') }}</li>
+                        <li>{{ __('app.settings_perm_info_3') }}</li>
+                        <li><a href="{{ route('settings.church-roles.index') }}" class="underline">{{ __('app.settings_perm_manage_roles') }}</a> {{ __('app.settings_perm_info_4') }}</li>
                     </ul>
                 </div>
             </div>

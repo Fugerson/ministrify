@@ -971,7 +971,7 @@ function budgetsPage() {
         },
 
         async deleteItem(itemId, itemName) {
-            if (!confirm(`Видалити статтю "${itemName}"?`)) return;
+            if (!confirm(`{{ __('app.finance_delete_item_confirm') }}`.replace(':name', itemName))) return;
 
             try {
                 const res = await fetch(`/finances/budgets/items/${itemId}`, {
@@ -986,10 +986,10 @@ function budgetsPage() {
                     showToast('success', data.message);
                     setTimeout(() => location.reload(), 600);
                 } else {
-                    showToast('error', data.message || 'Помилка видалення');
+                    showToast('error', data.message || '{{ __('app.finance_delete_error') }}');
                 }
             } catch (e) {
-                showToast('error', 'Помилка видалення');
+                showToast('error', '{{ __('app.finance_delete_error') }}');
             }
         },
 
@@ -1008,7 +1008,7 @@ function budgetsPage() {
                     this.transactionsList = data.transactions;
                 }
             } catch (e) {
-                showToast('error', 'Помилка завантаження транзакцій');
+                showToast('error', '{{ __('app.finance_load_transactions_error') }}');
             } finally {
                 this.transactionsLoading = false;
             }
@@ -1034,10 +1034,10 @@ function budgetsPage() {
                     showToast('success', data.message);
                     setTimeout(() => location.reload(), 600);
                 } else {
-                    showToast('error', data.message || 'Помилка');
+                    showToast('error', data.message || '{{ __('app.finance_error_toast') }}');
                 }
             } catch (e) {
-                showToast('error', 'Помилка створення бюджету');
+                showToast('error', '{{ __('app.finance_budget_create_error') }}');
             } finally {
                 this.creatingBudget = false;
             }
@@ -1115,19 +1115,19 @@ function budgetsPage() {
                     setTimeout(() => location.reload(), 600);
                 } else if (res.status === 422) {
                     const msgs = data.errors ? Object.values(data.errors).flat() : [data.message];
-                    showToast('error', msgs[0] || 'Помилка валідації');
+                    showToast('error', msgs[0] || '{{ __('app.finance_validation_error') }}');
                 } else {
-                    showToast('error', data.message || 'Помилка збереження');
+                    showToast('error', data.message || '{{ __('app.finance_save_error') }}');
                 }
             } catch (e) {
-                showToast('error', 'Помилка збереження');
+                showToast('error', '{{ __('app.finance_save_error') }}');
             } finally {
                 this.churchItemSaving = false;
             }
         },
 
         async deleteChurchItem(itemId, itemName) {
-            if (!confirm(`Видалити статтю "${itemName}"?`)) return;
+            if (!confirm(`{{ __('app.finance_delete_item_confirm') }}`.replace(':name', itemName))) return;
 
             try {
                 const res = await fetch(`/finances/church-budget-items/${itemId}`, {
@@ -1142,10 +1142,10 @@ function budgetsPage() {
                     showToast('success', data.message);
                     setTimeout(() => location.reload(), 600);
                 } else {
-                    showToast('error', data.message || 'Помилка видалення');
+                    showToast('error', data.message || '{{ __('app.finance_delete_error') }}');
                 }
             } catch (e) {
-                showToast('error', 'Помилка видалення');
+                showToast('error', '{{ __('app.finance_delete_error') }}');
             }
         },
 

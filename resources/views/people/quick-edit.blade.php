@@ -109,7 +109,7 @@
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                 </svg>
-                <span x-text="saving ? 'Зберігаю...' : 'Зберегти'"></span>
+                <span x-text="saving ? '{{ __('app.saving_btn') }}' : '{{ __('app.save_btn') }}'"></span>
             </button>
         </div>
     </div>
@@ -119,7 +119,7 @@
         <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
         </svg>
-        Прокрутіть вправо для перегляду всіх колонок
+        {{ __('app.scroll_right_hint') }}
     </div>
 
     <!-- Table -->
@@ -136,7 +136,7 @@
                         <!-- Row Number -->
                         <th class="px-2 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase w-10 bg-gray-100 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">#</th>
                         <!-- Photo -->
-                        <th class="px-2 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase w-14 bg-gray-100 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">Фото</th>
+                        <th class="px-2 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase w-14 bg-gray-100 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">{{ __('app.photo') }}</th>
                         <!-- Sortable columns -->
                         <template x-for="(col, colIndex) in columns" :key="col.key">
                             <th class="relative px-2 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase select-none bg-gray-100 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600 group"
@@ -209,14 +209,14 @@
                             <td class="px-1 py-1">
                                 <input type="text" x-model="row.first_name" @input="markDirty(row)"
                                        class="w-full px-2 py-1.5 bg-transparent hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-white dark:focus:bg-gray-700 border border-transparent hover:border-gray-300 dark:hover:border-gray-600 focus:border-primary-500 rounded text-sm transition-colors"
-                                       placeholder="Ім'я">
+                                       placeholder="{{ __('app.first_name') }}">
                             </td>
 
                             <!-- Last Name -->
                             <td class="px-1 py-1">
                                 <input type="text" x-model="row.last_name" @input="markDirty(row)"
                                        class="w-full px-2 py-1.5 bg-transparent hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-white dark:focus:bg-gray-700 border border-transparent hover:border-gray-300 dark:hover:border-gray-600 focus:border-primary-500 rounded text-sm transition-colors"
-                                       placeholder="Прізвище">
+                                       placeholder="{{ __('app.last_name') }}">
                             </td>
 
                             <!-- Phone -->
@@ -251,8 +251,8 @@
                                 <select x-model="row.gender" @change="markDirty(row)"
                                         class="w-full px-2 py-1.5 bg-transparent hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-white dark:focus:bg-gray-700 border border-transparent hover:border-gray-300 dark:hover:border-gray-600 focus:border-primary-500 rounded text-sm transition-colors">
                                     <option value="">—</option>
-                                    <option value="male">Ч</option>
-                                    <option value="female">Ж</option>
+                                    <option value="male">{{ __('app.male_short') }}</option>
+                                    <option value="female">{{ __('app.female_short') }}</option>
                                 </select>
                             </td>
 

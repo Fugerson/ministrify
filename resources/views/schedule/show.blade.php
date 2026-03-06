@@ -1083,23 +1083,23 @@
                                                 <div class="mt-4">
                                                     <button type="button" @click="showDeleteModal = false"
                                                             class="w-full px-4 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
-                                                        Скасувати
+                                                        {{ __('app.schedule_cancel') }}
                                                     </button>
                                                 </div>
                                             @else
                                                 <p class="mt-2 text-sm text-gray-500 dark:text-gray-400 text-center">
-                                                    Ви впевнені, що хочете видалити цю подію? Усі призначення також будуть видалені.
+                                                    {{ __('app.schedule_confirm_delete') }}
                                                 </p>
 
                                                 <div class="mt-6 flex justify-center space-x-3">
                                                     <button type="button" @click="showDeleteModal = false"
                                                             class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors">
-                                                        Скасувати
+                                                        {{ __('app.schedule_cancel') }}
                                                     </button>
                                                     <button type="button"
                                                             @click="ajaxAction('{{ route('events.destroy', $event) }}', 'DELETE').then(() => setTimeout(() => Livewire.navigate('{{ route('schedule') }}'), 600))"
                                                             class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors">
-                                                        Видалити
+                                                        {{ __('app.schedule_delete_btn') }}
                                                     </button>
                                                 </div>
                                             @endif
@@ -1371,7 +1371,7 @@ function titleEditor(itemId, initialTitle, existingSongId = null) {
         // Render text with song links
         renderWithSongLinks(text) {
             if (!text || text.trim() === '') {
-                return '<span class="text-gray-400 italic">Клікніть щоб додати текст...</span>';
+                return '<span class="text-gray-400 italic">{{ __("app.schedule_click_to_add") }}</span>';
             }
 
             // Escape HTML first
@@ -1384,7 +1384,7 @@ function titleEditor(itemId, initialTitle, existingSongId = null) {
                     const keyBadge = song.key ? `<span class="ml-1 px-1.5 py-0.5 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-xs rounded font-mono">${escapeHtml(song.key)}</span>` : '';
                     return `<a href="/songs/${song.id}" class="inline-flex items-center gap-1 text-primary-600 dark:text-primary-400 hover:underline font-medium whitespace-nowrap" onclick="event.stopPropagation()"><span>🎵</span><span>${escapeHtml(song.title)}</span>${keyBadge}</a>`;
                 }
-                return `<span class="text-red-500">[пісня не знайдена]</span>`;
+                return `<span class="text-red-500">{{ __("app.schedule_song_not_found") }}</span>`;
             });
 
             return html;
@@ -1410,7 +1410,7 @@ async function updateFieldWithSong(itemId, songId, title, songKey = null) {
         });
 
         if (response.ok) {
-            showGlobalToast(songId ? 'Пісню додано' : 'Пісню видалено', 'success');
+            showGlobalToast(songId ? '{{ __("app.schedule_song_added") }}' : '{{ __("app.schedule_song_removed") }}', 'success');
             // Update DOM without reload
             updateSongCellDOM(itemId, songId, title, songKey);
         } else {
