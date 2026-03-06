@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Люди')
+@section('title', __('app.people'))
 
 @section('actions')
 <div class="flex items-center gap-2">
@@ -36,7 +36,7 @@
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
         </svg>
-        Додати
+        {{ __('app.add') }}
     </button>
     @endif
 </div>
@@ -59,7 +59,7 @@
                     </svg>
                 </button>
                 <span class="font-medium">
-                    Вибрано: <span x-text="selectedIds.length"></span>
+                    {{ __('app.selected_label') }} <span x-text="selectedIds.length"></span>
                 </span>
             </div>
             <div class="flex flex-wrap items-center gap-2">

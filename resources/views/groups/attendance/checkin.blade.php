@@ -9,11 +9,11 @@
         <div class="flex items-center justify-between">
             <div>
                 <h2 class="text-xl font-bold text-gray-900 dark:text-white">{{ $group->name }}</h2>
-                <p class="text-gray-500 dark:text-gray-400">{{ $attendance->date->format('d.m.Y') }} о {{ now()->format('H:i') }}</p>
+                <p class="text-gray-500 dark:text-gray-400">{{ $attendance->date->format('d.m.Y') }} {{ __('app.group_at_time') }} {{ now()->format('H:i') }}</p>
             </div>
             <div class="text-right">
                 <div class="text-3xl font-bold text-primary-600 dark:text-primary-400" id="presentCount">{{ $attendance->members_present }}</div>
-                <div class="text-sm text-gray-500">з {{ $group->members->count() }}</div>
+                <div class="text-sm text-gray-500">{{ __('app.group_attendance_of_total', ['total' => $group->members->count()]) }}</div>
             </div>
         </div>
     </div>

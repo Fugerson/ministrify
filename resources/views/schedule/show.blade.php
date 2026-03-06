@@ -2389,13 +2389,13 @@ async function sendTelegramNotify(itemId, button) {
             button.innerHTML = '<svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>';
             setTimeout(() => { button.innerHTML = originalContent; button.disabled = false; }, 2000);
         } else {
-            alert(data.message || 'Помилка');
+            alert(data.message || '{{ __("app.schedule_error_alert") }}');
             button.innerHTML = originalContent;
             button.disabled = false;
         }
     } catch (err) {
         console.error(err);
-        alert('Помилка надсилання');
+        alert('{{ __("app.schedule_send_error") }}');
         button.innerHTML = originalContent;
         button.disabled = false;
     }
@@ -2473,7 +2473,7 @@ async function sendTelegramNotify(itemId, button) {
             if (data.new_responses && data.new_responses.length > 0) {
                 data.new_responses.forEach(resp => {
                     const emoji = resp.status === 'confirmed' ? '✅' : '❌';
-                    const action = resp.status === 'confirmed' ? 'підтвердив' : 'відхилив';
+                    const action = resp.status === 'confirmed' ? '{{ __("app.schedule_confirmed_action") }}' : '{{ __("app.schedule_declined_action") }}';
                     showToast(`${emoji} ${resp.person_name} ${action}: ${resp.name}`, resp.status === 'confirmed' ? 'success' : 'error');
                 });
 
@@ -2598,13 +2598,13 @@ function reminderManager() {
 
                 const data = await response.json().catch(() => ({}));
                 if (data.success) {
-                    showGlobalToast('Нагадування збережено', 'success');
+                    showGlobalToast('{{ __("app.schedule_reminders_saved") }}', 'success');
                 } else {
-                    showGlobalToast(data.message || 'Помилка', 'error');
+                    showGlobalToast(data.message || '{{ __("app.schedule_error") }}', 'error');
                 }
             } catch (err) {
                 console.error('Save reminders error:', err);
-                showGlobalToast('Помилка збереження', 'error');
+                showGlobalToast('{{ __("app.schedule_save_error") }}', 'error');
             } finally {
                 this.saving = false;
             }
@@ -2675,13 +2675,13 @@ function initPlanSortable() {
 
                 const data = await response.json().catch(() => ({}));
                 if (data.success || response.ok) {
-                    showGlobalToast('Порядок оновлено', 'success');
+                    showGlobalToast('{{ __("app.schedule_order_updated") }}', 'success');
                 } else {
-                    showGlobalToast(data.message || 'Помилка збереження порядку', 'error');
+                    showGlobalToast(data.message || '{{ __("app.schedule_order_error") }}', 'error');
                 }
             } catch (err) {
                 console.error('Reorder error:', err);
-                showGlobalToast('Помилка збереження порядку', 'error');
+                showGlobalToast('{{ __("app.schedule_order_error") }}', 'error');
             }
         }
     });

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Редагувати витрату')
+@section('title', __('app.finance_edit_expense_page'))
 
 @section('content')
 <div class="max-w-2xl mx-auto" x-data="expenseEditForm()">
@@ -8,18 +8,18 @@
         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
         </svg>
-        Назад
+        {{ __('app.finance_back') }}
     </a>
 
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Редагувати витрату</h2>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.finance_edit_expense_page') }}</h2>
             <x-delete-confirm
                 :action="route('finances.expenses.destroy', $expense)"
                 :redirect="route('finances.transactions', ['filter' => 'expense'])"
-                title="Видалити витрату?"
-                message="Ви впевнені, що хочете видалити цю витрату? Цю дію неможливо скасувати."
-                button-text="Видалити"
+                title="{{ __('app.finance_delete_expense_confirm') }}"
+                message="{{ __('app.finance_delete_expense_msg') }}"
+                button-text="{{ __('app.finance_delete') }}"
                 :icon="false"
                 :ajax="true"
                 class="text-sm"

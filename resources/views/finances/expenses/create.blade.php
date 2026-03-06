@@ -131,34 +131,34 @@
                     </div>
 
                     <div>
-                        <label for="expense_type" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Тип витрати</label>
+                        <label for="expense_type" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.finance_expense_type') }}</label>
                         <select name="expense_type" id="expense_type"
                                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                            <option value="">Не вказано</option>
-                            <option value="recurring" {{ old('expense_type') == 'recurring' ? 'selected' : '' }}>Регулярна</option>
-                            <option value="one_time" {{ old('expense_type') == 'one_time' ? 'selected' : '' }}>Одноразова</option>
+                            <option value="">{{ __('app.finance_not_specified') }}</option>
+                            <option value="recurring" {{ old('expense_type') == 'recurring' ? 'selected' : '' }}>{{ __('app.finance_recurring') }}</option>
+                            <option value="one_time" {{ old('expense_type') == 'one_time' ? 'selected' : '' }}>{{ __('app.finance_one_time') }}</option>
                         </select>
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Спосіб оплати</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.finance_payment_method') }}</label>
                     <div class="flex gap-4">
                         <label class="flex items-center">
                             <input type="radio" name="payment_method" value="card" {{ old('payment_method', 'card') == 'card' ? 'checked' : '' }}
                                    class="text-primary-600 focus:ring-primary-500">
-                            <span class="ml-2 text-gray-700 dark:text-gray-300">Картка</span>
+                            <span class="ml-2 text-gray-700 dark:text-gray-300">{{ __('app.finance_card') }}</span>
                         </label>
                         <label class="flex items-center">
                             <input type="radio" name="payment_method" value="cash" {{ old('payment_method') == 'cash' ? 'checked' : '' }}
                                    class="text-primary-600 focus:ring-primary-500">
-                            <span class="ml-2 text-gray-700 dark:text-gray-300">Готівка</span>
+                            <span class="ml-2 text-gray-700 dark:text-gray-300">{{ __('app.finance_cash') }}</span>
                         </label>
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Чеки / Квитанції</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.finance_receipts') }}</label>
 
                     <!-- Drop zone -->
                     <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center hover:border-primary-500 dark:hover:border-primary-400 transition-colors cursor-pointer"
@@ -172,10 +172,10 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                         </svg>
                         <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                            Натисніть або перетягніть файли сюди
+                            {{ __('app.finance_drag_drop_files') }}
                         </p>
                         <p class="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                            JPG, PNG, HEIC, PDF до 10 МБ (макс. 10 файлів)
+                            {{ __('app.finance_file_limits') }}
                         </p>
                     </div>
 
@@ -217,7 +217,7 @@
                 </div>
 
                 <div>
-                    <label for="notes" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Нотатки</label>
+                    <label for="notes" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.finance_notes') }}</label>
                     <textarea name="notes" id="notes" rows="2"
                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500">{{ old('notes') }}</textarea>
                 </div>
@@ -226,17 +226,17 @@
 
         <div class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2 sm:gap-3">
             <a href="{{ route('finances.transactions', ['filter' => 'expense']) }}" class="w-full sm:w-auto px-4 py-2 text-center text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
-                Скасувати
+                {{ __('app.finance_cancel') }}
             </a>
             <button type="submit" :disabled="saving"
                     class="w-full sm:w-auto px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
-                <span x-show="!saving">Зберегти</span>
+                <span x-show="!saving">{{ __('app.finance_save') }}</span>
                 <span x-show="saving" class="flex items-center justify-center gap-2">
                     <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
                     </svg>
-                    Збереження...
+                    {{ __('app.finance_saving') }}
                 </span>
             </button>
         </div>
@@ -326,21 +326,21 @@ function expenseCreateForm() {
                 if (!response.ok) {
                     if (response.status === 422 && data.errors) {
                         this.errors = data.errors;
-                        showToast('error', 'Перевірте правильність заповнення форми.');
+                        showToast('error', '{{ __('app.check_form_errors') }}');
                     } else {
-                        showToast('error', data.message || 'Помилка збереження.');
+                        showToast('error', data.message || '{{ __('app.finance_save_error') }}');
                     }
                     this.saving = false;
                     return;
                 }
 
-                showToast('success', data.message || 'Збережено!');
+                showToast('success', data.message || '{{ __('app.finance_saved_toast') }}');
                 if (data.budget_warning) {
                     showToast('warning', data.budget_warning);
                 }
                 setTimeout(() => Livewire.navigate(data.redirect_url), 800);
             } catch (e) {
-                showToast('error', 'Помилка з\'єднання з сервером.');
+                showToast('error', '{{ __('app.server_connection_error') }}');
                 this.saving = false;
             }
         }

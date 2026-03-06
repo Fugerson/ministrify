@@ -1953,40 +1953,40 @@
                                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4" x-text="itemModalTitle"></h3>
                                 <form @submit.prevent="saveItem()" class="space-y-4">
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Назва *</label>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.ministry_name_required') }}</label>
                                         <input type="text" x-model="itemForm.name" required maxlength="255"
-                                               placeholder="Оренда, Перекуси, Матеріали..."
+                                               placeholder="{{ __('app.ministry_rent_placeholder') }}"
                                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
                                     </div>
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Запланована сума (₴) *</label>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.ministry_planned_amount_label') }}</label>
                                         <input type="number" x-model="itemForm.planned_amount" required min="0" step="0.01"
                                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
                                     </div>
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Планова дата</label>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.ministry_planned_date_label') }}</label>
                                         <input type="date" x-model="itemForm.planned_date"
                                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
-                                        <p class="text-xs text-gray-500 mt-1">Коли очікується ця витрата</p>
+                                        <p class="text-xs text-gray-500 mt-1">{{ __('app.ministry_planned_date_hint') }}</p>
                                     </div>
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Категорія витрат</label>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.ministry_expense_category_label') }}</label>
                                         <select x-model="itemForm.category_id"
                                                 :class="{ 'hidden': itemForm.category_id === '__custom__' }"
                                                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
-                                            <option value="">Без категорії</option>
+                                            <option value="">{{ __('app.ministry_no_category') }}</option>
                                             @foreach($expenseCategories as $cat)
                                                 <option value="{{ $cat->id }}">{{ $cat->icon ?? '💸' }} {{ $cat->name }}</option>
                                             @endforeach
-                                            <option value="__custom__">Інше (ввести вручну)...</option>
+                                            <option value="__custom__">{{ __('app.ministry_custom_category') }}</option>
                                         </select>
                                         <div x-show="itemForm.category_id === '__custom__'" class="flex gap-2">
-                                            <input type="text" x-model="itemForm.category_name" placeholder="Назва категорії..."
+                                            <input type="text" x-model="itemForm.category_name" placeholder="{{ __('app.ministry_category_name_placeholder') }}"
                                                    class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
                                             <button type="button" @click="itemForm.category_id = ''; itemForm.category_name = ''"
                                                     class="px-3 py-2 text-gray-500 hover:text-red-500 border border-gray-300 dark:border-gray-600 rounded-lg">✕</button>
                                         </div>
-                                        <p class="text-xs text-gray-500 mt-1">Витрати з цією категорією автоматично враховуються у факті</p>
+                                        <p class="text-xs text-gray-500 mt-1">{{ __('app.ministry_category_auto_hint') }}</p>
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Відповідальні</label>
@@ -2282,14 +2282,14 @@
                                     <select x-model="expenseForm.category_id"
                                             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
                                             :class="{ 'hidden': expenseForm.category_id === '__custom__' }">
-                                        <option value="">Без категорії</option>
+                                        <option value="">{{ __('app.ministry_no_category') }}</option>
                                         @foreach($expenseCategories as $cat)
                                             <option value="{{ $cat->id }}">{{ $cat->icon ?? '💸' }} {{ $cat->name }}</option>
                                         @endforeach
-                                        <option value="__custom__">Інше (ввести вручну)...</option>
+                                        <option value="__custom__">{{ __('app.ministry_custom_category') }}</option>
                                     </select>
                                     <div x-show="expenseForm.category_id === '__custom__'" class="flex gap-2">
-                                        <input type="text" x-model="expenseForm.category_name" placeholder="Назва категорії..."
+                                        <input type="text" x-model="expenseForm.category_name" placeholder="{{ __('app.ministry_category_name_placeholder') }}"
                                                class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
                                         <button type="button" @click="expenseForm.category_id = ''; expenseForm.category_name = ''"
                                                 class="px-3 py-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" title="Назад до списку">

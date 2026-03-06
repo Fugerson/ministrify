@@ -864,11 +864,11 @@ function quickEdit() {
 
                     this.toast(@json(__('app.saved_stats', ['created' => ':created', 'updated' => ':updated', 'deleted' => ':deleted'])).replace(':created', data.stats.created).replace(':updated', data.stats.updated).replace(':deleted', data.stats.deleted));
                 } else {
-                    alert(data.message || 'Помилка збереження');
+                    alert(data.message || @json(__('app.save_error')));
                 }
             } catch (error) {
                 console.error('Save error:', error);
-                alert('Помилка збереження');
+                alert(@json(__('app.save_error')));
             } finally {
                 this.saving = false;
             }
@@ -880,7 +880,7 @@ function quickEdit() {
 
             // Only allow for saved rows
             if (!row.id) {
-                this.toast('Спочатку збережіть запис, потім додайте фото');
+                this.toast(@json(__('app.save_first_then_photo')));
                 event.target.value = '';
                 return;
             }
@@ -904,13 +904,13 @@ function quickEdit() {
 
                 if (data.success) {
                     row.photo_url = data.photo_url;
-                    this.toast('Фото завантажено');
+                    this.toast(@json(__('app.photo_uploaded')));
                 } else {
-                    alert(data.message || 'Помилка завантаження фото');
+                    alert(data.message || @json(__('app.photo_upload_error')));
                 }
             } catch (error) {
                 console.error('Photo upload error:', error);
-                alert('Помилка завантаження фото');
+                alert(@json(__('app.photo_upload_error')));
             } finally {
                 row.uploadingPhoto = false;
                 event.target.value = '';
@@ -937,13 +937,13 @@ function quickEdit() {
 
                 if (data.success) {
                     row.photo_url = null;
-                    this.toast('Фото видалено');
+                    this.toast(@json(__('app.photo_deleted')));
                 } else {
-                    alert(data.message || 'Помилка видалення');
+                    alert(data.message || @json(__('app.photo_delete_error')));
                 }
             } catch (error) {
                 console.error('Photo delete error:', error);
-                alert('Помилка видалення');
+                alert(@json(__('app.photo_delete_error')));
             }
         },
 
