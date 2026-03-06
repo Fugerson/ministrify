@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Мій розклад')
+@section('title', __('app.schedule_my_schedule'))
 
 @push('scripts')
 <script src="/js/pwa-db.js"></script>
@@ -18,8 +18,8 @@
                 </svg>
             </div>
             <div class="flex-1">
-                <p class="text-sm font-medium text-yellow-800 dark:text-yellow-200">Ви офлайн</p>
-                <p class="text-xs text-yellow-600 dark:text-yellow-400">Показуємо збережені дані. Зміни синхронізуються при підключенні.</p>
+                <p class="text-sm font-medium text-yellow-800 dark:text-yellow-200">{{ __('app.schedule_you_offline') }}</p>
+                <p class="text-xs text-yellow-600 dark:text-yellow-400">{{ __('app.schedule_offline_hint') }}</p>
             </div>
         </div>
     </div>
@@ -35,8 +35,8 @@
                 </svg>
             </div>
             <div class="flex-1">
-                <p class="text-sm font-medium text-blue-800 dark:text-blue-200">Синхронізація...</p>
-                <p class="text-xs text-blue-600 dark:text-blue-400">Очікує синхронізації: <span x-text="pendingActions"></span> дій</p>
+                <p class="text-sm font-medium text-blue-800 dark:text-blue-200">{{ __('app.schedule_syncing') }}</p>
+                <p class="text-xs text-blue-600 dark:text-blue-400">{{ __('app.schedule_pending_sync') }} <span x-text="pendingActions"></span> {{ __('app.schedule_actions') }}</p>
             </div>
         </div>
     </div>
@@ -45,13 +45,13 @@
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
             <div class="flex items-center justify-between">
                 <div>
-                    <h1 class="text-xl font-bold text-gray-900 dark:text-white">Мій розклад</h1>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Ваші майбутні служіння та призначення</p>
+                    <h1 class="text-xl font-bold text-gray-900 dark:text-white">{{ __('app.schedule_my_schedule') }}</h1>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.schedule_your_upcoming') }}</p>
                 </div>
                 <div class="flex items-center gap-2">
                     {{-- Sync status --}}
                     <div x-show="syncedAt" class="text-xs text-gray-400 dark:text-gray-500">
-                        <span x-text="'Оновлено: ' + formatSyncTime(syncedAt)"></span>
+                        <span x-text="'{{ __("app.schedule_updated") }} ' + formatSyncTime(syncedAt)"></span>
                     </div>
                     {{-- Refresh button --}}
                     <button @click="refresh()"
@@ -73,7 +73,7 @@
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    <p class="text-gray-500 dark:text-gray-400">Завантаження...</p>
+                    <p class="text-gray-500 dark:text-gray-400">{{ __('app.schedule_loading') }}</p>
                 </div>
             </template>
 
@@ -111,7 +111,7 @@
                                     <button @click="confirmItem(responsibility)"
                                             :disabled="responsibility.processing"
                                             class="p-2.5 text-green-600 bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30 active:bg-green-200 dark:active:bg-green-900/50 rounded-xl disabled:opacity-50 transition-colors"
-                                            title="Підтвердити">
+                                            title="{{ __('app.schedule_confirm_btn') }}">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                         </svg>
@@ -119,7 +119,7 @@
                                     <button @click="declineItem(responsibility)"
                                             :disabled="responsibility.processing"
                                             class="p-2.5 text-red-600 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 active:bg-red-200 dark:active:bg-red-900/50 rounded-xl disabled:opacity-50 transition-colors"
-                                            title="Відхилити">
+                                            title="{{ __('app.schedule_decline_btn') }}">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                         </svg>
@@ -137,7 +137,7 @@
                     <svg class="w-12 h-12 mx-auto mb-4 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                     </svg>
-                    <p>У вас немає майбутніх служінь та призначень</p>
+                    <p>{{ __('app.schedule_no_upcoming') }}</p>
                 </div>
             </template>
         </div>
@@ -260,8 +260,8 @@ function mySchedule() {
 
                     if (response.ok) {
                         item.status = 'confirmed';
-                        item.status_label = 'Підтверджено';
-                        await PWA_DB.updateResponsibilityStatus(item.id, 'confirmed', 'Підтверджено');
+                        item.status_label = '{{ __("app.schedule_confirmed_status") }}';
+                        await PWA_DB.updateResponsibilityStatus(item.id, 'confirmed', '{{ __("app.schedule_confirmed_status") }}');
                     }
                 } catch (error) {
                     console.error('Confirm failed:', error);
@@ -270,7 +270,7 @@ function mySchedule() {
             } else {
                 await this.queueOfflineAction(item, 'confirm');
                 item.status = 'confirmed';
-                item.status_label = 'Підтверджено (очікує синхр.)';
+                item.status_label = '{{ __("app.schedule_confirmed_pending_sync") }}';
             }
 
             item.processing = false;
@@ -292,8 +292,8 @@ function mySchedule() {
 
                     if (response.ok) {
                         item.status = 'declined';
-                        item.status_label = 'Відхилено';
-                        await PWA_DB.updateResponsibilityStatus(item.id, 'declined', 'Відхилено');
+                        item.status_label = '{{ __("app.schedule_declined_status") }}';
+                        await PWA_DB.updateResponsibilityStatus(item.id, 'declined', '{{ __("app.schedule_declined_status") }}');
                     }
                 } catch (error) {
                     console.error('Decline failed:', error);
@@ -302,7 +302,7 @@ function mySchedule() {
             } else {
                 await this.queueOfflineAction(item, 'decline');
                 item.status = 'declined';
-                item.status_label = 'Відхилено (очікує синхр.)';
+                item.status_label = '{{ __("app.schedule_declined_pending_sync") }}';
             }
 
             item.processing = false;
@@ -345,11 +345,11 @@ function mySchedule() {
             const now = new Date();
             const diff = now - date;
 
-            if (diff < 60000) return 'щойно';
-            if (diff < 3600000) return Math.floor(diff / 60000) + ' хв тому';
-            if (diff < 86400000) return Math.floor(diff / 3600000) + ' год тому';
+            if (diff < 60000) return '{{ __("app.schedule_just_now") }}';
+            if (diff < 3600000) return Math.floor(diff / 60000) + ' {{ __("app.schedule_min_ago") }}';
+            if (diff < 86400000) return Math.floor(diff / 3600000) + ' {{ __("app.schedule_hours_ago") }}';
 
-            return date.toLocaleDateString('uk-UA', { day: 'numeric', month: 'short' });
+            return date.toLocaleDateString('{{ app()->getLocale() }}', { day: 'numeric', month: 'short' });
         }
     };
 }

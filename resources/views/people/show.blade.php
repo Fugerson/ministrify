@@ -35,19 +35,19 @@
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            Збереження...
+            {{ __('app.saving') }}
         </span>
         <span x-show="saveStatus === 'saved'" class="flex items-center gap-2">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
             </svg>
-            Збережено
+            {{ __('app.saved') }}
         </span>
         <span x-show="saveStatus === 'error'" class="flex items-center gap-2">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
             </svg>
-            Помилка збереження
+            {{ __('app.error_saving') }}
         </span>
     </div>
     <form id="personForm" method="POST" action="{{ route('people.update', $person) }}" enctype="multipart/form-data" class="space-y-6">
@@ -107,10 +107,10 @@
                         <div class="flex items-center gap-2">
                             <input type="text" name="first_name" value="{{ old('first_name', $person->first_name) }}" required
                                    class="text-2xl font-bold text-gray-900 dark:text-white bg-transparent border-0 border-b-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600 focus:border-primary-500 focus:ring-0 px-0 py-0 w-auto"
-                                   placeholder="Ім'я">
+                                   placeholder="{{ __('app.first_name') }}">
                             <input type="text" name="last_name" value="{{ old('last_name', $person->last_name) }}" required
                                    class="text-2xl font-bold text-gray-900 dark:text-white bg-transparent border-0 border-b-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600 focus:border-primary-500 focus:ring-0 px-0 py-0 w-auto"
-                                   placeholder="Прізвище">
+                                   placeholder="{{ __('app.last_name') }}">
                         </div>
                     @else
                         <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $person->full_name }}</h1>
@@ -139,7 +139,7 @@
                                         <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                         </svg>
-                                        Тег
+                                        {{ __('app.tag') }}
                                     </button>
                                 </div>
                                 <div x-show="showPicker" x-cloak @click.outside="showPicker = false"
@@ -156,10 +156,10 @@
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                             </svg>
-                                            Створити теги в налаштуваннях
+                                            {{ __('app.create_tags_settings') }}
                                         </a>
                                     </template>
-                                    <p x-show="allTags.length > 0 && allTags.filter(t => !selectedTags.includes(t.id)).length === 0" class="text-xs text-gray-500 px-3 py-1">Всі теги додано</p>
+                                    <p x-show="allTags.length > 0 && allTags.filter(t => !selectedTags.includes(t.id)).length === 0" class="text-xs text-gray-500 px-3 py-1">{{ __('app.all_tags_added') }}</p>
                                 </div>
                             </div>
                         @else
@@ -172,7 +172,7 @@
                         @endif
                         @if($person->joined_date && $stats['membership_days'] !== null)
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
-                                {{ floor($stats['membership_days'] / 365) > 0 ? floor($stats['membership_days'] / 365) . ' р. ' : '' }}{{ $stats['membership_days'] % 365 }} днів в церкві
+                                {{ floor($stats['membership_days'] / 365) > 0 ? floor($stats['membership_days'] / 365) . ' ' . __('app.year_short') . ' ' : '' }}{{ $stats['membership_days'] % 365 }} {{ __('app.days_in_church') }}
                             </span>
                         @endif
                     </div>
@@ -188,14 +188,14 @@
                         </a>
                     @endif
                     @if($person->telegram_username)
-                        <a href="https://t.me/{{ ltrim($person->telegram_username, '@') }}" target="_blank" class="p-3 bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded-xl hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors" title="Написати в Telegram: {{ '@' . ltrim($person->telegram_username, '@') }}">
+                        <a href="https://t.me/{{ ltrim($person->telegram_username, '@') }}" target="_blank" class="p-3 bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded-xl hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors" title="{{ __('app.write_in_telegram', ['username' => '@' . ltrim($person->telegram_username, '@')]) }}">
                             <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.223-.535.223l.19-2.72 4.94-4.463c.215-.19-.047-.295-.334-.105l-6.11 3.85-2.63-.82c-.57-.18-.583-.57.12-.847l10.27-3.96c.475-.18.89.115.735.84z"/>
                             </svg>
                         </a>
                     @endif
                     @if($person->telegram_chat_id)
-                        <div class="relative p-3 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 rounded-xl" title="Бот підключено — сповіщення та запити підтвердження">
+                        <div class="relative p-3 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 rounded-xl" title="{{ __('app.bot_connected_title') }}">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
                             </svg>
@@ -216,56 +216,56 @@
             <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
                 @if($canEdit)
                     <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Телефон</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">{{ __('app.phone') }}</p>
                         <input type="tel" name="phone" value="{{ old('phone', $person->phone) }}"
                                class="w-full font-medium text-gray-900 dark:text-white bg-transparent border-0 p-0 focus:ring-0 text-sm"
-                               placeholder="Не вказано">
+                               placeholder="{{ __('app.not_specified') }}">
                     </div>
                     <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Email</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">{{ __('app.email') }}</p>
                         <input type="email" name="email" value="{{ old('email', $person->email) }}"
                                class="w-full font-medium text-gray-900 dark:text-white bg-transparent border-0 p-0 focus:ring-0 text-sm truncate"
-                               placeholder="Не вказано">
+                               placeholder="{{ __('app.not_specified') }}">
                     </div>
                     <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">День народження</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">{{ __('app.birthday') }}</p>
                         <input type="date" name="birth_date" value="{{ old('birth_date', $person->birth_date?->format('Y-m-d')) }}"
                                class="w-full font-medium text-gray-900 dark:text-white bg-transparent border-0 p-0 focus:ring-0 text-sm">
                     </div>
                     <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Адреса</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">{{ __('app.address') }}</p>
                         <input type="text" name="address" value="{{ old('address', $person->address) }}"
                                class="w-full font-medium text-gray-900 dark:text-white bg-transparent border-0 p-0 focus:ring-0 text-sm truncate"
-                               placeholder="Не вказано">
+                               placeholder="{{ __('app.not_specified') }}">
                     </div>
                 @else
                     @if($person->phone)
                         <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Телефон</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.phone') }}</p>
                             <p class="font-medium text-gray-900 dark:text-white">{{ $person->phone }}</p>
                         </div>
                     @endif
                     @if($person->email)
                         <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Email</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.email') }}</p>
                             <p class="font-medium text-gray-900 dark:text-white truncate">{{ $person->email }}</p>
                         </div>
                     @endif
                     @if($person->birth_date)
                         <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
-                            <p class="text-xs text-gray-500 dark:text-gray-400">День народження</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.birthday') }}</p>
                             <p class="font-medium text-gray-900 dark:text-white">{{ $person->birth_date->format('d.m.Y') }}</p>
                         </div>
                     @endif
                     @if($person->address)
                         <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Адреса</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.address') }}</p>
                             <p class="font-medium text-gray-900 dark:text-white truncate">{{ $person->address }}</p>
                         </div>
                     @endif
                     @if($church->shepherds_enabled && $person->shepherd)
                         <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Опікун</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.shepherd') }}</p>
                             <a href="{{ route('people.show', $person->shepherd) }}" class="font-medium text-primary-600 dark:text-primary-400 hover:underline">{{ $person->shepherd->full_name }}</a>
                         </div>
                     @endif
@@ -279,9 +279,9 @@
                     <p class="text-xs text-gray-500 dark:text-gray-400 mb-1 flex items-center gap-1">
                         Telegram
                         @if($person->telegram_chat_id)
-                            <span class="inline-flex items-center gap-0.5 text-green-600 dark:text-green-400" title="Бот підключено (chat_id: {{ $person->telegram_chat_id }})">
+                            <span class="inline-flex items-center gap-0.5 text-green-600 dark:text-green-400" title="{{ __('app.bot_connected_title') }} (chat_id: {{ $person->telegram_chat_id }})">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                <span class="text-[10px] font-medium">бот</span>
+                                <span class="text-[10px] font-medium">{{ __('app.bot_short') }}</span>
                             </span>
                         @endif
                     </p>
@@ -293,10 +293,10 @@
                     </div>
                 </div>
                 <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Церковна роль</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">{{ __('app.church_role_label') }}</p>
                     <select name="church_role_id"
                             class="w-full font-medium text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-700 border-0 p-0 focus:ring-0 text-sm cursor-pointer">
-                        <option value="" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">-- Не вказано --</option>
+                        <option value="" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">-- {{ __('app.not_specified') }} --</option>
                         @foreach($churchRoles as $role)
                             <option value="{{ $role->id }}" {{ $person->church_role_id == $role->id ? 'selected' : '' }} class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">{{ $role->name }}</option>
                         @endforeach
@@ -305,13 +305,13 @@
                 @if($church->shepherds_enabled)
                 <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3" x-data="shepherdSearch()">
                     <div class="flex items-center justify-between mb-1">
-                        <p class="text-xs text-gray-500 dark:text-gray-400">Опікун</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.shepherd') }}</p>
                         <a x-show="selectedId" :href="'/people/' + selectedId"
                            class="text-xs text-primary-600 dark:text-primary-400 hover:underline flex items-center gap-1">
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                             </svg>
-                            Профіль
+                            {{ __('app.profile') }}
                         </a>
                     </div>
                     <div class="relative">
@@ -323,7 +323,7 @@
                                @keydown.arrow-down.prevent="highlightNext()"
                                @keydown.arrow-up.prevent="highlightPrev()"
                                @keydown.enter.prevent="selectHighlighted()"
-                               :placeholder="selectedName || 'Пошук опікуна...'"
+                               :placeholder="selectedName || '{{ __('app.search_shepherd') }}'"
                                :class="{'text-gray-400': !searchQuery && selectedName}"
                                class="w-full text-sm font-medium text-gray-900 dark:text-white bg-transparent border-0 p-0 focus:ring-0 placeholder-gray-500 dark:placeholder-gray-400">
 
@@ -334,7 +334,7 @@
                             <!-- Clear option -->
                             <div @click="clearShepherd()"
                                  class="px-3 py-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 text-sm text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
-                                -- Без опікуна --
+                                {{ __('app.no_shepherd_option') }}
                             </div>
                             <template x-for="(shepherd, index) in filteredShepherds" :key="shepherd.id">
                                 <div @click="selectShepherd(shepherd)"
@@ -354,7 +354,7 @@
                             </template>
                         </div>
                     </div>
-                    <span x-show="updating" class="text-xs text-gray-400">Збереження...</span>
+                    <span x-show="updating" class="text-xs text-gray-400">{{ __('app.saving') }}...</span>
                 </div>
                 @endif
             </div>
@@ -362,32 +362,32 @@
             <!-- Personal Details -->
             <div class="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4" x-data="{ maritalStatus: '{{ $person->marital_status ?? '' }}' }">
                 <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Стать</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">{{ __('app.gender') }}</p>
                     <select name="gender"
                             class="w-full font-medium text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-700 border-0 p-0 focus:ring-0 text-sm cursor-pointer">
-                        <option value="" class="bg-white dark:bg-gray-800">-- Не вказано --</option>
+                        <option value="" class="bg-white dark:bg-gray-800">-- {{ __('app.not_specified') }} --</option>
                         @foreach(\App\Models\Person::getGenders() as $value => $label)
                             <option value="{{ $value }}" {{ $person->gender === $value ? 'selected' : '' }} class="bg-white dark:bg-gray-800">{{ $label }}</option>
                         @endforeach
                     </select>
                 </div>
                 <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Сімейний стан</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">{{ __('app.family_status') }}</p>
                     <select name="marital_status" x-model="maritalStatus"
                             class="w-full font-medium text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-700 border-0 p-0 focus:ring-0 text-sm cursor-pointer">
-                        <option value="" class="bg-white dark:bg-gray-800">-- Не вказано --</option>
+                        <option value="" class="bg-white dark:bg-gray-800">-- {{ __('app.not_specified') }} --</option>
                         @foreach(\App\Models\Person::getMaritalStatuses() as $value => $label)
                             <option value="{{ $value }}" {{ $person->marital_status === $value ? 'selected' : '' }} class="bg-white dark:bg-gray-800">{{ $label }}</option>
                         @endforeach
                     </select>
                 </div>
                 <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Дата хрещення</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">{{ __('app.baptism_date') }}</p>
                     <input type="date" name="baptism_date" value="{{ old('baptism_date', $person->baptism_date?->format('Y-m-d')) }}"
                            class="w-full font-medium text-gray-900 dark:text-white bg-transparent border-0 p-0 focus:ring-0 text-sm">
                 </div>
                 <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3" x-show="maritalStatus === 'married'" x-cloak>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Річниця весілля</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">{{ __('app.anniversary') }}</p>
                     <input type="date" name="anniversary" value="{{ old('anniversary', $person->anniversary?->format('Y-m-d')) }}"
                            class="w-full font-medium text-gray-900 dark:text-white bg-transparent border-0 p-0 focus:ring-0 text-sm">
                 </div>
@@ -406,20 +406,20 @@
                             </svg>
                         </div>
                         <div class="flex-1">
-                            <p class="font-medium text-gray-900 dark:text-white">Доступ до системи</p>
+                            <p class="font-medium text-gray-900 dark:text-white">{{ __('app.system_access') }}</p>
                             @if($person->user)
                                 <div class="flex items-center gap-2">
                                     <template x-if="!editingEmail">
                                         <div class="flex items-center gap-2">
                                             <p class="text-sm text-gray-600 dark:text-gray-400" x-text="userEmail">{{ $person->user->email }}</p>
                                             <button @click="editingEmail = true; setTimeout(() => { $refs.emailInput?.focus() }, 50)"
-                                                    class="p-1 text-gray-400 hover:text-purple-600 rounded transition-colors" title="Редагувати email">
+                                                    class="p-1 text-gray-400 hover:text-purple-600 rounded transition-colors" title="{{ __('app.edit_email') }}">
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
                                                 </svg>
                                             </button>
                                             <button @click="resetPassword()" :disabled="resettingPassword"
-                                                    class="p-1 text-gray-400 hover:text-orange-600 rounded transition-colors disabled:opacity-50" title="Скинути пароль">
+                                                    class="p-1 text-gray-400 hover:text-orange-600 rounded transition-colors disabled:opacity-50" title="{{ __('app.reset_password') }}">
                                                 <svg x-show="!resettingPassword" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
                                                 </svg>
@@ -451,7 +451,7 @@
                                     </template>
                                 </div>
                             @else
-                                <p class="text-sm text-gray-500 dark:text-gray-400" id="no-access-text">Немає доступу до системи</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400" id="no-access-text">{{ __('app.no_system_access') }}</p>
                             @endif
                         </div>
                     </div>
@@ -459,11 +459,11 @@
                     @if($person->user)
                         <!-- System Role Selector -->
                         <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
-                            <span class="text-xs text-gray-500 dark:text-gray-400">Рівень доступу:</span>
+                            <span class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.access_level') }}</span>
                             <select x-model="churchRoleId" @change.stop="updateRole()"
                                     :disabled="saving || {{ $person->user->id === auth()->id() ? 'true' : 'false' }}"
                                     class="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed">
-                                <option value="" class="bg-white dark:bg-gray-800 text-amber-600">Очікує підтвердження</option>
+                                <option value="" class="bg-white dark:bg-gray-800 text-amber-600">{{ __('app.pending_confirmation') }}</option>
                                 @foreach($churchRoles as $role)
                                 <option value="{{ $role->id }}" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
                                     {{ $role->name }}
@@ -482,7 +482,7 @@
                                 </svg>
                             </span>
                             @if($person->user->id === auth()->id())
-                                <span class="text-xs text-gray-500 dark:text-gray-400">(це ви)</span>
+                                <span class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.this_is_you') }}</span>
                             @endif
                         </div>
                     @else
@@ -492,7 +492,7 @@
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
                             </svg>
-                            Надати доступ
+                            {{ __('app.grant_access') }}
                         </button>
                     @endif
                 </div>

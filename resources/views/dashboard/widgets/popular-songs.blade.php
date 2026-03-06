@@ -8,8 +8,8 @@
                 </svg>
             </div>
             <div>
-                <h3 class="font-semibold text-gray-900 dark:text-white">Популярні пісні</h3>
-                <p class="text-xs text-gray-500 dark:text-gray-400">Топ-8 за використанням</p>
+                <h3 class="font-semibold text-gray-900 dark:text-white">{{ __('app.popular_songs') }}</h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.top_8_by_usage') }}</p>
             </div>
         </div>
     </div>
@@ -21,7 +21,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
                 </svg>
             </div>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Поки немає даних про використання пісень</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.no_song_usage_data') }}</p>
         </div>
     @else
         <div class="space-y-1">
@@ -57,7 +57,7 @@
                     <div class="flex-shrink-0 text-right">
                         <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ $song->times_used }}</p>
                         <p class="text-xs text-gray-400 dark:text-gray-500">
-                            {{ $song->times_used == 1 ? 'раз' : ($song->times_used >= 2 && $song->times_used <= 4 ? 'рази' : 'разів') }}
+                            {{ $song->times_used == 1 ? __('app.times_one') : ($song->times_used >= 2 && $song->times_used <= 4 ? __('app.times_few') : __('app.times_many')) }}
                         </p>
                     </div>
 
@@ -65,7 +65,7 @@
                     <div class="flex-shrink-0 hidden sm:block text-right min-w-[70px]">
                         <p class="text-xs text-gray-400 dark:text-gray-500">
                             @if($song->last_used_at)
-                                {{ \Carbon\Carbon::parse($song->last_used_at)->locale('uk')->diffForHumans() }}
+                                {{ \Carbon\Carbon::parse($song->last_used_at)->locale(app()->getLocale())->diffForHumans() }}
                             @else
                                 ---
                             @endif

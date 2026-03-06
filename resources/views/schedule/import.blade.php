@@ -1,14 +1,14 @@
 @extends('layouts.app')
 
-@section('title', 'Імпорт календаря')
+@section('title', __('app.schedule_import_title'))
 
 @section('content')
 <div class="max-w-2xl mx-auto">
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
         <div class="px-6 py-5 border-b border-gray-200 dark:border-gray-700">
-            <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Імпорт календаря</h2>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white">{{ __('app.schedule_import_title') }}</h2>
             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                Завантажте файл .ics для імпорту подій
+                {{ __('app.schedule_import_description') }}
             </p>
         </div>
 
@@ -22,13 +22,13 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                     <div class="ml-3">
-                        <h3 class="text-sm font-medium text-blue-800 dark:text-blue-300">Як імпортувати з Google Calendar?</h3>
+                        <h3 class="text-sm font-medium text-blue-800 dark:text-blue-300">{{ __('app.schedule_import_google_how') }}</h3>
                         <div class="mt-2 text-sm text-blue-700 dark:text-blue-400 space-y-1">
-                            <p>1. Відкрийте Google Calendar на комп'ютері</p>
-                            <p>2. Натисніть на шестерню (Налаштування)</p>
-                            <p>3. Виберіть "Імпорт та експорт" -> "Експортувати"</p>
-                            <p>4. Завантажиться .zip архів з файлами .ics</p>
-                            <p>5. Розпакуйте та завантажте потрібний .ics файл тут</p>
+                            <p>{{ __('app.schedule_import_step1') }}</p>
+                            <p>{{ __('app.schedule_import_step2') }}</p>
+                            <p>{{ __('app.schedule_import_step3') }}</p>
+                            <p>{{ __('app.schedule_import_step4') }}</p>
+                            <p>{{ __('app.schedule_import_step5') }}</p>
                         </div>
                     </div>
                 </div>
@@ -37,7 +37,7 @@
             <!-- Ministry Selection -->
             <div>
                 <label for="ministry_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Команда для імпортованих подій
+                    {{ __('app.schedule_import_team_label') }}
                 </label>
                 <x-searchable-select
                     name="ministry_id"
@@ -46,8 +46,8 @@
                     labelKey="name"
                     valueKey="id"
                     colorKey="color"
-                    placeholder="Пошук команди..."
-                    nullText="Виберіть команду..."
+                    :placeholder="__('app.schedule_import_search_team')"
+                    :nullText="__('app.schedule_import_select_team')"
                     :nullable="false"
                     required
                 />
@@ -57,7 +57,7 @@
             <!-- File Upload -->
             <div>
                 <label for="file" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Файл календаря (.ics)
+                    {{ __('app.schedule_import_file_label') }}
                 </label>
                 <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-xl hover:border-primary-400 dark:hover:border-primary-500 transition-colors">
                     <div class="space-y-1 text-center">
@@ -66,12 +66,12 @@
                         </svg>
                         <div class="flex text-sm text-gray-600 dark:text-gray-400">
                             <label for="file" class="relative cursor-pointer rounded-md font-medium text-primary-600 dark:text-primary-400 hover:text-primary-500 focus-within:outline-none">
-                                <span>Виберіть файл</span>
+                                <span>{{ __('app.schedule_import_choose_file') }}</span>
                                 <input id="file" name="file" type="file" class="sr-only" accept=".ics,.txt" required>
                             </label>
-                            <p class="pl-1">або перетягніть сюди</p>
+                            <p class="pl-1">{{ __('app.schedule_import_or_drag') }}</p>
                         </div>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">iCal файл до 5MB</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.schedule_import_file_hint') }}</p>
                     </div>
                 </div>
                 <p id="file-name" class="mt-2 text-sm text-gray-600 dark:text-gray-400 hidden"></p>
@@ -82,14 +82,14 @@
             <div class="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
                 <a href="{{ route('schedule') }}"
                    class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors">
-                    Скасувати
+                    {{ __('app.schedule_import_cancel') }}
                 </a>
                 <button type="submit" :disabled="saving"
                         class="px-6 py-2.5 bg-primary-600 hover:bg-primary-700 disabled:opacity-50 text-white font-medium rounded-xl transition-colors inline-flex items-center">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
                     </svg>
-                    <span x-text="saving ? 'Імпортування...' : 'Імпортувати'"></span>
+                    <span x-text="saving ? '{{ __("app.schedule_import_importing") }}' : '{{ __("app.schedule_import_btn") }}'"></span>
                 </button>
             </div>
         </form>
@@ -101,7 +101,7 @@
         const fileName = e.target.files[0]?.name;
         const fileNameEl = document.getElementById('file-name');
         if (fileName) {
-            fileNameEl.textContent = 'Вибрано: ' + fileName;
+            fileNameEl.textContent = '{{ __("app.schedule_import_selected") }} ' + fileName;
             fileNameEl.classList.remove('hidden');
         } else {
             fileNameEl.classList.add('hidden');

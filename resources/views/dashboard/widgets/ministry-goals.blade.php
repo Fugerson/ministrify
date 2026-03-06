@@ -5,7 +5,7 @@
             <svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
             </svg>
-            Цілі команд
+            {{ __('app.team_goals') }}
         </h2>
     </div>
 
@@ -36,11 +36,11 @@
                             'cancelled' => 'bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400',
                         ];
                         $statusLabels = [
-                            'in_progress' => 'В процесі',
-                            'completed' => 'Завершено',
-                            'on_hold' => 'На паузі',
-                            'not_started' => 'Не розпочато',
-                            'cancelled' => 'Скасовано',
+                            'in_progress' => __('app.goal_in_progress'),
+                            'completed' => __('app.goal_completed'),
+                            'on_hold' => __('app.goal_on_hold'),
+                            'not_started' => __('app.goal_not_started'),
+                            'cancelled' => __('app.goal_cancelled'),
                         ];
                         $statusClass = $statusColors[$goal->status] ?? $statusColors['not_started'];
                         $statusLabel = $statusLabels[$goal->status] ?? $goal->status;
@@ -77,7 +77,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
             </svg>
         </div>
-        <p class="text-gray-500 dark:text-gray-400 text-sm">Немає активних цілей</p>
+        <p class="text-gray-500 dark:text-gray-400 text-sm">{{ __('app.no_active_goals') }}</p>
     </div>
     @endif
 </div>

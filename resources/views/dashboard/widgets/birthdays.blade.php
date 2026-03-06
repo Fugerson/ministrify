@@ -7,7 +7,7 @@
                 <span class="text-xl">🎂</span>
             </div>
             <div>
-                <h3 class="font-semibold text-gray-900 dark:text-white">Дні народження</h3>
+                <h3 class="font-semibold text-gray-900 dark:text-white">{{ __('app.birthdays_title') }}</h3>
                 <p class="text-sm text-gray-600 dark:text-gray-400">
                     <span x-text="count"></span> <span x-text="countLabel"></span>
                 </p>
@@ -48,13 +48,13 @@
                         <span x-text="person.name"></span>
                         <template x-if="person.is_today"><span class="ml-1">🎉</span></template>
                     </p>
-                    <p class="text-xs" :class="person.is_today ? 'text-yellow-600 dark:text-yellow-400 font-medium' : 'text-gray-500 dark:text-gray-400'" x-text="person.is_today ? 'Сьогодні!' : person.day + ' ' + person.month_short"></p>
+                    <p class="text-xs" :class="person.is_today ? 'text-yellow-600 dark:text-yellow-400 font-medium' : 'text-gray-500 dark:text-gray-400'" x-text="person.is_today ? todayExcl : person.day + ' ' + person.month_short"></p>
                 </div>
             </a>
         </template>
     </div>
     <div x-show="!loading && people.length === 0" class="text-center py-6 text-sm text-gray-500 dark:text-gray-400">
-        Немає днів народження в цьому місяці
+        {{ __('app.no_birthdays_this_month') }}
     </div>
 </div>
 
@@ -76,14 +76,19 @@
 @push('scripts')
 <script>
 function birthdayWidget() {
-    const monthNames = ['Січень','Лютий','Березень','Квітень','Травень','Червень','Липень','Серпень','Вересень','Жовтень','Листопад','Грудень'];
+    const monthNames = [@json(__('app.january')),@json(__('app.february')),@json(__('app.march')),@json(__('app.april')),@json(__('app.may')),@json(__('app.june')),@json(__('app.july')),@json(__('app.august')),@json(__('app.september')),@json(__('app.october')),@json(__('app.november')),@json(__('app.december'))];
     const initialData = @json($birthdayInitialData);
+    const personOne = @json(__('app.person_one'));
+    const personFew = @json(__('app.person_few'));
+    const personMany = @json(__('app.person_many'));
+    const todayExcl = @json(__('app.today_excl'));
 
     return {
         currentMonth: {{ now()->month }},
         people: initialData,
         count: initialData.length,
         loading: false,
+        todayExcl: todayExcl,
 
         get sortedPeople() {
             return [...this.people].sort((a, b) => parseInt(a.day) - parseInt(b.day));
@@ -95,9 +100,9 @@ function birthdayWidget() {
 
         get countLabel() {
             const n = this.count;
-            if (n % 10 === 1 && n % 100 !== 11) return 'особа';
-            if ([2,3,4].includes(n % 10) && ![12,13,14].includes(n % 100)) return 'особи';
-            return 'осіб';
+            if (n % 10 === 1 && n % 100 !== 11) return personOne;
+            if ([2,3,4].includes(n % 10) && ![12,13,14].includes(n % 100)) return personFew;
+            return personMany;
         },
 
         prevMonth() {

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', __('Створити подію'))
+@section('title', __('app.create_event'))
 
 @php
     $ministriesData = $ministries->map(function($m) {
@@ -13,22 +13,22 @@
     <form class="space-y-6" x-ref="form" @submit.prevent="submitForm">
 
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('Нова подія') }}</h2>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.new_event_btn') }}</h2>
 
             <div class="space-y-4">
                 <div>
-                    <label for="title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Назва') }} *</label>
+                    <label for="title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.name_required') }} *</label>
                     <input type="text" name="title" id="title" value="{{ old('title') }}" required
                            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                            :class="errors.title ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'"
-                           placeholder="{{ __('Недільне богослужіння') }}">
+                           placeholder="{{ __('app.sunday_worship') }}">
                     <template x-if="errors.title"><p class="mt-1 text-sm text-red-500" x-text="errors.title[0]"></p></template>
                 </div>
 
                 <div x-data="{ allDay: {{ old('all_day') ? 'true' : 'false' }}, multiDay: {{ old('end_date') || $errors->has('end_date') ? 'true' : 'false' }} }">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                         <div>
-                            <label for="date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Дата') }} *</label>
+                            <label for="date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.date') }} *</label>
                             <input type="date" name="date" id="date" value="{{ old('date', now()->format('Y-m-d')) }}" required
                                    class="w-full px-3 py-2.5 md:py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                                    :class="errors.date ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'">
@@ -36,7 +36,7 @@
                         </div>
 
                         <div x-show="!allDay" x-transition>
-                            <label for="time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Час') }} *</label>
+                            <label for="time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.time_label') }} *</label>
                             <input type="time" name="time" id="time" value="{{ old('time', '10:00') }}" :required="!allDay"
                                    class="w-full px-3 py-2.5 md:py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                                    :class="errors.time ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'">
@@ -48,12 +48,12 @@
                     <label class="flex items-center gap-2 mt-3 cursor-pointer">
                         <input type="checkbox" name="multi_day" value="1" x-model="multiDay"
                                class="w-4 h-4 text-primary-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500">
-                        <span class="text-sm text-gray-600 dark:text-gray-400">{{ __('Подія на кілька днів') }}</span>
+                        <span class="text-sm text-gray-600 dark:text-gray-400">{{ __('app.multi_day_event') }}</span>
                     </label>
 
                     <!-- End date for multi-day events -->
                     <div x-show="multiDay" x-collapse class="mt-3">
-                        <label for="end_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Дата закінчення') }} *</label>
+                        <label for="end_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.end_date') }} *</label>
                         <input type="date" name="end_date" id="end_date" value="{{ old('end_date') }}"
                                class="w-full px-3 py-2.5 md:py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                                :class="errors.end_date ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'">
@@ -63,7 +63,7 @@
                     <label class="flex items-center gap-2 mt-2 cursor-pointer">
                         <input type="checkbox" name="all_day" value="1" x-model="allDay"
                                class="w-4 h-4 text-primary-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500">
-                        <span class="text-sm text-gray-600 dark:text-gray-400">{{ __('Подія на весь день') }}</span>
+                        <span class="text-sm text-gray-600 dark:text-gray-400">{{ __('app.all_day_label') }}</span>
                     </label>
                 </div>
 
@@ -76,16 +76,16 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                         </svg>
-                        {{ __('Повторення') }}
+                        {{ __('app.recurrence') }}
                         <span x-show="recurrenceType" x-cloak class="text-xs text-primary-600 dark:text-primary-400 font-medium"
-                              x-text="recurrenceType ? '(' + ({'daily':'щодня','weekly':'щотижня','biweekly':'що 2 тижні','monthly':'щомісяця','yearly':'щороку','weekdays':'пн-пт','custom':'свій'}[recurrenceType] || '') + ')' : ''"></span>
+                              x-text="recurrenceType ? '(' + ({'daily':'{{ __('app.recurrence_daily_js') }}','weekly':'{{ __('app.recurrence_weekly_js') }}','biweekly':'{{ __('app.recurrence_biweekly_js') }}','monthly':'{{ __('app.recurrence_monthly_js') }}','yearly':'{{ __('app.recurrence_yearly_js') }}','weekdays':'{{ __('app.recurrence_weekdays_js') }}','custom':'{{ __('app.recurrence_custom_js') }}'}[recurrenceType] || '') + ')' : ''"></span>
                     </button>
 
                     <div x-show="showRecurrence" x-collapse class="mt-3 space-y-3">
                         <select x-model="recurrenceType" @change="updateRecurrence()"
                                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                            <option value="">{{ __('Не повторювати') }}</option>
-                            <option value="daily">{{ __('Щодня') }}</option>
+                            <option value="">{{ __('app.do_not_repeat') }}</option>
+                            <option value="daily">{{ __('app.recurrence_daily') }}</option>
                             <option value="weekly">{{ __('Щотижня') }}</option>
                             <option value="biweekly">{{ __('Що 2 тижні') }}</option>
                             <option value="monthly">{{ __('Щомісяця') }}</option>

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Групи')
+@section('title', __('app.groups'))
 
 @section('actions')
 @can('create', App\Models\Group::class)
@@ -8,7 +8,7 @@
     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
     </svg>
-    Створити групу
+    {{ __('app.group_create') }}
 </button>
 @endcan
 @endsection
@@ -22,14 +22,14 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
             </svg>
         </div>
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Немає груп</h3>
-        <p class="text-gray-500 dark:text-gray-400 mb-6">Створіть групу для організації людей</p>
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">{{ __('app.group_no_groups') }}</h3>
+        <p class="text-gray-500 dark:text-gray-400 mb-6">{{ __('app.group_create_hint') }}</p>
         @can('create', App\Models\Group::class)
         <button type="button" onclick="openCreateGroupModal()" class="inline-flex items-center px-5 py-2.5 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 transition-all">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
             </svg>
-            Створити групу
+            {{ __('app.group_create') }}
         </button>
         @endcan
     </div>
@@ -45,7 +45,7 @@
                 </div>
                 <div class="ml-4">
                     <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $groups->count() }}</p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Всього груп</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.group_total_groups') }}</p>
                 </div>
             </div>
         </div>
@@ -59,7 +59,7 @@
                 </div>
                 <div class="ml-4">
                     <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $groups->sum('members_count') }}</p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Всього учасників</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.group_total_members') }}</p>
                 </div>
             </div>
         </div>
@@ -73,7 +73,7 @@
                 </div>
                 <div class="ml-4">
                     <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $groups->count() > 0 ? round($groups->sum('members_count') / $groups->count(), 1) : 0 }}</p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Середній розмір</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.group_avg_size') }}</p>
                 </div>
             </div>
         </div>
@@ -85,11 +85,11 @@
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead class="bg-gray-50 dark:bg-gray-700/50">
                     <tr>
-                        <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Група</th>
-                        <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden md:table-cell">Лідер</th>
-                        <th class="px-3 md:px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden sm:table-cell">Статус</th>
-                        <th class="px-3 md:px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Учасників</th>
-                        <th class="px-3 md:px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Дії</th>
+                        <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('app.group') }}</th>
+                        <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden md:table-cell">{{ __('app.leader') }}</th>
+                        <th class="px-3 md:px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden sm:table-cell">{{ __('app.status') }}</th>
+                        <th class="px-3 md:px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('app.members') }}</th>
+                        <th class="px-3 md:px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('app.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
@@ -165,7 +165,7 @@
             <form x-ref="form" @submit.prevent="submitForm">
                 {{-- Header --}}
                 <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Нова група</h3>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.group_new') }}</h3>
                     <button type="button" onclick="closeCreateGroupModal()" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -177,9 +177,9 @@
                 <div class="px-6 py-5 space-y-5 max-h-[70vh] overflow-y-auto">
                     {{-- Name --}}
                     <div>
-                        <label for="modal_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Назва групи *</label>
+                        <label for="modal_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.group_name') }}</label>
                         <input type="text" name="name" id="modal_name" required
-                               placeholder="Молодіжна група, Хор, Служіння дітям..."
+                               placeholder="{{ __('app.group_name_placeholder') }}"
                                :class="errors.name ? 'ring-2 ring-red-500' : ''"
                                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
                         <template x-if="errors.name">
@@ -189,52 +189,52 @@
 
                     {{-- Description --}}
                     <div>
-                        <label for="modal_description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Опис</label>
+                        <label for="modal_description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.description') }}</label>
                         <textarea name="description" id="modal_description" rows="3"
-                                  placeholder="Коротко про групу та її діяльність..."
+                                  placeholder="{{ __('app.group_desc_placeholder') }}"
                                   class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white"></textarea>
                     </div>
 
                     {{-- Leader --}}
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Лідер групи</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.group_leader') }}</label>
                         <x-person-select
                             name="leader_id"
                             :people="$people"
-                            placeholder="Почніть вводити ім'я лідера..."
-                            null-text="Без лідера"
+                            :placeholder="__('app.leader_placeholder')"
+                            :null-text="__('app.without_leader')"
                         />
-                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Лідер автоматично стане учасником групи</p>
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('app.group_leader_auto_member') }}</p>
                     </div>
 
                     {{-- Meeting details --}}
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div>
-                            <label for="modal_meeting_day" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">День зустрічі</label>
+                            <label for="modal_meeting_day" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.group_meeting_day') }}</label>
                             <select name="meeting_day" id="modal_meeting_day"
                                     class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
-                                <option value="">Не вказано</option>
-                                @foreach(['monday' => 'Понеділок', 'tuesday' => 'Вівторок', 'wednesday' => 'Середа', 'thursday' => 'Четвер', 'friday' => "П'ятниця", 'saturday' => 'Субота', 'sunday' => 'Неділя'] as $val => $label)
+                                <option value="">{{ __('app.group_not_specified') }}</option>
+                                @foreach(['monday' => __('app.monday'), 'tuesday' => __('app.tuesday'), 'wednesday' => __('app.wednesday'), 'thursday' => __('app.thursday'), 'friday' => __('app.friday'), 'saturday' => __('app.saturday'), 'sunday' => __('app.sunday')] as $val => $label)
                                     <option value="{{ $val }}">{{ $label }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div>
-                            <label for="modal_meeting_time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Час зустрічі</label>
+                            <label for="modal_meeting_time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.group_meeting_time') }}</label>
                             <input type="time" name="meeting_time" id="modal_meeting_time"
                                    class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
                         </div>
                         <div>
-                            <label for="modal_location" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Місце зустрічі</label>
+                            <label for="modal_location" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.group_meeting_location') }}</label>
                             <input type="text" name="location" id="modal_location"
-                                   placeholder="Адреса або кімната"
+                                   placeholder="{{ __('app.group_location_placeholder') }}"
                                    class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
                         </div>
                     </div>
 
                     {{-- Status --}}
                     <div>
-                        <label for="modal_status" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Статус</label>
+                        <label for="modal_status" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.status') }}</label>
                         <select name="status" id="modal_status"
                                 class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
                             @foreach(\App\Models\Group::getStatuses() as $value => $label)
@@ -250,14 +250,14 @@
                 <div class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2 sm:gap-3 px-6 py-4 border-t border-gray-200 dark:border-gray-700">
                     <button type="button" onclick="closeCreateGroupModal()"
                             class="w-full sm:w-auto px-5 py-2.5 text-center text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium">
-                        Скасувати
+                        {{ __('app.cancel') }}
                     </button>
                     <button type="submit" :disabled="saving"
                             class="w-full sm:w-auto px-5 py-2.5 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 transition-colors disabled:opacity-50">
-                        <span x-show="!saving">Створити групу</span>
+                        <span x-show="!saving">{{ __('app.group_create') }}</span>
                         <span x-show="saving" class="flex items-center justify-center gap-2">
                             <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
-                            Збереження...
+                            {{ __('app.saving') }}
                         </span>
                     </button>
                 </div>
@@ -303,18 +303,18 @@ function groupCreateForm() {
                 if (!response.ok) {
                     if (response.status === 422 && data.errors) {
                         this.errors = data.errors;
-                        showToast('error', 'Перевірте правильність заповнення форми.');
+                        showToast('error', '{{ __('app.form_check_error') }}');
                     } else {
-                        showToast('error', data.message || 'Помилка збереження.');
+                        showToast('error', data.message || '{{ __('app.save_error') }}');
                     }
                     this.saving = false;
                     return;
                 }
-                showToast('success', data.message || 'Збережено!');
+                showToast('success', data.message || '{{ __('app.saved_msg') }}');
                 closeCreateGroupModal();
                 setTimeout(() => Livewire.navigate(window.location.href), 600);
             } catch (e) {
-                showToast('error', "Помилка з'єднання з сервером.");
+                showToast('error', "{{ __('app.server_error') }}");
                 this.saving = false;
             }
         }

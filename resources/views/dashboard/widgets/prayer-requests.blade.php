@@ -5,10 +5,10 @@
             <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
             </svg>
-            Молитовні прохання
+            {{ __('app.prayer_requests_title') }}
         </h2>
         <a href="{{ route('website-builder.prayer-inbox.index') }}" class="text-sm text-primary-600 dark:text-primary-400 hover:underline flex items-center gap-1">
-            Всі
+            {{ __('app.view_all_short') }}
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
             </svg>
@@ -35,7 +35,7 @@
                         <h4 class="font-medium text-sm text-gray-900 dark:text-white truncate">{{ $request->title }}</h4>
                         @if($request->is_urgent)
                             <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400 flex-shrink-0">
-                                Термiново
+                                {{ __('app.urgent_label') }}
                             </span>
                         @endif
                     </div>
@@ -67,7 +67,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
                 </svg>
             </div>
-            <p class="text-gray-500 dark:text-gray-400 text-sm">Немає активних молитовних прохань</p>
+            <p class="text-gray-500 dark:text-gray-400 text-sm">{{ __('app.no_active_prayer_requests') }}</p>
         </div>
         @endforelse
     </div>

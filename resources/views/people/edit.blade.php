@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Редагувати: ' . $person->full_name)
+@section('title', __('app.edit_prefix') . $person->full_name)
 
 @section('content')
 <div class="max-w-3xl mx-auto" x-data="personEditForm()">
@@ -8,7 +8,7 @@
 
         <!-- Photo Upload Card -->
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Фото профілю</h2>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.profile_photo') }}</h2>
 
             <div x-data="avatarUpload()" class="flex items-center gap-6">
                 <!-- Preview -->
@@ -45,7 +45,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                             </svg>
                             <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                                <span class="text-primary-600 dark:text-primary-400 font-medium">Натисніть</span> або перетягніть фото
+                                {{ __('app.click_or_drag_photo') }}
                             </p>
                             <p class="text-xs text-gray-500 dark:text-gray-400">PNG, JPG до 2MB</p>
                         </div>
@@ -58,11 +58,11 @@
 
         <!-- Basic Info -->
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Основна інформація</h2>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.basic_info') }}</h2>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label for="first_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Ім'я *</label>
+                    <label for="first_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.first_name_required') }}</label>
                     <input type="text" name="first_name" id="first_name" value="{{ old('first_name', $person->first_name) }}" required
                            class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white"
                            :class="errors.first_name ? 'ring-2 ring-red-500' : ''">
@@ -70,7 +70,7 @@
                 </div>
 
                 <div>
-                    <label for="last_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Прізвище *</label>
+                    <label for="last_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.last_name_required') }}</label>
                     <input type="text" name="last_name" id="last_name" value="{{ old('last_name', $person->last_name) }}" required
                            class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white"
                            :class="errors.last_name ? 'ring-2 ring-red-500' : ''">
@@ -81,11 +81,11 @@
 
         <!-- Contacts -->
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Контакти</h2>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.contacts') }}</h2>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label for="phone" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Телефон</label>
+                    <label for="phone" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.phone') }}</label>
                     <input type="tel" name="phone" id="phone" value="{{ old('phone', $person->phone) }}"
                            class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
                     <template x-if="errors.phone"><p class="mt-1 text-xs text-red-500" x-text="errors.phone[0]"></p></template>
@@ -108,22 +108,22 @@
                 </div>
 
                 <div>
-                    <label for="address" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Адреса</label>
+                    <label for="address" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.address') }}</label>
                     <input type="text" name="address" id="address" value="{{ old('address', $person->address) }}"
                            class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
                 </div>
 
                 <div>
-                    <label for="birth_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Дата народження</label>
+                    <label for="birth_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.date_of_birth') }}</label>
                     <input type="date" name="birth_date" id="birth_date" value="{{ old('birth_date', $person->birth_date?->format('Y-m-d')) }}"
                            class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
                 </div>
 
                 <div>
-                    <label for="gender" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Стать</label>
+                    <label for="gender" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.gender') }}</label>
                     <select name="gender" id="gender"
                             class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 text-gray-900 dark:text-white">
-                        <option value="" class="bg-white dark:bg-gray-800">-- Не вказано --</option>
+                        <option value="" class="bg-white dark:bg-gray-800">-- {{ __('app.not_specified') }} --</option>
                         @foreach(\App\Models\Person::getGenders() as $value => $label)
                         <option value="{{ $value }}" {{ old('gender', $person->gender) == $value ? 'selected' : '' }} class="bg-white dark:bg-gray-800">{{ $label }}</option>
                         @endforeach
@@ -131,10 +131,10 @@
                 </div>
 
                 <div>
-                    <label for="marital_status" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Сімейний стан</label>
+                    <label for="marital_status" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.family_status') }}</label>
                     <select name="marital_status" id="marital_status"
                             class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 text-gray-900 dark:text-white">
-                        <option value="" class="bg-white dark:bg-gray-800">-- Не вказано --</option>
+                        <option value="" class="bg-white dark:bg-gray-800">-- {{ __('app.not_specified') }} --</option>
                         @foreach(\App\Models\Person::getMaritalStatuses() as $value => $label)
                         <option value="{{ $value }}" {{ old('marital_status', $person->marital_status) == $value ? 'selected' : '' }} class="bg-white dark:bg-gray-800">{{ $label }}</option>
                         @endforeach
@@ -142,13 +142,13 @@
                 </div>
 
                 <div>
-                    <label for="anniversary" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Річниця весілля</label>
+                    <label for="anniversary" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.anniversary') }}</label>
                     <input type="date" name="anniversary" id="anniversary" value="{{ old('anniversary', $person->anniversary?->format('Y-m-d')) }}"
                            class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
                 </div>
 
                 <div>
-                    <label for="joined_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Дата приходу в церкву</label>
+                    <label for="joined_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.joined_date') }}</label>
                     <input type="date" name="joined_date" id="joined_date" value="{{ old('joined_date', $person->joined_date?->format('Y-m-d')) }}"
                            class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
                 </div>
@@ -175,10 +175,10 @@
                 </div>
 
                 <div>
-                    <label for="church_role_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Церковна роль</label>
+                    <label for="church_role_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.church_role_label') }}</label>
                     <select name="church_role_id" id="church_role_id"
                             class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 text-gray-900 dark:text-white">
-                        <option value="" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">-- Не вказано --</option>
+                        <option value="" class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">-- {{ __('app.not_specified') }} --</option>
                         @foreach($churchRoles as $role)
                         <option value="{{ $role->id }}" {{ old('church_role_id', $person->church_role_id) == $role->id ? 'selected' : '' }} class="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">{{ $role->name }}</option>
                         @endforeach
@@ -189,7 +189,7 @@
 
         <!-- Tags -->
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Теги</h2>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.tags') }}</h2>
 
             <div class="flex flex-wrap gap-2">
                 @foreach($tags as $tag)
@@ -209,7 +209,7 @@
 
         <!-- Ministries -->
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Команди</h2>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.ministries') }}</h2>
 
             @php
                 $personMinistries = $person->ministries->keyBy('id');
@@ -255,9 +255,9 @@
 
         <!-- Notes -->
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Нотатки</h2>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.notes') }}</h2>
 
-            <textarea name="notes" rows="4" placeholder="Додаткова інформація про людину..."
+            <textarea name="notes" rows="4" placeholder="{{ __('app.notes_placeholder') }}"
                       class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400">{{ old('notes', $person->notes) }}</textarea>
         </div>
 
@@ -269,19 +269,19 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                 </svg>
-                Переглянути профіль
+                {{ __('app.view_profile') }}
             </a>
             <div class="flex items-center gap-3">
                 <a href="{{ route('people.index') }}"
                    class="px-5 py-2.5 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium">
-                    Назад
+                    {{ __('app.back') }}
                 </a>
                 <button type="submit" :disabled="saving"
                         class="px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors disabled:opacity-50">
-                    <span x-show="!saving">Зберегти</span>
+                    <span x-show="!saving">{{ __('app.save') }}</span>
                     <span x-show="saving" class="inline-flex items-center gap-2">
                         <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
-                        Збереження...
+                        {{ __('app.saving') }}
                     </span>
                 </button>
             </div>
@@ -352,7 +352,7 @@ function personEditForm() {
                     body: formData,
                 });
                 if (response.status === 413) {
-                    showToast('error', 'Файл занадто великий. Максимум 2 МБ.');
+                    showToast('error', '{{ __("app.file_too_large_2mb") }}');
                     this.saving = false;
                     return;
                 }
@@ -360,16 +360,16 @@ function personEditForm() {
                 if (!response.ok) {
                     if (response.status === 422 && data.errors) {
                         this.errors = data.errors;
-                        showToast('error', 'Перевірте правильність заповнення форми.');
+                        showToast('error', '{{ __("app.form_check_error") }}');
                     } else {
-                        showToast('error', data.message || 'Помилка збереження.');
+                        showToast('error', data.message || '{{ __("app.save_error") }}');
                     }
                     this.saving = false;
                     return;
                 }
-                showToast('success', data.message || 'Збережено!');
+                showToast('success', data.message || '{{ __("app.saved_msg") }}');
             } catch (e) {
-                showToast('error', "Помилка з'єднання з сервером.");
+                showToast('error', "{{ __('app.server_error') }}");
             }
             this.saving = false;
         }

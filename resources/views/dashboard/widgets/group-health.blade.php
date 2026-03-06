@@ -8,8 +8,8 @@
                 </svg>
             </div>
             <div>
-                <h3 class="font-semibold text-gray-900 dark:text-white">Здоров'я груп</h3>
-                <p class="text-xs text-gray-500 dark:text-gray-400">Активність та відвідуваність</p>
+                <h3 class="font-semibold text-gray-900 dark:text-white">{{ __('app.group_health') }}</h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.activity_and_attendance') }}</p>
             </div>
         </div>
     </div>
@@ -56,7 +56,7 @@
                             </svg>
                         </div>
                         <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                            <span>{{ $group['members_count'] }} учасників</span>
+                            <span>{{ __('app.n_members', ['count' => $group['members_count']]) }}</span>
                             @if($group['leader_name'])
                                 <span class="text-gray-300 dark:text-gray-600">&middot;</span>
                                 <span class="truncate">{{ $group['leader_name'] }}</span>
@@ -67,12 +67,12 @@
                     <div class="text-right flex-shrink-0">
                         @if($group['avg_attendance'])
                             <p class="text-xs font-semibold text-gray-700 dark:text-gray-300">{{ $group['avg_attendance'] }}</p>
-                            <p class="text-[10px] text-gray-400 dark:text-gray-500">сер. відв.</p>
+                            <p class="text-[10px] text-gray-400 dark:text-gray-500">{{ __('app.avg_attendance_short') }}</p>
                         @endif
                         @if($lastAttendance)
                             <p class="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">{{ $lastAttendance->diffForHumans() }}</p>
                         @else
-                            <p class="text-[10px] text-red-400 dark:text-red-500">Немає даних</p>
+                            <p class="text-[10px] text-red-400 dark:text-red-500">{{ __('app.no_data_short') }}</p>
                         @endif
                     </div>
                 </a>
@@ -84,15 +84,15 @@
             <div class="flex items-center gap-4 text-[10px] text-gray-500 dark:text-gray-400">
                 <div class="flex items-center gap-1.5">
                     <span class="w-2 h-2 rounded-full bg-green-500"></span>
-                    <span>Здорова</span>
+                    <span>{{ __('app.healthy') }}</span>
                 </div>
                 <div class="flex items-center gap-1.5">
                     <span class="w-2 h-2 rounded-full bg-yellow-500"></span>
-                    <span>Потребує уваги</span>
+                    <span>{{ __('app.needs_attention_label') }}</span>
                 </div>
                 <div class="flex items-center gap-1.5">
                     <span class="w-2 h-2 rounded-full bg-red-500"></span>
-                    <span>Критично</span>
+                    <span>{{ __('app.critical') }}</span>
                 </div>
             </div>
         </div>
@@ -103,7 +103,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
                 </svg>
             </div>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Немає активних груп</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.no_active_groups') }}</p>
         </div>
     @endif
 </div>

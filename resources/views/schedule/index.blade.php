@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', __('Події'))
+@section('title', __('app.events_title'))
 
 @section('actions')
 @if(auth()->user()->can('create', \App\Models\Event::class))
@@ -9,7 +9,7 @@
     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
     </svg>
-    {{ __('Нова подія') }}
+    {{ __('app.new_event_btn') }}
 </a>
 @endif
 @endsection
@@ -22,25 +22,25 @@
             <div class="flex items-center gap-1.5 sm:gap-2">
                 <a href="{{ route('schedule') }}"
                    class="px-3 sm:px-4 py-2 text-sm font-medium rounded-xl whitespace-nowrap text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
-                    {{ __('Календар') }}
+                    {{ __('app.calendar') }}
                 </a>
                 <a href="{{ route('schedule', ['tab' => 'matrix']) }}"
                    class="px-3 sm:px-4 py-2 text-sm font-medium rounded-xl whitespace-nowrap text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
-                    {{ __('Призначення') }}
+                    {{ __('app.assignments') }}
                 </a>
             </div>
 
             <div class="flex items-center gap-2">
                 <a href="{{ route('events.index', array_merge(request()->only('ministry'), ['past' => ($showPast ?? false) ? null : 1])) }}"
                    class="px-3 py-2 text-sm font-medium rounded-xl whitespace-nowrap transition-colors {{ ($showPast ?? false) ? 'bg-gray-200 dark:bg-gray-600 text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
-                    {{ ($showPast ?? false) ? __('Майбутні') : __('Минулі') }}
+                    {{ ($showPast ?? false) ? __('app.future_events') : __('app.past_events_btn') }}
                 </a>
                 @if($ministries->count() > 0)
                 <form method="GET" class="flex items-center gap-2">
                     @if($showPast ?? false)<input type="hidden" name="past" value="1">@endif
                     <select name="ministry" onchange="this.form.submit()"
                             class="rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-sm">
-                        <option value="">{{ __('Всі команди') }}</option>
+                        <option value="">{{ __('app.all_teams') }}</option>
                         @foreach($ministries as $ministry)
                             <option value="{{ $ministry->id }}" {{ request('ministry') == $ministry->id ? 'selected' : '' }}>
                                 {{ $ministry->name }}
@@ -71,7 +71,7 @@
                                 @endif
                                 @if($event->is_public)
                                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
-                                        {{ __('Публічна') }}
+                                        {{ __('app.public_label') }}
                                     </span>
                                 @endif
                                 @if($event->google_event_id)
@@ -85,7 +85,7 @@
                                     </span>
                                 @endif
                                 @if($event->parent_event_id || $event->recurrence_rule)
-                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs text-gray-500 dark:text-gray-400" title="{{ __('Повторювана подія') }}">
+                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs text-gray-500 dark:text-gray-400" title="{{ __('app.recurring_event') }}">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                                         </svg>
@@ -127,11 +127,11 @@
                                     {{ $event->date->format('d.m.Y') }}
                                 </div>
                             @elseif($daysUntil === 0)
-                                <div class="text-sm font-semibold text-primary-600 dark:text-primary-400">{{ __('Сьогодні') }}</div>
+                                <div class="text-sm font-semibold text-primary-600 dark:text-primary-400">{{ __('app.today_label') }}</div>
                             @elseif($daysUntil === 1)
-                                <div class="text-sm font-semibold text-primary-600 dark:text-primary-400">{{ __('Завтра') }}</div>
+                                <div class="text-sm font-semibold text-primary-600 dark:text-primary-400">{{ __('app.tomorrow_label') }}</div>
                             @elseif($daysUntil === 2)
-                                <div class="text-sm font-medium text-gray-900 dark:text-white">{{ __('Післязавтра') }}</div>
+                                <div class="text-sm font-medium text-gray-900 dark:text-white">{{ __('app.day_after_tomorrow') }}</div>
                             @elseif($daysUntil >= 3 && $daysUntil <= 6)
                                 <div class="text-sm font-medium text-gray-900 dark:text-white">{{ \Illuminate\Support\Str::ucfirst($event->date->translatedFormat('l')) }}</div>
                             @else
@@ -144,7 +144,7 @@
                                     {{ \Carbon\Carbon::parse($event->time)->format('H:i') }}
                                 </div>
                             @else
-                                <div class="text-xs text-gray-400 dark:text-gray-500">{{ __('Весь день') }}</div>
+                                <div class="text-xs text-gray-400 dark:text-gray-500">{{ __('app.all_day_label') }}</div>
                             @endif
                         </div>
                     </div>
@@ -160,8 +160,8 @@
                 <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                 </svg>
-                <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">{{ __('Немає подій') }}</h3>
-                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('Найближчі події не заплановано.') }}</p>
+                <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">{{ __('app.no_events_empty') }}</h3>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('app.no_events_scheduled') }}</p>
                 @if(auth()->user()->can('create', \App\Models\Event::class))
                 <div class="mt-6">
                     <a href="{{ route('events.create') }}"
@@ -169,7 +169,7 @@
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                         </svg>
-                        {{ __('Створити подію') }}
+                        {{ __('app.create_event_btn') }}
                     </a>
                 </div>
                 @endif

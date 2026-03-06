@@ -3,9 +3,9 @@
     <div class="px-4 lg:px-5 py-4 border-b border-gray-200 dark:border-gray-700">
         <div class="flex items-center gap-2">
             <span class="w-2 h-2 rounded-full bg-amber-500"></span>
-            <h2 class="font-semibold text-gray-900 dark:text-white">Потребують уваги</h2>
+            <h2 class="font-semibold text-gray-900 dark:text-white">{{ __('app.need_attention_title') }}</h2>
         </div>
-        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Не відвідували 3+ тижні</p>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ __('app.not_attended_3_weeks') }}</p>
     </div>
     @if(count($needAttention) > 0)
     <div class="divide-y divide-gray-50 dark:divide-gray-700">
@@ -39,7 +39,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
             </svg>
         </div>
-        <p class="text-gray-500 dark:text-gray-400 text-sm">Всі відвідують регулярно</p>
+        <p class="text-gray-500 dark:text-gray-400 text-sm">{{ __('app.all_attend_regularly') }}</p>
     </div>
     @endif
 </div>

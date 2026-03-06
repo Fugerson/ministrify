@@ -1,7 +1,7 @@
 {{-- Quick Actions Widget --}}
 <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
     <div class="px-4 lg:px-5 py-4 border-b border-gray-200 dark:border-gray-700">
-        <h2 class="font-semibold text-gray-900 dark:text-white">Швидкі дії</h2>
+        <h2 class="font-semibold text-gray-900 dark:text-white">{{ __('app.quick_actions') }}</h2>
     </div>
     <div class="p-4">
         <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -13,7 +13,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
                     </svg>
                 </div>
-                <span class="text-sm font-medium text-gray-700 dark:text-gray-300 text-center">Додати людину</span>
+                <span class="text-sm font-medium text-gray-700 dark:text-gray-300 text-center">{{ __('app.add_person_action') }}</span>
             </a>
             @endif
 
@@ -26,7 +26,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11v4m0 0h-2m2 0h2"/>
                     </svg>
                 </div>
-                <span class="text-sm font-medium text-gray-700 dark:text-gray-300 text-center">Створити подію</span>
+                <span class="text-sm font-medium text-gray-700 dark:text-gray-300 text-center">{{ __('app.create_event_action') }}</span>
             </a>
             @endif
 
@@ -38,7 +38,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
                     </svg>
                 </div>
-                <span class="text-sm font-medium text-gray-700 dark:text-gray-300 text-center">Нова транзакція</span>
+                <span class="text-sm font-medium text-gray-700 dark:text-gray-300 text-center">{{ __('app.new_transaction') }}</span>
             </a>
             @endif
 
@@ -50,7 +50,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/>
                     </svg>
                 </div>
-                <span class="text-sm font-medium text-gray-700 dark:text-gray-300 text-center">Оголошення</span>
+                <span class="text-sm font-medium text-gray-700 dark:text-gray-300 text-center">{{ __('app.announcement_action') }}</span>
             </a>
             @endif
 
@@ -62,7 +62,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
                     </svg>
                 </div>
-                <span class="text-sm font-medium text-gray-700 dark:text-gray-300 text-center">Створити групу</span>
+                <span class="text-sm font-medium text-gray-700 dark:text-gray-300 text-center">{{ __('app.create_group_action') }}</span>
             </a>
             @endif
 
@@ -74,7 +74,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                     </svg>
                 </div>
-                <span class="text-sm font-medium text-gray-700 dark:text-gray-300 text-center">Звіти</span>
+                <span class="text-sm font-medium text-gray-700 dark:text-gray-300 text-center">{{ __('app.reports_action') }}</span>
             </a>
             @endif
         </div>

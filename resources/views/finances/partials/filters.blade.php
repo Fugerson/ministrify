@@ -28,7 +28,7 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                 </svg>
-                <span class="hidden sm:inline">Період</span>
+                <span class="hidden sm:inline">{{ __('app.period_custom') }}</span>
             </button>
         </div>
 
@@ -48,7 +48,7 @@
 
         <!-- Balance Info -->
         <div class="text-right" x-show="currentBalance !== null">
-            <span class="text-sm text-gray-500 dark:text-gray-400">Баланс:</span>
+            <span class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.balance_label_short') }}</span>
             <span class="ml-1 font-semibold" :class="currentBalance >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'"
                   x-text="formatNumber(currentBalance) + ' ₴'">
             </span>
@@ -65,11 +65,11 @@ function financePeriodFilter() {
         customEnd: '',
         currentBalance: {{ $currentBalance ?? 'null' }},
         periodLabels: {
-            'today': 'Сьогодні',
-            'week': 'Тиждень',
-            'month': 'Місяць',
-            'quarter': 'Квартал',
-            'year': 'Рік'
+            'today': '{{ __('app.period_today') }}',
+            'week': '{{ __('app.period_week') }}',
+            'month': '{{ __('app.period_month') }}',
+            'quarter': '{{ __('app.period_quarter_btn') }}',
+            'year': '{{ __('app.period_year_btn') }}'
         },
 
         init() {

@@ -1,32 +1,32 @@
 @extends('layouts.app')
 
-@section('title', 'Мої пожертви')
+@section('title', __('app.my_giving'))
 
 @section('content')
 <div class="space-y-6">
     <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Мої пожертви</h1>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('app.my_giving') }}</h1>
         <a href="{{ route('my-profile') }}" class="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400">
-            ← Назад до профілю
+            ← {{ __('app.back_to_profile') }}
         </a>
     </div>
 
     <!-- Stats cards -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-            <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">Цього місяця</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">{{ __('app.this_month_label') }}</p>
             <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($stats['total_this_month'], 0, ',', ' ') }} ₴</p>
         </div>
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-            <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">Цього року</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">{{ __('app.this_year_label') }}</p>
             <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($stats['total_this_year'], 0, ',', ' ') }} ₴</p>
         </div>
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-            <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">Всього</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">{{ __('app.total_label') }}</p>
             <p class="text-2xl font-bold text-primary-600 dark:text-primary-400">{{ number_format($stats['total_lifetime'], 0, ',', ' ') }} ₴</p>
         </div>
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-            <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">Кількість</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">{{ __('app.quantity_label') }}</p>
             <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['donations_count'] }}</p>
         </div>
     </div>
@@ -34,7 +34,7 @@
     <!-- Monthly chart -->
     @if(count($monthlyData) > 0)
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Пожертви по місяцях ({{ now()->year }})</h2>
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.giving_by_month', ['year' => now()->year]) }}</h2>
         <div class="h-48">
             <canvas id="monthlyChart"></canvas>
         </div>
@@ -44,11 +44,11 @@
     <!-- Transactions list -->
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Історія пожертв</h2>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.giving_history') }}</h2>
             @if($years->count() > 0)
             <form method="GET" class="flex items-center gap-2">
                 <select name="year" onchange="this.form.submit()" class="text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-1.5">
-                    <option value="all" {{ $year === 'all' ? 'selected' : '' }}>Всі роки</option>
+                    <option value="all" {{ $year === 'all' ? 'selected' : '' }}>{{ __('app.all_years') }}</option>
                     @foreach($years as $y)
                     <option value="{{ $y }}" {{ $year == $y ? 'selected' : '' }}>{{ $y }}</option>
                     @endforeach
@@ -59,8 +59,8 @@
 
         @if($transactions->isEmpty())
         <x-empty-state
-            title="Немає пожертв"
-            description="Історія ваших пожертв буде відображатися тут"
+            title="{{ __('app.no_giving') }}"
+            description="{{ __('app.giving_history_desc') }}"
             icon="inbox"
         />
         @else
@@ -75,7 +75,7 @@
                     </div>
                     <div>
                         <p class="font-medium text-gray-900 dark:text-white">
-                            {{ $transaction->description ?? $transaction->category?->name ?? 'Пожертва' }}
+                            {{ $transaction->description ?? $transaction->category?->name ?? __('app.donation') }}
                         </p>
                         <p class="text-sm text-gray-500 dark:text-gray-400">
                             {{ $transaction->date->format('d.m.Y') }}
@@ -110,7 +110,7 @@ onPageReady(function() {
     if (!el) return;
     var old = Chart.getChart(el); if (old) old.destroy();
     const ctx = el.getContext('2d');
-    const months = ['Січ', 'Лют', 'Бер', 'Кві', 'Тра', 'Чер', 'Лип', 'Сер', 'Вер', 'Жов', 'Лис', 'Гру'];
+    const months = ['{{ __("app.month_short_jan") }}', '{{ __("app.month_short_feb") }}', '{{ __("app.month_short_mar") }}', '{{ __("app.month_short_apr") }}', '{{ __("app.month_short_may") }}', '{{ __("app.month_short_jun") }}', '{{ __("app.month_short_jul") }}', '{{ __("app.month_short_aug") }}', '{{ __("app.month_short_sep") }}', '{{ __("app.month_short_oct") }}', '{{ __("app.month_short_nov") }}', '{{ __("app.month_short_dec") }}'];
     const data = @json($monthlyData);
 
     const chartData = months.map((_, i) => data[i + 1] || 0);
@@ -120,7 +120,7 @@ onPageReady(function() {
         data: {
             labels: months,
             datasets: [{
-                label: 'Пожертви',
+                label: '{{ __("app.giving_chart_label") }}',
                 data: chartData,
                 backgroundColor: 'rgba(34, 197, 94, 0.5)',
                 borderColor: 'rgb(34, 197, 94)',

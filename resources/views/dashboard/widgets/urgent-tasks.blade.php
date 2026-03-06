@@ -5,10 +5,10 @@
             <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
             </svg>
-            Завдання
+            {{ __('app.tasks_title') }}
         </h2>
         <a href="{{ route('boards.index') }}" class="text-sm text-primary-600 dark:text-primary-400 hover:underline flex items-center gap-1">
-            Всі завдання
+            {{ __('app.all_tasks') }}
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
             </svg>
@@ -59,7 +59,7 @@
 
         @if(count($urgentTasks) > 5)
         <a href="{{ route('boards.index') }}" class="block text-center py-3 mt-3 text-sm text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 border-t border-gray-200 dark:border-gray-700">
-            + ще {{ count($urgentTasks) - 5 }} завдань
+            {{ __('app.more_tasks', ['count' => count($urgentTasks) - 5]) }}
         </a>
         @endif
     </div>
@@ -70,9 +70,9 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
             </svg>
         </div>
-        <p class="text-gray-600 dark:text-gray-400">Немає термінових завдань</p>
+        <p class="text-gray-600 dark:text-gray-400">{{ __('app.no_urgent_tasks') }}</p>
         <a href="{{ route('boards.index') }}" class="inline-block mt-2 text-sm text-primary-600 dark:text-primary-400 hover:underline">
-            Перейти до трекера
+            {{ __('app.go_to_tracker') }}
         </a>
     </div>
     @endif

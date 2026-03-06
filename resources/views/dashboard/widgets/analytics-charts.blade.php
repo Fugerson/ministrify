@@ -5,20 +5,20 @@
             <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
             </svg>
-            Аналітика
+            {{ __('app.analytics_title') }}
         </h2>
         <div class="flex rounded-xl bg-gray-100 dark:bg-gray-700 p-1 overflow-x-auto">
             <button type="button" data-chart="growth" class="chart-tab px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium rounded-lg transition-colors bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm whitespace-nowrap">
-                Зростання
+                {{ __('app.growth_tab') }}
             </button>
             <button type="button" data-chart="financial" class="chart-tab px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium rounded-lg transition-colors text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white whitespace-nowrap">
-                Фінанси
+                {{ __('app.finances_tab') }}
             </button>
             <button type="button" data-chart="attendance" class="chart-tab px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium rounded-lg transition-colors text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white whitespace-nowrap">
-                Відвідуваність
+                {{ __('app.attendance_tab') }}
             </button>
             <button type="button" data-chart="ministries" class="chart-tab px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium rounded-lg transition-colors text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white whitespace-nowrap">
-                Служіння
+                {{ __('app.ministries_tab') }}
             </button>
         </div>
     </div>
@@ -145,7 +145,7 @@ onPageReady(function() {
                     data: {
                         labels: data.map(d => d.label),
                         datasets: [{
-                            label: 'Загальна кількість',
+                            label: @json(__('app.total_count_legend')),
                             data: data.map(d => d.value),
                             borderColor: chartColors.primary,
                             backgroundColor: chartColors.primary + '20',
@@ -156,7 +156,7 @@ onPageReady(function() {
                             pointBorderWidth: 2,
                             pointRadius: 4,
                         }, {
-                            label: 'Нові',
+                            label: @json(__('app.new_label')),
                             data: data.map(d => d.new),
                             borderColor: chartColors.success,
                             backgroundColor: 'transparent',
@@ -177,19 +177,19 @@ onPageReady(function() {
                     data: {
                         labels: data.map(d => d.label),
                         datasets: [{
-                            label: 'Доходи',
+                            label: @json(__('app.income_legend')),
                             data: data.map(d => d.income),
                             backgroundColor: chartColors.success + 'cc',
                             borderRadius: 6,
                             borderSkipped: false,
                         }, {
-                            label: 'Витрати',
+                            label: @json(__('app.expenses_legend')),
                             data: data.map(d => d.expenses),
                             backgroundColor: chartColors.danger + 'cc',
                             borderRadius: 6,
                             borderSkipped: false,
                         }, {
-                            label: 'Залишок',
+                            label: @json(__('app.balance_legend')),
                             data: data.map(d => d.balance),
                             type: 'line',
                             borderColor: chartColors.info,
@@ -212,7 +212,7 @@ onPageReady(function() {
                     data: {
                         labels: data.map(d => d.label),
                         datasets: [{
-                            label: 'Середня відвідуваність',
+                            label: @json(__('app.avg_attendance_label')),
                             data: data.map(d => d.value),
                             borderColor: chartColors.info,
                             backgroundColor: chartColors.info + '20',
@@ -247,7 +247,7 @@ onPageReady(function() {
                             tooltip: {
                                 callbacks: {
                                     label: function(context) {
-                                        return context.label + ': ' + context.raw + ' учасників';
+                                        return context.label + ': ' + context.raw + @json(__('app.n_members_tooltip'));
                                     }
                                 }
                             }
@@ -268,11 +268,11 @@ onPageReady(function() {
                 html = `
                     <div class="flex items-center gap-2">
                         <span class="w-3 h-3 rounded-full" style="background: ${chartColors.primary}"></span>
-                        <span>Загальна кількість</span>
+                        <span>${@json(__('app.total_count_legend'))}</span>
                     </div>
                     <div class="flex items-center gap-2">
                         <span class="w-3 h-3 rounded-full" style="background: ${chartColors.success}"></span>
-                        <span>Нові за місяць</span>
+                        <span>${@json(__('app.new_per_month'))}</span>
                     </div>
                 `;
                 break;
@@ -281,15 +281,15 @@ onPageReady(function() {
                 html = `
                     <div class="flex items-center gap-2">
                         <span class="w-3 h-3 rounded-full" style="background: ${chartColors.success}"></span>
-                        <span>Доходи</span>
+                        <span>${@json(__('app.income_legend'))}</span>
                     </div>
                     <div class="flex items-center gap-2">
                         <span class="w-3 h-3 rounded-full" style="background: ${chartColors.danger}"></span>
-                        <span>Витрати</span>
+                        <span>${@json(__('app.expenses_legend'))}</span>
                     </div>
                     <div class="flex items-center gap-2">
                         <span class="w-3 h-3 rounded-full" style="background: ${chartColors.info}"></span>
-                        <span>Залишок</span>
+                        <span>${@json(__('app.balance_legend'))}</span>
                     </div>
                 `;
                 break;
@@ -298,7 +298,7 @@ onPageReady(function() {
                 html = `
                     <div class="flex items-center gap-2">
                         <span class="w-3 h-3 rounded-full" style="background: ${chartColors.info}"></span>
-                        <span>Середня відвідуваність за 12 місяців</span>
+                        <span>${@json(__('app.avg_attendance_12_months'))}</span>
                     </div>
                 `;
                 break;
@@ -311,7 +311,7 @@ onPageReady(function() {
                     </div>
                 `).join('');
                 if (data.length > 5) {
-                    html += `<span class="text-gray-400">+${data.length - 5} більше</span>`;
+                    html += `<span class="text-gray-400">${@json(__('app.n_more', ['count' => '__COUNT__'])).replace('__COUNT__', data.length - 5)}</span>`;
                 }
                 break;
         }

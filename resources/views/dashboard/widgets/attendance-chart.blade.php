@@ -1,13 +1,13 @@
 {{-- Attendance Chart Widget --}}
 <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 lg:p-5">
-    <h2 class="font-semibold text-gray-900 dark:text-white mb-4">Відвідуваність богослужінь</h2>
+    <h2 class="font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.service_attendance') }}</h2>
     <div class="h-48">
         <canvas id="attendanceChart"></canvas>
     </div>
     <div class="mt-4 flex items-center justify-center gap-4 text-sm text-gray-500 dark:text-gray-400">
         <div class="flex items-center gap-2">
             <span class="w-3 h-3 rounded-full bg-primary-500"></span>
-            <span>За останні 4 тижні</span>
+            <span>{{ __('app.last_4_weeks') }}</span>
         </div>
     </div>
 </div>
@@ -27,7 +27,7 @@ onPageReady(function() {
             data: {
                 labels: @json(collect($attendanceData)->pluck('date')),
                 datasets: [{
-                    label: 'Відвідуваність',
+                    label: @json(__('app.attendance_label')),
                     data: @json(collect($attendanceData)->pluck('count')),
                     borderColor: '{{ $currentChurch->primary_color ?? "#3b82f6" }}',
                     backgroundColor: '{{ $currentChurch->primary_color ?? "#3b82f6" }}20',

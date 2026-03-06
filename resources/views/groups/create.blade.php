@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Нова група')
+@section('title', __('app.group_new'))
 
 @section('content')
 <div class="max-w-2xl" x-data="groupCreateForm()">
@@ -8,9 +8,9 @@
         <form @submit.prevent="submitForm" class="space-y-6" x-ref="form">
 
             <div>
-                <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Назва групи *</label>
+                <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.group_name') }}</label>
                 <input type="text" name="name" id="name" value="{{ old('name') }}" required
-                       placeholder="Молодіжна група, Хор, Служіння дітям..."
+                       placeholder="{{ __('app.group_name_placeholder') }}"
                        class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
                 <template x-if="errors.name">
                     <p class="mt-1 text-sm text-red-600" x-text="errors.name[0]"></p>
@@ -18,50 +18,50 @@
             </div>
 
             <div>
-                <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Опис</label>
+                <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.description') }}</label>
                 <textarea name="description" id="description" rows="3"
-                          placeholder="Коротко про групу та її діяльність..."
+                          placeholder="{{ __('app.group_desc_placeholder') }}"
                           class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">{{ old('description') }}</textarea>
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Лідер групи</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.group_leader') }}</label>
                 <x-person-select
                     name="leader_id"
                     :people="$people"
                     :selected="old('leader_id')"
-                    placeholder="Почніть вводити ім'я лідера..."
-                    null-text="Без лідера"
+                    :placeholder="__('app.leader_placeholder')"
+                    :null-text="__('app.without_leader')"
                 />
-                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Лідер автоматично стане учасником групи</p>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('app.group_leader_auto_member') }}</p>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
-                    <label for="meeting_day" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">День зустрічі</label>
+                    <label for="meeting_day" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.group_meeting_day') }}</label>
                     <select name="meeting_day" id="meeting_day"
                             class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
-                        <option value="">Не вказано</option>
-                        @foreach(['monday' => 'Понеділок', 'tuesday' => 'Вівторок', 'wednesday' => 'Середа', 'thursday' => 'Четвер', 'friday' => "П'ятниця", 'saturday' => 'Субота', 'sunday' => 'Неділя'] as $val => $label)
+                        <option value="">{{ __('app.group_not_specified') }}</option>
+                        @foreach(['monday' => __('app.monday'), 'tuesday' => __('app.tuesday'), 'wednesday' => __('app.wednesday'), 'thursday' => __('app.thursday'), 'friday' => __('app.friday'), 'saturday' => __('app.saturday'), 'sunday' => __('app.sunday')] as $val => $label)
                             <option value="{{ $val }}" {{ old('meeting_day') == $val ? 'selected' : '' }}>{{ $label }}</option>
                         @endforeach
                     </select>
                 </div>
                 <div>
-                    <label for="meeting_time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Час зустрічі</label>
+                    <label for="meeting_time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.group_meeting_time') }}</label>
                     <input type="time" name="meeting_time" id="meeting_time" value="{{ old('meeting_time') }}"
                            class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
                 </div>
                 <div>
-                    <label for="location" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Місце зустрічі</label>
+                    <label for="location" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.group_meeting_location') }}</label>
                     <input type="text" name="location" id="location" value="{{ old('location') }}"
-                           placeholder="Адреса або кімната"
+                           placeholder="{{ __('app.group_location_placeholder') }}"
                            class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
                 </div>
             </div>
 
             <div>
-                <label for="status" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Статус</label>
+                <label for="status" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.status') }}</label>
                 <select name="status" id="status"
                         class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
                     @foreach(\App\Models\Group::getStatuses() as $value => $label)
@@ -74,14 +74,14 @@
 
             <div class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2 sm:gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
                 <a href="{{ route('groups.index') }}" class="w-full sm:w-auto px-5 py-2.5 text-center text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium">
-                    Скасувати
+                    {{ __('app.cancel') }}
                 </a>
                 <button type="submit" :disabled="saving"
                         class="w-full sm:w-auto px-5 py-2.5 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 transition-colors disabled:opacity-50">
-                    <span x-show="!saving">Створити групу</span>
+                    <span x-show="!saving">{{ __('app.group_create') }}</span>
                     <span x-show="saving" class="flex items-center justify-center gap-2">
                         <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
-                        Збереження...
+                        {{ __('app.saving') }}
                     </span>
                 </button>
             </div>
@@ -106,13 +106,13 @@ function groupCreateForm() {
                 });
                 const data = await response.json().catch(() => ({}));
                 if (!response.ok) {
-                    if (response.status === 422 && data.errors) { this.errors = data.errors; showToast('error', 'Перевірте правильність заповнення форми.'); }
-                    else { showToast('error', data.message || 'Помилка збереження.'); }
+                    if (response.status === 422 && data.errors) { this.errors = data.errors; showToast('error', '{{ __('app.form_check_error') }}'); }
+                    else { showToast('error', data.message || '{{ __('app.save_error') }}'); }
                     this.saving = false; return;
                 }
-                showToast('success', data.message || 'Збережено!');
+                showToast('success', data.message || '{{ __('app.saved_msg') }}');
                 setTimeout(() => Livewire.navigate(data.redirect_url), 800);
-            } catch (e) { showToast('error', "Помилка з'єднання з сервером."); this.saving = false; }
+            } catch (e) { showToast('error', "{{ __('app.server_error') }}"); this.saving = false; }
         }
     }
 }

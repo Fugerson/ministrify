@@ -7,8 +7,8 @@
             </svg>
         </div>
         <div>
-            <h3 class="font-semibold text-gray-900 dark:text-white">Відвідуваність груп</h3>
-            <p class="text-xs text-gray-500 dark:text-gray-400">Порівняння за останні 4 тижні</p>
+            <h3 class="font-semibold text-gray-900 dark:text-white">{{ __('app.group_attendance_title') }}</h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.comparison_last_4_weeks') }}</p>
         </div>
     </div>
 
@@ -19,8 +19,8 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
                 </svg>
             </div>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Немає даних про відвідуваність груп</p>
-            <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Почніть відмічати присутність у групах</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.no_group_attendance_data') }}</p>
+            <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">{{ __('app.start_marking_attendance') }}</p>
         </div>
     @else
         <div class="space-y-4">
@@ -73,7 +73,7 @@
                     {{-- Details --}}
                     <div class="flex items-center justify-between mt-1">
                         <span class="text-xs text-gray-400 dark:text-gray-500">
-                            Середня: {{ $group['avg_attendance'] ?? 0 }} з {{ $group['members_count'] ?? 0 }} учасників
+                            {{ __('app.average_x_of_y_members', ['avg' => $group['avg_attendance'] ?? 0, 'total' => $group['members_count'] ?? 0]) }}
                         </span>
                     </div>
                 </div>

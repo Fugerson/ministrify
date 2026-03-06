@@ -1,8 +1,8 @@
 {{-- Expenses Breakdown Widget (Admin Only) --}}
 <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 lg:p-5">
     <div class="flex items-center justify-between mb-4">
-        <h2 class="font-semibold text-gray-900 dark:text-white">Витрати за місяць</h2>
-        <a href="{{ route('finances.transactions', ['filter' => 'expense']) }}" class="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 font-medium">Всі</a>
+        <h2 class="font-semibold text-gray-900 dark:text-white">{{ __('app.expenses_this_month') }}</h2>
+        <a href="{{ route('finances.transactions', ['filter' => 'expense']) }}" class="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 font-medium">{{ __('app.all_short') }}</a>
     </div>
 
     @if(isset($stats['expenses_this_month']))
@@ -30,7 +30,7 @@
         @endforeach
     </div>
     @else
-    <p class="text-sm text-gray-500 dark:text-gray-400 text-center">Немає витрат за цей місяць</p>
+    <p class="text-sm text-gray-500 dark:text-gray-400 text-center">{{ __('app.no_expenses_this_month') }}</p>
     @endif
     @else
     <div class="py-4 text-center">
@@ -39,7 +39,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
             </svg>
         </div>
-        <p class="text-gray-500 dark:text-gray-400 text-sm">Немає даних про витрати</p>
+        <p class="text-gray-500 dark:text-gray-400 text-sm">{{ __('app.no_expense_data') }}</p>
     </div>
     @endif
 </div>

@@ -1,8 +1,8 @@
 {{-- Ministry Budgets Widget (Admin Only) --}}
 <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
     <div class="px-4 lg:px-5 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-        <h2 class="font-semibold text-gray-900 dark:text-white">Бюджети команд</h2>
-        <a href="{{ route('finances.index') }}" class="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 font-medium">Звіт</a>
+        <h2 class="font-semibold text-gray-900 dark:text-white">{{ __('app.ministry_budgets') }}</h2>
+        <a href="{{ route('finances.index') }}" class="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 font-medium">{{ __('app.report_link') }}</a>
     </div>
     @if(count($ministryBudgets) > 0)
     <div class="p-4 lg:p-5 space-y-4">
@@ -29,7 +29,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
         </div>
-        <p class="text-gray-500 dark:text-gray-400 text-sm">Немає бюджетів у служінь</p>
+        <p class="text-gray-500 dark:text-gray-400 text-sm">{{ __('app.no_ministry_budgets') }}</p>
     </div>
     @endif
 </div>

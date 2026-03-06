@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', __('Архівовані дошки'))
+@section('title', __('app.board_archived_boards'))
 
 @section('actions')
 <a href="{{ route('boards.index') }}"
@@ -8,7 +8,7 @@
     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
     </svg>
-    {{ __('Назад до дошок') }}
+    {{ __('app.board_back_to_boards') }}
 </a>
 @endsection
 
@@ -21,7 +21,7 @@
         </svg>
         <div>
             <p class="text-sm text-yellow-700 dark:text-yellow-300">
-                {{ __('Архівовані дошки не відображаються в основному списку. Ви можете відновити їх у будь-який час.') }}
+                {{ __('app.board_archived_info') }}
             </p>
         </div>
     </div>
@@ -48,12 +48,12 @@
                         <button type="button"
                                 @click="ajaxAction('{{ route('boards.restore', $board) }}', 'POST').then(() => $el.closest('[data-board]').remove())"
                                 class="px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors">
-                            {{ __('Відновити') }}
+                            {{ __('app.board_restore') }}
                         </button>
                         <button type="button"
-                                @click="ajaxDelete('{{ route('boards.destroy', $board) }}', '{{ __('Видалити назавжди?') }}', () => $el.closest('[data-board]').remove())"
+                                @click="ajaxDelete('{{ route('boards.destroy', $board) }}', '{{ __('app.board_delete_forever') }}', () => $el.closest('[data-board]').remove())"
                                 class="px-3 py-1.5 text-red-600 hover:text-red-700 text-sm font-medium">
-                            {{ __('Видалити') }}
+                            {{ __('app.delete') }}
                         </button>
                     </div>
                 </div>
@@ -65,8 +65,8 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
                     </svg>
                 </div>
-                <h3 class="font-medium text-gray-900 dark:text-white mb-2">{{ __('Немає архівованих дошок') }}</h3>
-                <p class="text-gray-500 dark:text-gray-400 text-sm">{{ __('Архівовані дошки з\'являться тут') }}</p>
+                <h3 class="font-medium text-gray-900 dark:text-white mb-2">{{ __('app.board_no_archived_boards') }}</h3>
+                <p class="text-gray-500 dark:text-gray-400 text-sm">{{ __('app.board_archived_will_appear') }}</p>
             </div>
         @endforelse
     </div>

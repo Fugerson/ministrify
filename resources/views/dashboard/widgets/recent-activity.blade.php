@@ -1,7 +1,7 @@
 {{-- Recent Activity Widget --}}
 <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
     <div class="px-4 lg:px-5 py-4 border-b border-gray-200 dark:border-gray-700">
-        <h2 class="font-semibold text-gray-900 dark:text-white">Остання активність</h2>
+        <h2 class="font-semibold text-gray-900 dark:text-white">{{ __('app.recent_activity_title') }}</h2>
     </div>
     <div class="p-4">
         @if(count($recentActivity) > 0)
@@ -66,7 +66,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
             </div>
-            <p class="text-gray-500 dark:text-gray-400 text-sm">Поки що немає активності</p>
+            <p class="text-gray-500 dark:text-gray-400 text-sm">{{ __('app.no_activity_yet') }}</p>
         </div>
         @endif
     </div>

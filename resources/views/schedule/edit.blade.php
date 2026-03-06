@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', __('Редагувати подію'))
+@section('title', __('app.edit_event'))
 
 @php
     $ministriesData = $ministries->map(function($m) {
@@ -15,18 +15,18 @@
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
             </svg>
-            {{ __('Назад до події') }}
+            {{ __('app.back_to_event') }}
         </a>
     </div>
 
     <form class="space-y-6" x-ref="form" @submit.prevent="submitForm">
 
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('Редагувати подію') }}</h2>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.edit_event') }}</h2>
 
             <div class="space-y-4">
                 <div>
-                    <label for="title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Назва') }} *</label>
+                    <label for="title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.name_label') }} *</label>
                     <input type="text" name="title" id="title" value="{{ old('title', $event->title) }}" required
                            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                            :class="errors.title ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'">
@@ -36,7 +36,7 @@
                 <div x-data="{ allDay: {{ old('all_day', !$event->time) ? 'true' : 'false' }}, multiDay: {{ old('multi_day', $event->end_date && $event->end_date->format('Y-m-d') !== $event->date->format('Y-m-d')) ? 'true' : 'false' }} }">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                         <div>
-                            <label for="date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Дата') }} *</label>
+                            <label for="date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.date') }} *</label>
                             <input type="date" name="date" id="date" value="{{ old('date', $event->date->format('Y-m-d')) }}" required
                                    class="w-full px-3 py-2.5 md:py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                                    :class="errors.date ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'">
@@ -44,7 +44,7 @@
                         </div>
 
                         <div x-show="!allDay" x-transition>
-                            <label for="time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Час') }}</label>
+                            <label for="time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.time_label') }}</label>
                             <input type="time" name="time" id="time" value="{{ old('time', $event->time?->format('H:i')) }}" :required="!allDay"
                                    class="w-full px-3 py-2.5 md:py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                                    :class="errors.time ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'">
@@ -55,19 +55,19 @@
                     <label class="flex items-center gap-2 mt-2 cursor-pointer">
                         <input type="checkbox" name="all_day" value="1" x-model="allDay"
                                class="w-4 h-4 text-primary-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500">
-                        <span class="text-sm text-gray-600 dark:text-gray-400">{{ __('Подія на весь день') }}</span>
+                        <span class="text-sm text-gray-600 dark:text-gray-400">{{ __('app.all_day_label') }}</span>
                     </label>
 
                     <!-- Multi-day event toggle -->
                     <label class="flex items-center gap-2 mt-3 cursor-pointer">
                         <input type="checkbox" name="multi_day" value="1" x-model="multiDay"
                                class="w-4 h-4 text-primary-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500">
-                        <span class="text-sm text-gray-600 dark:text-gray-400">{{ __('Подія на кілька днів') }}</span>
+                        <span class="text-sm text-gray-600 dark:text-gray-400">{{ __('app.multi_day_event') }}</span>
                     </label>
 
                     <!-- End date for multi-day events -->
                     <div x-show="multiDay" x-collapse class="mt-3">
-                        <label for="end_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Дата закінчення') }} *</label>
+                        <label for="end_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.end_date') }} *</label>
                         <input type="date" name="end_date" id="end_date" value="{{ old('end_date', $event->end_date?->format('Y-m-d')) }}"
                                class="w-full px-3 py-2.5 md:py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                                :class="errors.end_date ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'">
@@ -76,7 +76,7 @@
                 </div>
 
                 <div>
-                    <label for="notes" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Нотатки') }}</label>
+                    <label for="notes" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.notes_label') }}</label>
                     <textarea name="notes" id="notes" rows="3"
                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">{{ old('notes', $event->notes) }}</textarea>
                 </div>
@@ -84,7 +84,7 @@
                 <!-- Ministry/Team Selection -->
                 @if($ministries->count() > 0)
                 <div x-data="ministrySelector()">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Команда') }}</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.team_label') }}</label>
                     <x-searchable-select
                         name="ministry_id"
                         :items="$ministries"
@@ -92,8 +92,8 @@
                         labelKey="name"
                         valueKey="id"
                         colorKey="color"
-                        placeholder="{{ __('Пошук команди...') }}"
-                        nullText="{{ __('Без команди') }}"
+                        placeholder="{{ __('app.search_team') }}"
+                        nullText="{{ __('app.without_team') }}"
                         nullable
                         x-on:select-changed="selectedId = $event.detail.value || ''"
                     />
@@ -118,7 +118,7 @@
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                         </svg>
-                        {{ __('Переглянути план події') }}
+                        {{ __('app.view_event_plan') }}
                     </a>
                 </div>
 
@@ -126,7 +126,7 @@
                 @if($currentChurch->telegram_bot_token)
                 <div class="pt-4 border-t border-gray-200 dark:border-gray-600" x-data="reminderSettings({{ json_encode($event->reminder_settings ?? []) }})">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                        {{ __('Нагадування в Telegram') }}
+                        {{ __('app.telegram_reminders') }}
                     </label>
 
                     <div class="space-y-2">
@@ -134,8 +134,8 @@
                             <div class="flex items-center gap-2">
                                 <select x-model="reminder.type" @change="updateReminder(index)"
                                         class="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                                    <option value="days">За днів до</option>
-                                    <option value="hours">За годин до</option>
+                                    <option value="days">{{ __('app.days_before') }}</option>
+                                    <option value="hours">{{ __('app.hours_before') }}</option>
                                 </select>
                                 <input type="number" x-model="reminder.value" min="1" max="30"
                                        class="w-20 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-center">
@@ -158,11 +158,11 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                         </svg>
-                        Додати нагадування
+                        {{ __('app.add_reminder') }}
                     </button>
 
                     <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                        Нагадування надсилатимуться призначеним служителям
+                        {{ __('app.reminders_sent_to_assigned') }}
                     </p>
 
                     <!-- Hidden inputs for form submission -->
@@ -194,17 +194,17 @@
                 @if($event->google_event_id)
                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300">
                         <span class="w-1.5 h-1.5 bg-green-500 rounded-full mr-1"></span>
-                        Синхронізовано
+                        {{ __('app.synchronized_label') }}
                     </span>
                 @endif
             </div>
             <select name="google_calendar_id" x-model="calendarId"
                     class="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white text-sm">
-                <option value="">Не синхронізувати з Google</option>
-                <option value="primary">Основний календар</option>
+                <option value="">{{ __('app.do_not_sync_google') }}</option>
+                <option value="primary">{{ __('app.primary_calendar') }}</option>
                 <template x-for="cal in calendars" :key="cal.id">
                     <option :value="cal.id" :disabled="!cal.can_sync"
-                            x-text="cal.summary + (cal.can_sync ? '' : ' (тільки читання)')"></option>
+                            x-text="cal.summary + (cal.can_sync ? '' : ' ({{ __('app.read_only_suffix') }})')"></option>
                 </template>
             </select>
             <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400" x-text="statusText"></p>
@@ -216,7 +216,7 @@
             <button type="button"
                     @click="ajaxDelete('{{ route('events.destroy', $event) }}', '{{ __('messages.confirm_delete_event') }}', null, '{{ route('schedule') }}')"
                     class="text-red-600 hover:text-red-800 text-sm font-medium">
-                Видалити подію
+                {{ __('app.delete_event_action') }}
             </button>
             @else
             <div></div>
@@ -224,14 +224,14 @@
 
             <div class="flex flex-col-reverse sm:flex-row sm:items-center gap-2 sm:gap-3">
                 <a href="{{ route('events.show', $event) }}" class="w-full sm:w-auto px-4 py-2 text-center text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
-                    Скасувати
+                    {{ __('app.cancel') }}
                 </a>
                 <button type="submit" :disabled="saving" class="w-full sm:w-auto px-6 py-2.5 md:py-2 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2">
                     <svg x-show="saving" x-cloak class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                     </svg>
-                    <span x-text="saving ? 'Збереження...' : 'Зберегти'"></span>
+                    <span x-text="saving ? '{{ __('app.saving_btn') }}' : '{{ __('app.save_btn') }}'"></span>
                 </button>
             </div>
         </div>
@@ -264,16 +264,16 @@ function eventEditForm() {
                 if (!response.ok) {
                     if (response.status === 422 && data.errors) {
                         this.errors = data.errors;
-                        showToast('error', 'Перевірте правильність заповнення форми.');
+                        showToast('error', '{{ __('app.check_form_errors') }}');
                     } else {
-                        showToast('error', data.message || 'Помилка збереження.');
+                        showToast('error', data.message || '{{ __('app.save_error_msg') }}');
                     }
                     this.saving = false;
                     return;
                 }
-                showToast('success', data.message || 'Збережено!');
+                showToast('success', data.message || '{{ __('app.saved_label') }}');
             } catch (e) {
-                showToast('error', "Помилка з'єднання з сервером.");
+                showToast('error', '{{ __('app.connection_error_msg') }}');
             }
             this.saving = false;
         }
@@ -285,13 +285,13 @@ function googleCalendarPicker() {
         calendarId: '{{ $event->google_calendar_id ?? ($gcCalendarId ?? "primary") }}',
         calendars: [],
         get statusText() {
-            if (!this.calendarId) return 'Подія не буде синхронізуватись з Google Calendar';
+            if (!this.calendarId) return '{{ __('app.event_not_synced_msg') }}';
             @if($event->google_event_id)
                 const currentCal = this.calendars.find(c => c.id === this.calendarId);
-                const calName = this.calendarId === 'primary' ? 'Основний календар' : (currentCal?.summary || this.calendarId);
-                return 'Прив\u0027язано до: ' + calName;
+                const calName = this.calendarId === 'primary' ? '{{ __('app.primary_calendar') }}' : (currentCal?.summary || this.calendarId);
+                return '{{ __('app.linked_to_prefix') }} ' + calName;
             @else
-                return 'Подія автоматично з\u0027явиться в обраному календарі';
+                return '{{ __('app.event_will_appear_in_calendar') }}';
             @endif
         },
         async init() {

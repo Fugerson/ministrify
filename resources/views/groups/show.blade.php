@@ -10,7 +10,7 @@
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
         </svg>
-        Чек-ін
+        {{ __('app.group_checkin') }}
     </a>
     @endif
     <a href="{{ route('groups.edit', $group) }}" class="inline-flex items-center px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
@@ -78,7 +78,7 @@
                         </svg>
                         {{ $group->meeting_day }}
                         @if($group->meeting_time)
-                        о {{ $group->meeting_time->format('H:i') }}
+                        {{ __('app.group_at_time') }} {{ $group->meeting_time->format('H:i') }}
                         @endif
                     </div>
                     @endif
@@ -541,7 +541,7 @@
                             <span class="text-sm text-gray-500 dark:text-gray-400">/ {{ $group->members->count() }}</span>
                         </div>
                         @if($attendance->guests_count > 0)
-                        <p class="text-xs text-gray-500">+{{ $attendance->guests_count }} гостей</p>
+                        <p class="text-xs text-gray-500">+{{ $attendance->guests_count }} {{ __('app.group_guests') }}</p>
                         @endif
                     </div>
                 </a>
@@ -588,7 +588,7 @@
                 <div class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.person_label') }}</label>
-                        <x-person-select name="person_id" :people="$availablePeople" :required="true" :nullable="false" placeholder="Пошук людини..." />
+                        <x-person-select name="person_id" :people="$availablePeople" :required="true" :nullable="false" :placeholder="__('app.group_search_person')" />
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.role_label') }}</label>

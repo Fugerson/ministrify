@@ -7,8 +7,8 @@
             </svg>
         </div>
         <div>
-            <h3 class="font-semibold text-gray-900 dark:text-white">Сім'ї</h3>
-            <p class="text-xs text-gray-500 dark:text-gray-400">Сімейні зв'язки в базі</p>
+            <h3 class="font-semibold text-gray-900 dark:text-white">{{ __('app.families') }}</h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.family_connections_in_db') }}</p>
         </div>
     </div>
 
@@ -16,13 +16,13 @@
         {{-- Married couples --}}
         <div class="bg-pink-50 dark:bg-pink-900/30 rounded-xl p-3 text-center">
             <p class="text-2xl font-bold text-pink-700 dark:text-pink-300">{{ $familyStats['married_couples'] ?? 0 }}</p>
-            <p class="text-xs text-pink-600 dark:text-pink-400 mt-0.5">Подружніх пар</p>
+            <p class="text-xs text-pink-600 dark:text-pink-400 mt-0.5">{{ __('app.married_couples') }}</p>
         </div>
 
         {{-- Children --}}
         <div class="bg-amber-50 dark:bg-amber-900/30 rounded-xl p-3 text-center">
             <p class="text-2xl font-bold text-amber-700 dark:text-amber-300">{{ $familyStats['children_count'] ?? 0 }}</p>
-            <p class="text-xs text-amber-600 dark:text-amber-400 mt-0.5">Дітей</p>
+            <p class="text-xs text-amber-600 dark:text-amber-400 mt-0.5">{{ __('app.children_count') }}</p>
         </div>
     </div>
 </div>

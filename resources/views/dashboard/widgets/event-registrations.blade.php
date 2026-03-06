@@ -2,12 +2,12 @@
 <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
     <div class="px-4 lg:px-5 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
         <div class="flex items-center gap-2">
-            <h2 class="font-semibold text-gray-900 dark:text-white">Реєстрація на події</h2>
+            <h2 class="font-semibold text-gray-900 dark:text-white">{{ __('app.event_registrations') }}</h2>
             @if($eventRegistrations->count() > 0)
             <span class="text-xs font-medium text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/50 px-2 py-0.5 rounded-lg">{{ $eventRegistrations->count() }}</span>
             @endif
         </div>
-        <a href="{{ route('schedule') }}" class="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 font-medium">Всі</a>
+        <a href="{{ route('schedule') }}" class="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 font-medium">{{ __('app.all_short') }}</a>
     </div>
     <div class="divide-y divide-gray-50 dark:divide-gray-700">
         @forelse($eventRegistrations as $event)
@@ -46,12 +46,12 @@
                         </span>
                     </div>
                     <div class="flex items-center justify-between mt-1">
-                        <span class="text-xs text-gray-500 dark:text-gray-400">{{ $percentage }}% заповнено</span>
+                        <span class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.filled_percent', ['percent' => $percentage]) }}</span>
                         <span class="text-xs font-medium {{ $event->remaining_spaces > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
                             @if($event->remaining_spaces > 0)
-                                {{ $event->remaining_spaces }} {{ $event->remaining_spaces == 1 ? 'місце' : ($event->remaining_spaces < 5 ? 'місця' : 'місць') }}
+                                {{ trans_choice('app.n_spots_remaining', $event->remaining_spaces, ['count' => $event->remaining_spaces]) }}
                             @else
-                                Місць немає
+                                {{ __('app.no_spots') }}
                             @endif
                         </span>
                     </div>
@@ -66,7 +66,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
                 </svg>
             </div>
-            <p class="text-gray-500 dark:text-gray-400 text-sm">Немає подій з відкритою реєстрацією</p>
+            <p class="text-gray-500 dark:text-gray-400 text-sm">{{ __('app.no_events_with_registration') }}</p>
         </div>
         @endforelse
     </div>

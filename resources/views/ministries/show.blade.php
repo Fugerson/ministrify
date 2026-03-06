@@ -26,21 +26,21 @@
                                     'specific' => 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
                                 ];
                                 $badgeLabels = [
-                                    'members' => 'Тільки учасники',
-                                    'leaders' => 'Тільки лідери',
-                                    'specific' => 'Конкретні люди',
+                                    'members' => __('app.members_only'),
+                                    'leaders' => __('app.leaders_only'),
+                                    'specific' => __('app.specific_people'),
                                 ];
                             @endphp
                             <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $badgeColors[$visibility] ?? 'bg-gray-100 text-gray-800' }}">
                                 <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                                 </svg>
-                                {{ $badgeLabels[$visibility] ?? 'Приватна' }}
+                                {{ $badgeLabels[$visibility] ?? __('app.private') }}
                             </span>
                         @endif
                     </div>
                     @if($ministry->leader)
-                        <p class="text-gray-500 dark:text-gray-400">Лідер: {{ $ministry->leader->full_name }}</p>
+                        <p class="text-gray-500 dark:text-gray-400">{{ __('app.leader_prefix') }} {{ $ministry->leader->full_name }}</p>
                     @endif
                 </div>
             </div>
@@ -75,22 +75,22 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
-                    Планування
+                    {{ __('app.tab_planning') }}
                 </button>
                 <button @click="setTab('schedule')" type="button"
                    :class="activeTab === 'schedule' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
                    class="px-3 sm:px-6 py-3 border-b-2 text-sm font-medium">
-                    Події
+                    {{ __('app.tab_events') }}
                 </button>
                 <button @click="setTab('members')" type="button"
                    :class="activeTab === 'members' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
                    class="px-3 sm:px-6 py-3 border-b-2 text-sm font-medium">
-                    Команда ({{ $ministry->members->count() }})
+                    {{ __('app.tab_team') }} ({{ $ministry->members->count() }})
                 </button>
                 <button @click="setTab('expenses')" type="button"
                    :class="activeTab === 'expenses' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
                    class="px-3 sm:px-6 py-3 border-b-2 text-sm font-medium">
-                    Бюджет
+                    {{ __('app.tab_budget') }}
                 </button>
                 <button @click="setTab('board')" type="button"
                    :class="activeTab === 'board' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
@@ -98,7 +98,7 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7"/>
                     </svg>
-                    Завдання
+                    {{ __('app.tab_tasks') }}
                 </button>
                 <button @click="setTab('resources')" type="button"
                    :class="activeTab === 'resources' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
@@ -106,7 +106,7 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
                     </svg>
-                    Ресурси
+                    {{ __('app.tab_resources') }}
                 </button>
                 @if($ministry->is_worship_ministry)
                 <button @click="setTab('songs')" type="button"
@@ -115,7 +115,7 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
                     </svg>
-                    Бібліотека пісень
+                    {{ __('app.tab_songs_library') }}
                 </button>
                 @endif
                 @can('manage-ministry', $ministry)
@@ -126,7 +126,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                     </svg>
-                    Налаштування
+                    {{ __('app.tab_settings') }}
                 </button>
                 @endcan
             </nav>
@@ -149,7 +149,7 @@
                                 <button @click="nextMonth()" class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                                 </button>
-                                <button @click="goToToday()" class="ml-2 px-2 py-1 text-xs text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">Сьогодні</button>
+                                <button @click="goToToday()" class="ml-2 px-2 py-1 text-xs text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">{{ __('app.today_btn_calendar') }}</button>
                             </div>
                             <div class="flex items-center gap-2">
                                 {{-- View switcher --}}
@@ -157,12 +157,12 @@
                                     <button @click="gridView = false; let u = new URL(window.location); u.searchParams.delete('view'); history.replaceState({}, '', u)"
                                         :class="!gridView ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'"
                                         class="px-3 py-1 text-xs font-medium rounded-md transition-colors">
-                                        Календар
+                                        {{ __('app.calendar_view') }}
                                     </button>
                                     <button @click="gridView = true; loadGrid(); let u = new URL(window.location); u.searchParams.set('view', 'grid'); history.replaceState({}, '', u)"
                                         :class="gridView ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'"
                                         class="px-3 py-1 text-xs font-medium rounded-md transition-colors">
-                                        Сітка
+                                        {{ __('app.grid_view') }}
                                     </button>
                                 </div>
                                 @if($ministry->is_worship_ministry)
@@ -170,7 +170,7 @@
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                                     </svg>
-                                    Статистика
+                                    {{ __('app.statistics_tab') }}
                                 </a>
                                 @endif
                                 @can('contribute-ministry', $ministry)
@@ -205,7 +205,7 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
                                             </svg>
                                         </div>
-                                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.no_events_this_month') ?? 'Немає подій у цьому місяці' }}</p>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.no_events_this_month') }}</p>
                                     </div>
                                 </template>
 
@@ -228,15 +228,15 @@
 
                                                 {{-- Summary bar --}}
                                                 <div class="px-3 py-1.5 flex items-center gap-3 text-[11px] text-gray-500 dark:text-gray-400 border-b border-gray-50 dark:border-gray-700/50">
-                                                    <span x-text="'🎵 ' + event.songsCount + ' ' + (event.songsCount === 1 ? 'пісня' : (event.songsCount >= 2 && event.songsCount <= 4 ? 'пісні' : 'пісень'))"></span>
-                                                    <span x-text="'👥 ' + event.teamCount + ' уч.'"></span>
+                                                    <span x-text="'🎵 ' + event.songsCount + ' {{ __('app.songs_lowercase') }}'"></span>
+                                                    <span x-text="'👥 ' + event.teamCount"></span>
                                                 </div>
 
                                                 {{-- Card body: flat member list --}}
                                                 <div class="flex-1 px-3 py-2 space-y-0.5 min-h-[50px]">
                                                     {{-- Empty state --}}
                                                     <template x-if="getEventRoles(event.id).length === 0">
-                                                        <p class="text-xs text-gray-400 dark:text-gray-500 italic py-3 text-center">порожньо</p>
+                                                        <p class="text-xs text-gray-400 dark:text-gray-500 italic py-3 text-center">{{ __('app.empty') }}</p>
                                                     </template>
 
                                                     {{-- Flat list of members with role icons --}}
@@ -262,7 +262,7 @@
                                                             <button @click.stop="signupEvent = signupEvent === event.id ? null : event.id"
                                                                 class="flex-1 text-xs text-emerald-600 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 font-medium py-1 rounded-lg hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors flex items-center justify-center gap-1">
                                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
-                                                                Записатися
+                                                                {{ __('app.sign_up_btn') }}
                                                             </button>
                                                         </template>
                                                         {{-- Open button --}}
@@ -270,7 +270,7 @@
                                                             :class="isCurrentMember() && !isSignedUp(event.id) ? 'flex-1' : 'w-full'"
                                                             class="text-xs text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 font-medium py-1 rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors flex items-center justify-center gap-1">
                                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                                            Відкрити
+                                                            {{ __('app.open_event_btn') }}
                                                         </button>
                                                     </div>
 
@@ -285,7 +285,7 @@
                                                          @click.stop
                                                          @click.outside="signupEvent = null"
                                                          class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 w-48 bg-white dark:bg-gray-700 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 py-1 z-20">
-                                                        <div class="px-2 py-1 text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Оберіть роль</div>
+                                                        <div class="px-2 py-1 text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">{{ __('app.choose_role_label') }}</div>
                                                         <template x-for="role in gridData.roles" :key="'signup-'+event.id+'-'+role.id">
                                                             <button @click.stop="selfSignup(event.id, role.id)"
                                                                 class="w-full text-left px-3 py-1.5 text-xs text-gray-700 dark:text-gray-200 hover:bg-purple-50 dark:hover:bg-purple-900/30 flex items-center gap-2 transition-colors">
@@ -309,7 +309,7 @@
 
                         {{-- Day names --}}
                         <div class="grid grid-cols-7 mb-1">
-                            <template x-for="day in ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд']" :key="day">
+                            <template x-for="day in '{{ __('app.day_names_short_js') }}'.split(',')" :key="day">
                                 <div class="text-center text-xs font-medium text-gray-500 dark:text-gray-400 py-2" x-text="day"></div>
                             </template>
                         </div>
@@ -344,7 +344,7 @@
 
                         {{-- Events list below calendar --}}
                         <div class="mt-6" x-show="currentMonthEvents.length > 0">
-                            <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Події цього місяця</h4>
+                            <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ __('app.events_this_month_heading') }}</h4>
                             <div class="space-y-2">
                                 <template x-for="event in currentMonthEvents" :key="event.id">
                                     <button @click="event.isSundayService ? openEventModal(event) : (Livewire.navigate(event.eventUrl))"
@@ -394,8 +394,8 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
                                 </svg>
                             </div>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Немає запланованих подій</p>
-                            <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Створіть подію з типом "Недільне служіння"</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.no_planned_events_msg') }}</p>
+                            <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">{{ __('app.create_music_event_hint') }}</p>
                         </div>
 
                         </div>{{-- end calendar view wrapper --}}
@@ -440,7 +440,7 @@
                                         </div>
                                         <div class="flex items-center gap-2">
                                             <a :href="modalRoutes.eventUrl" class="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400">
-                                                Перейти до події
+                                                {{ __('app.go_to_event') }}
                                             </a>
                                             <button @click="closeModal()" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -456,7 +456,7 @@
                                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                         </svg>
-                                        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Завантаження...</p>
+                                        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">{{ __('app.loading_text') }}</p>
                                     </div>
 
                                     {{-- Content --}}
@@ -468,7 +468,7 @@
                                                     <svg class="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
                                                     </svg>
-                                                    Пісні
+                                                    {{ __('app.songs_tab_label') }}
                                                 </h4>
 
                                                 <template x-if="modalSongs.length > 0">
@@ -504,7 +504,7 @@
                                                         <svg class="w-8 h-8 mx-auto text-gray-300 dark:text-gray-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
                                                         </svg>
-                                                        <p class="text-sm text-gray-400 dark:text-gray-500">Пісні ще не додані</p>
+                                                        <p class="text-sm text-gray-400 dark:text-gray-500">{{ __('app.songs_not_added_yet') }}</p>
                                                     </div>
                                                 </template>
 
@@ -518,7 +518,7 @@
                                                                     class="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white truncate">
                                                             </select>
                                                         </div>
-                                                        <input type="text" x-model="selectedKey" placeholder="Тон." class="w-14 shrink-0 px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                                        <input type="text" x-model="selectedKey" placeholder="{{ __('app.song_key_label') }}" class="w-14 shrink-0 px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                                                         <button @click="addSong()" :disabled="!selectedSongId" class="shrink-0 px-3 py-1.5 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
                                                             +
                                                         </button>
@@ -536,7 +536,7 @@
                                                             <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
                                                             </svg>
-                                                            Команда: <span class="text-purple-600 dark:text-purple-400" x-text="selectedSongForTeam.title"></span>
+                                                            {{ __('app.team_heading') }}: <span class="text-purple-600 dark:text-purple-400" x-text="selectedSongForTeam.title"></span>
                                                         </h4>
 
                                                         <div class="flex-1 overflow-y-auto mb-3">
@@ -564,7 +564,7 @@
                                                                     <svg class="w-10 h-10 mx-auto text-gray-300 dark:text-gray-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
                                                                     </svg>
-                                                                    <p class="text-sm text-gray-400 dark:text-gray-500">Команда не призначена</p>
+                                                                    <p class="text-sm text-gray-400 dark:text-gray-500">{{ __('app.team_not_assigned_msg') }}</p>
                                                                 </div>
                                                             </template>
                                                         </div>
@@ -583,7 +583,7 @@
                                                                     </select>
                                                                 </div>
                                                                 <button @click="addTeamMember()" :disabled="!selectedPersonId || !selectedRoleId" class="w-full px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-                                                                    Додати учасника
+                                                                    {{ __('app.add_member_btn') }}
                                                                 </button>
                                                             </div>
                                                         </template>
@@ -667,7 +667,7 @@
                                                                     <svg class="w-10 h-10 mx-auto text-gray-300 dark:text-gray-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
                                                                     </svg>
-                                                                    <p class="text-sm text-gray-400 dark:text-gray-500">Команда не призначена</p>
+                                                                    <p class="text-sm text-gray-400 dark:text-gray-500">{{ __('app.team_not_assigned_msg') }}</p>
                                                                 </div>
                                                             </template>
                                                         </div>
@@ -686,7 +686,7 @@
                                                                     </select>
                                                                 </div>
                                                                 <button @click="addGeneralTeamMember()" :disabled="!selectedPersonId || !selectedRoleId" class="w-full px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-                                                                    Додати учасника
+                                                                    {{ __('app.add_member_btn') }}
                                                                 </button>
                                                             </div>
                                                         </template>

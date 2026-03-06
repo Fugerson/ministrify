@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Записати зустріч: ' . $group->name)
+@section('title', __('app.group_record_meeting') . ': ' . $group->name)
 
 @section('content')
 <div class="max-w-2xl mx-auto">
@@ -11,10 +11,10 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
             </svg>
             <div>
-                <p class="text-amber-800 dark:text-amber-200 font-medium">Сьогодні вже є запис</p>
+                <p class="text-amber-800 dark:text-amber-200 font-medium">{{ __('app.group_today_record_exists') }}</p>
                 @can('update', $group)
                 <p class="text-amber-700 dark:text-amber-300 text-sm mt-1">
-                    <a href="{{ route('groups.attendance.edit', [$group, $existingToday]) }}" class="underline hover:no-underline">Редагувати запис за сьогодні</a>
+                    <a href="{{ route('groups.attendance.edit', [$group, $existingToday]) }}" class="underline hover:no-underline">{{ __('app.group_edit_today_record') }}</a>
                 </p>
                 @endcan
             </div>
@@ -23,39 +23,39 @@
     @endif
 
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Записати зустріч</h2>
+        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-6">{{ __('app.group_record_meeting') }}</h2>
 
         <form @submit.prevent="submit($refs.grpAttForm)" x-ref="grpAttForm" x-data="{ ...ajaxForm({ url: '{{ route('groups.attendance.store', $group) }}', method: 'POST' }) }" class="space-y-6">
 
             <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <label for="date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Дата *</label>
+                    <label for="date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.date') }} *</label>
                     <input type="date" name="date" id="date" value="{{ old('date', now()->format('Y-m-d')) }}" required
                            class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
                 </div>
                 <div>
-                    <label for="time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Час</label>
+                    <label for="time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.group_time') }}</label>
                     <input type="time" name="time" id="time" value="{{ old('time', $group->meeting_time?->format('H:i')) }}"
                            class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
                 </div>
             </div>
 
             <div>
-                <label for="location" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Місце</label>
+                <label for="location" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.group_location') }}</label>
                 <input type="text" name="location" id="location" value="{{ old('location', $group->location) }}"
-                       placeholder="Адреса або назва місця"
+                       placeholder="{{ __('app.group_location_name_placeholder') }}"
                        class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
             </div>
 
             <div>
-                <label for="guests_count" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Кількість гостей</label>
+                <label for="guests_count" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.group_guests_count') }}</label>
                 <input type="number" name="guests_count" id="guests_count" value="{{ old('guests_count', 0) }}" min="0"
                        class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
             </div>
 
             <!-- Members Checklist -->
             <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Присутні учасники</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ __('app.group_present_members') }}</label>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     @foreach($group->members->sortBy('first_name') as $member)
                     <label class="flex items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-xl cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">

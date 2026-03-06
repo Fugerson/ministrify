@@ -8,8 +8,8 @@
                 </svg>
             </div>
             <div>
-                <h3 class="font-semibold text-gray-900 dark:text-white">Онлайн пожертви</h3>
-                <p class="text-xs text-gray-500 dark:text-gray-400">Цього місяця</p>
+                <h3 class="font-semibold text-gray-900 dark:text-white">{{ __('app.online_donations') }}</h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.this_month_label') }}</p>
             </div>
         </div>
     </div>
@@ -21,8 +21,8 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
                 </svg>
             </div>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Онлайн пожертви не налаштовані</p>
-            <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Підключіть платіжну систему для прийому онлайн пожертв</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.online_donations_not_configured') }}</p>
+            <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">{{ __('app.connect_payment_system') }}</p>
         </div>
     @else
         {{-- Total this month with change indicator --}}
@@ -46,7 +46,7 @@
                 @endif
             </div>
             <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
-                Минулого місяця: {{ number_format($onlineDonations['total_last_month'] ?? 0, 0, ',', ' ') }}
+                {{ __('app.last_month_amount', ['amount' => number_format($onlineDonations['total_last_month'] ?? 0, 0, ',', ' ')]) }}
             </p>
         </div>
 
@@ -54,15 +54,15 @@
         <div class="grid grid-cols-3 gap-2 mb-4">
             <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-2.5 text-center">
                 <p class="text-lg font-bold text-gray-900 dark:text-white">{{ number_format($onlineDonations['avg_donation'] ?? 0, 0, ',', ' ') }}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400">Середня</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.average_short') }}</p>
             </div>
             <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-2.5 text-center">
                 <p class="text-lg font-bold text-gray-900 dark:text-white">{{ $onlineDonations['recurring_count'] ?? 0 }}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400">Регулярних</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.recurring_short') }}</p>
             </div>
             <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-2.5 text-center">
                 <p class="text-lg font-bold text-gray-900 dark:text-white">{{ $onlineDonations['count_this_month'] ?? 0 }}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400">Транзакцій</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.transactions_short') }}</p>
             </div>
         </div>
 
@@ -73,7 +73,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                 </svg>
                 <p class="text-xs text-emerald-700 dark:text-emerald-300">
-                    Регулярних пожертв: <span class="font-semibold">{{ number_format($onlineDonations['recurring_amount'] ?? 0, 0, ',', ' ') }}/міс</span>
+                    {{ __('app.recurring_donations_amount', ['amount' => number_format($onlineDonations['recurring_amount'] ?? 0, 0, ',', ' ')]) }}
                 </p>
             </div>
         @endif
@@ -81,7 +81,7 @@
         {{-- Recent donations --}}
         @if(!empty($onlineDonations['recent']) && $onlineDonations['recent']->isNotEmpty())
             <div class="border-t border-gray-100 dark:border-gray-700 pt-3">
-                <h4 class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Останні пожертви</h4>
+                <h4 class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">{{ __('app.recent_donations') }}</h4>
                 <div class="space-y-2">
                     @foreach($onlineDonations['recent']->take(5) as $donation)
                         <div class="flex items-center justify-between">
@@ -100,10 +100,10 @@
                                 </div>
                                 <div class="min-w-0">
                                     <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
-                                        {{ $donation->is_anonymous ? 'Анонімно' : $donation->donor_name }}
+                                        {{ $donation->is_anonymous ? __('app.anonymous') : $donation->donor_name }}
                                     </p>
                                     <p class="text-xs text-gray-400 dark:text-gray-500">
-                                        {{ \Carbon\Carbon::parse($donation->paid_at)->locale('uk')->diffForHumans() }}
+                                        {{ \Carbon\Carbon::parse($donation->paid_at)->locale(app()->getLocale())->diffForHumans() }}
                                         @if($donation->provider)
                                             <span class="text-gray-300 dark:text-gray-600 mx-0.5">&middot;</span>
                                             {{ $donation->provider }}

@@ -5,10 +5,10 @@
             <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
-            Збори коштів
+            {{ __('app.fundraising') }}
         </h2>
         <a href="{{ route('donations.index') }}" class="text-sm text-primary-600 dark:text-primary-400 hover:underline flex items-center gap-1">
-            Всі
+            {{ __('app.view_all_short') }}
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
             </svg>
@@ -46,17 +46,17 @@
                             @php
                                 $lastTwo = $daysRemaining % 100;
                                 $lastOne = $daysRemaining % 10;
-                                if ($lastTwo >= 11 && $lastTwo <= 19) $dayWord = 'днів';
-                                elseif ($lastOne === 1) $dayWord = 'день';
-                                elseif ($lastOne >= 2 && $lastOne <= 4) $dayWord = 'дні';
-                                else $dayWord = 'днів';
+                                if ($lastTwo >= 11 && $lastTwo <= 19) $dayWord = __('app.days_many');
+                                elseif ($lastOne === 1) $dayWord = __('app.day_one');
+                                elseif ($lastOne >= 2 && $lastOne <= 4) $dayWord = __('app.days_few');
+                                else $dayWord = __('app.days_many');
                             @endphp
-                            {{ $daysRemaining }} {{ $dayWord }} залишилось
+                            {{ __('app.n_days_remaining', ['count' => $daysRemaining, 'word' => $dayWord]) }}
                         </span>
                     @elseif($daysRemaining == 0)
-                        <span class="text-amber-500 font-medium">Останній день</span>
+                        <span class="text-amber-500 font-medium">{{ __('app.last_day') }}</span>
                     @else
-                        <span class="text-red-500 font-medium">Завершено</span>
+                        <span class="text-red-500 font-medium">{{ __('app.completed_status') }}</span>
                     @endif
                 @endif
             </div>
@@ -70,7 +70,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
         </div>
-        <p class="text-gray-500 dark:text-gray-400 text-sm">Немає активних зборів</p>
+        <p class="text-gray-500 dark:text-gray-400 text-sm">{{ __('app.no_active_fundraising') }}</p>
     </div>
     @endif
 </div>

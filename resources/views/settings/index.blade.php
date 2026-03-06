@@ -152,7 +152,7 @@
         <div class="p-4 md:p-6">
             @if($church->logo)
                 <div class="mb-3">
-                    <img src="{{ Storage::url($church->logo) }}" alt="{{ $church->name }} логотип" class="w-16 h-16 object-contain rounded-lg">
+                    <img src="{{ Storage::url($church->logo) }}" alt="{{ $church->name }} {{ __('app.logo_alt') }}" class="w-16 h-16 object-contain rounded-lg">
                 </div>
             @endif
             <div x-data="{ fileName: '' }" class="relative">
@@ -293,7 +293,7 @@
                                 <svg class="w-5 h-5 text-gray-400 group-hover:text-primary-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                             </div>
                             <div class="flex-1 min-w-0">
-                                <p x-show="!fileName" class="text-sm font-medium text-gray-700 dark:text-gray-300">Обрати зображення</p>
+                                <p x-show="!fileName" class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('app.choose_image') }}</p>
                                 <p x-show="fileName" x-text="fileName" class="text-sm font-medium text-primary-600 dark:text-primary-400 truncate"></p>
                                 <p class="text-xs text-gray-500 dark:text-gray-400">PNG, JPG, WebP</p>
                             </div>
@@ -302,7 +302,7 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Розклад богослужінь</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.settings_service_schedule') }}</label>
                     <input type="text" name="service_times" value="{{ old('service_times', $church->service_times) }}"
                            autocomplete="off"
                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
@@ -314,20 +314,20 @@
         <!-- Contact Info -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Контактна інформація</h2>
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.settings_contact_info') }}</h2>
             </div>
 
             <div class="p-6 space-y-4">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Публічний Email</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.settings_public_email') }}</label>
                         <input type="email" name="public_email" value="{{ old('public_email', $church->public_email) }}"
                                autocomplete="off"
                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                                >
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Публічний телефон</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.settings_public_phone') }}</label>
                         <input type="text" name="public_phone" value="{{ old('public_phone', $church->public_phone) }}"
                                autocomplete="off"
                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
@@ -340,12 +340,12 @@
         <!-- Website -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Веб-сайт</h2>
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.settings_website') }}</h2>
             </div>
 
             <div class="p-6">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">URL веб-сайту</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.settings_website_url') }}</label>
                     <input type="url" name="website_url" value="{{ old('website_url', $church->website_url) }}"
                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                            placeholder="https://...">
@@ -356,19 +356,19 @@
         <!-- Pastor Info -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Слово пастора</h2>
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.settings_pastor_word') }}</h2>
             </div>
 
             <div class="p-6 space-y-4">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Ім'я пастора</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.settings_pastor_name') }}</label>
                         <input type="text" name="pastor_name" value="{{ old('pastor_name', $church->pastor_name) }}"
                                autocomplete="off"
                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Фото пастора</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.settings_pastor_photo') }}</label>
                         @if($church->pastor_photo)
                             <div class="mb-2">
                                 <img src="{{ Storage::url($church->pastor_photo) }}" class="w-16 h-16 object-cover rounded-lg">
@@ -381,7 +381,7 @@
                                     <svg class="w-5 h-5 text-gray-400 group-hover:text-primary-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                                 </div>
                                 <div class="flex-1 min-w-0">
-                                    <p x-show="!fileName" class="text-sm font-medium text-gray-700 dark:text-gray-300">Обрати фото</p>
+                                    <p x-show="!fileName" class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('app.choose_photo') }}</p>
                                     <p x-show="fileName" x-text="fileName" class="text-sm font-medium text-primary-600 dark:text-primary-400 truncate"></p>
                                     <p class="text-xs text-gray-500 dark:text-gray-400">PNG, JPG, WebP</p>
                                 </div>
@@ -390,17 +390,17 @@
                     </div>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Привітальне слово</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.settings_welcome_message') }}</label>
                     <textarea name="pastor_message" rows="4"
                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                              placeholder="Напишіть привітальне слово для відвідувачів...">{{ old('pastor_message', $church->pastor_message) }}</textarea>
+                              placeholder="{{ __('app.settings_welcome_message_placeholder') }}">{{ old('pastor_message', $church->pastor_message) }}</textarea>
                 </div>
             </div>
 
             <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-700 rounded-b-xl">
                 <button type="submit" :disabled="saving" class="px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
-                    <span x-show="!saving">Зберегти налаштування сайту</span>
-                    <span x-show="saving" x-cloak>Збереження...</span>
+                    <span x-show="!saving">{{ __('app.settings_save_public_site') }}</span>
+                    <span x-show="saving" x-cloak>{{ __('app.saving') }}</span>
                 </button>
             </div>
         </div>
@@ -425,7 +425,7 @@
                     </div>
                     <div>
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-white">LiqPay</h2>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Прийом пожертв Visa/Mastercard на публічному сайті</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.settings_liqpay_desc') }}</p>
                     </div>
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer">
@@ -439,9 +439,9 @@
             <div class="p-6 space-y-4">
                 <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
                     <p class="text-sm text-blue-800 dark:text-blue-300">
-                        Для налаштування LiqPay, зареєструйтеся на
+                        {{ __('app.settings_liqpay_instructions_before') }}
                         <a href="https://www.liqpay.ua/uk/adminbusiness" target="_blank" class="underline font-medium">liqpay.ua</a>
-                        та отримайте ключі API в особистому кабінеті.
+                        {{ __('app.settings_liqpay_instructions_after') }}
                     </p>
                 </div>
 
@@ -463,7 +463,7 @@
                            placeholder="sandbox_XXXXXXXXXXXX"
                            onfocus="if(this.value==='********')this.value='';"
                            onblur="if(this.value==='')this.value='{{ !empty($paymentSettings['liqpay_private_key']) ? '********' : '' }}';">
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Зберігається в зашифрованому вигляді</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('app.settings_stored_encrypted') }}</p>
                 </div>
             </div>
         </div>
@@ -477,7 +477,7 @@
                     </div>
                     <div>
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Monobank</h2>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Банка для збору пожертв</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.settings_monobank_desc') }}</p>
                     </div>
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer">
@@ -491,25 +491,25 @@
             <div class="p-6 space-y-4">
                 <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
                     <p class="text-sm text-gray-700 dark:text-gray-300">
-                        Створіть банку для збору в додатку Monobank і вставте посилання або ID банки.
+                        {{ __('app.settings_monobank_instructions') }}
                     </p>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">ID банки або посилання</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.settings_monobank_jar_label') }}</label>
                     <input type="text" name="monobank_jar_id"
                            value="{{ old('monobank_jar_id', $paymentSettings['monobank_jar_id'] ?? '') }}"
                            autocomplete="off"
                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                            placeholder="https://send.monobank.ua/jar/XXXXXXXXX або jar/XXXXXXXXX">
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Наприклад: https://send.monobank.ua/jar/ABC123def або просто ABC123def</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('app.settings_monobank_jar_hint') }}</p>
                 </div>
             </div>
         </div>
 
         <button type="submit" :disabled="saving" class="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
-            <span x-show="!saving">Зберегти налаштування платежів</span>
-            <span x-show="saving" x-cloak>Збереження...</span>
+            <span x-show="!saving">{{ __('app.settings_save_payments') }}</span>
+            <span x-show="saving" x-cloak>{{ __('app.saving') }}</span>
         </button>
     </form>
     </div>
@@ -527,8 +527,8 @@
                     </svg>
                 </div>
                 <div>
-                    <h3 class="text-lg font-semibold text-white">Telegram чати</h3>
-                    <p class="text-sm text-white/80">Перегляд та відповіді на повідомлення</p>
+                    <h3 class="text-lg font-semibold text-white">{{ __('app.settings_telegram_chats') }}</h3>
+                    <p class="text-sm text-white/80">{{ __('app.settings_telegram_chats_desc') }}</p>
                 </div>
             </div>
             @if(($unreadTelegramCount ?? 0) > 0)
@@ -550,74 +550,74 @@
                         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
                     </svg>
                 </div>
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Telegram бот</h2>
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.settings_telegram_bot') }}</h2>
             </div>
         </div>
 
         <div class="p-6">
-            <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-4">Як підключити Telegram?</h3>
+            <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.settings_how_to_connect_telegram') }}</h3>
             <ol class="space-y-4 text-sm">
                 <li class="flex gap-3">
                     <span class="flex-shrink-0 w-6 h-6 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center text-xs font-bold">1</span>
                     <div>
-                        <p class="font-medium text-gray-900 dark:text-white">Відкрийте бота в Telegram</p>
-                        <p class="text-gray-500 dark:text-gray-400 mt-0.5">Натисніть <a href="https://t.me/ministrify_bot" target="_blank" class="text-primary-600 dark:text-primary-400 hover:underline">@ministrify_bot</a> або знайдіть в пошуку Telegram</p>
+                        <p class="font-medium text-gray-900 dark:text-white">{{ __('app.settings_tg_step1_title') }}</p>
+                        <p class="text-gray-500 dark:text-gray-400 mt-0.5">{{ __('app.settings_tg_step1_desc_before') }} <a href="https://t.me/ministrify_bot" target="_blank" class="text-primary-600 dark:text-primary-400 hover:underline">@ministrify_bot</a> {{ __('app.settings_tg_step1_desc_after') }}</p>
                     </div>
                 </li>
                 <li class="flex gap-3">
                     <span class="flex-shrink-0 w-6 h-6 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center text-xs font-bold">2</span>
                     <div>
-                        <p class="font-medium text-gray-900 dark:text-white">Натисніть /start</p>
-                        <p class="text-gray-500 dark:text-gray-400 mt-0.5">Бот привітає вас і спробує знайти ваш профіль автоматично</p>
+                        <p class="font-medium text-gray-900 dark:text-white">{{ __('app.settings_tg_step2_title') }}</p>
+                        <p class="text-gray-500 dark:text-gray-400 mt-0.5">{{ __('app.settings_tg_step2_desc') }}</p>
                     </div>
                 </li>
                 <li class="flex gap-3">
                     <span class="flex-shrink-0 w-6 h-6 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center text-xs font-bold">3</span>
                     <div>
-                        <p class="font-medium text-gray-900 dark:text-white">Автоматичне підключення</p>
-                        <p class="text-gray-500 dark:text-gray-400 mt-0.5">Якщо у вашому профілі в Ministrify вказано Telegram @username — бот підключиться автоматично</p>
+                        <p class="font-medium text-gray-900 dark:text-white">{{ __('app.settings_tg_step3_title') }}</p>
+                        <p class="text-gray-500 dark:text-gray-400 mt-0.5">{{ __('app.settings_tg_step3_desc') }}</p>
                     </div>
                 </li>
                 <li class="flex gap-3">
                     <span class="flex-shrink-0 w-6 h-6 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center text-xs font-bold">4</span>
                     <div>
-                        <p class="font-medium text-gray-900 dark:text-white">Або введіть код вручну</p>
-                        <p class="text-gray-500 dark:text-gray-400 mt-0.5">Отримайте 6-значний код в розділі <a href="{{ route('my-profile') }}" class="text-primary-600 dark:text-primary-400 hover:underline">«Мій профіль»</a> і надішліть його боту</p>
+                        <p class="font-medium text-gray-900 dark:text-white">{{ __('app.settings_tg_step4_title') }}</p>
+                        <p class="text-gray-500 dark:text-gray-400 mt-0.5">{{ __('app.settings_tg_step4_desc_before') }} <a href="{{ route('my-profile') }}" class="text-primary-600 dark:text-primary-400 hover:underline">{{ __('app.settings_tg_step4_my_profile') }}</a> {{ __('app.settings_tg_step4_desc_after') }}</p>
                     </div>
                 </li>
             </ol>
 
             <div class="mt-5 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-800">
-                <p class="text-sm font-medium text-blue-900 dark:text-blue-300 mb-3">Що вміє бот:</p>
+                <p class="text-sm font-medium text-blue-900 dark:text-blue-300 mb-3">{{ __('app.settings_tg_capabilities') }}</p>
 
-                <p class="text-xs font-medium text-blue-800 dark:text-blue-200 mb-1">📬 Сповіщення:</p>
+                <p class="text-xs font-medium text-blue-800 dark:text-blue-200 mb-1">📬 {{ __('app.settings_tg_notifications') }}</p>
                 <ul class="text-sm text-blue-700 dark:text-blue-400 space-y-1 mb-3">
-                    <li>• Повідомлення про нові призначення на служіння</li>
-                    <li>• Нагадування за день до події</li>
-                    <li>• Сповіщення про призначення відповідальностей</li>
-                    <li>• Сповіщення про пункти плану служіння</li>
-                    <li>• Повідомлення лідеру, якщо хтось відмовився</li>
+                    <li>• {{ __('app.settings_tg_notif_new_assignment') }}</li>
+                    <li>• {{ __('app.settings_tg_notif_day_before') }}</li>
+                    <li>• {{ __('app.settings_tg_notif_responsibility') }}</li>
+                    <li>• {{ __('app.settings_tg_notif_plan_items') }}</li>
+                    <li>• {{ __('app.settings_tg_notif_leader_decline') }}</li>
                 </ul>
 
-                <p class="text-xs font-medium text-blue-800 dark:text-blue-200 mb-1">✅ Підтвердження:</p>
+                <p class="text-xs font-medium text-blue-800 dark:text-blue-200 mb-1">✅ {{ __('app.settings_tg_confirmations') }}</p>
                 <ul class="text-sm text-blue-700 dark:text-blue-400 space-y-1 mb-3">
-                    <li>• Підтвердження або відмова кнопками ✅/❌</li>
-                    <li>• Підтвердження відповідальностей на події</li>
-                    <li>• Підтвердження участі в плані служіння</li>
+                    <li>• {{ __('app.settings_tg_confirm_buttons') }}</li>
+                    <li>• {{ __('app.settings_tg_confirm_responsibilities') }}</li>
+                    <li>• {{ __('app.settings_tg_confirm_plan') }}</li>
                 </ul>
 
-                <p class="text-xs font-medium text-blue-800 dark:text-blue-200 mb-1">📋 Команди:</p>
+                <p class="text-xs font-medium text-blue-800 dark:text-blue-200 mb-1">📋 {{ __('app.settings_tg_commands') }}</p>
                 <ul class="text-sm text-blue-700 dark:text-blue-400 space-y-1 mb-3">
-                    <li>• <code class="bg-blue-100 dark:bg-blue-800 px-1 rounded">/schedule</code> — розклад на місяць</li>
-                    <li>• <code class="bg-blue-100 dark:bg-blue-800 px-1 rounded">/next</code> — наступне служіння</li>
-                    <li>• <code class="bg-blue-100 dark:bg-blue-800 px-1 rounded">/unavailable</code> — як вказати недоступність</li>
-                    <li>• <code class="bg-blue-100 dark:bg-blue-800 px-1 rounded">/help</code> — список команд</li>
+                    <li>• <code class="bg-blue-100 dark:bg-blue-800 px-1 rounded">/schedule</code> — {{ __('app.settings_tg_cmd_schedule') }}</li>
+                    <li>• <code class="bg-blue-100 dark:bg-blue-800 px-1 rounded">/next</code> — {{ __('app.settings_tg_cmd_next') }}</li>
+                    <li>• <code class="bg-blue-100 dark:bg-blue-800 px-1 rounded">/unavailable</code> — {{ __('app.settings_tg_cmd_unavailable') }}</li>
+                    <li>• <code class="bg-blue-100 dark:bg-blue-800 px-1 rounded">/help</code> — {{ __('app.settings_tg_cmd_help') }}</li>
                 </ul>
 
-                <p class="text-xs font-medium text-blue-800 dark:text-blue-200 mb-1">🔗 Підключення:</p>
+                <p class="text-xs font-medium text-blue-800 dark:text-blue-200 mb-1">🔗 {{ __('app.settings_tg_connection') }}</p>
                 <ul class="text-sm text-blue-700 dark:text-blue-400 space-y-1">
-                    <li>• Автоматичне підключення за Telegram username</li>
-                    <li>• Підключення за 6-значним кодом з профілю</li>
+                    <li>• {{ __('app.settings_tg_connect_username') }}</li>
+                    <li>• {{ __('app.settings_tg_connect_code') }}</li>
                 </ul>
             </div>
         </div>
@@ -679,15 +679,15 @@
                         </svg>
                     </div>
                     <div>
-                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Сповіщення</h2>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Управління Telegram-сповіщеннями</p>
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.notifications') }}</h2>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.settings_manage_telegram_notifications') }}</p>
                     </div>
                 </div>
                 <div class="flex items-center gap-2">
                     <span x-show="saving" x-cloak class="text-xs text-gray-400">
                         <svg class="animate-spin h-4 w-4 inline" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
                     </span>
-                    <span x-show="saved" x-cloak x-transition.opacity class="text-xs text-green-600 dark:text-green-400">Збережено</span>
+                    <span x-show="saved" x-cloak x-transition.opacity class="text-xs text-green-600 dark:text-green-400">{{ __('app.saved_check') }}</span>
                 </div>
             </div>
         </div>
@@ -695,12 +695,12 @@
         <div class="p-6 space-y-6">
             <!-- Automatic Notifications -->
             <div>
-                <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-3">Автоматичні сповіщення</h3>
+                <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-3">{{ __('app.settings_auto_notifications') }}</h3>
                 <div class="space-y-3">
                     <label class="flex items-center justify-between cursor-pointer group" @click.prevent="toggle('notify_on_assignment')">
                         <div>
-                            <p class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">Сповіщення про призначення</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Повідомлення при призначенні на позицію в служінні</p>
+                            <p class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">{{ __('app.settings_notif_assignment') }}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.settings_notif_assignment_desc') }}</p>
                         </div>
                         <div class="relative ml-4 flex-shrink-0">
                             <div class="w-11 h-6 rounded-full transition-colors" :class="settings.notify_on_assignment ? 'bg-primary-600' : 'bg-gray-300 dark:bg-gray-600'">
@@ -710,8 +710,8 @@
                     </label>
                     <label class="flex items-center justify-between cursor-pointer group" @click.prevent="toggle('notify_on_responsibility')">
                         <div>
-                            <p class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">Сповіщення про відповідальності</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Повідомлення при призначенні відповідальності на подію</p>
+                            <p class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">{{ __('app.settings_notif_responsibility') }}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.settings_notif_responsibility_desc') }}</p>
                         </div>
                         <div class="relative ml-4 flex-shrink-0">
                             <div class="w-11 h-6 rounded-full transition-colors" :class="settings.notify_on_responsibility ? 'bg-primary-600' : 'bg-gray-300 dark:bg-gray-600'">
@@ -721,8 +721,8 @@
                     </label>
                     <label class="flex items-center justify-between cursor-pointer group" @click.prevent="toggle('notify_on_plan_request')">
                         <div>
-                            <p class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">Сповіщення про план служіння</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Повідомлення про участь у service plan</p>
+                            <p class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">{{ __('app.settings_notif_plan') }}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.settings_notif_plan_desc') }}</p>
                         </div>
                         <div class="relative ml-4 flex-shrink-0">
                             <div class="w-11 h-6 rounded-full transition-colors" :class="settings.notify_on_plan_request ? 'bg-primary-600' : 'bg-gray-300 dark:bg-gray-600'">
@@ -732,8 +732,8 @@
                     </label>
                     <label class="flex items-center justify-between cursor-pointer group" @click.prevent="toggle('notify_leader_on_decline')">
                         <div>
-                            <p class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">Сповіщення лідеру при відхиленні</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Повідомлення лідеру, коли хтось відхиляє призначення</p>
+                            <p class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">{{ __('app.settings_notif_leader_decline') }}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.settings_notif_leader_decline_desc') }}</p>
                         </div>
                         <div class="relative ml-4 flex-shrink-0">
                             <div class="w-11 h-6 rounded-full transition-colors" :class="settings.notify_leader_on_decline ? 'bg-primary-600' : 'bg-gray-300 dark:bg-gray-600'">
@@ -743,8 +743,8 @@
                     </label>
                     <label class="flex items-center justify-between cursor-pointer group" @click.prevent="toggle('birthday_reminders')">
                         <div>
-                            <p class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">Привітання з днем народження</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Автоматичні привітання учасникам у день народження</p>
+                            <p class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">{{ __('app.settings_notif_birthday') }}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.settings_notif_birthday_desc') }}</p>
                         </div>
                         <div class="relative ml-4 flex-shrink-0">
                             <div class="w-11 h-6 rounded-full transition-colors" :class="settings.birthday_reminders ? 'bg-primary-600' : 'bg-gray-300 dark:bg-gray-600'">
@@ -757,12 +757,12 @@
 
             <!-- Reminders -->
             <div>
-                <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-3">Нагадування</h3>
+                <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-3">{{ __('app.settings_reminders') }}</h3>
                 <div class="space-y-3">
                     <label class="flex items-center justify-between cursor-pointer group" @click.prevent="toggle('reminder_day_before')">
                         <div>
-                            <p class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">Нагадування за день</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Нагадування за день до події учасникам служіння</p>
+                            <p class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">{{ __('app.settings_reminder_day_before') }}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.settings_reminder_day_before_desc') }}</p>
                         </div>
                         <div class="relative ml-4 flex-shrink-0">
                             <div class="w-11 h-6 rounded-full transition-colors" :class="settings.reminder_day_before ? 'bg-primary-600' : 'bg-gray-300 dark:bg-gray-600'">
@@ -772,8 +772,8 @@
                     </label>
                     <label class="flex items-center justify-between cursor-pointer group" @click.prevent="toggle('reminder_same_day')">
                         <div>
-                            <p class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">Нагадування в день події</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Нагадування в день події учасникам служіння</p>
+                            <p class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">{{ __('app.settings_reminder_same_day') }}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.settings_reminder_same_day_desc') }}</p>
                         </div>
                         <div class="relative ml-4 flex-shrink-0">
                             <div class="w-11 h-6 rounded-full transition-colors" :class="settings.reminder_same_day ? 'bg-primary-600' : 'bg-gray-300 dark:bg-gray-600'">
@@ -783,8 +783,8 @@
                     </label>
                     <label class="flex items-center justify-between cursor-pointer group" @click.prevent="toggle('task_reminders')">
                         <div>
-                            <p class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">Нагадування про завдання</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Нагадування про невиконані завдання на дошках</p>
+                            <p class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">{{ __('app.settings_reminder_tasks') }}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.settings_reminder_tasks_desc') }}</p>
                         </div>
                         <div class="relative ml-4 flex-shrink-0">
                             <div class="w-11 h-6 rounded-full transition-colors" :class="settings.task_reminders ? 'bg-primary-600' : 'bg-gray-300 dark:bg-gray-600'">
@@ -823,13 +823,13 @@
                     </div>
                     <div>
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Google Calendar</h2>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Синхронізація подій між Ministrify та Google</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.settings_gcal_desc') }}</p>
                     </div>
                 </div>
                 @if($isGoogleConnected)
                     <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300">
                         <span class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>
-                        Підключено
+                        {{ __('app.settings_connected') }}
                     </span>
                 @endif
             </div>
@@ -845,11 +845,11 @@
                     <!-- Connection info -->
                     <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900/30 rounded-lg">
                         <span class="text-sm text-gray-600 dark:text-gray-400">
-                            Підключено {{ \Carbon\Carbon::parse($googleCalendarSettings['connected_at'] ?? now())->diffForHumans() }}
+                            {{ __('app.settings_connected') }} {{ \Carbon\Carbon::parse($googleCalendarSettings['connected_at'] ?? now())->diffForHumans() }}
                         </span>
                         <button @click="if (confirm({{ Js::from(__('messages.confirm_disconnect_google')) }})) { ajaxAction('{{ route('settings.google-calendar.disconnect') }}', 'POST').then(() => location.reload()) }"
                                 class="text-sm text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors">
-                            Відключити
+                            {{ __('app.settings_disconnect') }}
                         </button>
                     </div>
 
@@ -859,12 +859,12 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                         </svg>
                         <div class="text-sm text-green-700 dark:text-green-300">
-                            <p><strong>Автоматична синхронізація</strong> кожні 15 хвилин.</p>
+                            <p><strong>{{ __('app.settings_auto_sync') }}</strong> {{ __('app.settings_every_15_min') }}</p>
                             <p class="mt-1 text-green-600 dark:text-green-400">
                                 @if($lastSyncedAt)
-                                    Остання синхронізація: {{ \Carbon\Carbon::parse($lastSyncedAt)->diffForHumans() }}
+                                    {{ __('app.settings_last_sync') }}: {{ \Carbon\Carbon::parse($lastSyncedAt)->diffForHumans() }}
                                 @else
-                                    Ще не синхронізовано
+                                    {{ __('app.settings_not_synced_yet') }}
                                 @endif
                             </p>
                         </div>
@@ -874,14 +874,14 @@
                     <div class="space-y-3">
                         <div>
                             <div class="flex items-center justify-between mb-1">
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Календарі для синхронізації</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('app.settings_calendars_to_sync') }}</label>
                                 <span x-show="saved" x-transition.opacity.duration.300ms
                                       class="text-xs text-green-600 dark:text-green-400 flex items-center gap-1">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                    Збережено
+                                    {{ __('app.saved_check') }}
                                 </span>
                             </div>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Оберіть календар Google та команду, до якої потраплятимуть події</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.settings_calendars_to_sync_desc') }}</p>
                         </div>
 
                         <!-- Mapping rows -->
@@ -892,12 +892,12 @@
                                      x-init="if (mapping._new) { setTimeout(() => { mapping._new = false }, 1500) }">
                                     <div class="flex items-center gap-2">
                                         <div class="flex-1 min-w-0">
-                                            <label class="block text-[11px] text-gray-500 dark:text-gray-400 mb-1">Календар Google</label>
+                                            <label class="block text-[11px] text-gray-500 dark:text-gray-400 mb-1">{{ __('app.settings_google_calendar_label') }}</label>
                                             <select x-model="mapping.calendar_id" @change="saveMappings()"
                                                     class="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white text-sm">
-                                                <option value="primary">Основний календар</option>
+                                                <option value="primary">{{ __('app.settings_primary_calendar') }}</option>
                                                 <template x-for="cal in calendars" :key="cal.id">
-                                                    <option :value="cal.id" :disabled="!cal.can_sync" x-text="cal.summary + (cal.can_sync ? '' : ' (тільки читання)')"></option>
+                                                    <option :value="cal.id" :disabled="!cal.can_sync" x-text="cal.summary + (cal.can_sync ? '' : ' ({{ __('app.settings_read_only') }})')"></option>
                                                 </template>
                                             </select>
                                         </div>
@@ -905,10 +905,10 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
                                         </svg>
                                         <div class="flex-1 min-w-0">
-                                            <label class="block text-[11px] text-gray-500 dark:text-gray-400 mb-1">Команда</label>
+                                            <label class="block text-[11px] text-gray-500 dark:text-gray-400 mb-1">{{ __('app.settings_team') }}</label>
                                             <select x-model="mapping.ministry_id" @change="saveMappings()"
                                                     class="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white text-sm">
-                                                <option value="">Без прив'язки до команди</option>
+                                                <option value="">{{ __('app.settings_no_team_binding') }}</option>
                                                 @foreach($ministries as $ministry)
                                                     <option value="{{ $ministry->id }}">{{ $ministry->name }}</option>
                                                 @endforeach
@@ -917,7 +917,7 @@
                                         <button @click="removeMapping(index)" type="button"
                                                 x-show="mappings.length > 1"
                                                 class="flex-shrink-0 w-8 h-8 mt-5 flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20"
-                                                title="Видалити">
+                                                title="{{ __('app.settings_delete') }}">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                             </svg>
@@ -935,7 +935,7 @@
                                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                                             </svg>
-                                            <span x-text="mapping._syncing ? 'Синхронізація...' : 'Синхронізувати'"></span>
+                                            <span x-text="mapping._syncing ? '{{ __('app.settings_syncing') }}' : '{{ __('app.settings_sync') }}'"></span>
                                         </button>
                                         <span x-show="mapping._message" x-transition
                                               :class="mapping._success ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'"
@@ -951,7 +951,7 @@
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                             </svg>
-                            Додати ще один календар
+                            {{ __('app.settings_add_another_calendar') }}
                         </button>
                     </div>
 
@@ -967,7 +967,7 @@
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                         </svg>
-                        <span x-text="loading ? 'Синхронізація всіх...' : 'Синхронізувати всі календарі'"></span>
+                        <span x-text="loading ? '{{ __('app.settings_syncing_all') }}' : '{{ __('app.settings_sync_all_calendars') }}'"></span>
                     </button>
 
                     <!-- Status Message -->
@@ -988,33 +988,33 @@
                         @endphp
                         <div class="p-4 bg-gray-50 dark:bg-gray-900/30 rounded-xl border border-gray-200 dark:border-gray-700">
                             <div class="flex items-center justify-between mb-2">
-                                <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300">Остання синхронізація</h4>
+                                <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('app.settings_last_sync') }}</h4>
                                 <span class="text-xs text-gray-500 dark:text-gray-400">
                                     @if($syncAt)
                                         {{ \Carbon\Carbon::parse($syncAt)->diffForHumans() }}
-                                        ({{ $calCount }} {{ $calCount === 1 ? 'календар' : 'календарів' }})
+                                        ({{ $calCount }} {{ trans_choice(__('app.settings_calendar_count'), $calCount) }})
                                     @endif
                                 </span>
                             </div>
                             <div class="grid grid-cols-2 gap-3 text-sm">
                                 <div>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Ministrify → Google</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">{{ __('app.settings_to_google') }}</p>
                                     <div class="space-y-0.5 text-gray-700 dark:text-gray-300">
-                                        @if(($toG['created'] ?? 0) > 0)<p>+ {{ $toG['created'] }} створено</p>@endif
-                                        @if(($toG['updated'] ?? 0) > 0)<p>~ {{ $toG['updated'] }} оновлено</p>@endif
-                                        @if(($toG['deleted'] ?? 0) > 0)<p>- {{ $toG['deleted'] }} видалено</p>@endif
+                                        @if(($toG['created'] ?? 0) > 0)<p>+ {{ $toG['created'] }} {{ __('app.settings_sync_created') }}</p>@endif
+                                        @if(($toG['updated'] ?? 0) > 0)<p>~ {{ $toG['updated'] }} {{ __('app.settings_sync_updated') }}</p>@endif
+                                        @if(($toG['deleted'] ?? 0) > 0)<p>- {{ $toG['deleted'] }} {{ __('app.settings_sync_deleted') }}</p>@endif
                                         @if(($toG['created'] ?? 0) + ($toG['updated'] ?? 0) + ($toG['deleted'] ?? 0) === 0)
-                                            <p class="text-gray-400 dark:text-gray-500">Без змін</p>
+                                            <p class="text-gray-400 dark:text-gray-500">{{ __('app.settings_no_changes') }}</p>
                                         @endif
                                     </div>
                                 </div>
                                 <div>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Google → Ministrify</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">{{ __('app.settings_from_google') }}</p>
                                     <div class="space-y-0.5 text-gray-700 dark:text-gray-300">
-                                        @if(($fromG['created'] ?? 0) > 0)<p>+ {{ $fromG['created'] }} імпортовано</p>@endif
-                                        @if(($fromG['updated'] ?? 0) > 0)<p>~ {{ $fromG['updated'] }} оновлено</p>@endif
+                                        @if(($fromG['created'] ?? 0) > 0)<p>+ {{ $fromG['created'] }} {{ __('app.settings_sync_imported') }}</p>@endif
+                                        @if(($fromG['updated'] ?? 0) > 0)<p>~ {{ $fromG['updated'] }} {{ __('app.settings_sync_updated') }}</p>@endif
                                         @if(($fromG['created'] ?? 0) + ($fromG['updated'] ?? 0) === 0)
-                                            <p class="text-gray-400 dark:text-gray-500">Без змін</p>
+                                            <p class="text-gray-400 dark:text-gray-500">{{ __('app.settings_no_changes') }}</p>
                                         @endif
                                     </div>
                                 </div>
@@ -1029,7 +1029,7 @@
                             <svg class="w-4 h-4 transition-transform" :class="showRollback && 'rotate-90'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                             </svg>
-                            Керування подіями
+                            {{ __('app.settings_manage_events') }}
                         </button>
                         <div x-show="showRollback" x-collapse class="mt-3 space-y-2">
                             <div class="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">

@@ -1,8 +1,8 @@
 {{-- Upcoming Events Widget --}}
 <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
     <div class="px-4 lg:px-5 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-        <h2 class="font-semibold text-gray-900 dark:text-white">Найближчі події</h2>
-        <a href="{{ route('schedule') }}" class="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 font-medium">Всі</a>
+        <h2 class="font-semibold text-gray-900 dark:text-white">{{ __('app.upcoming_events_title') }}</h2>
+        <a href="{{ route('schedule') }}" class="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 font-medium">{{ __('app.view_all_short') }}</a>
     </div>
     <div class="divide-y divide-gray-50 dark:divide-gray-700">
         @forelse($upcomingEvents as $event)
@@ -25,7 +25,7 @@
             </div>
             <div class="text-right flex-shrink-0">
                 <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $event->filled_positions_count }}/{{ $event->total_positions_count }}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400">позицій</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.positions_label') }}</p>
             </div>
         </a>
         @empty
@@ -35,7 +35,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                 </svg>
             </div>
-            <p class="text-gray-500 dark:text-gray-400 text-sm">Немає запланованих подій</p>
+            <p class="text-gray-500 dark:text-gray-400 text-sm">{{ __('app.no_planned_events_short') }}</p>
         </div>
         @endforelse
     </div>

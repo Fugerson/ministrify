@@ -16,7 +16,7 @@
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
             </button>
             <button @click="goToday()" class="px-2 py-1 text-xs font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors">
-                Сьогодні
+                {{ __('app.today_btn') }}
             </button>
             <button @click="nextMonth()" class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 transition-colors">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
@@ -26,7 +26,7 @@
 
     {{-- Day of week headers (Monday first) --}}
     <div class="grid grid-cols-7 mb-1">
-        <template x-for="day in ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд']" :key="day">
+        <template x-for="day in [@json(__('app.day_mon')), @json(__('app.day_tue')), @json(__('app.day_wed')), @json(__('app.day_thu')), @json(__('app.day_fri')), @json(__('app.day_sat')), @json(__('app.day_sun'))]" :key="day">
             <div class="text-center text-xs font-medium text-gray-400 dark:text-gray-500 py-1" x-text="day"></div>
         </template>
     </div>
@@ -84,7 +84,7 @@
 @push('scripts')
 <script>
 function miniCalendar() {
-    const monthNames = ['Січень','Лютий','Березень','Квітень','Травень','Червень','Липень','Серпень','Вересень','Жовтень','Листопад','Грудень'];
+    const monthNames = [@json(__('app.january')),@json(__('app.february')),@json(__('app.march')),@json(__('app.april')),@json(__('app.may')),@json(__('app.june')),@json(__('app.july')),@json(__('app.august')),@json(__('app.september')),@json(__('app.october')),@json(__('app.november')),@json(__('app.december'))];
     const today = new Date();
     const initialEvents = @json($calendarEvents ?? []);
 

@@ -7,7 +7,7 @@
             </svg>
         </div>
         <div class="flex-1">
-            <h3 class="font-semibold text-gray-900 dark:text-white">Очікує підтвердження</h3>
+            <h3 class="font-semibold text-gray-900 dark:text-white">{{ __('app.awaiting_confirmation') }}</h3>
 
             {{-- Pending Users (admin only) --}}
             @if(!empty($pendingUsers) && count($pendingUsers) > 0)
@@ -15,7 +15,7 @@
                 <svg class="w-4 h-4 inline -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
                 </svg>
-                {{ count($pendingUsers) }} {{ count($pendingUsers) === 1 ? 'користувач очікує' : 'користувачів очікують' }} на роль
+                {{ trans_choice('app.n_users_awaiting_role', count($pendingUsers), ['count' => count($pendingUsers)]) }}
             </p>
             <div class="mt-2 space-y-2">
                 @foreach($pendingUsers as $pendingUser)
@@ -37,7 +37,7 @@
 
             {{-- Pending Assignments --}}
             @if(count($pendingAssignments) > 0)
-            <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">У вас {{ count($pendingAssignments) }} призначень</p>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">{{ __('app.you_have_n_assignments', ['count' => count($pendingAssignments)]) }}</p>
             <div class="mt-3 space-y-2">
                 @foreach($pendingAssignments->take(3) as $assignment)
                 <div class="bg-white dark:bg-gray-800 rounded-xl p-3 flex items-center justify-between gap-3" x-data="{ responding: false }">
@@ -67,11 +67,11 @@
             </div>
             @if($pendingAssignments->count() > 3)
                 <a href="{{ route('my-schedule') }}" class="block mt-2 text-center text-xs text-primary-600 dark:text-primary-400 hover:underline">
-                    Всі призначення ({{ $pendingAssignments->count() }})
+                    {{ __('app.all_assignments', ['count' => $pendingAssignments->count()]) }}
                 </a>
             @endif
             @elseif(empty($pendingUsers) || count($pendingUsers) === 0)
-            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Немає призначень для підтвердження</p>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ __('app.no_assignments_to_confirm') }}</p>
             @endif
         </div>
     </div>

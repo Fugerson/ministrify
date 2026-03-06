@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Редагувати групу')
+@section('title', __('app.edit_group'))
 
 @section('content')
 <div class="max-w-2xl" x-data="groupEditForm()">
@@ -17,7 +17,7 @@
             </div>
 
             <div>
-                <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Опис</label>
+                <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.description') }}</label>
                 <textarea name="description" id="description" rows="3"
                           class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">{{ old('description', $group->description) }}</textarea>
             </div>
@@ -35,30 +35,30 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
-                    <label for="meeting_day" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">День зустрічі</label>
+                    <label for="meeting_day" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.group_meeting_day') }}</label>
                     <select name="meeting_day" id="meeting_day"
                             class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
-                        <option value="">Не вказано</option>
-                        @foreach(['monday' => 'Понеділок', 'tuesday' => 'Вівторок', 'wednesday' => 'Середа', 'thursday' => 'Четвер', 'friday' => "П'ятниця", 'saturday' => 'Субота', 'sunday' => 'Неділя'] as $val => $label)
+                        <option value="">{{ __('app.group_not_specified') }}</option>
+                        @foreach(['monday' => __('app.monday'), 'tuesday' => __('app.tuesday'), 'wednesday' => __('app.wednesday'), 'thursday' => __('app.thursday'), 'friday' => __('app.friday'), 'saturday' => __('app.saturday'), 'sunday' => __('app.sunday')] as $val => $label)
                             <option value="{{ $val }}" {{ old('meeting_day', $group->meeting_day) == $val ? 'selected' : '' }}>{{ $label }}</option>
                         @endforeach
                     </select>
                 </div>
                 <div>
-                    <label for="meeting_time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Час зустрічі</label>
+                    <label for="meeting_time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.group_meeting_time') }}</label>
                     <input type="time" name="meeting_time" id="meeting_time" value="{{ old('meeting_time', $group->meeting_time?->format('H:i')) }}"
                            class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
                 </div>
                 <div>
-                    <label for="location" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Місце зустрічі</label>
+                    <label for="location" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.group_meeting_location') }}</label>
                     <input type="text" name="location" id="location" value="{{ old('location', $group->location) }}"
-                           placeholder="Адреса або кімната"
+                           placeholder="{{ __('app.group_location_placeholder') }}"
                            class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
                 </div>
             </div>
 
             <div>
-                <label for="status" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Статус</label>
+                <label for="status" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.status') }}</label>
                 <select name="status" id="status"
                         class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
                     @foreach(\App\Models\Group::getStatuses() as $value => $label)

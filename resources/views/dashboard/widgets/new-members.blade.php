@@ -9,8 +9,8 @@
                     </svg>
                 </div>
                 <div>
-                    <h3 class="font-semibold text-gray-900 dark:text-white">Нові учасники</h3>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Додані цього місяця</p>
+                    <h3 class="font-semibold text-gray-900 dark:text-white">{{ __('app.new_members_title') }}</h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.added_this_month') }}</p>
                 </div>
             </div>
             @if($newMembers->count() > 0)
@@ -53,7 +53,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
                 </svg>
             </div>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Немає нових учасників цього місяця</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.no_new_members_this_month') }}</p>
         </div>
     @endif
 </div>

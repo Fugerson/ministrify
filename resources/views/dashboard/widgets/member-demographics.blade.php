@@ -7,15 +7,15 @@
             </svg>
         </div>
         <div>
-            <h3 class="font-semibold text-gray-900 dark:text-white">Демографія</h3>
-            <p class="text-xs text-gray-500 dark:text-gray-400">{{ $demographics['total'] ?? 0 }} учасників, {{ $demographics['with_birthdate'] ?? 0 }} з датою народження</p>
+            <h3 class="font-semibold text-gray-900 dark:text-white">{{ __('app.demographics_title') }}</h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.members_with_birthdate', ['total' => $demographics['total'] ?? 0, 'with_birthdate' => $demographics['with_birthdate'] ?? 0]) }}</p>
         </div>
     </div>
 
     @if(!empty($demographics))
     {{-- Gender Split --}}
     <div class="mb-5">
-        <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Стать</p>
+        <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">{{ __('app.gender_label') }}</p>
         @php
             $genderTotal = ($demographics['male'] ?? 0) + ($demographics['female'] ?? 0) + ($demographics['unknown_gender'] ?? 0);
             $malePercent = $genderTotal > 0 ? round($demographics['male'] / $genderTotal * 100) : 0;
@@ -36,16 +36,16 @@
         <div class="flex items-center gap-4 mt-2 text-xs">
             <div class="flex items-center gap-1.5">
                 <span class="w-2.5 h-2.5 rounded-full bg-blue-500 dark:bg-blue-400"></span>
-                <span class="text-gray-600 dark:text-gray-400">Чоловіки {{ $demographics['male'] ?? 0 }} ({{ $malePercent }}%)</span>
+                <span class="text-gray-600 dark:text-gray-400">{{ __('app.male_count', ['count' => $demographics['male'] ?? 0, 'percent' => $malePercent]) }}</span>
             </div>
             <div class="flex items-center gap-1.5">
                 <span class="w-2.5 h-2.5 rounded-full bg-pink-500 dark:bg-pink-400"></span>
-                <span class="text-gray-600 dark:text-gray-400">Жінки {{ $demographics['female'] ?? 0 }} ({{ $femalePercent }}%)</span>
+                <span class="text-gray-600 dark:text-gray-400">{{ __('app.female_count', ['count' => $demographics['female'] ?? 0, 'percent' => $femalePercent]) }}</span>
             </div>
             @if(($demographics['unknown_gender'] ?? 0) > 0)
             <div class="flex items-center gap-1.5">
                 <span class="w-2.5 h-2.5 rounded-full bg-gray-300 dark:bg-gray-500"></span>
-                <span class="text-gray-600 dark:text-gray-400">Невідомо {{ $demographics['unknown_gender'] ?? 0 }}</span>
+                <span class="text-gray-600 dark:text-gray-400">{{ __('app.unknown_gender', ['count' => $demographics['unknown_gender'] ?? 0]) }}</span>
             </div>
             @endif
         </div>
@@ -53,16 +53,16 @@
 
     {{-- Age Groups --}}
     <div>
-        <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Вікові групи</p>
+        <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">{{ __('app.age_groups_label') }}</p>
         @php
             $ageGroups = $demographics['age_groups'] ?? [];
             $maxAge = count($ageGroups) > 0 ? max(array_values($ageGroups)) : 0;
             $ageColors = [
-                'children' => ['bg' => 'bg-amber-400 dark:bg-amber-500', 'text' => 'text-amber-600 dark:text-amber-400', 'label' => 'Діти (0-12)'],
-                'teens' => ['bg' => 'bg-purple-400 dark:bg-purple-500', 'text' => 'text-purple-600 dark:text-purple-400', 'label' => 'Підлітки (13-17)'],
-                'youth' => ['bg' => 'bg-blue-400 dark:bg-blue-500', 'text' => 'text-blue-600 dark:text-blue-400', 'label' => 'Молодь (18-35)'],
-                'adults' => ['bg' => 'bg-green-400 dark:bg-green-500', 'text' => 'text-green-600 dark:text-green-400', 'label' => 'Дорослі (36-59)'],
-                'seniors' => ['bg' => 'bg-gray-400 dark:bg-gray-500', 'text' => 'text-gray-600 dark:text-gray-400', 'label' => 'Старші (60+)'],
+                'children' => ['bg' => 'bg-amber-400 dark:bg-amber-500', 'text' => 'text-amber-600 dark:text-amber-400', 'label' => __('app.children_age')],
+                'teens' => ['bg' => 'bg-purple-400 dark:bg-purple-500', 'text' => 'text-purple-600 dark:text-purple-400', 'label' => __('app.teens_age')],
+                'youth' => ['bg' => 'bg-blue-400 dark:bg-blue-500', 'text' => 'text-blue-600 dark:text-blue-400', 'label' => __('app.youth_age')],
+                'adults' => ['bg' => 'bg-green-400 dark:bg-green-500', 'text' => 'text-green-600 dark:text-green-400', 'label' => __('app.adults_age')],
+                'seniors' => ['bg' => 'bg-gray-400 dark:bg-gray-500', 'text' => 'text-gray-600 dark:text-gray-400', 'label' => __('app.seniors_age')],
             ];
         @endphp
         <div class="space-y-3">
@@ -84,6 +84,6 @@
         </div>
     </div>
     @else
-    <p class="text-sm text-gray-400 dark:text-gray-500 text-center py-4">Немає демографічних даних</p>
+    <p class="text-sm text-gray-400 dark:text-gray-500 text-center py-4">{{ __('app.no_demographic_data') }}</p>
     @endif
 </div>

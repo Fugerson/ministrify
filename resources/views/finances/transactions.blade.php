@@ -43,7 +43,7 @@
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
         </template>
-        <span x-text="exporting ? 'Генерація...' : 'CSV'"></span>
+        <span x-text="exporting ? '{{ __('app.generating') }}' : 'CSV'"></span>
     </button>
 </div>
 
@@ -73,7 +73,7 @@ function exportButton() {
                 a.remove();
             } catch (error) {
                 console.error('Export error:', error);
-                alert('Помилка експорту');
+                alert('{{ __('app.export_error') }}');
             } finally {
                 this.exporting = false;
             }
@@ -112,14 +112,14 @@ function exportButton() {
 
             <!-- Search -->
             <div class="flex-1 min-w-[200px]">
-                <input type="text" x-model.debounce.300ms="filters.search" placeholder="Пошук..."
+                <input type="text" x-model.debounce.300ms="filters.search" placeholder="{{ __('app.search') }}..."
                        class="w-full px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
             </div>
 
             <!-- Category filter -->
             <select x-model="filters.category_id"
                     class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
-                <option value="">Всі категорії</option>
+                <option value="">{{ __('app.all_categories') }}</option>
                 @foreach($categories as $cat)
                     <option value="{{ $cat->id }}">{{ $cat->icon ?? '' }} {{ $cat->name }}</option>
                 @endforeach
@@ -128,7 +128,7 @@ function exportButton() {
             <!-- Ministry filter -->
             <select x-model="filters.ministry_id"
                     class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
-                <option value="">Всі команди</option>
+                <option value="">{{ __('app.all_teams_filter') }}</option>
                 @foreach($ministries as $ministry)
                     <option value="{{ $ministry->id }}">{{ $ministry->name }}</option>
                 @endforeach
@@ -137,7 +137,7 @@ function exportButton() {
             <!-- Reset -->
             <button x-show="hasActiveFilters" @click="resetFilters()" x-cloak
                     class="px-3 py-1.5 text-sm text-gray-500 hover:text-red-500 transition-colors">
-                Скинути
+                {{ __('app.reset_filters') }}
             </button>
         </div>
     </div>
@@ -146,20 +146,20 @@ function exportButton() {
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
         <!-- Balance Before (all / income) -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4" x-show="subFilter !== 'out'">
-            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase">Баланс на початок</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase">{{ __('app.start_balance') }}</p>
             <p class="text-xl font-bold" :class="periodStats.balanceBefore >= 0 ? 'text-gray-900 dark:text-white' : 'text-red-600'"
                x-text="formatNumber(periodStats.balanceBefore) + ' ₴'"></p>
         </div>
         <!-- Income -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
-            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase" x-text="subFilter === 'out' ? 'Всього витрат' : 'Надходження'"></p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase" x-text="subFilter === 'out' ? '{{ __('app.total_expenses') }}' : '{{ __('app.income_action') }}'"></p>
             <p class="text-xl font-bold"
                :class="subFilter === 'out' ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'"
                x-text="subFilter === 'out' ? ('-' + formatNumber(periodStats.expense) + ' ₴') : ('+' + formatNumber(periodStats.income) + ' ₴')"></p>
         </div>
         <!-- Expense (only when not in expense-only mode) -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4" x-show="subFilter !== 'in' && subFilter !== 'out'">
-            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase">Витрати</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase">{{ __('app.expenses') }}</p>
             <p class="text-xl font-bold text-red-600 dark:text-red-400" x-text="'-' + formatNumber(periodStats.expense) + ' ₴'"></p>
         </div>
         <!-- Balance After -->

@@ -2,12 +2,12 @@
 <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
     <div class="px-4 lg:px-5 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
         <div class="flex items-center gap-2">
-            <h2 class="font-semibold text-gray-900 dark:text-white">Розклад служителів</h2>
+            <h2 class="font-semibold text-gray-900 dark:text-white">{{ __('app.volunteer_schedule') }}</h2>
             @if($volunteerSchedule->count() > 0)
             <span class="text-xs font-medium text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/50 px-2 py-0.5 rounded-lg">{{ $volunteerSchedule->count() }}</span>
             @endif
         </div>
-        <span class="text-xs text-gray-500 dark:text-gray-400">Наступні 7 днів</span>
+        <span class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.next_7_days') }}</span>
     </div>
     <div class="divide-y divide-gray-50 dark:divide-gray-700">
         @forelse($volunteerSchedule->filter(fn($a) => $a->event)->groupBy(fn($a) => $a->event->date->format('Y-m-d')) as $date => $assignments)
@@ -37,7 +37,7 @@
                     <div class="flex-1 min-w-0">
                         <p class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ $assignment->event->title }}</p>
                         <div class="flex items-center gap-2 mt-0.5">
-                            <span class="text-xs text-gray-500 dark:text-gray-400">{{ $assignment->event->time?->format('H:i') ?? 'Весь день' }}</span>
+                            <span class="text-xs text-gray-500 dark:text-gray-400">{{ $assignment->event->time?->format('H:i') ?? '{{ __('app.all_day_event') }}' }}</span>
                             <span class="text-xs text-gray-300 dark:text-gray-600">&bull;</span>
                             <span class="text-xs text-gray-500 dark:text-gray-400">{{ $assignment->position?->name }}</span>
                         </div>
@@ -52,7 +52,7 @@
 
                     {{-- Status badge --}}
                     <span class="text-xs px-2 py-0.5 rounded-full flex-shrink-0 {{ $assignment->status === 'confirmed' ? 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400' : 'bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400' }}">
-                        {{ $assignment->status === 'confirmed' ? 'Підтв.' : 'Очікує' }}
+                        {{ $assignment->status === 'confirmed' ? __('app.status_confirmed_short') : __('app.status_pending_short') }}
                     </span>
                 </a>
                 @endforeach
@@ -65,7 +65,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                 </svg>
             </div>
-            <p class="text-gray-500 dark:text-gray-400 text-sm">Немає призначень на найближчі 7 днів</p>
+            <p class="text-gray-500 dark:text-gray-400 text-sm">{{ __('app.no_assignments_7_days') }}</p>
         </div>
         @endforelse
     </div>

@@ -146,7 +146,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
 
-    <title>{{ config('app.name', 'Ministrify') }} - @yield('title', __('Головна'))</title>
+    <title>{{ config('app.name', 'Ministrify') }} - @yield('title', __('app.home'))</title>
 
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700&display=swap" rel="stylesheet" />
@@ -887,21 +887,21 @@
                     <span class="font-bold text-gray-900 dark:text-white">{{ $currentChurch->name ?? 'Ministrify' }}</span>
                 </a>
                 <div class="flex items-center gap-1 flex-wrap">
-                    <a wire:navigate href="{{ route('dashboard') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('dashboard') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('Головна') }}</a>
+                    <a wire:navigate href="{{ route('dashboard') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('dashboard') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('app.home') }}</a>
                     @hasChurchRole
-                    @if(auth()->user()->canView('people'))<a wire:navigate href="{{ route('people.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('people.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('Люди') }}</a>@endif
-                    @if(auth()->user()->canView('groups'))<a wire:navigate href="{{ route('groups.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('groups.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('Групи') }}</a>@endif
-                    @if(auth()->user()->canView('ministries'))<a wire:navigate href="{{ route('ministries.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('ministries.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('Команди') }}</a>@endif
-                    @if(auth()->user()->canView('events'))<a wire:navigate href="{{ route('schedule') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('schedule') || request()->routeIs('events.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('Розклад') }}</a>@endif
+                    @if(auth()->user()->canView('people'))<a wire:navigate href="{{ route('people.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('people.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('app.people') }}</a>@endif
+                    @if(auth()->user()->canView('groups'))<a wire:navigate href="{{ route('groups.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('groups.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('app.groups') }}</a>@endif
+                    @if(auth()->user()->canView('ministries'))<a wire:navigate href="{{ route('ministries.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('ministries.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('ui.teams') }}</a>@endif
+                    @if(auth()->user()->canView('events'))<a wire:navigate href="{{ route('schedule') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('schedule') || request()->routeIs('events.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('app.schedule') }}</a>@endif
                     @if(auth()->user()->canView('events'))<a wire:navigate href="{{ route('service-planning') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('service-planning') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('app.service_planning') }}</a>@endif
-                    @if(auth()->user()->canView('finances'))<a wire:navigate href="{{ route('finances.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('finances.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('Фінанси') }}</a>@endif
-                    @if(auth()->user()->canView('announcements'))<a wire:navigate href="{{ route('announcements.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('announcements.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('Комунікації') }}</a>@endif
-                    @if(auth()->user()->canView('reports'))<a wire:navigate href="{{ route('reports.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('reports.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('Звіти') }}</a>@endif
-                    @if(auth()->user()->canView('resources'))<a wire:navigate href="{{ route('resources.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('resources.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('Ресурси') }}</a>@endif
-                    @if(auth()->user()->canView('boards'))<a wire:navigate href="{{ route('boards.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('boards.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('Завдання') }}</a>@endif
+                    @if(auth()->user()->canView('finances'))<a wire:navigate href="{{ route('finances.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('finances.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('app.finances') }}</a>@endif
+                    @if(auth()->user()->canView('announcements'))<a wire:navigate href="{{ route('announcements.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('announcements.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('app.communications') }}</a>@endif
+                    @if(auth()->user()->canView('reports'))<a wire:navigate href="{{ route('reports.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('reports.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('app.reports') }}</a>@endif
+                    @if(auth()->user()->canView('resources'))<a wire:navigate href="{{ route('resources.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('resources.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('app.resources') }}</a>@endif
+                    @if(auth()->user()->canView('boards'))<a wire:navigate href="{{ route('boards.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('boards.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('app.tasks') }}</a>@endif
                     @endhasChurchRole
                     @if(auth()->user()->canView('settings'))
-                    <a wire:navigate href="{{ route('settings.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('settings.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('Налаштування') }}</a>
+                    <a wire:navigate href="{{ route('settings.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('settings.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('app.settings') }}</a>
                     @endif
                 </div>
             </div>
@@ -918,77 +918,77 @@
         <nav class="bottom-dock-nav hidden lg:flex fixed bottom-0 left-0 right-0 z-40 h-16 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 items-center justify-center gap-1">
             <a wire:navigate href="{{ route('dashboard') }}" class="flex flex-col items-center px-2 py-2 rounded-xl {{ request()->routeIs('dashboard') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-600' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-                <span class="text-[10px] mt-0.5">{{ __('Головна') }}</span>
+                <span class="text-[10px] mt-0.5">{{ __('app.home') }}</span>
             </a>
             @hasChurchRole
             @if(auth()->user()->canView('people'))
             <a wire:navigate href="{{ route('people.index') }}" class="flex flex-col items-center px-2 py-2 rounded-xl {{ request()->routeIs('people.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-600' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clip-rule="evenodd"/></svg>
-                <span class="text-[10px] mt-0.5">{{ __('Люди') }}</span>
+                <span class="text-[10px] mt-0.5">{{ __('app.people') }}</span>
             </a>
             @endif
             @if(auth()->user()->canView('groups'))
             <a wire:navigate href="{{ route('groups.index') }}" class="flex flex-col items-center px-2 py-2 rounded-xl {{ request()->routeIs('groups.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-600' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                <span class="text-[10px] mt-0.5">{{ __('Групи') }}</span>
+                <span class="text-[10px] mt-0.5">{{ __('app.groups') }}</span>
             </a>
             @endif
             @if(auth()->user()->canView('ministries'))
             <a wire:navigate href="{{ route('ministries.index') }}" class="flex flex-col items-center px-2 py-2 rounded-xl {{ request()->routeIs('ministries.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-600' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                <span class="text-[10px] mt-0.5">{{ __('Команди') }}</span>
+                <span class="text-[10px] mt-0.5">{{ __('ui.teams') }}</span>
             </a>
             @endif
             @if(auth()->user()->canView('events'))
             <a wire:navigate href="{{ route('schedule') }}" class="flex flex-col items-center px-2 py-2 rounded-xl {{ request()->routeIs('schedule') || request()->routeIs('events.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-600' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                <span class="text-[10px] mt-0.5">{{ __('Розклад') }}</span>
+                <span class="text-[10px] mt-0.5">{{ __('app.schedule') }}</span>
             </a>
             @endif
             @if(auth()->user()->canView('finances'))
             <a wire:navigate href="{{ route('finances.index') }}" class="flex flex-col items-center px-2 py-2 rounded-xl {{ request()->routeIs('finances.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-600' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                <span class="text-[10px] mt-0.5">{{ __('Фінанси') }}</span>
+                <span class="text-[10px] mt-0.5">{{ __('app.finances') }}</span>
             </a>
             @endif
             @if(auth()->user()->canView('announcements'))
             <a wire:navigate href="{{ route('announcements.index') }}" class="flex flex-col items-center px-2 py-2 rounded-xl {{ request()->routeIs('announcements.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-600' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
-                <span class="text-[10px] mt-0.5">{{ __('Комунікації') }}</span>
+                <span class="text-[10px] mt-0.5">{{ __('app.communications') }}</span>
             </a>
             @endif
             @if(auth()->user()->canView('reports'))
             <a wire:navigate href="{{ route('reports.index') }}" class="flex flex-col items-center px-2 py-2 rounded-xl {{ request()->routeIs('reports.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-600' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                <span class="text-[10px] mt-0.5">{{ __('Звіти') }}</span>
+                <span class="text-[10px] mt-0.5">{{ __('app.reports') }}</span>
             </a>
             @endif
             @if(auth()->user()->canView('resources'))
             <a wire:navigate href="{{ route('resources.index') }}" class="flex flex-col items-center px-2 py-2 rounded-xl {{ request()->routeIs('resources.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-600' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
-                <span class="text-[10px] mt-0.5">{{ __('Ресурси') }}</span>
+                <span class="text-[10px] mt-0.5">{{ __('app.resources') }}</span>
             </a>
             @endif
             @if(auth()->user()->canView('boards'))
             <a wire:navigate href="{{ route('boards.index') }}" class="flex flex-col items-center px-2 py-2 rounded-xl {{ request()->routeIs('boards.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-600' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-                <span class="text-[10px] mt-0.5">{{ __('Завдання') }}</span>
+                <span class="text-[10px] mt-0.5">{{ __('app.tasks') }}</span>
             </a>
             @endif
             @endhasChurchRole
             @if(auth()->user()->canView('settings'))
             <a wire:navigate href="{{ route('settings.index') }}" class="flex flex-col items-center px-2 py-2 rounded-xl {{ request()->routeIs('settings.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-600' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                <span class="text-[10px] mt-0.5">{{ __('Налашт.') }}</span>
+                <span class="text-[10px] mt-0.5">{{ __('app.settings_short') }}</span>
             </a>
             @endif
             <button @click="searchOpen = true" class="flex flex-col items-center px-2 py-2 rounded-xl text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                <span class="text-[10px] mt-0.5">{{ __('Пошук') }}</span>
+                <span class="text-[10px] mt-0.5">{{ __('app.search') }}</span>
             </button>
             <a wire:navigate href="{{ route('my-profile') }}" class="flex flex-col items-center px-2 py-2 rounded-xl text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700">
                 <x-user-avatar size="sm" />
-                <span class="text-[10px] mt-0.5">{{ __('Профіль') }}</span>
+                <span class="text-[10px] mt-0.5">{{ __('app.profile') }}</span>
             </a>
         </nav>
         @endif
@@ -1002,7 +1002,7 @@
             <!-- Toggle button on sidebar edge -->
             <button @click="collapsed = !collapsed"
                     class="absolute top-20 z-50 w-6 h-6 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-full shadow-md flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:border-primary-400 dark:hover:border-primary-500 hover:shadow-lg transition-all cursor-pointer {{ $menuPosition === 'right' ? '-left-3' : '-right-3' }}"
-                    :title="collapsed ? '{{ __("Розгорнути") }}' : '{{ __("Згорнути") }}'">
+                    :title="collapsed ? '{{ __("app.expand") }}' : '{{ __("app.collapse") }}'">
                 @if($menuPosition === 'right')
                 <svg x-show="!collapsed" class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                 <svg x-show="collapsed" x-cloak class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
@@ -1024,43 +1024,43 @@
             </div>
 
             <nav id="sidebar-nav" class="flex-1 py-4 space-y-1 overflow-y-auto no-scrollbar" :class="collapsed ? 'px-2' : 'px-4'">
-                <a wire:navigate href="{{ route('dashboard') }}" id="nav-dashboard" class="flex items-center py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('dashboard') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :class="collapsed ? 'justify-center px-2' : 'px-3'" :title="collapsed ? '{{ __("Головна") }}' : ''">
+                <a wire:navigate href="{{ route('dashboard') }}" id="nav-dashboard" class="flex items-center py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('dashboard') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :class="collapsed ? 'justify-center px-2' : 'px-3'" :title="collapsed ? '{{ __("app.home") }}' : ''">
                     <svg class="w-5 h-5 flex-shrink-0" :class="collapsed ? '' : 'mr-3'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
                     </svg>
-                    <span x-show="!collapsed" x-cloak>{{ __('Головна') }}</span>
+                    <span x-show="!collapsed" x-cloak>{{ __('app.home') }}</span>
                 </a>
                 @hasChurchRole
                 @if(auth()->user()->canView('people'))
-                <a wire:navigate href="{{ route('people.index') }}" id="nav-people" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('people.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("Люди") }}' : ''">
+                <a wire:navigate href="{{ route('people.index') }}" id="nav-people" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('people.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("app.people") }}' : ''">
                     <svg class="w-5 h-5 sidebar-icon flex-shrink-0" :class="collapsed ? '' : 'mr-3'" fill="currentColor" viewBox="0 0 24 24">
                         <path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clip-rule="evenodd"/>
                     </svg>
-                    <span x-show="!collapsed" class="sidebar-text">{{ __('Люди') }}</span>
+                    <span x-show="!collapsed" class="sidebar-text">{{ __('app.people') }}</span>
                 </a>
                 @endif
                 @if(auth()->user()->canView('groups'))
-                <a wire:navigate href="{{ route('groups.index') }}" id="nav-groups" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('groups.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("Групи") }}' : ''">
+                <a wire:navigate href="{{ route('groups.index') }}" id="nav-groups" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('groups.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("app.groups") }}' : ''">
                     <svg class="w-5 h-5 sidebar-icon flex-shrink-0" :class="collapsed ? '' : 'mr-3'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
                     </svg>
-                    <span x-show="!collapsed" class="sidebar-text">{{ __('Групи') }}</span>
+                    <span x-show="!collapsed" class="sidebar-text">{{ __('app.groups') }}</span>
                 </a>
                 @endif
                 @if(auth()->user()->canView('ministries'))
-                <a wire:navigate href="{{ route('ministries.index') }}" id="nav-ministries" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('ministries.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("Команди") }}' : ''">
+                <a wire:navigate href="{{ route('ministries.index') }}" id="nav-ministries" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('ministries.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("ui.teams") }}' : ''">
                     <svg class="w-5 h-5 sidebar-icon flex-shrink-0" :class="collapsed ? '' : 'mr-3'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                     </svg>
-                    <span x-show="!collapsed" class="sidebar-text">{{ __('Команди') }}</span>
+                    <span x-show="!collapsed" class="sidebar-text">{{ __('ui.teams') }}</span>
                 </a>
                 @endif
                 @if(auth()->user()->canView('events'))
-                <a wire:navigate href="{{ route('schedule') }}" id="nav-schedule" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('schedule') || request()->routeIs('events.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("Розклад") }}' : ''">
+                <a wire:navigate href="{{ route('schedule') }}" id="nav-schedule" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('schedule') || request()->routeIs('events.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("app.schedule") }}' : ''">
                     <svg class="w-5 h-5 sidebar-icon flex-shrink-0" :class="collapsed ? '' : 'mr-3'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                     </svg>
-                    <span x-show="!collapsed" class="sidebar-text">{{ __('Розклад') }}</span>
+                    <span x-show="!collapsed" class="sidebar-text">{{ __('app.schedule') }}</span>
                 </a>
                 @endif
                 @if(auth()->user()->canView('events'))
@@ -1075,53 +1075,53 @@
                 @hasChurchRole
                 @if(auth()->user()->canView('announcements') && auth()->user()->church_id && auth()->user()->churchRole)
                 <div x-data="pmBadge()" x-init="startPolling()" @pm-read.window="fetchCount()" class="relative">
-                    <a wire:navigate href="{{ route('announcements.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('announcements.*') || request()->routeIs('pm.*') || request()->routeIs('messages.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("Комунікації") }}' : ''">
+                    <a wire:navigate href="{{ route('announcements.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('announcements.*') || request()->routeIs('pm.*') || request()->routeIs('messages.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("app.communications") }}' : ''">
                         <svg class="w-5 h-5 sidebar-icon flex-shrink-0" :class="collapsed ? '' : 'mr-3'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
                         </svg>
-                        <span x-show="!collapsed" class="sidebar-text flex-1">{{ __('Комунікації') }}</span>
+                        <span x-show="!collapsed" class="sidebar-text flex-1">{{ __('app.communications') }}</span>
                         <span x-cloak x-show="$store.pmCount > 0" x-text="$store.pmCount > 99 ? '99+' : $store.pmCount" class="sidebar-badge px-2 py-0.5 text-xs font-bold bg-red-500 text-white rounded-full"></span>
                     </a>
                 </div>
                 @elseif(auth()->user()->canView('announcements'))
-                <a wire:navigate href="{{ route('announcements.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('announcements.*') || request()->routeIs('pm.*') || request()->routeIs('messages.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("Комунікації") }}' : ''">
+                <a wire:navigate href="{{ route('announcements.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('announcements.*') || request()->routeIs('pm.*') || request()->routeIs('messages.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("app.communications") }}' : ''">
                     <svg class="w-5 h-5 sidebar-icon flex-shrink-0" :class="collapsed ? '' : 'mr-3'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
                     </svg>
-                    <span x-show="!collapsed" class="sidebar-text">{{ __('Комунікації') }}</span>
+                    <span x-show="!collapsed" class="sidebar-text">{{ __('app.communications') }}</span>
                 </a>
                 @endif
                 @endhasChurchRole
                 @if(auth()->user()->canView('finances'))
-                <a wire:navigate href="{{ route('finances.index') }}" id="nav-finances" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('finances.*') || request()->routeIs('expenses.*') || request()->routeIs('donations.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("Фінанси") }}' : ''">
+                <a wire:navigate href="{{ route('finances.index') }}" id="nav-finances" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('finances.*') || request()->routeIs('expenses.*') || request()->routeIs('donations.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("app.finances") }}' : ''">
                     <svg class="w-5 h-5 sidebar-icon flex-shrink-0" :class="collapsed ? '' : 'mr-3'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                     </svg>
-                    <span x-show="!collapsed" class="sidebar-text">{{ __('Фінанси') }}</span>
+                    <span x-show="!collapsed" class="sidebar-text">{{ __('app.finances') }}</span>
                 </a>
                 @endif
                 @if(auth()->user()->canView('reports'))
-                <a wire:navigate href="{{ route('reports.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('reports.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("Звіти") }}' : ''">
+                <a wire:navigate href="{{ route('reports.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('reports.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("app.reports") }}' : ''">
                     <svg class="w-5 h-5 sidebar-icon flex-shrink-0" :class="collapsed ? '' : 'mr-3'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                     </svg>
-                    <span x-show="!collapsed" class="sidebar-text">{{ __('Звіти') }}</span>
+                    <span x-show="!collapsed" class="sidebar-text">{{ __('app.reports') }}</span>
                 </a>
                 @endif
                 @if(auth()->user()->canView('resources'))
-                <a wire:navigate href="{{ route('resources.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('resources.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("Ресурси") }}' : ''">
+                <a wire:navigate href="{{ route('resources.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('resources.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("app.resources") }}' : ''">
                     <svg class="w-5 h-5 sidebar-icon flex-shrink-0" :class="collapsed ? '' : 'mr-3'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
                     </svg>
-                    <span x-show="!collapsed" class="sidebar-text">{{ __('Ресурси') }}</span>
+                    <span x-show="!collapsed" class="sidebar-text">{{ __('app.resources') }}</span>
                 </a>
                 @endif
                 @if(auth()->user()->canView('boards'))
-                <a wire:navigate href="{{ route('boards.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('boards.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("Завдання") }}' : ''">
+                <a wire:navigate href="{{ route('boards.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('boards.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("app.tasks") }}' : ''">
                     <svg class="w-5 h-5 sidebar-icon flex-shrink-0" :class="collapsed ? '' : 'mr-3'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
                     </svg>
-                    <span x-show="!collapsed" class="sidebar-text">{{ __('Завдання') }}</span>
+                    <span x-show="!collapsed" class="sidebar-text">{{ __('app.tasks') }}</span>
                 </a>
                 @endif
                 @hasChurchRole
@@ -1133,8 +1133,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
                         <div>
-                            <p class="text-sm font-medium text-amber-800 dark:text-amber-200">{{ __('Очікування підтвердження') }}</p>
-                            <p class="text-xs text-amber-600 dark:text-amber-400 mt-1">{{ __('Адміністратор має надати вам доступ до системи.') }}</p>
+                            <p class="text-sm font-medium text-amber-800 dark:text-amber-200">{{ __('app.pending_confirmation') }}</p>
+                            <p class="text-xs text-amber-600 dark:text-amber-400 mt-1">{{ __('app.admin_grant_access') }}</p>
                         </div>
                     </div>
                 </div>
@@ -1142,23 +1142,23 @@
 
                 @if(auth()->user()->canView('settings'))
                 <div class="pt-4 mt-4 border-t border-gray-200 dark:border-gray-700" x-show="!collapsed">
-                    <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider sidebar-divider-text">{{ __('Адміністрування') }}</p>
+                    <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider sidebar-divider-text">{{ __('app.administration') }}</p>
                 </div>
                 <div x-show="collapsed" class="pt-2 mt-2 border-t border-gray-200 dark:border-gray-700"></div>
-                <a wire:navigate href="{{ route('settings.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('settings.*') || request()->routeIs('website-builder.*') || request()->routeIs('telegram.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("Налаштування") }}' : ''">
+                <a wire:navigate href="{{ route('settings.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('settings.*') || request()->routeIs('website-builder.*') || request()->routeIs('telegram.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("app.settings") }}' : ''">
                     <svg class="w-5 h-5 sidebar-icon flex-shrink-0" :class="collapsed ? '' : 'mr-3'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                     </svg>
-                    <span x-show="!collapsed" class="sidebar-text">{{ __('Налаштування') }}</span>
+                    <span x-show="!collapsed" class="sidebar-text">{{ __('app.settings') }}</span>
                 </a>
                 @endif
 
-                <a wire:navigate href="{{ route('support.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('support.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("Підтримка") }}' : ''">
+                <a wire:navigate href="{{ route('support.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('support.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("app.support") }}' : ''">
                     <svg class="w-5 h-5 sidebar-icon flex-shrink-0" :class="collapsed ? '' : 'mr-3'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/>
                     </svg>
-                    <span x-show="!collapsed" class="sidebar-text">{{ __('Підтримка') }}</span>
+                    <span x-show="!collapsed" class="sidebar-text">{{ __('app.support') }}</span>
                 </a>
 
                 @if(auth()->user()->isSuperAdmin())
@@ -1182,13 +1182,13 @@
                     <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                     </svg>
-                    <span class="truncate">{{ __('Церква') }}: <strong>{{ $currentChurch->name }}</strong></span>
+                    <span class="truncate">{{ __('app.church') }}: <strong>{{ $currentChurch->name }}</strong></span>
                 </div>
                 <div class="flex gap-1">
                     <form method="POST" action="{{ route('system.exit-church') }}" class="flex-1">
                         @csrf
                         <button type="submit" class="w-full px-2 py-1.5 text-xs font-medium text-indigo-700 dark:text-indigo-300 bg-indigo-100 dark:bg-indigo-800/50 hover:bg-indigo-200 dark:hover:bg-indigo-800 rounded-lg transition-colors">
-                            &larr; {{ __('Вийти') }}
+                            &larr; {{ __('app.exit_church') }}
                         </button>
                     </form>
                     <a wire:navigate href="{{ route('system.index') }}" class="px-2 py-1.5 text-xs text-indigo-600 dark:text-indigo-400 bg-indigo-100 dark:bg-indigo-800/50 hover:bg-indigo-200 dark:hover:bg-indigo-800 rounded-lg transition-colors">
@@ -1205,12 +1205,12 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                     </svg>
-                    <span class="truncate">{{ __('Ви увійшли як') }} <strong>{{ auth()->user()->name }}</strong></span>
+                    <span class="truncate">{{ __('app.logged_in_as') }} <strong>{{ auth()->user()->name }}</strong></span>
                 </div>
                 <form method="POST" action="{{ route('stop-impersonating') }}">
                     @csrf
                     <button type="submit" class="w-full px-2 py-1.5 text-xs font-medium text-orange-700 dark:text-orange-300 bg-orange-100 dark:bg-orange-800/50 hover:bg-orange-200 dark:hover:bg-orange-800 rounded-lg transition-colors">
-                        &larr; {{ __('Повернутись') }}
+                        &larr; {{ __('app.return_back') }}
                     </button>
                 </form>
             </div>
@@ -1246,31 +1246,31 @@
             <nav class="flex-1 px-4 py-4 space-y-1 overflow-y-auto">
                 <a wire:navigate href="{{ route('dashboard') }}" @click="sidebarOpen = false" class="flex items-center px-4 py-3 text-base font-medium rounded-xl {{ request()->routeIs('dashboard') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-                    {{ __('Головна') }}
+                    {{ __('app.home') }}
                 </a>
                 @hasChurchRole
                 @if(auth()->user()->canView('people'))
                 <a wire:navigate href="{{ route('people.index') }}" @click="sidebarOpen = false" class="flex items-center px-4 py-3 text-base font-medium rounded-xl {{ request()->routeIs('people.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     <svg class="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clip-rule="evenodd"/></svg>
-                    {{ __('Люди') }}
+                    {{ __('app.people') }}
                 </a>
                 @endif
                 @if(auth()->user()->canView('groups'))
                 <a wire:navigate href="{{ route('groups.index') }}" @click="sidebarOpen = false" class="flex items-center px-4 py-3 text-base font-medium rounded-xl {{ request()->routeIs('groups.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                    {{ __('Групи') }}
+                    {{ __('app.groups') }}
                 </a>
                 @endif
                 @if(auth()->user()->canView('ministries'))
                 <a wire:navigate href="{{ route('ministries.index') }}" @click="sidebarOpen = false" class="flex items-center px-4 py-3 text-base font-medium rounded-xl {{ request()->routeIs('ministries.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                    {{ __('Команди') }}
+                    {{ __('ui.teams') }}
                 </a>
                 @endif
                 @if(auth()->user()->canView('events'))
                 <a wire:navigate href="{{ route('schedule') }}" @click="sidebarOpen = false" class="flex items-center px-4 py-3 text-base font-medium rounded-xl {{ request()->routeIs('schedule') || request()->routeIs('events.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                    {{ __('Розклад') }}
+                    {{ __('app.schedule') }}
                 </a>
                 @endif
                 @if(auth()->user()->canView('events'))
@@ -1286,7 +1286,7 @@
                     <a wire:navigate href="{{ route('announcements.index') }}" @click="sidebarOpen = false" class="flex items-center justify-between px-4 py-3 text-base font-medium rounded-xl {{ request()->routeIs('announcements.*') || request()->routeIs('pm.*') || request()->routeIs('messages.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                         <span class="flex items-center">
                             <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
-                            {{ __('Комунікації') }}
+                            {{ __('app.communications') }}
                         </span>
                         <span x-cloak x-show="$store.pmCount > 0" x-text="$store.pmCount > 99 ? '99+' : $store.pmCount" class="px-2 py-0.5 text-xs font-bold bg-red-500 text-white rounded-full"></span>
                     </a>
@@ -1294,32 +1294,32 @@
                 @elseif(auth()->user()->canView('announcements'))
                 <a wire:navigate href="{{ route('announcements.index') }}" @click="sidebarOpen = false" class="flex items-center px-4 py-3 text-base font-medium rounded-xl {{ request()->routeIs('announcements.*') || request()->routeIs('pm.*') || request()->routeIs('messages.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
-                    {{ __('Комунікації') }}
+                    {{ __('app.communications') }}
                 </a>
                 @endif
                 @endhasChurchRole
                 @if(auth()->user()->canView('finances'))
                 <a wire:navigate href="{{ route('finances.index') }}" @click="sidebarOpen = false" class="flex items-center px-4 py-3 text-base font-medium rounded-xl {{ request()->routeIs('finances.*') || request()->routeIs('expenses.*') || request()->routeIs('donations.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                    {{ __('Фінанси') }}
+                    {{ __('app.finances') }}
                 </a>
                 @endif
                 @if(auth()->user()->canView('reports'))
                 <a wire:navigate href="{{ route('reports.index') }}" @click="sidebarOpen = false" class="flex items-center px-4 py-3 text-base font-medium rounded-xl {{ request()->routeIs('reports.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                    {{ __('Звіти') }}
+                    {{ __('app.reports') }}
                 </a>
                 @endif
                 @if(auth()->user()->canView('resources'))
                 <a wire:navigate href="{{ route('resources.index') }}" @click="sidebarOpen = false" class="flex items-center px-4 py-3 text-base font-medium rounded-xl {{ request()->routeIs('resources.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
-                    {{ __('Ресурси') }}
+                    {{ __('app.resources') }}
                 </a>
                 @endif
                 @if(auth()->user()->canView('boards'))
                 <a wire:navigate href="{{ route('boards.index') }}" @click="sidebarOpen = false" class="flex items-center px-4 py-3 text-base font-medium rounded-xl {{ request()->routeIs('boards.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-                    {{ __('Завдання') }}
+                    {{ __('app.tasks') }}
                 </a>
                 @endif
                 @hasChurchRole
@@ -1330,23 +1330,23 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
                         <div>
-                            <p class="text-sm font-medium text-amber-800 dark:text-amber-200">{{ __('Очікування') }}</p>
-                            <p class="text-xs text-amber-600 dark:text-amber-400 mt-1">{{ __('Адміністратор має надати доступ.') }}</p>
+                            <p class="text-sm font-medium text-amber-800 dark:text-amber-200">{{ __('app.pending_approval') }}</p>
+                            <p class="text-xs text-amber-600 dark:text-amber-400 mt-1">{{ __('app.admin_grant_access_short') }}</p>
                         </div>
                     </div>
                 </div>
                 @endhasChurchRole
                 @if(auth()->user()->canView('settings'))
-                <div class="pt-4 mt-4 border-t border-gray-200 dark:border-gray-700"><p class="px-4 text-xs font-semibold text-gray-400 uppercase">{{ __('Адміністрування') }}</p></div>
+                <div class="pt-4 mt-4 border-t border-gray-200 dark:border-gray-700"><p class="px-4 text-xs font-semibold text-gray-400 uppercase">{{ __('app.administration') }}</p></div>
                 <a wire:navigate href="{{ route('settings.index') }}" @click="sidebarOpen = false" class="flex items-center px-4 py-3 text-base font-medium rounded-xl {{ request()->routeIs('settings.*') || request()->routeIs('website-builder.*') || request()->routeIs('telegram.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                    {{ __('Налаштування') }}
+                    {{ __('app.settings') }}
                 </a>
                 @endif
 
                 <a wire:navigate href="{{ route('support.index') }}" @click="sidebarOpen = false" class="flex items-center px-4 py-3 text-base font-medium rounded-xl {{ request()->routeIs('support.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-                    {{ __('Підтримка') }}
+                    {{ __('app.support') }}
                 </a>
                 @if(auth()->user()->isSuperAdmin())
                 <div class="pt-4 mt-4 border-t border-gray-200 dark:border-gray-700"><p class="px-4 text-xs font-semibold text-red-400 uppercase">System Admin</p></div>
@@ -1365,13 +1365,13 @@
                     <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                     </svg>
-                    <span class="truncate">Церква: <strong>{{ $currentChurch->name }}</strong></span>
+                    <span class="truncate">{{ __('app.church') }}: <strong>{{ $currentChurch->name }}</strong></span>
                 </div>
                 <div class="flex gap-1">
                     <form method="POST" action="{{ route('system.exit-church') }}" class="flex-1">
                         @csrf
                         <button type="submit" class="w-full px-2 py-1.5 text-xs font-medium text-indigo-700 dark:text-indigo-300 bg-indigo-100 dark:bg-indigo-800/50 hover:bg-indigo-200 dark:hover:bg-indigo-800 rounded-lg transition-colors">
-                            ← Вийти
+                            ← {{ __('app.exit_church') }}
                         </button>
                     </form>
                     <a wire:navigate href="{{ route('system.index') }}" class="px-2 py-1.5 text-xs text-indigo-600 dark:text-indigo-400 bg-indigo-100 dark:bg-indigo-800/50 hover:bg-indigo-200 dark:hover:bg-indigo-800 rounded-lg transition-colors">
@@ -1388,12 +1388,12 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                     </svg>
-                    <span class="truncate">Ви увійшли як <strong>{{ auth()->user()->name }}</strong></span>
+                    <span class="truncate">{{ __('app.logged_in_as') }} <strong>{{ auth()->user()->name }}</strong></span>
                 </div>
                 <form method="POST" action="{{ route('stop-impersonating') }}">
                     @csrf
                     <button type="submit" class="w-full px-2 py-1.5 text-xs font-medium text-orange-700 dark:text-orange-300 bg-orange-100 dark:bg-orange-800/50 hover:bg-orange-200 dark:hover:bg-orange-800 rounded-lg transition-colors">
-                        ← Повернутись
+                        ← {{ __('app.return_back') }}
                     </button>
                 </form>
             </div>
@@ -1414,7 +1414,7 @@
                     </button>
                     <button @click="searchOpen = true" class="flex-1 mx-2 flex items-center justify-center space-x-2 h-10 px-3 bg-gray-100 dark:bg-gray-700 rounded-xl active:bg-gray-200 dark:active:bg-gray-600">
                         <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                        <span class="text-sm text-gray-500 dark:text-gray-400">Пошук...</span>
+                        <span class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.search') }}...</span>
                     </button>
                     <div class="flex items-center">
                         <button onclick="toggleTheme()" id="theme-toggle-mobile" class="w-11 h-11 flex items-center justify-center text-gray-400 hover:text-primary-600 active:bg-gray-100 dark:active:bg-gray-700 rounded-xl">
@@ -1425,7 +1425,7 @@
                                 <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
                             </svg>
                         </button>
-                        <a wire:navigate href="{{ route('my-schedule') }}" class="w-11 h-11 flex items-center justify-center text-gray-400 hover:text-primary-600 active:bg-gray-100 dark:active:bg-gray-700 rounded-xl" title="Мій розклад">
+                        <a wire:navigate href="{{ route('my-schedule') }}" class="w-11 h-11 flex items-center justify-center text-gray-400 hover:text-primary-600 active:bg-gray-100 dark:active:bg-gray-700 rounded-xl" title="{{ __('app.my_schedule') }}">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                         </a>
                         <a wire:navigate href="{{ route('my-profile') }}" class="w-11 h-11 flex items-center justify-center">
@@ -1445,12 +1445,12 @@
 
             <!-- Desktop Header -->
             <header class="hidden lg:flex sticky top-0 z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 items-center justify-between h-16 px-6">
-                <h1 class="text-lg font-semibold text-gray-900 dark:text-white">@yield('title', 'Головна')</h1>
+                <h1 class="text-lg font-semibold text-gray-900 dark:text-white">@yield('title', __('app.home'))</h1>
                 <div class="flex items-center space-x-4">
                     <!-- Theme Toggle -->
                     <button onclick="toggleTheme()" id="theme-toggle-desktop"
                             class="p-2 text-gray-400 hover:text-primary-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                            title="Змінити тему">
+                            title="{{ __('app.change_theme') }}">
                         <svg id="theme-sun-desktop" class="w-5 h-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"/>
                         </svg>
@@ -1461,7 +1461,7 @@
                     <!-- Search Button -->
                     <button @click="searchOpen = true" class="flex items-center space-x-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-xl transition-colors">
                         <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                        <span class="text-sm text-gray-500 dark:text-gray-400">Пошук...</span>
+                        <span class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.search') }}...</span>
                         <kbd class="hidden sm:inline-flex items-center px-2 py-0.5 text-xs text-gray-400 bg-gray-200 dark:bg-gray-600 rounded">/</kbd>
                     </button>
                     <!-- Profile Link -->
@@ -1504,29 +1504,29 @@
             <div class="flex items-center justify-around h-14 px-1">
                 <a wire:navigate href="{{ route('dashboard') }}" class="flex flex-col items-center justify-center w-full py-1 {{ request()->routeIs('dashboard') ? 'text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400' }}">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-                    <span class="text-[10px] mt-0.5 font-medium">{{ __('Головна') }}</span>
+                    <span class="text-[10px] mt-0.5 font-medium">{{ __('app.home') }}</span>
                 </a>
                 @if(auth()->user()->canView('people'))
                 <a wire:navigate href="{{ route('people.index') }}" class="flex flex-col items-center justify-center w-full py-1 {{ request()->routeIs('people.*') ? 'text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400' }}">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                    <span class="text-[10px] mt-0.5 font-medium">{{ __('Люди') }}</span>
+                    <span class="text-[10px] mt-0.5 font-medium">{{ __('app.people') }}</span>
                 </a>
                 @endif
                 @if(auth()->user()->canView('events'))
                 <a wire:navigate href="{{ route('schedule') }}" class="flex flex-col items-center justify-center w-full py-1 {{ request()->routeIs('schedule') || request()->routeIs('events.*') ? 'text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400' }}">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                    <span class="text-[10px] mt-0.5 font-medium">{{ __('Розклад') }}</span>
+                    <span class="text-[10px] mt-0.5 font-medium">{{ __('app.schedule') }}</span>
                 </a>
                 @endif
                 @if(auth()->user()->canView('announcements'))
                 <a wire:navigate href="{{ route('announcements.index') }}" class="flex flex-col items-center justify-center w-full py-1 {{ request()->routeIs('announcements.*') || request()->routeIs('pm.*') ? 'text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400' }}">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
-                    <span class="text-[10px] mt-0.5 font-medium">{{ __('Чат') }}</span>
+                    <span class="text-[10px] mt-0.5 font-medium">{{ __('app.chat') }}</span>
                 </a>
                 @endif
                 <button @click="sidebarOpen = true" class="flex flex-col items-center justify-center w-full py-1 text-gray-500 dark:text-gray-400">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-                    <span class="text-[10px] mt-0.5 font-medium">{{ __('Ще') }}</span>
+                    <span class="text-[10px] mt-0.5 font-medium">{{ __('app.more_nav') }}</span>
                 </button>
             </div>
         </nav>
@@ -1545,25 +1545,25 @@
                 @if(auth()->user()->canCreate('people'))
                 <a wire:navigate href="{{ route('people.create') }}" class="flex items-center px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                     <svg class="w-5 h-5 mr-3 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
-                    <span class="text-gray-700 dark:text-gray-200">Нова людина</span>
+                    <span class="text-gray-700 dark:text-gray-200">{{ __('app.new_person') }}</span>
                 </a>
                 @endif
                 @can('create', \App\Models\Event::class)
                 <a wire:navigate href="{{ route('events.create') }}" class="flex items-center px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                     <svg class="w-5 h-5 mr-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                    <span class="text-gray-700 dark:text-gray-200">Нова подія</span>
+                    <span class="text-gray-700 dark:text-gray-200">{{ __('app.new_event') }}</span>
                 </a>
                 @endcan
                 @if(auth()->user()->canCreate('groups'))
                 <a wire:navigate href="{{ route('groups.create') }}" class="flex items-center px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                     <svg class="w-5 h-5 mr-3 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                    <span class="text-gray-700 dark:text-gray-200">Нова група</span>
+                    <span class="text-gray-700 dark:text-gray-200">{{ __('app.new_group') }}</span>
                 </a>
                 @endif
                 @if(auth()->user()->canCreate('finances'))
                 <a wire:navigate href="{{ route('expenses.create') }}" class="flex items-center px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                     <svg class="w-5 h-5 mr-3 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                    <span class="text-gray-700 dark:text-gray-200">Нова витрата</span>
+                    <span class="text-gray-700 dark:text-gray-200">{{ __('app.new_expense') }}</span>
                 </a>
                 @endif
             </div>
@@ -1613,7 +1613,7 @@
                                    x-model="query"
                                    @input.debounce.300ms="search()"
                                    x-init="$nextTick(() => $refs.searchInput.focus())"
-                                   placeholder="Пошук людей, команд, подій..."
+                                   placeholder="{{ __('app.search_everything') }}"
                                    class="w-full px-4 py-4 text-gray-900 dark:text-white bg-transparent border-0 focus:ring-0 focus:outline-none placeholder-gray-400">
                             <kbd class="hidden sm:inline-flex px-2 py-1 text-xs text-gray-400 bg-gray-100 dark:bg-gray-700 rounded">ESC</kbd>
                         </div>
@@ -1631,21 +1631,21 @@
 
                             <template x-if="!loading && results.length === 0 && query.length >= 2">
                                 <div class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
-                                    Нічого не знайдено
+                                    {{ __('app.nothing_found') }}
                                 </div>
                             </template>
 
                             @if(auth()->user()->canCreate('people') || auth()->user()->canCreate('events') || auth()->user()->canCreate('groups'))
                             <template x-if="!loading && query.length < 2">
                                 <div class="px-4 py-6">
-                                    <p class="text-xs font-medium text-gray-400 uppercase mb-3">Швидкі дії</p>
+                                    <p class="text-xs font-medium text-gray-400 uppercase mb-3">{{ __('app.quick_actions') }}</p>
                                     <div class="space-y-1">
                                         @if(auth()->user()->canCreate('people'))
                                         <a wire:navigate href="{{ route('people.create') }}" class="flex items-center px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
                                             <span class="w-8 h-8 rounded-lg bg-primary-100 dark:bg-primary-900 flex items-center justify-center mr-3">
                                                 <svg class="w-4 h-4 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
                                             </span>
-                                            <span class="text-gray-700 dark:text-gray-200">Додати людину</span>
+                                            <span class="text-gray-700 dark:text-gray-200">{{ __('app.add_person') }}</span>
                                             <kbd class="ml-auto px-2 py-0.5 text-xs text-gray-400 bg-gray-100 dark:bg-gray-700 rounded">N</kbd>
                                         </a>
                                         @endif
@@ -1654,7 +1654,7 @@
                                             <span class="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900 flex items-center justify-center mr-3">
                                                 <svg class="w-4 h-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                                             </span>
-                                            <span class="text-gray-700 dark:text-gray-200">Створити подію</span>
+                                            <span class="text-gray-700 dark:text-gray-200">{{ __('app.create_event') }}</span>
                                             <kbd class="ml-auto px-2 py-0.5 text-xs text-gray-400 bg-gray-100 dark:bg-gray-700 rounded">E</kbd>
                                         </a>
                                         @endif
@@ -1663,7 +1663,7 @@
                                             <span class="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900 flex items-center justify-center mr-3">
                                                 <svg class="w-4 h-4 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                                             </span>
-                                            <span class="text-gray-700 dark:text-gray-200">Створити групу</span>
+                                            <span class="text-gray-700 dark:text-gray-200">{{ __('app.new_group') }}</span>
                                             <kbd class="ml-auto px-2 py-0.5 text-xs text-gray-400 bg-gray-100 dark:bg-gray-700 rounded">G</kbd>
                                         </a>
                                         @endif
@@ -1903,16 +1903,16 @@
                 <img src="/icons/icon-72x72.png" alt="Ministrify" class="w-8 h-8">
             </div>
             <div class="flex-1 min-w-0">
-                <h3 class="font-semibold">Встановити додаток</h3>
-                <p class="text-sm opacity-90 mt-1">Швидкий доступ з головного екрану вашого пристрою</p>
+                <h3 class="font-semibold">{{ __('app.install_prompt_title') }}</h3>
+                <p class="text-sm opacity-90 mt-1">{{ __('app.install_prompt_desc') }}</p>
                 <div class="flex gap-2 mt-3">
                     <button @click="install()"
                             class="px-4 py-2 bg-white text-primary-700 font-semibold rounded-lg hover:bg-white/90 transition-colors text-sm">
-                        Встановити
+                        {{ __('app.install_btn') }}
                     </button>
                     <button @click="dismiss()"
                             class="px-4 py-2 text-white/80 hover:text-white transition-colors text-sm">
-                        Не зараз
+                        {{ __('app.not_now') }}
                     </button>
                 </div>
             </div>
@@ -1925,10 +1925,10 @@
 
         {{-- iOS instructions --}}
         <div x-show="isIOS && !canInstall" class="mt-4 p-3 bg-white/10 rounded-xl text-sm">
-            <p class="font-medium mb-2">Для iOS:</p>
+            <p class="font-medium mb-2">{{ __('app.for_ios') }}</p>
             <ol class="list-decimal list-inside space-y-1 opacity-90">
-                <li>Натисніть <svg class="inline w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L12 14M12 2L8 6M12 2L16 6M4 12V20H20V12"/></svg> (Поділитися)</li>
-                <li>Виберіть "На Початковий екран"</li>
+                <li>{{ __('app.ios_tap_share') }} <svg class="inline w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L12 14M12 2L8 6M12 2L16 6M4 12V20H20V12"/></svg> {{ __('app.ios_share') }}</li>
+                <li>{{ __('app.ios_add_to_home') }}</li>
             </ol>
         </div>
     </div>
@@ -2109,45 +2109,45 @@
             }
 
             // === Dashboard ===
-            add('sidebar-nav', 'Навігація', 'Це головне меню. Звідси ви потрапите до будь-якого розділу системи.', 'right', 'start');
-            add('stats-grid', 'Статистика', 'Ключові показники вашої церкви: люди, служіння, групи та події. Натисніть на картку, щоб перейти до розділу.', 'bottom', 'center');
-            add('stat-people', 'Картка "Люди"', 'Загальна кількість людей, тренд за 3 місяці та розподіл за віком.', 'bottom', 'start');
-            add('stat-events', 'Картка "Події"', 'Скільки подій заплановано та проведено цього місяця.', 'bottom', 'end');
+            add('sidebar-nav', '{{ __("app.tour_nav_title") }}', '{{ __("app.tour_nav_desc") }}', 'right', 'start');
+            add('stats-grid', '{{ __("app.tour_stats_title") }}', '{{ __("app.tour_stats_desc") }}', 'bottom', 'center');
+            add('stat-people', '{{ __("app.tour_people_card_title") }}', '{{ __("app.tour_people_card_desc") }}', 'bottom', 'start');
+            add('stat-events', '{{ __("app.tour_events_card_title") }}', '{{ __("app.tour_events_card_desc") }}', 'bottom', 'end');
 
             // === Sidebar nav items ===
-            add('nav-people', 'Люди', 'База людей та контактів. Додавайте, редагуйте, фільтруйте за різними критеріями.', 'right', 'start');
-            add('nav-groups', 'Групи', 'Домашні групи та малі групи. Відстежуйте учасників, лідерів та зустрічі.', 'right', 'start');
-            add('nav-ministries', 'Команди', 'Служіння та команди волонтерів. Організовуйте людей за напрямками роботи.', 'right', 'start');
-            add('nav-schedule', 'Розклад', 'Календар подій та зустрічей. Плануйте, запрошуйте та відстежуйте відвідуваність.', 'right', 'start');
-            add('nav-finances', 'Фінанси', 'Облік доходів та витрат, баланс каси, фінансові звіти по категоріях.', 'right', 'start');
+            add('nav-people', '{{ __("app.tour_people_title") }}', '{{ __("app.tour_people_desc") }}', 'right', 'start');
+            add('nav-groups', '{{ __("app.tour_groups_title") }}', '{{ __("app.tour_groups_desc") }}', 'right', 'start');
+            add('nav-ministries', '{{ __("app.tour_teams_title") }}', '{{ __("app.tour_teams_desc") }}', 'right', 'start');
+            add('nav-schedule', '{{ __("app.tour_schedule_title") }}', '{{ __("app.tour_schedule_desc") }}', 'right', 'start');
+            add('nav-finances', '{{ __("app.tour_finances_title") }}', '{{ __("app.tour_finances_desc") }}', 'right', 'start');
 
             // === People page ===
-            add('people-add-btn', 'Додати людину', 'Натисніть, щоб додати нову людину до бази. Вкажіть ім\'я, контакти, день народження тощо.', 'bottom', 'end');
-            add('people-search-bar', 'Пошук та фільтри', 'Шукайте за ім\'ям, телефоном чи email. Використовуйте фільтри для вибірки за статтю, служінням, роллю та іншими критеріями.', 'bottom', 'center');
-            add('people-filter-btn', 'Розширені фільтри', 'Відкрийте панель фільтрів: стать, сімейний стан, служіння, роль, пастор, дата народження.', 'bottom', 'start');
+            add('people-add-btn', '{{ __("app.tour_add_person_title") }}', '{{ __("app.tour_add_person_desc") }}', 'bottom', 'end');
+            add('people-search-bar', '{{ __("app.tour_search_title") }}', '{{ __("app.tour_search_desc") }}', 'bottom', 'center');
+            add('people-filter-btn', '{{ __("app.tour_filter_title") }}', '{{ __("app.tour_filter_desc") }}', 'bottom', 'start');
 
             // === Groups page ===
-            add('groups-stats', 'Статистика груп', 'Загальна кількість груп, учасників та середній розмір групи.', 'bottom', 'center');
-            add('groups-table', 'Таблиця груп', 'Список усіх груп з лідерами, статусом та кількістю учасників. Натисніть на групу, щоб переглянути деталі.', 'top', 'center');
+            add('groups-stats', '{{ __("app.tour_groups_stats_title") }}', '{{ __("app.tour_groups_stats_desc") }}', 'bottom', 'center');
+            add('groups-table', '{{ __("app.tour_groups_table_title") }}', '{{ __("app.tour_groups_table_desc") }}', 'top', 'center');
 
             // === Ministries page ===
-            add('ministries-grid', 'Картки команд', 'Кожна картка — окреме служіння з лідером та кількістю учасників. Натисніть "Відкрити", щоб побачити деталі.', 'bottom', 'center');
+            add('ministries-grid', '{{ __("app.tour_ministries_grid_title") }}', '{{ __("app.tour_ministries_grid_desc") }}', 'bottom', 'center');
 
             // === Schedule page ===
-            add('schedule-options', 'Перегляд подій', 'Перемикайте між списком і календарем. Фільтруйте події за командою.', 'bottom', 'center');
-            add('events-list', 'Список подій', 'Усі заплановані та минулі події. Натисніть на подію, щоб побачити деталі та відвідуваність.', 'top', 'center');
+            add('schedule-options', '{{ __("app.tour_schedule_options_title") }}', '{{ __("app.tour_schedule_options_desc") }}', 'bottom', 'center');
+            add('events-list', '{{ __("app.tour_events_list_title") }}', '{{ __("app.tour_events_list_desc") }}', 'top', 'center');
 
             // === Finances page ===
-            add('finance-actions', 'Фінансові операції', 'Три кнопки: зелена — додати надходження, червона — витрату, жовта — обмін валют.', 'bottom', 'end');
-            add('finance-period', 'Вибір періоду', 'Оберіть рік та місяць для перегляду фінансів. Можна подивитися за весь рік або конкретний місяць.', 'bottom', 'start');
-            add('finance-balance', 'Баланс каси', 'Поточний залишок по кожній валюті. Синій — додатний, помаранчевий — від\'ємний баланс.', 'bottom', 'center');
+            add('finance-actions', '{{ __("app.tour_finance_actions_title") }}', '{{ __("app.tour_finance_actions_desc") }}', 'bottom', 'end');
+            add('finance-period', '{{ __("app.tour_finance_period_title") }}', '{{ __("app.tour_finance_period_desc") }}', 'bottom', 'start');
+            add('finance-balance', '{{ __("app.tour_finance_balance_title") }}', '{{ __("app.tour_finance_balance_desc") }}', 'bottom', 'center');
 
             // === Settings page ===
-            add('settings-tabs', 'Розділи налаштувань', 'Загальні, тема, сайт, інтеграції, категорії, фінанси, користувачі, права доступу та журнал дій — все тут.', 'bottom', 'center');
+            add('settings-tabs', '{{ __("app.tour_settings_title") }}', '{{ __("app.tour_settings_desc") }}', 'bottom', 'center');
 
             // === FAB & Tour restart ===
-            add('fab-button', 'Швидке створення', 'Натисніть "+", щоб швидко додати людину, подію, групу або витрату з будь-якої сторінки.', 'left', 'end');
-            add('tour-restart-btn', 'Повторити тур', 'Ви завжди можете запустити цей тур знову, натиснувши тут.', 'right', 'start');
+            add('fab-button', '{{ __("app.tour_fab_title") }}', '{{ __("app.tour_fab_desc") }}', 'left', 'end');
+            add('tour-restart-btn', '{{ __("app.tour_restart_title") }}', '{{ __("app.tour_restart_desc") }}', 'right', 'start');
 
             return steps;
         }
@@ -2176,10 +2176,10 @@
                 stageRadius: 12,
                 popoverOffset: 12,
                 showButtons: ['next', 'previous', 'close'],
-                nextBtnText: 'Далі',
-                prevBtnText: 'Назад',
-                doneBtnText: 'Готово',
-                progressText: '@{{current}} з @{{total}}',
+                nextBtnText: '{{ __("app.tour_next") }}',
+                prevBtnText: '{{ __("app.tour_prev") }}',
+                doneBtnText: '{{ __("app.tour_done") }}',
+                progressText: '@{{current}} {{ __("app.of") }} @{{total}}',
                 steps: steps,
                 onDestroyStarted: function() {
                     if (!driver.hasNextStep()) {

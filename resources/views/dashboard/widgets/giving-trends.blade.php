@@ -7,8 +7,8 @@
             </svg>
         </div>
         <div>
-            <h3 class="font-semibold text-gray-900 dark:text-white">Пожертви</h3>
-            <p class="text-xs text-gray-500 dark:text-gray-400">Тренд за 6 місяців</p>
+            <h3 class="font-semibold text-gray-900 dark:text-white">{{ __('app.donations_title') }}</h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.trend_6_months') }}</p>
         </div>
     </div>
 
@@ -61,15 +61,15 @@
         <div class="flex items-center justify-center gap-4 pt-3 border-t border-gray-100 dark:border-gray-700">
             <div class="flex items-center gap-1.5">
                 <span class="w-3 h-3 rounded bg-emerald-500 dark:bg-emerald-400"></span>
-                <span class="text-xs text-gray-600 dark:text-gray-400">Десятини</span>
+                <span class="text-xs text-gray-600 dark:text-gray-400">{{ __('app.tithes') }}</span>
             </div>
             <div class="flex items-center gap-1.5">
                 <span class="w-3 h-3 rounded bg-blue-500 dark:bg-blue-400"></span>
-                <span class="text-xs text-gray-600 dark:text-gray-400">Пожертви</span>
+                <span class="text-xs text-gray-600 dark:text-gray-400">{{ __('app.offerings') }}</span>
             </div>
             <div class="flex items-center gap-1.5">
                 <span class="w-3 h-3 rounded bg-amber-500 dark:bg-amber-400"></span>
-                <span class="text-xs text-gray-600 dark:text-gray-400">Дарування</span>
+                <span class="text-xs text-gray-600 dark:text-gray-400">{{ __('app.gifts') }}</span>
             </div>
         </div>
     @else
@@ -79,7 +79,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
             </div>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Немає даних про пожертви</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.no_donation_data') }}</p>
         </div>
     @endif
 </div>

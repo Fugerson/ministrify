@@ -11,7 +11,7 @@
             </div>
         </div>
         <p class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">{{ number_format($stats['income_this_month'], 0, ',', ' ') }} ₴</p>
-        <p class="text-xs lg:text-sm text-green-600 dark:text-green-400 mt-0.5">Доходи за місяць</p>
+        <p class="text-xs lg:text-sm text-green-600 dark:text-green-400 mt-0.5">{{ __('app.income_this_month') }}</p>
     </div>
     @endif
 
@@ -25,7 +25,7 @@
             </div>
         </div>
         <p class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">{{ number_format($stats['expenses_this_month'], 0, ',', ' ') }} ₴</p>
-        <p class="text-xs lg:text-sm text-red-600 dark:text-red-400 mt-0.5">Витрати за місяць</p>
+        <p class="text-xs lg:text-sm text-red-600 dark:text-red-400 mt-0.5">{{ __('app.expenses_this_month_label') }}</p>
     </div>
     @endif
 
@@ -40,7 +40,7 @@
             </div>
         </div>
         <p class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">{{ $balance >= 0 ? '+' : '' }}{{ number_format($balance, 0, ',', ' ') }} ₴</p>
-        <p class="text-xs lg:text-sm {{ $balance >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-amber-600 dark:text-amber-400' }} mt-0.5">Баланс за місяць</p>
+        <p class="text-xs lg:text-sm {{ $balance >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-amber-600 dark:text-amber-400' }} mt-0.5">{{ __('app.balance_this_month') }}</p>
     </div>
     @endif
 
@@ -55,7 +55,7 @@
             </div>
         </div>
         <p class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">+{{ $lastMonth['count'] }}</p>
-        <p class="text-xs lg:text-sm text-purple-600 dark:text-purple-400 mt-0.5">Нових за місяць</p>
+        <p class="text-xs lg:text-sm text-purple-600 dark:text-purple-400 mt-0.5">{{ __('app.new_this_month') }}</p>
     </div>
     @endif
 </div>
@@ -67,7 +67,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
             </svg>
         </div>
-        <p class="text-gray-500 dark:text-gray-400 text-sm">Немає фінансових даних за місяць</p>
+        <p class="text-gray-500 dark:text-gray-400 text-sm">{{ __('app.no_financial_data') }}</p>
     </div>
 </div>
 @endif
