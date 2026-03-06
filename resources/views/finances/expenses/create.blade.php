@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Додати витрату')
+@section('title', __('app.finance_add_expense_page'))
 
 @section('content')
 <div class="max-w-2xl mx-auto" x-data="expenseCreateForm()">
@@ -8,36 +8,36 @@
         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
         </svg>
-        Назад
+        {{ __('app.finance_back') }}
     </a>
 
     <form @submit.prevent="submitForm" enctype="multipart/form-data" x-ref="form" class="space-y-6">
         <input type="hidden" name="redirect_to" value="{{ old('redirect_to', request('redirect_to')) }}">
 
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Нова витрата</h2>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.finance_new_expense') }}</h2>
 
             <div class="space-y-4">
                 @if($selectedMinistry && $ministries->contains('id', $selectedMinistry))
                     @php $preselectedMinistry = $ministries->firstWhere('id', $selectedMinistry); @endphp
                     <input type="hidden" name="ministry_id" value="{{ $selectedMinistry }}">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Команда</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.finance_team') }}</label>
                         <div class="flex items-center justify-between px-3 py-2 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg">
                             <span class="text-gray-900 dark:text-white font-medium">{{ $preselectedMinistry->name }}</span>
                             @if($preselectedMinistry->monthly_budget)
                                 <span class="text-sm text-gray-500 dark:text-gray-400">
-                                    залишок: {{ number_format($preselectedMinistry->remaining_budget, 0, ',', ' ') }} ₴
+                                    {{ __('app.finance_remaining') }}: {{ number_format($preselectedMinistry->remaining_budget, 0, ',', ' ') }} ₴
                                 </span>
                             @endif
                         </div>
                     </div>
                 @else
                     <div>
-                        <label for="ministry_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Команда <span class="text-red-500">*</span></label>
+                        <label for="ministry_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.finance_team') }} <span class="text-red-500">*</span></label>
                         @php
                             $ministriesWithBudget = $ministries->map(function($m) {
-                                $m->display_name = $m->name . ($m->monthly_budget ? ' (залишок: ' . number_format($m->remaining_budget, 0, ',', ' ') . ' ₴)' : '');
+                                $m->display_name = $m->name . ($m->monthly_budget ? ' (' . __('app.finance_remaining') . ': ' . number_format($m->remaining_budget, 0, ',', ' ') . ' ₴)' : '');
                                 return $m;
                             });
                         @endphp
@@ -49,8 +49,8 @@
                             valueKey="id"
                             colorKey="color"
                             :searchKeys="['name', 'display_name']"
-                            placeholder="Пошук команди..."
-                            nullText="Виберіть команду"
+                            placeholder="{{ __('app.finance_search_team') }}"
+                            nullText="{{ __('app.finance_select_team') }}"
                             :nullable="false"
                             required
                         />
@@ -62,7 +62,7 @@
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" x-data="{ currency: '{{ old('currency', 'UAH') }}', exchangeRates: {{ json_encode($exchangeRates) }} }">
                     <div>
-                        <label for="amount" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Сума <span class="text-red-500">*</span></label>
+                        <label for="amount" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.finance_amount') }} <span class="text-red-500">*</span></label>
                         <div class="flex gap-2">
                             <div class="relative flex-1">
                                 <input type="number" name="amount" id="amount" value="{{ old('amount') }}" required min="0.01" step="0.01"
@@ -83,9 +83,9 @@
                         </div>
                         <template x-if="currency !== 'UAH' && exchangeRates[currency]">
                             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                Курс: 1 <span x-text="currency"></span> = <span x-text="exchangeRates[currency]?.toFixed(2)"></span> ₴
+                                {{ __('app.finance_rate_prefix') }}: 1 <span x-text="currency"></span> = <span x-text="exchangeRates[currency]?.toFixed(2)"></span> ₴
                                 @if(\App\Models\ExchangeRate::getLatestRateDate())
-                                    <span class="text-gray-400">({{ __('станом на') }} {{ \App\Models\ExchangeRate::getLatestRateDate() }})</span>
+                                    <span class="text-gray-400">({{ __('app.finance_as_of') }} {{ \App\Models\ExchangeRate::getLatestRateDate() }})</span>
                                 @endif
                             </p>
                         </template>
@@ -95,7 +95,7 @@
                     </div>
 
                     <div>
-                        <label for="date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Дата <span class="text-red-500">*</span></label>
+                        <label for="date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.finance_date') }} <span class="text-red-500">*</span></label>
                         <input type="date" name="date" id="date" value="{{ old('date', now()->format('Y-m-d')) }}" required
                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                         <template x-if="errors.date">
@@ -105,10 +105,10 @@
                 </div>
 
                 <div>
-                    <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Опис <span class="text-red-500">*</span></label>
+                    <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.finance_description') }} <span class="text-red-500">*</span></label>
                     <input type="text" name="description" id="description" value="{{ old('description') }}" required
                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                           placeholder="Струни для гітари">
+                           placeholder="{{ __('app.finance_guitar_strings') }}">
                     <template x-if="errors.description">
                         <p class="mt-1 text-sm text-red-500" x-text="errors.description[0]"></p>
                     </template>
@@ -116,7 +116,7 @@
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label for="category_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Категорія</label>
+                        <label for="category_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.finance_category') }}</label>
                         <x-searchable-select
                             name="category_id"
                             :items="$categories"
@@ -124,8 +124,8 @@
                             labelKey="name"
                             valueKey="id"
                             colorKey="color"
-                            placeholder="Пошук категорії..."
-                            nullText="Без категорії"
+                            placeholder="{{ __('app.finance_search_category') }}"
+                            nullText="{{ __('app.finance_no_category') }}"
                             nullable
                         />
                     </div>

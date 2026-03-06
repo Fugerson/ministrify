@@ -295,7 +295,7 @@
                             <div class="flex-1 min-w-0">
                                 <p x-show="!fileName" class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('app.choose_image') }}</p>
                                 <p x-show="fileName" x-text="fileName" class="text-sm font-medium text-primary-600 dark:text-primary-400 truncate"></p>
-                                <p class="text-xs text-gray-500 dark:text-gray-400">PNG, JPG, WebP</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.image_formats') }}</p>
                             </div>
                         </label>
                     </div>
@@ -383,7 +383,7 @@
                                 <div class="flex-1 min-w-0">
                                     <p x-show="!fileName" class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('app.choose_photo') }}</p>
                                     <p x-show="fileName" x-text="fileName" class="text-sm font-medium text-primary-600 dark:text-primary-400 truncate"></p>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400">PNG, JPG, WebP</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.image_formats') }}</p>
                                 </div>
                             </label>
                         </div>
@@ -501,7 +501,7 @@
                            value="{{ old('monobank_jar_id', $paymentSettings['monobank_jar_id'] ?? '') }}"
                            autocomplete="off"
                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                           placeholder="https://send.monobank.ua/jar/XXXXXXXXX або jar/XXXXXXXXX">
+                           placeholder="{{ __('app.settings_monobank_jar_placeholder') }}">
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('app.settings_monobank_jar_hint') }}</p>
                 </div>
             </div>
@@ -2509,8 +2509,8 @@
     <div x-show="activeTab === 'audit'" x-cloak class="space-y-6">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
             <div class="px-4 sm:px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Журнал дій</h2>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Останні 100 змін у системі</p>
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.settings_audit_log') }}</h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.settings_audit_log_desc') }}</p>
             </div>
 
             <!-- Desktop table -->
@@ -2518,12 +2518,12 @@
                 <table class="w-full">
                     <thead class="bg-gray-50 dark:bg-gray-700">
                         <tr>
-                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Дата</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Користувач</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Дія</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Тип</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Об'єкт</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase hidden lg:table-cell">Зміни</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">{{ __('app.settings_date') }}</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">{{ __('app.settings_user') }}</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">{{ __('app.settings_action') }}</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">{{ __('app.settings_type') }}</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">{{ __('app.settings_object') }}</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase hidden lg:table-cell">{{ __('app.settings_changes') }}</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -2571,9 +2571,9 @@
                                             {{ Str::limit($log->changes_summary_text, 50) }}
                                         </span>
                                     @elseif($log->action === 'created')
-                                        <span class="text-green-600 dark:text-green-400">Новий</span>
+                                        <span class="text-green-600 dark:text-green-400">{{ __('app.settings_new') }}</span>
                                     @elseif($log->action === 'deleted')
-                                        <span class="text-red-600 dark:text-red-400">Видалено</span>
+                                        <span class="text-red-600 dark:text-red-400">{{ __('app.settings_deleted') }}</span>
                                     @else
                                         <span class="text-gray-400">—</span>
                                     @endif
@@ -2582,7 +2582,7 @@
                         @empty
                             <tr>
                                 <td colspan="6" class="px-4 py-12 text-center text-gray-500 dark:text-gray-400">
-                                    Записів не знайдено
+                                    {{ __('app.settings_no_records_found') }}
                                 </td>
                             </tr>
                         @endforelse
@@ -2627,7 +2627,7 @@
                     </div>
                 @empty
                     <div class="px-4 py-12 text-center text-gray-500 dark:text-gray-400">
-                        Записів не знайдено
+                        {{ __('app.settings_no_records_found') }}
                     </div>
                 @endforelse
             </div>
@@ -2635,7 +2635,7 @@
             @if($auditLogs->count() >= 100)
                 <div class="px-4 py-3 border-t border-gray-200 dark:border-gray-700 text-center">
                     <a href="{{ route('settings.audit-logs.index') }}" class="text-primary-600 dark:text-primary-400 hover:underline text-sm">
-                        Показати всі записи з фільтрами →
+                        {{ __('app.settings_show_all_with_filters') }} →
                     </a>
                 </div>
             @endif
@@ -2692,14 +2692,14 @@ function permissionsManager() {
                 if (response.ok) {
                     this.isDirty = false;
                     if (window.showGlobalToast) {
-                        showGlobalToast('Права доступу збережено', 'success');
+                        showGlobalToast('{{ __('app.settings_permissions_saved') }}', 'success');
                     }
                 } else {
                     throw new Error('Failed to save');
                 }
             } catch (error) {
                 if (window.showGlobalToast) {
-                    showGlobalToast('Помилка збереження', 'error');
+                    showGlobalToast('{{ __('app.settings_save_error') }}', 'error');
                 }
             }
 
@@ -2707,7 +2707,7 @@ function permissionsManager() {
         },
 
         async resetToDefaults() {
-            const roleName = this.roles[this.currentRoleId]?.name || 'цієї ролі';
+            const roleName = this.roles[this.currentRoleId]?.name || '{{ __('app.settings_this_role') }}';
             if (!confirm({{ Js::from(__('messages.confirm_reset_role_permissions')) }}.replace(':role', roleName))) {
                 return;
             }
@@ -2730,7 +2730,7 @@ function permissionsManager() {
                 }
             } catch (error) {
                 if (window.showGlobalToast) {
-                    showGlobalToast('Помилка скидання', 'error');
+                    showGlobalToast('{{ __('app.settings_reset_error') }}', 'error');
                 }
             }
         }
@@ -2809,13 +2809,13 @@ function userOverridesManager() {
                 const data = await res.json();
                 if (res.ok) {
                     this.showModal = false;
-                    if (window.showGlobalToast) showGlobalToast('Додаткові права збережено', 'success');
+                    if (window.showGlobalToast) showGlobalToast('{{ __('app.settings_overrides_saved') }}', 'success');
                     window.location.reload();
                 } else {
-                    if (window.showGlobalToast) showGlobalToast(data.message || 'Помилка збереження', 'error');
+                    if (window.showGlobalToast) showGlobalToast(data.message || '{{ __('app.settings_save_error') }}', 'error');
                 }
             } catch (e) {
-                if (window.showGlobalToast) showGlobalToast('Помилка збереження', 'error');
+                if (window.showGlobalToast) showGlobalToast('{{ __('app.settings_save_error') }}', 'error');
             } finally {
                 this.savingUser = false;
             }

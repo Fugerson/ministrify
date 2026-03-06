@@ -1182,13 +1182,13 @@ function responsibleEditor(itemId, initialPeople) {
                     body: JSON.stringify({ responsible_names: names, responsible_id: primaryId })
                 });
                 if (response.ok) {
-                    showGlobalToast('Збережено', 'success');
+                    showGlobalToast('{{ __("app.schedule_saved_toast") }}', 'success');
                 } else {
-                    showGlobalToast('Помилка збереження', 'error');
+                    showGlobalToast('{{ __("app.schedule_save_error") }}', 'error');
                 }
             } catch (err) {
                 console.error('Update error:', err);
-                showGlobalToast("Помилка з'єднання", 'error');
+                showGlobalToast('{{ __("app.schedule_connection_error") }}', 'error');
             }
         },
         async askPerson(person, index) {
@@ -1414,11 +1414,11 @@ async function updateFieldWithSong(itemId, songId, title, songKey = null) {
             // Update DOM without reload
             updateSongCellDOM(itemId, songId, title, songKey);
         } else {
-            showGlobalToast('Помилка оновлення', 'error');
+            showGlobalToast('{{ __("app.schedule_update_error") }}', 'error');
         }
     } catch (err) {
         console.error('Update error:', err);
-        showGlobalToast('Помилка з\'єднання', 'error');
+        showGlobalToast('{{ __("app.schedule_connection_error") }}', 'error');
     }
 }
 
@@ -1441,7 +1441,7 @@ function updateSongCellDOM(itemId, songId, title, songKey) {
                             <span class="text-lg">🎵</span>
                             <a href="/songs/${songId}" class="text-sm text-primary-600 dark:text-primary-400 hover:underline font-medium" @click.stop>${escapeHtml(title)}</a>
                             ${keyBadge}
-                            <button type="button" @click.stop="if(confirm('{{ __('messages.confirm_remove_song') }}')) { updateFieldWithSong(${itemId}, null, ''); editing = false; }" class="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-500" title="Видалити пісню">
+                            <button type="button" @click.stop="if(confirm('{{ __('messages.confirm_remove_song') }}')) { updateFieldWithSong(${itemId}, null, ''); editing = false; }" class="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-500" title="{{ __("app.schedule_remove_song") }}">
                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                             </button>
                         </div>
@@ -1453,7 +1453,7 @@ function updateSongCellDOM(itemId, songId, title, songKey) {
                                    @blur="setTimeout(() => { if(!showSongs) editing = false; }, 200)"
                                    @keydown.escape="editing = false"
                                    @keydown.enter.prevent="if(showSongs && filteredSongs().length) { selectSong(filteredSongs()[songIndex]); } else { saveTitle(); editing = false; }"
-                                   placeholder="Введіть song- для пошуку пісні"
+                                   placeholder="{{ __("app.schedule_enter_song") }}"
                                    class="w-full px-2 py-1 text-sm bg-white dark:bg-gray-700 border border-primary-300 rounded focus:ring-1 focus:ring-primary-500">
                             <div x-show="showSongs" x-transition @click.away="showSongs = false"
                                  class="absolute left-0 right-0 top-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto">
@@ -1473,7 +1473,7 @@ function updateSongCellDOM(itemId, songId, title, songKey) {
                     <input type="text" x-model="desc"
                            @blur="updateField(${itemId}, 'description', desc)"
                            @keydown.enter="$el.blur()"
-                           placeholder="Додатковий текст..."
+                           placeholder="{{ __("app.schedule_additional_text") }}"
                            class="w-full px-1 py-0.5 text-xs text-gray-600 dark:text-gray-400 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-primary-500 focus:ring-0 placeholder-gray-400">
                 </div>
             </div>
@@ -1489,7 +1489,7 @@ function updateSongCellDOM(itemId, songId, title, songKey) {
                           @keydown.arrow-down.prevent="if(showSongs) songIndex = Math.min(songIndex + 1, filteredSongs().length - 1)"
                           @keydown.arrow-up.prevent="if(showSongs) songIndex = Math.max(songIndex - 1, 0)"
                           @keydown.enter.prevent="if(showSongs && filteredSongs().length) { selectSong(filteredSongs()[songIndex]); } else { saveTitle(); $el.blur(); }"
-                          placeholder="Опис пункту... (song- для пісні)"
+                          placeholder="{{ __("app.schedule_description_placeholder") }}"
                           rows="1"
                           class="w-full px-1 py-1 text-sm text-gray-900 dark:text-white bg-transparent border-0 focus:ring-1 focus:ring-primary-500 rounded resize-none break-words"></textarea>
                 <div x-show="showSongs" x-transition @click.away="showSongs = false"
@@ -1582,13 +1582,13 @@ function eventEditor() {
                 const data = await response.json().catch(() => ({}));
                 if (data.success) {
                     this._original[originalKey] = value; // Update original after successful save
-                    showGlobalToast('Збережено', 'success');
+                    showGlobalToast('{{ __("app.schedule_saved_toast") }}', 'success');
                 } else {
-                    showGlobalToast(data.message || 'Помилка', 'error');
+                    showGlobalToast(data.message || '{{ __("app.schedule_error") }}', 'error');
                 }
             } catch (err) {
                 console.error('Save error:', err);
-                showGlobalToast('Помилка збереження', 'error');
+                showGlobalToast('{{ __("app.schedule_save_error") }}', 'error');
             }
         },
 
@@ -1606,7 +1606,7 @@ function eventEditor() {
 
         getMinistryName() {
             const ministry = this.ministries.find(m => m.id == this.ministryId);
-            return ministry ? ministry.name : 'Без команди';
+            return ministry ? ministry.name : '{{ __("app.schedule_without_team_js") }}';
         }
     };
 }
@@ -1656,17 +1656,17 @@ function planTemplatesManager() {
 
                 const data = await response.json().catch(() => ({}));
                 if (data.success) {
-                    showGlobalToast('Шаблон збережено', 'success');
+                    showGlobalToast('{{ __("app.schedule_template_saved") }}', 'success');
                     this.showSaveModal = false;
                     this.templateName = '';
                     this.includeResponsible = false;
                     this.customTemplates.push(data.template);
                 } else {
-                    showGlobalToast(data.message || 'Помилка', 'error');
+                    showGlobalToast(data.message || '{{ __("app.schedule_error") }}', 'error');
                 }
             } catch (err) {
                 console.error('Save template error:', err);
-                showGlobalToast('Помилка збереження', 'error');
+                showGlobalToast('{{ __("app.schedule_save_error") }}', 'error');
             }
         },
 
@@ -1684,14 +1684,14 @@ function planTemplatesManager() {
 
                 const data = await response.json().catch(() => ({}));
                 if (data.success) {
-                    showGlobalToast('Шаблон застосовано', 'success');
+                    showGlobalToast('{{ __("app.schedule_template_applied") }}', 'success');
                     setTimeout(() => window.location.reload(), 500);
                 } else {
-                    showGlobalToast(data.message || 'Помилка', 'error');
+                    showGlobalToast(data.message || '{{ __("app.schedule_error") }}', 'error');
                 }
             } catch (err) {
                 console.error('Apply template error:', err);
-                showGlobalToast('Помилка застосування', 'error');
+                showGlobalToast('{{ __("app.schedule_apply_error") }}', 'error');
             }
         },
 
@@ -1709,14 +1709,14 @@ function planTemplatesManager() {
 
                 const data = await response.json().catch(() => ({}));
                 if (data.success) {
-                    showGlobalToast('Шаблон видалено', 'success');
+                    showGlobalToast('{{ __("app.schedule_template_deleted") }}', 'success');
                     this.customTemplates = this.customTemplates.filter(t => t.id !== templateId);
                 } else {
-                    showGlobalToast(data.message || 'Помилка', 'error');
+                    showGlobalToast(data.message || '{{ __("app.schedule_error") }}', 'error');
                 }
             } catch (err) {
                 console.error('Delete template error:', err);
-                showGlobalToast('Помилка видалення', 'error');
+                showGlobalToast('{{ __("app.schedule_delete_error") }}', 'error');
             }
         }
     };
@@ -1737,15 +1737,15 @@ async function updateField(itemId, field, value) {
         });
 
         if (response.ok) {
-            showGlobalToast('Збережено', 'success');
+            showGlobalToast('{{ __("app.schedule_saved_toast") }}', 'success');
             return true;
         } else {
-            showGlobalToast('Помилка збереження', 'error');
+            showGlobalToast('{{ __("app.schedule_save_error") }}', 'error');
             return false;
         }
     } catch (err) {
         console.error('Update error:', err);
-        showGlobalToast('Помилка з\'єднання', 'error');
+        showGlobalToast('{{ __("app.schedule_connection_error") }}', 'error');
         return false;
     }
 }
@@ -1853,15 +1853,15 @@ async function askInTelegram(itemId, personName, personId = null) {
         const data = await response.json().catch(() => ({}));
 
         if (data.success) {
-            showGlobalToast(`Запит надіслано: ${personName}`, 'success');
+            showGlobalToast('{{ __("app.schedule_request_sent") }}: ' + personName, 'success');
             return true;
         } else {
-            showGlobalToast(data.message || 'Помилка надсилання', 'error');
+            showGlobalToast(data.message || '{{ __("app.schedule_send_error") }}', 'error');
             return false;
         }
     } catch (err) {
         console.error('Telegram error:', err);
-        showGlobalToast('Помилка надсилання', 'error');
+        showGlobalToast('{{ __("app.schedule_send_error") }}', 'error');
         return false;
     }
 }
@@ -1983,14 +1983,14 @@ function planEditor() {
                         // Clear form
                         this.newItem = { start_time: '', title: '', responsible_names: '', notes: '', song_id: null };
                         this.newResponsible = { open: false, search: '', people: [] };
-                        showGlobalToast('Пункт додано', 'success');
+                        showGlobalToast('{{ __("app.schedule_item_added") }}', 'success');
                     }
                 } else {
-                    this.showMessage('Помилка додавання', 'error');
+                    this.showMessage('{{ __("app.schedule_add_error") }}', 'error');
                 }
             } catch (err) {
                 console.error('Add error:', err);
-                this.showMessage('Помилка з\'єднання', 'error');
+                this.showMessage('{{ __("app.schedule_connection_error") }}', 'error');
             }
         },
 
@@ -2017,23 +2017,23 @@ function planEditor() {
                     const row = document.querySelector(`tr[data-id="${id}"]`);
                     if (row) {
                         row.remove();
-                        showGlobalToast('Пункт видалено', 'success');
+                        showGlobalToast('{{ __("app.schedule_item_deleted") }}', 'success');
                     }
                     // Check if table is empty
                     const tbody = document.querySelector('table tbody');
                     if (tbody && tbody.children.length === 0) {
                         tbody.innerHTML = `<tr id="empty-row">
                             <td colspan="6" class="px-4 py-8 text-center text-gray-400 text-sm">
-                                Почніть додавати пункти плану нижче
+                                {{ __("app.schedule_start_adding") }}
                             </td>
                         </tr>`;
                     }
                 } else {
-                    this.showMessage('Помилка видалення', 'error');
+                    this.showMessage('{{ __("app.schedule_delete_error") }}', 'error');
                 }
             } catch (err) {
                 console.error('Delete error:', err);
-                this.showMessage('Помилка з\'єднання', 'error');
+                this.showMessage('{{ __("app.schedule_connection_error") }}', 'error');
             }
         },
 
@@ -2118,7 +2118,7 @@ window.insertPlanRow = function(item) {
                               @keydown.arrow-down.prevent="if(showSongs) songIndex = Math.min(songIndex + 1, filteredSongs().length - 1)"
                               @keydown.arrow-up.prevent="if(showSongs) songIndex = Math.max(songIndex - 1, 0)"
                               @keydown.enter.prevent="if(showSongs && filteredSongs().length) { insertSongLink(filteredSongs()[songIndex]); } else { saveTitle(); editing = false; }"
-                              placeholder="Текст... (введіть song- для пошуку пісні)"
+                              placeholder="{{ __("app.schedule_text_song_placeholder") }}"
                               rows="1"
                               class="w-full px-1 py-1 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-700 border border-primary-300 focus:ring-1 focus:ring-primary-500 rounded resize-none break-words"
                               style="word-wrap: break-word; overflow-wrap: break-word;"></textarea>
@@ -2126,7 +2126,7 @@ window.insertPlanRow = function(item) {
                          class="absolute left-0 right-0 top-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto">
                         <template x-if="SONGS_DATA.length === 0">
                             <div class="px-3 py-3 text-center text-gray-500 dark:text-gray-400 text-sm">
-                                Команда прославлення ще не обрала пісні.
+                                {{ __("app.schedule_worship_no_songs") }}
                             </div>
                         </template>
                         <template x-for="(song, index) in filteredSongs()" :key="song.id">
@@ -2160,12 +2160,12 @@ window.insertPlanRow = function(item) {
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                         </svg>
-                        <span x-show="people.length === 0">Додати</span>
+                        <span x-show="people.length === 0">{{ __("app.schedule_add") }}</span>
                     </button>
                     <div x-show="open" x-cloak @click.outside="open = false"
                          class="absolute z-50 left-0 mt-1 w-48 sm:w-56 max-w-[calc(100vw-2rem)] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
                         <div class="p-2 border-b border-gray-200 dark:border-gray-700">
-                            <input type="text" x-model="search" placeholder="Пошук..."
+                            <input type="text" x-model="search" placeholder="{{ __("app.schedule_search") }}"
                                    class="w-full px-2 py-1 text-sm border border-gray-200 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                         </div>
                         <div class="max-h-48 overflow-y-auto">
@@ -2182,7 +2182,7 @@ window.insertPlanRow = function(item) {
             </div>
         </td>
         <td class="px-3 py-3 border-r border-gray-200 dark:border-gray-700 align-top">
-            <textarea placeholder="Примітки..."
+            <textarea placeholder="{{ __("app.schedule_notes_placeholder") }}"
                       onchange="updateField(${item.id}, 'notes', this.value)"
                       rows="1"
                       class="w-full px-1 py-1 text-sm text-gray-500 dark:text-gray-400 bg-transparent border-0 focus:ring-1 focus:ring-primary-500 rounded resize-none break-words"
@@ -2193,7 +2193,7 @@ window.insertPlanRow = function(item) {
             <button type="button"
                     onclick="window.planEditorDeleteItem(${item.id})"
                     class="p-1 text-gray-400 hover:text-red-500 transition-colors"
-                    title="Видалити">
+                    title="{{ __("app.schedule_delete_item") }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
@@ -2229,22 +2229,22 @@ window.planEditorDeleteItem = async function(id) {
             const row = document.querySelector(`tr[data-id="${id}"]`);
             if (row) {
                 row.remove();
-                showGlobalToast('Пункт видалено', 'success');
+                showGlobalToast('{{ __("app.schedule_item_deleted") }}', 'success');
             }
             const tbody = document.querySelector('table tbody');
             if (tbody && tbody.children.length === 0) {
                 tbody.innerHTML = `<tr id="empty-row">
                     <td colspan="6" class="px-4 py-8 text-center text-gray-400 text-sm">
-                        Почніть додавати пункти плану нижче
+                        {{ __("app.schedule_start_adding") }}
                     </td>
                 </tr>`;
             }
         } else {
-            showGlobalToast('Помилка видалення', 'error');
+            showGlobalToast('{{ __("app.schedule_delete_error") }}', 'error');
         }
     } catch (err) {
         console.error('Delete error:', err);
-        showGlobalToast('Помилка з\'єднання', 'error');
+        showGlobalToast('{{ __("app.schedule_connection_error") }}', 'error');
     }
 };
 
@@ -2285,7 +2285,7 @@ function servicePlanManager() {
                 if (!response.ok) {
                     const text = await response.text();
                     console.error('Error:', response.status, text);
-                    showGlobalToast('Помилка: ' + response.status, 'error');
+                    showGlobalToast('{{ __("app.schedule_error_status") }}: ' + response.status, 'error');
                     return;
                 }
 
@@ -2300,11 +2300,11 @@ function servicePlanManager() {
                         responsible_names: '',
                         song_id: null
                     };
-                    showGlobalToast('Пункт додано', 'success');
+                    showGlobalToast('{{ __("app.schedule_item_added") }}', 'success');
                 }
             } catch (err) {
                 console.error('Fetch error:', err);
-                showGlobalToast('Помилка з\'єднання', 'error');
+                showGlobalToast('{{ __("app.schedule_connection_error") }}', 'error');
             }
         },
 
@@ -2330,7 +2330,7 @@ function servicePlanManager() {
                 }
             } catch (err) {
                 console.error(err);
-                alert('Помилка');
+                alert('{{ __("app.schedule_error_alert") }}');
             }
         },
 
@@ -2350,7 +2350,7 @@ function servicePlanManager() {
                 });
 
                 if (!response.ok) {
-                    alert('Помилка: ' + response.status);
+                    alert('{{ __("app.schedule_error_status") }}: ' + response.status);
                     return;
                 }
 
@@ -2361,7 +2361,7 @@ function servicePlanManager() {
                 }
             } catch (err) {
                 console.error(err);
-                alert('Помилка парсингу');
+                alert('{{ __("app.schedule_error_parsing") }}');
             }
         }
     };

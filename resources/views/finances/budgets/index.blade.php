@@ -1164,7 +1164,7 @@ function budgetsPage() {
                     this.churchTransList = data.transactions || [];
                 }
             } catch (e) {
-                showToast('error', 'Помилка завантаження транзакцій');
+                showToast('error', '{{ __('app.finance_load_transactions_error') }}');
             } finally {
                 this.churchTransLoading = false;
             }
@@ -1195,10 +1195,10 @@ function budgetsPage() {
                         Livewire.navigate(`{{ route('finances.budgets') }}?year=${this.copyToYear}&month=${this.copyToMonth}`);
                     }, 800);
                 } else {
-                    showToast('error', data.message || 'Помилка копіювання');
+                    showToast('error', data.message || '{{ __('app.finance_copy_error') }}');
                 }
             } catch (e) {
-                showToast('error', 'Помилка копіювання');
+                showToast('error', '{{ __('app.finance_copy_error') }}');
             } finally {
                 this.copySaving = false;
             }

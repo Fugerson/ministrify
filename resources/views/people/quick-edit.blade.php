@@ -261,10 +261,10 @@
                                 <select x-model="row.marital_status" @change="markDirty(row)"
                                         class="w-full px-2 py-1.5 bg-transparent hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-white dark:focus:bg-gray-700 border border-transparent hover:border-gray-300 dark:hover:border-gray-600 focus:border-primary-500 rounded text-sm transition-colors">
                                     <option value="">—</option>
-                                    <option value="single">Неодруж.</option>
-                                    <option value="married">Одруж.</option>
-                                    <option value="widowed">Вдівець</option>
-                                    <option value="divorced">Розлуч.</option>
+                                    <option value="single">{{ __('app.marital_single_short') }}</option>
+                                    <option value="married">{{ __('app.marital_married_short') }}</option>
+                                    <option value="widowed">{{ __('app.marital_widowed_short') }}</option>
+                                    <option value="divorced">{{ __('app.marital_divorced_short') }}</option>
                                 </select>
                             </td>
 
@@ -310,7 +310,7 @@
                             <td class="px-1 py-1">
                                 <input type="text" x-model="row.address" @input="markDirty(row)"
                                        class="w-full px-2 py-1.5 bg-transparent hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-white dark:focus:bg-gray-700 border border-transparent hover:border-gray-300 dark:hover:border-gray-600 focus:border-primary-500 rounded text-sm transition-colors"
-                                       placeholder="Адреса">
+                                       placeholder="{{ __('app.address') }}">
                             </td>
 
                             <!-- First Visit Date -->
@@ -341,7 +341,7 @@
                             <td class="px-1 py-1">
                                 <input type="text" x-model="row.notes" @input="markDirty(row)"
                                        class="w-full px-2 py-1.5 bg-transparent hover:bg-gray-100 dark:hover:bg-gray-700 focus:bg-white dark:focus:bg-gray-700 border border-transparent hover:border-gray-300 dark:hover:border-gray-600 focus:border-primary-500 rounded text-sm transition-colors"
-                                       placeholder="Нотатки">
+                                       placeholder="{{ __('app.notes') }}">
                             </td>
 
                             <!-- Actions -->
@@ -363,31 +363,31 @@
             <svg class="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197"/>
             </svg>
-            <p class="text-gray-500 dark:text-gray-400 mb-4">Немає даних для відображення</p>
+            <p class="text-gray-500 dark:text-gray-400 mb-4">{{ __('app.no_data_to_display') }}</p>
             <button @click="addNewRow()" class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-medium transition-colors">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                 </svg>
-                Додати першу людину
+                {{ __('app.add_first_person') }}
             </button>
         </div>
 
         <!-- Footer -->
         <div class="px-4 py-3 bg-gray-50 dark:bg-gray-700 border-t border-gray-200 dark:border-gray-600 flex flex-wrap items-center justify-between gap-4">
             <div class="text-sm text-gray-500 dark:text-gray-400">
-                Всього: <span x-text="rows.length"></span> |
-                Показано: <span x-text="filteredRows.length"></span> |
-                Нових: <span x-text="rows.filter(r => r.isNew).length"></span> |
-                Змінено: <span x-text="rows.filter(r => r.isDirty && !r.isNew).length"></span>
+                {{ __('app.total_count_label') }} <span x-text="rows.length"></span> |
+                {{ __('app.shown_count_label') }} <span x-text="filteredRows.length"></span> |
+                {{ __('app.new_count_label') }} <span x-text="rows.filter(r => r.isNew).length"></span> |
+                {{ __('app.changed_count_label') }} <span x-text="rows.filter(r => r.isDirty && !r.isNew).length"></span>
             </div>
             <div class="flex items-center gap-4">
                 <div class="flex items-center gap-2">
                     <kbd class="px-2 py-1 bg-gray-200 dark:bg-gray-600 rounded text-xs">Tab</kbd>
-                    <span class="text-xs text-gray-500 dark:text-gray-400">перехід</span>
+                    <span class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.navigation_hint') }}</span>
                 </div>
                 <div class="flex items-center gap-2">
                     <kbd class="px-2 py-1 bg-gray-200 dark:bg-gray-600 rounded text-xs">Shift</kbd>
-                    <span class="text-xs text-gray-500 dark:text-gray-400">+ клік для діапазону</span>
+                    <span class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.range_click_hint') }}</span>
                 </div>
             </div>
         </div>
@@ -402,18 +402,18 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                     </svg>
                 </div>
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Підтвердіть видалення</h3>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.confirm_delete_title') }}</h3>
             </div>
             <p class="text-gray-600 dark:text-gray-400 mb-6">
-                Ви впевнені, що хочете видалити <span x-text="deleteCount" class="font-semibold"></span> <span x-text="deleteCount === 1 ? 'людину' : 'людей'"></span>?
-                Ця дія незворотня.
+                {{ __('app.confirm_delete_count') }} <span x-text="deleteCount" class="font-semibold"></span> <span x-text="deleteCount === 1 ? '{{ __('app.person_accusative') }}' : '{{ __('app.people_accusative') }}'"></span>?
+                {{ __('app.action_irreversible') }}
             </p>
             <div class="flex justify-end gap-3">
                 <button @click="showDeleteModal = false" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                    Скасувати
+                    {{ __('app.cancel') }}
                 </button>
                 <button @click="confirmDelete()" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors">
-                    Видалити
+                    {{ __('app.delete') }}
                 </button>
             </div>
         </div>
@@ -428,45 +428,45 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
                     </svg>
                 </div>
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Надати доступ до системи</h3>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.grant_system_access') }}</h3>
             </div>
 
             <div class="space-y-4 mb-6">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Рівень доступу</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.access_level_label') }}</label>
                     <select x-model="grantAccessRoleId" class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-purple-500 dark:text-white">
-                        <option value="">Оберіть роль...</option>
+                        <option value="">{{ __('app.select_role') }}</option>
                         @foreach($churchRoles as $role)
-                        <option value="{{ $role->id }}">{{ $role->name }}@if($role->is_admin_role) (Повний доступ)@endif</option>
+                        <option value="{{ $role->id }}">{{ $role->name }}@if($role->is_admin_role) {{ __('app.full_access') }}@endif</option>
                         @endforeach
                     </select>
                 </div>
 
                 <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-xl text-sm">
                     <p class="text-gray-700 dark:text-gray-300">
-                        Вибрано: <span x-text="grantAccessCount" class="font-semibold"></span> людей
+                        {{ __('app.selected_people_label') }} <span x-text="grantAccessCount" class="font-semibold"></span>
                     </p>
                     <p x-show="grantAccessNoEmail > 0" class="text-amber-600 dark:text-amber-400 mt-1">
-                        <span x-text="grantAccessNoEmail"></span> без email (буде пропущено)
+                        <span x-text="grantAccessNoEmail"></span> {{ __('app.without_email_skip') }}
                     </p>
                     <p x-show="grantAccessAlreadyHave > 0" class="text-gray-500 dark:text-gray-400 mt-1">
-                        <span x-text="grantAccessAlreadyHave"></span> вже мають доступ (буде пропущено)
+                        <span x-text="grantAccessAlreadyHave"></span> {{ __('app.already_have_access_skip') }}
                     </p>
                 </div>
 
                 <p class="text-sm text-gray-500 dark:text-gray-400">
-                    Користувачі отримають лист з посиланням для встановлення пароля.
+                    {{ __('app.users_will_receive_email') }}
                 </p>
             </div>
 
             <div class="flex justify-end gap-3">
                 <button @click="showGrantAccessModal = false" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                    Скасувати
+                    {{ __('app.cancel') }}
                 </button>
                 <button @click="confirmGrantAccess()" :disabled="!grantAccessRoleId || grantAccessLoading || grantAccessEligible === 0"
                         class="px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 text-white rounded-lg transition-colors">
-                    <span x-show="!grantAccessLoading">Надати доступ</span>
-                    <span x-show="grantAccessLoading">Зачекайте...</span>
+                    <span x-show="!grantAccessLoading">{{ __('app.grant_access') }}</span>
+                    <span x-show="grantAccessLoading">{{ __('app.please_wait') }}</span>
                 </button>
             </div>
         </div>
@@ -528,23 +528,23 @@ function quickEdit() {
         resizeStartWidth: 0,
 
         columns: [
-            { key: 'first_name', label: "Ім'я", width: '160px' },
-            { key: 'last_name', label: 'Прізвище', width: '160px' },
-            { key: 'phone', label: 'Телефон', width: '160px' },
-            { key: 'email', label: 'Email', width: '220px' },
+            { key: 'first_name', label: @json(__('app.first_name')), width: '160px' },
+            { key: 'last_name', label: @json(__('app.col_last_name')), width: '160px' },
+            { key: 'phone', label: @json(__('app.phone')), width: '160px' },
+            { key: 'email', label: @json(__('app.email')), width: '220px' },
             { key: 'telegram_username', label: 'Telegram', width: '140px' },
-            { key: 'birth_date', label: 'Народження', width: '140px' },
-            { key: 'gender', label: 'Стать', width: '90px' },
-            { key: 'marital_status', label: 'Сімейний стан', width: '130px' },
-            { key: 'membership_status', label: 'Статус', width: '120px' },
-            { key: 'church_role', label: 'Роль', width: '140px' },
-            { key: 'ministry_id', label: 'Команда', width: '180px' },
-            { key: 'address', label: 'Адреса', width: '220px' },
-            { key: 'first_visit_date', label: 'Перший візит', width: '140px' },
-            { key: 'joined_date', label: 'Приєднався', width: '140px' },
-            { key: 'baptism_date', label: 'Хрещення', width: '140px' },
-            { key: 'anniversary', label: 'Річниця', width: '140px' },
-            { key: 'notes', label: 'Нотатки', width: '250px' },
+            { key: 'birth_date', label: @json(__('app.col_birth_date')), width: '140px' },
+            { key: 'gender', label: @json(__('app.gender')), width: '90px' },
+            { key: 'marital_status', label: @json(__('app.col_marital_status')), width: '130px' },
+            { key: 'membership_status', label: @json(__('app.status_filter')), width: '120px' },
+            { key: 'church_role', label: @json(__('app.col_role')), width: '140px' },
+            { key: 'ministry_id', label: @json(__('app.col_team')), width: '180px' },
+            { key: 'address', label: @json(__('app.address')), width: '220px' },
+            { key: 'first_visit_date', label: @json(__('app.col_first_visit')), width: '140px' },
+            { key: 'joined_date', label: @json(__('app.col_joined')), width: '140px' },
+            { key: 'baptism_date', label: @json(__('app.col_baptism')), width: '140px' },
+            { key: 'anniversary', label: @json(__('app.col_anniversary_col')), width: '140px' },
+            { key: 'notes', label: @json(__('app.col_notes')), width: '250px' },
         ],
 
         init() {
@@ -785,11 +785,11 @@ function quickEdit() {
                         if (row) row.user_id = true; // Mark as having access
                     });
                 } else {
-                    alert(data.message || 'Сталася помилка');
+                    alert(data.message || @json(__('app.bulk_action_error')));
                 }
             } catch (error) {
                 console.error('Grant access error:', error);
-                alert('Сталася помилка при наданні доступу');
+                alert(@json(__('app.error_granting_access')));
             } finally {
                 this.grantAccessLoading = false;
             }
@@ -862,7 +862,7 @@ function quickEdit() {
                     // Remove deleted rows
                     this.rows = this.rows.filter(r => !r.isDeleted);
 
-                    this.toast(`Збережено! Створено: ${data.stats.created}, Оновлено: ${data.stats.updated}, Видалено: ${data.stats.deleted}`);
+                    this.toast(@json(__('app.saved_stats', ['created' => ':created', 'updated' => ':updated', 'deleted' => ':deleted'])).replace(':created', data.stats.created).replace(':updated', data.stats.updated).replace(':deleted', data.stats.deleted));
                 } else {
                     alert(data.message || 'Помилка збереження');
                 }
