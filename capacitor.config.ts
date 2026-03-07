@@ -8,7 +8,17 @@ const config: CapacitorConfig = {
   // Remote URL mode — the native shell loads the production site
   server: {
     url: 'https://ministrify.app',
-    cleartext: false, // HTTPS only
+    cleartext: false,
+    allowNavigation: ['ministrify.app', '*.ministrify.app'],
+  },
+
+  android: {
+    allowMixedContent: false,
+    backgroundColor: '#ffffff',
+    buildOptions: {
+      keystorePath: 'ministrify-release.keystore',
+      keystoreAlias: 'ministrify',
+    },
   },
 
   plugins: {
@@ -17,10 +27,13 @@ const config: CapacitorConfig = {
       launchShowDuration: 2000,
       backgroundColor: '#3b82f6',
       showSpinner: false,
+      splashImmersive: true,
+      splashFullScreen: true,
     },
     StatusBar: {
-      style: 'LIGHT',
-      backgroundColor: '#3b82f6',
+      style: 'DEFAULT',
+      backgroundColor: '#ffffff',
+      overlaysWebView: false,
     },
     Keyboard: {
       resize: 'body',

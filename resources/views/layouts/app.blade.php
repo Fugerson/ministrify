@@ -113,7 +113,7 @@
         }, 5 * 60 * 1000);
     </script>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="theme-color" content="{{ $currentChurch->primary_color ?? '#3b82f6' }}">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -132,6 +132,7 @@
             document.documentElement.classList.add('capacitor-native');
         }
     </script>
+    <script src="/js/capacitor-bridge.js" defer></script>
 
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json">
@@ -193,6 +194,10 @@
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
         .safe-top { padding-top: env(safe-area-inset-top); }
+
+        /* Capacitor native app adjustments */
+        .capacitor-native body { padding-top: env(safe-area-inset-top); }
+        .capacitor-native .pwa-install-banner { display: none !important; }
         input:focus, select:focus, textarea:focus { outline: none; }
         @media screen and (max-width: 768px) {
             input, select, textarea { font-size: 16px !important; }
@@ -1897,7 +1902,7 @@
          x-transition:leave="transition ease-in duration-200"
          x-transition:leave-start="opacity-100"
          x-transition:leave-end="opacity-0 transform translate-y-full"
-         class="fixed bottom-0 left-0 right-0 z-50 p-4 bg-gradient-to-r from-primary-600 to-primary-700 text-white shadow-lg md:bottom-4 md:left-4 md:right-auto md:max-w-sm md:rounded-2xl">
+         class="pwa-install-banner fixed bottom-0 left-0 right-0 z-50 p-4 bg-gradient-to-r from-primary-600 to-primary-700 text-white shadow-lg md:bottom-4 md:left-4 md:right-auto md:max-w-sm md:rounded-2xl">
         <div class="flex items-start gap-4">
             <div class="flex-shrink-0 w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
                 <img src="/icons/icon-72x72.png" alt="Ministrify" class="w-8 h-8">
@@ -1941,6 +1946,8 @@
             isIOS: /iPad|iPhone|iPod/.test(navigator.userAgent),
 
             init() {
+                // Don't show in native Capacitor app
+                if (window.isCapacitor) return;
                 // Check if already installed or dismissed
                 if (localStorage.getItem('pwa-installed') === 'true') return;
                 if (localStorage.getItem('pwa-banner-dismissed')) {

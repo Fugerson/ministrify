@@ -1,7 +1,7 @@
 {
     "name": "Ministrify",
     "short_name": "Ministrify",
-    "description": "Церковна CRM система для управління служіннями, подіями та членами",
+    "description": "Church management — schedules, people, finances, attendance",
     "start_url": "/dashboard",
     "display": "standalone",
     "background_color": "#ffffff",
@@ -15,70 +15,82 @@
             "src": "/icons/icon-72x72.png",
             "sizes": "72x72",
             "type": "image/png",
-            "purpose": "maskable any"
+            "purpose": "any"
         },
         {
             "src": "/icons/icon-96x96.png",
             "sizes": "96x96",
             "type": "image/png",
-            "purpose": "maskable any"
+            "purpose": "any"
         },
         {
             "src": "/icons/icon-128x128.png",
             "sizes": "128x128",
             "type": "image/png",
-            "purpose": "maskable any"
+            "purpose": "any"
         },
         {
             "src": "/icons/icon-144x144.png",
             "sizes": "144x144",
             "type": "image/png",
-            "purpose": "maskable any"
+            "purpose": "any"
         },
         {
             "src": "/icons/icon-152x152.png",
             "sizes": "152x152",
             "type": "image/png",
-            "purpose": "maskable any"
+            "purpose": "any"
         },
         {
             "src": "/icons/icon-192x192.png",
             "sizes": "192x192",
             "type": "image/png",
-            "purpose": "maskable any"
+            "purpose": "any"
         },
         {
             "src": "/icons/icon-384x384.png",
             "sizes": "384x384",
             "type": "image/png",
-            "purpose": "maskable any"
+            "purpose": "any"
         },
         {
             "src": "/icons/icon-512x512.png",
             "sizes": "512x512",
             "type": "image/png",
-            "purpose": "maskable any"
+            "purpose": "any"
+        },
+        {
+            "src": "/icons/icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable"
+        },
+        {
+            "src": "/icons/icon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
         }
     ],
     "shortcuts": [
         {
-            "name": "Розклад",
-            "short_name": "Розклад",
-            "description": "Переглянути розклад подій",
+            "name": "Schedule",
+            "short_name": "Schedule",
+            "description": "View event schedule",
             "url": "/schedule",
             "icons": [{"src": "/icons/calendar.png", "sizes": "96x96"}]
         },
         {
-            "name": "Люди",
-            "short_name": "Люди",
-            "description": "Список членів церкви",
+            "name": "People",
+            "short_name": "People",
+            "description": "Church members list",
             "url": "/people",
             "icons": [{"src": "/icons/people.png", "sizes": "96x96"}]
         },
         {
-            "name": "Дошки",
-            "short_name": "Дошки",
-            "description": "Kanban дошки задач",
+            "name": "Boards",
+            "short_name": "Boards",
+            "description": "Kanban task boards",
             "url": "/boards",
             "icons": [{"src": "/icons/boards.png", "sizes": "96x96"}]
         }
