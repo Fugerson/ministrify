@@ -79,10 +79,10 @@ window.exchangeModal = function() {
                     showToast('success', data.message);
                     setTimeout(() => Livewire.navigate(window.location.href), 500);
                 } else {
-                    showToast('error', data.message || 'Помилка');
+                    showToast('error', data.message || '{{ __('app.save_error') }}');
                 }
             } catch (e) {
-                showToast('error', 'Помилка з\'єднання');
+                showToast('error', '{{ __('app.connection_error') }}');
             } finally {
                 this.loading = false;
             }
@@ -108,7 +108,7 @@ window.exchangeModal = function() {
                  x-transition:enter-end="opacity-100 scale-100"
                  @click.stop>
                 <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Обмін валюти</h3>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.exchange_title') }}</h3>
                     <button @click="modalOpen = false" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -117,7 +117,7 @@ window.exchangeModal = function() {
                 </div>
                 <form @submit.prevent="submit()" class="p-6 space-y-4">
                     <div class="bg-red-50 dark:bg-red-900/20 rounded-lg p-4">
-                        <label class="block text-sm font-medium text-red-700 dark:text-red-300 mb-2">Віддаєте</label>
+                        <label class="block text-sm font-medium text-red-700 dark:text-red-300 mb-2">{{ __('app.exchange_you_give') }}</label>
                         <div class="flex gap-2">
                             <input type="number" x-model="formData.from_amount" @input="calculate()" step="0.01" min="0.01" required
                                    class="flex-1 px-4 py-2 border border-red-200 dark:border-red-800 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
@@ -138,7 +138,7 @@ window.exchangeModal = function() {
                         <span class="font-medium">₴</span>
                     </div>
                     <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
-                        <label class="block text-sm font-medium text-green-700 dark:text-green-300 mb-2">Отримуєте</label>
+                        <label class="block text-sm font-medium text-green-700 dark:text-green-300 mb-2">{{ __('app.exchange_you_receive') }}</label>
                         <div class="flex gap-2">
                             <input type="number" x-model="formData.to_amount" step="0.01" min="0.01" required readonly
                                    class="flex-1 px-4 py-2 border border-green-200 dark:border-green-800 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white">
@@ -151,28 +151,28 @@ window.exchangeModal = function() {
                         </div>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Дата</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.date_column') }}</label>
                         <input type="date" x-model="formData.date" required
                                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Нотатки</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.notes_label_simple') }}</label>
                         <input type="text" x-model="formData.notes" maxlength="500"
                                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                               placeholder="Де обміняли...">
+                               placeholder="{{ __('app.where_exchanged') }}">
                     </div>
                     <div x-show="formData.from_currency === formData.to_currency" class="bg-red-50 dark:bg-red-900/20 rounded-lg p-3">
-                        <p class="text-sm text-red-700 dark:text-red-300">Оберіть різні валюти</p>
+                        <p class="text-sm text-red-700 dark:text-red-300">{{ __('app.select_different_currencies') }}</p>
                     </div>
                     <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
                         <button type="button" @click="modalOpen = false"
                                 class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-                            Скасувати
+                            {{ __('app.cancel') }}
                         </button>
                         <button type="submit" :disabled="loading || formData.from_currency === formData.to_currency"
                                 class="px-6 py-2 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-lg disabled:opacity-50">
-                            <span x-show="!loading">Обміняти</span>
-                            <span x-show="loading">Обмін...</span>
+                            <span x-show="!loading">{{ __('app.exchange_btn') }}</span>
+                            <span x-show="loading">{{ __('app.exchange_processing') }}</span>
                         </button>
                     </div>
                 </form>

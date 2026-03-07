@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Молитовні прохання')
+@section('title', __('app.prayer_index_title'))
 
 @section('actions')
 <div class="flex items-center space-x-2">
@@ -9,14 +9,14 @@
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
         </svg>
-        Молитовна стіна
+        {{ __('app.prayer_wall') }}
     </a>
     <button onclick="openCreatePrayerRequestModal()"
        class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors">
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
         </svg>
-        Нове прохання
+        {{ __('app.prayer_new_request') }}
     </button>
 </div>
 @endsection
@@ -33,7 +33,7 @@
                     </svg>
                 </div>
                 <div class="sm:ml-3 md:ml-4 mt-2 sm:mt-0 text-center sm:text-left">
-                    <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400">Активні</p>
+                    <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400">{{ __('app.prayer_stat_active') }}</p>
                     <p class="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['active'] }}</p>
                 </div>
             </div>
@@ -47,7 +47,7 @@
                     </svg>
                 </div>
                 <div class="sm:ml-3 md:ml-4 mt-2 sm:mt-0 text-center sm:text-left">
-                    <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400">Відповіді</p>
+                    <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400">{{ __('app.prayer_stat_answers') }}</p>
                     <p class="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['answered'] }}</p>
                 </div>
             </div>
@@ -59,7 +59,7 @@
                     <span class="text-lg md:text-2xl">🙏</span>
                 </div>
                 <div class="sm:ml-3 md:ml-4 mt-2 sm:mt-0 text-center sm:text-left">
-                    <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400">Молитов</p>
+                    <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400">{{ __('app.prayer_stat_prayers') }}</p>
                     <p class="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['total_prayers'] }}</p>
                 </div>
             </div>
@@ -71,15 +71,15 @@
         <div class="flex gap-1 sm:gap-2 min-w-max">
             <a href="{{ route('prayer-requests.index') }}"
                class="px-3 md:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap {{ !request('status') ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
-                Активні
+                {{ __('app.prayer_filter_active') }}
             </a>
             <a href="{{ route('prayer-requests.index', ['status' => 'answered']) }}"
                class="px-3 md:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap {{ request('status') === 'answered' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
-                Відповіді
+                {{ __('app.prayer_filter_answers') }}
             </a>
             <a href="{{ route('prayer-requests.index', ['status' => 'closed']) }}"
                class="px-3 md:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap {{ request('status') === 'closed' ? 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
-                Закриті
+                {{ __('app.prayer_filter_closed') }}
             </a>
         </div>
     </div>
@@ -93,12 +93,12 @@
                         <div class="flex flex-wrap items-center gap-1.5 md:gap-2 mb-2">
                             @if($request->is_urgent)
                                 <span class="px-2 py-1 bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 text-xs font-medium rounded-full">
-                                    🔥 Терміново
+                                    🔥 {{ __('app.prayer_badge_urgent') }}
                                 </span>
                             @endif
                             @if(!$request->is_public)
                                 <span class="px-2 py-1 bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400 text-xs font-medium rounded-full">
-                                    🔒 Приватне
+                                    🔒 {{ __('app.prayer_badge_private') }}
                                 </span>
                             @endif
                             <span class="px-2 py-1 bg-{{ $request->status_color }}-100 text-{{ $request->status_color }}-700 dark:bg-{{ $request->status_color }}-900/30 dark:text-{{ $request->status_color }}-400 text-xs font-medium rounded-full">
@@ -134,7 +134,7 @@
                                     :disabled="prayed"
                                     class="w-full sm:w-auto px-4 py-2 bg-primary-50 hover:bg-primary-100 dark:bg-primary-900/20 dark:hover:bg-primary-900/40 text-primary-600 dark:text-primary-400 rounded-lg font-medium text-sm transition-colors"
                                     :class="{ 'opacity-50': prayed }">
-                                🙏 <span x-text="prayed ? 'Помолився' : 'Молюсь'"></span>
+                                🙏 <span x-text="prayed ? @json(__('app.prayer_prayed')) : @json(__('app.prayer_praying'))"></span>
                             </button>
                         </div>
                     @endif
@@ -145,11 +145,11 @@
                 <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
                     <span class="text-3xl">🙏</span>
                 </div>
-                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Немає прохань</h3>
-                <p class="text-gray-500 dark:text-gray-400 mb-4">Поділіться своїм молитовним проханням з церквою</p>
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">{{ __('app.prayer_no_requests') }}</h3>
+                <p class="text-gray-500 dark:text-gray-400 mb-4">{{ __('app.prayer_no_requests_desc') }}</p>
                 <button onclick="openCreatePrayerRequestModal()"
                    class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">
-                    Додати прохання
+                    {{ __('app.prayer_add_request') }}
                 </button>
             </div>
         @endforelse
@@ -168,7 +168,7 @@
                 <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
                         <span class="text-2xl mr-2">🙏</span>
-                        Нове молитовне прохання
+                        {{ __('app.prayer_new_title') }}
                     </h2>
                     <button type="button" onclick="closeCreatePrayerRequestModal()" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -179,11 +179,11 @@
                 <div class="px-6 py-4 space-y-5 max-h-[70vh] overflow-y-auto">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Заголовок <span class="text-red-500">*</span>
+                            {{ __('app.prayer_title_label') }} <span class="text-red-500">*</span>
                         </label>
                         <input type="text" name="title" required maxlength="255"
                                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                               placeholder="Коротко опишіть прохання">
+                               placeholder="{{ __('app.prayer_title_placeholder') }}">
                         <template x-if="errors.title">
                             <p class="mt-1 text-sm text-red-500" x-text="errors.title[0]"></p>
                         </template>
@@ -191,11 +191,11 @@
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Опис <span class="text-red-500">*</span>
+                            {{ __('app.prayer_description_label') }} <span class="text-red-500">*</span>
                         </label>
                         <textarea name="description" rows="5" required maxlength="2000"
                                   class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                                  placeholder="Детально опишіть ваше молитовне прохання..."></textarea>
+                                  placeholder="{{ __('app.prayer_description_placeholder') }}"></textarea>
                         <template x-if="errors.description">
                             <p class="mt-1 text-sm text-red-500" x-text="errors.description[0]"></p>
                         </template>
@@ -206,8 +206,8 @@
                             <input type="checkbox" name="is_urgent" value="1"
                                    class="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500">
                             <div>
-                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">🔥 Терміново</span>
-                                <p class="text-xs text-gray-500 dark:text-gray-400">Позначити як термінове прохання</p>
+                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">🔥 {{ __('app.prayer_urgent') }}</span>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.prayer_urgent_desc') }}</p>
                             </div>
                         </label>
 
@@ -215,8 +215,8 @@
                             <input type="checkbox" name="is_public" value="1" checked
                                    class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500">
                             <div>
-                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">👥 Публічне</span>
-                                <p class="text-xs text-gray-500 dark:text-gray-400">Інші члени церкви зможуть бачити та молитися</p>
+                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">👥 {{ __('app.prayer_public') }}</span>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.prayer_public_desc') }}</p>
                             </div>
                         </label>
 
@@ -224,8 +224,8 @@
                             <input type="checkbox" name="is_anonymous" value="1"
                                    class="w-4 h-4 text-gray-600 border-gray-300 rounded focus:ring-gray-500">
                             <div>
-                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">🎭 Анонімно</span>
-                                <p class="text-xs text-gray-500 dark:text-gray-400">Ваше ім'я не буде відображатися</p>
+                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">🎭 {{ __('app.prayer_anonymous') }}</span>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.prayer_anonymous_desc') }}</p>
                             </div>
                         </label>
                     </div>
@@ -235,14 +235,14 @@
                 <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3 px-6 py-4 border-t border-gray-200 dark:border-gray-700">
                     <button type="button" onclick="closeCreatePrayerRequestModal()"
                             class="w-full sm:w-auto px-4 py-2 text-center text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
-                        Скасувати
+                        {{ __('app.prayer_cancel') }}
                     </button>
                     <button type="submit" :disabled="saving"
                             class="w-full sm:w-auto px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
-                        <span x-show="!saving">Надіслати прохання</span>
+                        <span x-show="!saving">{{ __('app.prayer_submit') }}</span>
                         <span x-show="saving" class="flex items-center justify-center gap-2">
                             <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
-                            Збереження...
+                            {{ __('app.prayer_saving') }}
                         </span>
                     </button>
                 </div>
@@ -270,6 +270,12 @@ function prayerRequestCreateForm() {
     return {
         saving: false,
         errors: {},
+        i18n: {
+            validationError: @json(__('app.prayer_validation_error')),
+            saveError: @json(__('app.prayer_save_error')),
+            added: @json(__('app.prayer_added')),
+            connectionError: @json(__('app.prayer_connection_error')),
+        },
         async submitForm() {
             this.saving = true;
             this.errors = {};
@@ -282,14 +288,14 @@ function prayerRequestCreateForm() {
                 });
                 const data = await response.json().catch(() => ({}));
                 if (!response.ok) {
-                    if (response.status === 422 && data.errors) { this.errors = data.errors; showToast('error', 'Перевірте правильність заповнення форми.'); }
-                    else { showToast('error', data.message || 'Помилка збереження.'); }
+                    if (response.status === 422 && data.errors) { this.errors = data.errors; showToast('error', this.i18n.validationError); }
+                    else { showToast('error', data.message || this.i18n.saveError); }
                     this.saving = false; return;
                 }
-                showToast('success', data.message || 'Молитовне прохання додано!');
+                showToast('success', data.message || this.i18n.added);
                 closeCreatePrayerRequestModal();
                 setTimeout(() => Livewire.navigate(window.location.href), 600);
-            } catch (e) { showToast('error', "Помилка з'єднання з сервером."); this.saving = false; }
+            } catch (e) { showToast('error', this.i18n.connectionError); this.saving = false; }
         }
     }
 }

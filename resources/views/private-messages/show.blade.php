@@ -16,13 +16,13 @@
         </div>
         <div class="ml-3 flex-1">
             <h2 class="font-semibold text-gray-900 dark:text-white">{{ $user->name }}</h2>
-            <p class="text-xs text-gray-500 dark:text-gray-400">{{ $user->role === 'admin' ? 'Адміністратор' : ($user->role === 'leader' ? 'Лідер' : 'Служитель') }}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400">{{ $user->role === 'admin' ? __('app.pm_admin') : ($user->role === 'leader' ? __('app.pm_leader') : __('app.pm_servant')) }}</p>
         </div>
         <a href="{{ route('pm.index') }}" class="hidden lg:flex items-center text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
             </svg>
-            Всі повідомлення
+            {{ __('app.pm_all_messages') }}
         </a>
     </div>
 
@@ -37,7 +37,7 @@
                 @php $lastDate = $message->created_at->format('Y-m-d'); @endphp
                 <div class="flex items-center justify-center my-4">
                     <span class="px-3 py-1 bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 text-xs rounded-full">
-                        {{ $message->created_at->isToday() ? 'Сьогодні' : ($message->created_at->isYesterday() ? 'Вчора' : $message->created_at->format('d.m.Y')) }}
+                        {{ $message->created_at->isToday() ? __('app.pm_today') : ($message->created_at->isYesterday() ? __('common.yesterday') : $message->created_at->format('d.m.Y')) }}
                     </span>
                 </div>
             @endif
@@ -75,7 +75,7 @@
                 <textarea x-model="message"
                           @keydown.enter.prevent="if (!$event.shiftKey) sendMessage()"
                           rows="1"
-                          placeholder="Напишіть повідомлення..."
+                          placeholder="{{ __('app.pm_write_message_short') }}"
                           class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-0 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500 resize-none"
                           x-ref="messageInput"
                           @input="autoResize($el)"></textarea>
@@ -94,7 +94,6 @@
 
 @push('scripts')
 <script>
-// Global lock to prevent any double sends
 window._pmSending = false;
 
 function chatApp() {
@@ -123,11 +122,7 @@ function chatApp() {
         },
 
         sendMessage() {
-            // Global lock - prevent any double sends
-            if (window._pmSending) {
-                // blocked by global lock
-                return;
-            }
+            if (window._pmSending) return;
             window._pmSending = true;
 
             const messageText = this.message.trim();
@@ -153,8 +148,6 @@ function chatApp() {
             })
             .then(response => {
                 if (response.ok) {
-                    // Don't add locally - let polling fetch it to avoid duplicates
-                    // Force immediate poll to show message faster
                     setTimeout(() => this.pollMessages(), 500);
                 }
             })
@@ -180,7 +173,6 @@ function chatApp() {
 
                 if (data.messages && data.messages.length > 0) {
                     data.messages.forEach(msg => {
-                        // Avoid duplicates by checking real message ID
                         if (!this.newMessages.find(m => m.id === msg.id)) {
                             this.newMessages.push(msg);
                             this.lastMessageId = Math.max(this.lastMessageId, msg.id);

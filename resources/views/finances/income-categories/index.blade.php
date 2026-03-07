@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Категорії надходжень')
+@section('title', __('app.income_categories_title'))
 
 @section('content')
 <div class="max-w-4xl mx-auto space-y-6">
@@ -8,13 +8,13 @@
         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
         </svg>
-        До налаштувань
+        {{ __('app.back_to_settings') }}
     </a>
 
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Категорії надходжень</h2>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Налаштуйте категорії для відстеження різних типів надходжень</p>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.income_categories_title') }}</h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ __('app.income_categories_desc') }}</p>
         </div>
 
         <div class="p-6">
@@ -22,23 +22,23 @@
             <form @submit.prevent="submit($refs.addForm)" x-ref="addForm"
                   x-data="{ ...ajaxForm({ url: '{{ route('settings.income-categories.store') }}', method: 'POST', resetOnSuccess: true, stayOnPage: true, onSuccess() { _addIncomeCategory(this); } }) }"
                   class="mb-6 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
-                <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-4">Додати категорію</h3>
+                <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-4">{{ __('app.add_category') }}</h3>
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div>
-                        <input type="text" name="name" placeholder="Назва категорії" required
+                        <input type="text" name="name" placeholder="{{ __('app.category_name_placeholder') }}" required
                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
                         <template x-if="errors.name">
                             <p class="mt-1 text-sm text-red-600" x-text="errors.name[0]"></p>
                         </template>
                     </div>
                     <div class="relative">
-                        <input type="text" name="icon" placeholder="Емодзі" maxlength="10"
+                        <input type="text" name="icon" placeholder="{{ __('app.emoji_label') }}" maxlength="10"
                                class="w-full px-3 py-2 pr-8 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
                                oninput="this.nextElementSibling.style.display = this.value ? '' : 'none'">
                         <button type="button" style="display:none"
                                 onclick="const i=this.previousElementSibling; i.value=''; i.focus(); this.style.display='none'"
                                 class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 transition-colors"
-                                title="Очистити">
+                                title="{{ __('app.clear_btn') }}">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                         </button>
                     </div>
@@ -48,7 +48,7 @@
                     </div>
                     <div>
                         <button type="submit" :disabled="saving" class="w-full px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
-                            Додати
+                            {{ __('app.add_btn') }}
                         </button>
                     </div>
                 </div>
@@ -65,7 +65,7 @@
                                 </div>
                                 <div>
                                     <p class="font-medium text-gray-900 dark:text-white">{{ $category->name }}</p>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $category->incomes_count }} записів</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $category->incomes_count }} {{ __('app.entries_count') }}</p>
                                 </div>
                             </div>
                             <div class="flex items-center space-x-2">
@@ -102,7 +102,7 @@
                                     <button type="button" {!! $category->icon_emoji ? '' : 'style="display:none"' !!}
                                             onclick="const i=this.previousElementSibling; i.value=''; i.focus(); this.style.display='none'"
                                             class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 transition-colors"
-                                            title="Очистити">
+                                            title="{{ __('app.clear_btn') }}">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                                     </button>
                                 </div>
@@ -112,17 +112,17 @@
                                 </div>
                                 <div class="flex items-center space-x-2">
                                     <button type="submit" :disabled="saving" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
-                                        Зберегти
+                                        {{ __('app.save_btn') }}
                                     </button>
                                     <button type="button" @click="editing = false" class="px-4 py-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white">
-                                        Скасувати
+                                        {{ __('app.cancel') }}
                                     </button>
                                 </div>
                             </div>
                         </form>
                     </div>
                 @empty
-                    <p class="text-center text-gray-500 dark:text-gray-400 py-8">Немає категорій. Додайте першу категорію вище.</p>
+                    <p class="text-center text-gray-500 dark:text-gray-400 py-8">{{ __('app.no_categories_yet') }}. {{ __('app.add_first_income_category') }}</p>
                 @endforelse
             </div>
         </div>
@@ -143,7 +143,7 @@ function _addIncomeCategory(ctx) {
     var el = document.createElement('div');
     el.setAttribute('data-category', '');
     el.className = 'border border-gray-200 dark:border-gray-700 rounded-lg p-4';
-    el.innerHTML = '\x3Cdiv class="flex items-center justify-between">\x3Cdiv class="flex items-center space-x-4">\x3Cdiv class="w-10 h-10 rounded-full flex items-center justify-center text-lg" style="background-color: ' + color + '20">' + safeIcon + '\x3C/div>\x3Cdiv>\x3Cp class="font-medium text-gray-900 dark:text-white">' + safeName + '\x3C/p>\x3Cp class="text-xs text-gray-500 dark:text-gray-400 mt-1">0 записів\x3C/p>\x3C/div>\x3C/div>\x3C/div>';
+    el.innerHTML = '\x3Cdiv class="flex items-center justify-between">\x3Cdiv class="flex items-center space-x-4">\x3Cdiv class="w-10 h-10 rounded-full flex items-center justify-center text-lg" style="background-color: ' + color + '20">' + safeIcon + '\x3C/div>\x3Cdiv>\x3Cp class="font-medium text-gray-900 dark:text-white">' + safeName + '\x3C/p>\x3Cp class="text-xs text-gray-500 dark:text-gray-400 mt-1">0 {{ __('app.entries_count') }}\x3C/p>\x3C/div>\x3C/div>\x3C/div>';
     list.appendChild(el);
 }
 

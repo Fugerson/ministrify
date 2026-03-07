@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Моя карта')
+@section('title', __('app.my_card'))
 
 @section('content')
 @include('finances.partials.tabs')

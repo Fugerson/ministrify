@@ -1,13 +1,13 @@
 @extends('layouts.app')
 
-@section('title', 'Розсилка')
+@section('title', __('app.msg_broadcast'))
 
 @section('actions')
 <a href="{{ route('messages.create') }}" class="inline-flex items-center px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-xl hover:bg-primary-700 transition-colors">
     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
     </svg>
-    Нова розсилка
+    {{ __('app.msg_new_broadcast') }}
 </a>
 @endsection
 
@@ -26,7 +26,7 @@
                 </div>
                 <div>
                     <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $logs->sum('sent_count') }}</p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Надіслано</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.msg_sent_count') }}</p>
                 </div>
             </div>
         </div>
@@ -39,7 +39,7 @@
                 </div>
                 <div>
                     <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $templates->count() }}</p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Шаблонів</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.msg_templates_count') }}</p>
                 </div>
             </div>
         </div>
@@ -52,7 +52,7 @@
                 </div>
                 <div>
                     <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $logs->count() }}</p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Розсилок</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.msg_broadcasts_count') }}</p>
                 </div>
             </div>
         </div>
@@ -62,10 +62,10 @@
         <!-- Templates -->
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
             <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                <h3 class="font-semibold text-gray-900 dark:text-white">Шаблони</h3>
+                <h3 class="font-semibold text-gray-900 dark:text-white">{{ __('app.msg_templates') }}</h3>
                 <button type="button" onclick="document.getElementById('templateModal').classList.remove('hidden')"
                         class="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 font-medium">
-                    + Новий
+                    {{ __('app.msg_new_template') }}
                 </button>
             </div>
             <div id="templates-list" class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -86,7 +86,7 @@
                 </div>
                 @empty
                 <div class="p-8 text-center text-gray-500 dark:text-gray-400">
-                    Немає шаблонів
+                    {{ __('app.msg_no_templates') }}
                 </div>
                 @endforelse
             </div>
@@ -95,7 +95,7 @@
         <!-- History -->
         <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
             <div class="p-4 border-b border-gray-200 dark:border-gray-700">
-                <h3 class="font-semibold text-gray-900 dark:text-white">Історія розсилок</h3>
+                <h3 class="font-semibold text-gray-900 dark:text-white">{{ __('app.msg_broadcast_history') }}</h3>
             </div>
             <div class="divide-y divide-gray-200 dark:divide-gray-700">
                 @forelse($logs as $log)
@@ -108,18 +108,18 @@
                             </div>
                             <p class="text-gray-900 dark:text-white mt-2 line-clamp-2">{{ Str::limit($log->content, 150) }}</p>
                             <div class="flex items-center space-x-4 mt-2 text-sm">
-                                <span class="text-green-600 dark:text-green-400">Надіслано: {{ $log->sent_count }}</span>
+                                <span class="text-green-600 dark:text-green-400">{{ __('app.msg_sent_label') }} {{ $log->sent_count }}</span>
                                 @if($log->failed_count > 0)
-                                <span class="text-red-600 dark:text-red-400">Помилок: {{ $log->failed_count }}</span>
+                                <span class="text-red-600 dark:text-red-400">{{ __('app.msg_errors_label') }} {{ $log->failed_count }}</span>
                                 @endif
-                                <span class="text-gray-500 dark:text-gray-400">{{ $log->user?->name ?? 'Видалений' }}</span>
+                                <span class="text-gray-500 dark:text-gray-400">{{ $log->user?->name ?? __('app.msg_deleted_user') }}</span>
                             </div>
                         </div>
                     </div>
                 </div>
                 @empty
                 <div class="p-8 text-center text-gray-500 dark:text-gray-400">
-                    Немає розсилок
+                    {{ __('app.msg_no_broadcasts') }}
                 </div>
                 @endforelse
             </div>
@@ -132,23 +132,23 @@
     <div class="min-h-screen px-4 flex items-center justify-center">
         <div class="fixed inset-0 bg-black/50" onclick="document.getElementById('templateModal').classList.add('hidden')"></div>
         <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full p-6">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Новий шаблон</h3>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.msg_new_template_title') }}</h3>
             <form @submit.prevent="submit($refs.templateForm)" x-ref="templateForm"
                   x-data="{ ...ajaxForm({ url: '{{ route('messages.templates.store') }}', method: 'POST', stayOnPage: true, resetOnSuccess: true, onSuccess(data) { _addTemplate(this, data); } }) }">
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Назва</label>
-                        <input type="text" name="name" required placeholder="Привітання з днем народження"
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.msg_template_name') }}</label>
+                        <input type="text" name="name" required placeholder="{{ __('app.msg_template_name_placeholder') }}"
                                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl dark:text-white">
                         <template x-if="errors.name">
                             <p class="text-red-500 text-sm mt-1" x-text="errors.name[0]"></p>
                         </template>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Текст повідомлення</label>
-                        <textarea name="content" rows="4" required placeholder="Привіт, {first_name}!..."
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.msg_template_text') }}</label>
+                        <textarea name="content" rows="4" required placeholder="{{ __('app.msg_template_text_placeholder') }}"
                                   class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl dark:text-white"></textarea>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Змінні: {first_name}, {last_name}, {full_name}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('app.msg_template_variables') }}</p>
                         <template x-if="errors.content">
                             <p class="text-red-500 text-sm mt-1" x-text="errors.content[0]"></p>
                         </template>
@@ -157,10 +157,10 @@
                 <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3 mt-6">
                     <button type="button" onclick="document.getElementById('templateModal').classList.add('hidden')"
                             class="w-full sm:w-auto px-4 py-2 text-gray-700 dark:text-gray-300">
-                        Скасувати
+                        {{ __('app.msg_cancel') }}
                     </button>
                     <button type="submit" :disabled="saving" class="w-full sm:w-auto px-4 py-2 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700">
-                        Зберегти
+                        {{ __('app.msg_save') }}
                     </button>
                 </div>
             </form>
@@ -183,7 +183,7 @@ function _addTemplate(ctx, data) {
     if (safeContent.length > 100) safeContent = safeContent.substring(0, 100) + '...';
     var el = document.createElement('div');
     el.className = 'p-4';
-    el.innerHTML = '\x3Cdiv class="flex items-start justify-between">\x3Cdiv class="flex-1">\x3Cp class="font-medium text-gray-900 dark:text-white">' + safeName + '\x3C/p>\x3Cp class="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">' + safeContent + '\x3C/p>\x3C/div>\x3Cbutton onclick="ajaxDelete(\'/messages/templates/' + data.id + '\', \'Видалити?\', function() { this.closest(\'.p-4\').remove(); }.bind(this))" class="ml-2 p-1 text-gray-400 hover:text-red-500">\x3Csvg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">\x3Cpath stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>\x3C/svg>\x3C/button>\x3C/div>';
+    el.innerHTML = '\x3Cdiv class="flex items-start justify-between">\x3Cdiv class="flex-1">\x3Cp class="font-medium text-gray-900 dark:text-white">' + safeName + '\x3C/p>\x3Cp class="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">' + safeContent + '\x3C/p>\x3C/div>\x3Cbutton onclick="ajaxDelete(\'/messages/templates/' + data.id + '\', \'{{ __("messages.confirm_delete_short") }}\', function() { this.closest(\'.p-4\').remove(); }.bind(this))" class="ml-2 p-1 text-gray-400 hover:text-red-500">\x3Csvg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">\x3Cpath stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>\x3C/svg>\x3C/button>\x3C/div>';
     list.appendChild(el);
 }
 </script>

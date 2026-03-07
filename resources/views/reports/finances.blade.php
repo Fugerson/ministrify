@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Звіт: Фінанси')
+@section('title', __('app.report_finances_title'))
 
 @section('actions')
 <a href="{{ route('reports.export-finances', ['year' => $year]) }}"
@@ -8,7 +8,7 @@
     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
     </svg>
-    Експорт Excel
+    {{ __('app.reports_export_excel') }}
 </a>
 @endsection
 
@@ -19,7 +19,7 @@
             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
             </svg>
-            Назад до звітів
+            {{ __('app.reports_back_to_reports') }}
         </a>
 
         <form>
@@ -35,7 +35,7 @@
     <!-- Year Comparison -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg p-6 text-white">
-            <p class="text-green-100 text-sm">Надходження {{ $year }}</p>
+            <p class="text-green-100 text-sm">{{ __('app.reports_income_year', ['year' => $year]) }}</p>
             <p class="text-3xl font-bold mt-1">{{ number_format($comparison['current']['income'], 0, ',', ' ') }} ₴</p>
             @if($comparison['previous']['income'] > 0)
                 @php $incomeGrowth = (($comparison['current']['income'] - $comparison['previous']['income']) / $comparison['previous']['income']) * 100; @endphp
@@ -46,7 +46,7 @@
         </div>
 
         <div class="bg-gradient-to-br from-red-500 to-red-600 rounded-xl shadow-lg p-6 text-white">
-            <p class="text-red-100 text-sm">Витрати {{ $year }}</p>
+            <p class="text-red-100 text-sm">{{ __('app.reports_expense_year', ['year' => $year]) }}</p>
             <p class="text-3xl font-bold mt-1">{{ number_format($comparison['current']['expense'], 0, ',', ' ') }} ₴</p>
             @if($comparison['previous']['expense'] > 0)
                 @php $expenseGrowth = (($comparison['current']['expense'] - $comparison['previous']['expense']) / $comparison['previous']['expense']) * 100; @endphp
@@ -57,7 +57,7 @@
         </div>
 
         <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg p-6 text-white">
-            <p class="text-blue-100 text-sm">Баланс {{ $year }}</p>
+            <p class="text-blue-100 text-sm">{{ __('app.reports_balance_year', ['year' => $year]) }}</p>
             @php $balance = $comparison['current']['income'] - $comparison['current']['expense']; @endphp
             <p class="text-3xl font-bold mt-1">{{ $balance >= 0 ? '+' : '' }}{{ number_format($balance, 0, ',', ' ') }} ₴</p>
         </div>
@@ -65,7 +65,7 @@
 
     <!-- Monthly Chart -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Динаміка по місяцях</h3>
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.reports_monthly_dynamics') }}</h3>
         <div class="h-72">
             <canvas id="financeChart"></canvas>
         </div>
@@ -74,7 +74,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Income by Category -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">💰 Надходження по категоріях</h3>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">💰 {{ __('app.reports_income_by_category') }}</h3>
             @if($incomeByCategory->count() > 0)
                 @php $totalIncome = $incomeByCategory->sum('total'); @endphp
                 <div class="space-y-3">
@@ -82,7 +82,7 @@
                         @php $percent = $totalIncome > 0 ? ($item->total / $totalIncome * 100) : 0; @endphp
                         <div>
                             <div class="flex items-center justify-between mb-1">
-                                <span class="text-sm text-gray-700 dark:text-gray-300">{{ $item->category?->icon ?? '💵' }} {{ $item->category?->name ?? 'Без категорії' }}</span>
+                                <span class="text-sm text-gray-700 dark:text-gray-300">{{ $item->category?->icon ?? '💵' }} {{ $item->category?->name ?? __('app.reports_no_category') }}</span>
                                 <span class="text-sm font-medium text-gray-900 dark:text-white">{{ number_format($item->total, 0, ',', ' ') }} ₴</span>
                             </div>
                             <div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2">
@@ -92,13 +92,13 @@
                     @endforeach
                 </div>
             @else
-                <p class="text-gray-500 dark:text-gray-400 text-center py-4">Немає даних</p>
+                <p class="text-gray-500 dark:text-gray-400 text-center py-4">{{ __('app.reports_no_data') }}</p>
             @endif
         </div>
 
         <!-- Expense by Ministry -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">📊 Витрати по командах</h3>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">📊 {{ __('app.reports_expense_by_team') }}</h3>
             @if($expenseByMinistry->count() > 0)
                 @php $totalExpense = $expenseByMinistry->sum('total'); @endphp
                 <div class="space-y-3">
@@ -106,7 +106,7 @@
                         @php $percent = $totalExpense > 0 ? ($item->total / $totalExpense * 100) : 0; @endphp
                         <div>
                             <div class="flex items-center justify-between mb-1">
-                                <span class="text-sm text-gray-700 dark:text-gray-300">{{ $item->ministry?->name ?? 'Без команди' }}</span>
+                                <span class="text-sm text-gray-700 dark:text-gray-300">{{ $item->ministry?->name ?? __('app.reports_no_team') }}</span>
                                 <span class="text-sm font-medium text-gray-900 dark:text-white">{{ number_format($item->total, 0, ',', ' ') }} ₴</span>
                             </div>
                             <div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2">
@@ -116,7 +116,7 @@
                     @endforeach
                 </div>
             @else
-                <p class="text-gray-500 dark:text-gray-400 text-center py-4">Немає даних</p>
+                <p class="text-gray-500 dark:text-gray-400 text-center py-4">{{ __('app.reports_no_data') }}</p>
             @endif
         </div>
     </div>
@@ -136,21 +136,21 @@ onPageReady(function() {
             labels: data.map(d => d.month),
             datasets: [
                 {
-                    label: 'Надходження',
+                    label: @json(__('app.reports_income_label')),
                     data: data.map(d => d.income),
                     backgroundColor: 'rgba(34, 197, 94, 0.8)',
                     borderRadius: 4,
                     yAxisID: 'y',
                 },
                 {
-                    label: 'Витрати',
+                    label: @json(__('app.reports_expense_label')),
                     data: data.map(d => d.expense),
                     backgroundColor: 'rgba(239, 68, 68, 0.8)',
                     borderRadius: 4,
                     yAxisID: 'y',
                 },
                 {
-                    label: 'Накопичувальний баланс',
+                    label: @json(__('app.reports_cumulative_balance')),
                     data: data.map(d => d.cumulative),
                     type: 'line',
                     borderColor: 'rgb(59, 130, 246)',

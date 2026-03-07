@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Редагувати оголошення')
+@section('title', __('app.ann_edit_title'))
 
 @section('content')
 <div class="max-w-2xl mx-auto">
@@ -9,33 +9,33 @@
             <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
             </svg>
-            Назад до оголошень
+            {{ __('app.ann_back_to_list') }}
         </a>
     </div>
 
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-        <h1 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Редагувати оголошення</h1>
+        <h1 class="text-xl font-bold text-gray-900 dark:text-white mb-6">{{ __('app.ann_edit_title') }}</h1>
 
         <form @submit.prevent="submit($refs.editAnnouncementForm)" x-ref="editAnnouncementForm"
               x-data="{ ...ajaxForm({url: '{{ route('announcements.update', $announcement) }}', method: 'PUT'}) }"
               class="space-y-6">
 
             <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Заголовок *</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.ann_heading_label') }}</label>
                 <input type="text" name="title" value="{{ old('title', $announcement->title) }}" required
                        class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent">
                 <template x-if="errors.title"><p class="mt-1 text-sm text-red-600" x-text="errors.title[0]"></p></template>
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Текст оголошення *</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.ann_content_label') }}</label>
                 <textarea name="content" rows="8" required
                           class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none">{{ old('content', $announcement->content) }}</textarea>
                 <template x-if="errors.content"><p class="mt-1 text-sm text-red-600" x-text="errors.content[0]"></p></template>
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Актуально до</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.ann_valid_until') }}</label>
                 <input type="date" name="expires_at" value="{{ old('expires_at', $announcement->expires_at?->format('Y-m-d')) }}"
                        class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
                 <template x-if="errors.expires_at"><p class="mt-1 text-sm text-red-600" x-text="errors.expires_at[0]"></p></template>
@@ -45,18 +45,18 @@
                 <input type="checkbox" name="is_pinned" value="1" id="is_pinned" {{ old('is_pinned', $announcement->is_pinned) ? 'checked' : '' }}
                        class="w-5 h-5 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500 dark:bg-gray-700">
                 <label for="is_pinned" class="ml-3 text-gray-700 dark:text-gray-300">
-                    Закріпити зверху
+                    {{ __('app.ann_pin_top') }}
                 </label>
             </div>
 
             <div class="flex justify-end gap-3 pt-4">
                 <a href="{{ route('announcements.index') }}"
                    class="px-6 py-3 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium rounded-xl">
-                    Скасувати
+                    {{ __('app.msg_cancel') }}
                 </a>
                 <button type="submit" :disabled="saving"
                         class="px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl">
-                    Зберегти
+                    {{ __('app.msg_save') }}
                 </button>
             </div>
         </form>

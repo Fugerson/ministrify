@@ -1,11 +1,53 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Ministrify</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3/dist/cdn.min.js"></script>
+    <script>
+        var _tmaI18n = @json([
+            'account_not_linked' => __('app.tma_account_not_linked'),
+            'link_instructions' => __('app.tma_link_instructions'),
+            'loading' => __('app.tma_loading'),
+            'upcoming_events' => __('app.tma_upcoming_events'),
+            'no_events_30days' => __('app.tma_no_events_30days'),
+            'my_assignments' => __('app.tma_my_assignments'),
+            'no_active_assignments' => __('app.tma_no_active_assignments'),
+            'confirm' => __('app.tma_confirm'),
+            'cant' => __('app.tma_cant'),
+            'responsibilities' => __('app.tma_responsibilities'),
+            'service_plan' => __('app.tma_service_plan'),
+            'announcements' => __('app.tma_announcements'),
+            'no_announcements' => __('app.tma_no_announcements'),
+            'prayer_needs' => __('app.tma_prayer_needs'),
+            'no_active_prayers' => __('app.tma_no_active_prayers'),
+            'urgent' => __('app.tma_urgent'),
+            'prayed' => __('app.tma_prayed'),
+            'pray' => __('app.tma_pray'),
+            'joined' => __('app.tma_joined'),
+            'ministries' => __('app.tma_ministries'),
+            'groups' => __('app.tma_groups'),
+            'statistics' => __('app.tma_statistics'),
+            'upcoming_assignments' => __('app.tma_upcoming_assignments'),
+            'confirmed' => __('app.tma_confirmed'),
+            'awaiting_response' => __('app.tma_awaiting_response'),
+            'birthdays' => __('app.tma_birthdays'),
+            'no_birthdays_soon' => __('app.tma_no_birthdays_soon'),
+            'today' => __('app.tma_today'),
+            'in_days' => __('app.tma_in_days'),
+            'years_short' => __('app.tma_years_short'),
+            'tab_events' => __('app.tma_tab_events'),
+            'tab_assignments' => __('app.tma_tab_assignments'),
+            'tab_announcements' => __('app.tma_tab_announcements'),
+            'tab_prayers' => __('app.tma_tab_prayers'),
+            'tab_profile' => __('app.tma_tab_profile'),
+            'status_pending' => __('app.tma_status_pending'),
+            'status_confirmed' => __('app.tma_status_confirmed'),
+            'status_declined' => __('app.tma_status_declined'),
+        ]);
+    </script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         [x-cloak] { display: none !important; }
@@ -222,15 +264,15 @@
     <template x-if="!person && !loadingInit">
         <div class="error-banner">
             <div style="font-size: 48px; margin-bottom: 16px;">🔗</div>
-            <h2>Акаунт не прив'язано</h2>
-            <p>Щоб користуватися додатком, надішліть команду <strong>/app</strong> боту та натисніть кнопку "Відкрити додаток".</p>
+            <h2 x-text="_tmaI18n.account_not_linked"></h2>
+            <p x-html="_tmaI18n.link_instructions"></p>
         </div>
     </template>
 
     <!-- Loading init -->
     <template x-if="loadingInit">
         <div class="loading" style="min-height: 100vh;">
-            <div class="spinner"></div> Завантаження...
+            <div class="spinner"></div> <span x-text="_tmaI18n.loading"></span>
         </div>
     </template>
 
@@ -240,7 +282,7 @@
             <!-- Events Tab -->
             <div class="tab-content" x-show="tab === 'events'" x-cloak>
                 <div class="section-header">
-                    <span>Найближчі події</span>
+                    <span x-text="_tmaI18n.upcoming_events"></span>
                     <button class="btn-refresh" @click="refreshTab('events')">↻</button>
                 </div>
                 <template x-if="loading.events">
@@ -249,7 +291,7 @@
                 <template x-if="!loading.events && events.length === 0">
                     <div class="empty-state">
                         <div class="empty-state-icon">📅</div>
-                        Немає подій на найближчі 30 днів
+                        <span x-text="_tmaI18n.no_events_30days"></span>
                     </div>
                 </template>
                 <template x-if="!loading.events && events.length > 0">
@@ -267,7 +309,7 @@
                                                     <div class="card-subtitle" x-text="event.ministry?.name || ''"></div>
                                                 </div>
                                             </div>
-                                            <span x-show="event.is_service" class="badge badge-service" x-text="event.service_type || 'Служіння'"></span>
+                                            <span x-show="event.is_service" class="badge badge-service" x-text="event.service_type || _tmaI18n.tab_assignments"></span>
                                         </div>
                                         <div class="card-meta" style="display: flex; gap: 12px; flex-wrap: wrap;">
                                             <span x-show="event.time">🕐 <span x-text="event.time + (event.end_time ? ' — ' + event.end_time : '')"></span></span>
@@ -285,7 +327,7 @@
             <!-- Assignments Tab -->
             <div class="tab-content" x-show="tab === 'assignments'" x-cloak>
                 <div class="section-header">
-                    <span>Мої призначення</span>
+                    <span x-text="_tmaI18n.my_assignments"></span>
                     <button class="btn-refresh" @click="refreshTab('assignments')">↻</button>
                 </div>
                 <template x-if="loading.assignments">
@@ -294,7 +336,7 @@
                 <template x-if="!loading.assignments && allAssignmentsEmpty">
                     <div class="empty-state">
                         <div class="empty-state-icon">✨</div>
-                        Немає активних призначень
+                        <span x-text="_tmaI18n.no_active_assignments"></span>
                     </div>
                 </template>
 
@@ -314,15 +356,15 @@
                             <span x-show="item.event.ministry" x-text="item.event.ministry?.name"></span>
                         </div>
                         <div class="btn-group" x-show="item.status === 'pending'">
-                            <button class="btn btn-confirm btn-sm" @click="confirmAssignment(item.id)" :disabled="item._loading">✓ Підтверджую</button>
-                            <button class="btn btn-decline btn-sm" @click="declineAssignment(item.id)" :disabled="item._loading">✗ Не можу</button>
+                            <button class="btn btn-confirm btn-sm" @click="confirmAssignment(item.id)" :disabled="item._loading">✓ <span x-text="_tmaI18n.confirm"></span></button>
+                            <button class="btn btn-decline btn-sm" @click="declineAssignment(item.id)" :disabled="item._loading">✗ <span x-text="_tmaI18n.cant"></span></button>
                         </div>
                     </div>
                 </template>
 
                 <!-- Responsibilities -->
                 <template x-if="responsibilitiesList.length > 0">
-                    <div class="section-header" style="margin-top: 4px;">Обов'язки</div>
+                    <div class="section-header" style="margin-top: 4px;" x-text="_tmaI18n.responsibilities"></div>
                 </template>
                 <template x-for="item in responsibilitiesList" :key="'r-' + item.id">
                     <div class="card">
@@ -338,15 +380,15 @@
                             <span x-show="item.event.time">🕐 <span x-text="item.event.time"></span></span>
                         </div>
                         <div class="btn-group" x-show="item.status === 'pending'">
-                            <button class="btn btn-confirm btn-sm" @click="confirmResponsibility(item.id)" :disabled="item._loading">✓ Підтверджую</button>
-                            <button class="btn btn-decline btn-sm" @click="declineResponsibility(item.id)" :disabled="item._loading">✗ Не можу</button>
+                            <button class="btn btn-confirm btn-sm" @click="confirmResponsibility(item.id)" :disabled="item._loading">✓ <span x-text="_tmaI18n.confirm"></span></button>
+                            <button class="btn btn-decline btn-sm" @click="declineResponsibility(item.id)" :disabled="item._loading">✗ <span x-text="_tmaI18n.cant"></span></button>
                         </div>
                     </div>
                 </template>
 
                 <!-- Service Plan Items -->
                 <template x-if="planItemsList.length > 0">
-                    <div class="section-header" style="margin-top: 4px;">План служіння</div>
+                    <div class="section-header" style="margin-top: 4px;" x-text="_tmaI18n.service_plan"></div>
                 </template>
                 <template x-for="item in planItemsList" :key="'p-' + item.id">
                     <div class="card">
@@ -368,8 +410,8 @@
                             <span x-show="item.event.time">🕐 <span x-text="item.event.time"></span></span>
                         </div>
                         <div class="btn-group" x-show="item.status === 'pending'">
-                            <button class="btn btn-confirm btn-sm" @click="confirmPlanItem(item.id)" :disabled="item._loading">✓ Підтверджую</button>
-                            <button class="btn btn-decline btn-sm" @click="declinePlanItem(item.id)" :disabled="item._loading">✗ Не можу</button>
+                            <button class="btn btn-confirm btn-sm" @click="confirmPlanItem(item.id)" :disabled="item._loading">✓ <span x-text="_tmaI18n.confirm"></span></button>
+                            <button class="btn btn-decline btn-sm" @click="declinePlanItem(item.id)" :disabled="item._loading">✗ <span x-text="_tmaI18n.cant"></span></button>
                         </div>
                     </div>
                 </template>
@@ -378,7 +420,7 @@
             <!-- Announcements Tab -->
             <div class="tab-content" x-show="tab === 'announcements'" x-cloak>
                 <div class="section-header">
-                    <span>Оголошення</span>
+                    <span x-text="_tmaI18n.announcements"></span>
                     <button class="btn-refresh" @click="refreshTab('announcements')">↻</button>
                 </div>
                 <template x-if="loading.announcements">
@@ -387,7 +429,7 @@
                 <template x-if="!loading.announcements && announcements.length === 0">
                     <div class="empty-state">
                         <div class="empty-state-icon">📢</div>
-                        Немає оголошень
+                        <span x-text="_tmaI18n.no_announcements"></span>
                     </div>
                 </template>
                 <template x-for="a in announcements" :key="a.id">
@@ -407,7 +449,7 @@
             <!-- Prayers Tab -->
             <div class="tab-content" x-show="tab === 'prayers'" x-cloak>
                 <div class="section-header">
-                    <span>Молитовні потреби</span>
+                    <span x-text="_tmaI18n.prayer_needs"></span>
                     <button class="btn-refresh" @click="refreshTab('prayers')">↻</button>
                 </div>
                 <template x-if="loading.prayers">
@@ -416,14 +458,14 @@
                 <template x-if="!loading.prayers && prayers.length === 0">
                     <div class="empty-state">
                         <div class="empty-state-icon">🙏</div>
-                        Немає активних молитовних потреб
+                        <span x-text="_tmaI18n.no_active_prayers"></span>
                     </div>
                 </template>
                 <template x-for="p in prayers" :key="p.id">
                     <div class="card">
                         <div class="card-header">
                             <div class="card-title" x-text="p.title"></div>
-                            <span x-show="p.is_urgent" class="badge badge-urgent">🔥 Терміново</span>
+                            <span x-show="p.is_urgent" class="badge badge-urgent">🔥 <span x-text="_tmaI18n.urgent"></span></span>
                         </div>
                         <div class="card-text" x-text="p.description"></div>
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
@@ -433,7 +475,7 @@
                             <div style="display: flex; align-items: center; gap: 8px;">
                                 <span style="font-size: 13px; color: var(--tg-hint);">🙏 <span x-text="p.prayer_count"></span></span>
                                 <button class="btn btn-pray btn-sm" @click="pray(p)" :disabled="p._prayed">
-                                    <span x-text="p._prayed ? '✓ Помолився' : '🙏 Помолитися'"></span>
+                                    <span x-text="p._prayed ? ('✓ ' + _tmaI18n.prayed) : ('🙏 ' + _tmaI18n.pray)"></span>
                                 </button>
                             </div>
                         </div>
@@ -460,13 +502,13 @@
                             <div class="profile-name" x-text="profile.full_name"></div>
                             <div class="profile-role" x-show="profile.membership_label" x-text="profile.membership_label"></div>
                             <div class="card-meta" x-show="profile.joined_date" style="text-align: center; margin-top: 4px;">
-                                Приєднався: <span x-text="profile.joined_date"></span>
+                                <span x-text="_tmaI18n.joined"></span> <span x-text="profile.joined_date"></span>
                             </div>
                         </div>
 
                         <template x-if="profile.ministries && profile.ministries.length > 0">
                             <div>
-                                <div class="section-header">Служіння</div>
+                                <div class="section-header" x-text="_tmaI18n.ministries"></div>
                                 <div class="card" style="display: flex; flex-wrap: wrap; gap: 4px;">
                                     <template x-for="m in profile.ministries" :key="m.name">
                                         <span class="chip">
@@ -480,7 +522,7 @@
 
                         <template x-if="profile.groups && profile.groups.length > 0">
                             <div>
-                                <div class="section-header">Групи</div>
+                                <div class="section-header" x-text="_tmaI18n.groups"></div>
                                 <template x-for="g in profile.groups" :key="g.name">
                                     <div class="card">
                                         <div class="card-title" x-text="g.name"></div>
@@ -494,33 +536,32 @@
                             </div>
                         </template>
 
-                        <div class="section-header">Статистика</div>
+                        <div class="section-header" x-text="_tmaI18n.statistics"></div>
                         <div class="card">
                             <div class="profile-stat">
-                                <span>Найближчі призначення</span>
+                                <span x-text="_tmaI18n.upcoming_assignments"></span>
                                 <span class="profile-stat-value" x-text="profile.stats.upcoming_assignments"></span>
                             </div>
                             <div class="profile-stat">
-                                <span>Підтверджені</span>
+                                <span x-text="_tmaI18n.confirmed"></span>
                                 <span class="profile-stat-value" x-text="profile.stats.confirmed_assignments"></span>
                             </div>
                             <div class="profile-stat">
-                                <span>Очікують відповіді</span>
+                                <span x-text="_tmaI18n.awaiting_response"></span>
                                 <span class="profile-stat-value" style="color: var(--tg-destructive);" x-text="profile.stats.pending_assignments"></span>
                             </div>
                         </div>
 
                         <!-- Birthdays -->
                         <div class="section-header">
-                            <span>🎂 Дні народження</span>
+                            <span>🎂 <span x-text="_tmaI18n.birthdays"></span></span>
                             <button class="btn-refresh" @click="loadBirthdays()">↻</button>
                         </div>
                         <template x-if="loading.birthdays">
                             <div class="loading"><div class="spinner"></div></div>
                         </template>
                         <template x-if="!loading.birthdays && birthdays.length === 0">
-                            <div class="card" style="text-align: center; color: var(--tg-hint); font-size: 13px; padding: 20px;">
-                                Немає днів народження найближчим часом
+                            <div class="card" style="text-align: center; color: var(--tg-hint); font-size: 13px; padding: 20px;" x-text="_tmaI18n.no_birthdays_soon">
                             </div>
                         </template>
                         <template x-if="!loading.birthdays && birthdays.length > 0">
@@ -531,12 +572,12 @@
                                             <div style="font-size: 14px; font-weight: 500;" x-text="b.full_name"></div>
                                             <div style="font-size: 12px; color: var(--tg-hint);">
                                                 <span x-text="b.date_formatted"></span>
-                                                <span x-show="b.age"> · <span x-text="b.age + ' р.'"></span></span>
+                                                <span x-show="b.age"> · <span x-text="b.age + ' ' + _tmaI18n.years_short"></span></span>
                                             </div>
                                         </div>
                                         <div>
-                                            <span x-show="b.is_today" class="badge badge-today">🎉 Сьогодні!</span>
-                                            <span x-show="!b.is_today" style="font-size: 12px; color: var(--tg-hint);" x-text="'через ' + b.days_until + ' дн.'"></span>
+                                            <span x-show="b.is_today" class="badge badge-today" x-text="'🎉 ' + _tmaI18n.today"></span>
+                                            <span x-show="!b.is_today" style="font-size: 12px; color: var(--tg-hint);" x-text="_tmaI18n.in_days.replace(':days', b.days_until)"></span>
                                         </div>
                                     </div>
                                 </template>
@@ -550,24 +591,24 @@
             <nav class="tab-bar">
                 <div class="tab-bar-item" :class="tab === 'events' && 'active'" @click="switchTab('events')">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                    <span>Події</span>
+                    <span x-text="_tmaI18n.tab_events"></span>
                 </div>
                 <div class="tab-bar-item" :class="tab === 'assignments' && 'active'" @click="switchTab('assignments')">
                     <span x-show="pendingCount > 0" class="tab-badge" x-text="pendingCount"></span>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M9 14l2 2 4-4"/></svg>
-                    <span>Служіння</span>
+                    <span x-text="_tmaI18n.tab_assignments"></span>
                 </div>
                 <div class="tab-bar-item" :class="tab === 'announcements' && 'active'" @click="switchTab('announcements')">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
-                    <span>Оголошення</span>
+                    <span x-text="_tmaI18n.tab_announcements"></span>
                 </div>
                 <div class="tab-bar-item" :class="tab === 'prayers' && 'active'" @click="switchTab('prayers')">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
-                    <span>Молитви</span>
+                    <span x-text="_tmaI18n.tab_prayers"></span>
                 </div>
                 <div class="tab-bar-item" :class="tab === 'profile' && 'active'" @click="switchTab('profile')">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                    <span>Профіль</span>
+                    <span x-text="_tmaI18n.tab_profile"></span>
                 </div>
             </nav>
         </div>
@@ -645,7 +686,11 @@
             },
 
             statusLabel(status) {
-                const map = { pending: 'Очікує', confirmed: 'Підтверджено', declined: 'Відхилено' };
+                const map = {
+                    pending: _tmaI18n.status_pending,
+                    confirmed: _tmaI18n.status_confirmed,
+                    declined: _tmaI18n.status_declined,
+                };
                 return map[status] || status;
             },
 
@@ -749,7 +794,7 @@
                     const res = await this.api('POST', `/api/tma/assignments/${id}/confirm`);
                     if (res?.success) {
                         item.status = 'confirmed';
-                        item.status_label = 'Підтверджено';
+                        item.status_label = _tmaI18n.status_confirmed;
                         this.haptic('success');
                     }
                 } catch (e) { console.error(e); }
@@ -764,7 +809,7 @@
                     const res = await this.api('POST', `/api/tma/assignments/${id}/decline`);
                     if (res?.success) {
                         item.status = 'declined';
-                        item.status_label = 'Відхилено';
+                        item.status_label = _tmaI18n.status_declined;
                         this.haptic('warning');
                     }
                 } catch (e) { console.error(e); }
@@ -779,7 +824,7 @@
                     const res = await this.api('POST', `/api/tma/responsibilities/${id}/confirm`);
                     if (res?.success) {
                         item.status = 'confirmed';
-                        item.status_label = 'Підтверджено';
+                        item.status_label = _tmaI18n.status_confirmed;
                         this.haptic('success');
                     }
                 } catch (e) { console.error(e); }
@@ -794,7 +839,7 @@
                     const res = await this.api('POST', `/api/tma/responsibilities/${id}/decline`);
                     if (res?.success) {
                         item.status = 'declined';
-                        item.status_label = 'Відхилено';
+                        item.status_label = _tmaI18n.status_declined;
                         this.haptic('warning');
                     }
                 } catch (e) { console.error(e); }

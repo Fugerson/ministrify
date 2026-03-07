@@ -42,18 +42,18 @@ function ajaxForm(config = {}) {
                 if (!response.ok) {
                     if (response.status === 422 && data.errors) {
                         this.errors = data.errors;
-                        showToast('error', data.message || 'Перевірте правильність заповнення форми.');
+                        showToast('error', data.message || @json(__('app.check_form_errors')));
                     } else if (response.status === 419) {
-                        showToast('error', 'Сесія закінчилась. Оновіть сторінку.');
+                        showToast('error', @json(__('app.session_expired')));
                         setTimeout(() => window.location.reload(), 1500);
                     } else {
-                        showToast('error', data.message || 'Помилка збереження.');
+                        showToast('error', data.message || @json(__('app.save_error')));
                     }
                     this.saving = false;
                     return;
                 }
 
-                showToast('success', data.message || 'Збережено!');
+                showToast('success', data.message || @json(__('app.saved_toast')));
 
                 if (config.onSuccess) {
                     config.onSuccess.call(this, data);
@@ -68,7 +68,7 @@ function ajaxForm(config = {}) {
 
                 this.saving = false;
             } catch (e) {
-                showToast('error', "Помилка з'єднання з сервером.");
+                showToast('error', @json(__('app.server_connection_error')));
                 this.saving = false;
             }
         }
@@ -84,7 +84,7 @@ function ajaxForm(config = {}) {
  *   <button @click="ajaxDelete(url, 'Ви впевнені?', null, redirectUrl)">
  */
 async function ajaxDelete(url, confirmMsg, onSuccess, redirectUrl) {
-    if (!confirm(confirmMsg || 'Ви впевнені?')) return;
+    if (!confirm(confirmMsg || @json(__('app.are_you_sure')))) return;
 
     try {
         const response = await fetch(url, {
@@ -100,11 +100,11 @@ async function ajaxDelete(url, confirmMsg, onSuccess, redirectUrl) {
         const data = await response.json().catch(() => ({}));
 
         if (!response.ok) {
-            showToast('error', data.message || 'Помилка видалення.');
+            showToast('error', data.message || @json(__('app.delete_error_generic')));
             return;
         }
 
-        showToast('success', data.message || 'Видалено!');
+        showToast('success', data.message || @json(__('app.deleted_toast')));
 
         if (onSuccess) {
             onSuccess(data);
@@ -112,7 +112,7 @@ async function ajaxDelete(url, confirmMsg, onSuccess, redirectUrl) {
             setTimeout(() => Livewire.navigate(redirectUrl || data.redirect_url), 600);
         }
     } catch (e) {
-        showToast('error', "Помилка з'єднання з сервером.");
+        showToast('error', @json(__('app.server_connection_error')));
     }
 }
 
@@ -145,15 +145,15 @@ async function ajaxAction(url, method = 'POST', body = {}) {
 
     if (!response.ok) {
         if (response.status === 419) {
-            showToast('error', 'Сесія закінчилась. Оновіть сторінку.');
+            showToast('error', @json(__('app.session_expired')));
             setTimeout(() => window.location.reload(), 1500);
         } else {
-            showToast('error', data.message || 'Помилка.');
+            showToast('error', data.message || @json(__('app.error_generic')));
         }
         throw new Error(data.message || 'Request failed');
     }
 
-    showToast('success', data.message || 'Готово!');
+    showToast('success', data.message || @json(__('app.done_toast')));
     return data;
 }
 </script>

@@ -1,18 +1,18 @@
 @extends('layouts.app')
 
-@section('title', 'Telegram чати')
+@section('title', __('app.tg_chats_title'))
 
 @section('content')
 <div class="max-w-4xl mx-auto space-y-6">
     <!-- Header -->
     <div class="flex items-center justify-between">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Telegram чати</h1>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('app.tg_chats_title') }}</h1>
             <p class="text-gray-600 dark:text-gray-400 mt-1">
                 @if($totalUnread > 0)
-                    <span class="text-primary-600 dark:text-primary-400 font-medium">{{ $totalUnread }} непрочитаних</span>
+                    <span class="text-primary-600 dark:text-primary-400 font-medium">{{ __('app.tg_unread_count', ['count' => $totalUnread]) }}</span>
                 @else
-                    Всі повідомлення прочитані
+                    {{ __('app.tg_all_read') }}
                 @endif
             </p>
         </div>
@@ -20,13 +20,13 @@
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
             </svg>
-            Розсилка
+            {{ __('app.tg_broadcast') }}
         </a>
     </div>
 
     @if(!$hasBot)
         <div class="bg-amber-100 dark:bg-amber-900/30 border border-amber-400 dark:border-amber-600 text-amber-700 dark:text-amber-400 px-4 py-3 rounded-lg">
-            Telegram бот не налаштований. <a href="{{ route('settings.index') }}" class="underline">Налаштувати</a>
+            {{ __('app.tg_bot_not_configured') }} <a href="{{ route('settings.index') }}" class="underline">{{ __('app.tg_configure') }}</a>
         </div>
     @elseif($conversations->count() > 0)
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 divide-y divide-gray-200 dark:divide-gray-700">
@@ -65,12 +65,12 @@
                         @if($lastMessage)
                             <p class="text-sm text-gray-600 dark:text-gray-400 truncate mt-0.5">
                                 @if($lastMessage->isOutgoing())
-                                    <span class="text-gray-400 dark:text-gray-500">Ви: </span>
+                                    <span class="text-gray-400 dark:text-gray-500">{{ __('app.tg_you_prefix') }} </span>
                                 @endif
                                 {{ Str::limit($lastMessage->message, 50) }}
                             </p>
                         @else
-                            <p class="text-sm text-gray-400 dark:text-gray-500 mt-0.5">Немає повідомлень</p>
+                            <p class="text-sm text-gray-400 dark:text-gray-500 mt-0.5">{{ __('app.tg_no_messages') }}</p>
                         @endif
                     </div>
 
@@ -88,10 +88,10 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
                 </svg>
             </div>
-            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Немає чатів</h3>
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">{{ __('app.tg_no_chats') }}</h3>
             <p class="text-gray-500 dark:text-gray-400">
-                Ніхто ще не підключив Telegram.<br>
-                Люди можуть підключитись через бота.
+                {{ __('app.tg_no_chats_desc') }}<br>
+                {{ __('app.tg_connect_via_bot') }}
             </p>
         </div>
     @endif

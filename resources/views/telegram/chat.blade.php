@@ -42,7 +42,7 @@
                 </div>
             @empty
                 <div class="h-full flex items-center justify-center text-gray-500 dark:text-gray-400">
-                    <p>Почніть розмову</p>
+                    <p>{{ __('app.tg_start_conversation') }}</p>
                 </div>
             @endforelse
         </div>
@@ -55,7 +55,7 @@
                 <div class="flex gap-3">
                     <textarea name="message" rows="1" required
                               class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none"
-                              placeholder="Напишіть повідомлення..."
+                              placeholder="{{ __('app.tg_write_message') }}"
                               @keydown.enter.prevent="if(!$event.shiftKey) submit($refs.chatForm)"></textarea>
                     <button type="submit" :disabled="saving" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors flex items-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -66,7 +66,7 @@
             </form>
         @else
             <div class="border-t border-gray-200 dark:border-gray-700 p-4 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 text-sm text-center">
-                Telegram бот не налаштований. <a href="{{ route('settings.index') }}" class="underline">Налаштувати</a>
+                {{ __('app.tg_bot_not_configured') }} <a href="{{ route('settings.index') }}" class="underline">{{ __('app.tg_configure') }}</a>
             </div>
         @endif
     </div>

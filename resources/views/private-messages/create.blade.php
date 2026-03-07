@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Нове повідомлення')
+@section('title', __('app.pm_new_message'))
 
 @section('content')
 <div class="max-w-2xl mx-auto">
@@ -9,26 +9,26 @@
             <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
             </svg>
-            Назад до повідомлень
+            {{ __('app.pm_back_to_messages') }}
         </a>
     </div>
 
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-        <h1 class="text-xl font-bold text-gray-900 dark:text-white mb-6">Нове повідомлення</h1>
+        <h1 class="text-xl font-bold text-gray-900 dark:text-white mb-6">{{ __('app.pm_new_message') }}</h1>
 
         <form @submit.prevent="submit($refs.pmForm)" x-ref="pmForm" class="space-y-6"
               x-data="{ ...ajaxForm({ url: '{{ route('pm.store') }}', method: 'POST' }) }">
 
             <!-- Recipient -->
             <div x-data="{ search: '', open: false, selected: null }">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Кому</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.pm_to_label') }}</label>
 
                 <div class="relative">
                     <input type="text"
                            x-model="search"
                            @focus="open = true"
                            @click.away="open = false"
-                           placeholder="Почніть вводити ім'я..."
+                           placeholder="{{ __('app.pm_start_typing_name') }}"
                            class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                            :class="selected ? 'hidden' : ''">
 
@@ -74,11 +74,11 @@
 
             <!-- Message -->
             <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Повідомлення</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.pm_message_label') }}</label>
                 <textarea name="message"
                           rows="5"
                           required
-                          placeholder="Напишіть ваше повідомлення..."
+                          placeholder="{{ __('app.pm_write_your_message') }}"
                           class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none">{{ old('message') }}</textarea>
                 <template x-if="errors.message">
                     <p class="mt-1 text-sm text-red-600" x-text="errors.message[0]"></p>
@@ -88,11 +88,11 @@
             <div class="flex justify-end gap-3">
                 <a href="{{ route('pm.index') }}"
                    class="px-6 py-3 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium rounded-xl">
-                    Скасувати
+                    {{ __('app.msg_cancel') }}
                 </a>
                 <button type="submit" :disabled="saving"
                         class="px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl">
-                    <span x-text="saving ? 'Надсилання...' : 'Надіслати'"></span>
+                    <span x-text="saving ? @json(__('app.msg_sending')) : @json(__('app.msg_send'))"></span>
                 </button>
             </div>
         </form>

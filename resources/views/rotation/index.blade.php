@@ -1,14 +1,14 @@
 @extends('layouts.app')
 
-@section('title', 'Ротація служительів')
+@section('title', __('app.rotation_title'))
 
 @section('content')
 <div class="space-y-6">
     <!-- Header -->
     <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Ротація служительів</h1>
-            <p class="text-gray-500 dark:text-gray-400 mt-1">Автоматичний розподіл служителів по подіям</p>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('app.rotation_title') }}</h1>
+            <p class="text-gray-500 dark:text-gray-400 mt-1">{{ __('app.rotation_subtitle') }}</p>
         </div>
     </div>
 
@@ -21,23 +21,22 @@
                 </svg>
             </div>
             <div>
-                <h3 class="font-semibold text-gray-900 dark:text-white">Як працює ротація?</h3>
+                <h3 class="font-semibold text-gray-900 dark:text-white">{{ __('app.rotation_how_works') }}</h3>
                 <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                    Система аналізує навантаження служительів, їх навички та доступність, щоб справедливо розподілити призначення.
-                    Враховується мінімальний відпочинок між подіями та максимальна кількість на місяць.
+                    {{ __('app.rotation_how_works_desc') }}
                 </p>
                 <div class="flex flex-wrap gap-4 mt-3">
                     <div class="flex items-center gap-2 text-sm">
                         <span class="w-2 h-2 rounded-full bg-green-500"></span>
-                        <span class="text-gray-600 dark:text-gray-400">Баланс навантаження</span>
+                        <span class="text-gray-600 dark:text-gray-400">{{ __('app.rotation_workload_balance') }}</span>
                     </div>
                     <div class="flex items-center gap-2 text-sm">
                         <span class="w-2 h-2 rounded-full bg-blue-500"></span>
-                        <span class="text-gray-600 dark:text-gray-400">Відповідність навичкам</span>
+                        <span class="text-gray-600 dark:text-gray-400">{{ __('app.rotation_skill_matching') }}</span>
                     </div>
                     <div class="flex items-center gap-2 text-sm">
                         <span class="w-2 h-2 rounded-full bg-purple-500"></span>
-                        <span class="text-gray-600 dark:text-gray-400">Доступність</span>
+                        <span class="text-gray-600 dark:text-gray-400">{{ __('app.rotation_availability') }}</span>
                     </div>
                 </div>
             </div>
@@ -55,7 +54,7 @@
                     </div>
                     <div>
                         <h3 class="font-semibold text-gray-900 dark:text-white">{{ $ministry->name }}</h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ $ministry->members_count }} учасників</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.rotation_members_count', ['count' => $ministry->members_count]) }}</p>
                     </div>
                 </div>
 
@@ -84,19 +83,19 @@
                     @endforeach
                 </div>
                 @else
-                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Немає запланованих подій</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">{{ __('app.rotation_no_scheduled_events') }}</p>
                 @endif
 
                 <div class="flex gap-2">
                     <a href="{{ route('rotation.ministry', $ministry) }}"
                        class="flex-1 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-center text-sm">
-                        Деталі
+                        {{ __('app.rotation_details') }}
                     </a>
                     @if(isset($upcomingEvents[$ministry->id]) && $upcomingEvents[$ministry->id]->count() > 0)
                     <button type="button"
                             onclick="autoAssignMinistry({{ $ministry->id }}, @js($ministry->name))"
                             class="flex-1 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors text-center text-sm">
-                        Авто-розподіл
+                        {{ __('app.rotation_auto_assign') }}
                     </button>
                     @endif
                 </div>
@@ -110,13 +109,13 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                     </svg>
                 </div>
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Немає команд</h3>
-                <p class="text-gray-500 dark:text-gray-400 mt-1">Створіть команду для використання ротації</p>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.rotation_no_teams') }}</h3>
+                <p class="text-gray-500 dark:text-gray-400 mt-1">{{ __('app.rotation_no_teams_desc') }}</p>
                 <a href="{{ route('ministries.create') }}" class="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                     </svg>
-                    Створити команду
+                    {{ __('app.rotation_create_team') }}
                 </a>
             </div>
         </div>
@@ -129,7 +128,7 @@
     <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeAutoAssignModal()"></div>
     <div class="absolute inset-4 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-full md:max-w-lg bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white" id="modalTitle">Авто-розподіл</h3>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white" id="modalTitle">{{ __('app.rotation_auto_assign') }}</h3>
             <button onclick="closeAutoAssignModal()" class="p-2 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -147,32 +146,52 @@
 @push('scripts')
 <script>
 let currentMinistryId = null;
+const i18n = {
+    autoAssignFor: @json(__('app.rotation_auto_assign_for')),
+    autoAssignDesc: @json(__('app.rotation_auto_assign_desc')),
+    period: @json(__('app.rotation_period')),
+    week1: @json(__('app.rotation_1_week')),
+    weeks2: @json(__('app.rotation_2_weeks')),
+    weeks4: @json(__('app.rotation_4_weeks')),
+    weeks8: @json(__('app.rotation_8_weeks')),
+    cancel: @json(__('app.rotation_cancel')),
+    run: @json(__('app.rotation_run')),
+    running: @json(__('app.rotation_running')),
+    error: @json(__('app.rotation_error')),
+    close: @json(__('app.rotation_close')),
+    connectionError: @json(__('app.rotation_connection_error')),
+    complete: @json(__('app.rotation_complete')),
+    eventsLabel: @json(__('app.rotation_events_label')),
+    assignedLabel: @json(__('app.rotation_assigned_label')),
+    unfilledLabel: @json(__('app.rotation_unfilled_label')),
+    refreshPage: @json(__('app.rotation_refresh_page')),
+};
 
 function autoAssignMinistry(ministryId, ministryName) {
     currentMinistryId = ministryId;
-    document.getElementById('modalTitle').textContent = 'Авто-розподіл: ' + ministryName;
+    document.getElementById('modalTitle').textContent = i18n.autoAssignFor + ministryName;
     document.getElementById('modalContent').innerHTML = `
         <div class="space-y-4">
             <p class="text-gray-600 dark:text-gray-400">
-                Система автоматично призначить служителів на всі події цієї команди на найближчі тижні.
+                ${i18n.autoAssignDesc}
             </p>
             <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Період</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">${i18n.period}</label>
                 <select id="weeksSelect" class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl">
-                    <option value="1">1 тиждень</option>
-                    <option value="2">2 тижні</option>
-                    <option value="4" selected>4 тижні</option>
-                    <option value="8">8 тижнів</option>
+                    <option value="1">${i18n.week1}</option>
+                    <option value="2">${i18n.weeks2}</option>
+                    <option value="4" selected>${i18n.weeks4}</option>
+                    <option value="8">${i18n.weeks8}</option>
                 </select>
             </div>
             <div class="flex gap-3">
                 <button onclick="closeAutoAssignModal()"
                         class="flex-1 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
-                    Скасувати
+                    ${i18n.cancel}
                 </button>
                 <button onclick="runAutoAssign()"
                         class="flex-1 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors">
-                    Запустити
+                    ${i18n.run}
                 </button>
             </div>
         </div>
@@ -192,7 +211,7 @@ async function runAutoAssign() {
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            <p class="text-gray-600 dark:text-gray-400">Виконується розподіл...</p>
+            <p class="text-gray-600 dark:text-gray-400">${i18n.running}</p>
         </div>
     `;
 
@@ -219,9 +238,9 @@ async function runAutoAssign() {
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                         </svg>
                     </div>
-                    <p class="text-red-600 dark:text-red-400">Помилка при розподілі</p>
+                    <p class="text-red-600 dark:text-red-400">${i18n.error}</p>
                     <button onclick="closeAutoAssignModal()" class="mt-4 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl">
-                        Закрити
+                        ${i18n.close}
                     </button>
                 </div>
             `;
@@ -230,9 +249,9 @@ async function runAutoAssign() {
         console.error(error);
         document.getElementById('modalContent').innerHTML = `
             <div class="text-center py-4">
-                <p class="text-red-600 dark:text-red-400">Помилка з'єднання</p>
+                <p class="text-red-600 dark:text-red-400">${i18n.connectionError}</p>
                 <button onclick="closeAutoAssignModal()" class="mt-4 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl">
-                    Закрити
+                    ${i18n.close}
                 </button>
             </div>
         `;
@@ -248,24 +267,24 @@ function displayResults(data) {
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                 </svg>
             </div>
-            <h4 class="text-lg font-semibold text-gray-900 dark:text-white">Розподіл завершено!</h4>
+            <h4 class="text-lg font-semibold text-gray-900 dark:text-white">${i18n.complete}</h4>
         </div>
         <div class="grid grid-cols-3 gap-4 mb-6">
             <div class="text-center p-3 bg-gray-50 dark:bg-gray-700 rounded-xl">
                 <p class="text-2xl font-bold text-gray-900 dark:text-white">${summary.events}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400">Подій</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">${i18n.eventsLabel}</p>
             </div>
             <div class="text-center p-3 bg-green-50 dark:bg-green-900/30 rounded-xl">
                 <p class="text-2xl font-bold text-green-600 dark:text-green-400">${summary.assigned}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400">Призначено</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">${i18n.assignedLabel}</p>
             </div>
             <div class="text-center p-3 bg-amber-50 dark:bg-amber-900/30 rounded-xl">
                 <p class="text-2xl font-bold text-amber-600 dark:text-amber-400">${summary.unassigned}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400">Не заповнено</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">${i18n.unfilledLabel}</p>
             </div>
         </div>
         <button onclick="location.reload()" class="w-full px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors">
-            Оновити сторінку
+            ${i18n.refreshPage}
         </button>
     `;
     document.getElementById('modalContent').innerHTML = html;

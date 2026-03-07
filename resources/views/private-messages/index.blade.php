@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Чат')
+@section('title', __('app.pm_chat'))
 
 @section('content')
 <x-comm-tabs class="mb-4" />
@@ -14,7 +14,7 @@
             <!-- Header -->
             <div class="p-4 border-b border-gray-200 dark:border-gray-700">
                 <div class="flex items-center justify-between mb-4">
-                    <h1 class="text-xl font-bold text-gray-900 dark:text-white">Повідомлення</h1>
+                    <h1 class="text-xl font-bold text-gray-900 dark:text-white">{{ __('app.pm_messages') }}</h1>
                     <span class="px-2 py-1 bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400 text-xs font-medium rounded-full {{ $unreadCount > 0 ? '' : 'hidden' }}">
                         <span class="header-unread-count">{{ $unreadCount }}</span>
                     </span>
@@ -24,7 +24,7 @@
                 <div class="relative">
                     <input type="text" x-model="searchQuery" @input="filterConversations"
                            class="w-full pl-10 pr-10 py-2.5 bg-gray-100 dark:bg-gray-700 border-0 rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500"
-                           placeholder="Пошук або почати новий чат...">
+                           placeholder="{{ __('app.pm_search_or_new') }}">
                     <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                     </svg>
@@ -72,7 +72,7 @@
                             </div>
                             <p class="conv-preview text-sm text-gray-500 dark:text-gray-400 truncate mt-0.5">
                                 @if($lastMessage->sender_id === auth()->id())
-                                <span class="text-gray-400">Ви:</span>
+                                <span class="text-gray-400">{{ __('app.pm_you_prefix') }}</span>
                                 @endif
                                 {{ Str::limit($lastMessage->message, 45) }}
                             </p>
@@ -85,9 +85,9 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
                             </svg>
                         </div>
-                        <p class="text-gray-500 dark:text-gray-400 text-sm">Немає чатів</p>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">{{ __('app.pm_no_chats') }}</p>
                         <button @click="showNewChat = true" class="mt-3 text-sm text-primary-600 hover:text-primary-700 font-medium">
-                            Почати новий чат
+                            {{ __('app.pm_start_new_chat') }}
                         </button>
                     </div>
                 @endforelse
@@ -105,16 +105,16 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
                             </svg>
                         </div>
-                        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Приватні повідомлення</h2>
+                        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">{{ __('app.pm_private_messages') }}</h2>
                         <p class="text-gray-500 dark:text-gray-400 mb-6 max-w-sm">
-                            Оберіть чат зі списку або почніть нову розмову з членом церкви
+                            {{ __('app.pm_select_or_start') }}
                         </p>
                         <button @click="showNewChat = true"
                                 class="inline-flex items-center px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                             </svg>
-                            Новий чат
+                            {{ __('app.pm_new_chat') }}
                         </button>
                     </div>
                 </div>
@@ -135,18 +135,17 @@
                         </div>
                         <div class="ml-3 flex-1">
                             <h2 class="font-semibold text-gray-900 dark:text-white" x-text="selectedUser.name"></h2>
-                            <p class="text-xs text-gray-500" x-text="selectedUser.role === 'admin' ? 'Адміністратор' : (selectedUser.role === 'leader' ? 'Лідер' : 'Служитель')"></p>
+                            <p class="text-xs text-gray-500" x-text="roleLabel(selectedUser.role)"></p>
                         </div>
                         <div class="flex items-center gap-2">
-                            <span x-show="isTyping" class="text-xs text-primary-600 animate-pulse">Друкує...</span>
+                            <span x-show="isTyping" class="text-xs text-primary-600 animate-pulse" x-text="_pmI18n.typing"></span>
                         </div>
                     </div>
 
                     <!-- Messages -->
                     <div class="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50 dark:bg-gray-900" x-ref="messagesContainer" id="chatMessages">
                         <div class="flex justify-center">
-                            <span x-show="loadingMessages" class="px-3 py-1 bg-gray-200 dark:bg-gray-700 text-gray-500 text-xs rounded-full animate-pulse">
-                                Завантаження...
+                            <span x-show="loadingMessages" class="px-3 py-1 bg-gray-200 dark:bg-gray-700 text-gray-500 text-xs rounded-full animate-pulse" x-text="_pmI18n.loading">
                             </span>
                         </div>
 
@@ -156,7 +155,7 @@
                                 <template x-if="index === 0 || messages[index-1]?.date !== msg.date">
                                     <div class="flex items-center justify-center my-4">
                                         <span class="px-3 py-1 bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 text-xs rounded-full"
-                                              x-text="msg.date === todayDate ? 'Сьогодні' : msg.date"></span>
+                                              x-text="msg.date === todayDate ? _pmI18n.today : msg.date"></span>
                                     </div>
                                 </template>
 
@@ -182,7 +181,7 @@
                         </template>
 
                         <div x-show="messages.length === 0 && !loadingMessages" class="text-center py-8">
-                            <p class="text-gray-500 dark:text-gray-400">Почніть спілкування!</p>
+                            <p class="text-gray-500 dark:text-gray-400" x-text="_pmI18n.start_chatting"></p>
                         </div>
                     </div>
 
@@ -195,7 +194,7 @@
                                           @keydown.enter.prevent="if (!$event.shiftKey) sendMessage()"
                                           @input="autoResize($el); emitTyping()"
                                           rows="1"
-                                          placeholder="Написати повідомлення..."
+                                          :placeholder="_pmI18n.write_message"
                                           class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-0 rounded-2xl text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500 resize-none max-h-32"></textarea>
                             </div>
                             <button type="submit"
@@ -227,9 +226,9 @@
             <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-lg w-full max-h-[80vh] flex flex-col">
                 <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                        <span x-show="!composeMode">Нове повідомлення</span>
-                        <span x-show="composeMode === 'all'">Написати всім</span>
-                        <span x-show="composeMode === 'user'" x-text="'Написати: ' + (composeRecipient?.name || '')"></span>
+                        <span x-show="!composeMode" x-text="_pmI18n.new_message"></span>
+                        <span x-show="composeMode === 'all'" x-text="_pmI18n.write_to_all"></span>
+                        <span x-show="composeMode === 'user'" x-text="composeRecipient?.name || ''"></span>
                     </h3>
                     <button @click="showNewChat = false; composeMode = null; composeRecipient = null; composeMessage = ''" class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -242,13 +241,13 @@
                 <div x-show="!composeMode" class="p-4 space-y-3">
                     <!-- Search users with dropdown -->
                     <div class="relative">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Оберіть отримувача</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" x-text="_pmI18n.select_recipient"></label>
                         <div class="relative">
                             <input type="text"
                                    x-model="userSearch"
                                    @focus="showUserDropdown = true"
                                    @click="showUserDropdown = true"
-                                   placeholder="Почніть вводити ім'я..."
+                                   :placeholder="_pmI18n.start_typing_name"
                                    class="w-full px-4 py-3 pl-10 bg-gray-100 dark:bg-gray-700 border-0 rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500">
                             <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
@@ -278,15 +277,13 @@
                                     </svg>
                                 </div>
                                 <div class="ml-3">
-                                    <p class="font-medium text-primary-600 dark:text-primary-400">Написати всім</p>
-                                    <p class="text-xs text-gray-500">Надіслати всім користувачам церкви</p>
+                                    <p class="font-medium text-primary-600 dark:text-primary-400" x-text="_pmI18n.write_to_all"></p>
+                                    <p class="text-xs text-gray-500" x-text="_pmI18n.send_to_all_church"></p>
                                 </div>
                             </button>
 
                             <!-- Users list -->
                             @php
-                                // For System Admin: show all users
-                                // For regular users: show users from the same church
                                 if (auth()->user()->is_super_admin) {
                                     $availableUsers = \App\Models\User::where('id', '!=', auth()->id())
                                         ->orderBy('name')
@@ -303,7 +300,7 @@
                                     <svg class="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
                                     </svg>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Немає користувачів</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.pm_no_users') }}</p>
                                 </div>
                             @else
                                 @foreach($availableUsers as $user)
@@ -316,7 +313,7 @@
                                         </div>
                                         <div class="ml-3 flex-1">
                                             <p class="font-medium text-gray-900 dark:text-white">{{ $user->name }}</p>
-                                            <p class="text-xs text-gray-500">{{ $user->role === 'admin' ? 'Адміністратор' : ($user->role === 'leader' ? 'Лідер' : 'Служитель') }}</p>
+                                            <p class="text-xs text-gray-500">{{ $user->role === 'admin' ? __('app.pm_admin') : ($user->role === 'leader' ? __('app.pm_leader') : __('app.pm_servant')) }}</p>
                                             @if(auth()->user()->is_super_admin && $user->church)
                                                 <p class="text-xs text-gray-400">{{ $user->church->name }}</p>
                                             @endif
@@ -336,7 +333,7 @@
                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                             </svg>
-                            Назад
+                            <span x-text="_pmI18n.back"></span>
                         </button>
 
                         <div x-show="composeMode === 'all'" class="p-3 bg-primary-50 dark:bg-primary-900/20 rounded-xl">
@@ -344,19 +341,19 @@
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                 </svg>
-                                <span class="text-sm">Повідомлення буде надіслано всім користувачам церкви</span>
+                                <span class="text-sm" x-text="_pmI18n.message_to_all_church"></span>
                             </div>
                         </div>
 
                         <textarea x-model="composeMessage"
                                   rows="4"
-                                  placeholder="Введіть повідомлення..."
+                                  :placeholder="_pmI18n.enter_message"
                                   class="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-0 rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500 resize-none"></textarea>
 
                         <div class="flex justify-end gap-3">
                             <button @click="showNewChat = false; composeMode = null; composeRecipient = null; composeMessage = ''"
                                     class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors">
-                                Скасувати
+                                {{ __('app.msg_cancel') }}
                             </button>
                             <button @click="sendComposeMessage()"
                                     :disabled="!composeMessage.trim() || composeSending"
@@ -368,7 +365,7 @@
                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                                 </svg>
-                                <span x-text="composeMode === 'all' ? 'Надіслати всім' : 'Надіслати'"></span>
+                                <span x-text="composeMode === 'all' ? _pmI18n.send_to_all : _pmI18n.send"></span>
                             </button>
                         </div>
                     </div>
@@ -379,6 +376,29 @@
 </div>
 
 <script>
+var _pmI18n = @json([
+    'admin' => __('app.pm_admin'),
+    'leader' => __('app.pm_leader'),
+    'servant' => __('app.pm_servant'),
+    'typing' => __('app.pm_typing'),
+    'loading' => __('app.pm_loading'),
+    'today' => __('app.pm_today'),
+    'start_chatting' => __('app.pm_start_chatting'),
+    'write_message' => __('app.pm_write_message'),
+    'new_message' => __('app.pm_new_message'),
+    'write_to_all' => __('app.pm_write_to_all'),
+    'send_to_all_church' => __('app.pm_send_to_all_church'),
+    'select_recipient' => __('app.pm_select_recipient'),
+    'start_typing_name' => __('app.pm_start_typing_name'),
+    'message_to_all_church' => __('app.pm_message_to_all_church'),
+    'back' => __('app.pm_back'),
+    'enter_message' => __('app.pm_enter_message'),
+    'send_to_all' => __('app.pm_send_to_all'),
+    'send' => __('app.msg_send'),
+    'message_sent_count' => __('app.pm_message_sent_count'),
+    'send_error' => __('app.pm_send_error'),
+]);
+
 function messengerApp() {
     const _savedMsgFilters = filterStorage.load('messages', { searchQuery: '' });
     return {
@@ -393,22 +413,23 @@ function messengerApp() {
         isTyping: false,
         pollInterval: null,
         lastMessageId: 0,
-        todayDate: new Date().toLocaleDateString('uk-UA'),
-        // Compose modal
-        composeMode: null, // null, 'all', 'user'
+        todayDate: new Date().toLocaleDateString(document.documentElement.lang || 'uk'),
+        composeMode: null,
         composeRecipient: null,
         composeMessage: '',
         composeSending: false,
         showUserDropdown: false,
 
+        roleLabel(role) {
+            return role === 'admin' ? _pmI18n.admin : (role === 'leader' ? _pmI18n.leader : _pmI18n.servant);
+        },
+
         init() {
-            // Restore search filter and apply
             if (this.searchQuery) {
                 this.$nextTick(() => this.filterConversations());
             }
             this.$watch('searchQuery', () => this._saveFilters());
 
-            // Check if URL has user parameter
             const urlParams = new URLSearchParams(window.location.search);
             const userId = urlParams.get('user');
             if (userId) {
@@ -426,12 +447,10 @@ function messengerApp() {
             this.loadingMessages = true;
             this.lastMessageId = 0;
 
-            // Stop previous polling
             if (this.pollInterval) {
                 clearInterval(this.pollInterval);
             }
 
-            // Remove unread indicator from clicked conversation
             if (btnEl) {
                 const dot = btnEl.querySelector('.unread-dot');
                 if (dot) dot.classList.add('hidden');
@@ -451,16 +470,12 @@ function messengerApp() {
                     this.lastMessageId = Math.max(...this.messages.map(m => m.id));
                 }
                 this.scrollToBottom();
-
-                // Update unread counts
                 this.updateUnreadBadges();
             } catch (e) {
                 console.error('Error loading messages:', e);
             }
 
             this.loadingMessages = false;
-
-            // Start polling
             this.pollInterval = setInterval(() => this.pollMessages(), 2000);
         },
 
@@ -511,7 +526,6 @@ function messengerApp() {
                 });
 
                 if (response.ok) {
-                    // Trigger immediate poll to show message
                     await this.pollMessages();
                 }
             } catch (error) {
@@ -537,9 +551,7 @@ function messengerApp() {
             el.style.height = Math.min(el.scrollHeight, 128) + 'px';
         },
 
-        emitTyping() {
-            // Could be used for "typing..." indicator
-        },
+        emitTyping() {},
 
         filterConversations() {
             const query = this.searchQuery.toLowerCase().trim();
@@ -573,29 +585,24 @@ function messengerApp() {
                 if (response.ok) {
                     const data = await response.json().catch(() => ({}));
                     if (data.broadcast) {
-                        alert(`Повідомлення надіслано ${data.count} користувачам`);
+                        alert(_pmI18n.message_sent_count.replace(':count', data.count));
                     }
 
-                    // Save recipient before reset
                     const recipient = this.composeRecipient;
-
-                    // Close modal and reset
                     this.showNewChat = false;
                     this.composeMode = null;
                     this.composeRecipient = null;
                     this.composeMessage = '';
 
-                    // If individual user, open their chat
                     if (!data.broadcast && recipient) {
                         this.selectUser(recipient.id, recipient.name, recipient.role);
                     } else {
-                        // Reload page to see new conversations
                         window.location.reload();
                     }
                 }
             } catch (error) {
                 console.error('Error sending message:', error);
-                alert('Помилка надсилання повідомлення');
+                alert(_pmI18n.send_error);
             }
 
             this.composeSending = false;
@@ -606,7 +613,6 @@ function messengerApp() {
                 const response = await fetch('/pm/unread-count');
                 const data = await response.json().catch(() => ({}));
 
-                // Update tab badge
                 const pmBadge = document.getElementById('pm-badge');
                 if (pmBadge) {
                     if (data.count > 0) {
@@ -617,7 +623,6 @@ function messengerApp() {
                     }
                 }
 
-                // Update header badge
                 const headerBadge = document.querySelector('.header-unread-count');
                 if (headerBadge) {
                     if (data.count > 0) {

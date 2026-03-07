@@ -11,8 +11,8 @@
                 </select>
                 <select x-model="selectedMonth" @change="updatePeriod()"
                         class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
-                    <option value="" {{ empty($month) ? 'selected' : '' }}>Весь рік</option>
-                    @foreach([1 => 'Січень', 2 => 'Лютий', 3 => 'Березень', 4 => 'Квітень', 5 => 'Травень', 6 => 'Червень', 7 => 'Липень', 8 => 'Серпень', 9 => 'Вересень', 10 => 'Жовтень', 11 => 'Листопад', 12 => 'Грудень'] as $m => $name)
+                    <option value="" {{ empty($month) ? 'selected' : '' }}>{{ __('app.full_year') }}</option>
+                    @foreach([1 => __('app.month_january'), 2 => __('app.month_february'), 3 => __('app.month_march'), 4 => __('app.month_april'), 5 => __('app.month_may'), 6 => __('app.month_june'), 7 => __('app.month_july'), 8 => __('app.month_august'), 9 => __('app.month_september'), 10 => __('app.month_october'), 11 => __('app.month_november'), 12 => __('app.month_december')] as $m => $name)
                         <option value="{{ $m }}" {{ $month == $m ? 'selected' : '' }}>{{ $name }}</option>
                     @endforeach
                 </select>

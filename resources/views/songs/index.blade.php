@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Бібліотека пісень')
+@section('title', __('app.songs_library'))
 
 @section('actions')
 <div class="flex items-center gap-2">
@@ -9,14 +9,14 @@
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
         </svg>
-        Імпорт
+        {{ __('app.songs_import') }}
     </a>
     <a href="{{ route('songs.create') }}"
        class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors">
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
         </svg>
-        Додати пісню
+        {{ __('app.songs_add_song') }}
     </a>
 </div>
 @endsection
@@ -29,68 +29,68 @@
             <div class="flex-1 min-w-[200px] relative">
                 <input type="text" x-model="search"
                        class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
-                       placeholder="Пошук пісень...">
+                       placeholder="{{ __('app.songs_search_placeholder') }}">
             </div>
             <select x-model="filterKey"
                     class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-sm">
-                <option value="">Усі тональності</option>
+                <option value="">{{ __('app.songs_all_keys') }}</option>
                 @foreach(\App\Models\Song::KEYS as $key => $label)
                     <option value="{{ $key }}">{{ $key }}</option>
                 @endforeach
             </select>
             <select x-model="filterTag"
                     class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-sm">
-                <option value="">Усі теги</option>
+                <option value="">{{ __('app.songs_all_tags') }}</option>
                 @foreach($allTags as $tag)
                     <option value="{{ $tag }}">{{ $tag }}</option>
                 @endforeach
             </select>
             <select x-model="filterArtist"
                     class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-sm">
-                <option value="">Усі виконавці</option>
+                <option value="">{{ __('app.songs_all_artists') }}</option>
                 @foreach($allArtists as $artist)
                     <option value="{{ $artist }}">{{ $artist }}</option>
                 @endforeach
             </select>
             <select x-model="filterBpm"
                     class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-sm">
-                <option value="">Будь-який темп</option>
-                <option value="slow">Повільні (&lt; 80 BPM)</option>
-                <option value="medium">Середні (80–120 BPM)</option>
-                <option value="fast">Швидкі (&gt; 120 BPM)</option>
-                <option value="none">Без BPM</option>
+                <option value="">{{ __('app.songs_any_tempo') }}</option>
+                <option value="slow">{{ __('app.songs_tempo_slow') }}</option>
+                <option value="medium">{{ __('app.songs_tempo_medium') }}</option>
+                <option value="fast">{{ __('app.songs_tempo_fast') }}</option>
+                <option value="none">{{ __('app.songs_no_bpm') }}</option>
             </select>
             <select x-model="filterUsage"
                     class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-sm">
-                <option value="">Будь-яке використання</option>
-                <option value="frequent">Часто (5+ разів)</option>
-                <option value="moderate">Помірно (1–4 рази)</option>
-                <option value="never">Ніколи не використані</option>
+                <option value="">{{ __('app.songs_any_usage') }}</option>
+                <option value="frequent">{{ __('app.songs_usage_frequent') }}</option>
+                <option value="moderate">{{ __('app.songs_usage_moderate') }}</option>
+                <option value="never">{{ __('app.songs_usage_never') }}</option>
             </select>
             <select x-model="filterContent"
                     class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-sm">
-                <option value="">Будь-який контент</option>
-                <option value="has_lyrics">Зі словами</option>
-                <option value="has_chords">З акордами</option>
-                <option value="has_youtube">З YouTube</option>
-                <option value="has_spotify">Зі Spotify</option>
-                <option value="no_lyrics">Без слів</option>
-                <option value="no_chords">Без акордів</option>
+                <option value="">{{ __('app.songs_any_content') }}</option>
+                <option value="has_lyrics">{{ __('app.songs_with_lyrics') }}</option>
+                <option value="has_chords">{{ __('app.songs_with_chords') }}</option>
+                <option value="has_youtube">{{ __('app.songs_with_youtube') }}</option>
+                <option value="has_spotify">{{ __('app.songs_with_spotify') }}</option>
+                <option value="no_lyrics">{{ __('app.songs_without_lyrics') }}</option>
+                <option value="no_chords">{{ __('app.songs_without_chords') }}</option>
             </select>
             <select x-model="sortBy"
                     class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-sm">
-                <option value="title">За назвою</option>
-                <option value="recent">Нові</option>
-                <option value="popular">Популярні</option>
-                <option value="last_used">Недавно використані</option>
+                <option value="title">{{ __('app.songs_sort_by_title') }}</option>
+                <option value="recent">{{ __('app.songs_sort_by_recent') }}</option>
+                <option value="popular">{{ __('app.songs_sort_by_popular') }}</option>
+                <option value="last_used">{{ __('app.songs_sort_by_last_used') }}</option>
             </select>
         </div>
         <div class="mt-3 flex items-center justify-between">
             <span class="text-sm text-gray-500 dark:text-gray-400">
-                Знайдено: <span x-text="filteredSongs.length"></span> пісень
+                {{ __('app.songs_found_count') }} <span x-text="filteredSongs.length"></span> {{ __('app.songs_found_suffix') }}
             </span>
             <button x-show="hasActiveFilters" x-on:click="resetFilters()" class="text-sm text-primary-600 dark:text-primary-400 hover:underline">
-                Скинути фільтри
+                {{ __('app.songs_reset_filters') }}
             </button>
         </div>
     </div>
@@ -123,7 +123,7 @@
                     </template>
 
                     <div class="flex items-center justify-between mt-4 text-xs text-gray-500 dark:text-gray-400">
-                        <span x-text="song.times_used + ' разів'"></span>
+                        <span x-text="song.times_used + ' {{ __('app.songs_times_suffix') }}'"></span>
                         <span x-show="song.bpm" x-text="song.bpm + ' BPM'"></span>
                     </div>
                 </a>
@@ -139,8 +139,8 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                 </svg>
             </div>
-            <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Нічого не знайдено</h3>
-            <p class="text-gray-500 dark:text-gray-400">Спробуйте змінити параметри пошуку</p>
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">{{ __('app.songs_nothing_found') }}</h3>
+            <p class="text-gray-500 dark:text-gray-400">{{ __('app.songs_try_change_search') }}</p>
         </div>
     </template>
 
@@ -151,14 +151,14 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
                 </svg>
             </div>
-            <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Бібліотека порожня</h3>
-            <p class="text-gray-500 dark:text-gray-400 mb-6">Почніть додавати пісні до вашої бібліотеки</p>
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">{{ __('app.songs_library_empty') }}</h3>
+            <p class="text-gray-500 dark:text-gray-400 mb-6">{{ __('app.songs_start_adding') }}</p>
             <a href="{{ route('songs.create') }}"
                class="inline-flex items-center px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
-                Додати першу пісню
+                {{ __('app.songs_add_first_song') }}
             </a>
         </div>
     </template>

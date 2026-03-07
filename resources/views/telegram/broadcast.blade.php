@@ -1,18 +1,18 @@
 @extends('layouts.app')
 
-@section('title', 'Telegram розсилка')
+@section('title', __('app.tg_broadcast_title'))
 
 @section('content')
 <div class="max-w-4xl mx-auto space-y-6">
     <!-- Header -->
     <div>
-        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Telegram розсилка</h1>
-        <p class="text-gray-600 dark:text-gray-400 mt-1">Надішліть повідомлення в Telegram</p>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('app.tg_broadcast_title') }}</h1>
+        <p class="text-gray-600 dark:text-gray-400 mt-1">{{ __('app.tg_broadcast_desc') }}</p>
     </div>
 
     @if(!$hasBot)
         <div class="bg-amber-100 dark:bg-amber-900/30 border border-amber-400 dark:border-amber-600 text-amber-700 dark:text-amber-400 px-4 py-3 rounded-lg">
-            Telegram бот не налаштований. <a href="{{ route('settings.index') }}" class="underline">Налаштувати</a>
+            {{ __('app.tg_bot_not_configured') }} <a href="{{ route('settings.index') }}" class="underline">{{ __('app.tg_configure') }}</a>
         </div>
     @else
         <form @submit.prevent="submit($refs.broadcastForm)" x-ref="broadcastForm" class="space-y-6"
@@ -21,22 +21,17 @@
             <!-- Message -->
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
                 <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Повідомлення</h2>
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.tg_message') }}</h2>
                 </div>
                 <div class="p-6">
                     <textarea name="message" rows="6" required
                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                              placeholder="Введіть текст повідомлення...
-
-Можна використовувати:
-*жирний текст*
-_курсив_
-`код`">{{ old('message') }}</textarea>
+                              placeholder="{{ __('app.tg_message_placeholder') }}">{{ old('message') }}</textarea>
                     <template x-if="errors.message">
                         <p class="text-red-500 text-sm mt-1" x-text="errors.message[0]"></p>
                     </template>
                     <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                        Підтримується Markdown: *жирний*, _курсив_, `код`
+                        {{ __('app.tg_markdown_hint') }}
                     </p>
                 </div>
             </div>
@@ -44,10 +39,10 @@ _курсив_
             <!-- Recipients -->
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
                 <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Отримувачі</h2>
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.tg_recipients') }}</h2>
                     <label class="flex items-center gap-2 text-sm">
                         <input type="checkbox" id="selectAll" class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500">
-                        <span class="text-gray-600 dark:text-gray-400">Вибрати всіх</span>
+                        <span class="text-gray-600 dark:text-gray-400">{{ __('app.tg_select_all') }}</span>
                     </label>
                 </div>
                 <div class="p-6">
@@ -87,10 +82,10 @@ _курсив_
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"/>
                                 </svg>
                             </div>
-                            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Немає отримувачів</h3>
+                            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">{{ __('app.tg_no_recipients') }}</h3>
                             <p class="text-gray-500 dark:text-gray-400">
-                                Ніхто ще не підключив Telegram.<br>
-                                Люди можуть підключитись через бота.
+                                {{ __('app.tg_no_chats_desc') }}<br>
+                                {{ __('app.tg_connect_via_bot') }}
                             </p>
                         </div>
                     @endif
@@ -103,7 +98,7 @@ _курсив_
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
                         </svg>
-                        <span x-text="saving ? 'Надсилання...' : 'Надіслати'"></span>
+                        <span x-text="saving ? @json(__('app.tg_sending')) : @json(__('app.tg_send'))"></span>
                     </button>
                 </div>
             @endif

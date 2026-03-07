@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Обмін валюти')
+@section('title', __('app.exchange_title'))
 
 @section('content')
 <div class="max-w-lg mx-auto">
@@ -8,13 +8,13 @@
         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
         </svg>
-        Назад
+        {{ __('app.back') }}
     </a>
 
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Обмін валюти</h2>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Зареєструйте обмін валюти</p>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.exchange_title') }}</h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ __('app.register_exchange_desc') }}</p>
         </div>
 
         <form @submit.prevent="submit($refs.exchangeForm)" x-ref="exchangeForm" class="p-6 space-y-6"
@@ -66,7 +66,7 @@
             <!-- From Currency -->
             <div class="bg-red-50 dark:bg-red-900/20 rounded-lg p-4">
                 <label class="block text-sm font-medium text-red-700 dark:text-red-300 mb-2">
-                    Віддаєте
+                    {{ __('app.exchange_you_give') }}
                 </label>
                 <div class="flex gap-3">
                     <div class="flex-1">
@@ -86,7 +86,7 @@
             <!-- Exchange Rate -->
             <div class="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-4">
                 <label class="block text-sm font-medium text-amber-700 dark:text-amber-300 mb-2">
-                    Курс обміну
+                    {{ __('app.exchange_rate_label') }}
                 </label>
                 <div class="flex items-center gap-3">
                     <span class="text-gray-600 dark:text-gray-400">1</span>
@@ -97,7 +97,7 @@
                     <span class="font-medium text-gray-900 dark:text-white" x-text="fromCurrency !== 'UAH' ? 'UAH' : toCurrency"></span>
                 </div>
                 <p class="text-xs text-amber-600 dark:text-amber-400 mt-2">
-                    Курс НБУ: <span x-text="(nbuRates[fromCurrency !== 'UAH' ? fromCurrency : toCurrency] || 0).toFixed(2)"></span> ₴
+                    {{ __('app.nbu_rate') }}: <span x-text="(nbuRates[fromCurrency !== 'UAH' ? fromCurrency : toCurrency] || 0).toFixed(2)"></span> ₴
                 </p>
             </div>
 
@@ -113,7 +113,7 @@
             <!-- To Currency -->
             <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
                 <label class="block text-sm font-medium text-green-700 dark:text-green-300 mb-2">
-                    Отримуєте
+                    {{ __('app.exchange_you_receive') }}
                 </label>
                 <div class="flex gap-3">
                     <div class="flex-1">
@@ -133,7 +133,7 @@
             <!-- Date -->
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Дата обміну
+                    {{ __('app.exchange_date') }}
                 </label>
                 <input type="date" name="date" value="{{ now()->format('Y-m-d') }}" required
                        class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
@@ -142,17 +142,17 @@
             <!-- Notes -->
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Нотатки
+                    {{ __('app.notes_label_simple') }}
                 </label>
                 <input type="text" name="notes" maxlength="500"
                        class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                       placeholder="Де обміняли, курс тощо...">
+                       placeholder="{{ __('app.where_exchanged_etc') }}">
             </div>
 
             <!-- Warning for same currency -->
             <div x-show="fromCurrency === toCurrency" x-cloak class="bg-red-50 dark:bg-red-900/20 rounded-lg p-4">
                 <p class="text-sm text-red-700 dark:text-red-300">
-                    Оберіть різні валюти для обміну
+                    {{ __('app.select_different_currencies') }}
                 </p>
             </div>
 
@@ -160,12 +160,12 @@
             <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
                 <a href="{{ route('finances.index') }}"
                    class="w-full sm:w-auto px-4 py-2 text-center text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
-                    Скасувати
+                    {{ __('app.cancel') }}
                 </a>
                 <button type="submit" x-bind:disabled="fromCurrency === toCurrency || saving"
                         class="w-full sm:w-auto px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                    <span x-show="!saving">Зареєструвати обмін</span>
-                    <span x-show="saving">Збереження...</span>
+                    <span x-show="!saving">{{ __('app.register_exchange_btn') }}</span>
+                    <span x-show="saving">{{ __('app.saving_label') }}</span>
                 </button>
             </div>
         </form>

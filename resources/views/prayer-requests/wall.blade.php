@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
-@section('title', 'Молитовна стіна')
+@section('title', __('app.prayer_wall'))
 
 @section('content')
 <div class="max-w-4xl mx-auto">
     <div class="text-center mb-8">
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">🙏 Молитовна стіна</h1>
-        <p class="text-gray-600 dark:text-gray-400">Підтримайте братів і сестер у молитві</p>
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">🙏 {{ __('app.prayer_wall') }}</h1>
+        <p class="text-gray-600 dark:text-gray-400">{{ __('app.prayer_wall_subtitle') }}</p>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -14,7 +14,7 @@
         <div class="lg:col-span-2 space-y-4">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
                 <span class="w-3 h-3 bg-blue-500 rounded-full mr-2 animate-pulse"></span>
-                Активні прохання
+                {{ __('app.prayer_active_requests') }}
             </h2>
 
             @forelse($requests as $request)
@@ -23,7 +23,7 @@
                         <div class="flex-1">
                             @if($request->is_urgent)
                                 <span class="inline-block px-2 py-1 bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 text-xs font-medium rounded-full mb-2">
-                                    🔥 Терміново
+                                    🔥 {{ __('app.prayer_badge_urgent') }}
                                 </span>
                             @endif
                             <h3 class="font-semibold text-gray-900 dark:text-white">{{ $request->title }}</h3>
@@ -46,7 +46,7 @@
                 </div>
             @empty
                 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-8 text-center">
-                    <p class="text-gray-500 dark:text-gray-400">Немає активних прохань</p>
+                    <p class="text-gray-500 dark:text-gray-400">{{ __('app.prayer_no_active') }}</p>
                 </div>
             @endforelse
 
@@ -56,7 +56,7 @@
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                     </svg>
-                    Додати прохання
+                    {{ __('app.prayer_add_request') }}
                 </a>
             </div>
         </div>
@@ -67,7 +67,7 @@
                 <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
-                Свідчення
+                {{ __('app.prayer_testimonies') }}
             </h2>
 
             @forelse($answered as $testimony)
@@ -80,7 +80,7 @@
                 </div>
             @empty
                 <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 text-center">
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Поки немає свідчень</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.prayer_no_testimonies') }}</p>
                 </div>
             @endforelse
         </div>

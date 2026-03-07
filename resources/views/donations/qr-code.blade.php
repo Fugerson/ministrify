@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'QR-код для пожертв')
+@section('title', __('app.donations_qr_title'))
 
 @section('content')
 <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -9,7 +9,7 @@
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
             </svg>
-            Назад до пожертв
+            {{ __('app.donations_back') }}
         </a>
     </div>
 
@@ -20,8 +20,8 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
                 </svg>
             </div>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">QR-код для пожертв</h1>
-            <p class="text-gray-600 dark:text-gray-400 mt-2">Роздрукуйте або покажіть на екрані</p>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('app.donations_qr_title') }}</h1>
+            <p class="text-gray-600 dark:text-gray-400 mt-2">{{ __('app.donations_qr_subtitle') }}</p>
         </div>
 
         <!-- QR Code Display -->
@@ -33,13 +33,13 @@
 
         <!-- URL Display -->
         <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 mb-6">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Посилання на сторінку пожертв</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.donations_link_label') }}</label>
             <div class="flex gap-2">
                 <input type="text" readonly value="{{ $donateUrl }}" id="donateUrl"
                     class="flex-1 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white">
                 <button type="button" onclick="copyUrl()"
                     class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-medium transition-colors">
-                    Копіювати
+                    {{ __('app.donations_copy') }}
                 </button>
             </div>
         </div>
@@ -50,13 +50,13 @@
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
                 </svg>
-                Друкувати QR-код
+                {{ __('app.donations_print_qr') }}
             </button>
             <button onclick="downloadQR()" class="btn-secondary flex items-center justify-center gap-2 py-3">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                 </svg>
-                Завантажити PNG
+                {{ __('app.donations_download_png') }}
             </button>
         </div>
 
@@ -66,32 +66,32 @@
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
-                Як використовувати
+                {{ __('app.donations_how_to_use') }}
             </h3>
             <ul class="space-y-2 text-sm text-blue-800 dark:text-blue-300">
                 <li class="flex items-start gap-2">
                     <svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                     </svg>
-                    Роздрукуйте QR-код та розмістіть у церкві
+                    {{ __('app.donations_tip_print') }}
                 </li>
                 <li class="flex items-start gap-2">
                     <svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                     </svg>
-                    Покажіть на екрані під час богослужіння
+                    {{ __('app.donations_tip_screen') }}
                 </li>
                 <li class="flex items-start gap-2">
                     <svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                     </svg>
-                    Додайте до буклетів або листівок
+                    {{ __('app.donations_tip_booklets') }}
                 </li>
                 <li class="flex items-start gap-2">
                     <svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                     </svg>
-                    Поділіться посиланням у соціальних мережах
+                    {{ __('app.donations_tip_social') }}
                 </li>
             </ul>
         </div>
@@ -101,9 +101,9 @@
     <div id="printTemplate" class="hidden">
         <div style="text-align: center; padding: 40px; font-family: Arial, sans-serif;">
             <h1 style="font-size: 24px; margin-bottom: 10px;">{{ $church->name }}</h1>
-            <p style="font-size: 16px; color: #666; margin-bottom: 30px;">Підтримати церкву</p>
+            <p style="font-size: 16px; color: #666; margin-bottom: 30px;">{{ __('app.donations_support_church') }}</p>
             <div id="qrPrint" style="display: inline-block; padding: 20px; border: 3px solid #e5e7eb; border-radius: 16px;"></div>
-            <p style="margin-top: 20px; font-size: 12px; color: #999;">Скануйте QR-код камерою телефону</p>
+            <p style="margin-top: 20px; font-size: 12px; color: #999;">{{ __('app.donations_scan_qr') }}</p>
             <p style="font-size: 10px; color: #ccc; margin-top: 10px;">{{ $donateUrl }}</p>
         </div>
     </div>
@@ -111,7 +111,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <script>
-    // Generate QR code
     const qrcode = new QRCode(document.getElementById("qrcode"), {
         text: "{{ $donateUrl }}",
         width: 256,
@@ -128,7 +127,7 @@
 
         const btn = event.target;
         const originalText = btn.textContent;
-        btn.textContent = 'Скопійовано!';
+        btn.textContent = @json(__('app.donations_copied'));
         setTimeout(() => btn.textContent = originalText, 2000);
     }
 
@@ -145,11 +144,10 @@
     function printQR() {
         const printContent = document.getElementById('printTemplate').innerHTML;
         const printWindow = window.open('', '', 'width=600,height=600');
-        printWindow.document.write('<html><head><title>QR-код для пожертв</title></head><body>');
+        printWindow.document.write('<html><head><title>' + @json(__('app.donations_qr_title')) + '</title></head><body>');
         printWindow.document.write(printContent);
         printWindow.document.write('</body></html>');
 
-        // Generate QR in print window
         setTimeout(() => {
             const printQR = printWindow.document.getElementById('qrPrint');
             new QRCode(printQR, {

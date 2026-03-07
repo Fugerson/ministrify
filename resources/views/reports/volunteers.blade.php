@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Звіт: Служителі')
+@section('title', __('app.report_volunteers_title'))
 
 @section('content')
 <div class="space-y-6">
@@ -9,7 +9,7 @@
             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
             </svg>
-            Назад до звітів
+            {{ __('app.reports_back_to_reports') }}
         </a>
 
         <div class="flex items-center gap-3">
@@ -33,7 +33,7 @@
 
     <!-- Monthly Chart -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Активність служителів по місяцях</h3>
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.reports_volunteer_activity_by_month') }}</h3>
         <div class="h-64">
             <canvas id="volunteersChart"></canvas>
         </div>
@@ -42,7 +42,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Top Volunteers -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">🏆 Топ служителів</h3>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">🏆 {{ __('app.reports_top_volunteers') }}</h3>
             <div class="space-y-3">
                 @foreach($topVolunteers as $index => $person)
                     <div class="flex items-center justify-between p-3 rounded-lg {{ $index < 3 ? 'bg-yellow-50 dark:bg-yellow-900/20' : 'bg-gray-50 dark:bg-gray-700/50' }}">
@@ -57,7 +57,7 @@
                         </div>
                         <div class="text-right">
                             <p class="text-lg font-bold text-gray-900 dark:text-white">{{ $person->assignments_count }}</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">подій</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.reports_events_count') }}</p>
                         </div>
                     </div>
                 @endforeach
@@ -66,7 +66,7 @@
 
         <!-- By Ministry -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Розподіл по командах</h3>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.reports_distribution_by_team') }}</h3>
             @if($byMinistry->count() > 0)
                 @php $totalAssignments = $byMinistry->sum('count'); @endphp
                 <div class="space-y-3">
@@ -75,7 +75,7 @@
                         <div>
                             <div class="flex items-center justify-between mb-1">
                                 <span class="text-sm text-gray-700 dark:text-gray-300">{{ $item->name }}</span>
-                                <span class="text-sm font-medium text-gray-900 dark:text-white">{{ $item->count }} призначень</span>
+                                <span class="text-sm font-medium text-gray-900 dark:text-white">{{ __('app.reports_assignments_count', ['count' => $item->count]) }}</span>
                             </div>
                             <div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-3">
                                 <div class="h-3 rounded-full" style="width: {{ $percent }}%; background-color: {{ $item->color ?? '#3b82f6' }}"></div>
@@ -84,7 +84,7 @@
                     @endforeach
                 </div>
             @else
-                <p class="text-gray-500 dark:text-gray-400 text-center py-4">Немає даних</p>
+                <p class="text-gray-500 dark:text-gray-400 text-center py-4">{{ __('app.reports_no_data') }}</p>
             @endif
         </div>
     </div>
@@ -96,7 +96,7 @@
             <svg class="w-5 h-5 text-orange-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
             </svg>
-            Неактивні служителі (3+ місяці)
+            {{ __('app.reports_inactive_volunteers') }}
         </h3>
         <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
             @foreach($inactiveVolunteers as $person)
@@ -126,13 +126,13 @@ onPageReady(function() {
             labels: data.map(d => d.month),
             datasets: [
                 {
-                    label: 'Призначень',
+                    label: @json(__('app.reports_assignments_label')),
                     data: data.map(d => d.assignments),
                     backgroundColor: 'rgba(59, 130, 246, 0.8)',
                     borderRadius: 4,
                 },
                 {
-                    label: 'Унікальних служителів',
+                    label: @json(__('app.reports_unique_volunteers')),
                     data: data.map(d => d.volunteers),
                     type: 'line',
                     borderColor: 'rgb(249, 115, 22)',

@@ -9,7 +9,7 @@
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
         </svg>
-        Редагувати
+        {{ __('app.songs_edit_action') }}
     </a>
 </div>
 @endsection
@@ -20,7 +20,7 @@
         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
         </svg>
-        Назад до бібліотеки
+        {{ __('app.songs_back_to_library') }}
     </a>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -60,16 +60,16 @@
                 @endif
 
                 <div class="flex items-center gap-4 mt-4 text-sm text-gray-500 dark:text-gray-400">
-                    <span>Використано {{ $song->times_used }} разів</span>
+                    <span>{{ __('app.songs_used_times', ['count' => $song->times_used]) }}</span>
                     @if($song->last_used_at)
-                        <span>Востаннє: {{ $song->last_used_at->diffForHumans() }}</span>
+                        <span>{{ __('app.songs_last_used') }} {{ $song->last_used_at->diffForHumans() }}</span>
                     @endif
                 </div>
 
                 @if($song->notes)
                     <div class="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
                         <p class="text-sm text-yellow-800 dark:text-yellow-200">
-                            <span class="font-medium">Коментарі:</span> {{ $song->notes }}
+                            <span class="font-medium">{{ __('app.songs_comments_note') }}</span> {{ $song->notes }}
                         </p>
                     </div>
                 @endif
@@ -78,7 +78,7 @@
             <!-- Chords -->
             @if($song->chords)
                 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Текст з акордами</h2>
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.songs_lyrics_with_chords') }}</h2>
                     <div class="prose dark:prose-invert max-w-none font-mono text-sm leading-relaxed whitespace-pre-wrap">
                         {!! $song->chords_html !!}
                     </div>
@@ -88,7 +88,7 @@
             <!-- Lyrics only (if no chords) -->
             @if($song->lyrics && !$song->chords)
                 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Текст</h2>
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.songs_lyrics_label') }}</h2>
                     <div class="prose dark:prose-invert max-w-none whitespace-pre-wrap">
                         {{ $song->lyrics }}
                     </div>
@@ -98,7 +98,7 @@
             <!-- YouTube Embed -->
             @if($song->youtube_id)
                 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Відео</h2>
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.songs_video') }}</h2>
                     <div class="aspect-video rounded-lg overflow-hidden">
                         <iframe
                             src="https://www.youtube.com/embed/{{ $song->youtube_id }}"
@@ -116,14 +116,14 @@
         <div class="space-y-6">
             <!-- Quick Actions -->
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-                <h3 class="font-semibold text-gray-900 dark:text-white mb-4">Дії</h3>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.songs_actions') }}</h3>
                 <div class="space-y-3">
                     <a href="{{ route('songs.edit', $song) }}"
                        class="flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                         </svg>
-                        Редагувати
+                        {{ __('app.songs_edit_action') }}
                     </a>
                     @if($song->spotify_url)
                         <a href="{{ $song->spotify_url }}" target="_blank"
@@ -131,7 +131,7 @@
                             <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
                             </svg>
-                            Відкрити в Spotify
+                            {{ __('app.songs_open_in_spotify') }}
                         </a>
                     @endif
                     @if($song->youtube_url)
@@ -148,7 +148,7 @@
 
             <!-- Info -->
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-                <h3 class="font-semibold text-gray-900 dark:text-white mb-4">Інформація</h3>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.songs_info') }}</h3>
                 <dl class="space-y-3 text-sm">
                     @if($song->ccli_number)
                         <div>
@@ -157,12 +157,12 @@
                         </div>
                     @endif
                     <div>
-                        <dt class="text-gray-500 dark:text-gray-400">Додано</dt>
+                        <dt class="text-gray-500 dark:text-gray-400">{{ __('app.songs_added_date') }}</dt>
                         <dd class="font-medium text-gray-900 dark:text-white">{{ $song->created_at->format('d.m.Y') }}</dd>
                     </div>
                     @if($song->creator)
                         <div>
-                            <dt class="text-gray-500 dark:text-gray-400">Додав</dt>
+                            <dt class="text-gray-500 dark:text-gray-400">{{ __('app.songs_added_by') }}</dt>
                             <dd class="font-medium text-gray-900 dark:text-white">{{ $song->creator->name }}</dd>
                         </div>
                     @endif
@@ -172,7 +172,7 @@
             <!-- Recent Events -->
             @if($song->events->count() > 0)
                 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-                    <h3 class="font-semibold text-gray-900 dark:text-white mb-4">Останні події</h3>
+                    <h3 class="font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.songs_recent_events') }}</h3>
                     <div class="space-y-2">
                         @foreach($song->events as $event)
                             <a href="{{ route('events.show', $event) }}"

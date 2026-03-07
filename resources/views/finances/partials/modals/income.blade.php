@@ -77,10 +77,10 @@ window.incomeModal = function() {
                         setTimeout(() => Livewire.navigate(window.location.href), 600);
                     }
                 } else {
-                    showToast('error', data.message || 'Помилка видалення');
+                    showToast('error', data.message || '{{ __('app.delete_error') }}');
                 }
             } catch (e) {
-                showToast('error', 'Помилка з\'єднання');
+                showToast('error', '{{ __('app.connection_error') }}');
             } finally {
                 this.loading = false;
             }
@@ -114,12 +114,12 @@ window.incomeModal = function() {
                     }
                 } else if (response.status === 422) {
                     this.errors = data.errors || {};
-                    showToast('error', 'Перевірте правильність заповнення форми.');
+                    showToast('error', '{{ __('app.check_form_errors') }}');
                 } else {
-                    showToast('error', data.message || 'Помилка збереження');
+                    showToast('error', data.message || '{{ __('app.save_error') }}');
                 }
             } catch (e) {
-                showToast('error', 'Помилка з\'єднання');
+                showToast('error', '{{ __('app.connection_error') }}');
             } finally {
                 this.loading = false;
             }
@@ -156,7 +156,7 @@ window.incomeModal = function() {
                 <form @submit.prevent="submit()" class="max-h-[70vh] overflow-y-auto p-6 space-y-4">
                     <!-- Amount + Currency -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Сума <span class="text-red-500">*</span></label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.amount') }} <span class="text-red-500">*</span></label>
                         <div class="flex gap-2">
                             <input type="number" x-model="formData.amount" step="0.01" min="0.01" required placeholder="0.00"
                                    class="flex-1 px-4 py-2 border rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
@@ -175,7 +175,7 @@ window.incomeModal = function() {
                         @if(count($enabledCurrencies ?? ['UAH']) > 1)
                         <template x-if="formData.currency !== 'UAH' && exchangeRates[formData.currency]">
                             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                Курс НБУ: 1 <span x-text="formData.currency"></span> = <span x-text="exchangeRates[formData.currency]?.toFixed(2)"></span> ₴
+                                {{ __('app.nbu_rate') }}: 1 <span x-text="formData.currency"></span> = <span x-text="exchangeRates[formData.currency]?.toFixed(2)"></span> ₴
                             </p>
                         </template>
                         @endif
@@ -184,7 +184,7 @@ window.incomeModal = function() {
 
                     <!-- Date -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Дата <span class="text-red-500">*</span></label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.date_column') }} <span class="text-red-500">*</span></label>
                         <input type="date" x-model="formData.date" required
                                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
                         <p class="text-red-500 text-sm mt-1" x-show="errors.date" x-text="errors.date?.[0]"></p>
@@ -192,19 +192,19 @@ window.incomeModal = function() {
 
                     <!-- Category -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Категорія <span class="text-red-500">*</span></label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.category_column') }} <span class="text-red-500">*</span></label>
                         <select x-model="formData.category_id" :required="formData.category_id !== '__custom__'"
                                 x-show="formData.category_id !== '__custom__'"
                                 class="w-full px-4 py-2 border rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
                                 :class="errors.category_id ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'">
-                            <option value="">Оберіть категорію</option>
+                            <option value="">{{ __('app.select_category') }}</option>
                             @foreach($incomeCategories ?? [] as $cat)
                                 <option value="{{ $cat->id }}">{{ $cat->icon ?? '💰' }} {{ $cat->name }}</option>
                             @endforeach
-                            <option value="__custom__">Інше (ввести вручну)...</option>
+                            <option value="__custom__">{{ __('app.other_enter_manually') }}</option>
                         </select>
                         <div x-show="formData.category_id === '__custom__'" class="flex gap-2">
-                            <input type="text" x-model="formData.category_name" placeholder="Назва категорії..." :required="formData.category_id === '__custom__'"
+                            <input type="text" x-model="formData.category_name" placeholder="{{ __('app.category_name_placeholder') }}" :required="formData.category_id === '__custom__'"
                                    class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
                             <button type="button" @click="formData.category_id = ''; formData.category_name = ''"
                                     class="px-3 py-2 text-gray-500 hover:text-red-500 border border-gray-300 dark:border-gray-600 rounded-xl transition-colors">&#x2715;</button>
@@ -214,25 +214,25 @@ window.incomeModal = function() {
 
                     <!-- Payment Method -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Спосіб оплати <span class="text-red-500">*</span></label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.payment_method_field') }} <span class="text-red-500">*</span></label>
                         <div class="grid grid-cols-2 gap-3">
                             <label class="relative flex items-center justify-center px-4 py-3 border rounded-xl cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                                    :class="formData.payment_method === 'cash' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-300 dark:border-gray-600'">
                                 <input type="radio" x-model="formData.payment_method" value="cash" class="sr-only">
-                                <span class="text-sm" :class="formData.payment_method === 'cash' ? 'text-primary-600 dark:text-primary-400 font-medium' : 'text-gray-700 dark:text-gray-300'">💵 Готівка</span>
+                                <span class="text-sm" :class="formData.payment_method === 'cash' ? 'text-primary-600 dark:text-primary-400 font-medium' : 'text-gray-700 dark:text-gray-300'">💵 {{ __('app.cash_payment') }}</span>
                             </label>
                             <label class="relative flex items-center justify-center px-4 py-3 border rounded-xl cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                                    :class="formData.payment_method === 'card' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-300 dark:border-gray-600'">
                                 <input type="radio" x-model="formData.payment_method" value="card" class="sr-only">
-                                <span class="text-sm" :class="formData.payment_method === 'card' ? 'text-primary-600 dark:text-primary-400 font-medium' : 'text-gray-700 dark:text-gray-300'">💳 Картка</span>
+                                <span class="text-sm" :class="formData.payment_method === 'card' ? 'text-primary-600 dark:text-primary-400 font-medium' : 'text-gray-700 dark:text-gray-300'">💳 {{ __('app.card_payment') }}</span>
                             </label>
                         </div>
                     </div>
 
                     <!-- Notes -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Нотатки</label>
-                        <textarea x-model="formData.notes" rows="2" placeholder="Внутрішні нотатки..."
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.notes_label_simple') }}</label>
+                        <textarea x-model="formData.notes" rows="2" placeholder="{{ __('app.internal_notes_placeholder') }}"
                                   class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"></textarea>
                     </div>
 
@@ -243,24 +243,24 @@ window.incomeModal = function() {
                             <button x-show="isEdit" type="button" @click="deleteIncome()"
                                     :disabled="loading"
                                     class="px-4 py-2 text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 rounded-xl text-sm font-medium disabled:opacity-50">
-                                Видалити
+                                {{ __('app.delete') }}
                             </button>
                             @endif
                         </div>
                         <div class="flex gap-3">
                             <button type="button" @click="modalOpen = false"
                                     class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors">
-                                Скасувати
+                                {{ __('app.cancel') }}
                             </button>
                             <button type="submit" :disabled="loading"
                                     class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-xl disabled:opacity-50 transition-colors">
-                                <span x-show="!loading" x-text="isEdit ? 'Зберегти' : 'Додати'"></span>
+                                <span x-show="!loading" x-text="isEdit ? '{{ __('app.save_btn') }}' : '{{ __('app.add_btn') }}'"></span>
                                 <span x-show="loading" class="flex items-center justify-center gap-2">
                                     <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
                                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
                                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
                                     </svg>
-                                    Збереження...
+                                    {{ __('app.saving_label') }}
                                 </span>
                             </button>
                         </div>

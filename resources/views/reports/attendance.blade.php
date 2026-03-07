@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Звіт: Відвідуваність')
+@section('title', __('app.report_attendance_title'))
 
 @section('actions')
 <a href="{{ route('reports.export-attendance', ['year' => $year]) }}"
@@ -8,7 +8,7 @@
     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
     </svg>
-    Експорт Excel
+    {{ __('app.reports_export_excel') }}
 </a>
 @endsection
 
@@ -19,7 +19,7 @@
             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
             </svg>
-            Назад до звітів
+            {{ __('app.reports_back_to_reports') }}
         </a>
 
         <form class="flex items-center space-x-2">
@@ -31,7 +31,7 @@
             </select>
             <select name="ministry_id" onchange="this.form.submit()"
                     class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-sm text-gray-900 dark:text-white">
-                <option value="">Усі команди</option>
+                <option value="">{{ __('app.reports_all_teams') }}</option>
                 @foreach($ministries as $ministry)
                     <option value="{{ $ministry->id }}" {{ $ministryId == $ministry->id ? 'selected' : '' }}>{{ $ministry->name }}</option>
                 @endforeach
@@ -41,7 +41,7 @@
 
     <!-- Monthly Chart -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Відвідуваність по місяцях</h3>
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.reports_attendance_by_month') }}</h3>
         <div class="h-64">
             <canvas id="attendanceChart"></canvas>
         </div>
@@ -50,7 +50,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Weekday Distribution -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">По днях тижня</h3>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.reports_by_weekday') }}</h3>
             <div class="space-y-3">
                 @php $maxWeekday = max(array_column($weekdayStats, 'count')); @endphp
                 @foreach($weekdayStats as $day)
@@ -67,7 +67,7 @@
 
         <!-- Top Attendees -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">🏆 Топ відвідувачів</h3>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">🏆 {{ __('app.reports_top_attendees') }}</h3>
             <div class="space-y-3">
                 @foreach($topAttendees as $index => $person)
                     <div class="flex items-center justify-between">
@@ -78,7 +78,7 @@
                             </span>
                             <span class="ml-3 text-sm font-medium text-gray-900 dark:text-white">{{ $person->full_name }}</span>
                         </div>
-                        <span class="text-sm text-gray-500 dark:text-gray-400">{{ $person->attendance_records_count }} відвідувань</span>
+                        <span class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.reports_visits_count', ['count' => $person->attendance_records_count]) }}</span>
                     </div>
                 @endforeach
             </div>
@@ -92,7 +92,7 @@
             <svg class="w-5 h-5 text-red-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
             </svg>
-            Перестали відвідувати (3+ місяці)
+            {{ __('app.reports_stopped_attending') }}
         </h3>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             @foreach($inactiveMembers as $person)
@@ -103,7 +103,7 @@
                     <div class="ml-3">
                         <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $person->full_name }}</p>
                         <p class="text-xs text-gray-500 dark:text-gray-400">
-                            Останній раз: {{ $person->attendanceRecords->first()?->attendance?->date?->diffForHumans() ?? $person->attendanceRecords->first()?->created_at?->diffForHumans() ?? 'Невідомо' }}
+                            {{ __('app.reports_last_seen', ['date' => $person->attendanceRecords->first()?->attendance?->date?->diffForHumans() ?? $person->attendanceRecords->first()?->created_at?->diffForHumans() ?? __('app.reports_unknown')]) }}
                         </p>
                     </div>
                 </a>
@@ -127,7 +127,7 @@ onPageReady(function() {
             labels: data.map(d => d.month),
             datasets: [
                 {
-                    label: 'Всього відвідувань',
+                    label: @json(__('app.reports_total_visits')),
                     data: data.map(d => d.count),
                     borderColor: 'rgb(59, 130, 246)',
                     backgroundColor: 'rgba(59, 130, 246, 0.1)',
@@ -135,7 +135,7 @@ onPageReady(function() {
                     tension: 0.4,
                 },
                 {
-                    label: 'Унікальних людей',
+                    label: @json(__('app.reports_unique_people')),
                     data: data.map(d => d.unique_people),
                     borderColor: 'rgb(34, 197, 94)',
                     backgroundColor: 'rgba(34, 197, 94, 0.1)',

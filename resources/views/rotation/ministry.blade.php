@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Ротація - ' . $ministry->name)
+@section('title', __('app.rotation_title') . ' - ' . $ministry->name)
 
 @section('content')
 <div class="space-y-6">
@@ -18,7 +18,7 @@
                 </div>
                 <div>
                     <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $ministry->name }}</h1>
-                    <p class="text-gray-500 dark:text-gray-400">Ротація служительів</p>
+                    <p class="text-gray-500 dark:text-gray-400">{{ __('app.rotation_of_volunteers') }}</p>
                 </div>
             </div>
         </div>
@@ -27,7 +27,7 @@
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
             </svg>
-            Авто-розподіл
+            {{ __('app.rotation_auto_assign') }}
         </button>
     </div>
 
@@ -35,30 +35,30 @@
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
         <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div>
-                <h3 class="font-semibold text-gray-900 dark:text-white">Баланс навантаження</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">За останні 3 місяці</p>
+                <h3 class="font-semibold text-gray-900 dark:text-white">{{ __('app.rotation_balance_card') }}</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.rotation_last_3_months') }}</p>
             </div>
             <div class="flex items-center gap-6">
                 <div class="text-center">
                     <p class="text-3xl font-bold {{ $report['balance_score'] >= 70 ? 'text-green-600' : ($report['balance_score'] >= 40 ? 'text-amber-600' : 'text-red-600') }}">
                         {{ $report['balance_score'] }}%
                     </p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Рівномірність</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.rotation_evenness') }}</p>
                 </div>
                 <div class="text-center">
                     <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ $report['total_events'] }}</p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Подій</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.rotation_events_count') }}</p>
                 </div>
                 <div class="text-center">
                     <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ $report['average_per_member'] }}</p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Середнє на особу</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.rotation_avg_per_person') }}</p>
                 </div>
             </div>
         </div>
 
         <!-- Member Distribution -->
         <div class="mt-6">
-            <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Розподіл по учасниках</h4>
+            <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ __('app.rotation_member_distribution') }}</h4>
             <div class="space-y-2 max-h-48 overflow-y-auto">
                 @foreach($report['member_stats'] as $memberId => $stat)
                 <div class="flex items-center gap-3">
@@ -78,7 +78,7 @@
     <!-- Upcoming Events -->
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-            <h3 class="font-semibold text-gray-900 dark:text-white">Найближчі події</h3>
+            <h3 class="font-semibold text-gray-900 dark:text-white">{{ __('app.rotation_upcoming_events') }}</h3>
         </div>
         <div class="divide-y divide-gray-200 dark:divide-gray-700">
             @forelse($events as $event)
@@ -130,14 +130,14 @@
                             </span>
                             <button onclick="autoAssignEvent({{ $event->id }})"
                                     class="p-2 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
-                                    title="Авто-розподіл">
+                                    title="{{ __('app.rotation_auto_assign_title') }}">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                                 </svg>
                             </button>
                             <a href="{{ route('events.show', $event) }}"
                                class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-                               title="Переглянути">
+                               title="{{ __('app.rotation_view') }}">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                                 </svg>
@@ -176,7 +176,7 @@
             </div>
             @empty
             <div class="p-8 text-center">
-                <p class="text-gray-500 dark:text-gray-400">Немає запланованих подій на найближчі 4 тижні</p>
+                <p class="text-gray-500 dark:text-gray-400">{{ __('app.rotation_no_events_4_weeks') }}</p>
             </div>
             @endforelse
         </div>
@@ -185,16 +185,16 @@
     <!-- Members Table -->
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-            <h3 class="font-semibold text-gray-900 dark:text-white">Учасники команди</h3>
+            <h3 class="font-semibold text-gray-900 dark:text-white">{{ __('app.rotation_team_members') }}</h3>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full">
                 <thead class="bg-gray-50 dark:bg-gray-700/50">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Учасник</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Позиції</th>
-                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Призначень (3 міс)</th>
-                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">% участі</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ __('app.rotation_member') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ __('app.rotation_positions') }}</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ __('app.rotation_assignments_3mo') }}</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ __('app.rotation_participation') }}</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -267,6 +267,13 @@
 
 @push('scripts')
 <script>
+const i18n = {
+    completeToast: @json(__('app.rotation_complete_toast')),
+    errorToast: @json(__('app.rotation_error_toast')),
+    assignFailed: @json(__('app.rotation_assign_failed')),
+    connectionFailed: @json(__('app.rotation_connection_failed')),
+};
+
 function showToast(type, title, message) {
     const toast = document.getElementById('resultToast');
     const icon = document.getElementById('toastIcon');
@@ -303,13 +310,13 @@ async function autoAssignEvent(eventId) {
         const data = await response.json().catch(() => ({}));
 
         if (data.success) {
-            showToast('success', 'Розподіл завершено', data.message);
+            showToast('success', i18n.completeToast, data.message);
             setTimeout(() => location.reload(), 2000);
         } else {
-            showToast('error', 'Помилка', 'Не вдалося виконати розподіл');
+            showToast('error', i18n.errorToast, i18n.assignFailed);
         }
     } catch (error) {
-        showToast('error', 'Помилка', 'Помилка з\'єднання');
+        showToast('error', i18n.errorToast, i18n.connectionFailed);
     }
 }
 
@@ -330,14 +337,14 @@ async function autoAssignAll() {
         const data = await response.json().catch(() => ({}));
 
         if (data.success) {
-            showToast('success', 'Розподіл завершено',
-                `${data.summary.assigned} призначень для ${data.summary.events} подій`);
+            showToast('success', i18n.completeToast,
+                @json(__('app.rotation_assignments_for_events', ['assigned' => '${data.summary.assigned}', 'events' => '${data.summary.events}'])).replace('${data.summary.assigned}', data.summary.assigned).replace('${data.summary.events}', data.summary.events));
             setTimeout(() => location.reload(), 2000);
         } else {
-            showToast('error', 'Помилка', 'Не вдалося виконати розподіл');
+            showToast('error', i18n.errorToast, i18n.assignFailed);
         }
     } catch (error) {
-        showToast('error', 'Помилка', 'Помилка з\'єднання');
+        showToast('error', i18n.errorToast, i18n.connectionFailed);
     }
 }
 </script>
