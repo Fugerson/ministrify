@@ -7,7 +7,7 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3/dist/cdn.min.js"></script>
     <script>
-        var _tmaI18n = @json([
+        var _tmaI18n = {!! json_encode([
             'account_not_linked' => __('app.tma_account_not_linked'),
             'link_instructions' => __('app.tma_link_instructions'),
             'loading' => __('app.tma_loading'),
@@ -46,7 +46,7 @@
             'status_pending' => __('app.tma_status_pending'),
             'status_confirmed' => __('app.tma_status_confirmed'),
             'status_declined' => __('app.tma_status_declined'),
-        ]);
+        ]) !!};
     </script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }

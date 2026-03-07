@@ -731,7 +731,7 @@
                                 isWorshipMinistry: {{ $ministry->is_worship_ministry ? 'true' : 'false' }},
                                 ministryId: {{ $ministry->id }},
                                 gridUrl: '{{ route('ministries.schedule-grid', $ministry) }}',
-                                monthNames: @json([__('app.january'), __('app.february'), __('app.march'), __('app.april'), __('app.may'), __('app.june'), __('app.july'), __('app.august'), __('app.september'), __('app.october'), __('app.november'), __('app.december')]),
+                                monthNames: {!! json_encode([__('app.january'), __('app.february'), __('app.march'), __('app.april'), __('app.may'), __('app.june'), __('app.july'), __('app.august'), __('app.september'), __('app.october'), __('app.november'), __('app.december')]) !!},
 
                                 // Grid state
                                 gridView: new URL(window.location).searchParams.get('view') === 'grid',

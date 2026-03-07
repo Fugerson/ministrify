@@ -184,7 +184,7 @@ function songImportWizard() {
     return {
         step: 1, file: null, dragOver: false, loading: false, errorMessage: '',
         headers: [], preview: [], totalRows: 0,
-        stepNames: @json([__('app.songs_import_step_upload'), __('app.songs_import_step_mapping'), __('app.songs_import_step_import')]),
+        stepNames: {!! json_encode([__('app.songs_import_step_upload'), __('app.songs_import_step_mapping'), __('app.songs_import_step_import')]) !!},
         i18n: {
             processing: @json(__('app.songs_processing')),
             next: @json(__('app.songs_next')),

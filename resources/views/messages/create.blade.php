@@ -246,10 +246,10 @@
 </div>
 
 <script>
-var _msgI18n = @json([
+var _msgI18n = {!! json_encode([
     'no_recipients' => __('app.msg_no_recipients_with_tg'),
     'confirm_send' => __('app.msg_confirm_send'),
-]);
+]) !!};
 
 function messageForm() {
     return {

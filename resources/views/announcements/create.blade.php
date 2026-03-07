@@ -72,12 +72,12 @@
 </div>
 
 <script>
-var _annI18n = @json([
+var _annI18n = {!! json_encode([
     'check_form' => __('app.ann_check_form'),
     'save_error' => __('app.ann_save_error'),
     'saved' => __('app.ann_saved'),
     'connection_error' => __('app.ann_connection_error'),
-]);
+]) !!};
 
 function announcementCreateForm() {
     return {

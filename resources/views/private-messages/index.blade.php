@@ -376,7 +376,7 @@
 </div>
 
 <script>
-var _pmI18n = @json([
+var _pmI18n = {!! json_encode([
     'admin' => __('app.pm_admin'),
     'leader' => __('app.pm_leader'),
     'servant' => __('app.pm_servant'),
@@ -397,7 +397,7 @@ var _pmI18n = @json([
     'send' => __('app.msg_send'),
     'message_sent_count' => __('app.pm_message_sent_count'),
     'send_error' => __('app.pm_send_error'),
-]);
+]) !!};
 
 function messengerApp() {
     const _savedMsgFilters = filterStorage.load('messages', { searchQuery: '' });

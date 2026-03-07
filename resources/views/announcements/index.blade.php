@@ -188,12 +188,12 @@
 </div>
 
 <script>
-var _annI18n = @json([
+var _annI18n = {!! json_encode([
     'check_form' => __('app.ann_check_form'),
     'save_error' => __('app.ann_save_error'),
     'published' => __('app.ann_published'),
     'connection_error' => __('app.ann_connection_error'),
-]);
+]) !!};
 
 function openCreateAnnouncementModal() {
     document.getElementById('createAnnouncementModal').classList.remove('hidden');
