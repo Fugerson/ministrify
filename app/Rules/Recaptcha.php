@@ -15,6 +15,11 @@ class Recaptcha implements ValidationRule
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
+        // Skip in non-production environments
+        if (!app()->isProduction()) {
+            return;
+        }
+
         $secretKey = config('services.recaptcha.secret_key');
 
         // Graceful degradation: skip if not configured
