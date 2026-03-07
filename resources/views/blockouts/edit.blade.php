@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Редагувати період недоступності')
+@section('title', __('app.bo_edit_title'))
 
 @section('content')
 <div class="max-w-2xl mx-auto space-y-6">
@@ -12,7 +12,7 @@
             </svg>
         </a>
         <div>
-            <h1 class="text-xl font-semibold text-gray-900 dark:text-white">Редагувати період</h1>
+            <h1 class="text-xl font-semibold text-gray-900 dark:text-white">{{ __('app.bo_edit_title') }}</h1>
             <p class="text-sm text-gray-500 dark:text-gray-400">{{ $blockout->date_range }}</p>
         </div>
     </div>
@@ -25,13 +25,13 @@
                 <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                 </svg>
-                Дати
+                {{ __('app.bo_dates') }}
             </h2>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label for="start_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Початок <span class="text-red-500">*</span>
+                        {{ __('app.bo_start') }} <span class="text-red-500">*</span>
                     </label>
                     <input type="date" name="start_date" id="start_date"
                            value="{{ old('start_date', $blockout->start_date->format('Y-m-d')) }}"
@@ -44,7 +44,7 @@
 
                 <div>
                     <label for="end_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Кінець <span class="text-red-500">*</span>
+                        {{ __('app.bo_end') }} <span class="text-red-500">*</span>
                     </label>
                     <input type="date" name="end_date" id="end_date"
                            value="{{ old('end_date', $blockout->end_date->format('Y-m-d')) }}"
@@ -63,7 +63,7 @@
                            {{ old('all_day', $blockout->all_day) ? 'checked' : '' }}
                            class="rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
                            onchange="toggleTimeFields()">
-                    <span class="text-sm text-gray-700 dark:text-gray-300">Весь день</span>
+                    <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('app.bo_all_day') }}</span>
                 </label>
             </div>
 
@@ -71,7 +71,7 @@
             <div id="time-fields" class="mt-4 grid grid-cols-2 gap-4 {{ old('all_day', $blockout->all_day) ? 'hidden' : '' }}">
                 <div>
                     <label for="start_time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Час початку
+                        {{ __('app.bo_start_time') }}
                     </label>
                     <input type="time" name="start_time" id="start_time"
                            value="{{ old('start_time', $blockout->start_time?->format('H:i')) }}"
@@ -79,7 +79,7 @@
                 </div>
                 <div>
                     <label for="end_time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Час закінчення
+                        {{ __('app.bo_end_time') }}
                     </label>
                     <input type="time" name="end_time" id="end_time"
                            value="{{ old('end_time', $blockout->end_time?->format('H:i')) }}"
@@ -94,7 +94,7 @@
                 <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
                 </svg>
-                Причина
+                {{ __('app.bo_reason') }}
             </h2>
 
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -132,7 +132,7 @@
 
             <div class="mt-4">
                 <label for="reason_note" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Додаткова інформація (необов'язково)
+                    {{ __('app.bo_additional_info') }}
                 </label>
                 <input type="text" name="reason_note" id="reason_note"
                        value="{{ old('reason_note', $blockout->reason_note) }}"
@@ -146,7 +146,7 @@
                 <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                 </svg>
-                Сфера застосування
+                {{ __('app.bo_scope') }}
             </h2>
 
             @php $appliesToAll = old('applies_to_all', $blockout->applies_to_all); @endphp
@@ -159,8 +159,8 @@
                            class="mt-0.5 text-primary-600 focus:ring-primary-500"
                            onchange="toggleMinistrySelection()">
                     <div>
-                        <span class="font-medium text-gray-900 dark:text-white">Всі команди</span>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Я недоступний для будь-якої команди</p>
+                        <span class="font-medium text-gray-900 dark:text-white">{{ __('app.bo_scope_all') }}</span>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.bo_scope_all_desc') }}</p>
                     </div>
                 </label>
 
@@ -171,8 +171,8 @@
                            class="mt-0.5 text-primary-600 focus:ring-primary-500"
                            onchange="toggleMinistrySelection()">
                     <div>
-                        <span class="font-medium text-gray-900 dark:text-white">Окремі команди</span>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Я недоступний тільки для вибраних команд</p>
+                        <span class="font-medium text-gray-900 dark:text-white">{{ __('app.bo_scope_specific') }}</span>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.bo_scope_specific_desc') }}</p>
                     </div>
                 </label>
             </div>
@@ -192,7 +192,7 @@
                     @endforeach
                 </div>
                 @else
-                <p class="text-sm text-gray-500 dark:text-gray-400 italic">Ви не належите до жодної команди</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 italic">{{ __('app.bo_no_ministries') }}</p>
                 @endif
             </div>
         </div>
@@ -203,7 +203,7 @@
                 <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                 </svg>
-                Повторення
+                {{ __('app.bo_recurrence') }}
             </h2>
 
             @php $recurrence = old('recurrence', $blockout->recurrence); @endphp
@@ -223,12 +223,12 @@
             <!-- Recurrence End Date -->
             <div id="recurrence-end" class="mt-4 {{ $recurrence === 'none' ? 'hidden' : '' }}">
                 <label for="recurrence_end_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Повторювати до
+                    {{ __('app.bo_repeat_until') }}
                 </label>
                 <input type="date" name="recurrence_end_date" id="recurrence_end_date"
                        value="{{ old('recurrence_end_date', $blockout->recurrence_end_date?->format('Y-m-d')) }}"
                        class="w-full rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-primary-500 focus:ring-primary-500">
-                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Залиште порожнім для безкінечного повторення</p>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('app.bo_repeat_forever_hint') }}</p>
             </div>
         </div>
 
@@ -236,19 +236,19 @@
         <div class="flex items-center justify-between">
             <button type="button" @click="ajaxDelete('{{ route("blockouts.destroy", $blockout) }}', '{{ __("messages.confirm_delete_blockout") }}', null, '{{ route("blockouts.index") }}')"
                     class="px-4 py-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors">
-                Видалити
+                {{ __('app.bo_delete') }}
             </button>
             <div class="flex items-center gap-3">
                 <a href="{{ route('blockouts.index') }}"
                    class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors">
-                    Скасувати
+                    {{ __('app.bo_cancel') }}
                 </a>
                 <button type="submit" :disabled="saving"
                         class="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors disabled:opacity-50">
-                    <span x-show="!saving">Зберегти</span>
+                    <span x-show="!saving">{{ __('app.bo_save') }}</span>
                     <span x-show="saving" class="flex items-center gap-2">
                         <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
-                        Збереження...
+                        {{ __('app.bo_saving') }}
                     </span>
                 </button>
             </div>

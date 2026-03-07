@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>419 - Сесія закінчилась | Ministrify</title>
+    <title>419 - {{ __('app.err_419_title') }} | Ministrify</title>
     <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700&display=swap" rel="stylesheet" />
@@ -37,12 +37,12 @@
 
             {{-- Title --}}
             <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">
-                Сесія закінчилась
+                {{ __('app.err_419_title') }}
             </h1>
 
             {{-- Description --}}
             <p class="text-gray-500 dark:text-gray-400 mb-8 leading-relaxed">
-                Ваша сесія закінчилась через тривалу неактивність. Будь ласка, оновіть сторінку та спробуйте ще раз.
+                {{ __('app.err_419_desc') }}
             </p>
 
             {{-- Actions --}}
@@ -52,14 +52,14 @@
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                     </svg>
-                    Оновити сторінку
+                    {{ __('app.err_419_refresh') }}
                 </a>
                 <a href="{{ url('/login') }}"
                    class="inline-flex items-center justify-center px-5 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 rounded-xl transition-all shadow-md shadow-primary-500/30">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
                     </svg>
-                    Увійти
+                    {{ __('app.err_401_login') }}
                 </a>
             </div>
         </div>

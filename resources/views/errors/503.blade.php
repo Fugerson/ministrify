@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="uk" x-data="{ darkMode: localStorage.getItem('theme') === 'dark' || (localStorage.getItem('theme') === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches) }" x-bind:class="{ 'dark': darkMode }">
+<html lang="{{ app()->getLocale() }}" x-data="{ darkMode: localStorage.getItem('theme') === 'dark' || (localStorage.getItem('theme') === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches) }" x-bind:class="{ 'dark': darkMode }">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>503 - Технічні роботи | Ministrify</title>
+    <title>503 - {{ __('app.err_503_title') }} | Ministrify</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700&display=swap" rel="stylesheet" />
@@ -37,12 +37,12 @@
 
             {{-- Title --}}
             <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">
-                Технічні роботи
+                {{ __('app.err_503_title') }}
             </h1>
 
             {{-- Description --}}
             <p class="text-gray-500 dark:text-gray-400 mb-8 leading-relaxed">
-                Сервіс тимчасово недоступний. Ми проводимо оновлення для покращення роботи. Повернемося найближчим часом!
+                {{ __('app.err_503_desc') }}
             </p>
 
             {{-- Actions --}}
@@ -52,7 +52,7 @@
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                     </svg>
-                    Спробувати знову
+                    {{ __('app.err_try_again') }}
                 </a>
             </div>
         </div>

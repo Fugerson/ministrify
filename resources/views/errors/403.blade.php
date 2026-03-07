@@ -11,7 +11,7 @@
     </script>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>403 - {{ __('app.access_denied') ?? 'Доступ заборонено' }} | Ministrify</title>
+    <title>403 - {{ __('app.err_403_title') }} | Ministrify</title>
     <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700,800&display=swap" rel="stylesheet" />
@@ -143,10 +143,10 @@
 
                     <div class="relative">
                         <h1 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                            Доступ заборонено
+                            {{ __('app.err_403_title') }}
                         </h1>
                         <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
-                            У вас немає дозволу для перегляду цієї сторінки. Зверніться до адміністратора, якщо вважаєте, що це помилка.
+                            {{ __('app.err_403_desc') }}
                         </p>
                     </div>
                 </div>
@@ -159,14 +159,14 @@
                     <svg class="w-4 h-4 mr-2 transition-transform group-hover:-translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                     </svg>
-                    Назад
+                    {{ __('app.err_back') }}
                 </a>
                 <a href="{{ url('/dashboard') }}"
                    class="group inline-flex items-center justify-center px-6 py-3 text-sm font-medium text-white bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 rounded-xl transition-all shadow-lg shadow-red-500/25 hover:shadow-red-500/40 hover:scale-[1.02] active:scale-[0.98]">
                     <svg class="w-4 h-4 mr-2 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
                     </svg>
-                    На головну
+                    {{ __('app.err_home') }}
                 </a>
             </div>
         </div>

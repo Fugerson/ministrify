@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Мої періоди недоступності')
+@section('title', __('app.bo_my_blockouts'))
 
 @section('actions')
 <a href="{{ route('blockouts.create') }}"
@@ -8,7 +8,7 @@
     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
     </svg>
-    Додати період
+    {{ __('app.bo_add_period') }}
 </a>
 @endsection
 
@@ -22,8 +22,8 @@
             </svg>
         </a>
         <div>
-            <h1 class="text-xl font-semibold text-gray-900 dark:text-white">Періоди недоступності</h1>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Вкажіть дати, коли ви не можете служити</p>
+            <h1 class="text-xl font-semibold text-gray-900 dark:text-white">{{ __('app.bo_title') }}</h1>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.bo_subtitle') }}</p>
         </div>
     </div>
 
@@ -35,7 +35,7 @@
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
                 </svg>
-                Активні періоди ({{ $blockouts['active']->count() }})
+                {{ __('app.bo_active_periods', ['count' => $blockouts['active']->count()]) }}
             </h2>
         </div>
         <div class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -86,7 +86,7 @@
                                 <span>{{ $blockout->ministries->pluck('name')->join(', ') }}</span>
                                 @else
                                 <span>•</span>
-                                <span>Всі команди</span>
+                                <span>{{ __('app.bo_all_teams') }}</span>
                                 @endif
                             </div>
                         </div>
@@ -121,7 +121,7 @@
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
-                Минулі періоди ({{ $blockouts['expired']->count() }})
+                {{ __('app.bo_expired_periods', ['count' => $blockouts['expired']->count()]) }}
             </h2>
         </div>
         <div class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -145,26 +145,26 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
             </svg>
         </div>
-        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Немає періодів недоступності</h3>
-        <p class="text-gray-500 dark:text-gray-400 mb-6">Вкажіть дати, коли ви не зможете служити</p>
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">{{ __('app.bo_no_blockouts') }}</h3>
+        <p class="text-gray-500 dark:text-gray-400 mb-6">{{ __('app.bo_no_blockouts_desc') }}</p>
         <a href="{{ route('blockouts.create') }}"
            class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-xl transition-colors">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
             </svg>
-            Додати період
+            {{ __('app.bo_add_period') }}
         </a>
     </div>
     @endif
 
     <!-- Quick Reference -->
     <div class="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4">
-        <h3 class="font-medium text-blue-800 dark:text-blue-200 mb-2">Як це працює?</h3>
+        <h3 class="font-medium text-blue-800 dark:text-blue-200 mb-2">{{ __('app.bo_how_it_works') }}</h3>
         <ul class="text-sm text-blue-700 dark:text-blue-300 space-y-1">
-            <li>• Вкажіть дати, коли ви недоступні для подій</li>
-            <li>• Система автоматично врахує це при плануванні</li>
-            <li>• Лідери побачать попередження, якщо спробують вас призначити</li>
-            <li>• Незатверджені призначення на ці дати будуть автоматично відхилені</li>
+            <li>• {{ __('app.bo_hint_1') }}</li>
+            <li>• {{ __('app.bo_hint_2') }}</li>
+            <li>• {{ __('app.bo_hint_3') }}</li>
+            <li>• {{ __('app.bo_hint_4') }}</li>
         </ul>
     </div>
 </div>
