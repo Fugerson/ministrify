@@ -86,44 +86,44 @@
                                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                             <option value="">{{ __('app.do_not_repeat') }}</option>
                             <option value="daily">{{ __('app.recurrence_daily') }}</option>
-                            <option value="weekly">{{ __('Щотижня') }}</option>
-                            <option value="biweekly">{{ __('Що 2 тижні') }}</option>
-                            <option value="monthly">{{ __('Щомісяця') }}</option>
-                            <option value="yearly">{{ __('Щороку') }}</option>
-                            <option value="weekdays">{{ __('Кожен робочий день (пн-пт)') }}</option>
-                            <option value="custom">{{ __('Користувацьке...') }}</option>
+                            <option value="weekly">{{ __('app.recurrence_weekly') }}</option>
+                            <option value="biweekly">{{ __('app.every_2_weeks') }}</option>
+                            <option value="monthly">{{ __('app.recurrence_monthly') }}</option>
+                            <option value="yearly">{{ __('app.recurrence_yearly') }}</option>
+                            <option value="weekdays">{{ __('app.every_weekday') }}</option>
+                            <option value="custom">{{ __('app.custom_recurrence') }}</option>
                         </select>
 
                         <!-- Custom recurrence settings -->
                         <div x-show="recurrenceType === 'custom'" x-collapse class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg space-y-3">
                             <div class="flex items-center gap-2">
-                                <span class="text-sm text-gray-600 dark:text-gray-400">{{ __('Кожні') }}</span>
+                                <span class="text-sm text-gray-600 dark:text-gray-400">{{ __('app.every_n') }}</span>
                                 <input type="number" x-model="customInterval" @input="updatePreview()" min="1" max="99"
                                        class="w-16 px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-center">
                                 <select x-model="customFrequency" @change="updatePreview()"
                                         class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                                    <option value="day">{{ __('днів') }}</option>
-                                    <option value="week">{{ __('тижнів') }}</option>
-                                    <option value="month">{{ __('місяців') }}</option>
-                                    <option value="year">{{ __('років') }}</option>
+                                    <option value="day">{{ __('app.days_unit') }}</option>
+                                    <option value="week">{{ __('app.weeks_unit') }}</option>
+                                    <option value="month">{{ __('app.months_unit') }}</option>
+                                    <option value="year">{{ __('app.years_unit') }}</option>
                                 </select>
                             </div>
                         </div>
 
                         <!-- Recurrence end settings -->
                         <div x-show="recurrenceType && recurrenceType !== ''" x-collapse class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg space-y-3">
-                            <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">{{ __('Закінчується') }}</label>
+                            <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">{{ __('app.ends') }}</label>
                             <div class="space-y-2">
                                 <label class="flex items-center gap-2 cursor-pointer">
                                     <input type="radio" x-model="endType" value="count" @change="updatePreview()" class="text-primary-600 focus:ring-primary-500">
-                                    <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('Після') }}</span>
+                                    <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('app.after_label') }}</span>
                                     <input type="number" x-model="endCount" @input="updatePreview()" min="2" max="365" :disabled="endType !== 'count'"
                                            class="w-16 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-center disabled:opacity-50">
-                                    <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('повторень') }}</span>
+                                    <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('app.occurrences') }}</span>
                                 </label>
                                 <label class="flex items-center gap-2 cursor-pointer">
                                     <input type="radio" x-model="endType" value="date" @change="updatePreview()" class="text-primary-600 focus:ring-primary-500">
-                                    <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('До дати') }}</span>
+                                    <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('app.until_date') }}</span>
                                     <input type="date" x-model="endDate" @change="updatePreview()" :disabled="endType !== 'date'"
                                            class="px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:opacity-50">
                                 </label>
@@ -145,16 +145,16 @@
                 </div>
 
                 <div>
-                    <label for="notes" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Нотатки') }}</label>
+                    <label for="notes" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.notes_label') }}</label>
                     <textarea name="notes" id="notes" rows="2"
                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                              placeholder="{{ __('Додаткова інформація...') }}">{{ old('notes') }}</textarea>
+                              placeholder="{{ __('app.additional_info_placeholder') }}">{{ old('notes') }}</textarea>
                 </div>
 
                 <!-- Ministry/Team Selection -->
                 @if($ministries->count() > 0)
                 <div x-data="ministrySelector()">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Команда') }}</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.team_label') }}</label>
                     <x-searchable-select
                         name="ministry_id"
                         :items="$ministries"
@@ -162,8 +162,8 @@
                         labelKey="name"
                         valueKey="id"
                         colorKey="color"
-                        placeholder="{{ __('Пошук команди...') }}"
-                        nullText="{{ __('Без команди') }}"
+                        placeholder="{{ __('app.search_team') }}"
+                        nullText="{{ __('app.without_team') }}"
                         nullable
                         x-on:select-changed="selectedId = $event.detail.value || ''"
                     />
@@ -193,7 +193,7 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
                         </svg>
-                        {{ __('Нагадування в Telegram') }}
+                        {{ __('app.telegram_reminders') }}
                         <span x-show="reminders.length > 0" x-cloak class="inline-flex items-center justify-center w-5 h-5 text-xs font-medium bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 rounded-full" x-text="reminders.length"></span>
                     </button>
 
@@ -202,8 +202,8 @@
                             <div class="flex items-center gap-2">
                                 <select x-model="reminder.type" @change="updateReminder(index)"
                                         class="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                                    <option value="days">{{ __('За днів до') }}</option>
-                                    <option value="hours">{{ __('За годин до') }}</option>
+                                    <option value="days">{{ __('app.days_before') }}</option>
+                                    <option value="hours">{{ __('app.hours_before') }}</option>
                                 </select>
                                 <input type="number" x-model="reminder.value" min="1" max="30"
                                        class="w-20 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-center">
@@ -225,11 +225,11 @@
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                             </svg>
-                            {{ __('Додати нагадування') }}
+                            {{ __('app.add_reminder') }}
                         </button>
 
                         <p class="text-xs text-gray-500 dark:text-gray-400">
-                            {{ __('Нагадування надсилатимуться призначеним служителям') }}
+                            {{ __('app.reminders_sent_to_assigned') }}
                         </p>
                     </div>
 
@@ -262,27 +262,27 @@
             </div>
             <select name="google_calendar_id" x-model="calendarId"
                     class="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white text-sm">
-                <option value="">{{ __('Не додавати в Google') }}</option>
-                <option value="primary">{{ __('Основний календар') }}</option>
+                <option value="">{{ __('app.do_not_add_google') }}</option>
+                <option value="primary">{{ __('app.primary_calendar') }}</option>
                 <template x-for="cal in calendars" :key="cal.id">
                     <option :value="cal.id" :disabled="!cal.can_sync" :selected="cal.id === defaultCalendarId"
-                            x-text="cal.summary + (cal.can_sync ? '' : ' (тільки читання)')"></option>
+                            x-text="cal.summary + (cal.can_sync ? '' : ' {{ __('app.read_only_suffix') }}')"></option>
                 </template>
             </select>
-            <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">{{ __('Подія автоматично з\'явиться в обраному календарі') }}</p>
+            <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">{{ __('app.event_will_appear_in_calendar') }}</p>
         </div>
         @endif
 
         <div class="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 sm:space-x-4">
             <a href="{{ route('schedule') }}" class="w-full sm:w-auto text-center px-4 py-2.5 md:py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
-                {{ __('Скасувати') }}
+                {{ __('app.cancel') }}
             </a>
             <button type="submit" :disabled="saving" class="w-full sm:w-auto px-6 py-2.5 md:py-2 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2">
                 <svg x-show="saving" x-cloak class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                 </svg>
-                <span x-text="saving ? '{{ __('Створення...') }}' : '{{ __('Створити') }}'"></span>
+                <span x-text="saving ? '{{ __('app.creating_label') }}' : '{{ __('app.create') }}'"></span>
             </button>
         </div>
     </form>
@@ -291,6 +291,26 @@
 
 @push('scripts')
 <script>
+var _schedI18n = {
+    checkForm: @json(__('app.check_form_errors')),
+    saveError: @json(__('app.save_error_msg')),
+    saved: @json(__('app.saved_label')),
+    connectionError: @json(__('app.connection_error_msg')),
+    recDaily: @json(__('app.recurrence_daily_js')),
+    recWeekly: @json(__('app.recurrence_weekly_js')),
+    recBiweekly: @json(__('app.recurrence_biweekly_js')),
+    recMonthly: @json(__('app.recurrence_monthly_js')),
+    recYearly: @json(__('app.recurrence_yearly_js')),
+    recWeekdays: @json(__('app.recurrence_weekdays_js')),
+    everyN: @json(__('app.every_n')),
+    willCreate: @json(__('app.will_create_n_events')),
+    willRepeat: @json(__('app.will_repeat_until')),
+    freqDay: @json(__('app.days_unit')),
+    freqWeek: @json(__('app.weeks_unit')),
+    freqMonth: @json(__('app.months_unit')),
+    freqYear: @json(__('app.years_unit'))
+};
+
 function eventCreateForm() {
     return {
         saving: false,
@@ -312,17 +332,17 @@ function eventCreateForm() {
                 if (!response.ok) {
                     if (response.status === 422 && data.errors) {
                         this.errors = data.errors;
-                        showToast('error', 'Перевірте правильність заповнення форми.');
+                        showToast('error', _schedI18n.checkForm);
                     } else {
-                        showToast('error', data.message || 'Помилка збереження.');
+                        showToast('error', data.message || _schedI18n.saveError);
                     }
                     this.saving = false;
                     return;
                 }
-                showToast('success', data.message || 'Збережено!');
+                showToast('success', data.message || _schedI18n.saved);
                 setTimeout(() => Livewire.navigate(data.redirect_url), 800);
             } catch (e) {
-                showToast('error', "Помилка з'єднання з сервером.");
+                showToast('error', _schedI18n.connectionError);
                 this.saving = false;
             }
         }
@@ -377,30 +397,30 @@ function recurrenceSettings() {
             }
 
             const typeLabels = {
-                'daily': 'щодня',
-                'weekly': 'щотижня',
-                'biweekly': 'що 2 тижні',
-                'monthly': 'щомісяця',
-                'yearly': 'щороку',
-                'weekdays': 'кожен робочий день',
-                'custom': `кожні ${this.customInterval} ${this.getFrequencyLabel()}`
+                'daily': _schedI18n.recDaily,
+                'weekly': _schedI18n.recWeekly,
+                'biweekly': _schedI18n.recBiweekly,
+                'monthly': _schedI18n.recMonthly,
+                'yearly': _schedI18n.recYearly,
+                'weekdays': _schedI18n.recWeekdays,
+                'custom': `${_schedI18n.everyN} ${this.customInterval} ${this.getFrequencyLabel()}`
             };
 
             const label = typeLabels[this.recurrenceType] || '';
 
             if (this.endType === 'count') {
-                this.previewText = `Буде створено ${this.endCount} подій (${label})`;
+                this.previewText = _schedI18n.willCreate.replace(':count', this.endCount).replace(':label', label);
             } else {
-                this.previewText = `Повторюватиметься ${label} до ${this.formatDate(this.endDate)}`;
+                this.previewText = _schedI18n.willRepeat.replace(':label', label).replace(':date', this.formatDate(this.endDate));
             }
         },
 
         getFrequencyLabel() {
             const labels = {
-                'day': this.customInterval == 1 ? 'день' : 'днів',
-                'week': this.customInterval == 1 ? 'тиждень' : 'тижнів',
-                'month': this.customInterval == 1 ? 'місяць' : 'місяців',
-                'year': this.customInterval == 1 ? 'рік' : 'років'
+                'day': _schedI18n.freqDay,
+                'week': _schedI18n.freqWeek,
+                'month': _schedI18n.freqMonth,
+                'year': _schedI18n.freqYear
             };
             return labels[this.customFrequency] || '';
         },
@@ -408,7 +428,7 @@ function recurrenceSettings() {
         formatDate(dateStr) {
             if (!dateStr) return '';
             const date = new Date(dateStr);
-            return date.toLocaleDateString('uk-UA', { day: 'numeric', month: 'long', year: 'numeric' });
+            return date.toLocaleDateString(document.documentElement.lang || 'uk', { day: 'numeric', month: 'long', year: 'numeric' });
         },
 
         getRecurrenceRule() {

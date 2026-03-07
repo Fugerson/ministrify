@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Розклад')
+@section('title', __('app.schedule_title'))
 
 @section('actions')
 @if(auth()->user()->can('create', \App\Models\Event::class))
@@ -9,16 +9,16 @@
     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
     </svg>
-    Нова подія
+    {{ __('app.schedule_new_event') }}
 </button>
 @endif
 @endsection
 
 @section('content')
 @php
-    $months = ['Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень', 'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'];
-    $daysShort = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд'];
-    $daysFull = ['Понеділок', 'Вівторок', 'Середа', 'Четвер', "П'ятниця", 'Субота', 'Неділя'];
+    $months = explode(',', __('app.cal_months'));
+    $daysShort = explode(',', __('app.cal_days_short'));
+    $daysFull = explode(',', __('app.cal_days_full'));
 
     $prevMonth = $month == 1 ? 12 : $month - 1;
     $prevYear = $month == 1 ? $year - 1 : $year;
@@ -104,7 +104,7 @@
 
                                 {{-- Month Grid --}}
                                 <div class="grid grid-cols-3 gap-2 mb-4">
-                                    <template x-for="(month, index) in ['Січ', 'Лют', 'Бер', 'Кві', 'Тра', 'Чер', 'Лип', 'Сер', 'Вер', 'Жов', 'Лис', 'Гру']" :key="index">
+                                    <template x-for="(month, index) in @json(explode(',', __('app.cal_months_short')))" :key="index">
                                         <button @click="pickMonth(index + 1); showPicker = false;" type="button"
                                            :class="{
                                                'bg-primary-600 text-white': currentMonth === index + 1 && currentYear === {{ now()->year }},
@@ -121,7 +121,7 @@
                                 {{-- Today Button --}}
                                 <button @click="goToday(); showPicker = false;" type="button"
                                    class="w-full py-2 text-sm font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/30 rounded-lg transition-colors">
-                                    {{ __('Сьогодні') }}
+                                    {{ __('app.cal_today') }}
                                 </button>
                             </div>
                         </div>
@@ -165,11 +165,11 @@
                             .then(r => r.json())
                             .then(data => {
                                 syncing = false;
-                                message = data.message || data.error || 'Готово';
+                                message = data.message || data.error || '{{ __('app.cal_done') }}';
                                 error = !data.success;
                                 if (data.success) lastSynced = new Date().toISOString();
                             })
-                            .catch(e => { syncing = false; message = 'Помилка з\'єднання'; error = true; })
+                            .catch(e => { syncing = false; message = '{{ __('app.cal_connection_error') }}'; error = true; })
                         "
                                 :disabled="syncing"
                                 title="{{ __('app.sync_google') }}"
@@ -189,7 +189,7 @@
                 @else
                     <a href="{{ route('settings.index') }}#google-calendar"
                        class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600 rounded-lg transition-colors"
-                       title="Підключити Google Calendar">
+                       title="{{ __('app.cal_connect_google') }}">
                         <svg class="w-4 h-4 mr-1.5 text-blue-500" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M12 0C5.383 0 0 5.383 0 12s5.383 12 12 12 12-5.383 12-12S18.617 0 12 0zM9.857 17.143H6.857v-3h3v3zm0-4.286H6.857V9.857h3v3zm4.286 4.286h-3v-3h3v3zm0-4.286h-3V9.857h3v3zm4.286 4.286h-3v-3h3v3zm0-4.286h-3V9.857h3v3z"/>
                         </svg>
@@ -345,7 +345,7 @@
                         <div class="p-4 {{ $isToday ? 'border-l-4 border-l-primary-500 bg-primary-50/50 dark:bg-primary-900/10' : '' }} {{ $isPast ? 'opacity-60' : '' }}">
                             <div class="flex items-center gap-2 mb-2">
                                 <span class="{{ $isToday ? 'w-8 h-8 flex items-center justify-center rounded-full bg-primary-600 text-white font-bold text-sm' : 'text-lg font-bold text-gray-900 dark:text-white' }}">{{ $dayDate->format('d') }}</span>
-                                <span class="text-sm text-gray-500 dark:text-gray-400">{{ $daysShort[$i] }}@if($isToday) <span class="ml-1 text-primary-600 dark:text-primary-400 font-medium">Сьогодні</span>@endif</span>
+                                <span class="text-sm text-gray-500 dark:text-gray-400">{{ $daysShort[$i] }}@if($isToday) <span class="ml-1 text-primary-600 dark:text-primary-400 font-medium">{{ __('app.cal_today') }}</span>@endif</span>
                             </div>
                             <div class="space-y-2">
                                 @foreach($dayEvents as $item)
@@ -489,7 +489,7 @@
                                     <span class="text-sm text-gray-500 dark:text-gray-400">
                                         {{ $dayOfWeek }}
                                         @if($isToday)
-                                            <span class="ml-1 text-primary-600 dark:text-primary-400 font-medium">Сьогодні</span>
+                                            <span class="ml-1 text-primary-600 dark:text-primary-400 font-medium">{{ __('app.cal_today') }}</span>
                                         @endif
                                     </span>
                                 </div>
@@ -570,7 +570,7 @@
                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                 </svg>
-                                Створити подію
+                                {{ __('app.cal_create_event') }}
                             </button>
                             @endif
                         </div>
@@ -586,7 +586,7 @@
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
                         </svg>
-                        Найближчі події ({{ $months[$nextMonth - 1] ?? __('app.next_month') }})
+                        {{ __('app.cal_upcoming_events', ['month' => $months[$nextMonth - 1] ?? '']) }}
                     </h3>
                 </div>
                 <div class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -651,7 +651,7 @@
             <form class="divide-y divide-gray-200 dark:divide-gray-700" x-ref="form" @submit.prevent="submitForm">
                 {{-- Header --}}
                 <div class="px-6 py-4 flex items-center justify-between">
-                    <h3 id="create-event-title" class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Нова подія') }}</h3>
+                    <h3 id="create-event-title" class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.cal_new_event') }}</h3>
                     <button type="button" onclick="closeCreateEventModal()" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -663,11 +663,11 @@
                 <div class="px-6 py-4 space-y-4 max-h-[70vh] overflow-y-auto">
                     {{-- Title --}}
                     <div>
-                        <label for="modal_title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Назва') }} *</label>
+                        <label for="modal_title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.cal_name_label') }} *</label>
                         <input type="text" name="title" id="modal_title" required
                                class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                                :class="errors.title ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'"
-                               placeholder="{{ __('Недільне богослужіння') }}">
+                               placeholder="{{ __('app.sunday_worship') }}">
                         <template x-if="errors.title"><p class="mt-1 text-sm text-red-500" x-text="errors.title[0]"></p></template>
                     </div>
 
@@ -675,14 +675,14 @@
                     <div x-data="{ allDay: false, multiDay: false }">
                         <div class="grid grid-cols-2 gap-3">
                             <div>
-                                <label for="modal_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Дата') }} *</label>
+                                <label for="modal_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.cal_date_label') }} *</label>
                                 <input type="date" name="date" id="modal_date" value="{{ now()->format('Y-m-d') }}" required
                                        class="w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                                        :class="errors.date ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'">
                                 <template x-if="errors.date"><p class="mt-1 text-sm text-red-500" x-text="errors.date[0]"></p></template>
                             </div>
                             <div x-show="!allDay" x-transition>
-                                <label for="modal_time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Час') }} *</label>
+                                <label for="modal_time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.cal_time_label') }} *</label>
                                 <input type="time" name="time" id="modal_time" value="10:00" :required="!allDay"
                                        class="w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                                        :class="errors.time ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'">
@@ -693,11 +693,11 @@
                         <label class="flex items-center gap-2 mt-3 cursor-pointer">
                             <input type="checkbox" name="multi_day" value="1" x-model="multiDay"
                                    class="w-4 h-4 text-primary-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500">
-                            <span class="text-sm text-gray-600 dark:text-gray-400">{{ __('Подія на кілька днів') }}</span>
+                            <span class="text-sm text-gray-600 dark:text-gray-400">{{ __('app.cal_multi_day') }}</span>
                         </label>
 
                         <div x-show="multiDay" x-collapse class="mt-3">
-                            <label for="modal_end_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Дата закінчення') }} *</label>
+                            <label for="modal_end_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.cal_end_date_label') }} *</label>
                             <input type="date" name="end_date" id="modal_end_date"
                                    class="w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                                    :class="errors.end_date ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'">
@@ -707,7 +707,7 @@
                         <label class="flex items-center gap-2 mt-2 cursor-pointer">
                             <input type="checkbox" name="all_day" value="1" x-model="allDay"
                                    class="w-4 h-4 text-primary-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500">
-                            <span class="text-sm text-gray-600 dark:text-gray-400">{{ __('Подія на весь день') }}</span>
+                            <span class="text-sm text-gray-600 dark:text-gray-400">{{ __('app.cal_all_day') }}</span>
                         </label>
                     </div>
 
@@ -721,52 +721,52 @@
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                             </svg>
-                            {{ __('Повторення') }}
+                            {{ __('app.recurrence') }}
                             <span x-show="recurrenceType" x-cloak class="text-xs text-primary-600 dark:text-primary-400 font-medium"
-                                  x-text="recurrenceType ? '(' + ({'daily':'щодня','weekly':'щотижня','biweekly':'що 2 тижні','monthly':'щомісяця','yearly':'щороку','weekdays':'пн-пт','custom':'свій'}[recurrenceType] || '') + ')' : ''"></span>
+                                  x-text="recurrenceType ? '(' + ({'daily':{{ @json(__('app.recurrence_daily_js')) }},'weekly':{{ @json(__('app.recurrence_weekly_js')) }},'biweekly':{{ @json(__('app.recurrence_biweekly_js')) }},'monthly':{{ @json(__('app.recurrence_monthly_js')) }},'yearly':{{ @json(__('app.recurrence_yearly_js')) }},'weekdays':{{ @json(__('app.recurrence_weekdays_js')) }},'custom':{{ @json(__('app.recurrence_custom_js')) }}}[recurrenceType] || '') + ')' : ''"></span>
                         </button>
 
                         <div x-show="showRecurrence" x-collapse class="mt-3 space-y-3">
                             <select x-model="recurrenceType" @change="updateRecurrence()"
                                     class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                                <option value="">{{ __('Не повторювати') }}</option>
-                                <option value="daily">{{ __('Щодня') }}</option>
-                                <option value="weekly">{{ __('Щотижня') }}</option>
-                                <option value="biweekly">{{ __('Що 2 тижні') }}</option>
-                                <option value="monthly">{{ __('Щомісяця') }}</option>
-                                <option value="yearly">{{ __('Щороку') }}</option>
-                                <option value="weekdays">{{ __('Кожен робочий день (пн-пт)') }}</option>
-                                <option value="custom">{{ __('Користувацьке...') }}</option>
+                                <option value="">{{ __('app.do_not_repeat') }}</option>
+                                <option value="daily">{{ __('app.recurrence_daily') }}</option>
+                                <option value="weekly">{{ __('app.recurrence_weekly') }}</option>
+                                <option value="biweekly">{{ __('app.every_2_weeks') }}</option>
+                                <option value="monthly">{{ __('app.recurrence_monthly') }}</option>
+                                <option value="yearly">{{ __('app.recurrence_yearly') }}</option>
+                                <option value="weekdays">{{ __('app.every_weekday') }}</option>
+                                <option value="custom">{{ __('app.custom_recurrence') }}</option>
                             </select>
 
                             <div x-show="recurrenceType === 'custom'" x-collapse class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg space-y-3">
                                 <div class="flex items-center gap-2">
-                                    <span class="text-sm text-gray-600 dark:text-gray-400">{{ __('Кожні') }}</span>
+                                    <span class="text-sm text-gray-600 dark:text-gray-400">{{ __('app.every_n') }}</span>
                                     <input type="number" x-model="customInterval" @input="updatePreview()" min="1" max="99"
                                            class="w-16 px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-center">
                                     <select x-model="customFrequency" @change="updatePreview()"
                                             class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                                        <option value="day">{{ __('днів') }}</option>
-                                        <option value="week">{{ __('тижнів') }}</option>
-                                        <option value="month">{{ __('місяців') }}</option>
-                                        <option value="year">{{ __('років') }}</option>
+                                        <option value="day">{{ __('app.days_unit') }}</option>
+                                        <option value="week">{{ __('app.weeks_unit') }}</option>
+                                        <option value="month">{{ __('app.months_unit') }}</option>
+                                        <option value="year">{{ __('app.years_unit') }}</option>
                                     </select>
                                 </div>
                             </div>
 
                             <div x-show="recurrenceType && recurrenceType !== ''" x-collapse class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg space-y-3">
-                                <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">{{ __('Закінчується') }}</label>
+                                <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">{{ __('app.ends') }}</label>
                                 <div class="space-y-2">
                                     <label class="flex items-center gap-2 cursor-pointer">
                                         <input type="radio" x-model="endType" value="count" @change="updatePreview()" class="text-primary-600 focus:ring-primary-500">
-                                        <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('Після') }}</span>
+                                        <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('app.after_label') }}</span>
                                         <input type="number" x-model="endCount" @input="updatePreview()" min="2" max="365" :disabled="endType !== 'count'"
                                                class="w-16 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-center disabled:opacity-50">
-                                        <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('повторень') }}</span>
+                                        <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('app.occurrences') }}</span>
                                     </label>
                                     <label class="flex items-center gap-2 cursor-pointer">
                                         <input type="radio" x-model="endType" value="date" @change="updatePreview()" class="text-primary-600 focus:ring-primary-500">
-                                        <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('До дати') }}</span>
+                                        <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('app.until_date') }}</span>
                                         <input type="date" x-model="endDate" @change="updatePreview()" :disabled="endType !== 'date'"
                                                class="px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:opacity-50">
                                     </label>
@@ -788,24 +788,24 @@
 
                     {{-- Notes --}}
                     <div>
-                        <label for="modal_notes" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Нотатки') }}</label>
+                        <label for="modal_notes" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.notes_label') }}</label>
                         <textarea name="notes" id="modal_notes" rows="2"
                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                  placeholder="{{ __('Додаткова інформація...') }}"></textarea>
+                                  placeholder="{{ __('app.additional_info_placeholder') }}"></textarea>
                     </div>
 
                     {{-- Ministry --}}
                     @if($createMinistries->count() > 0)
                     <div x-data="modalMinistrySelector()">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Команда') }}</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.team_label') }}</label>
                         <x-searchable-select
                             name="ministry_id"
                             :items="$createMinistries"
                             labelKey="name"
                             valueKey="id"
                             colorKey="color"
-                            placeholder="{{ __('Пошук команди...') }}"
-                            nullText="{{ __('Без команди') }}"
+                            placeholder="{{ __('app.search_team') }}"
+                            nullText="{{ __('app.without_team') }}"
                             nullable
                             x-on:select-changed="selectedId = $event.detail.value || ''"
                         />
@@ -833,7 +833,7 @@
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
                             </svg>
-                            {{ __('Нагадування в Telegram') }}
+                            {{ __('app.telegram_reminders') }}
                             <span x-show="reminders.length > 0" x-cloak class="inline-flex items-center justify-center w-5 h-5 text-xs font-medium bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 rounded-full" x-text="reminders.length"></span>
                         </button>
 
@@ -842,8 +842,8 @@
                                 <div class="flex items-center gap-2">
                                     <select x-model="reminder.type" @change="updateReminder(index)"
                                             class="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                                        <option value="days">{{ __('За днів до') }}</option>
-                                        <option value="hours">{{ __('За годин до') }}</option>
+                                        <option value="days">{{ __('app.days_before') }}</option>
+                                        <option value="hours">{{ __('app.hours_before') }}</option>
                                     </select>
                                     <input type="number" x-model="reminder.value" min="1" max="30"
                                            class="w-20 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-center">
@@ -865,11 +865,11 @@
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                 </svg>
-                                {{ __('Додати нагадування') }}
+                                {{ __('app.add_reminder') }}
                             </button>
 
                             <p class="text-xs text-gray-500 dark:text-gray-400">
-                                {{ __('Нагадування надсилатимуться призначеним служителям') }}
+                                {{ __('app.reminders_sent_to_assigned') }}
                             </p>
                         </div>
 
@@ -895,11 +895,11 @@
                         </div>
                         <select name="google_calendar_id" x-model="calendarId"
                                 class="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white text-sm">
-                            <option value="">{{ __('Не додавати в Google') }}</option>
-                            <option value="primary">{{ __('Основний календар') }}</option>
+                            <option value="">{{ __('app.do_not_add_google') }}</option>
+                            <option value="primary">{{ __('app.primary_calendar') }}</option>
                             <template x-for="cal in calendars" :key="cal.id">
                                 <option :value="cal.id" :disabled="!cal.can_sync" :selected="cal.id === defaultCalendarId"
-                                        x-text="cal.summary + (cal.can_sync ? '' : ' (тільки читання)')"></option>
+                                        x-text="cal.summary + (cal.can_sync ? '' : ' {{ __('app.cal_read_only') }}')"></option>
                             </template>
                         </select>
                     </div>
@@ -909,14 +909,14 @@
                 {{-- Footer --}}
                 <div class="px-6 py-4 flex items-center justify-end gap-3">
                     <button type="button" onclick="closeCreateEventModal()" class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
-                        {{ __('Скасувати') }}
+                        {{ __('app.cancel') }}
                     </button>
                     <button type="submit" :disabled="saving" class="px-6 py-2 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 text-white font-medium rounded-lg transition-colors flex items-center gap-2">
                         <svg x-show="saving" x-cloak class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                         </svg>
-                        <span x-text="saving ? '{{ __('Створення...') }}' : '{{ __('Створити') }}'"></span>
+                        <span x-text="saving ? '{{ __('app.creating_label') }}' : '{{ __('app.create') }}'"></span>
                     </button>
                 </div>
             </form>
@@ -945,7 +945,7 @@
                                value="{{ $church->calendar_feed_url }}"
                                class="flex-1 px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white">
                         <button onclick="copyIcalUrl(event)" class="px-3 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-medium transition-colors">
-                            Копіювати
+                            {{ __('app.cal_copy') }}
                         </button>
                     </div>
                 </div>
@@ -1000,13 +1000,13 @@
                         <code class="block text-xs bg-gray-100 dark:bg-gray-600 p-2 rounded overflow-x-auto">
                             GET {{ url('/api/calendar/events') }}?token={{ $church->getCalendarToken() }}
                         </code>
-                        <p class="text-xs mt-2">Параметри: <code>start</code>, <code>end</code>, <code>ministry</code></p>
+                        <p class="text-xs mt-2">{{ __('app.cal_api_params') }}: <code>start</code>, <code>end</code>, <code>ministry</code></p>
                     </div>
                 </details>
             </div>
             <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-700">
                 <button onclick="hideSubscriptionModal()" class="w-full px-4 py-2 bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 text-gray-800 dark:text-white rounded-lg font-medium transition-colors">
-                    Закрити
+                    {{ __('app.cal_close') }}
                 </button>
             </div>
         </div>
@@ -1014,6 +1014,27 @@
 </div>
 
 <script>
+var _calI18n = {
+    checkForm: @json(__('app.check_form_errors')),
+    saveError: @json(__('app.save_error_msg')),
+    saved: @json(__('app.saved_label')),
+    connectionError: @json(__('app.connection_error_msg')),
+    months: @json(explode(',', __('app.cal_months'))),
+    recDaily: @json(__('app.recurrence_daily_js')),
+    recWeekly: @json(__('app.recurrence_weekly_js')),
+    recBiweekly: @json(__('app.recurrence_biweekly_js')),
+    recMonthly: @json(__('app.recurrence_monthly_js')),
+    recYearly: @json(__('app.recurrence_yearly_js')),
+    recWeekdays: @json(__('app.recurrence_weekdays_js')),
+    everyN: @json(__('app.every_n')),
+    willCreate: @json(__('app.will_create_n_events')),
+    willRepeat: @json(__('app.will_repeat_until')),
+    freqDay: @json(__('app.days_unit')),
+    freqWeek: @json(__('app.weeks_unit')),
+    freqMonth: @json(__('app.months_unit')),
+    freqYear: @json(__('app.years_unit'))
+};
+
 function showSubscriptionModal() {
     document.getElementById('subscriptionModal').classList.remove('hidden');
 }
@@ -1068,19 +1089,19 @@ function eventCreateForm() {
                 if (!response.ok) {
                     if (response.status === 422 && data.errors) {
                         this.errors = data.errors;
-                        showToast('error', 'Перевірте правильність заповнення форми.');
+                        showToast('error', _calI18n.checkForm);
                     } else {
-                        showToast('error', data.message || 'Помилка збереження.');
+                        showToast('error', data.message || _calI18n.saveError);
                     }
                     this.saving = false;
                     return;
                 }
-                showToast('success', data.message || 'Збережено!');
+                showToast('success', data.message || _calI18n.saved);
                 closeCreateEventModal();
                 // Reload the calendar to show the new event
                 setTimeout(() => Livewire.navigate(window.location.href), 600);
             } catch (e) {
-                showToast('error', "Помилка з'єднання з сервером.");
+                showToast('error', _calI18n.connectionError);
                 this.saving = false;
             }
         }
@@ -1118,31 +1139,31 @@ function recurrenceSettings() {
         updatePreview() {
             if (!this.recurrenceType) { this.previewText = ''; return; }
             const typeLabels = {
-                'daily': 'щодня', 'weekly': 'щотижня', 'biweekly': 'що 2 тижні',
-                'monthly': 'щомісяця', 'yearly': 'щороку', 'weekdays': 'кожен робочий день',
-                'custom': `кожні ${this.customInterval} ${this.getFrequencyLabel()}`
+                'daily': _calI18n.recDaily, 'weekly': _calI18n.recWeekly, 'biweekly': _calI18n.recBiweekly,
+                'monthly': _calI18n.recMonthly, 'yearly': _calI18n.recYearly, 'weekdays': _calI18n.recWeekdays,
+                'custom': `${_calI18n.everyN} ${this.customInterval} ${this.getFrequencyLabel()}`
             };
             const label = typeLabels[this.recurrenceType] || '';
             if (this.endType === 'count') {
-                this.previewText = `Буде створено ${this.endCount} подій (${label})`;
+                this.previewText = _calI18n.willCreate.replace(':count', this.endCount).replace(':label', label);
             } else {
-                this.previewText = `Повторюватиметься ${label} до ${this.formatDate(this.endDate)}`;
+                this.previewText = _calI18n.willRepeat.replace(':label', label).replace(':date', this.formatDate(this.endDate));
             }
         },
 
         getFrequencyLabel() {
             const labels = {
-                'day': this.customInterval == 1 ? 'день' : 'днів',
-                'week': this.customInterval == 1 ? 'тиждень' : 'тижнів',
-                'month': this.customInterval == 1 ? 'місяць' : 'місяців',
-                'year': this.customInterval == 1 ? 'рік' : 'років'
+                'day': _calI18n.freqDay,
+                'week': _calI18n.freqWeek,
+                'month': _calI18n.freqMonth,
+                'year': _calI18n.freqYear
             };
             return labels[this.customFrequency] || '';
         },
 
         formatDate(dateStr) {
             if (!dateStr) return '';
-            return new Date(dateStr).toLocaleDateString('uk-UA', { day: 'numeric', month: 'long', year: 'numeric' });
+            return new Date(dateStr).toLocaleDateString(document.documentElement.lang || 'uk', { day: 'numeric', month: 'long', year: 'numeric' });
         },
 
         getRecurrenceFrequency() {
@@ -1212,7 +1233,7 @@ function modalGoogleCalendarPicker() {
 
 // Calendar Navigator
 function calendarNavigator(initialState) {
-    const months = ['Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень', 'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'];
+    const months = _calI18n.months;
 
     // Restore saved view from localStorage if URL doesn't have explicit view param
     const savedCalendarFilters = filterStorage.load('schedule_calendar', { currentView: 'month' });

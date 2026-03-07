@@ -1,13 +1,13 @@
 @extends('layouts.app')
 
-@section('title', 'Зустрічі - ' . $ministry->name)
+@section('title', __('app.meeting_index_title') . ' - ' . $ministry->name)
 
 @section('actions')
 <a href="{{ route('meetings.create', $ministry) }}" class="inline-flex items-center px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-xl hover:bg-primary-700 transition-colors">
     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
     </svg>
-    Нова зустріч
+    {{ __('app.meeting_new') }}
 </a>
 @endsection
 
@@ -34,7 +34,7 @@
                 </div>
                 <div class="ml-3 md:ml-4 min-w-0">
                     <p class="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">{{ $meetings->total() }}</p>
-                    <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400 truncate">Всього</p>
+                    <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400 truncate">{{ __('app.meeting_stat_total') }}</p>
                 </div>
             </div>
         </div>
@@ -54,7 +54,7 @@
                 </div>
                 <div class="ml-3 md:ml-4 min-w-0">
                     <p class="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">{{ $upcomingCount }}</p>
-                    <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400 truncate">Заплановано</p>
+                    <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400 truncate">{{ __('app.meeting_stat_planned') }}</p>
                 </div>
             </div>
         </div>
@@ -68,7 +68,7 @@
                 </div>
                 <div class="ml-3 md:ml-4 min-w-0">
                     <p class="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">{{ $completedCount }}</p>
-                    <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400 truncate">Проведено</p>
+                    <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400 truncate">{{ __('app.meeting_stat_completed') }}</p>
                 </div>
             </div>
         </div>
@@ -82,7 +82,7 @@
                 </div>
                 <div class="ml-3 md:ml-4 min-w-0">
                     <p class="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">{{ $thisMonth }}</p>
-                    <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400 truncate">Цей місяць</p>
+                    <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400 truncate">{{ __('app.meeting_stat_this_month') }}</p>
                 </div>
             </div>
         </div>
@@ -97,13 +97,13 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                 </svg>
             </div>
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Немає зустрічей</h3>
-            <p class="text-gray-500 dark:text-gray-400 mb-6">Створіть першу зустріч для команди</p>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">{{ __('app.meeting_no_meetings') }}</h3>
+            <p class="text-gray-500 dark:text-gray-400 mb-6">{{ __('app.meeting_no_meetings_desc') }}</p>
             <a href="{{ route('meetings.create', $ministry) }}" class="inline-flex items-center px-5 py-2.5 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 transition-all">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                 </svg>
-                Створити зустріч
+                {{ __('app.meeting_create_meeting') }}
             </a>
         </div>
         @else
@@ -166,11 +166,11 @@
                         <!-- Attendees count (mobile: single stat) -->
                         <div class="text-center hidden sm:block">
                             <span class="text-base md:text-lg font-semibold text-gray-900 dark:text-white">{{ $meeting->agendaItems->count() }}</span>
-                            <p class="text-[10px] md:text-xs text-gray-500 dark:text-gray-400">пунктів</p>
+                            <p class="text-[10px] md:text-xs text-gray-500 dark:text-gray-400">{{ __('app.meeting_items_label') }}</p>
                         </div>
                         <div class="text-center">
                             <span class="text-base md:text-lg font-semibold text-gray-900 dark:text-white">{{ $meeting->attendees->count() }}</span>
-                            <p class="text-[10px] md:text-xs text-gray-500 dark:text-gray-400">осіб</p>
+                            <p class="text-[10px] md:text-xs text-gray-500 dark:text-gray-400">{{ __('app.meeting_people_label') }}</p>
                         </div>
 
                         <svg class="w-4 h-4 md:w-5 md:h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

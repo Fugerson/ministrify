@@ -1120,6 +1120,8 @@
 
 @push('scripts')
 <script>
+var _schedShowI18n = { confirmDelete: @json(__('app.confirm_delete')) };
+
 function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text || '';
@@ -1437,7 +1439,7 @@ function updateSongCellDOM(itemId, songId, title, songKey) {
             <div class="space-y-1">
                 <div class="flex items-center gap-2" x-data="{ editing: false }">
                     <template x-if="!editing">
-                        <div class="flex items-center gap-2 cursor-pointer" @click="editing = true" title="Клікніть для зміни пісні">
+                        <div class="flex items-center gap-2 cursor-pointer" @click="editing = true" title="{{ __('app.click_to_change_song') }}">
                             <span class="text-lg">🎵</span>
                             <a href="/songs/${songId}" class="text-sm text-primary-600 dark:text-primary-400 hover:underline font-medium" @click.stop>${escapeHtml(title)}</a>
                             ${keyBadge}
@@ -2628,7 +2630,7 @@ function _addSimpleResp(ctx, data) {
     el.className = 'flex items-center justify-between py-1.5 px-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg';
     el.setAttribute('data-resp', '');
     el.setAttribute('x-data', '');
-    el.innerHTML = '\x3Cspan class="text-sm text-gray-900 dark:text-white">' + safeName + '\x3C/span>\x3Cbutton type="button" @click="ajaxDelete(\'/responsibilities/' + data.id + '\', \'Видалити?\', () => $el.closest(\'[data-resp]\').remove())" class="p-1 text-gray-400 hover:text-red-500">\x3Csvg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">\x3Cpath stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>\x3C/svg>\x3C/button>';
+    el.innerHTML = '\x3Cspan class="text-sm text-gray-900 dark:text-white">' + safeName + '\x3C/span>\x3Cbutton type="button" @click="ajaxDelete(\'/responsibilities/' + data.id + '\', \'' + _schedShowI18n.confirmDelete.replace(/'/g, "\\'") + '\', () => $el.closest(\'[data-resp]\').remove())" class="p-1 text-gray-400 hover:text-red-500">\x3Csvg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">\x3Cpath stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>\x3C/svg>\x3C/button>';
     list.appendChild(el);
     Alpine.initTree(el);
 }

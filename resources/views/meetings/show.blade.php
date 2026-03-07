@@ -26,7 +26,7 @@
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
         </svg>
-        Зустрічі {{ $ministry->name }}
+        {{ __('app.meeting_meetings_of', ['name' => $ministry->name]) }}
     </a>
 
     <!-- Meeting Header -->
@@ -98,7 +98,7 @@
 
                     @if($meeting->copiedFrom)
                     <p class="mt-2 text-xs text-gray-400 dark:text-gray-500">
-                        Скопійовано з: {{ $meeting->copiedFrom->date->format('d.m.Y') }} - {{ $meeting->copiedFrom->title }}
+                        {{ __('app.meeting_copied_from', ['date' => $meeting->copiedFrom->date->format('d.m.Y'), 'title' => $meeting->copiedFrom->title]) }}
                     </p>
                     @endif
                 </div>
@@ -143,7 +143,7 @@
                 </button>
                 <button @click="activeTab = 'notes'" :class="activeTab === 'notes' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'"
                         class="px-6 py-4 text-sm font-medium border-b-2 whitespace-nowrap transition-colors">
-                    Нотатки
+                    {{ __('app.meeting_notes_tab') }}
                 </button>
             </nav>
         </div>
@@ -151,12 +151,12 @@
         <!-- Agenda Tab -->
         <div x-show="activeTab === 'agenda'" class="p-4">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="font-semibold text-gray-900 dark:text-white">План зустрічі</h3>
+                <h3 class="font-semibold text-gray-900 dark:text-white">{{ __('app.meeting_agenda_plan') }}</h3>
                 <button @click="showAddAgenda = true" class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/30 rounded-lg transition-colors">
                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                     </svg>
-                    Додати пункт
+                    {{ __('app.meeting_add_item') }}
                 </button>
             </div>
 
@@ -165,9 +165,9 @@
                 <svg class="w-12 h-12 mx-auto mb-3 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
                 </svg>
-                <p>Немає пунктів плану</p>
+                <p>{{ __('app.meeting_no_items') }}</p>
                 <button @click="showAddAgenda = true" class="mt-2 text-sm text-primary-600 dark:text-primary-400 hover:underline">
-                    Додати перший пункт
+                    {{ __('app.meeting_add_first_item') }}
                 </button>
             </div>
             @else
@@ -206,7 +206,7 @@
                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                 </svg>
-                                {{ $item->duration_minutes }} хв
+                                {{ $item->duration_minutes }} {{ __('app.meeting_min') }}
                             </span>
                             @endif
                             @if($item->responsible)
@@ -226,7 +226,7 @@
             @if($meeting->agendaItems->whereNotNull('duration_minutes')->count() > 0)
             <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600 flex justify-end">
                 <span class="text-sm text-gray-500 dark:text-gray-400">
-                    Загальна тривалість: <strong>{{ $meeting->agendaItems->sum('duration_minutes') }} хв</strong>
+                    {!! __('app.meeting_total_duration', ['minutes' => $meeting->agendaItems->sum('duration_minutes')]) !!}
                 </span>
             </div>
             @endif
@@ -238,21 +238,21 @@
                 <form @submit.prevent="submit($refs.agendaForm)" x-ref="agendaForm">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="md:col-span-2">
-                            <input type="text" name="title" required placeholder="Назва пункту *"
+                            <input type="text" name="title" required placeholder="{{ __('app.meeting_item_title_placeholder') }}"
                                    class="w-full px-4 py-2 bg-white dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
                             <template x-if="errors.title"><p class="mt-1 text-sm text-red-500" x-text="errors.title[0]"></p></template>
                         </div>
                         <div class="md:col-span-2">
-                            <textarea name="description" rows="2" placeholder="Опис (необов'язково)"
+                            <textarea name="description" rows="2" placeholder="{{ __('app.meeting_item_desc_placeholder') }}"
                                       class="w-full px-4 py-2 bg-white dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white"></textarea>
                         </div>
                         <div>
-                            <input type="number" name="duration_minutes" min="1" placeholder="Тривалість (хв)"
+                            <input type="number" name="duration_minutes" min="1" placeholder="{{ __('app.meeting_item_duration_placeholder') }}"
                                    class="w-full px-4 py-2 bg-white dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
                         </div>
                         <div>
                             <select name="responsible_id" class="w-full px-4 py-2 bg-white dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
-                                <option value="">Відповідальний</option>
+                                <option value="">{{ __('app.meeting_responsible') }}</option>
                                 @foreach($ministry->members as $member)
                                 <option value="{{ $member->id }}">{{ $member->full_name }}</option>
                                 @endforeach
@@ -260,10 +260,10 @@
                         </div>
                     </div>
                     <div class="flex justify-end gap-2 mt-4">
-                        <button type="button" @click="showAddAgenda = false" class="px-4 py-2 text-gray-600 dark:text-gray-300">Скасувати</button>
+                        <button type="button" @click="showAddAgenda = false" class="px-4 py-2 text-gray-600 dark:text-gray-300">{{ __('app.meeting_cancel') }}</button>
                         <button type="submit" :disabled="saving" class="px-4 py-2 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 disabled:opacity-50">
-                            <span x-show="!saving">Додати</span>
-                            <span x-show="saving" x-cloak>Додавання...</span>
+                            <span x-show="!saving">{{ __('app.meeting_add') }}</span>
+                            <span x-show="saving" x-cloak>{{ __('app.meeting_adding') }}</span>
                         </button>
                     </div>
                 </form>
@@ -273,12 +273,12 @@
         <!-- Materials Tab -->
         <div x-show="activeTab === 'materials'" x-cloak class="p-4">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="font-semibold text-gray-900 dark:text-white">Матеріали</h3>
+                <h3 class="font-semibold text-gray-900 dark:text-white">{{ __('app.meeting_materials_title') }}</h3>
                 <button @click="showAddMaterial = true" class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/30 rounded-lg transition-colors">
                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                     </svg>
-                    Додати
+                    {{ __('app.meeting_add') }}
                 </button>
             </div>
 
@@ -287,7 +287,7 @@
                 <svg class="w-12 h-12 mx-auto mb-3 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                 </svg>
-                <p>Немає матеріалів</p>
+                <p>{{ __('app.meeting_no_materials') }}</p>
             </div>
             @else
             <div id="materials-list" class="grid gap-3">
@@ -324,34 +324,34 @@
                 <form @submit.prevent="submit($refs.materialForm)" x-ref="materialForm">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <input type="text" name="title" required placeholder="Назва матеріалу *"
+                            <input type="text" name="title" required placeholder="{{ __('app.meeting_material_title_placeholder') }}"
                                    class="w-full px-4 py-2 bg-white dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
                             <template x-if="errors.title"><p class="mt-1 text-sm text-red-500" x-text="errors.title[0]"></p></template>
                         </div>
                         <div>
                             <select name="type" required class="w-full px-4 py-2 bg-white dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
-                                <option value="link">Посилання</option>
-                                <option value="note">Нотатка</option>
-                                <option value="video">Відео</option>
-                                <option value="audio">Аудіо</option>
-                                <option value="document">Документ</option>
+                                <option value="link">{{ __('app.meeting_material_type_link') }}</option>
+                                <option value="note">{{ __('app.meeting_material_type_note') }}</option>
+                                <option value="video">{{ __('app.meeting_material_type_video') }}</option>
+                                <option value="audio">{{ __('app.meeting_material_type_audio') }}</option>
+                                <option value="document">{{ __('app.meeting_material_type_document') }}</option>
                             </select>
                         </div>
                         <div class="md:col-span-2">
-                            <textarea name="content" rows="3" required placeholder="URL посилання або текст нотатки *"
+                            <textarea name="content" rows="3" required placeholder="{{ __('app.meeting_material_content_placeholder') }}"
                                       class="w-full px-4 py-2 bg-white dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white"></textarea>
                             <template x-if="errors.content"><p class="mt-1 text-sm text-red-500" x-text="errors.content[0]"></p></template>
                         </div>
                         <div class="md:col-span-2">
-                            <input type="text" name="description" placeholder="Опис (необов'язково)"
+                            <input type="text" name="description" placeholder="{{ __('app.meeting_material_desc_placeholder') }}"
                                    class="w-full px-4 py-2 bg-white dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
                         </div>
                     </div>
                     <div class="flex justify-end gap-2 mt-4">
-                        <button type="button" @click="showAddMaterial = false" class="px-4 py-2 text-gray-600 dark:text-gray-300">Скасувати</button>
+                        <button type="button" @click="showAddMaterial = false" class="px-4 py-2 text-gray-600 dark:text-gray-300">{{ __('app.meeting_cancel') }}</button>
                         <button type="submit" :disabled="saving" class="px-4 py-2 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 disabled:opacity-50">
-                            <span x-show="!saving">Додати</span>
-                            <span x-show="saving" x-cloak>Додавання...</span>
+                            <span x-show="!saving">{{ __('app.meeting_add') }}</span>
+                            <span x-show="saving" x-cloak>{{ __('app.meeting_adding') }}</span>
                         </button>
                     </div>
                 </form>
@@ -361,12 +361,12 @@
         <!-- Attendees Tab -->
         <div x-show="activeTab === 'attendees'" x-cloak class="p-4">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="font-semibold text-gray-900 dark:text-white">Учасники</h3>
+                <h3 class="font-semibold text-gray-900 dark:text-white">{{ __('app.meeting_attendees_title') }}</h3>
                 <div class="flex items-center gap-2">
                     @if($meeting->attendees->isNotEmpty())
                     <button type="button" @click="ajaxAction('{{ route('meetings.attendees.mark-all', [$ministry, $meeting]) }}', 'POST').then(() => { document.querySelectorAll('[x-data*=currentStatus]').forEach(function(el) { if (el._x_dataStack) el._x_dataStack[0].currentStatus = 'attended'; }); })"
                             class="px-3 py-1.5 text-sm font-medium text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 rounded-lg transition-colors">
-                        Всі присутні
+                        {{ __('app.meeting_all_present') }}
                     </button>
                     @endif
                     @if($availableMembers->isNotEmpty())
@@ -374,7 +374,7 @@
                         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                         </svg>
-                        Додати
+                        {{ __('app.meeting_add') }}
                     </button>
                     @endif
                 </div>
@@ -382,7 +382,7 @@
 
             @if($meeting->attendees->isEmpty())
             <div class="text-center py-8 text-gray-500 dark:text-gray-400">
-                <p>Учасники будуть додані автоматично при створенні зустрічі</p>
+                <p>{{ __('app.meeting_attendees_auto_added') }}</p>
             </div>
             @else
             <div id="attendees-list" class="grid gap-2">
@@ -416,10 +416,10 @@
                                     'text-blue-600 dark:text-blue-400': currentStatus === 'confirmed',
                                     'text-gray-600 dark:text-gray-400': currentStatus === 'invited'
                                 }">
-                            <option value="invited">Запрошено</option>
-                            <option value="confirmed">Підтверджено</option>
-                            <option value="attended">Був присутній</option>
-                            <option value="absent">Був відсутній</option>
+                            <option value="invited">{{ __('app.meeting_status_invited') }}</option>
+                            <option value="confirmed">{{ __('app.meeting_status_confirmed') }}</option>
+                            <option value="attended">{{ __('app.meeting_status_attended') }}</option>
+                            <option value="absent">{{ __('app.meeting_status_absent') }}</option>
                         </select>
                         <button type="button" @click="ajaxDelete('{{ route('meetings.attendees.destroy', $attendee) }}', '{{ __('messages.confirm_remove_member') }}', () => $el.closest('.rounded-xl').remove())"
                                 class="p-1 text-gray-400 hover:text-red-500">
@@ -439,17 +439,17 @@
                  x-data="{ ...ajaxForm({ url: '{{ route('meetings.attendees.store', [$ministry, $meeting]) }}', method: 'POST', stayOnPage: true, resetOnSuccess: true, onSuccess(data) { _meetingAddAttendee(this, data); } }) }">
                 <form @submit.prevent="submit($refs.attendeeForm)" x-ref="attendeeForm">
                     <select name="person_id" required class="w-full px-4 py-2 bg-white dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
-                        <option value="">Оберіть учасника...</option>
+                        <option value="">{{ __('app.meeting_select_member') }}</option>
                         @foreach($availableMembers as $member)
                         <option value="{{ $member->id }}">{{ $member->full_name }}</option>
                         @endforeach
                     </select>
                     <template x-if="errors.person_id"><p class="mt-1 text-sm text-red-500" x-text="errors.person_id[0]"></p></template>
                     <div class="flex justify-end gap-2 mt-4">
-                        <button type="button" @click="showAddAttendee = false" class="px-4 py-2 text-gray-600 dark:text-gray-300">Скасувати</button>
+                        <button type="button" @click="showAddAttendee = false" class="px-4 py-2 text-gray-600 dark:text-gray-300">{{ __('app.meeting_cancel') }}</button>
                         <button type="submit" :disabled="saving" class="px-4 py-2 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 disabled:opacity-50">
-                            <span x-show="!saving">Додати</span>
-                            <span x-show="saving" x-cloak>Додавання...</span>
+                            <span x-show="!saving">{{ __('app.meeting_add') }}</span>
+                            <span x-show="saving" x-cloak>{{ __('app.meeting_adding') }}</span>
                         </button>
                     </div>
                 </form>
@@ -465,21 +465,21 @@
                 <input type="hidden" name="status" value="{{ $meeting->status }}">
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Нотатки під час зустрічі</label>
-                    <textarea name="notes" rows="5" placeholder="Записуйте важливі моменти..."
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.meeting_notes_during') }}</label>
+                    <textarea name="notes" rows="5" placeholder="{{ __('app.meeting_notes_placeholder') }}"
                               class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">{{ $meeting->notes }}</textarea>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Підсумок зустрічі</label>
-                    <textarea name="summary" rows="5" placeholder="Короткий підсумок після завершення..."
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.meeting_summary_title') }}</label>
+                    <textarea name="summary" rows="5" placeholder="{{ __('app.meeting_summary_placeholder') }}"
                               class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">{{ $meeting->summary }}</textarea>
                 </div>
 
                 <div class="flex justify-end">
                     <button type="submit" :disabled="saving" class="px-5 py-2.5 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 transition-colors disabled:opacity-50">
-                        <span x-show="!saving">Зберегти</span>
-                        <span x-show="saving" x-cloak>Збереження...</span>
+                        <span x-show="!saving">{{ __('app.meeting_save') }}</span>
+                        <span x-show="saving" x-cloak>{{ __('app.meeting_saving') }}</span>
                     </button>
                 </div>
             </form>
@@ -488,6 +488,11 @@
 </div>
 
 <script>
+var _meetingI18n = {
+    min: @json(__('app.meeting_min')),
+    invited: @json(__('app.meeting_status_invited'))
+};
+
 function _meetingAddAgenda(ctx, data) {
     var form = ctx.$refs.agendaForm;
     var title = form.querySelector('[name="title"]').value;
@@ -516,7 +521,7 @@ function _meetingAddAgenda(ctx, data) {
     html += '\x3C/div>\x3C/div>';
     if (dur || respName) {
         html += '\x3Cdiv class="flex items-center gap-3 mt-2 text-xs text-gray-500 dark:text-gray-400">';
-        if (dur) html += '\x3Cspan>' + dur + ' хв\x3C/span>';
+        if (dur) html += '\x3Cspan>' + dur + ' ' + _meetingI18n.min + '\x3C/span>';
         if (respName) html += '\x3Cspan>' + respName + '\x3C/span>';
         html += '\x3C/div>';
     }
@@ -582,7 +587,7 @@ function _meetingAddAttendee(ctx, data) {
     html += '\x3Cdiv class="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center">\x3Cspan class="text-sm font-medium text-primary-600 dark:text-primary-400">' + safeInitials + '\x3C/span>\x3C/div>';
     html += '\x3Cdiv>\x3Cp class="font-medium text-gray-900 dark:text-white">' + safeName + '\x3C/p>\x3C/div>';
     html += '\x3C/div>';
-    html += '\x3Cspan class="text-xs text-gray-600 dark:text-gray-400">Запрошено\x3C/span>';
+    html += '\x3Cspan class="text-xs text-gray-600 dark:text-gray-400">' + _meetingI18n.invited + '\x3C/span>';
     el.innerHTML = html;
     list.appendChild(el);
     if (select) {

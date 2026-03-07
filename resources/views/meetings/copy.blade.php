@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Копіювати зустріч')
+@section('title', __('app.meeting_copy_title'))
 
 @section('content')
 <div class="max-w-xl mx-auto">
@@ -20,35 +20,35 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                 </svg>
             </div>
-            <h2 class="text-xl font-bold text-gray-900 dark:text-white">Копіювати зустріч</h2>
-            <p class="text-gray-500 dark:text-gray-400 mt-1">Створити нову зустріч на основі "{{ $meeting->title }}"</p>
+            <h2 class="text-xl font-bold text-gray-900 dark:text-white">{{ __('app.meeting_copy_title') }}</h2>
+            <p class="text-gray-500 dark:text-gray-400 mt-1">{{ __('app.meeting_copy_desc', ['title' => $meeting->title]) }}</p>
         </div>
 
         <!-- What will be copied -->
         <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 mb-6">
-            <h3 class="font-medium text-gray-900 dark:text-white mb-3">Буде скопійовано:</h3>
+            <h3 class="font-medium text-gray-900 dark:text-white mb-3">{{ __('app.meeting_will_be_copied') }}</h3>
             <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-300">
                 <li class="flex items-center gap-2">
                     <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                     </svg>
-                    План зустрічі ({{ $meeting->agendaItems->count() }} пунктів)
+                    {{ __('app.meeting_agenda_items_count', ['count' => $meeting->agendaItems->count()]) }}
                 </li>
                 <li class="flex items-center gap-2">
                     <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                     </svg>
-                    Матеріали ({{ $meeting->materials->count() }} шт.)
+                    {{ __('app.meeting_materials_count_label', ['count' => $meeting->materials->count()]) }}
                 </li>
                 <li class="flex items-center gap-2">
                     <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                     </svg>
-                    Опис, місце та час
+                    {{ __('app.meeting_desc_location_time') }}
                 </li>
             </ul>
             <p class="mt-3 text-xs text-gray-500 dark:text-gray-400">
-                Нотатки та підсумок не копіюються. Статус буде "Заплановано".
+                {{ __('app.meeting_notes_not_copied') }}
             </p>
         </div>
 
@@ -57,14 +57,14 @@
               class="space-y-6">
 
             <div>
-                <label for="date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Дата нової зустрічі *</label>
+                <label for="date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.meeting_new_date') }} *</label>
                 <input type="date" name="date" id="date" value="{{ old('date', now()->addWeek()->format('Y-m-d')) }}" required
                        class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
                 <template x-if="errors.date"><p class="mt-1 text-sm text-red-500" x-text="errors.date[0]"></p></template>
             </div>
 
             <div>
-                <label for="title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Назва (залиште пустим щоб зберегти оригінальну)</label>
+                <label for="title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.meeting_title_keep_original') }}</label>
                 <input type="text" name="title" id="title"
                        placeholder="{{ $meeting->title }}"
                        class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
@@ -72,11 +72,11 @@
 
             <div class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2 sm:gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
                 <a href="{{ route('meetings.show', [$ministry, $meeting]) }}" class="w-full sm:w-auto px-5 py-2.5 text-center text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium">
-                    Скасувати
+                    {{ __('app.meeting_cancel') }}
                 </a>
                 <button type="submit" :disabled="saving" class="w-full sm:w-auto px-5 py-2.5 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 transition-colors disabled:opacity-50">
-                    <span x-show="!saving">Створити копію</span>
-                    <span x-show="saving" x-cloak>Створення...</span>
+                    <span x-show="!saving">{{ __('app.meeting_create_copy') }}</span>
+                    <span x-show="saving" x-cloak>{{ __('app.meeting_creating') }}</span>
                 </button>
             </div>
         </form>
