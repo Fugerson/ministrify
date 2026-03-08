@@ -430,6 +430,62 @@
 {{-- Pricing Preview - HIDDEN --}}
 {{-- ... --}}
 
+{{-- Security & Privacy Section --}}
+<section class="py-20 bg-white dark:bg-gray-950 relative overflow-hidden">
+    <div class="absolute inset-0 grid-pattern"></div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="text-center mb-16">
+            <span class="reveal inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 mb-4">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                </svg>
+                {{ __('landing.security_badge') }}
+            </span>
+            <h2 class="reveal reveal-delay-1 text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                {{ __('landing.security_heading') }}
+            </h2>
+            <p class="reveal reveal-delay-2 text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
+                {{ __('landing.security_subheading') }}
+            </p>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-8">
+            {{-- EU Servers --}}
+            <div class="reveal reveal-delay-1 glass-card rounded-2xl p-8 text-center hover:shadow-xl transition-all hover:-translate-y-1">
+                <div class="w-16 h-16 mx-auto mb-6 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center">
+                    <svg class="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">{{ __('landing.security_eu_title') }}</h3>
+                <p class="text-gray-600 dark:text-gray-400">{{ __('landing.security_eu_desc') }}</p>
+            </div>
+
+            {{-- No Data Selling --}}
+            <div class="reveal reveal-delay-2 glass-card rounded-2xl p-8 text-center hover:shadow-xl transition-all hover:-translate-y-1">
+                <div class="w-16 h-16 mx-auto mb-6 bg-emerald-100 dark:bg-emerald-900/30 rounded-2xl flex items-center justify-center">
+                    <svg class="w-8 h-8 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">{{ __('landing.security_nodata_title') }}</h3>
+                <p class="text-gray-600 dark:text-gray-400">{{ __('landing.security_nodata_desc') }}</p>
+            </div>
+
+            {{-- Encryption & Backups --}}
+            <div class="reveal reveal-delay-3 glass-card rounded-2xl p-8 text-center hover:shadow-xl transition-all hover:-translate-y-1">
+                <div class="w-16 h-16 mx-auto mb-6 bg-indigo-100 dark:bg-indigo-900/30 rounded-2xl flex items-center justify-center">
+                    <svg class="w-8 h-8 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">{{ __('landing.security_encryption_title') }}</h3>
+                <p class="text-gray-600 dark:text-gray-400">{{ __('landing.security_encryption_desc') }}</p>
+            </div>
+        </div>
+    </div>
+</section>
+
 {{-- CTA Section --}}
 <section class="py-24 bg-white dark:bg-gray-950 relative overflow-hidden">
     <div class="absolute inset-0 grid-pattern"></div>
