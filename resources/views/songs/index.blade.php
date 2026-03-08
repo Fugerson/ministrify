@@ -123,7 +123,7 @@
                     </template>
 
                     <div class="flex items-center justify-between mt-4 text-xs text-gray-500 dark:text-gray-400">
-                        <span x-text="song.times_used + ' {{ __('app.songs_times_suffix') }}'"></span>
+                        <span x-text="song.times_used + ' ' + @js(__('app.songs_times_suffix'))"></span>
                         <span x-show="song.bpm" x-text="song.bpm + ' BPM'"></span>
                     </div>
                 </a>

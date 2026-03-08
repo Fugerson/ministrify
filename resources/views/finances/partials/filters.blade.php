@@ -65,11 +65,11 @@ function financePeriodFilter() {
         customEnd: '',
         currentBalance: {{ $currentBalance ?? 'null' }},
         periodLabels: {
-            'today': '{{ __('app.period_today') }}',
-            'week': '{{ __('app.period_week') }}',
-            'month': '{{ __('app.period_month') }}',
-            'quarter': '{{ __('app.period_quarter_btn') }}',
-            'year': '{{ __('app.period_year_btn') }}'
+            'today': @js( __('app.period_today') ),
+            'week': @js( __('app.period_week') ),
+            'month': @js( __('app.period_month') ),
+            'quarter': @js( __('app.period_quarter_btn') ),
+            'year': @js( __('app.period_year_btn') )
         },
 
         init() {

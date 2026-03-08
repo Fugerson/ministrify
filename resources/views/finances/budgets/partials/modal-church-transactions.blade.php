@@ -45,7 +45,7 @@
                         <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-3">
                             <div class="flex items-center justify-between">
                                 <div>
-                                    <div class="font-medium text-gray-900 dark:text-white" x-text="tx.description || '{{ __('common.no_description') }}'"></div>
+                                    <div class="font-medium text-gray-900 dark:text-white" x-text="tx.description || @js( __('common.no_description') )"></div>
                                     <div class="text-xs text-gray-500 dark:text-gray-400">
                                         <span x-text="tx.date"></span>
                                         <template x-if="tx.category">

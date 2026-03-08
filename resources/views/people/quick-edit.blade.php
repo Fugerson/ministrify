@@ -109,7 +109,7 @@
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                 </svg>
-                <span x-text="saving ? '{{ __('app.saving_btn') }}' : '{{ __('app.save_btn') }}'"></span>
+                <span x-text="saving ? @js(__('app.saving_btn')) : @js(__('app.save_btn'))"></span>
             </button>
         </div>
     </div>
@@ -405,7 +405,7 @@
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.confirm_delete_title') }}</h3>
             </div>
             <p class="text-gray-600 dark:text-gray-400 mb-6">
-                {{ __('app.confirm_delete_count') }} <span x-text="deleteCount" class="font-semibold"></span> <span x-text="deleteCount === 1 ? '{{ __('app.person_accusative') }}' : '{{ __('app.people_accusative') }}'"></span>?
+                {{ __('app.confirm_delete_count') }} <span x-text="deleteCount" class="font-semibold"></span> <span x-text="deleteCount === 1 ? @js(__('app.person_accusative')) : @js(__('app.people_accusative'))"></span>?
                 {{ __('app.action_irreversible') }}
             </p>
             <div class="flex justify-end gap-3">
@@ -920,7 +920,7 @@ function quickEdit() {
         async deletePhoto(row) {
             if (!row.id || !row.photo_url) return;
 
-            if (!confirm('{{ __('messages.confirm_delete_photo') }}')) return;
+            if (!confirm(@js(__('messages.confirm_delete_photo')))) return;
 
             const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 

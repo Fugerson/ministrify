@@ -90,7 +90,7 @@
                         {{ __('app.ann_edit') }}
                     </a>
                     <span class="text-gray-300 dark:text-gray-600">|</span>
-                    <button @click="ajaxDelete('{{ route('announcements.destroy', $announcement) }}', '{{ __('messages.confirm_delete_announcement') }}', () => $el.closest('.rounded-2xl').remove())"
+                    <button @click="ajaxDelete('{{ route('announcements.destroy', $announcement) }}', @js( __('messages.confirm_delete_announcement') ), () => $el.closest('.rounded-2xl').remove())"
                             class="text-sm text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400">
                         {{ __('app.ann_delete') }}
                     </button>

@@ -478,7 +478,7 @@ function ministryResourcesManager() {
         deleteItem() {
             this.menuOpen = false;
             const id = this.selectedId;
-            ajaxDelete(`/resources/${id}`, '{{ __('messages.confirm_delete_item') }}', () => {
+            ajaxDelete(`/resources/${id}`, @js(__('messages.confirm_delete_item')), () => {
                 const row = document.querySelector(`[data-resource-id="${id}"]`);
                 if (row) row.remove();
             });

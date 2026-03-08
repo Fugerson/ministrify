@@ -51,7 +51,7 @@
                             {{ __('app.board_restore') }}
                         </button>
                         <button type="button"
-                                @click="ajaxDelete('{{ route('boards.destroy', $board) }}', '{{ __('app.board_delete_forever') }}', () => $el.closest('[data-board]').remove())"
+                                @click="ajaxDelete('{{ route('boards.destroy', $board) }}', @js( __('app.board_delete_forever') ), () => $el.closest('[data-board]').remove())"
                                 class="px-3 py-1.5 text-red-600 hover:text-red-700 text-sm font-medium">
                             {{ __('app.delete') }}
                         </button>

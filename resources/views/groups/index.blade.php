@@ -303,18 +303,18 @@ function groupCreateForm() {
                 if (!response.ok) {
                     if (response.status === 422 && data.errors) {
                         this.errors = data.errors;
-                        showToast('error', '{{ __('app.form_check_error') }}');
+                        showToast('error', @js( __('app.form_check_error') ));
                     } else {
-                        showToast('error', data.message || '{{ __('app.save_error') }}');
+                        showToast('error', data.message || @js( __('app.save_error') ));
                     }
                     this.saving = false;
                     return;
                 }
-                showToast('success', data.message || '{{ __('app.saved_msg') }}');
+                showToast('success', data.message || @js( __('app.saved_msg') ));
                 closeCreateGroupModal();
                 setTimeout(() => Livewire.navigate(window.location.href), 600);
             } catch (e) {
-                showToast('error', "{{ __('app.server_error') }}");
+                showToast('error', @js( __('app.server_error') ));
                 this.saving = false;
             }
         }

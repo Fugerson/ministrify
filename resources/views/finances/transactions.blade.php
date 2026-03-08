@@ -43,7 +43,7 @@
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
         </template>
-        <span x-text="exporting ? '{{ __('app.generating') }}' : 'CSV'"></span>
+        <span x-text="exporting ? @js( __('app.generating') ) : 'CSV'"></span>
     </button>
 </div>
 
@@ -73,7 +73,7 @@ function exportButton() {
                 a.remove();
             } catch (error) {
                 console.error('Export error:', error);
-                alert('{{ __('app.export_error') }}');
+                alert(@js( __('app.export_error') ));
             } finally {
                 this.exporting = false;
             }
@@ -152,7 +152,7 @@ function exportButton() {
         </div>
         <!-- Income -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
-            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase" x-text="subFilter === 'out' ? '{{ __('app.total_expenses') }}' : '{{ __('app.income_action') }}'"></p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase" x-text="subFilter === 'out' ? @js( __('app.total_expenses') ) : @js( __('app.income_action') )"></p>
             <p class="text-xl font-bold"
                :class="subFilter === 'out' ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'"
                x-text="subFilter === 'out' ? ('-' + formatNumber(periodStats.expense) + ' ₴') : ('+' + formatNumber(periodStats.income) + ' ₴')"></p>
@@ -331,7 +331,7 @@ function exportButton() {
                             </div>
                             <div>
                                 <span class="text-gray-500 dark:text-gray-400">{{ __('app.finance_type_colon') }}</span>
-                                <span class="ml-2 text-gray-900 dark:text-white" x-text="transaction?.direction === 'in' ? '{{ __('app.finance_type_income') }}' : '{{ __('app.finance_type_expense') }}'"></span>
+                                <span class="ml-2 text-gray-900 dark:text-white" x-text="transaction?.direction === 'in' ? @js( __('app.finance_type_income') ) : @js( __('app.finance_type_expense') )"></span>
                             </div>
                             <div>
                                 <span class="text-gray-500 dark:text-gray-400">{{ __('app.finance_category_colon') }}</span>

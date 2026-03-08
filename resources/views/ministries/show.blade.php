@@ -228,7 +228,7 @@
 
                                                 {{-- Summary bar --}}
                                                 <div class="px-3 py-1.5 flex items-center gap-3 text-[11px] text-gray-500 dark:text-gray-400 border-b border-gray-50 dark:border-gray-700/50">
-                                                    <span x-text="'🎵 ' + event.songsCount + ' {{ __('app.songs_lowercase') }}'"></span>
+                                                    <span x-text="'🎵 ' + event.songsCount + ' ' + @js(__('app.songs_lowercase'))"></span>
                                                     <span x-text="'👥 ' + event.teamCount"></span>
                                                 </div>
 
@@ -309,7 +309,7 @@
 
                         {{-- Day names --}}
                         <div class="grid grid-cols-7 mb-1">
-                            <template x-for="day in '{{ __('app.day_names_short_js') }}'.split(',')" :key="day">
+                            <template x-for="day in @js( __('app.day_names_short_js') ).split(',')" :key="day">
                                 <div class="text-center text-xs font-medium text-gray-500 dark:text-gray-400 py-2" x-text="day"></div>
                             </template>
                         </div>
@@ -357,7 +357,7 @@
                                                 </div>
                                                 <div>
                                                     <p class="font-medium text-gray-900 dark:text-white text-sm" x-text="event.title"></p>
-                                                    <p class="text-xs text-gray-500 dark:text-gray-400" x-text="event.fullDate + '{{ __('app.ministry_at_time') }}' + event.time"></p>
+                                                    <p class="text-xs text-gray-500 dark:text-gray-400" x-text="event.fullDate + @js( __('app.ministry_at_time') ) + event.time"></p>
                                                 </div>
                                             </div>
                                             <div class="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
@@ -484,7 +484,7 @@
                                                                         <template x-if="song.key">
                                                                             <span class="text-xs text-gray-500 dark:text-gray-400" x-text="song.key"></span>
                                                                         </template>
-                                                                        <span class="text-xs text-blue-500" x-text="(new Set(song.team?.map(t => t.person_id) || [])).size + ' {{ __('app.ministry_participants_short') }}'"></span>
+                                                                        <span class="text-xs text-blue-500" x-text="(new Set(song.team?.map(t => t.person_id) || [])).size + ' ' + @js(__('app.ministry_participants_short'))"></span>
                                                                     </div>
                                                                 </div>
                                                                 @if($canEditEvent)
@@ -813,7 +813,7 @@
                                 },
 
                                 updateSongSelect(el) {
-                                    let html = '<option value="">{{ __('app.ministry_select_song_placeholder') }}</option>';
+                                    let html = '<option value="">' + @js(__('app.ministry_select_song_placeholder') ) + '</option>';
                                     this.modalAvailableSongs.filter(s => !s.inEvent).forEach(s => {
                                         html += '<option value="' + s.id + '">' + s.title + (s.key ? ' (' + s.key + ')' : '') + '</option>';
                                     });
@@ -821,7 +821,7 @@
                                 },
 
                                 updateMemberSelect(el) {
-                                    let html = '<option value="">{{ __('app.ministry_member_placeholder') }}</option>';
+                                    let html = '<option value="">' + @js(__('app.ministry_member_placeholder') ) + '</option>';
                                     this.modalMembers.forEach(m => {
                                         html += '<option value="' + m.id + '">' + m.name + '</option>';
                                     });
@@ -829,7 +829,7 @@
                                 },
 
                                 updateRoleSelect(el) {
-                                    let html = '<option value="">{{ __('app.ministry_role_placeholder') }}</option>';
+                                    let html = '<option value="">' + @js(__('app.ministry_role_placeholder') ) + '</option>';
                                     this.modalRoles.forEach(r => {
                                         html += '<option value="' + r.id + '">' + r.name + '</option>';
                                     });
@@ -1316,7 +1316,7 @@
                                                 this.gridData = { ...this.gridData, grid: { ...this.gridData.grid } };
                                             }
                                         } else {
-                                            alert(result.message || '{{ __('app.ministry_error_fallback') }}');
+                                            alert(result.message || @js( __('app.ministry_error_fallback') ));
                                         }
                                     } catch (error) {
                                         console.error('Error sending notification:', error);
@@ -1457,7 +1457,7 @@
                                                             'bg-primary-100 text-primary-800 dark:bg-primary-900/30 dark:text-primary-400 hover:bg-primary-200 dark:hover:bg-primary-900/50': role === 'co-leader',
                                                             'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600': role === 'member'
                                                         }">
-                                                    <span x-text="role === 'leader' ? '{{ __('app.ministry_role_leader') }}' : (role === 'co-leader' ? '{{ __('app.ministry_role_co_leader') }}' : '{{ __('app.ministry_role_member') }}')"></span>
+                                                    <span x-text="role === 'leader' ? @js( __('app.ministry_role_leader') ) : (role === 'co-leader' ? @js( __('app.ministry_role_co_leader') ) : @js( __('app.ministry_role_member') ))"></span>
                                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                                                 </button>
                                                 <div x-show="open" @click.away="open = false" x-transition
@@ -1533,7 +1533,7 @@
 
                                     {{-- Remove button --}}
                                     @can('contribute-ministry', $ministry)
-                                    <button @click="ajaxDelete('{{ route('ministries.members.remove', [$ministry, $member]) }}', '{{ __('messages.confirm_remove_team_member') }}', () => $el.closest('.group').remove())"
+                                    <button @click="ajaxDelete('{{ route('ministries.members.remove', [$ministry, $member]) }}', @js( __('messages.confirm_remove_team_member') ), () => $el.closest('.group').remove())"
                                             class="shrink-0 p-1.5 text-gray-300 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                     </button>
@@ -1606,7 +1606,7 @@
                                                         'bg-primary-100 text-primary-800 dark:bg-primary-900/30 dark:text-primary-400': role === 'co-leader',
                                                         'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400': role === 'member'
                                                     }">
-                                                <span x-text="role === 'leader' ? '{{ __('app.ministry_role_leader') }}' : (role === 'co-leader' ? '{{ __('app.ministry_role_co_leader') }}' : '{{ __('app.ministry_role_member') }}')"></span>
+                                                <span x-text="role === 'leader' ? @js( __('app.ministry_role_leader') ) : (role === 'co-leader' ? @js( __('app.ministry_role_co_leader') ) : @js( __('app.ministry_role_member') ))"></span>
                                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                                             </button>
                                             <div x-show="open" @click.away="open = false" x-transition
@@ -1676,7 +1676,7 @@
 
                                 {{-- Remove button --}}
                                 @can('contribute-ministry', $ministry)
-                                <button @click="ajaxDelete('{{ route('ministries.members.remove', [$ministry, $member]) }}', '{{ __('messages.confirm_remove_team_member') }}', () => $el.closest('.group').remove())"
+                                <button @click="ajaxDelete('{{ route('ministries.members.remove', [$ministry, $member]) }}', @js( __('messages.confirm_remove_team_member') ), () => $el.closest('.group').remove())"
                                         class="shrink-0 p-1.5 text-gray-300 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                 </button>
@@ -1705,7 +1705,7 @@
                                 </a>
 
                                 <span class="text-xs text-gray-400 dark:text-gray-500 shrink-0"
-                                      x-text="role === 'leader' ? '{{ __('app.ministry_role_leader') }}' : (role === 'co-leader' ? '{{ __('app.ministry_role_co_leader') }}' : '')"></span>
+                                      x-text="role === 'leader' ? @js( __('app.ministry_role_leader') ) : (role === 'co-leader' ? @js( __('app.ministry_role_co_leader') ) : '')"></span>
 
                                 <span class="flex-1"></span>
 
@@ -1725,7 +1725,7 @@
 
                                 {{-- Remove button --}}
                                 @can('contribute-ministry', $ministry)
-                                <button @click="ajaxDelete('{{ route('ministries.members.remove', [$ministry, $member]) }}', '{{ __('messages.confirm_remove_team_member') }}', () => $el.closest('.group').remove())"
+                                <button @click="ajaxDelete('{{ route('ministries.members.remove', [$ministry, $member]) }}', @js( __('messages.confirm_remove_team_member') ), () => $el.closest('.group').remove())"
                                         class="shrink-0 p-1 text-gray-300 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                                 </button>
@@ -1782,10 +1782,10 @@
                                 <span class="text-gray-300 dark:text-gray-600">|</span>
                                 <span class="font-medium px-2 py-0.5 rounded-full text-xs"
                                       :class="balance >= 0 ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'">
-                                    <span x-text="'{{ __('app.ministry_balance') }} ' + (balance >= 0 ? '+' : '') + fmt(balance) + ' ₴'"></span>
+                                    <span x-text="@js(__('app.ministry_balance')) + ' ' + (balance >= 0 ? '+' : '') + fmt(balance) + ' ₴'"></span>
                                 </span>
                                 @can('contribute-ministry', $ministry)
-                                <button x-show="budget.has_items" @click="copyBudget()" class="ml-auto text-xs text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 flex items-center gap-1" title="{{ __('app.ministry_copy_next_month') }}">
+                                <button x-show="budget.has_items" @click="copyBudget()" class="ml-auto text-xs text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 flex items-center gap-1" title=@js( __('app.ministry_copy_next_month') )>
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                                     {{ __('app.ministry_copy_next_month') }}
                                 </button>
@@ -2910,7 +2910,7 @@
                                             <button @click="editGoal({{ $goal->id }}, {{ json_encode(['title' => $goal->title, 'description' => $goal->description, 'period' => $goal->period, 'due_date' => $goal->due_date?->format('Y-m-d'), 'priority' => $goal->priority, 'status' => $goal->status]) }})" class="p-1.5 text-gray-400 hover:text-gray-600">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
                                             </button>
-                                            <button @click="ajaxDelete('{{ route('ministries.goals.destroy', [$ministry, $goal]) }}', '{{ __('messages.confirm_delete_short') }}', () => $el.closest('.border.border-gray-200').remove())"
+                                            <button @click="ajaxDelete('{{ route('ministries.goals.destroy', [$ministry, $goal]) }}', @js( __('messages.confirm_delete_short') ), () => $el.closest('.border.border-gray-200').remove())"
                                                     class="p-1.5 text-gray-400 hover:text-red-600"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
                                         </div>
                                         @endcan
@@ -2942,7 +2942,7 @@
                                                 @can('contribute-ministry', $ministry)
                                                 <div class="flex items-center gap-1">
                                                     <button @click="editTask({{ $task->id }}, {{ json_encode(['title' => $task->title, 'description' => $task->description, 'goal_id' => $task->goal_id, 'assigned_to' => $task->assigned_to, 'due_date' => $task->due_date?->format('Y-m-d'), 'priority' => $task->priority, 'status' => $task->status]) }})" class="p-1 text-gray-400 hover:text-gray-600"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg></button>
-                                                    <button @click="ajaxDelete('{{ route('ministries.tasks.destroy', [$ministry, $task]) }}', '{{ __('messages.confirm_delete_short') }}', () => $el.closest('.p-3.flex.items-center').remove())" class="p-1 text-gray-400 hover:text-red-600"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+                                                    <button @click="ajaxDelete('{{ route('ministries.tasks.destroy', [$ministry, $task]) }}', @js( __('messages.confirm_delete_short') ), () => $el.closest('.p-3.flex.items-center').remove())" class="p-1 text-gray-400 hover:text-red-600"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
                                                 </div>
                                                 @endcan
                                             </div>
@@ -4018,7 +4018,7 @@
                             Видалення команди є незворотнім. Всі дані команди (цілі, задачі, ресурси) будуть втрачені.
                         </p>
                         <button type="button"
-                                @click="ajaxDelete('{{ route('ministries.destroy', $ministry) }}', '{{ __('messages.confirm_delete_ministry_named', ['name' => $ministry->name]) }}', null, '{{ route('ministries.index') }}')"
+                                @click="ajaxDelete('{{ route('ministries.destroy', $ministry) }}', @js( __('messages.confirm_delete_ministry_named', ['name' => $ministry->name]) ), null, '{{ route('ministries.index') }}')"
                                 class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors">
                             Видалити команду
                         </button>
@@ -4271,7 +4271,7 @@ function resourcesManager() {
         deleteItem() {
             this.menuOpen = false;
             const id = this.selectedId;
-            ajaxDelete(`/resources/${id}`, '{{ __('messages.confirm_delete_item') }}', () => {
+            ajaxDelete(`/resources/${id}`, @js(__('messages.confirm_delete_item')), () => {
                 const row = this.$el.querySelector(`[data-resource-id="${id}"]`);
                 if (row) row.remove();
             });
@@ -4790,7 +4790,7 @@ function songsLibrary() {
         },
 
         async deleteSong(song) {
-            if (!confirm('{{ __('messages.confirm_delete_song') }}')) return;
+            if (!confirm(@js( __('messages.confirm_delete_song') ))) return;
 
             try {
                 const response = await fetch(`/songs/${song.id}`, {
@@ -4984,7 +4984,7 @@ function ministryRolesManager() {
         },
 
         async deleteRole(id) {
-            if (!confirm('{{ __('messages.confirm_delete_role') }}')) return;
+            if (!confirm(@js( __('messages.confirm_delete_role') ))) return;
             this.loading = true;
 
             try {

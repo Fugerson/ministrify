@@ -9,8 +9,8 @@
 {
     "@context": "https://schema.org",
     "@type": "ContactPage",
-    "name": "{{ __('landing.contact_us_page') }}",
-    "description": "{{ __('landing.contact_team') }}",
+    "name": @js( __('landing.contact_us_page') ),
+    "description": @js( __('landing.contact_team') ),
     "mainEntity": {
         "@type": "Organization",
         "name": "Ministrify",

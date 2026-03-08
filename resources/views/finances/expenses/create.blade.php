@@ -326,21 +326,21 @@ function expenseCreateForm() {
                 if (!response.ok) {
                     if (response.status === 422 && data.errors) {
                         this.errors = data.errors;
-                        showToast('error', '{{ __('app.check_form_errors') }}');
+                        showToast('error', @js( __('app.check_form_errors') ));
                     } else {
-                        showToast('error', data.message || '{{ __('app.finance_save_error') }}');
+                        showToast('error', data.message || @js( __('app.finance_save_error') ));
                     }
                     this.saving = false;
                     return;
                 }
 
-                showToast('success', data.message || '{{ __('app.finance_saved_toast') }}');
+                showToast('success', data.message || @js( __('app.finance_saved_toast') ));
                 if (data.budget_warning) {
                     showToast('warning', data.budget_warning);
                 }
                 setTimeout(() => Livewire.navigate(data.redirect_url), 800);
             } catch (e) {
-                showToast('error', '{{ __('app.server_connection_error') }}');
+                showToast('error', @js( __('app.server_connection_error') ));
                 this.saving = false;
             }
         }

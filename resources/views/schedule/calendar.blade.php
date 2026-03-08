@@ -104,7 +104,8 @@
 
                                 {{-- Month Grid --}}
                                 <div class="grid grid-cols-3 gap-2 mb-4">
-                                    <template x-for="(month, index) in @json(explode(',', __('app.cal_months_short')))" :key="index">
+                                    @php $monthsShort = explode(',', __('app.cal_months_short')); @endphp
+                                    <template x-for="(month, index) in {{ json_encode($monthsShort) }}" :key="index">
                                         <button @click="pickMonth(index + 1); showPicker = false;" type="button"
                                            :class="{
                                                'bg-primary-600 text-white': currentMonth === index + 1 && currentYear === {{ now()->year }},
@@ -145,10 +146,10 @@
                         error: false,
                         lastSynced: '{{ $lastSyncedAt ?? '' }}',
                         get syncStatus() {
-                            if (this.syncing) return '{{ __('app.syncing') }}';
-                            if (!this.lastSynced) return '{{ __('app.not_synced') }}';
+                            if (this.syncing) return @js( __('app.syncing') );
+                            if (!this.lastSynced) return @js( __('app.not_synced') );
                             const diff = Math.floor((Date.now() - new Date(this.lastSynced).getTime()) / 60000);
-                            if (diff < 1) return '{{ __('app.just_now') }}';
+                            if (diff < 1) return @js( __('app.just_now') );
                             if (diff < 60) return diff + ' {{ __('app.min_ago') }}';
                             if (diff < 1440) return Math.floor(diff / 60) + ' {{ __('app.hour_ago') }}';
                             return Math.floor(diff / 1440) + ' {{ __('app.day_ago') }}';
@@ -165,11 +166,11 @@
                             .then(r => r.json())
                             .then(data => {
                                 syncing = false;
-                                message = data.message || data.error || '{{ __('app.cal_done') }}';
+                                message = data.message || data.error || @js( __('app.cal_done') );
                                 error = !data.success;
                                 if (data.success) lastSynced = new Date().toISOString();
                             })
-                            .catch(e => { syncing = false; message = '{{ __('app.cal_connection_error') }}'; error = true; })
+                            .catch(e => { syncing = false; message = @js( __('app.cal_connection_error') ); error = true; })
                         "
                                 :disabled="syncing"
                                 title="{{ __('app.sync_google') }}"
@@ -899,7 +900,7 @@
                             <option value="primary">{{ __('app.primary_calendar') }}</option>
                             <template x-for="cal in calendars" :key="cal.id">
                                 <option :value="cal.id" :disabled="!cal.can_sync" :selected="cal.id === defaultCalendarId"
-                                        x-text="cal.summary + (cal.can_sync ? '' : ' {{ __('app.cal_read_only') }}')"></option>
+                                        x-text="cal.summary + (cal.can_sync ? '' : ' ' + @js(__('app.cal_read_only')))"></option>
                             </template>
                         </select>
                     </div>
@@ -916,7 +917,7 @@
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                         </svg>
-                        <span x-text="saving ? '{{ __('app.creating_label') }}' : '{{ __('app.create') }}'"></span>
+                        <span x-text="saving ? @js( __('app.creating_label') ) : @js( __('app.create') )"></span>
                     </button>
                 </div>
             </form>
@@ -1019,7 +1020,7 @@ var _calI18n = {
     saveError: @json(__('app.save_error_msg')),
     saved: @json(__('app.saved_label')),
     connectionError: @json(__('app.connection_error_msg')),
-    months: @json(explode(',', __('app.cal_months'))),
+    months: {!! json_encode($months) !!},
     recDaily: @json(__('app.recurrence_daily_js')),
     recWeekly: @json(__('app.recurrence_weekly_js')),
     recBiweekly: @json(__('app.recurrence_biweekly_js')),
@@ -1050,7 +1051,7 @@ function copyIcalUrl(e) {
     navigator.clipboard.writeText(input.value).then(() => {
         if (btn) {
             const originalText = btn.textContent;
-            btn.textContent = '{{ __('app.copied') }}';
+            btn.textContent = @js( __('app.copied') );
             setTimeout(() => btn.textContent = originalText, 2000);
         }
     });

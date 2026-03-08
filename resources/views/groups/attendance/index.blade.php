@@ -132,14 +132,14 @@ onPageReady(function() {
         data: {
             labels: chartData.map(d => d.date),
             datasets: [{
-                label: '{{ __('app.members') }}',
+                label: @js( __('app.members') ),
                 data: chartData.map(d => d.members),
                 borderColor: '#3b82f6',
                 backgroundColor: 'rgba(59, 130, 246, 0.1)',
                 fill: true,
                 tension: 0.3,
             }, {
-                label: '{{ __('app.group_guests') }}',
+                label: @js( __('app.group_guests') ),
                 data: chartData.map(d => d.guests),
                 borderColor: '#10b981',
                 backgroundColor: 'rgba(16, 185, 129, 0.1)',

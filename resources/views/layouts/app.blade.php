@@ -1007,7 +1007,7 @@
             <!-- Toggle button on sidebar edge -->
             <button @click="collapsed = !collapsed"
                     class="absolute top-20 z-50 w-6 h-6 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-full shadow-md flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:border-primary-400 dark:hover:border-primary-500 hover:shadow-lg transition-all cursor-pointer {{ $menuPosition === 'right' ? '-left-3' : '-right-3' }}"
-                    :title="collapsed ? '{{ __("app.expand") }}' : '{{ __("app.collapse") }}'">
+                    :title="collapsed ? @js( __("app.expand") ) : @js( __("app.collapse") )">
                 @if($menuPosition === 'right')
                 <svg x-show="!collapsed" class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                 <svg x-show="collapsed" x-cloak class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
@@ -1029,7 +1029,7 @@
             </div>
 
             <nav id="sidebar-nav" class="flex-1 py-4 space-y-1 overflow-y-auto no-scrollbar" :class="collapsed ? 'px-2' : 'px-4'">
-                <a wire:navigate href="{{ route('dashboard') }}" id="nav-dashboard" class="flex items-center py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('dashboard') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :class="collapsed ? 'justify-center px-2' : 'px-3'" :title="collapsed ? '{{ __("app.home") }}' : ''">
+                <a wire:navigate href="{{ route('dashboard') }}" id="nav-dashboard" class="flex items-center py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('dashboard') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :class="collapsed ? 'justify-center px-2' : 'px-3'" :title="collapsed ? @js( __("app.home") ) : ''">
                     <svg class="w-5 h-5 flex-shrink-0" :class="collapsed ? '' : 'mr-3'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
                     </svg>
@@ -1037,7 +1037,7 @@
                 </a>
                 @hasChurchRole
                 @if(auth()->user()->canView('people'))
-                <a wire:navigate href="{{ route('people.index') }}" id="nav-people" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('people.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("app.people") }}' : ''">
+                <a wire:navigate href="{{ route('people.index') }}" id="nav-people" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('people.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? @js( __("app.people") ) : ''">
                     <svg class="w-5 h-5 sidebar-icon flex-shrink-0" :class="collapsed ? '' : 'mr-3'" fill="currentColor" viewBox="0 0 24 24">
                         <path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clip-rule="evenodd"/>
                     </svg>
@@ -1045,7 +1045,7 @@
                 </a>
                 @endif
                 @if(auth()->user()->canView('groups'))
-                <a wire:navigate href="{{ route('groups.index') }}" id="nav-groups" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('groups.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("app.groups") }}' : ''">
+                <a wire:navigate href="{{ route('groups.index') }}" id="nav-groups" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('groups.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? @js( __("app.groups") ) : ''">
                     <svg class="w-5 h-5 sidebar-icon flex-shrink-0" :class="collapsed ? '' : 'mr-3'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
                     </svg>
@@ -1053,7 +1053,7 @@
                 </a>
                 @endif
                 @if(auth()->user()->canView('ministries'))
-                <a wire:navigate href="{{ route('ministries.index') }}" id="nav-ministries" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('ministries.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("ui.teams") }}' : ''">
+                <a wire:navigate href="{{ route('ministries.index') }}" id="nav-ministries" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('ministries.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? @js( __("ui.teams") ) : ''">
                     <svg class="w-5 h-5 sidebar-icon flex-shrink-0" :class="collapsed ? '' : 'mr-3'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                     </svg>
@@ -1061,7 +1061,7 @@
                 </a>
                 @endif
                 @if(auth()->user()->canView('events'))
-                <a wire:navigate href="{{ route('schedule') }}" id="nav-schedule" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('schedule') || request()->routeIs('events.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("app.schedule") }}' : ''">
+                <a wire:navigate href="{{ route('schedule') }}" id="nav-schedule" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('schedule') || request()->routeIs('events.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? @js( __("app.schedule") ) : ''">
                     <svg class="w-5 h-5 sidebar-icon flex-shrink-0" :class="collapsed ? '' : 'mr-3'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                     </svg>
@@ -1069,7 +1069,7 @@
                 </a>
                 @endif
                 @if(auth()->user()->canView('events'))
-                <a wire:navigate href="{{ route('service-planning') }}" id="nav-service-planning" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('service-planning') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("app.service_planning") }}' : ''">
+                <a wire:navigate href="{{ route('service-planning') }}" id="nav-service-planning" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('service-planning') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? @js( __("app.service_planning") ) : ''">
                     <svg class="w-5 h-5 sidebar-icon flex-shrink-0" :class="collapsed ? '' : 'mr-3'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
                     </svg>
@@ -1080,7 +1080,7 @@
                 @hasChurchRole
                 @if(auth()->user()->canView('announcements') && auth()->user()->church_id && auth()->user()->churchRole)
                 <div x-data="pmBadge()" x-init="startPolling()" @pm-read.window="fetchCount()" class="relative">
-                    <a wire:navigate href="{{ route('announcements.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('announcements.*') || request()->routeIs('pm.*') || request()->routeIs('messages.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("app.communications") }}' : ''">
+                    <a wire:navigate href="{{ route('announcements.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('announcements.*') || request()->routeIs('pm.*') || request()->routeIs('messages.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? @js( __("app.communications") ) : ''">
                         <svg class="w-5 h-5 sidebar-icon flex-shrink-0" :class="collapsed ? '' : 'mr-3'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
                         </svg>
@@ -1089,7 +1089,7 @@
                     </a>
                 </div>
                 @elseif(auth()->user()->canView('announcements'))
-                <a wire:navigate href="{{ route('announcements.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('announcements.*') || request()->routeIs('pm.*') || request()->routeIs('messages.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("app.communications") }}' : ''">
+                <a wire:navigate href="{{ route('announcements.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('announcements.*') || request()->routeIs('pm.*') || request()->routeIs('messages.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? @js( __("app.communications") ) : ''">
                     <svg class="w-5 h-5 sidebar-icon flex-shrink-0" :class="collapsed ? '' : 'mr-3'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
                     </svg>
@@ -1098,7 +1098,7 @@
                 @endif
                 @endhasChurchRole
                 @if(auth()->user()->canView('finances'))
-                <a wire:navigate href="{{ route('finances.index') }}" id="nav-finances" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('finances.*') || request()->routeIs('expenses.*') || request()->routeIs('donations.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("app.finances") }}' : ''">
+                <a wire:navigate href="{{ route('finances.index') }}" id="nav-finances" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('finances.*') || request()->routeIs('expenses.*') || request()->routeIs('donations.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? @js( __("app.finances") ) : ''">
                     <svg class="w-5 h-5 sidebar-icon flex-shrink-0" :class="collapsed ? '' : 'mr-3'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                     </svg>
@@ -1106,7 +1106,7 @@
                 </a>
                 @endif
                 @if(auth()->user()->canView('reports'))
-                <a wire:navigate href="{{ route('reports.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('reports.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("app.reports") }}' : ''">
+                <a wire:navigate href="{{ route('reports.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('reports.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? @js( __("app.reports") ) : ''">
                     <svg class="w-5 h-5 sidebar-icon flex-shrink-0" :class="collapsed ? '' : 'mr-3'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                     </svg>
@@ -1114,7 +1114,7 @@
                 </a>
                 @endif
                 @if(auth()->user()->canView('resources'))
-                <a wire:navigate href="{{ route('resources.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('resources.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("app.resources") }}' : ''">
+                <a wire:navigate href="{{ route('resources.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('resources.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? @js( __("app.resources") ) : ''">
                     <svg class="w-5 h-5 sidebar-icon flex-shrink-0" :class="collapsed ? '' : 'mr-3'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
                     </svg>
@@ -1122,7 +1122,7 @@
                 </a>
                 @endif
                 @if(auth()->user()->canView('boards'))
-                <a wire:navigate href="{{ route('boards.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('boards.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("app.tasks") }}' : ''">
+                <a wire:navigate href="{{ route('boards.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('boards.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? @js( __("app.tasks") ) : ''">
                     <svg class="w-5 h-5 sidebar-icon flex-shrink-0" :class="collapsed ? '' : 'mr-3'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
                     </svg>
@@ -1150,7 +1150,7 @@
                     <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider sidebar-divider-text">{{ __('app.administration') }}</p>
                 </div>
                 <div x-show="collapsed" class="pt-2 mt-2 border-t border-gray-200 dark:border-gray-700"></div>
-                <a wire:navigate href="{{ route('settings.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('settings.*') || request()->routeIs('website-builder.*') || request()->routeIs('telegram.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("app.settings") }}' : ''">
+                <a wire:navigate href="{{ route('settings.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('settings.*') || request()->routeIs('website-builder.*') || request()->routeIs('telegram.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? @js( __("app.settings") ) : ''">
                     <svg class="w-5 h-5 sidebar-icon flex-shrink-0" :class="collapsed ? '' : 'mr-3'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -1159,7 +1159,7 @@
                 </a>
                 @endif
 
-                <a wire:navigate href="{{ route('support.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('support.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? '{{ __("app.support") }}' : ''">
+                <a wire:navigate href="{{ route('support.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('support.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? @js( __("app.support") ) : ''">
                     <svg class="w-5 h-5 sidebar-icon flex-shrink-0" :class="collapsed ? '' : 'mr-3'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/>
                     </svg>
@@ -2116,45 +2116,45 @@
             }
 
             // === Dashboard ===
-            add('sidebar-nav', '{{ __("app.tour_nav_title") }}', '{{ __("app.tour_nav_desc") }}', 'right', 'start');
-            add('stats-grid', '{{ __("app.tour_stats_title") }}', '{{ __("app.tour_stats_desc") }}', 'bottom', 'center');
-            add('stat-people', '{{ __("app.tour_people_card_title") }}', '{{ __("app.tour_people_card_desc") }}', 'bottom', 'start');
-            add('stat-events', '{{ __("app.tour_events_card_title") }}', '{{ __("app.tour_events_card_desc") }}', 'bottom', 'end');
+            add('sidebar-nav', @js( __("app.tour_nav_title") ), @js( __("app.tour_nav_desc") ), 'right', 'start');
+            add('stats-grid', @js( __("app.tour_stats_title") ), @js( __("app.tour_stats_desc") ), 'bottom', 'center');
+            add('stat-people', @js( __("app.tour_people_card_title") ), @js( __("app.tour_people_card_desc") ), 'bottom', 'start');
+            add('stat-events', @js( __("app.tour_events_card_title") ), @js( __("app.tour_events_card_desc") ), 'bottom', 'end');
 
             // === Sidebar nav items ===
-            add('nav-people', '{{ __("app.tour_people_title") }}', '{{ __("app.tour_people_desc") }}', 'right', 'start');
-            add('nav-groups', '{{ __("app.tour_groups_title") }}', '{{ __("app.tour_groups_desc") }}', 'right', 'start');
-            add('nav-ministries', '{{ __("app.tour_teams_title") }}', '{{ __("app.tour_teams_desc") }}', 'right', 'start');
-            add('nav-schedule', '{{ __("app.tour_schedule_title") }}', '{{ __("app.tour_schedule_desc") }}', 'right', 'start');
-            add('nav-finances', '{{ __("app.tour_finances_title") }}', '{{ __("app.tour_finances_desc") }}', 'right', 'start');
+            add('nav-people', @js( __("app.tour_people_title") ), @js( __("app.tour_people_desc") ), 'right', 'start');
+            add('nav-groups', @js( __("app.tour_groups_title") ), @js( __("app.tour_groups_desc") ), 'right', 'start');
+            add('nav-ministries', @js( __("app.tour_teams_title") ), @js( __("app.tour_teams_desc") ), 'right', 'start');
+            add('nav-schedule', @js( __("app.tour_schedule_title") ), @js( __("app.tour_schedule_desc") ), 'right', 'start');
+            add('nav-finances', @js( __("app.tour_finances_title") ), @js( __("app.tour_finances_desc") ), 'right', 'start');
 
             // === People page ===
-            add('people-add-btn', '{{ __("app.tour_add_person_title") }}', '{{ __("app.tour_add_person_desc") }}', 'bottom', 'end');
-            add('people-search-bar', '{{ __("app.tour_search_title") }}', '{{ __("app.tour_search_desc") }}', 'bottom', 'center');
-            add('people-filter-btn', '{{ __("app.tour_filter_title") }}', '{{ __("app.tour_filter_desc") }}', 'bottom', 'start');
+            add('people-add-btn', @js( __("app.tour_add_person_title") ), @js( __("app.tour_add_person_desc") ), 'bottom', 'end');
+            add('people-search-bar', @js( __("app.tour_search_title") ), @js( __("app.tour_search_desc") ), 'bottom', 'center');
+            add('people-filter-btn', @js( __("app.tour_filter_title") ), @js( __("app.tour_filter_desc") ), 'bottom', 'start');
 
             // === Groups page ===
-            add('groups-stats', '{{ __("app.tour_groups_stats_title") }}', '{{ __("app.tour_groups_stats_desc") }}', 'bottom', 'center');
-            add('groups-table', '{{ __("app.tour_groups_table_title") }}', '{{ __("app.tour_groups_table_desc") }}', 'top', 'center');
+            add('groups-stats', @js( __("app.tour_groups_stats_title") ), @js( __("app.tour_groups_stats_desc") ), 'bottom', 'center');
+            add('groups-table', @js( __("app.tour_groups_table_title") ), @js( __("app.tour_groups_table_desc") ), 'top', 'center');
 
             // === Ministries page ===
-            add('ministries-grid', '{{ __("app.tour_ministries_grid_title") }}', '{{ __("app.tour_ministries_grid_desc") }}', 'bottom', 'center');
+            add('ministries-grid', @js( __("app.tour_ministries_grid_title") ), @js( __("app.tour_ministries_grid_desc") ), 'bottom', 'center');
 
             // === Schedule page ===
-            add('schedule-options', '{{ __("app.tour_schedule_options_title") }}', '{{ __("app.tour_schedule_options_desc") }}', 'bottom', 'center');
-            add('events-list', '{{ __("app.tour_events_list_title") }}', '{{ __("app.tour_events_list_desc") }}', 'top', 'center');
+            add('schedule-options', @js( __("app.tour_schedule_options_title") ), @js( __("app.tour_schedule_options_desc") ), 'bottom', 'center');
+            add('events-list', @js( __("app.tour_events_list_title") ), @js( __("app.tour_events_list_desc") ), 'top', 'center');
 
             // === Finances page ===
-            add('finance-actions', '{{ __("app.tour_finance_actions_title") }}', '{{ __("app.tour_finance_actions_desc") }}', 'bottom', 'end');
-            add('finance-period', '{{ __("app.tour_finance_period_title") }}', '{{ __("app.tour_finance_period_desc") }}', 'bottom', 'start');
-            add('finance-balance', '{{ __("app.tour_finance_balance_title") }}', '{{ __("app.tour_finance_balance_desc") }}', 'bottom', 'center');
+            add('finance-actions', @js( __("app.tour_finance_actions_title") ), @js( __("app.tour_finance_actions_desc") ), 'bottom', 'end');
+            add('finance-period', @js( __("app.tour_finance_period_title") ), @js( __("app.tour_finance_period_desc") ), 'bottom', 'start');
+            add('finance-balance', @js( __("app.tour_finance_balance_title") ), @js( __("app.tour_finance_balance_desc") ), 'bottom', 'center');
 
             // === Settings page ===
-            add('settings-tabs', '{{ __("app.tour_settings_title") }}', '{{ __("app.tour_settings_desc") }}', 'bottom', 'center');
+            add('settings-tabs', @js( __("app.tour_settings_title") ), @js( __("app.tour_settings_desc") ), 'bottom', 'center');
 
             // === FAB & Tour restart ===
-            add('fab-button', '{{ __("app.tour_fab_title") }}', '{{ __("app.tour_fab_desc") }}', 'left', 'end');
-            add('tour-restart-btn', '{{ __("app.tour_restart_title") }}', '{{ __("app.tour_restart_desc") }}', 'right', 'start');
+            add('fab-button', @js( __("app.tour_fab_title") ), @js( __("app.tour_fab_desc") ), 'left', 'end');
+            add('tour-restart-btn', @js( __("app.tour_restart_title") ), @js( __("app.tour_restart_desc") ), 'right', 'start');
 
             return steps;
         }
@@ -2183,10 +2183,10 @@
                 stageRadius: 12,
                 popoverOffset: 12,
                 showButtons: ['next', 'previous', 'close'],
-                nextBtnText: '{{ __("app.tour_next") }}',
-                prevBtnText: '{{ __("app.tour_prev") }}',
-                doneBtnText: '{{ __("app.tour_done") }}',
-                progressText: '@{{current}} {{ __("app.of") }} @{{total}}',
+                nextBtnText: @js( __("app.tour_next") ),
+                prevBtnText: @js( __("app.tour_prev") ),
+                doneBtnText: @js( __("app.tour_done") ),
+                progressText: '@{{current}} ' + @js(__("app.of") ) + ' @{{total}}',
                 steps: steps,
                 onDestroyStarted: function() {
                     if (!driver.hasNextStep()) {

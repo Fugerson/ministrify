@@ -78,7 +78,7 @@
                         </svg>
                         {{ __('app.recurrence') }}
                         <span x-show="recurrenceType" x-cloak class="text-xs text-primary-600 dark:text-primary-400 font-medium"
-                              x-text="recurrenceType ? '(' + ({'daily':'{{ __('app.recurrence_daily_js') }}','weekly':'{{ __('app.recurrence_weekly_js') }}','biweekly':'{{ __('app.recurrence_biweekly_js') }}','monthly':'{{ __('app.recurrence_monthly_js') }}','yearly':'{{ __('app.recurrence_yearly_js') }}','weekdays':'{{ __('app.recurrence_weekdays_js') }}','custom':'{{ __('app.recurrence_custom_js') }}'}[recurrenceType] || '') + ')' : ''"></span>
+                              x-text="recurrenceType ? '(' + ({'daily':@js( __('app.recurrence_daily_js') ),'weekly':@js( __('app.recurrence_weekly_js') ),'biweekly':@js( __('app.recurrence_biweekly_js') ),'monthly':@js( __('app.recurrence_monthly_js') ),'yearly':@js( __('app.recurrence_yearly_js') ),'weekdays':@js( __('app.recurrence_weekdays_js') ),'custom':@js( __('app.recurrence_custom_js') )}[recurrenceType] || '') + ')' : ''"></span>
                     </button>
 
                     <div x-show="showRecurrence" x-collapse class="mt-3 space-y-3">
@@ -266,7 +266,7 @@
                 <option value="primary">{{ __('app.primary_calendar') }}</option>
                 <template x-for="cal in calendars" :key="cal.id">
                     <option :value="cal.id" :disabled="!cal.can_sync" :selected="cal.id === defaultCalendarId"
-                            x-text="cal.summary + (cal.can_sync ? '' : ' {{ __('app.read_only_suffix') }}')"></option>
+                            x-text="cal.summary + (cal.can_sync ? '' : ' ' + @js(__('app.read_only_suffix')))"></option>
                 </template>
             </select>
             <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">{{ __('app.event_will_appear_in_calendar') }}</p>
@@ -282,7 +282,7 @@
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                 </svg>
-                <span x-text="saving ? '{{ __('app.creating_label') }}' : '{{ __('app.create') }}'"></span>
+                <span x-text="saving ? @js( __('app.creating_label') ) : @js( __('app.create') )"></span>
             </button>
         </div>
     </form>

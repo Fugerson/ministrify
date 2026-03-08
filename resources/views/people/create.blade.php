@@ -296,17 +296,17 @@ function personCreateForm() {
                     }
                     if (response.status === 422 && data.errors) {
                         this.errors = data.errors;
-                        showToast('error', '{{ __("app.check_form_errors") }}');
+                        showToast('error', @js( __("app.check_form_errors") ));
                     } else {
-                        showToast('error', data.message || '{{ __("app.save_error") }}');
+                        showToast('error', data.message || @js( __("app.save_error") ));
                     }
                     this.saving = false;
                     return;
                 }
-                showToast('success', data.message || '{{ __("app.saved") }}');
+                showToast('success', data.message || @js( __("app.saved") ));
                 setTimeout(() => Livewire.navigate(data.redirect_url), 800);
             } catch (e) {
-                showToast('error', "{{ __('app.connection_error') }}");
+                showToast('error', @js( __('app.connection_error') ));
                 this.saving = false;
             }
         }

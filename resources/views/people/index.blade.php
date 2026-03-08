@@ -158,7 +158,7 @@
         <div x-show="hasFilters" x-cloak class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
             <template x-if="filters.gender">
                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg text-sm">
-                    <span x-text="filters.gender === 'male' ? '{{ __('app.male') }}' : '{{ __('app.female') }}'"></span>
+                    <span x-text="filters.gender === 'male' ? @js(__('app.male')) : @js(__('app.female'))"></span>
                     <button @click="filters.gender = ''" class="hover:text-blue-900 dark:hover:text-blue-100">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -209,7 +209,7 @@
             @if($church->shepherds_enabled)
             <template x-if="filters.shepherd">
                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 rounded-lg text-sm">
-                    <span x-text="filters.shepherd === 'none' ? '{{ __('app.no_shepherd') }}' : filters.shepherd"></span>
+                    <span x-text="filters.shepherd === 'none' ? @js(__('app.no_shepherd')) : filters.shepherd"></span>
                     <button @click="filters.shepherd = ''" class="hover:text-amber-900 dark:hover:text-amber-100">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -879,9 +879,9 @@
                 <!-- Header -->
                 <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between flex-shrink-0">
                     <div>
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white" x-text="mergeState ? '{{ __('app.merge_manager_title') }}' : '{{ __('app.find_duplicates') }}'"></h3>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white" x-text="mergeState ? @js(__('app.merge_manager_title')) : @js(__('app.find_duplicates'))"></h3>
                         <p x-show="!mergeState && duplicatePairs.length > 0" class="text-sm text-gray-500 dark:text-gray-400 mt-0.5"
-                           x-text="'{{ __('app.duplicates_pair') }}'.replace(':current', currentDuplicateIndex + 1).replace(':total', duplicatePairs.length)"></p>
+                           x-text="@js(__('app.duplicates_pair')).replace(':current', currentDuplicateIndex + 1).replace(':total', duplicatePairs.length)"></p>
                     </div>
                     <button @click="if(mergeState) mergeState = null; else showDuplicatesModal = false;" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1018,7 +1018,7 @@
                                                           'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400': field.type === 'conflict',
                                                           'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400': field.type === 'same',
                                                       }"
-                                                      x-text="field.type === 'auto' ? '{{ __('app.merge_auto_selected') }}' : (field.type === 'conflict' ? '{{ __('app.merge_conflict') }}' : '{{ __('app.merge_same_value') }}')"></span>
+                                                      x-text="field.type === 'auto' ? @js(__('app.merge_auto_selected')) : (field.type === 'conflict' ? @js(__('app.merge_conflict')) : @js(__('app.merge_same_value')))"></span>
                                             </div>
                                         </div>
 
@@ -1607,18 +1607,18 @@ function personCreateForm() {
                     }
                     if (response.status === 422 && data.errors) {
                         this.errors = data.errors;
-                        showToast('error', '{{ __("app.check_form_errors") }}');
+                        showToast('error', @js( __("app.check_form_errors") ));
                     } else {
-                        showToast('error', data.message || '{{ __("app.save_error") }}');
+                        showToast('error', data.message || @js( __("app.save_error") ));
                     }
                     this.saving = false;
                     return;
                 }
-                showToast('success', data.message || '{{ __("app.saved") }}');
+                showToast('success', data.message || @js( __("app.saved") ));
                 closeCreatePersonModal();
                 setTimeout(() => Livewire.navigate(window.location.href), 600);
             } catch (e) {
-                showToast('error', "{{ __('app.connection_error') }}");
+                showToast('error', @js( __('app.connection_error') ));
                 this.saving = false;
             }
         }
@@ -1740,15 +1740,15 @@ function peopleTable() {
         mergeState: null, // { personA, personB, fields: [...], selectedValues: {key: 'A'|'B'}, mergedMinistries, mergedTags, accountNote, bothHaveAccounts }
 
         mergeFields: [
-            { key: 'photo_url', label: '{{ __("app.photo") }}', type: 'photo' },
-            { key: 'phone', label: '{{ __("app.phone") }}' },
+            { key: 'photo_url', label: @js( __("app.photo") ), type: 'photo' },
+            { key: 'phone', label: @js( __("app.phone") ) },
             { key: 'email', label: 'Email' },
-            { key: 'birth_date', label: '{{ __("app.date_of_birth") }}' },
-            { key: 'gender', label: '{{ __("app.gender") }}' },
-            { key: 'membership_status', label: '{{ __("app.membership_status") }}' },
+            { key: 'birth_date', label: @js( __("app.date_of_birth") ) },
+            { key: 'gender', label: @js( __("app.gender") ) },
+            { key: 'membership_status', label: @js( __("app.membership_status") ) },
             { key: 'telegram_username', label: 'Telegram' },
-            { key: 'address', label: '{{ __("app.address") }}' },
-            { key: 'notes', label: '{{ __("app.notes") }}' },
+            { key: 'address', label: @js( __("app.address") ) },
+            { key: 'notes', label: @js( __("app.notes") ) },
         ],
 
         get currentPair() {
@@ -2022,11 +2022,11 @@ function peopleTable() {
         getMergeFieldDisplay(person, key) {
             if (!person) return '';
             if (key === 'gender') {
-                const map = { 'male': '{{ __("app.gender_male") }}', 'female': '{{ __("app.gender_female") }}' };
+                const map = { 'male': @js( __("app.gender_male") ), 'female': @js( __("app.gender_female") ) };
                 return map[person.gender] || person.gender || '';
             }
             if (key === 'membership_status') {
-                const map = { 'guest': '{{ __("app.guest") }}', 'newcomer': '{{ __("app.newcomer") }}', 'member': '{{ __("app.church_member") }}', 'servant': '{{ __("app.servant") }}', 'leader': '{{ __("app.leader") }}', 'leadership': '{{ __("app.leadership") }}' };
+                const map = { 'guest': @js( __("app.guest") ), 'newcomer': @js( __("app.newcomer") ), 'member': @js( __("app.church_member") ), 'servant': @js( __("app.servant") ), 'leader': @js( __("app.leader") ), 'leadership': @js( __("app.leadership") ) };
                 return map[person.membership_status] || person.membership_status || '';
             }
             if (key === 'photo_url') return person.photo_url || '';

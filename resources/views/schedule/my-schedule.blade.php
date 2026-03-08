@@ -51,7 +51,7 @@
                 <div class="flex items-center gap-2">
                     {{-- Sync status --}}
                     <div x-show="syncedAt" class="text-xs text-gray-400 dark:text-gray-500">
-                        <span x-text="'{{ __("app.schedule_updated") }} ' + formatSyncTime(syncedAt)"></span>
+                        <span x-text="@js(__('app.schedule_updated')) + ' ' + formatSyncTime(syncedAt)"></span>
                     </div>
                     {{-- Refresh button --}}
                     <button @click="refresh()"
@@ -260,8 +260,8 @@ function mySchedule() {
 
                     if (response.ok) {
                         item.status = 'confirmed';
-                        item.status_label = '{{ __("app.schedule_confirmed_status") }}';
-                        await PWA_DB.updateResponsibilityStatus(item.id, 'confirmed', '{{ __("app.schedule_confirmed_status") }}');
+                        item.status_label = @js( __("app.schedule_confirmed_status") );
+                        await PWA_DB.updateResponsibilityStatus(item.id, 'confirmed', @js( __("app.schedule_confirmed_status") ));
                     }
                 } catch (error) {
                     console.error('Confirm failed:', error);
@@ -270,7 +270,7 @@ function mySchedule() {
             } else {
                 await this.queueOfflineAction(item, 'confirm');
                 item.status = 'confirmed';
-                item.status_label = '{{ __("app.schedule_confirmed_pending_sync") }}';
+                item.status_label = @js( __("app.schedule_confirmed_pending_sync") );
             }
 
             item.processing = false;
@@ -292,8 +292,8 @@ function mySchedule() {
 
                     if (response.ok) {
                         item.status = 'declined';
-                        item.status_label = '{{ __("app.schedule_declined_status") }}';
-                        await PWA_DB.updateResponsibilityStatus(item.id, 'declined', '{{ __("app.schedule_declined_status") }}');
+                        item.status_label = @js( __("app.schedule_declined_status") );
+                        await PWA_DB.updateResponsibilityStatus(item.id, 'declined', @js( __("app.schedule_declined_status") ));
                     }
                 } catch (error) {
                     console.error('Decline failed:', error);
@@ -302,7 +302,7 @@ function mySchedule() {
             } else {
                 await this.queueOfflineAction(item, 'decline');
                 item.status = 'declined';
-                item.status_label = '{{ __("app.schedule_declined_pending_sync") }}';
+                item.status_label = @js( __("app.schedule_declined_pending_sync") );
             }
 
             item.processing = false;
@@ -345,9 +345,9 @@ function mySchedule() {
             const now = new Date();
             const diff = now - date;
 
-            if (diff < 60000) return '{{ __("app.schedule_just_now") }}';
-            if (diff < 3600000) return Math.floor(diff / 60000) + ' {{ __("app.schedule_min_ago") }}';
-            if (diff < 86400000) return Math.floor(diff / 3600000) + ' {{ __("app.schedule_hours_ago") }}';
+            if (diff < 60000) return @js( __("app.schedule_just_now") );
+            if (diff < 3600000) return Math.floor(diff / 60000) + ' ' + @js(__("app.schedule_min_ago") );
+            if (diff < 86400000) return Math.floor(diff / 3600000) + ' ' + @js(__("app.schedule_hours_ago") );
 
             return date.toLocaleDateString('{{ app()->getLocale() }}', { day: 'numeric', month: 'short' });
         }

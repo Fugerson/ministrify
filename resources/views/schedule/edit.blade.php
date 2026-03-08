@@ -204,7 +204,7 @@
                 <option value="primary">{{ __('app.primary_calendar') }}</option>
                 <template x-for="cal in calendars" :key="cal.id">
                     <option :value="cal.id" :disabled="!cal.can_sync"
-                            x-text="cal.summary + (cal.can_sync ? '' : ' ({{ __('app.read_only_suffix') }})')"></option>
+                            x-text="cal.summary + (cal.can_sync ? '' : ' (' + @js(__('app.read_only_suffix')) + ')')"></option>
                 </template>
             </select>
             <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400" x-text="statusText"></p>
@@ -214,7 +214,7 @@
         <div class="flex items-center justify-between">
             @if(auth()->user()->canDelete('events'))
             <button type="button"
-                    @click="ajaxDelete('{{ route('events.destroy', $event) }}', '{{ __('messages.confirm_delete_event') }}', null, '{{ route('schedule') }}')"
+                    @click="ajaxDelete('{{ route('events.destroy', $event) }}', @js(__('messages.confirm_delete_event')), null, '{{ route('schedule') }}')"
                     class="text-red-600 hover:text-red-800 text-sm font-medium">
                 {{ __('app.delete_event_action') }}
             </button>
@@ -231,7 +231,7 @@
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                     </svg>
-                    <span x-text="saving ? '{{ __('app.saving_btn') }}' : '{{ __('app.save_btn') }}'"></span>
+                    <span x-text="saving ? @js(__('app.saving_btn')) : @js(__('app.save_btn'))"></span>
                 </button>
             </div>
         </div>
@@ -264,16 +264,16 @@ function eventEditForm() {
                 if (!response.ok) {
                     if (response.status === 422 && data.errors) {
                         this.errors = data.errors;
-                        showToast('error', '{{ __('app.check_form_errors') }}');
+                        showToast('error', @js( __('app.check_form_errors') ));
                     } else {
-                        showToast('error', data.message || '{{ __('app.save_error_msg') }}');
+                        showToast('error', data.message || @js( __('app.save_error_msg') ));
                     }
                     this.saving = false;
                     return;
                 }
-                showToast('success', data.message || '{{ __('app.saved_label') }}');
+                showToast('success', data.message || @js( __('app.saved_label') ));
             } catch (e) {
-                showToast('error', '{{ __('app.connection_error_msg') }}');
+                showToast('error', @js( __('app.connection_error_msg') ));
             }
             this.saving = false;
         }
@@ -285,13 +285,13 @@ function googleCalendarPicker() {
         calendarId: '{{ $event->google_calendar_id ?? ($gcCalendarId ?? "primary") }}',
         calendars: [],
         get statusText() {
-            if (!this.calendarId) return '{{ __('app.event_not_synced_msg') }}';
+            if (!this.calendarId) return @js( __('app.event_not_synced_msg') );
             @if($event->google_event_id)
                 const currentCal = this.calendars.find(c => c.id === this.calendarId);
-                const calName = this.calendarId === 'primary' ? '{{ __('app.primary_calendar') }}' : (currentCal?.summary || this.calendarId);
-                return '{{ __('app.linked_to_prefix') }} ' + calName;
+                const calName = this.calendarId === 'primary' ? @js( __('app.primary_calendar') ) : (currentCal?.summary || this.calendarId);
+                return @js(__('app.linked_to_prefix') ) + ' ' + calName;
             @else
-                return '{{ __('app.event_will_appear_in_calendar') }}';
+                return @js( __('app.event_will_appear_in_calendar') );
             @endif
         },
         async init() {

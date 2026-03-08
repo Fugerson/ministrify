@@ -61,7 +61,7 @@
         <div class="flex items-center justify-between">
             @if(auth()->user()->canDelete('ministries'))
             <button type="button"
-                    @click="ajaxDelete('{{ route('ministries.destroy', $ministry) }}', '{{ __('messages.confirm_delete_ministry') }}', null, '{{ route('ministries.index') }}')"
+                    @click="ajaxDelete('{{ route('ministries.destroy', $ministry) }}', @js( __('messages.confirm_delete_ministry') ), null, '{{ route('ministries.index') }}')"
                     class="text-red-600 hover:text-red-800 text-sm font-medium">
                 Видалити команду
             </button>

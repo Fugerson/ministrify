@@ -82,11 +82,11 @@ window.expenseModal = function() {
                 if (this.previews.length >= 10) break;
                 const isHeic = file.name.match(/\.heic$/i) || file.name.match(/\.heif$/i);
                 if (!file.type.match('image.*') && file.type !== 'application/pdf' && !isHeic) {
-                    showToast('error', '{{ __('app.unsupported_format') }}: ' + file.name);
+                    showToast('error', @js(__('app.unsupported_format') ) + ': ' + file.name);
                     continue;
                 }
                 if (file.size > 10 * 1024 * 1024) {
-                    showToast('error', '{{ __('app.file_too_large_name') }}: ' + file.name);
+                    showToast('error', @js(__('app.file_too_large_name') ) + ': ' + file.name);
                     continue;
                 }
                 this.previews.push({
@@ -103,7 +103,7 @@ window.expenseModal = function() {
             this.files.splice(index, 1);
         },
         async deleteExpense() {
-            if (!confirm('{{ __('messages.confirm_delete_expense') }}')) return;
+            if (!confirm(@js( __('messages.confirm_delete_expense') ))) return;
             this.loading = true;
             try {
                 const response = await fetch(`/finances/expenses/${this.editId}`, {
@@ -117,17 +117,17 @@ window.expenseModal = function() {
                 const data = await response.json().catch(() => ({}));
                 if (response.ok && data.success) {
                     this.modalOpen = false;
-                    showToast('success', data.message || '{{ __('app.expense_deleted') }}');
+                    showToast('success', data.message || @js( __('app.expense_deleted') ));
                     if (window.journalRemoveTransaction) {
                         window.journalRemoveTransaction(this.editId);
                     } else {
                         setTimeout(() => Livewire.navigate(window.location.href), 600);
                     }
                 } else {
-                    showToast('error', data.message || '{{ __('app.delete_error') }}');
+                    showToast('error', data.message || @js( __('app.delete_error') ));
                 }
             } catch (e) {
-                showToast('error', '{{ __('app.connection_error') }}');
+                showToast('error', @js( __('app.connection_error') ));
             } finally {
                 this.loading = false;
             }
@@ -160,7 +160,7 @@ window.expenseModal = function() {
                 });
 
                 if (response.status === 413) {
-                    showToast('error', '{{ __('app.file_too_large_upload', ['size' => '10 MB']) }}');
+                    showToast('error', @js( __('app.file_too_large_upload', ['size' => '10 MB']) ));
                     this.loading = false;
                     return;
                 }
@@ -168,7 +168,7 @@ window.expenseModal = function() {
                 const data = await response.json().catch(() => ({}));
                 if (response.ok && data.success) {
                     this.modalOpen = false;
-                    showToast('success', data.message || '{{ __('app.saved') }}');
+                    showToast('success', data.message || @js( __('app.saved') ));
                     if (data.budget_warning) {
                         showToast('warning', data.budget_warning);
                     }
@@ -179,12 +179,12 @@ window.expenseModal = function() {
                     }
                 } else if (response.status === 422) {
                     this.errors = data.errors || {};
-                    showToast('error', '{{ __('app.check_form_errors') }}');
+                    showToast('error', @js( __('app.check_form_errors') ));
                 } else {
-                    showToast('error', data.message || '{{ __('app.save_error') }}');
+                    showToast('error', data.message || @js( __('app.save_error') ));
                 }
             } catch (e) {
-                showToast('error', '{{ __('app.connection_error_generic') }}');
+                showToast('error', @js( __('app.connection_error_generic') ));
             } finally {
                 this.loading = false;
             }
@@ -211,7 +211,7 @@ window.expenseModal = function() {
                  @click.stop>
                 <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white"
-                        x-text="isEdit ? '{{ __('app.edit_expense') }}' : '{{ __('app.add_expense_title') }}'"></h3>
+                        x-text="isEdit ? @js( __('app.edit_expense') ) : @js( __('app.add_expense_title') )"></h3>
                     <button @click="modalOpen = false" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -403,7 +403,7 @@ window.expenseModal = function() {
                             </button>
                             <button type="submit" :disabled="loading"
                                     class="px-6 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-xl disabled:opacity-50 transition-colors">
-                                <span x-show="!loading" x-text="isEdit ? '{{ __('app.save_btn') }}' : '{{ __('app.add_btn') }}'"></span>
+                                <span x-show="!loading" x-text="isEdit ? @js( __('app.save_btn') ) : @js( __('app.add_btn') )"></span>
                                 <span x-show="loading" class="flex items-center justify-center gap-2">
                                     <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
                                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>

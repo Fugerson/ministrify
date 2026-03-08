@@ -15,7 +15,7 @@
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.prayer_edit_title') }}</h2>
             <button type="button"
-                    @click="ajaxDelete('{{ route('prayer-requests.destroy', $prayerRequest) }}', '{{ __('messages.confirm_delete_prayer_request') }}', null, '{{ route('prayer-requests.index') }}')"
+                    @click="ajaxDelete('{{ route('prayer-requests.destroy', $prayerRequest) }}', @js( __('messages.confirm_delete_prayer_request') ), null, '{{ route('prayer-requests.index') }}')"
                     class="text-red-600 hover:text-red-700 text-sm">{{ __('app.prayer_delete') }}</button>
         </div>
 

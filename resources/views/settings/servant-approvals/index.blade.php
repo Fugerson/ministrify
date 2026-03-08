@@ -247,7 +247,7 @@ function personLinker(userId, suggestedMatches) {
                 // For servant approvals roleId is null — use default volunteer role
                 // For church role approvals, roleId must be selected
                 if (roleId === '') {
-                    alert('{{ __("Виберіть роль для одобрення") }}');
+                    alert(@js( __("Виберіть роль для одобрення") ));
                     return;
                 }
             }
@@ -271,10 +271,10 @@ function personLinker(userId, suggestedMatches) {
                     alert(data.message);
                     location.reload();
                 } else {
-                    alert('{{ __("Помилка") }}: ' + data.message);
+                    alert(@js(__("Помилка") ) + ': ' + data.message);
                 }
             })
-            .catch(err => alert('{{ __("Помилка запиту") }}: ' + err));
+            .catch(err => alert(@js(__("Помилка запиту") ) + ': ' + err));
         }
     };
 }
@@ -312,10 +312,10 @@ onPageReady(function() {
                     alert(data.message);
                     location.reload();
                 } else {
-                    alert('{{ __("Помилка") }}: ' + data.message);
+                    alert(@js(__("Помилка") ) + ': ' + data.message);
                 }
             })
-            .catch(err => alert('{{ __("Помилка запиту") }}: ' + err));
+            .catch(err => alert(@js(__("Помилка запиту") ) + ': ' + err));
         });
     }
 });

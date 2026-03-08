@@ -84,7 +84,7 @@
                 {{ __('app.cancel') }}
             </a>
             <button type="submit" :disabled="saving" class="w-full sm:w-auto px-6 py-2 bg-primary-600 hover:bg-primary-700 disabled:opacity-50 text-white font-medium rounded-lg transition-colors">
-                <span x-text="saving ? '{{ __('app.saving') }}' : '{{ __('app.save') }}'"></span>
+                <span x-text="saving ? @js(__('app.saving')) : @js(__('app.save'))"></span>
             </button>
         </div>
     </form>
@@ -107,7 +107,7 @@ document.querySelectorAll('input[name="present[]"]').forEach(function(checkbox) 
 
 function updateCount() {
     const count = document.querySelectorAll('input[name="present[]"]:checked').length;
-    document.getElementById('selected-count').textContent = count + ' {{ __("app.attendance_selected") }}';
+    document.getElementById('selected-count').textContent = count + ' ' + @js(__("app.attendance_selected") );
 }
 
 window.selectAll = function() {

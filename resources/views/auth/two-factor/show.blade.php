@@ -62,7 +62,7 @@
                     </form>
 
                     <form action="{{ route('two-factor.disable') }}" method="POST"
-                          onsubmit="return confirm('{{ __('Ви впевнені, що хочете вимкнути 2FA?') }}')">
+                          onsubmit="return confirm(@js( __('Ви впевнені, що хочете вимкнути 2FA?') ))">
                         @csrf
                         @method('DELETE')
                         <div class="mb-4">

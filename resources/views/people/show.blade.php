@@ -323,7 +323,7 @@
                                @keydown.arrow-down.prevent="highlightNext()"
                                @keydown.arrow-up.prevent="highlightPrev()"
                                @keydown.enter.prevent="selectHighlighted()"
-                               :placeholder="selectedName || '{{ __('app.search_shepherd') }}'"
+                               :placeholder="selectedName || @js(__('app.search_shepherd'))"
                                :class="{'text-gray-400': !searchQuery && selectedName}"
                                class="w-full text-sm font-medium text-gray-900 dark:text-white bg-transparent border-0 p-0 focus:ring-0 placeholder-gray-500 dark:placeholder-gray-400">
 
@@ -546,7 +546,7 @@
                                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                         </svg>
-                                        <span x-text="creating ? '{{ __('app.creating') }}' : '{{ __('app.create') }}'"></span>
+                                        <span x-text="creating ? @js(__('app.creating')) : @js(__('app.create'))"></span>
                                     </button>
                                 </div>
                             </div>
@@ -1080,7 +1080,7 @@
                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                 </svg>
-                                <span x-text="saving ? '{{ __('app.saving') }}...' : '{{ __('app.add') }}'"></span>
+                                <span x-text="saving ? @js(__('app.saving')) + '...' : @js(__('app.add'))"></span>
                             </button>
                         </div>
                     </div>
@@ -1120,7 +1120,7 @@
 
         @if(auth()->user()->canDelete('people'))
         <button type="button"
-                @click="ajaxDelete('{{ route('people.destroy', $person) }}', '{{ __('messages.confirm_delete_person') }}', null, '{{ route('people.index') }}')"
+                @click="ajaxDelete('{{ route('people.destroy', $person) }}', @js(__('messages.confirm_delete_person')), null, '{{ route('people.index') }}')"
                 class="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-sm font-medium">
             {{ __('app.delete') }}
         </button>
@@ -1225,7 +1225,7 @@ function userRoleManager() {
         },
 
         async resetPassword() {
-            if (!confirm('{{ __('messages.confirm_generate_password') }}')) return;
+            if (!confirm(@js(__('messages.confirm_generate_password')))) return;
 
             this.resettingPassword = true;
 
@@ -1290,7 +1290,7 @@ function userRoleManager() {
             if (hadNoRole && newRoleId) {
                 const roleSelect = document.querySelector('select[x-model="churchRoleId"]');
                 const roleName = roleSelect.options[roleSelect.selectedIndex].text;
-                if (!confirm('{{ __('messages.confirm_grant_access') }}'.replace(':role', roleName))) {
+                if (!confirm(@js(__('messages.confirm_grant_access')).replace(':role', roleName))) {
                     this.churchRoleId = '';
                     return;
                 }
@@ -1578,7 +1578,7 @@ function familyManager() {
         },
 
         async deleteRelationship(relationshipId) {
-            if (!confirm('{{ __('messages.confirm_delete_family_link') }}')) return;
+            if (!confirm(@js(__('messages.confirm_delete_family_link')))) return;
 
             try {
                 const response = await fetch(`/family/${relationshipId}`, {

@@ -36,7 +36,7 @@
         <div>
             <button x-on:click="showManualSearch = !showManualSearch"
                     class="text-sm text-blue-600 dark:text-blue-400 hover:underline mt-1">
-                <span x-text="showManualSearch ? '{{ __('Сховати пошук') }}' : '{{ __('Знайти вручну в базі') }}'"></span>
+                <span x-text="showManualSearch ? @js( __('Сховати пошук') ) : @js( __('Знайти вручну в базі') )"></span>
             </button>
 
             {{-- Manual search dropdown --}}

@@ -16,7 +16,7 @@
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.songs_edit_song') }}</h2>
-                <button type="button" @click="ajaxDelete('{{ route("songs.destroy", $song) }}', '{{ __("messages.confirm_delete_song") }}', null, '{{ route("songs.index") }}')"
+                <button type="button" @click="ajaxDelete('{{ route("songs.destroy", $song) }}', @js( __("messages.confirm_delete_song") ), null, '{{ route("songs.index") }}')"
                         class="text-red-600 hover:text-red-700 text-sm">{{ __('app.songs_delete') }}</button>
             </div>
 

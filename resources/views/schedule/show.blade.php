@@ -110,7 +110,7 @@
                        class="text-gray-500 dark:text-gray-400 bg-transparent border-0 border-b border-transparent hover:border-gray-300 dark:hover:border-gray-600 focus:border-primary-500 focus:ring-0 p-0 pb-1 text-right block ml-auto cursor-pointer">
                 @else
                 <span class="text-xl font-bold text-gray-900 dark:text-white" x-text="date"></span>
-                <span class="text-gray-500 dark:text-gray-400 block text-right" x-text="time || '{{ __("app.schedule_all_day_parenthesis") }}'"></span>
+                <span class="text-gray-500 dark:text-gray-400 block text-right" x-text="time || @js(__('app.schedule_all_day_parenthesis'))"></span>
                 @endif
                 @if($event->google_event_id)
                     <span class="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800">
@@ -416,7 +416,7 @@
                                                             x-show="person.hasTelegram && (!person.status || person.status === 'declined')"
                                                             @click="askPerson(person, index)"
                                                             class="text-blue-500 hover:text-blue-700"
-                                                            :title="person.status === 'declined' ? '{{ __("app.schedule_ask_again") }}' : '{{ __("app.schedule_ask_telegram") }}'">
+                                                            :title="person.status === 'declined' ? @js(__('app.schedule_ask_again')) : @js(__('app.schedule_ask_telegram'))">
                                                         <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
                                                             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .37z"/>
                                                         </svg>
@@ -434,7 +434,7 @@
                                                     </button>
 
                                                     {{-- No telegram indicator --}}
-                                                    <span x-show="person.id && !person.hasTelegram && !person.status" class="text-gray-400" title="{{ __('app.schedule_no_telegram') }}">
+                                                    <span x-show="person.id && !person.hasTelegram && !person.status" class="text-gray-400" title=@js( __('app.schedule_no_telegram') )>
                                                         <svg class="w-3 h-3 opacity-50" fill="currentColor" viewBox="0 0 24 24">
                                                             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .37z"/>
                                                         </svg>
@@ -1184,13 +1184,13 @@ function responsibleEditor(itemId, initialPeople) {
                     body: JSON.stringify({ responsible_names: names, responsible_id: primaryId })
                 });
                 if (response.ok) {
-                    showGlobalToast('{{ __("app.schedule_saved_toast") }}', 'success');
+                    showGlobalToast(@js( __("app.schedule_saved_toast") ), 'success');
                 } else {
-                    showGlobalToast('{{ __("app.schedule_save_error") }}', 'error');
+                    showGlobalToast(@js( __("app.schedule_save_error") ), 'error');
                 }
             } catch (err) {
                 console.error('Update error:', err);
-                showGlobalToast('{{ __("app.schedule_connection_error") }}', 'error');
+                showGlobalToast(@js( __("app.schedule_connection_error") ), 'error');
             }
         },
         async askPerson(person, index) {
@@ -1373,7 +1373,7 @@ function titleEditor(itemId, initialTitle, existingSongId = null) {
         // Render text with song links
         renderWithSongLinks(text) {
             if (!text || text.trim() === '') {
-                return '<span class="text-gray-400 italic">{{ __("app.schedule_click_to_add") }}</span>';
+                return '<span class="text-gray-400 italic">' + @js(__("app.schedule_click_to_add") ) + '</span>';
             }
 
             // Escape HTML first
@@ -1386,7 +1386,7 @@ function titleEditor(itemId, initialTitle, existingSongId = null) {
                     const keyBadge = song.key ? `<span class="ml-1 px-1.5 py-0.5 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-xs rounded font-mono">${escapeHtml(song.key)}</span>` : '';
                     return `<a href="/songs/${song.id}" class="inline-flex items-center gap-1 text-primary-600 dark:text-primary-400 hover:underline font-medium whitespace-nowrap" onclick="event.stopPropagation()"><span>🎵</span><span>${escapeHtml(song.title)}</span>${keyBadge}</a>`;
                 }
-                return `<span class="text-red-500">{{ __("app.schedule_song_not_found") }}</span>`;
+                return `<span class="text-red-500">' + @js(__("app.schedule_song_not_found") ) + '</span>`;
             });
 
             return html;
@@ -1412,15 +1412,15 @@ async function updateFieldWithSong(itemId, songId, title, songKey = null) {
         });
 
         if (response.ok) {
-            showGlobalToast(songId ? '{{ __("app.schedule_song_added") }}' : '{{ __("app.schedule_song_removed") }}', 'success');
+            showGlobalToast(songId ? @js( __("app.schedule_song_added") ) : @js( __("app.schedule_song_removed") ), 'success');
             // Update DOM without reload
             updateSongCellDOM(itemId, songId, title, songKey);
         } else {
-            showGlobalToast('{{ __("app.schedule_update_error") }}', 'error');
+            showGlobalToast(@js( __("app.schedule_update_error") ), 'error');
         }
     } catch (err) {
         console.error('Update error:', err);
-        showGlobalToast('{{ __("app.schedule_connection_error") }}', 'error');
+        showGlobalToast(@js( __("app.schedule_connection_error") ), 'error');
     }
 }
 
@@ -1439,11 +1439,11 @@ function updateSongCellDOM(itemId, songId, title, songKey) {
             <div class="space-y-1">
                 <div class="flex items-center gap-2" x-data="{ editing: false }">
                     <template x-if="!editing">
-                        <div class="flex items-center gap-2 cursor-pointer" @click="editing = true" title="{{ __('app.click_to_change_song') }}">
+                        <div class="flex items-center gap-2 cursor-pointer" @click="editing = true" title=@js( __('app.click_to_change_song') )>
                             <span class="text-lg">🎵</span>
                             <a href="/songs/${songId}" class="text-sm text-primary-600 dark:text-primary-400 hover:underline font-medium" @click.stop>${escapeHtml(title)}</a>
                             ${keyBadge}
-                            <button type="button" @click.stop="if(confirm('{{ __('messages.confirm_remove_song') }}')) { updateFieldWithSong(${itemId}, null, ''); editing = false; }" class="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-500" title="{{ __("app.schedule_remove_song") }}">
+                            <button type="button" @click.stop="if(confirm(@js(__('messages.confirm_remove_song')))) { updateFieldWithSong(${itemId}, null, ''); editing = false; }" class="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-500" title=@js( __("app.schedule_remove_song") )>
                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                             </button>
                         </div>
@@ -1455,7 +1455,7 @@ function updateSongCellDOM(itemId, songId, title, songKey) {
                                    @blur="setTimeout(() => { if(!showSongs) editing = false; }, 200)"
                                    @keydown.escape="editing = false"
                                    @keydown.enter.prevent="if(showSongs && filteredSongs().length) { selectSong(filteredSongs()[songIndex]); } else { saveTitle(); editing = false; }"
-                                   placeholder="{{ __("app.schedule_enter_song") }}"
+                                   placeholder=@js( __("app.schedule_enter_song") )
                                    class="w-full px-2 py-1 text-sm bg-white dark:bg-gray-700 border border-primary-300 rounded focus:ring-1 focus:ring-primary-500">
                             <div x-show="showSongs" x-transition @click.away="showSongs = false"
                                  class="absolute left-0 right-0 top-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto">
@@ -1475,7 +1475,7 @@ function updateSongCellDOM(itemId, songId, title, songKey) {
                     <input type="text" x-model="desc"
                            @blur="updateField(${itemId}, 'description', desc)"
                            @keydown.enter="$el.blur()"
-                           placeholder="{{ __("app.schedule_additional_text") }}"
+                           placeholder=@js( __("app.schedule_additional_text") )
                            class="w-full px-1 py-0.5 text-xs text-gray-600 dark:text-gray-400 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-primary-500 focus:ring-0 placeholder-gray-400">
                 </div>
             </div>
@@ -1491,7 +1491,7 @@ function updateSongCellDOM(itemId, songId, title, songKey) {
                           @keydown.arrow-down.prevent="if(showSongs) songIndex = Math.min(songIndex + 1, filteredSongs().length - 1)"
                           @keydown.arrow-up.prevent="if(showSongs) songIndex = Math.max(songIndex - 1, 0)"
                           @keydown.enter.prevent="if(showSongs && filteredSongs().length) { selectSong(filteredSongs()[songIndex]); } else { saveTitle(); $el.blur(); }"
-                          placeholder="{{ __("app.schedule_description_placeholder") }}"
+                          placeholder=@js( __("app.schedule_description_placeholder") )
                           rows="1"
                           class="w-full px-1 py-1 text-sm text-gray-900 dark:text-white bg-transparent border-0 focus:ring-1 focus:ring-primary-500 rounded resize-none break-words"></textarea>
                 <div x-show="showSongs" x-transition @click.away="showSongs = false"
@@ -1584,13 +1584,13 @@ function eventEditor() {
                 const data = await response.json().catch(() => ({}));
                 if (data.success) {
                     this._original[originalKey] = value; // Update original after successful save
-                    showGlobalToast('{{ __("app.schedule_saved_toast") }}', 'success');
+                    showGlobalToast(@js( __("app.schedule_saved_toast") ), 'success');
                 } else {
-                    showGlobalToast(data.message || '{{ __("app.schedule_error") }}', 'error');
+                    showGlobalToast(data.message || @js( __("app.schedule_error") ), 'error');
                 }
             } catch (err) {
                 console.error('Save error:', err);
-                showGlobalToast('{{ __("app.schedule_save_error") }}', 'error');
+                showGlobalToast(@js( __("app.schedule_save_error") ), 'error');
             }
         },
 
@@ -1608,7 +1608,7 @@ function eventEditor() {
 
         getMinistryName() {
             const ministry = this.ministries.find(m => m.id == this.ministryId);
-            return ministry ? ministry.name : '{{ __("app.schedule_without_team_js") }}';
+            return ministry ? ministry.name : @js( __("app.schedule_without_team_js") );
         }
     };
 }
@@ -1658,22 +1658,22 @@ function planTemplatesManager() {
 
                 const data = await response.json().catch(() => ({}));
                 if (data.success) {
-                    showGlobalToast('{{ __("app.schedule_template_saved") }}', 'success');
+                    showGlobalToast(@js( __("app.schedule_template_saved") ), 'success');
                     this.showSaveModal = false;
                     this.templateName = '';
                     this.includeResponsible = false;
                     this.customTemplates.push(data.template);
                 } else {
-                    showGlobalToast(data.message || '{{ __("app.schedule_error") }}', 'error');
+                    showGlobalToast(data.message || @js( __("app.schedule_error") ), 'error');
                 }
             } catch (err) {
                 console.error('Save template error:', err);
-                showGlobalToast('{{ __("app.schedule_save_error") }}', 'error');
+                showGlobalToast(@js( __("app.schedule_save_error") ), 'error');
             }
         },
 
         async applyCustomTemplate(templateId) {
-            if (!confirm('{{ __('messages.confirm_apply_template') }}')) return;
+            if (!confirm(@js(__('messages.confirm_apply_template')))) return;
 
             try {
                 const response = await fetch(`/service-plan-templates/apply/{{ $event->id }}/${templateId}`, {
@@ -1686,19 +1686,19 @@ function planTemplatesManager() {
 
                 const data = await response.json().catch(() => ({}));
                 if (data.success) {
-                    showGlobalToast('{{ __("app.schedule_template_applied") }}', 'success');
+                    showGlobalToast(@js( __("app.schedule_template_applied") ), 'success');
                     setTimeout(() => window.location.reload(), 500);
                 } else {
-                    showGlobalToast(data.message || '{{ __("app.schedule_error") }}', 'error');
+                    showGlobalToast(data.message || @js( __("app.schedule_error") ), 'error');
                 }
             } catch (err) {
                 console.error('Apply template error:', err);
-                showGlobalToast('{{ __("app.schedule_apply_error") }}', 'error');
+                showGlobalToast(@js( __("app.schedule_apply_error") ), 'error');
             }
         },
 
         async deleteTemplate(templateId) {
-            if (!confirm('{{ __('messages.confirm_delete_template') }}')) return;
+            if (!confirm(@js(__('messages.confirm_delete_template')))) return;
 
             try {
                 const response = await fetch(`/service-plan-templates/${templateId}`, {
@@ -1711,14 +1711,14 @@ function planTemplatesManager() {
 
                 const data = await response.json().catch(() => ({}));
                 if (data.success) {
-                    showGlobalToast('{{ __("app.schedule_template_deleted") }}', 'success');
+                    showGlobalToast(@js( __("app.schedule_template_deleted") ), 'success');
                     this.customTemplates = this.customTemplates.filter(t => t.id !== templateId);
                 } else {
-                    showGlobalToast(data.message || '{{ __("app.schedule_error") }}', 'error');
+                    showGlobalToast(data.message || @js( __("app.schedule_error") ), 'error');
                 }
             } catch (err) {
                 console.error('Delete template error:', err);
-                showGlobalToast('{{ __("app.schedule_delete_error") }}', 'error');
+                showGlobalToast(@js( __("app.schedule_delete_error") ), 'error');
             }
         }
     };
@@ -1739,15 +1739,15 @@ async function updateField(itemId, field, value) {
         });
 
         if (response.ok) {
-            showGlobalToast('{{ __("app.schedule_saved_toast") }}', 'success');
+            showGlobalToast(@js( __("app.schedule_saved_toast") ), 'success');
             return true;
         } else {
-            showGlobalToast('{{ __("app.schedule_save_error") }}', 'error');
+            showGlobalToast(@js( __("app.schedule_save_error") ), 'error');
             return false;
         }
     } catch (err) {
         console.error('Update error:', err);
-        showGlobalToast('{{ __("app.schedule_connection_error") }}', 'error');
+        showGlobalToast(@js( __("app.schedule_connection_error") ), 'error');
         return false;
     }
 }
@@ -1855,15 +1855,15 @@ async function askInTelegram(itemId, personName, personId = null) {
         const data = await response.json().catch(() => ({}));
 
         if (data.success) {
-            showGlobalToast('{{ __("app.schedule_request_sent") }}: ' + personName, 'success');
+            showGlobalToast(@js(__("app.schedule_request_sent") ) + ': ' + personName, 'success');
             return true;
         } else {
-            showGlobalToast(data.message || '{{ __("app.schedule_send_error") }}', 'error');
+            showGlobalToast(data.message || @js( __("app.schedule_send_error") ), 'error');
             return false;
         }
     } catch (err) {
         console.error('Telegram error:', err);
-        showGlobalToast('{{ __("app.schedule_send_error") }}', 'error');
+        showGlobalToast(@js( __("app.schedule_send_error") ), 'error');
         return false;
     }
 }
@@ -1985,14 +1985,14 @@ function planEditor() {
                         // Clear form
                         this.newItem = { start_time: '', title: '', responsible_names: '', notes: '', song_id: null };
                         this.newResponsible = { open: false, search: '', people: [] };
-                        showGlobalToast('{{ __("app.schedule_item_added") }}', 'success');
+                        showGlobalToast(@js( __("app.schedule_item_added") ), 'success');
                     }
                 } else {
-                    this.showMessage('{{ __("app.schedule_add_error") }}', 'error');
+                    this.showMessage(@js( __("app.schedule_add_error") ), 'error');
                 }
             } catch (err) {
                 console.error('Add error:', err);
-                this.showMessage('{{ __("app.schedule_connection_error") }}', 'error');
+                this.showMessage(@js( __("app.schedule_connection_error") ), 'error');
             }
         },
 
@@ -2002,7 +2002,7 @@ function planEditor() {
         },
 
         async deleteItem(id) {
-            if (!confirm('{{ __('messages.confirm_delete_plan_item') }}')) return;
+            if (!confirm(@js(__('messages.confirm_delete_plan_item')))) return;
 
             try {
                 const response = await fetch(`{{ url('events/' . $event->id . '/plan') }}/${id}`, {
@@ -2019,23 +2019,23 @@ function planEditor() {
                     const row = document.querySelector(`tr[data-id="${id}"]`);
                     if (row) {
                         row.remove();
-                        showGlobalToast('{{ __("app.schedule_item_deleted") }}', 'success');
+                        showGlobalToast(@js( __("app.schedule_item_deleted") ), 'success');
                     }
                     // Check if table is empty
                     const tbody = document.querySelector('table tbody');
                     if (tbody && tbody.children.length === 0) {
                         tbody.innerHTML = `<tr id="empty-row">
                             <td colspan="6" class="px-4 py-8 text-center text-gray-400 text-sm">
-                                {{ __("app.schedule_start_adding") }}
+                                ' + @js(__("app.schedule_start_adding") ) + '
                             </td>
                         </tr>`;
                     }
                 } else {
-                    this.showMessage('{{ __("app.schedule_delete_error") }}', 'error');
+                    this.showMessage(@js( __("app.schedule_delete_error") ), 'error');
                 }
             } catch (err) {
                 console.error('Delete error:', err);
-                this.showMessage('{{ __("app.schedule_connection_error") }}', 'error');
+                this.showMessage(@js( __("app.schedule_connection_error") ), 'error');
             }
         },
 
@@ -2120,7 +2120,7 @@ window.insertPlanRow = function(item) {
                               @keydown.arrow-down.prevent="if(showSongs) songIndex = Math.min(songIndex + 1, filteredSongs().length - 1)"
                               @keydown.arrow-up.prevent="if(showSongs) songIndex = Math.max(songIndex - 1, 0)"
                               @keydown.enter.prevent="if(showSongs && filteredSongs().length) { insertSongLink(filteredSongs()[songIndex]); } else { saveTitle(); editing = false; }"
-                              placeholder="{{ __("app.schedule_text_song_placeholder") }}"
+                              placeholder=@js( __("app.schedule_text_song_placeholder") )
                               rows="1"
                               class="w-full px-1 py-1 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-700 border border-primary-300 focus:ring-1 focus:ring-primary-500 rounded resize-none break-words"
                               style="word-wrap: break-word; overflow-wrap: break-word;"></textarea>
@@ -2128,7 +2128,7 @@ window.insertPlanRow = function(item) {
                          class="absolute left-0 right-0 top-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto">
                         <template x-if="SONGS_DATA.length === 0">
                             <div class="px-3 py-3 text-center text-gray-500 dark:text-gray-400 text-sm">
-                                {{ __("app.schedule_worship_no_songs") }}
+                                ' + @js(__("app.schedule_worship_no_songs") ) + '
                             </div>
                         </template>
                         <template x-for="(song, index) in filteredSongs()" :key="song.id">
@@ -2162,12 +2162,12 @@ window.insertPlanRow = function(item) {
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                         </svg>
-                        <span x-show="people.length === 0">{{ __("app.schedule_add") }}</span>
+                        <span x-show="people.length === 0">' + @js(__("app.schedule_add") ) + '</span>
                     </button>
                     <div x-show="open" x-cloak @click.outside="open = false"
                          class="absolute z-50 left-0 mt-1 w-48 sm:w-56 max-w-[calc(100vw-2rem)] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
                         <div class="p-2 border-b border-gray-200 dark:border-gray-700">
-                            <input type="text" x-model="search" placeholder="{{ __("app.schedule_search") }}"
+                            <input type="text" x-model="search" placeholder=@js( __("app.schedule_search") )
                                    class="w-full px-2 py-1 text-sm border border-gray-200 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                         </div>
                         <div class="max-h-48 overflow-y-auto">
@@ -2184,7 +2184,7 @@ window.insertPlanRow = function(item) {
             </div>
         </td>
         <td class="px-3 py-3 border-r border-gray-200 dark:border-gray-700 align-top">
-            <textarea placeholder="{{ __("app.schedule_notes_placeholder") }}"
+            <textarea placeholder=@js( __("app.schedule_notes_placeholder") )
                       onchange="updateField(${item.id}, 'notes', this.value)"
                       rows="1"
                       class="w-full px-1 py-1 text-sm text-gray-500 dark:text-gray-400 bg-transparent border-0 focus:ring-1 focus:ring-primary-500 rounded resize-none break-words"
@@ -2195,7 +2195,7 @@ window.insertPlanRow = function(item) {
             <button type="button"
                     onclick="window.planEditorDeleteItem(${item.id})"
                     class="p-1 text-gray-400 hover:text-red-500 transition-colors"
-                    title="{{ __("app.schedule_delete_item") }}">
+                    title=@js( __("app.schedule_delete_item") )>
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
@@ -2215,7 +2215,7 @@ window.insertPlanRow = function(item) {
 
 // Global delete function for dynamically added rows
 window.planEditorDeleteItem = async function(id) {
-    if (!confirm('{{ __('messages.confirm_delete_plan_item') }}')) return;
+    if (!confirm(@js(__('messages.confirm_delete_plan_item')))) return;
 
     try {
         const response = await fetch(`{{ url('events/' . $event->id . '/plan') }}/${id}`, {
@@ -2231,22 +2231,22 @@ window.planEditorDeleteItem = async function(id) {
             const row = document.querySelector(`tr[data-id="${id}"]`);
             if (row) {
                 row.remove();
-                showGlobalToast('{{ __("app.schedule_item_deleted") }}', 'success');
+                showGlobalToast(@js( __("app.schedule_item_deleted") ), 'success');
             }
             const tbody = document.querySelector('table tbody');
             if (tbody && tbody.children.length === 0) {
                 tbody.innerHTML = `<tr id="empty-row">
                     <td colspan="6" class="px-4 py-8 text-center text-gray-400 text-sm">
-                        {{ __("app.schedule_start_adding") }}
+                        ' + @js(__("app.schedule_start_adding") ) + '
                     </td>
                 </tr>`;
             }
         } else {
-            showGlobalToast('{{ __("app.schedule_delete_error") }}', 'error');
+            showGlobalToast(@js( __("app.schedule_delete_error") ), 'error');
         }
     } catch (err) {
         console.error('Delete error:', err);
-        showGlobalToast('{{ __("app.schedule_connection_error") }}', 'error');
+        showGlobalToast(@js( __("app.schedule_connection_error") ), 'error');
     }
 };
 
@@ -2287,7 +2287,7 @@ function servicePlanManager() {
                 if (!response.ok) {
                     const text = await response.text();
                     console.error('Error:', response.status, text);
-                    showGlobalToast('{{ __("app.schedule_error_status") }}: ' + response.status, 'error');
+                    showGlobalToast(@js(__("app.schedule_error_status") ) + ': ' + response.status, 'error');
                     return;
                 }
 
@@ -2302,11 +2302,11 @@ function servicePlanManager() {
                         responsible_names: '',
                         song_id: null
                     };
-                    showGlobalToast('{{ __("app.schedule_item_added") }}', 'success');
+                    showGlobalToast(@js( __("app.schedule_item_added") ), 'success');
                 }
             } catch (err) {
                 console.error('Fetch error:', err);
-                showGlobalToast('{{ __("app.schedule_connection_error") }}', 'error');
+                showGlobalToast(@js( __("app.schedule_connection_error") ), 'error');
             }
         },
 
@@ -2332,7 +2332,7 @@ function servicePlanManager() {
                 }
             } catch (err) {
                 console.error(err);
-                alert('{{ __("app.schedule_error_alert") }}');
+                alert(@js( __("app.schedule_error_alert") ));
             }
         },
 
@@ -2352,7 +2352,7 @@ function servicePlanManager() {
                 });
 
                 if (!response.ok) {
-                    alert('{{ __("app.schedule_error_status") }}: ' + response.status);
+                    alert(@js(__("app.schedule_error_status") ) + ': ' + response.status);
                     return;
                 }
 
@@ -2363,7 +2363,7 @@ function servicePlanManager() {
                 }
             } catch (err) {
                 console.error(err);
-                alert('{{ __("app.schedule_error_parsing") }}');
+                alert(@js( __("app.schedule_error_parsing") ));
             }
         }
     };
@@ -2391,13 +2391,13 @@ async function sendTelegramNotify(itemId, button) {
             button.innerHTML = '<svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>';
             setTimeout(() => { button.innerHTML = originalContent; button.disabled = false; }, 2000);
         } else {
-            alert(data.message || '{{ __("app.schedule_error_alert") }}');
+            alert(data.message || @js( __("app.schedule_error_alert") ));
             button.innerHTML = originalContent;
             button.disabled = false;
         }
     } catch (err) {
         console.error(err);
-        alert('{{ __("app.schedule_send_error") }}');
+        alert(@js( __("app.schedule_send_error") ));
         button.innerHTML = originalContent;
         button.disabled = false;
     }
@@ -2475,7 +2475,7 @@ async function sendTelegramNotify(itemId, button) {
             if (data.new_responses && data.new_responses.length > 0) {
                 data.new_responses.forEach(resp => {
                     const emoji = resp.status === 'confirmed' ? '✅' : '❌';
-                    const action = resp.status === 'confirmed' ? '{{ __("app.schedule_confirmed_action") }}' : '{{ __("app.schedule_declined_action") }}';
+                    const action = resp.status === 'confirmed' ? @js( __("app.schedule_confirmed_action") ) : @js( __("app.schedule_declined_action") );
                     showToast(`${emoji} ${resp.person_name} ${action}: ${resp.name}`, resp.status === 'confirmed' ? 'success' : 'error');
                 });
 
@@ -2600,13 +2600,13 @@ function reminderManager() {
 
                 const data = await response.json().catch(() => ({}));
                 if (data.success) {
-                    showGlobalToast('{{ __("app.schedule_reminders_saved") }}', 'success');
+                    showGlobalToast(@js( __("app.schedule_reminders_saved") ), 'success');
                 } else {
-                    showGlobalToast(data.message || '{{ __("app.schedule_error") }}', 'error');
+                    showGlobalToast(data.message || @js( __("app.schedule_error") ), 'error');
                 }
             } catch (err) {
                 console.error('Save reminders error:', err);
-                showGlobalToast('{{ __("app.schedule_save_error") }}', 'error');
+                showGlobalToast(@js( __("app.schedule_save_error") ), 'error');
             } finally {
                 this.saving = false;
             }
@@ -2677,13 +2677,13 @@ function initPlanSortable() {
 
                 const data = await response.json().catch(() => ({}));
                 if (data.success || response.ok) {
-                    showGlobalToast('{{ __("app.schedule_order_updated") }}', 'success');
+                    showGlobalToast(@js( __("app.schedule_order_updated") ), 'success');
                 } else {
-                    showGlobalToast(data.message || '{{ __("app.schedule_order_error") }}', 'error');
+                    showGlobalToast(data.message || @js( __("app.schedule_order_error") ), 'error');
                 }
             } catch (err) {
                 console.error('Reorder error:', err);
-                showGlobalToast('{{ __("app.schedule_order_error") }}', 'error');
+                showGlobalToast(@js( __("app.schedule_order_error") ), 'error');
             }
         }
     });

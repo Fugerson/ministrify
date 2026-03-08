@@ -30,7 +30,7 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                 </svg>
-                <span x-text="editMode ? '{{ __('app.editing') }}' : '{{ __('app.edit_dashboard') }}'"></span>
+                <span x-text="editMode ? @js( __('app.editing') ) : @js( __('app.edit_dashboard') )"></span>
             </button>
         </div>
         @endadmin
@@ -145,7 +145,7 @@
                                     <span class="text-[10px]">2/3</span>
                                 </button>
                                 @endif
-                                <button @click="changeWidth('{{ $widget['id'] }}', 12)" class="w-7 h-7 rounded-md text-xs font-bold transition-colors" :class="getWidgetCols('{{ $widget['id'] }}') === 12 ? 'bg-primary-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-500 border border-gray-200 dark:border-gray-700 hover:bg-gray-50'" title="{{ __('app.full_width') }}">
+                                <button @click="changeWidth('{{ $widget['id'] }}', 12)" class="w-7 h-7 rounded-md text-xs font-bold transition-colors" :class="getWidgetCols('{{ $widget['id'] }}') === 12 ? 'bg-primary-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-500 border border-gray-200 dark:border-gray-700 hover:bg-gray-50'" title=@js( __('app.full_width') )>
                                     <span class="text-[10px]">Full</span>
                                 </button>
 
@@ -344,14 +344,14 @@ function dashboardBuilder() {
                     this.originalWidgets = JSON.parse(JSON.stringify(this.widgets));
                     this.editMode = false;
                     this.destroySortable();
-                    if (window.showGlobalToast) showGlobalToast('{{ __('app.dashboard_saved') }}', 'success');
+                    if (window.showGlobalToast) showGlobalToast(@js( __('app.dashboard_saved') ), 'success');
                 } else {
                     const err = await response.json().catch(() => ({}));
-                    alert('{{ __('app.save_error_prefix') }} ' + (err.message || '{{ __('app.unknown_error') }}'));
+                    alert(@js(__('app.save_error_prefix')) + ' ' + (err.message || @js(__('app.unknown_error'))));
                 }
             } catch (e) {
                 console.error('Save failed:', e);
-                alert('{{ __('app.network_save_error') }}');
+                alert(@js( __('app.network_save_error') ));
             } finally {
                 this.saving = false;
             }

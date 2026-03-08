@@ -352,7 +352,7 @@ function personEditForm() {
                     body: formData,
                 });
                 if (response.status === 413) {
-                    showToast('error', '{{ __("app.file_too_large_2mb") }}');
+                    showToast('error', @js( __("app.file_too_large_2mb") ));
                     this.saving = false;
                     return;
                 }
@@ -360,16 +360,16 @@ function personEditForm() {
                 if (!response.ok) {
                     if (response.status === 422 && data.errors) {
                         this.errors = data.errors;
-                        showToast('error', '{{ __("app.form_check_error") }}');
+                        showToast('error', @js( __("app.form_check_error") ));
                     } else {
-                        showToast('error', data.message || '{{ __("app.save_error") }}');
+                        showToast('error', data.message || @js( __("app.save_error") ));
                     }
                     this.saving = false;
                     return;
                 }
-                showToast('success', data.message || '{{ __("app.saved_msg") }}');
+                showToast('success', data.message || @js( __("app.saved_msg") ));
             } catch (e) {
-                showToast('error', "{{ __('app.server_error') }}");
+                showToast('error', @js( __('app.server_error') ));
             }
             this.saving = false;
         }

@@ -163,7 +163,7 @@
                                 <div class="flex gap-1">
                                     <button type="button" x-data="{ active: {{ $campaign->is_active ? 'true' : 'false' }} }"
                                             @click="ajaxAction('{{ route('donations.campaigns.toggle', $campaign) }}', 'POST').then(() => { active = !active; })"
-                                            class="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700" :title="active ? '{{ __('app.donations_pause') }}' : '{{ __('app.donations_activate') }}'">
+                                            class="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700" :title="active ? @js( __('app.donations_pause') ) : @js( __('app.donations_activate') )">
                                         <svg x-show="active" class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                         </svg>
@@ -172,7 +172,7 @@
                                         </svg>
                                     </button>
                                     <button type="button"
-                                            @click="ajaxDelete('{{ route('donations.campaigns.destroy', $campaign) }}', '{{ __('app.donations_delete_campaign') }}', () => $el.closest('.border.border-gray-200').remove())"
+                                            @click="ajaxDelete('{{ route('donations.campaigns.destroy', $campaign) }}', @js( __('app.donations_delete_campaign') ), () => $el.closest('.border.border-gray-200').remove())"
                                             class="p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20">
                                         <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>

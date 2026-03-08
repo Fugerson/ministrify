@@ -220,13 +220,13 @@
             slides: 7,
             fullscreen: false,
             images: [
-                { src: '/icons/demo/Screenshot_7.jpg', label: '{{ __('landing.home') }}' },
-                { src: '/icons/demo/Screenshot_2.jpg', label: '{{ __('landing.people') }}' },
-                { src: '/icons/demo/Screenshot_5.jpg', label: '{{ __('landing.teams') }}' },
-                { src: '/icons/demo/Screenshot_4.jpg', label: '{{ __('landing.schedule') }}' },
-                { src: '/icons/demo/Screenshot_3.jpg', label: '{{ __('landing.finances') }}' },
-                { src: '/icons/demo/Screenshot_6.jpg', label: '{{ __('landing.tasks') }}' },
-                { src: '/icons/demo/Screenshot_8.jpg', label: '{{ __('landing.settings') }}' }
+                { src: '/icons/demo/Screenshot_7.jpg', label: @js( __('landing.home') ) },
+                { src: '/icons/demo/Screenshot_2.jpg', label: @js( __('landing.people') ) },
+                { src: '/icons/demo/Screenshot_5.jpg', label: @js( __('landing.teams') ) },
+                { src: '/icons/demo/Screenshot_4.jpg', label: @js( __('landing.schedule') ) },
+                { src: '/icons/demo/Screenshot_3.jpg', label: @js( __('landing.finances') ) },
+                { src: '/icons/demo/Screenshot_6.jpg', label: @js( __('landing.tasks') ) },
+                { src: '/icons/demo/Screenshot_8.jpg', label: @js( __('landing.settings') ) }
             ],
             openFullscreen(index) {
                 this.activeSlide = index;

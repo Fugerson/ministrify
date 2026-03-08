@@ -57,7 +57,7 @@ window.incomeModal = function() {
             this.modalOpen = true;
         },
         async deleteIncome() {
-            if (!confirm('{{ __('messages.confirm_delete_income') }}')) return;
+            if (!confirm(@js( __('messages.confirm_delete_income') ))) return;
             this.loading = true;
             try {
                 const response = await fetch(`/finances/incomes/${this.editId}`, {
@@ -77,10 +77,10 @@ window.incomeModal = function() {
                         setTimeout(() => Livewire.navigate(window.location.href), 600);
                     }
                 } else {
-                    showToast('error', data.message || '{{ __('app.delete_error') }}');
+                    showToast('error', data.message || @js( __('app.delete_error') ));
                 }
             } catch (e) {
-                showToast('error', '{{ __('app.connection_error') }}');
+                showToast('error', @js( __('app.connection_error') ));
             } finally {
                 this.loading = false;
             }
@@ -114,12 +114,12 @@ window.incomeModal = function() {
                     }
                 } else if (response.status === 422) {
                     this.errors = data.errors || {};
-                    showToast('error', '{{ __('app.check_form_errors') }}');
+                    showToast('error', @js( __('app.check_form_errors') ));
                 } else {
-                    showToast('error', data.message || '{{ __('app.save_error') }}');
+                    showToast('error', data.message || @js( __('app.save_error') ));
                 }
             } catch (e) {
-                showToast('error', '{{ __('app.connection_error') }}');
+                showToast('error', @js( __('app.connection_error') ));
             } finally {
                 this.loading = false;
             }
@@ -146,7 +146,7 @@ window.incomeModal = function() {
                  @click.stop>
                 <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white"
-                        x-text="isEdit ? '{{ __('app.edit_income') }}' : '{{ __('app.add_income_title') }}'"></h3>
+                        x-text="isEdit ? @js( __('app.edit_income') ) : @js( __('app.add_income_title') )"></h3>
                     <button @click="modalOpen = false" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -254,7 +254,7 @@ window.incomeModal = function() {
                             </button>
                             <button type="submit" :disabled="loading"
                                     class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-xl disabled:opacity-50 transition-colors">
-                                <span x-show="!loading" x-text="isEdit ? '{{ __('app.save_btn') }}' : '{{ __('app.add_btn') }}'"></span>
+                                <span x-show="!loading" x-text="isEdit ? @js( __('app.save_btn') ) : @js( __('app.add_btn') )"></span>
                                 <span x-show="loading" class="flex items-center justify-center gap-2">
                                     <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
                                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>

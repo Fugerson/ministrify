@@ -65,7 +65,7 @@
 function copyRecoveryCodes() {
     const codes = @json($recoveryCodes);
     navigator.clipboard.writeText(codes.join('\n')).then(() => {
-        alert('{{ __('Коди скопійовано!') }}');
+        alert(@js( __('Коди скопійовано!') ));
     });
 }
 </script>

@@ -18,7 +18,7 @@
              x-transition:enter-end="opacity-100 scale-100"
              x-on:click.stop>
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4"
-                x-text="churchItemMode === 'create' ? '{{ __('app.add_budget_item') }}' : '{{ __('app.edit_budget_item') }}'"></h3>
+                x-text="churchItemMode === 'create' ? @js( __('app.add_budget_item') ) : @js( __('app.edit_budget_item') )"></h3>
 
             <form x-on:submit.prevent="saveChurchItem()" class="space-y-4">
                 <div>
@@ -94,7 +94,7 @@
                     </button>
                     <button type="submit" :disabled="churchItemSaving"
                             class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
-                        <span x-show="!churchItemSaving" x-text="churchItemMode === 'create' ? '{{ __('ui.add') }}' : '{{ __('ui.save') }}'"></span>
+                        <span x-show="!churchItemSaving" x-text="churchItemMode === 'create' ? @js( __('ui.add') ) : @js( __('ui.save') )"></span>
                         <span x-show="churchItemSaving">Збереження...</span>
                     </button>
                 </div>

@@ -261,7 +261,7 @@
                             <button type="button"
                                     @click="navigator.clipboard.writeText('{{ route('public.church', $church->slug) }}'); copied = true; setTimeout(() => copied = false, 2000)"
                                     class="flex-shrink-0 p-1.5 rounded-lg text-gray-400 hover:text-primary-600 hover:bg-primary-50 transition-colors"
-                                    :title="copied ? '{{ __('app.copied') }}' : '{{ __('app.copy_link') }}'">
+                                    :title="copied ? @js( __('app.copied') ) : @js( __('app.copy_link') )">
                                 <svg x-show="!copied" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                                 <svg x-show="copied" x-cloak class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                             </button>
@@ -897,7 +897,7 @@
                                                     class="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white text-sm">
                                                 <option value="primary">{{ __('app.settings_primary_calendar') }}</option>
                                                 <template x-for="cal in calendars" :key="cal.id">
-                                                    <option :value="cal.id" :disabled="!cal.can_sync" x-text="cal.summary + (cal.can_sync ? '' : ' ({{ __('app.settings_read_only') }})')"></option>
+                                                    <option :value="cal.id" :disabled="!cal.can_sync" x-text="cal.summary + (cal.can_sync ? '' : ' (' + @js(__('app.settings_read_only')) + ')')"></option>
                                                 </template>
                                             </select>
                                         </div>
@@ -935,7 +935,7 @@
                                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                                             </svg>
-                                            <span x-text="mapping._syncing ? '{{ __('app.settings_syncing') }}' : '{{ __('app.settings_sync') }}'"></span>
+                                            <span x-text="mapping._syncing ? @js( __('app.settings_syncing') ) : @js( __('app.settings_sync') )"></span>
                                         </button>
                                         <span x-show="mapping._message" x-transition
                                               :class="mapping._success ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'"
@@ -967,7 +967,7 @@
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                         </svg>
-                        <span x-text="loading ? '{{ __('app.settings_syncing_all') }}' : '{{ __('app.settings_sync_all_calendars') }}'"></span>
+                        <span x-text="loading ? @js( __('app.settings_syncing_all') ) : @js( __('app.settings_sync_all_calendars') )"></span>
                     </button>
 
                     <!-- Status Message -->
@@ -1203,10 +1203,10 @@
                         })
                     });
                     const data = await res.json();
-                    mapping._message = data.message || (data.success ? '{{ __('app.settings_done') }}' : '{{ __('app.settings_error') }}');
+                    mapping._message = data.message || (data.success ? @js( __('app.settings_done') ) : @js( __('app.settings_error') ));
                     mapping._success = data.success;
                 } catch (e) {
-                    mapping._message = '{{ __('app.settings_connection_error') }}';
+                    mapping._message = @js( __('app.settings_connection_error') );
                     mapping._success = false;
                 }
                 mapping._syncing = false;
@@ -1226,10 +1226,10 @@
                         body: JSON.stringify({})
                     });
                     const data = await res.json();
-                    this.message = data.message || (data.success ? '{{ __('app.settings_sync_completed') }}' : '{{ __('app.settings_sync_error') }}');
+                    this.message = data.message || (data.success ? @js( __('app.settings_sync_completed') ) : @js( __('app.settings_sync_error') ));
                     this.success = data.success;
                 } catch (e) {
-                    this.message = '{{ __('app.settings_connection_error') }}';
+                    this.message = @js( __('app.settings_connection_error') );
                     this.success = false;
                 }
                 this.loading = false;
@@ -1244,10 +1244,10 @@
                         headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' }
                     });
                     const data = await res.json();
-                    this.rollbackMessage = data.message || '{{ __('app.settings_done') }}';
+                    this.rollbackMessage = data.message || @js( __('app.settings_done') );
                     this.rollbackSuccess = data.success;
                 } catch (e) {
-                    this.rollbackMessage = '{{ __('app.settings_connection_error') }}';
+                    this.rollbackMessage = @js( __('app.settings_connection_error') );
                     this.rollbackSuccess = false;
                 }
                 this.rollbackLoading = false;
@@ -1263,10 +1263,10 @@
                         body: JSON.stringify({ scope: 'synced' })
                     });
                     const data = await res.json();
-                    this.rollbackMessage = data.message || '{{ __('app.settings_done') }}';
+                    this.rollbackMessage = data.message || @js( __('app.settings_done') );
                     this.rollbackSuccess = data.success;
                 } catch (e) {
-                    this.rollbackMessage = '{{ __('app.settings_connection_error') }}';
+                    this.rollbackMessage = @js( __('app.settings_connection_error') );
                     this.rollbackSuccess = false;
                 }
                 this.rollbackLoading = false;
@@ -2007,7 +2007,7 @@
                                             });
                                             if (res.ok) {
                                                 const data = await res.json().catch(() => ({}));
-                                                showToast('success', data.message || '{{ __('app.saved_check') }}');
+                                                showToast('success', data.message || @js( __('app.saved_check') ));
                                                 if (roleName && badge) {
                                                     const svg = badge.querySelector('svg')?.outerHTML || '';
                                                     badge.innerHTML = roleName + ' ' + svg;
@@ -2015,11 +2015,11 @@
                                                 this.editing = false;
                                             } else {
                                                 const data = await res.json();
-                                                alert(data.message || '{{ __('app.settings_error') }}');
+                                                alert(data.message || @js( __('app.settings_error') ));
                                             }
                                         } catch (e) {
                                             console.error(e);
-                                            alert('{{ __('app.settings_save_error') }}');
+                                            alert(@js( __('app.settings_save_error') ));
                                         } finally {
                                             this.saving = false;
                                         }
@@ -2096,7 +2096,7 @@
                                                 <div>
                                                     <button x-on:click="showPersonSearch = !showPersonSearch"
                                                             class="text-xs text-blue-600 dark:text-blue-400 hover:underline">
-                                                        <span x-text="showPersonSearch ? '{{ __('app.settings_hide') }}' : '{{ __('app.settings_find_in_db') }}'"></span>
+                                                        <span x-text="showPersonSearch ? @js( __('app.settings_hide') ) : @js( __('app.settings_find_in_db') )"></span>
                                                     </button>
                                                     <template x-if="showPersonSearch">
                                                         <div class="mt-1 relative">
@@ -2692,14 +2692,14 @@ function permissionsManager() {
                 if (response.ok) {
                     this.isDirty = false;
                     if (window.showGlobalToast) {
-                        showGlobalToast('{{ __('app.settings_permissions_saved') }}', 'success');
+                        showGlobalToast(@js( __('app.settings_permissions_saved') ), 'success');
                     }
                 } else {
                     throw new Error('Failed to save');
                 }
             } catch (error) {
                 if (window.showGlobalToast) {
-                    showGlobalToast('{{ __('app.settings_save_error') }}', 'error');
+                    showGlobalToast(@js( __('app.settings_save_error') ), 'error');
                 }
             }
 
@@ -2707,7 +2707,7 @@ function permissionsManager() {
         },
 
         async resetToDefaults() {
-            const roleName = this.roles[this.currentRoleId]?.name || '{{ __('app.settings_this_role') }}';
+            const roleName = this.roles[this.currentRoleId]?.name || @js( __('app.settings_this_role') );
             if (!confirm({{ Js::from(__('messages.confirm_reset_role_permissions')) }}.replace(':role', roleName))) {
                 return;
             }
@@ -2730,7 +2730,7 @@ function permissionsManager() {
                 }
             } catch (error) {
                 if (window.showGlobalToast) {
-                    showGlobalToast('{{ __('app.settings_reset_error') }}', 'error');
+                    showGlobalToast(@js( __('app.settings_reset_error') ), 'error');
                 }
             }
         }
@@ -2809,13 +2809,13 @@ function userOverridesManager() {
                 const data = await res.json();
                 if (res.ok) {
                     this.showModal = false;
-                    if (window.showGlobalToast) showGlobalToast('{{ __('app.settings_overrides_saved') }}', 'success');
+                    if (window.showGlobalToast) showGlobalToast(@js( __('app.settings_overrides_saved') ), 'success');
                     window.location.reload();
                 } else {
-                    if (window.showGlobalToast) showGlobalToast(data.message || '{{ __('app.settings_save_error') }}', 'error');
+                    if (window.showGlobalToast) showGlobalToast(data.message || @js( __('app.settings_save_error') ), 'error');
                 }
             } catch (e) {
-                if (window.showGlobalToast) showGlobalToast('{{ __('app.settings_save_error') }}', 'error');
+                if (window.showGlobalToast) showGlobalToast(@js( __('app.settings_save_error') ), 'error');
             } finally {
                 this.savingUser = false;
             }

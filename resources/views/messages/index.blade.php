@@ -76,7 +76,7 @@
                             <p class="font-medium text-gray-900 dark:text-white">{{ $template->name }}</p>
                             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">{{ Str::limit($template->content, 100) }}</p>
                         </div>
-                        <button @click="ajaxDelete('{{ route('messages.templates.destroy', $template) }}', '{{ __('messages.confirm_delete_short') }}', () => $el.closest('.p-4').remove())"
+                        <button @click="ajaxDelete('{{ route('messages.templates.destroy', $template) }}', @js( __('messages.confirm_delete_short') ), () => $el.closest('.p-4').remove())"
                                 class="ml-2 p-1 text-gray-400 hover:text-red-500">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
@@ -183,7 +183,7 @@ function _addTemplate(ctx, data) {
     if (safeContent.length > 100) safeContent = safeContent.substring(0, 100) + '...';
     var el = document.createElement('div');
     el.className = 'p-4';
-    el.innerHTML = '\x3Cdiv class="flex items-start justify-between">\x3Cdiv class="flex-1">\x3Cp class="font-medium text-gray-900 dark:text-white">' + safeName + '\x3C/p>\x3Cp class="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">' + safeContent + '\x3C/p>\x3C/div>\x3Cbutton onclick="ajaxDelete(\'/messages/templates/' + data.id + '\', \'{{ __("messages.confirm_delete_short") }}\', function() { this.closest(\'.p-4\').remove(); }.bind(this))" class="ml-2 p-1 text-gray-400 hover:text-red-500">\x3Csvg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">\x3Cpath stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>\x3C/svg>\x3C/button>\x3C/div>';
+    el.innerHTML = '\x3Cdiv class="flex items-start justify-between">\x3Cdiv class="flex-1">\x3Cp class="font-medium text-gray-900 dark:text-white">' + safeName + '\x3C/p>\x3Cp class="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">' + safeContent + '\x3C/p>\x3C/div>\x3Cbutton onclick="ajaxDelete(\'/messages/templates/' + data.id + '\', \' + @js(__('messages.confirm_delete_short')) + \', function() { this.closest(\'.p-4\').remove(); }.bind(this))" class="ml-2 p-1 text-gray-400 hover:text-red-500">\x3Csvg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">\x3Cpath stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>\x3C/svg>\x3C/button>\x3C/div>';
     list.appendChild(el);
 }
 </script>

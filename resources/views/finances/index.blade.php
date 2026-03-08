@@ -378,13 +378,13 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <script>
 function financesDashboard() {
-    const monthNames = ['', '{{ __('app.january') }}', '{{ __('app.february') }}', '{{ __('app.march') }}', '{{ __('app.april') }}', '{{ __('app.may') }}', '{{ __('app.june') }}', '{{ __('app.july') }}', '{{ __('app.august') }}', '{{ __('app.september') }}', '{{ __('app.october') }}', '{{ __('app.november') }}', '{{ __('app.december') }}'];
+    const monthNames = ['', @js( __('app.january') ), @js( __('app.february') ), @js( __('app.march') ), @js( __('app.april') ), @js( __('app.may') ), @js( __('app.june') ), @js( __('app.july') ), @js( __('app.august') ), @js( __('app.september') ), @js( __('app.october') ), @js( __('app.november') ), @js( __('app.december') )];
 
     return {
         selectedYear: '{{ $year }}',
         selectedMonth: '{{ $month ?? "" }}',
         chartPeriod: 'year',
-        chartTitle: '{{ __('app.chart_dynamics', ['year' => $year]) }}',
+        chartTitle: @js( __('app.chart_dynamics', ['year' => $year]) ),
         chartLoading: false,
         chartInstance: null,
 
@@ -430,9 +430,9 @@ function financesDashboard() {
         updateChartTitle(period, year, month) {
             switch(period) {
                 case 'month': this.chartTitle = monthNames[month] + ' ' + year; break;
-                case 'quarter': this.chartTitle = '{{ __('app.chart_dynamics', ['year' => '']) }}' + year; break;
-                case 'year': this.chartTitle = '{{ __('app.chart_dynamics', ['year' => '']) }}' + year; break;
-                case 'all': this.chartTitle = '{{ __('app.period_all_time') }}'; break;
+                case 'quarter': this.chartTitle = @js( __('app.chart_dynamics', ['year' => '']) ) + year; break;
+                case 'year': this.chartTitle = @js( __('app.chart_dynamics', ['year' => '']) ) + year; break;
+                case 'all': this.chartTitle = @js( __('app.period_all_time') ); break;
             }
         },
 
@@ -449,7 +449,7 @@ function financesDashboard() {
                     labels: data.labels,
                     datasets: [
                         {
-                            label: '{{ __('app.income_action') }}',
+                            label: @js( __('app.income_action') ),
                             data: data.income,
                             backgroundColor: 'rgba(34, 197, 94, 0.7)',
                             borderColor: 'rgb(34, 197, 94)',
@@ -457,7 +457,7 @@ function financesDashboard() {
                             borderRadius: 4
                         },
                         {
-                            label: '{{ __('app.expenses') }}',
+                            label: @js( __('app.expenses') ),
                             data: data.expense,
                             backgroundColor: 'rgba(239, 68, 68, 0.7)',
                             borderColor: 'rgb(239, 68, 68)',

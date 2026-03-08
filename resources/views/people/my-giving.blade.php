@@ -110,7 +110,7 @@ onPageReady(function() {
     if (!el) return;
     var old = Chart.getChart(el); if (old) old.destroy();
     const ctx = el.getContext('2d');
-    const months = ['{{ __("app.month_short_jan") }}', '{{ __("app.month_short_feb") }}', '{{ __("app.month_short_mar") }}', '{{ __("app.month_short_apr") }}', '{{ __("app.month_short_may") }}', '{{ __("app.month_short_jun") }}', '{{ __("app.month_short_jul") }}', '{{ __("app.month_short_aug") }}', '{{ __("app.month_short_sep") }}', '{{ __("app.month_short_oct") }}', '{{ __("app.month_short_nov") }}', '{{ __("app.month_short_dec") }}'];
+    const months = [@js( __("app.month_short_jan") ), @js( __("app.month_short_feb") ), @js( __("app.month_short_mar") ), @js( __("app.month_short_apr") ), @js( __("app.month_short_may") ), @js( __("app.month_short_jun") ), @js( __("app.month_short_jul") ), @js( __("app.month_short_aug") ), @js( __("app.month_short_sep") ), @js( __("app.month_short_oct") ), @js( __("app.month_short_nov") ), @js( __("app.month_short_dec") )];
     const data = @json($monthlyData);
 
     const chartData = months.map((_, i) => data[i + 1] || 0);
@@ -120,7 +120,7 @@ onPageReady(function() {
         data: {
             labels: months,
             datasets: [{
-                label: '{{ __("app.giving_chart_label") }}',
+                label: @js( __("app.giving_chart_label") ),
                 data: chartData,
                 backgroundColor: 'rgba(34, 197, 94, 0.5)',
                 borderColor: 'rgb(34, 197, 94)',

@@ -75,7 +75,7 @@
             <div class="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
                 @can('delete', $group)
                 <button type="button"
-                        @click="ajaxDelete('{{ route('groups.destroy', $group) }}', '{{ __('messages.confirm_delete_group') }}', null, '{{ route('groups.index') }}')"
+                        @click="ajaxDelete('{{ route('groups.destroy', $group) }}', @js( __('messages.confirm_delete_group') ), null, '{{ route('groups.index') }}')"
                         class="text-red-600 hover:text-red-700 text-sm font-medium">
                     {{ __('app.delete_group') }}
                 </button>
@@ -118,12 +118,12 @@ function groupEditForm() {
                 });
                 const data = await response.json().catch(() => ({}));
                 if (!response.ok) {
-                    if (response.status === 422 && data.errors) { this.errors = data.errors; showToast('error', '{{ __('app.form_check_error') }}'); }
-                    else { showToast('error', data.message || '{{ __('app.save_error') }}'); }
+                    if (response.status === 422 && data.errors) { this.errors = data.errors; showToast('error', @js( __('app.form_check_error') )); }
+                    else { showToast('error', data.message || @js( __('app.save_error') )); }
                     this.saving = false; return;
                 }
-                showToast('success', data.message || '{{ __('app.saved_msg') }}');
-            } catch (e) { showToast('error', "{{ __('app.server_error') }}"); }
+                showToast('success', data.message || @js( __('app.saved_msg') ));
+            } catch (e) { showToast('error', @js( __('app.server_error') )); }
             this.saving = false;
         }
     }

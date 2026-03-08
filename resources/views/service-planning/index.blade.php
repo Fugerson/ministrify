@@ -276,7 +276,7 @@
                                                         <div class="flex items-center gap-1 text-xs leading-tight w-full justify-center">
                                                             <span class="w-1.5 h-1.5 rounded-full flex-shrink-0"
                                                                   :class="statusDotClass(person.status)"></span>
-                                                            <span class="truncate max-w-[110px] font-medium" x-text="isMe(person) ? person.person_name + ' (' + '{{ __("app.you") }}' + ')' : person.person_name"
+                                                            <span class="truncate max-w-[110px] font-medium" x-text="isMe(person) ? person.person_name + ' (' + @js( __("app.you") ) + ')' : person.person_name"
                                                                   :class="statusTextClass(person.status)"></span>
                                                         </div>
                                                     </template>
@@ -365,7 +365,7 @@
                     <div class="flex items-center justify-between px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                         <div class="flex items-center gap-2 min-w-0">
                             <span class="w-2 h-2 rounded-full flex-shrink-0" :class="statusDotClass(person.status)"></span>
-                            <span class="text-sm text-gray-900 dark:text-white truncate" x-text="isMe(person) ? person.person_name + ' (' + '{{ __("app.you") }}' + ')' : person.person_name"></span>
+                            <span class="text-sm text-gray-900 dark:text-white truncate" x-text="isMe(person) ? person.person_name + ' (' + @js( __("app.you") ) + ')' : person.person_name"></span>
                             <span class="text-[10px] px-1.5 py-0.5 rounded-full flex-shrink-0"
                                   :class="statusBadgeClass(person.status)"
                                   x-text="statusLabel(person.status)"></span>
@@ -375,7 +375,7 @@
                             <template x-if="isLeader && person.has_telegram && person.source !== 'assignment'">
                                 <button @click.stop="notifyPerson(person)"
                                     class="p-1.5 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20"
-                                    :title="'{{ __('Надіслати в Telegram') }}'">
+                                    :title="@js( __('Надіслати в Telegram') )">
                                     <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
                                         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
                                     </svg>
@@ -385,7 +385,7 @@
                             <template x-if="isLeader || isMe(person)">
                                 <button @click.stop="isMe(person) && !isLeader ? selfUnsubscribe(person) : removePerson(person)"
                                     class="p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20"
-                                    :title="isMe(person) ? '{{ __("app.unsubscribe") }}' : '{{ __('Видалити') }}'">
+                                    :title="isMe(person) ? @js( __("app.unsubscribe") ) : @js( __('Видалити') )">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                     </svg>
@@ -689,7 +689,7 @@ function servicePlanningMatrix() {
                 this.findNearestEvent();
             } catch (e) {
                 console.error('Matrix load error:', e);
-                this.showToast('{{ __("Помилка завантаження") }}', 'error');
+                this.showToast(@js( __("Помилка завантаження") ), 'error');
             } finally {
                 this.loading = false;
             }
@@ -788,14 +788,14 @@ function servicePlanningMatrix() {
                     });
 
                     this.dropdown.persons = this.grid[mKey][rKey][eKey];
-                    this.showToast('{{ __("app.you_signed_up") }}');
+                    this.showToast(@js( __("app.you_signed_up") ));
                     setTimeout(() => { this.dropdown.open = false; }, 600);
                 } else {
-                    this.showToast(data.error || data.message || '{{ __("Помилка") }}', 'error');
+                    this.showToast(data.error || data.message || @js( __("Помилка") ), 'error');
                 }
             } catch (e) {
                 console.error('Self-signup error:', e);
-                this.showToast('{{ __("Помилка") }}', 'error');
+                this.showToast(@js( __("Помилка") ), 'error');
             } finally {
                 this.busy = false;
             }
@@ -824,14 +824,14 @@ function servicePlanningMatrix() {
                         this.grid[mKey][rKey][eKey] = this.grid[mKey][rKey][eKey].filter(p => p.id !== person.id);
                     }
                     this.dropdown.persons = this.grid[mKey]?.[rKey]?.[eKey] || [];
-                    this.showToast('{{ __("app.you_unsubscribed") }}');
+                    this.showToast(@js( __("app.you_unsubscribed") ));
                     if (this.dropdown.persons.length === 0) {
                         setTimeout(() => { this.dropdown.open = false; }, 400);
                     }
                 }
             } catch (e) {
                 console.error('Unsubscribe error:', e);
-                this.showToast('{{ __("Помилка") }}', 'error');
+                this.showToast(@js( __("Помилка") ), 'error');
             } finally {
                 this.busy = false;
             }
@@ -866,7 +866,7 @@ function servicePlanningMatrix() {
         statusDotClass(s) { return { confirmed: 'bg-green-500', pending: 'bg-amber-500', declined: 'bg-red-500', attended: 'bg-blue-500' }[s] || 'bg-gray-400'; },
         statusTextClass(s) { return { confirmed: 'text-green-700 dark:text-green-400', pending: 'text-amber-700 dark:text-amber-300', declined: 'text-red-500 dark:text-red-400 line-through', attended: 'text-blue-700 dark:text-blue-400' }[s] || 'text-gray-700 dark:text-gray-300'; },
         statusBadgeClass(s) { return { confirmed: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400', pending: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400', declined: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400', attended: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400' }[s] || 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'; },
-        statusLabel(s) { return { confirmed: '{{ __("Так") }}', pending: '{{ __("Очікує") }}', declined: '{{ __("Ні") }}', attended: '{{ __("Був") }}' }[s] || '—'; },
+        statusLabel(s) { return { confirmed: @js( __("Так") ), pending: @js( __("Очікує") ), declined: @js( __("Ні") ), attended: @js( __("Був") ) }[s] || '—'; },
 
         openCellDropdown(ministry, role, event, $event) {
             // Don't open dropdown for non-leaders on foreign teams (view-only)
@@ -947,15 +947,15 @@ function servicePlanningMatrix() {
                     });
 
                     this.dropdown.persons = this.grid[mKey][rKey][eKey];
-                    this.showToast((member.short_name || member.name) + ' — {{ __("призначено") }}');
+                    this.showToast((member.short_name || member.name) + ' — ' + @js(__("призначено") ));
                     if (this.filteredMembers().length === 0) setTimeout(() => { this.dropdown.open = false; }, 600);
                 } else {
                     const err = await resp.json().catch(() => ({}));
-                    this.showToast(err.error || err.message || '{{ __("Помилка при призначенні") }}', 'error');
+                    this.showToast(err.error || err.message || @js( __("Помилка при призначенні") ), 'error');
                 }
             } catch (e) {
                 console.error('Assign error:', e);
-                this.showToast('{{ __("Помилка при призначенні") }}', 'error');
+                this.showToast(@js( __("Помилка при призначенні") ), 'error');
             } finally { this.busy = false; }
         },
 
@@ -975,12 +975,12 @@ function servicePlanningMatrix() {
                 if (resp.ok) {
                     if (this.grid[mKey]?.[rKey]?.[eKey]) this.grid[mKey][rKey][eKey] = this.grid[mKey][rKey][eKey].filter(p => p.id !== person.id);
                     this.dropdown.persons = this.grid[mKey]?.[rKey]?.[eKey] || [];
-                    this.showToast(person.person_name + ' — {{ __("видалено") }}');
+                    this.showToast(person.person_name + ' — ' + @js(__("видалено") ));
                     if (this.dropdown.persons.length === 0) setTimeout(() => { this.dropdown.open = false; }, 400);
                 }
             } catch (e) {
                 console.error('Remove error:', e);
-                this.showToast('{{ __("Помилка") }}', 'error');
+                this.showToast(@js( __("Помилка") ), 'error');
             } finally { this.busy = false; }
         },
 
@@ -1006,10 +1006,10 @@ function servicePlanningMatrix() {
                     delete this.cellNotes[noteKey];
                 }
 
-                this.showToast('{{ __("Примітку збережено") }}');
+                this.showToast(@js( __("Примітку збережено") ));
             } catch (e) {
                 console.error('Save cell notes error:', e);
-                this.showToast('{{ __("Помилка") }}', 'error');
+                this.showToast(@js( __("Помилка") ), 'error');
             }
         },
 
@@ -1026,13 +1026,13 @@ function servicePlanningMatrix() {
                     const mKey = String(this.dropdown.ministry.id), rKey = this.getRoleKey(this.dropdown.role), eKey = String(event.id);
                     if (this.grid[mKey]?.[rKey]?.[eKey]) { const p = this.grid[mKey][rKey][eKey].find(p => p.id === person.id); if (p) p.status = 'pending'; }
                     this.dropdown.persons = [...(this.grid[mKey]?.[rKey]?.[eKey] || [])];
-                    this.showToast('{{ __("Повідомлення надіслано") }}');
+                    this.showToast(@js( __("Повідомлення надіслано") ));
                 } else {
-                    this.showToast(data.message || '{{ __("Не вдалося надіслати") }}', 'error');
+                    this.showToast(data.message || @js( __("Не вдалося надіслати") ), 'error');
                 }
             } catch (e) {
                 console.error('Notify error:', e);
-                this.showToast('{{ __("Помилка") }}', 'error');
+                this.showToast(@js( __("Помилка") ), 'error');
             }
         },
     };

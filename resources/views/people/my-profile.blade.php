@@ -180,7 +180,7 @@
                                  this.botUsername = data.bot_username;
                              }
                          } catch (e) {
-                             this.error = '{{ __('app.connection_error') }}';
+                             this.error = @js(__('app.connection_error'));
                          }
                          this.loading = false;
                      },
@@ -228,7 +228,7 @@
                     </div>
 
                     <button type="button"
-                            @click="ajaxDelete('{{ route('my-profile.telegram.unlink') }}', '{{ __('app.confirm_disconnect_telegram') }}', () => { var s = $el.closest('.rounded-2xl'); if (s) { var inner = s.querySelector('.p-6') || s.querySelector('.px-6'); if (inner) inner.innerHTML = '\x3Cdiv class=&quot;text-center py-4&quot;>\x3Cp class=&quot;text-gray-600 dark:text-gray-400&quot;>{{ __("app.connect_telegram_desc") }}\x3C/p>\x3C/div>'; } })"
+                            @click="ajaxDelete('{{ route('my-profile.telegram.unlink') }}', @js(__('app.confirm_disconnect_telegram')), () => { var s = $el.closest('.rounded-2xl'); if (s) { var inner = s.querySelector('.p-6') || s.querySelector('.px-6'); if (inner) inner.innerHTML = '\x3Cdiv class=&quot;text-center py-4&quot;>\x3Cp class=&quot;text-gray-600 dark:text-gray-400&quot;>' + @js(__('app.connect_telegram_desc')) + '\x3C/p>\x3C/div>'; } })"
                             class="text-sm text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300">
                         {{ __('app.disconnect_telegram') }}
                     </button>
@@ -282,19 +282,15 @@
 
                         <!-- Generate button -->
                         <button @click="generateCode()" :disabled="loading" type="button"
-                                class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 text-white font-medium rounded-xl transition-colors">
-                            <template x-if="loading">
-                                <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                                </svg>
-                            </template>
-                            <template x-if="!loading">
-                                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
-                                </svg>
-                            </template>
-                            <span x-text="code ? '{{ __('app.get_new_code') }}' : '{{ __('app.connect_telegram_btn') }}'">{{ __('app.connect_telegram_btn') }}</span>
+                                class="w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 text-white font-medium rounded-xl transition-colors">
+                            <svg x-show="loading" x-cloak class="animate-spin h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                            </svg>
+                            <svg x-show="!loading" class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
+                            </svg>
+                            <span x-text="code ? @js(__('app.get_new_code')) : @js(__('app.connect_telegram_btn'))">{{ __('app.connect_telegram_btn') }}</span>
                         </button>
                     </div>
                 @endif
@@ -326,7 +322,7 @@
                              const keyResponse = await fetch('/api/push/public-key');
                              const { publicKey } = await keyResponse.json();
                              if (!publicKey) {
-                                 this.error = '{{ __('app.push_not_configured') }}';
+                                 this.error = @js( __('app.push_not_configured') );
                                  return;
                              }
 
@@ -334,7 +330,7 @@
                              const permission = await Notification.requestPermission();
                              this.permission = permission;
                              if (permission !== 'granted') {
-                                 this.error = '{{ __('app.notification_denied') }}';
+                                 this.error = @js( __('app.notification_denied') );
                                  return;
                              }
 
@@ -360,11 +356,11 @@
                                  this.subscribed = true;
                              } else {
                                  const data = await response.json().catch(() => ({}));
-                                 this.error = data.error || '{{ __('app.subscription_error') }}';
+                                 this.error = data.error || @js( __('app.subscription_error') );
                              }
                          } catch (e) {
                              console.error('Subscribe error:', e);
-                             this.error = '{{ __('app.error_prefix') }}' + e.message;
+                             this.error = @js( __('app.error_prefix') ) + e.message;
                          } finally {
                              this.loading = false;
                          }
@@ -473,7 +469,7 @@
                                             <svg x-show="!loading" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
                                             </svg>
-                                            <span x-text="loading ? '{{ __('app.enabling_notifications') }}' : '{{ __('app.enable_push_btn') }}'"></span>
+                                            <span x-text="loading ? @js(__('app.enabling_notifications')) : @js(__('app.enable_push_btn'))"></span>
                                         </button>
                                     </div>
                                 </template>

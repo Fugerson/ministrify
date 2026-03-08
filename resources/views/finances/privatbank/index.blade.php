@@ -168,7 +168,7 @@
                     </button>
                 </div>
 
-                <button type="button" @click="ajaxDelete('{{ route('finances.privatbank.disconnect') }}', '{{ __('messages.confirm_disconnect_privatbank') }}', null, '{{ route('finances.privatbank.index') }}')" class="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300">
+                <button type="button" @click="ajaxDelete('{{ route('finances.privatbank.disconnect') }}', @js( __('messages.confirm_disconnect_privatbank') ), null, '{{ route('finances.privatbank.index') }}')" class="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300">
                     {{ __('app.disconnect_privatbank') }}
                 </button>
             </div>
@@ -366,18 +366,18 @@ function importModal() {
                 if (!response.ok) {
                     if (response.status === 422 && data.errors) {
                         this.errors = data.errors;
-                        showToast('error', data.message || '{{ __('app.check_form_errors') }}');
+                        showToast('error', data.message || @js( __('app.check_form_errors') ));
                     } else {
-                        showToast('error', data.message || '{{ __('app.import_error') }}');
+                        showToast('error', data.message || @js( __('app.import_error') ));
                     }
                     this.saving = false;
                     return;
                 }
-                showToast('success', data.message || '{{ __('app.status_imported') }}!');
+                showToast('success', data.message || @js(__('app.status_imported') ) + '!');
                 closeImportModal();
                 setTimeout(() => location.reload(), 600);
             } catch (e) {
-                showToast('error', '{{ __('app.connection_error_generic') }}');
+                showToast('error', @js( __('app.connection_error_generic') ));
                 this.saving = false;
             }
         }

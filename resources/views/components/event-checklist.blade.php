@@ -196,17 +196,17 @@ function checklistManager(eventId, hasChecklistInitial) {
                         this.hasChecklist = true;
                         this.showTemplates = false;
                         this.updateProgress();
-                        if (window.showGlobalToast) showGlobalToast('{{ __('Чеклист створено') }}', 'success');
+                        if (window.showGlobalToast) showGlobalToast(@js( __('Чеклист створено') ), 'success');
                     }
                 }
             } catch (err) {
                 console.error(err);
-                if (window.showGlobalToast) showGlobalToast('{{ __('Помилка створення') }}', 'error');
+                if (window.showGlobalToast) showGlobalToast(@js( __('Помилка створення') ), 'error');
             }
         },
 
         async deleteChecklist() {
-            if (!confirm('{{ __('Видалити чеклист?') }}')) return;
+            if (!confirm(@js( __('Видалити чеклист?') ))) return;
 
             try {
                 const response = await fetch(`/checklists/${this.checklistId}`, {
@@ -223,11 +223,11 @@ function checklistManager(eventId, hasChecklistInitial) {
                     this.checklistId = null;
                     this.items = [];
                     this.progress = 0;
-                    if (window.showGlobalToast) showGlobalToast('{{ __('Чеклист видалено') }}', 'success');
+                    if (window.showGlobalToast) showGlobalToast(@js( __('Чеклист видалено') ), 'success');
                 }
             } catch (err) {
                 console.error(err);
-                if (window.showGlobalToast) showGlobalToast('{{ __('Помилка видалення') }}', 'error');
+                if (window.showGlobalToast) showGlobalToast(@js( __('Помилка видалення') ), 'error');
             }
         },
 
@@ -257,7 +257,7 @@ function checklistManager(eventId, hasChecklistInitial) {
                 }
             } catch (err) {
                 console.error(err);
-                if (window.showGlobalToast) showGlobalToast('{{ __('Помилка') }}', 'error');
+                if (window.showGlobalToast) showGlobalToast(@js( __('Помилка') ), 'error');
             }
         },
 
@@ -290,12 +290,12 @@ function checklistManager(eventId, hasChecklistInitial) {
                         this.newTitle = '';
                         this.adding = false;
                         this.updateProgress();
-                        if (window.showGlobalToast) showGlobalToast('{{ __('Пункт додано') }}', 'success');
+                        if (window.showGlobalToast) showGlobalToast(@js( __('Пункт додано') ), 'success');
                     }
                 }
             } catch (err) {
                 console.error(err);
-                if (window.showGlobalToast) showGlobalToast('{{ __('Помилка додавання') }}', 'error');
+                if (window.showGlobalToast) showGlobalToast(@js( __('Помилка додавання') ), 'error');
             }
         },
 
@@ -313,11 +313,11 @@ function checklistManager(eventId, hasChecklistInitial) {
                 if (response.ok) {
                     this.items = this.items.filter(i => i.id !== item.id);
                     this.updateProgress();
-                    if (window.showGlobalToast) showGlobalToast('{{ __('Пункт видалено') }}', 'success');
+                    if (window.showGlobalToast) showGlobalToast(@js( __('Пункт видалено') ), 'success');
                 }
             } catch (err) {
                 console.error(err);
-                if (window.showGlobalToast) showGlobalToast('{{ __('Помилка видалення') }}', 'error');
+                if (window.showGlobalToast) showGlobalToast(@js( __('Помилка видалення') ), 'error');
             }
         }
     };

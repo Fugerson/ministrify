@@ -211,7 +211,7 @@
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                         </svg>
-                        <span x-text="creatingBudget ? '{{ __('app.creating') }}' : '{{ __('app.create_budget') }}'"></span>
+                        <span x-text="creatingBudget ? @js( __('app.creating') ) : @js( __('app.create_budget') )"></span>
                     </button>
                 @endif
             </div>
@@ -752,7 +752,7 @@ function budgetsPage() {
         copySaving: false,
         copyToMonth: {{ $month == 12 ? 1 : $month + 1 }},
         copyToYear: {{ $month == 12 ? $year + 1 : $year }},
-        monthNames: ['{{ __('app.finance_month_jan') }}', '{{ __('app.finance_month_feb') }}', '{{ __('app.finance_month_mar') }}', '{{ __('app.finance_month_apr') }}', '{{ __('app.finance_month_may') }}', '{{ __('app.finance_month_jun') }}', '{{ __('app.finance_month_jul') }}', '{{ __('app.finance_month_aug') }}', '{{ __('app.finance_month_sep') }}', '{{ __('app.finance_month_oct') }}', '{{ __('app.finance_month_nov') }}', '{{ __('app.finance_month_dec') }}'],
+        monthNames: [@js( __('app.finance_month_jan') ), @js( __('app.finance_month_feb') ), @js( __('app.finance_month_mar') ), @js( __('app.finance_month_apr') ), @js( __('app.finance_month_may') ), @js( __('app.finance_month_jun') ), @js( __('app.finance_month_jul') ), @js( __('app.finance_month_aug') ), @js( __('app.finance_month_sep') ), @js( __('app.finance_month_oct') ), @js( __('app.finance_month_nov') ), @js( __('app.finance_month_dec') )],
 
         updatePeriod() {
             filterStorage.save('finance_budgets', { month: Number(this.month), year: Number(this.year) });
@@ -813,16 +813,16 @@ function budgetsPage() {
                 const data = await res.json().catch(() => ({}));
                 if (res.ok && data.success) {
                     this.showAllocateModal = false;
-                    showToast('success', data.message || '{{ __('app.finance_budget_allocated_toast') }}');
+                    showToast('success', data.message || @js( __('app.finance_budget_allocated_toast') ));
                     setTimeout(() => location.reload(), 600);
                 } else if (res.status === 422 && data.errors) {
                     const msgs = Object.values(data.errors).flat();
-                    showToast('error', msgs[0] || '{{ __('app.finance_validation_error') }}');
+                    showToast('error', msgs[0] || @js( __('app.finance_validation_error') ));
                 } else {
-                    showToast('error', data.message || '{{ __('app.finance_allocation_error') }}');
+                    showToast('error', data.message || @js( __('app.finance_allocation_error') ));
                 }
             } catch (e) {
-                showToast('error', '{{ __('app.finance_allocation_error') }}');
+                showToast('error', @js( __('app.finance_allocation_error') ));
             } finally {
                 this.allocateSaving = false;
             }
@@ -849,16 +849,16 @@ function budgetsPage() {
                 const data = await res.json().catch(() => ({}));
                 if (res.ok && data.success) {
                     this.showBudgetModal = false;
-                    showToast('success', data.message || '{{ __('app.finance_saved_toast') }}');
+                    showToast('success', data.message || @js( __('app.finance_saved_toast') ));
                     setTimeout(() => location.reload(), 600);
                 } else if (res.status === 422 && data.errors) {
                     const msgs = Object.values(data.errors).flat();
-                    showToast('error', msgs[0] || '{{ __('app.finance_validation_error') }}');
+                    showToast('error', msgs[0] || @js( __('app.finance_validation_error') ));
                 } else {
-                    showToast('error', data.message || '{{ __('app.finance_save_error') }}');
+                    showToast('error', data.message || @js( __('app.finance_save_error') ));
                 }
             } catch (e) {
-                showToast('error', '{{ __('app.finance_save_error') }}');
+                showToast('error', @js( __('app.finance_save_error') ));
             } finally {
                 this.budgetSaving = false;
             }
@@ -868,7 +868,7 @@ function budgetsPage() {
             this.itemModalMode = mode;
             this.itemBudgetId = budgetId;
             this.itemEditId = mode === 'edit' ? itemData.id : null;
-            this.itemModalTitle = mode === 'create' ? '{{ __('app.finance_new_budget_item') }}' : '{{ __('app.finance_edit_budget_item') }}';
+            this.itemModalTitle = mode === 'create' ? @js( __('app.finance_new_budget_item') ) : @js( __('app.finance_edit_budget_item') );
 
             if (mode === 'edit' && itemData) {
                 this.itemForm = {
@@ -959,19 +959,19 @@ function budgetsPage() {
                     setTimeout(() => location.reload(), 600);
                 } else if (res.status === 422) {
                     const msgs = data.errors ? Object.values(data.errors).flat() : [data.message];
-                    showToast('error', msgs[0] || '{{ __('app.finance_validation_error') }}');
+                    showToast('error', msgs[0] || @js( __('app.finance_validation_error') ));
                 } else {
-                    showToast('error', data.message || '{{ __('app.finance_save_error') }}');
+                    showToast('error', data.message || @js( __('app.finance_save_error') ));
                 }
             } catch (e) {
-                showToast('error', '{{ __('app.finance_save_error') }}');
+                showToast('error', @js( __('app.finance_save_error') ));
             } finally {
                 this.itemSaving = false;
             }
         },
 
         async deleteItem(itemId, itemName) {
-            if (!confirm(`{{ __('app.finance_delete_item_confirm') }}`.replace(':name', itemName))) return;
+            if (!confirm(@js( __('app.finance_delete_item_confirm') ).replace(':name', itemName))) return;
 
             try {
                 const res = await fetch(`/finances/budgets/items/${itemId}`, {
@@ -986,10 +986,10 @@ function budgetsPage() {
                     showToast('success', data.message);
                     setTimeout(() => location.reload(), 600);
                 } else {
-                    showToast('error', data.message || '{{ __('app.finance_delete_error') }}');
+                    showToast('error', data.message || @js( __('app.finance_delete_error') ));
                 }
             } catch (e) {
-                showToast('error', '{{ __('app.finance_delete_error') }}');
+                showToast('error', @js( __('app.finance_delete_error') ));
             }
         },
 
@@ -1008,7 +1008,7 @@ function budgetsPage() {
                     this.transactionsList = data.transactions;
                 }
             } catch (e) {
-                showToast('error', '{{ __('app.finance_load_transactions_error') }}');
+                showToast('error', @js( __('app.finance_load_transactions_error') ));
             } finally {
                 this.transactionsLoading = false;
             }
@@ -1034,10 +1034,10 @@ function budgetsPage() {
                     showToast('success', data.message);
                     setTimeout(() => location.reload(), 600);
                 } else {
-                    showToast('error', data.message || '{{ __('app.finance_error_toast') }}');
+                    showToast('error', data.message || @js( __('app.finance_error_toast') ));
                 }
             } catch (e) {
-                showToast('error', '{{ __('app.finance_budget_create_error') }}');
+                showToast('error', @js( __('app.finance_budget_create_error') ));
             } finally {
                 this.creatingBudget = false;
             }
@@ -1115,19 +1115,19 @@ function budgetsPage() {
                     setTimeout(() => location.reload(), 600);
                 } else if (res.status === 422) {
                     const msgs = data.errors ? Object.values(data.errors).flat() : [data.message];
-                    showToast('error', msgs[0] || '{{ __('app.finance_validation_error') }}');
+                    showToast('error', msgs[0] || @js( __('app.finance_validation_error') ));
                 } else {
-                    showToast('error', data.message || '{{ __('app.finance_save_error') }}');
+                    showToast('error', data.message || @js( __('app.finance_save_error') ));
                 }
             } catch (e) {
-                showToast('error', '{{ __('app.finance_save_error') }}');
+                showToast('error', @js( __('app.finance_save_error') ));
             } finally {
                 this.churchItemSaving = false;
             }
         },
 
         async deleteChurchItem(itemId, itemName) {
-            if (!confirm(`{{ __('app.finance_delete_item_confirm') }}`.replace(':name', itemName))) return;
+            if (!confirm(@js( __('app.finance_delete_item_confirm') ).replace(':name', itemName))) return;
 
             try {
                 const res = await fetch(`/finances/church-budget-items/${itemId}`, {
@@ -1142,10 +1142,10 @@ function budgetsPage() {
                     showToast('success', data.message);
                     setTimeout(() => location.reload(), 600);
                 } else {
-                    showToast('error', data.message || '{{ __('app.finance_delete_error') }}');
+                    showToast('error', data.message || @js( __('app.finance_delete_error') ));
                 }
             } catch (e) {
-                showToast('error', '{{ __('app.finance_delete_error') }}');
+                showToast('error', @js( __('app.finance_delete_error') ));
             }
         },
 
@@ -1164,7 +1164,7 @@ function budgetsPage() {
                     this.churchTransList = data.transactions || [];
                 }
             } catch (e) {
-                showToast('error', '{{ __('app.finance_load_transactions_error') }}');
+                showToast('error', @js( __('app.finance_load_transactions_error') ));
             } finally {
                 this.churchTransLoading = false;
             }
@@ -1195,10 +1195,10 @@ function budgetsPage() {
                         Livewire.navigate(`{{ route('finances.budgets') }}?year=${this.copyToYear}&month=${this.copyToMonth}`);
                     }, 800);
                 } else {
-                    showToast('error', data.message || '{{ __('app.finance_copy_error') }}');
+                    showToast('error', data.message || @js( __('app.finance_copy_error') ));
                 }
             } catch (e) {
-                showToast('error', '{{ __('app.finance_copy_error') }}');
+                showToast('error', @js( __('app.finance_copy_error') ));
             } finally {
                 this.copySaving = false;
             }

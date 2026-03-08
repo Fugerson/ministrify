@@ -84,7 +84,7 @@
         <!-- Actions -->
         <div class="flex items-center justify-between">
             <button type="button"
-                    @click="ajaxDelete('{{ route('checklists.templates.destroy', $template) }}', '{{ __('messages.confirm_delete_template') }}', null, '{{ route('checklists.templates') }}')"
+                    @click="ajaxDelete('{{ route('checklists.templates.destroy', $template) }}', @js( __('messages.confirm_delete_template') ), null, '{{ route('checklists.templates') }}')"
                     class="text-red-600 dark:text-red-400 hover:text-red-700 text-sm font-medium">
                 Видалити шаблон
             </button>

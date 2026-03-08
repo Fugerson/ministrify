@@ -28,7 +28,7 @@
             if (response.ok && data.success) {
                 this.open = false;
                 if (typeof showToast === 'function') {
-                    showToast('success', data.message || '{{ __('app.deleted') }}');
+                    showToast('success', data.message || @js( __('app.deleted') ));
                 }
                 @if($redirect)
                     setTimeout(() => Livewire.navigate('{{ $redirect }}'), 500);
@@ -37,12 +37,12 @@
                 @endif
             } else {
                 if (typeof showToast === 'function') {
-                    showToast('error', data.message || '{{ __('app.delete_error') }}');
+                    showToast('error', data.message || @js( __('app.delete_error') ));
                 }
             }
         } catch (e) {
             if (typeof showToast === 'function') {
-                showToast('error', '{{ __('app.connection_error') }}');
+                showToast('error', @js( __('app.connection_error') ));
             }
         } finally {
             this.loading = false;

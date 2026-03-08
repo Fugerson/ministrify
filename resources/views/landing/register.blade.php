@@ -9,8 +9,8 @@
 {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    "name": "{{ __('landing.register_church_page') }}",
-    "description": "{{ __('landing.register_quick_access') }}",
+    "name": @js( __('landing.register_church_page') ),
+    "description": @js( __('landing.register_quick_access') ),
     "potentialAction": {
         "@type": "RegisterAction",
         "target": {

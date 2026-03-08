@@ -21,7 +21,7 @@
     </a>
     @endcan
     @can('delete', $group)
-    <button @click="ajaxDelete('{{ route('groups.destroy', $group) }}', '{{ __('messages.confirm_delete_group') }}', null, '{{ route('groups.index') }}')"
+    <button @click="ajaxDelete('{{ route('groups.destroy', $group) }}', @js(__('messages.confirm_delete_group')), null, '{{ route('groups.index') }}')"
             class="inline-flex items-center px-4 py-2 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-sm font-medium rounded-xl hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors">
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
@@ -234,7 +234,7 @@
                                                         'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40': role === 'assistant',
                                                         'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600': role === 'member'
                                                     }">
-                                                <span x-text="role === 'leader' ? '{{ __('app.leader') }}' : (role === 'assistant' ? '{{ __('app.assistant_role') }}' : '{{ __('app.member_role') }}')"></span>
+                                                <span x-text="role === 'leader' ? @js(__('app.leader')) : (role === 'assistant' ? @js(__('app.assistant_role')) : @js(__('app.member_role')))"></span>
                                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                                             </button>
                                             <div x-show="open" @click.away="open = false" x-transition x-cloak
@@ -304,7 +304,7 @@
                                 {{-- Remove button --}}
                                 @can('update', $group)
                                 @if($pivotRole !== 'leader')
-                                <button @click="ajaxDelete('{{ route('groups.members.remove', [$group, $member]) }}', '{{ __('messages.confirm_remove_member') }}', () => $el.closest('.group\\/card').remove())"
+                                <button @click="ajaxDelete('{{ route('groups.members.remove', [$group, $member]) }}', @js(__('messages.confirm_remove_member')),() => $el.closest('.group\\/card').remove())"
                                         class="shrink-0 p-1.5 text-gray-300 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 opacity-0 group-hover/card:opacity-100 transition-opacity rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                 </button>
@@ -372,7 +372,7 @@
                                                     'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300': role === 'assistant',
                                                     'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400': role === 'member'
                                                 }">
-                                            <span x-text="role === 'leader' ? '{{ __('app.leader') }}' : (role === 'assistant' ? '{{ __('app.assistant_role') }}' : '{{ __('app.member_role') }}')"></span>
+                                            <span x-text="role === 'leader' ? @js(__('app.leader')) : (role === 'assistant' ? @js(__('app.assistant_role')) : @js(__('app.member_role')))"></span>
                                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                                         </button>
                                         <div x-show="open" @click.away="open = false" x-transition x-cloak
@@ -440,7 +440,7 @@
                             {{-- Remove button --}}
                             @can('update', $group)
                             @if($pivotRole !== 'leader')
-                            <button @click="ajaxDelete('{{ route('groups.members.remove', [$group, $member]) }}', '{{ __('messages.confirm_remove_member') }}', () => $el.closest('.group\\/row').remove())"
+                            <button @click="ajaxDelete('{{ route('groups.members.remove', [$group, $member]) }}', @js(__('messages.confirm_remove_member')),() => $el.closest('.group\\/row').remove())"
                                     class="shrink-0 p-1.5 text-gray-300 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 opacity-0 group-hover/row:opacity-100 transition-opacity rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                             </button>
@@ -467,7 +467,7 @@
                             </a>
 
                             <span class="text-xs text-gray-400 dark:text-gray-500 shrink-0"
-                                  x-text="role === 'leader' ? '{{ __('app.leader') }}' : (role === 'assistant' ? '{{ __('app.assistant_role') }}' : '')"></span>
+                                  x-text="role === 'leader' ? @js(__('app.leader')) : (role === 'assistant' ? @js(__('app.assistant_role')) : '')"></span>
 
                             <span class="flex-1"></span>
 
@@ -488,7 +488,7 @@
                             {{-- Remove button --}}
                             @can('update', $group)
                             @if($pivotRole !== 'leader')
-                            <button @click="ajaxDelete('{{ route('groups.members.remove', [$group, $member]) }}', '{{ __('messages.confirm_remove_member') }}', () => $el.closest('.group\\/compact').remove())"
+                            <button @click="ajaxDelete('{{ route('groups.members.remove', [$group, $member]) }}', @js(__('messages.confirm_remove_member')),() => $el.closest('.group\\/compact').remove())"
                                     class="shrink-0 p-1 text-gray-300 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 opacity-0 group-hover/compact:opacity-100 transition-opacity">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                             </button>

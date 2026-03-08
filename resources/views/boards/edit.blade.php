@@ -54,7 +54,7 @@
                     {{ __('Архівувати') }}
                 </button>
                 <button type="button"
-                        @click="ajaxDelete('{{ route('boards.destroy', $board) }}', '{{ __('Видалити цю дошку? Всі картки будуть втрачені.') }}', null, '{{ route('boards.index') }}')"
+                        @click="ajaxDelete('{{ route('boards.destroy', $board) }}', @js( __('Видалити цю дошку? Всі картки будуть втрачені.') ), null, '{{ route('boards.index') }}')"
                         class="text-red-600 dark:text-red-400 hover:text-red-700 text-sm font-medium">
                     {{ __('Видалити') }}
                 </button>

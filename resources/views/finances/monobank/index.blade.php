@@ -103,7 +103,7 @@
                                 {{ $church->monobank_auto_sync ? __('app.disable_auto_sync') : __('app.enable_auto_sync') }}
                             </button>
                             <hr class="border-gray-200 dark:border-gray-700">
-                            <button type="button" @click="ajaxDelete('{{ route('finances.monobank.disconnect') }}', '{{ __('messages.confirm_disconnect_monobank') }}', null, '{{ route('finances.monobank.index') }}')" class="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20">
+                            <button type="button" @click="ajaxDelete('{{ route('finances.monobank.disconnect') }}', @js( __('messages.confirm_disconnect_monobank') ), null, '{{ route('finances.monobank.index') }}')" class="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20">
                                 {{ __('app.disconnect_monobank') }}
                             </button>
                         </div>
@@ -309,7 +309,7 @@
                                 <div class="space-y-2">
                                     <span class="text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase">{{ __('app.actions') }}</span>
                                     <div class="h-6 flex items-center justify-center">
-                                        <button type="button" @click="clearFilters()" x-show="hasFilters()" class="px-2 py-1 text-gray-500 hover:text-gray-700 text-xs" title="{{ __('app.reset_filters') }}">
+                                        <button type="button" @click="clearFilters()" x-show="hasFilters()" class="px-2 py-1 text-gray-500 hover:text-gray-700 text-xs" title=@js( __('app.reset_filters') )>
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                             </svg>

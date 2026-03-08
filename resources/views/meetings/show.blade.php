@@ -193,7 +193,7 @@
                                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ $item->description }}</p>
                                 @endif
                             </div>
-                            <button type="button" @click="ajaxDelete('{{ route('meetings.agenda.destroy', $item) }}', '{{ __('messages.confirm_delete_plan_item') }}', () => $el.closest('.group').remove())"
+                            <button type="button" @click="ajaxDelete('{{ route('meetings.agenda.destroy', $item) }}', @js( __('messages.confirm_delete_plan_item') ), () => $el.closest('.group').remove())"
                                     class="opacity-0 group-hover:opacity-100 transition-opacity p-1 text-gray-400 hover:text-red-500">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
@@ -307,7 +307,7 @@
                         <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">{{ $material->content }}</p>
                         @endif
                     </div>
-                    <button type="button" @click="ajaxDelete('{{ route('meetings.materials.destroy', $material) }}', '{{ __('messages.confirm_delete_material') }}', () => $el.closest('.group').remove())"
+                    <button type="button" @click="ajaxDelete('{{ route('meetings.materials.destroy', $material) }}', @js( __('messages.confirm_delete_material') ), () => $el.closest('.group').remove())"
                             class="opacity-0 group-hover:opacity-100 transition-opacity p-1 text-gray-400 hover:text-red-500">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
@@ -421,7 +421,7 @@
                             <option value="attended">{{ __('app.meeting_status_attended') }}</option>
                             <option value="absent">{{ __('app.meeting_status_absent') }}</option>
                         </select>
-                        <button type="button" @click="ajaxDelete('{{ route('meetings.attendees.destroy', $attendee) }}', '{{ __('messages.confirm_remove_member') }}', () => $el.closest('.rounded-xl').remove())"
+                        <button type="button" @click="ajaxDelete('{{ route('meetings.attendees.destroy', $attendee) }}', @js( __('messages.confirm_remove_member') ), () => $el.closest('.rounded-xl').remove())"
                                 class="p-1 text-gray-400 hover:text-red-500">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>

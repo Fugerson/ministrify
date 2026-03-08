@@ -62,7 +62,7 @@
         </a>
         @can('delete', $attendance)
         <button type="button"
-                @click="ajaxDelete('{{ route('attendance.destroy', $attendance) }}', '{{ __('app.attendance_confirm_delete') }}', null, '{{ route('attendance.index') }}')"
+                @click="ajaxDelete('{{ route('attendance.destroy', $attendance) }}', @js( __('app.attendance_confirm_delete') ), null, '{{ route('attendance.index') }}')"
                 class="text-red-600 hover:text-red-800">
             {{ __('app.delete') }}
         </button>

@@ -90,7 +90,7 @@
 
             <div class="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
                 <button type="button"
-                        @click="ajaxDelete('{{ route('meetings.destroy', [$ministry, $meeting]) }}', '{{ __('messages.confirm_delete_meeting') }}', null, '{{ route('meetings.index', $ministry) }}')"
+                        @click="ajaxDelete('{{ route('meetings.destroy', [$ministry, $meeting]) }}', @js( __('messages.confirm_delete_meeting') ), null, '{{ route('meetings.index', $ministry) }}')"
                         class="text-red-600 hover:text-red-700 text-sm font-medium">
                     {{ __('app.meeting_delete') }}
                 </button>

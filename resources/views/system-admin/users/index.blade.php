@@ -143,7 +143,7 @@
                                         </button>
                                     </form>
                                     <form method="POST" action="{{ route('system.users.forceDelete', $user->id) }}"
-                                          onsubmit="return confirm('{{ __('messages.confirm_delete_user_warning', ['name' => $user->name]) }}')" class="inline">
+                                          onsubmit="return confirm(@js( __('messages.confirm_delete_user_warning', ['name' => $user->name]) ))" class="inline">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="p-2 text-red-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg" title="Видалити назавжди">
@@ -171,7 +171,7 @@
                                     </a>
                                     @if($user->id !== auth()->id())
                                     <form method="POST" action="{{ route('system.users.destroy', $user) }}"
-                                          onsubmit="return confirm('{{ __('messages.confirm_delete_user', ['name' => $user->name]) }}')" class="inline">
+                                          onsubmit="return confirm(@js( __('messages.confirm_delete_user', ['name' => $user->name]) ))" class="inline">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="Видалити">
@@ -230,7 +230,7 @@
                             </button>
                         </form>
                         <form method="POST" action="{{ route('system.users.forceDelete', $user->id) }}"
-                              onsubmit="return confirm('{{ __('messages.confirm_delete_user_warning', ['name' => $user->name]) }}')" class="inline">
+                              onsubmit="return confirm(@js( __('messages.confirm_delete_user_warning', ['name' => $user->name]) ))" class="inline">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="p-2 text-red-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg" title="Видалити назавжди">
@@ -258,7 +258,7 @@
                         </a>
                         @if($user->id !== auth()->id())
                         <form method="POST" action="{{ route('system.users.destroy', $user) }}"
-                              onsubmit="return confirm('{{ __('messages.confirm_delete_user', ['name' => $user->name]) }}')" class="inline">
+                              onsubmit="return confirm(@js( __('messages.confirm_delete_user', ['name' => $user->name]) ))" class="inline">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded-lg" title="Видалити">

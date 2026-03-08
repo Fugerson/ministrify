@@ -349,7 +349,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
                         </svg>
                     </template>
-                    <span x-text="darkMode ? '{{ __('Світла тема') }}' : '{{ __('Темна тема') }}'"></span>
+                    <span x-text="darkMode ? @js(__('Світла тема')) : @js(__('Темна тема'))"></span>
                 </button>
             </aside>
 
@@ -390,7 +390,7 @@
                         <button @click="saveAndNext()"
                                 :disabled="saving"
                                 class="btn-primary flex items-center gap-2 px-8 py-3 text-white rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
-                            <span x-show="!saving" x-text="isLastStep() ? '{{ __('Завершити') }}' : '{{ __('Продовжити') }}'"></span>
+                            <span x-show="!saving" x-text="isLastStep() ? @js(__('Завершити')) : @js(__('Продовжити'))"></span>
                             <span x-show="saving" class="flex items-center gap-2">
                                 <svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -574,8 +574,8 @@
                         if (!response.ok) {
                             const errorData = await response.json().catch(() => ({}));
                             this.serverError = {
-                                title: '{{ __('Помилка валідації') }}',
-                                message: errorData.message || '{{ __('Перевірте правильність даних') }}',
+                                title: @js(__('Помилка валідації')),
+                                message: errorData.message || @js(__('Перевірте правильність даних')),
                                 errors: errorData.errors ? Object.values(errorData.errors).flat() : null
                             };
                             setTimeout(() => this.serverError = null, 8000);
@@ -594,13 +594,13 @@
                             this.progress = data.progress || this.progress;
 
                             if (data.completed) {
-                                this.successMessage = '{{ __('Налаштування завершено!') }}';
+                                this.successMessage = @js(__('Налаштування завершено!'));
                                 this.celebrate();
                                 setTimeout(() => {
                                     window.location.href = data.redirect;
                                 }, 2500);
                             } else if (data.nextStep) {
-                                this.successMessage = '{{ __('Збережено') }}';
+                                this.successMessage = @js(__('Збережено'));
                                 setTimeout(() => this.successMessage = null, 1500);
                                 this.currentStep = data.nextStep;
                                 await this.loadStepContent();
@@ -608,8 +608,8 @@
                         }
                     } catch (error) {
                         this.serverError = {
-                            title: '{{ __('Помилка з\'єднання') }}',
-                            message: '{{ __('Перевірте інтернет-з\'єднання') }}'
+                            title: @js(__('Помилка з\'єднання')),
+                            message: @js(__('Перевірте інтернет-з\'єднання'))
                         };
                         setTimeout(() => this.serverError = null, 5000);
                     }

@@ -69,7 +69,7 @@
                         {{ __('app.cancel') }}
                     </a>
                     <button type="submit" :disabled="saving" class="px-5 py-2.5 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 transition-colors disabled:opacity-50">
-                        <span x-text="saving ? '{{ __('app.saving') }}' : '{{ __('app.save') }}'"></span>
+                        <span x-text="saving ? @js(__('app.saving')) : @js(__('app.save'))"></span>
                     </button>
                 </div>
             </div>
@@ -79,7 +79,7 @@
         @can('update', $group)
         <div class="mt-4 text-center">
             <button type="button"
-                    @click="ajaxDelete('{{ route('groups.attendance.destroy', [$group, $attendance]) }}', '{{ __('messages.confirm_delete_record') }}', null, '{{ route('groups.show', $group) }}')"
+                    @click="ajaxDelete('{{ route('groups.attendance.destroy', [$group, $attendance]) }}', @js(__('messages.confirm_delete_record')), null, '{{ route('groups.show', $group) }}')"
                     class="text-red-600 hover:text-red-700 text-sm font-medium hover:underline">
                 {{ __('app.group_delete_record') }}
             </button>

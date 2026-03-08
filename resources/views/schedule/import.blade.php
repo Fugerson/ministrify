@@ -89,7 +89,7 @@
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
                     </svg>
-                    <span x-text="saving ? '{{ __("app.schedule_import_importing") }}' : '{{ __("app.schedule_import_btn") }}'"></span>
+                    <span x-text="saving ? @js( __("app.schedule_import_importing") ) : @js( __("app.schedule_import_btn") )"></span>
                 </button>
             </div>
         </form>
@@ -101,7 +101,7 @@
         const fileName = e.target.files[0]?.name;
         const fileNameEl = document.getElementById('file-name');
         if (fileName) {
-            fileNameEl.textContent = '{{ __("app.schedule_import_selected") }} ' + fileName;
+            fileNameEl.textContent = @js(__("app.schedule_import_selected") ) + ' ' + fileName;
             fileNameEl.classList.remove('hidden');
         } else {
             fileNameEl.classList.add('hidden');

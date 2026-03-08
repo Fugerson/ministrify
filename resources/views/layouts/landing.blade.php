@@ -246,7 +246,7 @@
         "applicationCategory": "BusinessApplication",
         "applicationSubCategory": "Church Management Software",
         "operatingSystem": "Web, iOS, Android",
-        "description": "{{ __('landing.schema_description') }}",
+        "description": @js( __('landing.schema_description') ),
         "url": "{{ url('/') }}",
         "inLanguage": "{{ app()->getLocale() }}",
         "author": {
@@ -258,7 +258,7 @@
         "offers": {
             "@type": "Offer",
             "availability": "https://schema.org/InStock",
-            "description": "{{ __('landing.schema_available') }}"
+            "description": @js( __('landing.schema_available') )
         },
         "aggregateRating": {
             "@type": "AggregateRating",
@@ -267,7 +267,7 @@
             "bestRating": "5",
             "worstRating": "1"
         },
-        "featureList": "{{ __('landing.schema_features') }}"
+        "featureList": @js( __('landing.schema_features') )
     }
     </script>
     <script type="application/ld+json">
@@ -277,7 +277,7 @@
         "name": "Ministrify",
         "url": "{{ url('/') }}",
         "logo": "{{ asset('icon-512x512.png') }}",
-        "description": "{{ __('landing.schema_org_description') }}",
+        "description": @js( __('landing.schema_org_description') ),
         "foundingDate": "2024",
         "foundingLocation": "Ukraine",
         "areaServed": {

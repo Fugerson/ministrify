@@ -79,10 +79,10 @@ window.exchangeModal = function() {
                     showToast('success', data.message);
                     setTimeout(() => Livewire.navigate(window.location.href), 500);
                 } else {
-                    showToast('error', data.message || '{{ __('app.save_error') }}');
+                    showToast('error', data.message || @js( __('app.save_error') ));
                 }
             } catch (e) {
-                showToast('error', '{{ __('app.connection_error') }}');
+                showToast('error', @js( __('app.connection_error') ));
             } finally {
                 this.loading = false;
             }

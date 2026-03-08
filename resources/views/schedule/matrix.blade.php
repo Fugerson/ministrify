@@ -266,7 +266,7 @@
                             <template x-if="person.has_telegram && person.source !== 'assignment'">
                                 <button @click.stop="notifyPerson(person)"
                                     class="p-1.5 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20"
-                                    :title="'{{ __("app.schedule_send_telegram") }}'">
+                                    :title="@js( __("app.schedule_send_telegram") )">
                                     <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
                                         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
                                     </svg>
@@ -274,7 +274,7 @@
                             </template>
                             <button @click.stop="removePerson(person)"
                                 class="p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20"
-                                :title="'{{ __("app.schedule_delete") }}'">
+                                :title="@js( __("app.schedule_delete") )">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                 </svg>
@@ -395,7 +395,7 @@ function matrixView() {
         },
 
         updatePeriodLabel() {
-            const months = '{{ __("app.schedule_months_short") }}'.split(',');
+            const months = @js( __("app.schedule_months_short") ).split(',');
             const end = new Date(this.startDate);
             end.setDate(end.getDate() + this.weeks * 7 - 1);
 
@@ -471,7 +471,7 @@ function matrixView() {
                 this.findNearestEvent();
             } catch (e) {
                 console.error('Matrix load error:', e);
-                this.showToast('{{ __("app.schedule_load_error") }}', 'error');
+                this.showToast(@js( __("app.schedule_load_error") ), 'error');
             } finally {
                 this.loading = false;
             }
@@ -540,10 +540,10 @@ function matrixView() {
 
         statusLabel(status) {
             const labels = {
-                confirmed: '{{ __("app.schedule_yes_label") }}',
-                pending: '{{ __("app.schedule_pending_label") }}',
-                declined: '{{ __("app.schedule_no_label") }}',
-                attended: '{{ __("app.schedule_was_label") }}',
+                confirmed: @js( __("app.schedule_yes_label") ),
+                pending: @js( __("app.schedule_pending_label") ),
+                declined: @js( __("app.schedule_no_label") ),
+                attended: @js( __("app.schedule_was_label") ),
             };
             return labels[status] || '—';
         },
@@ -653,7 +653,7 @@ function matrixView() {
                     });
 
                     this.dropdown.persons = this.grid[mKey][rKey][eKey];
-                    this.showToast((member.short_name || member.name) + ' — ' + '{{ __("app.schedule_assigned_toast") }}');
+                    this.showToast((member.short_name || member.name) + ' — ' + @js( __("app.schedule_assigned_toast") ));
 
                     // Auto-close if no more available members
                     if (this.filteredMembers().length === 0) {
@@ -661,11 +661,11 @@ function matrixView() {
                     }
                 } else {
                     const err = await resp.json().catch(() => ({}));
-                    this.showToast(err.error || err.message || '{{ __("app.schedule_assign_error") }}', 'error');
+                    this.showToast(err.error || err.message || @js( __("app.schedule_assign_error") ), 'error');
                 }
             } catch (e) {
                 console.error('Assign error:', e);
-                this.showToast('{{ __("app.schedule_assign_error") }}', 'error');
+                this.showToast(@js( __("app.schedule_assign_error") ), 'error');
             } finally {
                 this.busy = false;
             }
@@ -702,7 +702,7 @@ function matrixView() {
                         this.grid[mKey][rKey][eKey] = this.grid[mKey][rKey][eKey].filter(p => p.id !== person.id);
                     }
                     this.dropdown.persons = this.grid[mKey]?.[rKey]?.[eKey] || [];
-                    this.showToast(person.person_name + ' — ' + '{{ __("app.schedule_removed_toast") }}');
+                    this.showToast(person.person_name + ' — ' + @js( __("app.schedule_removed_toast") ));
 
                     // Auto-close if empty
                     if (this.dropdown.persons.length === 0) {
@@ -711,7 +711,7 @@ function matrixView() {
                 }
             } catch (e) {
                 console.error('Remove error:', e);
-                this.showToast('{{ __("app.schedule_error") }}', 'error');
+                this.showToast(@js( __("app.schedule_error") ), 'error');
             } finally {
                 this.busy = false;
             }
@@ -753,10 +753,10 @@ function matrixView() {
                 if (this.grid[mKey]?.[rKey]?.[eKey]) {
                     this.grid[mKey][rKey][eKey].forEach(p => p.notes = notes);
                 }
-                this.showToast('{{ __("app.schedule_note_saved") }}');
+                this.showToast(@js( __("app.schedule_note_saved") ));
             } catch (e) {
                 console.error('Save cell notes error:', e);
-                this.showToast('{{ __("app.schedule_error") }}', 'error');
+                this.showToast(@js( __("app.schedule_error") ), 'error');
             }
         },
 
@@ -785,13 +785,13 @@ function matrixView() {
                         if (p) p.status = 'pending';
                     }
                     this.dropdown.persons = [...(this.grid[mKey]?.[rKey]?.[eKey] || [])];
-                    this.showToast('{{ __("app.schedule_notification_sent") }}');
+                    this.showToast(@js( __("app.schedule_notification_sent") ));
                 } else {
-                    this.showToast(data.message || '{{ __("app.schedule_notification_failed") }}', 'error');
+                    this.showToast(data.message || @js( __("app.schedule_notification_failed") ), 'error');
                 }
             } catch (e) {
                 console.error('Notify error:', e);
-                this.showToast('{{ __("app.schedule_error") }}', 'error');
+                this.showToast(@js( __("app.schedule_error") ), 'error');
             }
         },
     };
