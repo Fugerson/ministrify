@@ -6,12 +6,12 @@
 <div class="space-y-4" x-data="servicePlanningMatrix()" x-init="loadData()">
 
     {{-- Header --}}
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 px-4 py-3">
-        <div class="flex items-center justify-between gap-2">
-            {{-- Left: title + filter --}}
-            <div class="flex items-center gap-2 min-w-0">
-                <h1 class="text-lg font-semibold text-gray-900 dark:text-white whitespace-nowrap">{{ __('app.service_planning') }}</h1>
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 px-3 sm:px-4 py-3">
+        {{-- Row 1: Title + View toggle --}}
+        <div class="flex items-center justify-between gap-2 mb-2 sm:mb-0">
+            <h1 class="text-sm sm:text-lg font-semibold text-gray-900 dark:text-white truncate">{{ __('app.service_planning') }}</h1>
 
+            <div class="flex items-center gap-2 flex-shrink-0">
                 {{-- View mode toggle --}}
                 <div class="flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg p-0.5">
                     <button @click="switchToWeek()" type="button"
@@ -29,8 +29,11 @@
                 {{-- Event type filter --}}
                 <div class="relative" x-data="{ filterOpen: false }">
                     <button @click="filterOpen = !filterOpen" type="button"
-                        class="flex items-center gap-1.5 px-2.5 py-1.5 text-sm rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
-                        <span>{{ __('Фільтр') }}</span>
+                        class="flex items-center gap-1 px-2 py-1.5 text-xs sm:text-sm rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+                        </svg>
+                        <span class="hidden sm:inline">{{ __('Фільтр') }}</span>
                         <template x-if="hiddenEventTitles.size > 0">
                             <span class="w-4 h-4 flex items-center justify-center text-[9px] font-bold bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400 rounded-full"
                                   x-text="hiddenEventTitles.size"></span>
@@ -38,7 +41,7 @@
                     </button>
                     <div x-show="filterOpen" @click.outside="filterOpen = false"
                          x-transition
-                         class="absolute left-0 top-full mt-1 z-30 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 w-72 py-1 max-h-80 overflow-y-auto">
+                         class="absolute right-0 sm:left-0 top-full mt-1 z-30 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 w-72 py-1 max-h-80 overflow-y-auto">
                         <template x-for="title in uniqueEventTitles" :key="title">
                             <label class="flex items-center gap-2.5 px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors">
                                 <input type="checkbox" :checked="!hiddenEventTitles.has(title)"
@@ -59,77 +62,77 @@
                     </div>
                 </div>
             </div>
+        </div>
 
-            {{-- Right: date navigation --}}
-            <div class="flex items-center gap-1" x-data="{ pickerOpen: false, pickerYear: new Date().getFullYear() }">
-                <button @click="prevPeriod()" type="button"
-                   class="w-9 h-9 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 rounded-lg transition-colors">
-                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        {{-- Row 2: Date navigation (separate row on mobile) --}}
+        <div class="flex items-center justify-center gap-1" x-data="{ pickerOpen: false, pickerYear: new Date().getFullYear() }">
+            <button @click="prevPeriod()" type="button"
+               class="w-9 h-9 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 rounded-lg transition-colors">
+                <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+            </button>
+
+            {{-- Clickable date label → opens month picker --}}
+            <div class="relative">
+                <button @click="pickerOpen = !pickerOpen; pickerYear = startDate.getFullYear()" type="button"
+                    class="flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold text-gray-900 dark:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors whitespace-nowrap">
+                    <span x-text="periodLabel"></span>
+                    <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                     </svg>
                 </button>
 
-                {{-- Clickable date label → opens month picker --}}
-                <div class="relative">
-                    <button @click="pickerOpen = !pickerOpen; pickerYear = startDate.getFullYear()" type="button"
-                        class="flex items-center gap-1.5 px-2.5 py-1.5 text-sm font-semibold text-gray-900 dark:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors whitespace-nowrap">
-                        <span x-text="periodLabel"></span>
-                        <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                        </svg>
-                    </button>
+                {{-- Month/year picker dropdown --}}
+                <div x-show="pickerOpen" @click.outside="pickerOpen = false" x-transition
+                     class="absolute left-1/2 -translate-x-1/2 sm:left-auto sm:translate-x-0 sm:right-0 top-full mt-1 z-30 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 p-3 min-w-[240px]">
 
-                    {{-- Month/year picker dropdown --}}
-                    <div x-show="pickerOpen" @click.outside="pickerOpen = false" x-transition
-                         class="absolute right-0 top-full mt-1 z-30 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 p-3 min-w-[240px]">
-
-                        {{-- Year navigation --}}
-                        <div class="flex items-center justify-between mb-3">
-                            <button @click="pickerYear--" type="button"
-                                class="w-8 h-8 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                                <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                                </svg>
-                            </button>
-                            <span class="text-sm font-bold text-gray-900 dark:text-white" x-text="pickerYear"></span>
-                            <button @click="pickerYear++" type="button"
-                                class="w-8 h-8 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                                <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                                </svg>
-                            </button>
-                        </div>
-
-                        {{-- Month grid 3x4 --}}
-                        <div class="grid grid-cols-3 gap-1.5 mb-3">
-                            <template x-for="(month, index) in ['Січ','Лют','Бер','Кві','Тра','Чер','Лип','Сер','Вер','Жов','Лис','Гру']" :key="index">
-                                <button @click="pickMonth(pickerYear, index); pickerOpen = false" type="button"
-                                    :class="startDate.getFullYear() === pickerYear && startDate.getMonth() === index
-                                        ? 'bg-primary-500 text-white font-bold'
-                                        : (pickerYear === new Date().getFullYear() && index === new Date().getMonth()
-                                            ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 font-medium'
-                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700')"
-                                    class="px-2 py-2 rounded-lg text-sm transition-colors">
-                                    <span x-text="month"></span>
-                                </button>
-                            </template>
-                        </div>
-
-                        {{-- Today button --}}
-                        <button @click="goToday(); pickerOpen = false" type="button"
-                            class="w-full py-1.5 text-xs font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/30 rounded-lg transition-colors pt-2 border-t border-gray-200 dark:border-gray-700">
-                            {{ __('common.today') }}
+                    {{-- Year navigation --}}
+                    <div class="flex items-center justify-between mb-3">
+                        <button @click="pickerYear--" type="button"
+                            class="w-8 h-8 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                            <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                            </svg>
+                        </button>
+                        <span class="text-sm font-bold text-gray-900 dark:text-white" x-text="pickerYear"></span>
+                        <button @click="pickerYear++" type="button"
+                            class="w-8 h-8 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                            <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
                         </button>
                     </div>
-                </div>
 
-                <button @click="nextPeriod()" type="button"
-                   class="w-9 h-9 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 rounded-lg transition-colors">
-                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                    </svg>
-                </button>
+                    {{-- Month grid 3x4 --}}
+                    <div class="grid grid-cols-3 gap-1.5 mb-3">
+                        <template x-for="(month, index) in ['Січ','Лют','Бер','Кві','Тра','Чер','Лип','Сер','Вер','Жов','Лис','Гру']" :key="index">
+                            <button @click="pickMonth(pickerYear, index); pickerOpen = false" type="button"
+                                :class="startDate.getFullYear() === pickerYear && startDate.getMonth() === index
+                                    ? 'bg-primary-500 text-white font-bold'
+                                    : (pickerYear === new Date().getFullYear() && index === new Date().getMonth()
+                                        ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 font-medium'
+                                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700')"
+                                class="px-2 py-2 rounded-lg text-sm transition-colors">
+                                <span x-text="month"></span>
+                            </button>
+                        </template>
+                    </div>
+
+                    {{-- Today button --}}
+                    <button @click="goToday(); pickerOpen = false" type="button"
+                        class="w-full py-1.5 text-xs font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/30 rounded-lg transition-colors pt-2 border-t border-gray-200 dark:border-gray-700">
+                        {{ __('common.today') }}
+                    </button>
+                </div>
             </div>
+
+            <button @click="nextPeriod()" type="button"
+               class="w-9 h-9 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 rounded-lg transition-colors">
+                <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+            </button>
         </div>
     </div>
 
@@ -164,14 +167,14 @@
     <template x-if="!loading && allEvents.length > 0 && ministries.length > 0">
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
             <div class="overflow-x-auto">
-                <table class="w-full border-collapse min-w-[600px]">
+                <table class="w-full border-collapse min-w-[400px]">
                     <thead>
                         <tr class="bg-gray-50 dark:bg-gray-700">
-                            <th class="sticky left-0 z-20 bg-gray-50 dark:bg-gray-700 px-3 sm:px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-r border-gray-200 dark:border-gray-600 w-[160px] sm:w-[200px] min-w-[160px] sm:min-w-[200px]">
+                            <th class="sticky left-0 z-20 bg-gray-50 dark:bg-gray-700 px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-r border-gray-200 dark:border-gray-600 w-[120px] sm:w-[200px] min-w-[120px] sm:min-w-[200px]">
                                 {{ __('Команда / Роль') }}
                             </th>
                             <template x-for="event in filteredEvents()" :key="event.id">
-                                <th class="px-2 py-2 text-center border-b border-gray-200 dark:border-gray-600 min-w-[140px]"
+                                <th class="px-1 sm:px-2 py-2 text-center border-b border-gray-200 dark:border-gray-600 min-w-[100px] sm:min-w-[140px]"
                                     :class="isNearestEvent(event) ? 'bg-primary-50 dark:bg-primary-900/30' : 'bg-gray-50 dark:bg-gray-700'">
                                     <a :href="'/events/' + event.id"
                                        class="block hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
@@ -209,7 +212,7 @@
                                     x-show="row.type === 'header' || isExpanded(ministry.id)">
 
                                     {{-- Left column --}}
-                                    <td class="sticky left-0 z-10 bg-white dark:bg-gray-800 group-hover/row:bg-gray-50 dark:group-hover/row:bg-gray-700 px-3 sm:px-4 border-r border-gray-200 dark:border-gray-600 transition-colors"
+                                    <td class="sticky left-0 z-10 bg-white dark:bg-gray-800 group-hover/row:bg-gray-50 dark:group-hover/row:bg-gray-700 px-2 sm:px-4 border-r border-gray-200 dark:border-gray-600 transition-colors"
                                         :class="row.type === 'header' ? 'py-2.5 cursor-pointer' : 'py-2.5'"
                                         @click="row.type === 'header' && toggleMinistry(ministry.id)">
 
@@ -223,7 +226,7 @@
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                                                     </svg>
                                                     <span class="w-1 h-4 rounded-full flex-shrink-0" :style="'background:' + (ministry.color || '#6B7280')"></span>
-                                                    <span class="text-[11px] font-bold uppercase tracking-wide"
+                                                    <span class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wide truncate max-w-[80px] sm:max-w-none"
                                                           :style="'color:' + (ministry.color || '#6B7280')"
                                                           x-text="(ministry.icon ? ministry.icon + ' ' : '') + ministry.name"></span>
                                                     <span class="text-[10px] text-gray-400 dark:text-gray-500" x-text="'(' + ministry.roles.length + ')'"></span>
@@ -245,7 +248,7 @@
                                                 <template x-if="!row.role.icon">
                                                     <span class="w-1.5 h-1.5 rounded-full flex-shrink-0 bg-gray-300 dark:bg-gray-600"></span>
                                                 </template>
-                                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300" x-text="row.role.name"></span>
+                                                <span class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 truncate max-w-[70px] sm:max-w-none" x-text="row.role.name"></span>
                                             </div>
                                         </template>
                                     </td>
@@ -276,7 +279,7 @@
                                                         <div class="flex items-center gap-1 text-xs leading-tight w-full justify-center">
                                                             <span class="w-1.5 h-1.5 rounded-full flex-shrink-0"
                                                                   :class="statusDotClass(person.status)"></span>
-                                                            <span class="truncate max-w-[110px] font-medium" x-text="isMe(person) ? person.person_name + ' (' + @js( __("app.you") ) + ')' : person.person_name"
+                                                            <span class="truncate max-w-[70px] sm:max-w-[110px] font-medium" x-text="isMe(person) ? person.person_name + ' (' + @js( __("app.you") ) + ')' : person.person_name"
                                                                   :class="statusTextClass(person.status)"></span>
                                                         </div>
                                                     </template>
@@ -331,6 +334,13 @@
         <span x-text="toast.message"></span>
     </div>
 
+    {{-- Mobile backdrop overlay --}}
+    <div x-show="dropdown.open" @click="dropdown.open = false"
+         class="fixed inset-0 bg-black/40 z-40 sm:hidden"
+         x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+    </div>
+
     {{-- Assign/Action Dropdown --}}
     <div x-show="dropdown.open" x-transition:enter="transition ease-out duration-150"
          x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
@@ -338,8 +348,8 @@
          x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
          @click.outside="dropdown.open = false"
          @keydown.escape.window="dropdown.open = false"
-         class="fixed z-50 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 w-72 overflow-hidden"
-         :style="'top:' + dropdown.y + 'px;left:' + dropdown.x + 'px'">
+         class="fixed z-50 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden w-[calc(100vw-16px)] sm:w-72 max-h-[80vh] overflow-y-auto"
+         :style="window.innerWidth < 640 ? 'top:50%;left:50%;transform:translate(-50%,-50%)' : 'top:' + dropdown.y + 'px;left:' + dropdown.x + 'px'"
 
         <div class="px-3 py-2 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
             <div class="flex items-center justify-between">
@@ -872,17 +882,22 @@ function servicePlanningMatrix() {
             // Don't open dropdown for non-leaders on foreign teams (view-only)
             if (!this.isLeader && !this.canSelfSignup(ministry)) return;
 
-            const rect = $event.currentTarget.getBoundingClientRect();
-            const dw = 288, dh = 360;
-            let x = rect.left + (rect.width / 2) - (dw / 2);
-            let y = rect.bottom + 6;
-            if (x + dw > window.innerWidth - 8) x = window.innerWidth - dw - 8;
-            if (y + dh > window.innerHeight) y = rect.top - dh - 6;
-            if (x < 8) x = 8;
-            if (y < 8) y = 8;
-
-            this.dropdown.x = x;
-            this.dropdown.y = y;
+            // On mobile, dropdown is centered via CSS transform; on desktop, position near cell
+            if (window.innerWidth >= 640) {
+                const rect = $event.currentTarget.getBoundingClientRect();
+                const dw = 288, dh = 360;
+                let x = rect.left + (rect.width / 2) - (dw / 2);
+                let y = rect.bottom + 6;
+                if (x + dw > window.innerWidth - 8) x = window.innerWidth - dw - 8;
+                if (y + dh > window.innerHeight) y = rect.top - dh - 6;
+                if (x < 8) x = 8;
+                if (y < 8) y = 8;
+                this.dropdown.x = x;
+                this.dropdown.y = y;
+            } else {
+                this.dropdown.x = 0;
+                this.dropdown.y = 0;
+            }
             this.dropdown.ministry = ministry;
             this.dropdown.role = role;
             this.dropdown.event = event;
