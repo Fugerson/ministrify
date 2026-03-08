@@ -2362,7 +2362,7 @@
                             </div>
                         </div>
                     </div>
-                    <button @click="openUserModal({{ $u->id }}, @js($u->name), @js($u->churchRole?->name ?? '{{ __('app.settings_no_role') }}'))"
+                    <button @click="openUserModal({{ $u->id }}, @js($u->name), @js($u->churchRole?->name ?? __('app.settings_no_role')))"
                             class="flex-shrink-0 px-3 py-1.5 text-sm font-medium text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-900/30 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/50 transition-colors">
                         {{ __('app.settings_configure') }}
                     </button>
