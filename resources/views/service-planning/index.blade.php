@@ -349,7 +349,7 @@
          @click.outside="dropdown.open = false"
          @keydown.escape.window="dropdown.open = false"
          class="fixed z-50 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden w-[calc(100vw-16px)] sm:w-72 max-h-[80vh] overflow-y-auto"
-         :style="window.innerWidth < 640 ? 'top:50%;left:50%;transform:translate(-50%,-50%)' : 'top:' + dropdown.y + 'px;left:' + dropdown.x + 'px'"
+         :style="window.innerWidth < 640 ? 'top:50%;left:50%;transform:translate(-50%,-50%)' : 'top:' + dropdown.y + 'px;left:' + dropdown.x + 'px'">
 
         <div class="px-3 py-2 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
             <div class="flex items-center justify-between">
