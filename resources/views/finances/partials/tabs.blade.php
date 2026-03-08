@@ -14,7 +14,7 @@
     <nav class="flex overflow-x-auto items-center" aria-label="Tabs">
         @foreach($tabs as $tab)
             <a href="{{ route($tab['route']) }}"
-               class="whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm transition-colors flex-shrink-0
+               class="whitespace-nowrap py-3 sm:py-4 px-3 sm:px-6 border-b-2 font-medium text-xs sm:text-sm transition-colors flex-shrink-0
                    {{ $activeTab === $tab['id']
                        ? 'border-primary-500 text-primary-600 dark:text-primary-400'
                        : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300' }}">

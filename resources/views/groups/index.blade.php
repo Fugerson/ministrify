@@ -35,7 +35,7 @@
     </div>
     @else
     <!-- Stats -->
-    <div id="groups-stats" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div id="groups-stats" class="grid grid-cols-3 gap-2 sm:gap-4">
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-5">
             <div class="flex items-center">
                 <div class="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">

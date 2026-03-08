@@ -15,7 +15,7 @@ if(auth()->user()->canCreate('announcements')) {
     <nav class="flex space-x-1 bg-gray-100 dark:bg-gray-800 rounded-xl p-1 w-full sm:w-fit overflow-x-auto" aria-label="Tabs">
         @foreach($commTabs as $tab)
             <a href="{{ route($tab['route']) }}"
-               class="relative flex items-center px-4 py-2.5 text-sm font-medium rounded-lg transition-all
+               class="relative flex items-center px-3 sm:px-4 py-2.5 text-xs sm:text-sm font-medium rounded-lg transition-all whitespace-nowrap
                       {{ request()->routeIs($tab['active'] ?? $tab['route'])
                          ? 'bg-white dark:bg-gray-700 text-primary-600 dark:text-primary-400 shadow-sm'
                          : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-gray-700/50' }}">
