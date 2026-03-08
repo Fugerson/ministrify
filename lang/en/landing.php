@@ -85,11 +85,11 @@ return [
     // Security section
     'security_badge' => 'Security & Privacy',
     'security_heading' => 'Your data is securely protected',
-    'security_subheading' => 'Privacy and security of your church\'s data is our absolute priority. We\'re not a social network — we\'re a tool for the church.',
+    'security_subheading' => 'Privacy and security of your church\'s data is our absolute priority. Your data belongs only to you.',
     'security_eu_title' => 'European Servers',
     'security_eu_desc' => 'All data is stored on servers in the European Union (Germany). Your information never leaves the EU and is not subject to foreign jurisdiction.',
     'security_nodata_title' => 'No Data Selling',
-    'security_nodata_desc' => 'Unlike social networks, we never use your church\'s data for advertising, marketing or any commercial purposes. Your data belongs only to you.',
+    'security_nodata_desc' => 'We never use your church\'s data for advertising, marketing or any commercial purposes. Your data belongs only to you.',
     'security_encryption_title' => 'Encryption & Backups',
     'security_encryption_desc' => 'All connections are protected with SSL encryption. Passwords are hashed. Automatic backups every 6 hours ensure your data is always safe.',
 
