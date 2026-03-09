@@ -78,6 +78,7 @@ return [
 
     // Stats section
     'churches' => 'Церков',
+    'features_count_label' => 'Функцій',
     'members' => 'Членів',
     'events' => 'Подій',
     'uptime' => 'Доступність',

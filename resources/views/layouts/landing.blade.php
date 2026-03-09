@@ -26,7 +26,9 @@
     <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:title" content="@yield('title', __('landing.home_title'))">
     <meta property="og:description" content="@yield('description', __('landing.home_meta'))">
-    <meta property="og:image" content="@yield('og_image', asset('icon-512x512.png'))">
+    <meta property="og:image" content="@yield('og_image', asset('og-image.jpg'))">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
     <meta property="og:locale" content="{{ app()->getLocale() === 'en' ? 'en_US' : 'uk_UA' }}">
     <meta property="og:site_name" content="Ministrify">
 
@@ -35,7 +37,7 @@
     <meta name="twitter:url" content="{{ url()->current() }}">
     <meta name="twitter:title" content="@yield('title', __('landing.home_title'))">
     <meta name="twitter:description" content="@yield('description', __('landing.home_meta'))">
-    <meta name="twitter:image" content="@yield('og_image', asset('icon-512x512.png'))">
+    <meta name="twitter:image" content="@yield('og_image', asset('og-image.jpg'))">
 
     {{-- Favicon --}}
     <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
@@ -260,13 +262,6 @@
             "availability": "https://schema.org/InStock",
             "description": @js( __('landing.schema_available') )
         },
-        "aggregateRating": {
-            "@type": "AggregateRating",
-            "ratingValue": "4.9",
-            "ratingCount": "50",
-            "bestRating": "5",
-            "worstRating": "1"
-        },
         "featureList": @js( __('landing.schema_features') )
     }
     </script>
@@ -344,6 +339,17 @@
     </script>
 
     @yield('head')
+
+    {{-- Google Analytics --}}
+    @if(config('services.google_analytics.id'))
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ config('services.google_analytics.id') }}"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', '{{ config('services.google_analytics.id') }}');
+    </script>
+    @endif
 </head>
 <body class="font-sans antialiased text-gray-900 bg-white dark:bg-gray-950 dark:text-gray-100" x-data="{ mobileMenu: false, darkMode: localStorage.getItem('theme') !== 'light' }" :class="{ 'dark': darkMode }" x-effect="darkMode ? document.documentElement.classList.add('dark') : document.documentElement.classList.remove('dark')">
 

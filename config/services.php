@@ -29,6 +29,10 @@ return [
         'threshold' => env('RECAPTCHA_THRESHOLD', 0.5),
     ],
 
+    'google_analytics' => [
+        'id' => env('GOOGLE_ANALYTICS_ID'),
+    ],
+
     'google' => [
         'client_id' => env('GOOGLE_CLIENT_ID'),
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),

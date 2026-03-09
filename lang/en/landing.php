@@ -78,6 +78,7 @@ return [
 
     // Stats section
     'churches' => 'Churches',
+    'features_count_label' => 'Features',
     'members' => 'Members',
     'events' => 'Events',
     'uptime' => 'Uptime',

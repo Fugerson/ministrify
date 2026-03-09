@@ -408,8 +408,8 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div class="reveal reveal-delay-1">
-                <div class="text-4xl md:text-5xl font-bold text-white mb-2 stat-number" data-count="{{ $stats['churches'] ?? 10 }}" data-suffix="+">0</div>
-                <div class="text-blue-200/80 font-medium">{{ __('landing.churches') }}</div>
+                <div class="text-4xl md:text-5xl font-bold text-white mb-2 stat-number" data-count="20" data-suffix="+">0</div>
+                <div class="text-blue-200/80 font-medium">{{ __('landing.features_count_label') }}</div>
             </div>
             <div class="reveal reveal-delay-2">
                 <div class="text-4xl md:text-5xl font-bold text-white mb-2 stat-number" data-count="{{ $stats['members'] ?? 500 }}" data-suffix="+">0</div>
