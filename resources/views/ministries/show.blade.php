@@ -1746,6 +1746,25 @@
             <div x-show="activeTab === 'expenses'"{{ $tab !== 'expenses' ? ' style="display:none"' : '' }}
                  x-data="budgetPage()"
                  x-init="loadBudget()">
+                {{-- ===== OVERALL BALANCE CARD ===== --}}
+                <div x-show="budget.overall_received > 0 || budget.overall_spent > 0" class="mb-4">
+                    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-200 dark:border-blue-800/50 px-4 py-3">
+                        <div class="flex items-center justify-between gap-3">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                                </svg>
+                                <span class="font-semibold text-gray-900 dark:text-white text-sm">Загальний баланс</span>
+                            </div>
+                            <span class="text-lg font-bold" :class="budget.overall_balance >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'" x-text="(budget.overall_balance >= 0 ? '' : '') + fmt(budget.overall_balance) + ' ₴'"></span>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-4 mt-1.5 text-xs text-gray-600 dark:text-gray-400">
+                            <span>Отримано за весь час: <span class="font-medium text-green-600 dark:text-green-400" x-text="fmt(budget.overall_received) + ' ₴'"></span></span>
+                            <span>Витрачено за весь час: <span class="font-medium text-red-500 dark:text-red-400" x-text="fmt(budget.overall_spent) + ' ₴'"></span></span>
+                        </div>
+                    </div>
+                </div>
+
                 {{-- ===== BUDGET PLANNING SECTION (fully dynamic via Alpine.js) ===== --}}
                 <div class="mb-6">
                     {{-- Budget header with unified month navigation --}}
@@ -5076,6 +5095,9 @@ function budgetPage() {
             total_spent: 0,
             total_income: {{ $budgetData['total_income'] ?? 0 }},
             total_allocated: {{ $budgetData['total_allocated'] ?? 0 }},
+            overall_received: {{ $budgetData['overall_received'] ?? 0 }},
+            overall_spent: {{ $budgetData['overall_spent'] ?? 0 }},
+            overall_balance: {{ $budgetData['overall_balance'] ?? 0 }},
             unmatched_spent: 0,
         },
         budgetLoading: false,
@@ -5217,6 +5239,9 @@ function budgetPage() {
                         total_spent: data.total_spent,
                         total_income: data.total_income || 0,
                         total_allocated: data.total_allocated || 0,
+                        overall_received: data.overall_received || 0,
+                        overall_spent: data.overall_spent || 0,
+                        overall_balance: data.overall_balance || 0,
                         unmatched_spent: data.unmatched_spent,
                     };
                 }
@@ -5394,13 +5419,14 @@ function budgetPage() {
         async openExpenseModal(mode, transactionData) {
             // Check if ministry has any budget/funds before allowing new expense
             if (mode === 'create') {
-                const received = (this.budget.total_allocated || 0) + (this.budget.total_income || 0);
-                if (received <= 0) {
+                const overallReceived = this.budget.overall_received || 0;
+                if (overallReceived <= 0) {
                     if (typeof showToast === 'function') showToast('warning', 'Бюджет не виділено. Спочатку церква має виділити кошти для служіння.');
                     return;
                 }
-                if (this.balance <= 0) {
-                    if (!confirm('Баланс служіння: ' + this.fmt(this.balance) + ' ₴. Кошти вичерпано. Все одно додати витрату?')) {
+                const overallBalance = this.budget.overall_balance || 0;
+                if (overallBalance <= 0) {
+                    if (!confirm('Загальний баланс: ' + this.fmt(overallBalance) + ' ₴. Кошти вичерпано. Все одно додати витрату?')) {
                         return;
                     }
                 }

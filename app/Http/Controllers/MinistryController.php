@@ -376,6 +376,19 @@ class MinistryController extends Controller
             ->whereMonth('date', $budgetMonth)
             ->sum(\DB::raw('COALESCE(amount_uah, amount)'));
 
+        // Overall balance (all time): all IN - all OUT (exclude allocations OUT to avoid double-counting)
+        $overallIn = (float) Transaction::where('church_id', $church->id)
+            ->where('ministry_id', $ministry->id)
+            ->where('direction', Transaction::DIRECTION_IN)
+            ->completed()
+            ->sum(\DB::raw('COALESCE(amount_uah, amount)'));
+        $overallOut = (float) Transaction::where('church_id', $church->id)
+            ->where('ministry_id', $ministry->id)
+            ->where('direction', Transaction::DIRECTION_OUT)
+            ->where('source_type', '!=', Transaction::SOURCE_ALLOCATION)
+            ->completed()
+            ->sum(\DB::raw('COALESCE(amount_uah, amount)'));
+
         $monthNames = ['', 'Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень', 'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'];
         $budgetData = [
             'budget' => $ministryBudget,
@@ -385,6 +398,9 @@ class MinistryController extends Controller
             'total_spent' => $totalSpent,
             'total_income' => (float) $totalIncome,
             'total_allocated' => $totalAllocated,
+            'overall_received' => $overallIn,
+            'overall_spent' => $overallOut,
+            'overall_balance' => $overallIn - $overallOut,
             'unmatched_spent' => max(0, $totalSpent - $itemsSpentTotal),
             'year' => $budgetYear,
             'month' => $budgetMonth,
@@ -495,6 +511,19 @@ class MinistryController extends Controller
             ->whereMonth('date', $month)
             ->sum(\DB::raw('COALESCE(amount_uah, amount)'));
 
+        // Overall balance (all time)
+        $overallIn = (float) Transaction::where('church_id', $church->id)
+            ->where('ministry_id', $ministry->id)
+            ->where('direction', Transaction::DIRECTION_IN)
+            ->completed()
+            ->sum(\DB::raw('COALESCE(amount_uah, amount)'));
+        $overallOut = (float) Transaction::where('church_id', $church->id)
+            ->where('ministry_id', $ministry->id)
+            ->where('direction', Transaction::DIRECTION_OUT)
+            ->where('source_type', '!=', Transaction::SOURCE_ALLOCATION)
+            ->completed()
+            ->sum(\DB::raw('COALESCE(amount_uah, amount)'));
+
         return response()->json([
             'success' => true,
             'budget_id' => $ministryBudget?->id,
@@ -504,6 +533,9 @@ class MinistryController extends Controller
             'total_spent' => $totalSpent,
             'total_income' => (float) $totalIncome,
             'total_allocated' => $totalAllocated,
+            'overall_received' => $overallIn,
+            'overall_spent' => $overallOut,
+            'overall_balance' => $overallIn - $overallOut,
             'unmatched_spent' => max(0, $totalSpent - $itemsSpentTotal),
             'year' => $year,
             'month' => $month,
@@ -789,17 +821,14 @@ class MinistryController extends Controller
             'receipts.*' => 'file|mimes:jpg,jpeg,png,gif,webp,heic,heif,pdf|max:10240',
         ]);
 
-        // Check if ministry has received any funds
-        $expenseDate = Carbon::parse($validated['date']);
-        $totalReceived = Transaction::where('church_id', $church->id)
+        // Check if ministry has ever received any funds (overall balance)
+        $overallReceived = (float) Transaction::where('church_id', $church->id)
             ->where('ministry_id', $ministry->id)
             ->where('direction', Transaction::DIRECTION_IN)
             ->completed()
-            ->whereYear('date', $expenseDate->year)
-            ->whereMonth('date', $expenseDate->month)
             ->sum(\DB::raw('COALESCE(amount_uah, amount)'));
 
-        if ($totalReceived <= 0) {
+        if ($overallReceived <= 0) {
             return response()->json([
                 'success' => false,
                 'message' => 'Бюджет не виділено. Спочатку церква має виділити кошти для служіння.',
