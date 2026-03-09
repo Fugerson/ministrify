@@ -1853,13 +1853,20 @@
                                         <template x-for="bi in budget.items" :key="bi.id">
                                             <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 group">
                                                 <td class="px-2 py-2.5">
-                                                    <div class="font-medium text-gray-900 dark:text-white" x-text="bi.name"></div>
+                                                    <div class="font-medium text-gray-900 dark:text-white flex items-center gap-1.5">
+                                                        <span x-text="bi.name"></span>
+                                                        <span x-show="bi.frequency === 'weekly'" class="inline-flex items-center px-1.5 py-0.5 text-[10px] font-medium rounded bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300">щотижнева</span>
+                                                        <span x-show="bi.frequency === 'monthly'" class="inline-flex items-center px-1.5 py-0.5 text-[10px] font-medium rounded bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300">щомісячна</span>
+                                                    </div>
                                                     <div x-show="bi.category_name" class="text-xs text-gray-400" x-text="(bi.category_icon || '') + ' ' + (bi.category_name || '')"></div>
                                                 </td>
                                                 <td class="px-2 py-2.5 text-center hidden sm:table-cell whitespace-nowrap text-xs text-gray-500 dark:text-gray-400">
                                                     <span x-show="bi.planned_date" x-text="bi.planned_date ? new Date(bi.planned_date).toLocaleDateString('uk-UA', {day: '2-digit', month: '2-digit'}) : ''"></span>
                                                 </td>
-                                                <td class="px-2 py-2.5 text-right whitespace-nowrap text-gray-600 dark:text-gray-300" x-text="fmt(bi.planned_amount) + ' ₴'"></td>
+                                                <td class="px-2 py-2.5 text-right whitespace-nowrap text-gray-600 dark:text-gray-300">
+                                                    <span x-text="fmt(bi.monthly_planned || bi.planned_amount) + ' ₴'"></span>
+                                                    <div x-show="bi.frequency === 'weekly'" class="text-[10px] text-gray-400" x-text="fmt(bi.planned_amount) + ' ₴ × ' + weeksInCurrentMonth + ' тиж.'"></div>
+                                                </td>
                                                 <td class="px-2 py-2.5 text-right whitespace-nowrap font-medium text-gray-900 dark:text-white" x-text="fmt(bi.actual) + ' ₴'"></td>
                                                 <td class="px-2 py-2.5 text-right whitespace-nowrap">
                                                     <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium"
@@ -1978,9 +1985,27 @@
                                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
                                     </div>
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.ministry_planned_amount_label') }}</label>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Частота</label>
+                                        <div class="flex gap-2">
+                                            <label class="flex-1 cursor-pointer">
+                                                <input type="radio" x-model="itemForm.frequency" value="one_time" class="sr-only peer">
+                                                <div class="text-center px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg peer-checked:border-primary-500 peer-checked:bg-primary-50 dark:peer-checked:bg-primary-900/20 peer-checked:text-primary-700 dark:peer-checked:text-primary-400 text-gray-600 dark:text-gray-400">Разова</div>
+                                            </label>
+                                            <label class="flex-1 cursor-pointer">
+                                                <input type="radio" x-model="itemForm.frequency" value="weekly" class="sr-only peer">
+                                                <div class="text-center px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg peer-checked:border-primary-500 peer-checked:bg-primary-50 dark:peer-checked:bg-primary-900/20 peer-checked:text-primary-700 dark:peer-checked:text-primary-400 text-gray-600 dark:text-gray-400">Щотижнева</div>
+                                            </label>
+                                            <label class="flex-1 cursor-pointer">
+                                                <input type="radio" x-model="itemForm.frequency" value="monthly" class="sr-only peer">
+                                                <div class="text-center px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg peer-checked:border-primary-500 peer-checked:bg-primary-50 dark:peer-checked:bg-primary-900/20 peer-checked:text-primary-700 dark:peer-checked:text-primary-400 text-gray-600 dark:text-gray-400">Щомісячна</div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" x-text="itemForm.frequency === 'weekly' ? 'Сума за тиждень (₴) *' : itemForm.frequency === 'monthly' ? 'Сума за місяць (₴) *' : '{{ __('app.ministry_planned_amount_label') }}'"></label>
                                         <input type="number" x-model="itemForm.planned_amount" required min="0" step="0.01"
                                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                                        <p x-show="itemForm.frequency === 'weekly' && itemForm.planned_amount > 0" class="text-xs text-primary-600 dark:text-primary-400 mt-1" x-text="'≈ ' + new Intl.NumberFormat('uk-UA').format(Math.ceil(itemForm.planned_amount * weeksInCurrentMonth)) + ' ₴ за місяць (' + weeksInCurrentMonth + ' тижнів)'"></p>
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.ministry_planned_date_label') }}</label>
@@ -5081,7 +5106,7 @@ function budgetPage() {
         itemModalTitle: '',
         itemEditId: null,
         itemSaving: false,
-        itemForm: { name: '', planned_amount: '', planned_date: '', category_id: '', category_name: '', notes: '', person_ids: [] },
+        itemForm: { name: '', planned_amount: '', frequency: 'one_time', planned_date: '', category_id: '', category_name: '', notes: '', person_ids: [] },
 
         // Expense modal
         showExpenseModal: false,
@@ -5139,7 +5164,7 @@ function budgetPage() {
             return this.filteredTransactions.reduce((sum, t) => sum + parseFloat(t.amount), 0);
         },
         get totalPlanned() {
-            return this.budget.items.reduce((sum, i) => sum + i.planned_amount, 0);
+            return this.budget.items.reduce((sum, i) => sum + (i.monthly_planned || i.planned_amount), 0);
         },
         get budgetRemaining() {
             return this.budget.effective_budget - this.budget.total_spent;
@@ -5148,6 +5173,11 @@ function budgetPage() {
             return this.budget.effective_budget > 0
                 ? Math.round((this.budget.total_spent / this.budget.effective_budget) * 1000) / 10
                 : 0;
+        },
+
+        // Weeks in current month
+        get weeksInCurrentMonth() {
+            return Math.ceil(new Date(this.currentYear, this.currentMonth, 0).getDate() / 7);
         },
 
         // Format number
@@ -5232,6 +5262,7 @@ function budgetPage() {
                 this.itemForm = {
                     name: itemData.name,
                     planned_amount: itemData.planned_amount,
+                    frequency: itemData.frequency || 'one_time',
                     planned_date: itemData.planned_date || '',
                     category_id: itemData.category_id || '',
                     category_name: '',
@@ -5240,7 +5271,7 @@ function budgetPage() {
                 };
             } else {
                 this.itemEditId = null;
-                this.itemForm = { name: '', planned_amount: '', planned_date: '', category_id: '', category_name: '', notes: '', person_ids: [] };
+                this.itemForm = { name: '', planned_amount: '', frequency: 'one_time', planned_date: '', category_id: '', category_name: '', notes: '', person_ids: [] };
             }
 
             if (mode === 'create' && !this.budget.budget_id) {
@@ -5263,6 +5294,7 @@ function budgetPage() {
                 const payload = {
                     name: this.itemForm.name,
                     planned_amount: this.itemForm.planned_amount,
+                    frequency: this.itemForm.frequency || 'one_time',
                     planned_date: this.itemForm.planned_date || null,
                     category_id: (this.itemForm.category_id && this.itemForm.category_id !== '__custom__') ? this.itemForm.category_id : null,
                     category_name: (this.itemForm.category_id === '__custom__' && this.itemForm.category_name) ? this.itemForm.category_name : null,

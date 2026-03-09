@@ -340,15 +340,18 @@ class MinistryController extends Controller
                 $autoMatched = $item->category_id ? ($spendingByCategoryUnlinked[$item->category_id] ?? 0) : 0;
                 $itemSpent = $directSpent + $autoMatched;
                 $itemsSpentTotal += $itemSpent;
+                $monthlyPlanned = $item->getMonthlyPlanned();
                 $budgetItems[] = [
                     'id' => $item->id,
                     'name' => $item->name,
                     'category' => $item->category,
                     'category_id' => $item->category_id,
                     'planned_amount' => (float) $item->planned_amount,
+                    'frequency' => $item->frequency ?? 'one_time',
+                    'monthly_planned' => $monthlyPlanned,
                     'planned_date' => $item->planned_date?->format('Y-m-d'),
                     'actual' => $itemSpent,
-                    'difference' => (float) $item->planned_amount - $itemSpent,
+                    'difference' => $monthlyPlanned - $itemSpent,
                     'responsible' => $item->responsiblePeople,
                     'notes' => $item->notes,
                     'sort_order' => $item->sort_order,
@@ -468,6 +471,7 @@ class MinistryController extends Controller
                 $autoMatched = $item->category_id ? ($spendingByCategoryUnlinked[$item->category_id] ?? 0) : 0;
                 $itemSpent = $directSpent + $autoMatched;
                 $itemsSpentTotal += $itemSpent;
+                $monthlyPlanned = $item->getMonthlyPlanned();
                 $budgetItems[] = [
                     'id' => $item->id,
                     'name' => $item->name,
@@ -475,9 +479,11 @@ class MinistryController extends Controller
                     'category_icon' => $item->category?->icon,
                     'category_id' => $item->category_id,
                     'planned_amount' => (float) $item->planned_amount,
+                    'frequency' => $item->frequency ?? 'one_time',
+                    'monthly_planned' => $monthlyPlanned,
                     'planned_date' => $item->planned_date?->format('Y-m-d'),
                     'actual' => $itemSpent,
-                    'difference' => (float) $item->planned_amount - $itemSpent,
+                    'difference' => $monthlyPlanned - $itemSpent,
                     'responsible' => $item->responsiblePeople->map(fn($p) => [
                         'id' => $p->id,
                         'name' => $p->short_name ?? $p->first_name,
@@ -661,6 +667,7 @@ class MinistryController extends Controller
             'budget_id' => 'required|integer',
             'name' => 'required|string|max:255',
             'planned_amount' => 'required|numeric|min:0',
+            'frequency' => 'nullable|in:one_time,weekly,monthly',
             'planned_date' => 'nullable|date',
             'category_id' => 'nullable|integer|exists:transaction_categories,id',
             'category_name' => 'nullable|string|max:100',
@@ -704,6 +711,7 @@ class MinistryController extends Controller
             'category_id' => $categoryId,
             'name' => $validated['name'],
             'planned_amount' => $validated['planned_amount'],
+            'frequency' => $validated['frequency'] ?? 'one_time',
             'planned_date' => $validated['planned_date'] ?? null,
             'notes' => $validated['notes'] ?? null,
             'sort_order' => $maxSort + 1,
@@ -730,6 +738,7 @@ class MinistryController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'planned_amount' => 'required|numeric|min:0',
+            'frequency' => 'nullable|in:one_time,weekly,monthly',
             'planned_date' => 'nullable|date',
             'category_id' => 'nullable|integer|exists:transaction_categories,id',
             'category_name' => 'nullable|string|max:100',
@@ -765,6 +774,7 @@ class MinistryController extends Controller
         $budgetItem->update([
             'name' => $validated['name'],
             'planned_amount' => $validated['planned_amount'],
+            'frequency' => $validated['frequency'] ?? 'one_time',
             'planned_date' => $validated['planned_date'] ?? null,
             'category_id' => $categoryId,
             'notes' => $validated['notes'] ?? null,

@@ -9,12 +9,17 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class BudgetItem extends Model
 {
+    public const FREQUENCY_ONE_TIME = 'one_time';
+    public const FREQUENCY_WEEKLY = 'weekly';
+    public const FREQUENCY_MONTHLY = 'monthly';
+
     protected $fillable = [
         'church_id',
         'ministry_budget_id',
         'category_id',
         'name',
         'planned_amount',
+        'frequency',
         'planned_date',
         'notes',
         'sort_order',
@@ -58,6 +63,24 @@ class BudgetItem extends Model
     // ==================
     // Methods
     // ==================
+
+    /**
+     * Get the effective monthly planned amount based on frequency.
+     * For weekly items: amount × weeks in the budget month.
+     */
+    public function getMonthlyPlanned(): float
+    {
+        if ($this->frequency === self::FREQUENCY_WEEKLY) {
+            $budget = $this->ministryBudget;
+            if ($budget) {
+                $weeksInMonth = (int) ceil(\Carbon\Carbon::create($budget->year, $budget->month, 1)->daysInMonth / 7);
+                return (float) $this->planned_amount * $weeksInMonth;
+            }
+            return (float) $this->planned_amount * 4;
+        }
+
+        return (float) $this->planned_amount;
+    }
 
     /**
      * Get actual spending: direct transactions + auto-matched by category

@@ -98,7 +98,7 @@ class MinistryBudget extends Model
     public function getEffectiveBudget(): float
     {
         if ($this->items->isNotEmpty()) {
-            return (float) $this->items->sum('planned_amount');
+            return (float) $this->items->sum(fn($item) => $item->getMonthlyPlanned());
         }
 
         return (float) $this->monthly_budget;
