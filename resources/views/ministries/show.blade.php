@@ -2038,21 +2038,17 @@
                     </div>
                 </div>
 
-                {{-- ===== INCOME SECTION ===== --}}
-                <div class="mb-6">
-                    <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
-                        <h3 class="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                            <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12"/>
-                            </svg>
-                            Надходження
-                            <span class="text-xs font-normal text-gray-400" x-text="monthNames[currentMonth] + ' ' + currentYear"></span>
-                        </h3>
-                        <span class="text-sm font-semibold text-green-600 dark:text-green-400" x-text="fmt(totalIncome) + ' ₴'"></span>
-                    </div>
-
-                    {{-- Income list --}}
-                    <div x-show="filteredIncome.length > 0" class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden mb-3">
+                {{-- ===== INCOME & EXPENSES TWO COLUMNS ===== --}}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    {{-- INCOME COLUMN --}}
+                    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                        <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                            <h3 class="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                                <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12"/></svg>
+                                Надходження
+                            </h3>
+                            <span class="text-sm font-bold text-green-600 dark:text-green-400" x-text="fmt(totalIncome) + ' ₴'"></span>
+                        </div>
                         <div class="divide-y divide-gray-100 dark:divide-gray-700/50">
                             <template x-for="inc in filteredIncome" :key="inc.id">
                                 <div class="px-4 py-2.5 flex items-center justify-between gap-3 hover:bg-gray-50 dark:hover:bg-gray-700/30 group">
@@ -2070,27 +2066,78 @@
                                     @can('contribute-ministry', $ministry)
                                     <button @click="deleteIncome(inc.id)"
                                             class="p-1 text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded opacity-0 group-hover:opacity-100 transition-opacity shrink-0" title="{{ __('app.ministry_delete_title') }}">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                        </svg>
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                     </button>
                                     @endcan
                                 </div>
                             </template>
                         </div>
+                        <div x-show="filteredIncome.length === 0" class="px-4 py-6 text-center text-gray-400 dark:text-gray-500 text-sm">Немає надходжень за цей період</div>
+                        @can('contribute-ministry', $ministry)
+                        <div class="px-4 py-3 border-t border-gray-200 dark:border-gray-700">
+                            <button @click="openIncomeModal()"
+                                    class="inline-flex items-center gap-1.5 text-sm text-green-600 dark:text-green-400 hover:text-green-500 font-medium">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                Додати надходження
+                            </button>
+                        </div>
+                        @endcan
                     </div>
 
-                    <p x-show="filteredIncome.length === 0" class="text-center text-gray-400 dark:text-gray-500 py-4 text-sm">Немає надходжень за цей період</p>
-
-                    @can('contribute-ministry', $ministry)
-                    <button @click="openIncomeModal()"
-                            class="inline-flex items-center gap-1.5 text-sm text-green-600 dark:text-green-400 hover:text-green-500 font-medium">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                        </svg>
-                        Додати надходження
-                    </button>
-                    @endcan
+                    {{-- EXPENSES COLUMN --}}
+                    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                        <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                            <h3 class="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                                <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13l-5 5m0 0l-5-5m5 5V6"/></svg>
+                                Витрати
+                            </h3>
+                            <span class="text-sm font-bold text-red-500 dark:text-red-400" x-text="fmt(totalSum) + ' ₴'"></span>
+                        </div>
+                        <div class="divide-y divide-gray-100 dark:divide-gray-700/50">
+                            <template x-for="t in filteredTransactions" :key="t.id">
+                                <div class="px-4 py-2.5 flex items-center justify-between gap-3 hover:bg-gray-50 dark:hover:bg-gray-700/30 group">
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center gap-2">
+                                            <span class="font-semibold text-red-500 dark:text-red-400 whitespace-nowrap" x-text="'-' + new Intl.NumberFormat('uk-UA').format(t.amount) + ' ' + t.currency"></span>
+                                            <span x-show="t.category" class="inline-flex items-center px-1.5 py-0.5 text-[10px] font-medium rounded bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400" x-text="t.category"></span>
+                                            <span class="text-sm text-gray-900 dark:text-white truncate" x-text="t.description"></span>
+                                        </div>
+                                        <div class="flex items-center gap-2 mt-0.5">
+                                            <span class="text-xs text-gray-400" x-text="t.date_formatted"></span>
+                                            <span x-show="t.payment_method" class="text-xs text-gray-400" x-text="' • ' + (t.payment_method === 'cash' ? 'Готівка' : 'Картка')"></span>
+                                            <span x-show="t.notes" class="text-xs text-gray-400 italic truncate" x-text="t.notes"></span>
+                                            <template x-if="t.attachments.length > 0">
+                                                <button @click="t.attachments[0].is_image ? $dispatch('open-lightbox', t.attachments[0].url) : window.open(t.attachments[0].url, '_blank')" class="text-primary-600 dark:text-primary-400 hover:underline text-xs flex items-center gap-1 cursor-pointer">
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
+                                                    <span x-text="t.attachments.length"></span>
+                                                </button>
+                                            </template>
+                                        </div>
+                                    </div>
+                                    @can('contribute-ministry', $ministry)
+                                    <div class="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                                        <button @click="openExpenseModal('edit', t)" class="p-1 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 rounded" title="{{ __('app.ministry_edit_title') }}">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                        </button>
+                                        <button @click="deleteExpense(t.id)" class="p-1 text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded" title="{{ __('app.ministry_delete_title') }}">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                        </button>
+                                    </div>
+                                    @endcan
+                                </div>
+                            </template>
+                        </div>
+                        <div x-show="filteredTransactions.length === 0" class="px-4 py-6 text-center text-gray-400 dark:text-gray-500 text-sm">Немає витрат за цей період</div>
+                        @can('contribute-ministry', $ministry)
+                        <div class="px-4 py-3 border-t border-gray-200 dark:border-gray-700">
+                            <button @click="openExpenseModal('create')"
+                                    class="inline-flex items-center gap-1.5 text-sm text-red-500 dark:text-red-400 hover:text-red-600 font-medium">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                Додати витрату
+                            </button>
+                        </div>
+                        @endcan
+                    </div>
                 </div>
 
                 {{-- ===== INCOME MODAL ===== --}}
@@ -2148,95 +2195,6 @@
                     </div>
                 </div>
 
-                {{-- ===== EXPENSES LIST SECTION ===== --}}
-                <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-                    <h3 class="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
-                        </svg>
-                        Витрати
-                        <span class="text-xs font-normal text-gray-400" x-text="monthNames[currentMonth] + ' ' + currentYear"></span>
-                    </h3>
-                    <span class="text-sm font-semibold text-gray-900 dark:text-white" x-text="fmt(totalSum) + ' ₴'"></span>
-                </div>
-
-
-                <!-- Expenses Table -->
-                <div class="overflow-x-auto" x-show="filteredTransactions.length > 0">
-                    <table class="w-full text-sm">
-                        <thead>
-                            <tr class="text-left text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
-                                <th class="py-2 pr-3 font-medium">Сума</th>
-                                <th class="py-2 px-3 font-medium">Категорія</th>
-                                <th class="py-2 px-3 font-medium">Опис</th>
-                                <th class="py-2 px-3 font-medium">Дата</th>
-                                <th class="py-2 px-3 font-medium">Примітка</th>
-                                <th class="py-2 px-3 font-medium">Чек</th>
-                                @can('contribute-ministry', $ministry)
-                                <th class="py-2 pl-3 font-medium"></th>
-                                @endcan
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <template x-for="t in filteredTransactions" :key="t.id">
-                                <tr class="border-b border-gray-200 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30">
-                                    <td class="py-2 pr-3">
-                                        <span class="font-semibold text-gray-900 dark:text-white whitespace-nowrap" x-text="new Intl.NumberFormat('uk-UA').format(t.amount) + ' ' + t.currency"></span>
-                                    </td>
-                                    <td class="py-2 px-3">
-                                        <span x-show="t.category" class="px-2 py-0.5 text-xs rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400" x-text="t.category"></span>
-                                    </td>
-                                    <td class="py-2 px-3 text-gray-900 dark:text-white" x-text="t.description"></td>
-                                    <td class="py-2 px-3 text-gray-500 dark:text-gray-400 whitespace-nowrap">
-                                        <span x-text="t.date_formatted"></span>
-                                        <span x-show="t.payment_method" class="text-xs" x-text="' • ' + (t.payment_method === 'cash' ? 'Готівка' : 'Картка')"></span>
-                                    </td>
-                                    <td class="py-2 px-3 text-gray-500 dark:text-gray-400 text-xs italic max-w-[100px] sm:max-w-[150px] truncate" x-text="t.notes" :title="t.notes"></td>
-                                    <td class="py-2 px-3">
-                                        <template x-if="t.attachments.length > 0">
-                                            <button @click="t.attachments[0].is_image ? $dispatch('open-lightbox', t.attachments[0].url) : window.open(t.attachments[0].url, '_blank')" class="text-primary-600 dark:text-primary-400 hover:underline text-xs flex items-center gap-1 cursor-pointer">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
-                                                <span x-text="t.attachments.length"></span>
-                                            </button>
-                                        </template>
-                                    </td>
-                                    @can('contribute-ministry', $ministry)
-                                    <td class="py-2 pl-3">
-                                        <div class="flex items-center gap-1">
-                                            <button @click="openExpenseModal('edit', t)"
-                                                    class="p-1 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 rounded"
-                                                    title="{{ __('app.ministry_edit_title') }}">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                                </svg>
-                                            </button>
-                                            <button @click="deleteExpense(t.id)"
-                                                    class="p-1 text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded" title="{{ __('app.ministry_delete_title') }}">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                                </svg>
-                                            </button>
-                                        </div>
-                                    </td>
-                                    @endcan
-                                </tr>
-                            </template>
-                        </tbody>
-                    </table>
-                </div>
-                <p x-show="filteredTransactions.length === 0" class="text-center text-gray-500 dark:text-gray-400 py-6">Немає витрат за цей період</p>
-
-                @can('contribute-ministry', $ministry)
-                <div class="mt-3">
-                    <button @click="openExpenseModal('create')"
-                            class="inline-flex items-center gap-1.5 text-sm text-primary-600 dark:text-primary-400 hover:text-primary-500 font-medium">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                        </svg>
-                        Додати витрату
-                    </button>
-                </div>
-                @endcan
 
                 {{-- ===== EXPENSE MODAL ===== --}}
                 <div x-show="showExpenseModal" x-cloak
