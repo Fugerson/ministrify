@@ -4876,6 +4876,7 @@ return [
     // Transaction types
     'transaction_allocation' => 'Allocation',
     'transaction_allocation_budget' => 'Budget Allocation',
+    'transaction_internal_transfer' => 'Internal Transfer',
     'transaction_exchange' => 'Exchange',
     'transaction_exchange_currency' => 'Currency Exchange',
 ];

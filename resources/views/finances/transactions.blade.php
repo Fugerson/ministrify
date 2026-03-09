@@ -212,7 +212,10 @@ function exportButton() {
                                 <div class="flex items-center gap-1.5">
                                     <span class="text-sm text-gray-900 dark:text-white" x-text="truncate(item.transaction.description, 40)"></span>
                                     <template x-if="item.transaction.source_type === 'allocation'">
-                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300">{{ __('app.transaction_allocation') }}</span>
+                                        <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300">
+                                            <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+                                            {{ __('app.transaction_internal_transfer') }}
+                                        </span>
                                     </template>
                                     <template x-if="item.transaction.source_type === 'exchange'">
                                         <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">{{ __('app.transaction_exchange') }}</span>
@@ -240,10 +243,26 @@ function exportButton() {
                                 </template>
                             </td>
                             <td class="px-4 py-3 whitespace-nowrap text-right">
-                                <span class="text-sm font-semibold" :class="item.transaction.source_type === 'allocation' ? 'text-violet-600 dark:text-violet-400' : (item.transaction.source_type === 'exchange' ? 'text-amber-600 dark:text-amber-400' : (item.transaction.direction === 'in' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'))">
-                                    <span x-text="(item.transaction.direction === 'in' ? '+' : '-') + formatNumber(item.transaction.amount)"></span>
-                                    <span class="text-xs" x-text="currencySymbol(item.transaction.currency)"></span>
-                                </span>
+                                <template x-if="item.transaction.source_type === 'allocation'">
+                                    <span class="text-sm font-semibold text-violet-600 dark:text-violet-400 inline-flex items-center gap-1">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+                                        <span x-text="formatNumber(item.transaction.amount)"></span>
+                                        <span class="text-xs" x-text="currencySymbol(item.transaction.currency)"></span>
+                                    </span>
+                                </template>
+                                <template x-if="item.transaction.source_type === 'exchange'">
+                                    <span class="text-sm font-semibold text-amber-600 dark:text-amber-400 inline-flex items-center gap-1">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+                                        <span x-text="formatNumber(item.transaction.amount)"></span>
+                                        <span class="text-xs" x-text="currencySymbol(item.transaction.currency)"></span>
+                                    </span>
+                                </template>
+                                <template x-if="item.transaction.source_type !== 'allocation' && item.transaction.source_type !== 'exchange'">
+                                    <span class="text-sm font-semibold" :class="item.transaction.direction === 'in' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
+                                        <span x-text="(item.transaction.direction === 'in' ? '+' : '-') + formatNumber(item.transaction.amount)"></span>
+                                        <span class="text-xs" x-text="currencySymbol(item.transaction.currency)"></span>
+                                    </span>
+                                </template>
                             </td>
                             <td class="px-4 py-3 whitespace-nowrap text-right" x-show="subFilter === ''">
                                 <span class="text-sm font-medium" :class="item.balance >= 0 ? 'text-gray-900 dark:text-white' : 'text-red-600'" x-text="formatNumber(item.balance) + ' ₴'"></span>
@@ -327,11 +346,22 @@ function exportButton() {
                         <!-- Amount -->
                         <div class="text-center py-4">
                             <span class="text-3xl font-bold" :class="transaction?.source_type === 'allocation' ? 'text-violet-600' : (transaction?.source_type === 'exchange' ? 'text-amber-600' : (transaction?.direction === 'in' ? 'text-green-600' : 'text-red-600'))"
-                                  x-text="(transaction?.direction === 'in' ? '+' : '-') + formatNumber(transaction?.amount || 0) + ' ' + currencySymbol(transaction?.currency)">
+                                  x-text="(transaction?.source_type === 'allocation' || transaction?.source_type === 'exchange' ? '' : (transaction?.direction === 'in' ? '+' : '-')) + formatNumber(transaction?.amount || 0) + ' ' + currencySymbol(transaction?.currency)">
                             </span>
                             <template x-if="transaction?.source_type === 'allocation'">
                                 <div class="mt-1">
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300">{{ __('app.transaction_allocation_budget') }}</span>
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+                                        {{ __('app.transaction_internal_transfer') }}
+                                    </span>
+                                </div>
+                            </template>
+                            <template x-if="transaction?.source_type === 'exchange'">
+                                <div class="mt-1">
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+                                        {{ __('app.transaction_exchange_currency') }}
+                                    </span>
                                 </div>
                             </template>
                         </div>
@@ -344,7 +374,7 @@ function exportButton() {
                             </div>
                             <div>
                                 <span class="text-gray-500 dark:text-gray-400">{{ __('app.finance_type_colon') }}</span>
-                                <span class="ml-2 text-gray-900 dark:text-white" x-text="transaction?.source_type === 'allocation' ? @js(__('app.transaction_allocation_budget')) : (transaction?.source_type === 'exchange' ? @js(__('app.transaction_exchange_currency')) : (transaction?.direction === 'in' ? @js( __('app.finance_type_income') ) : @js( __('app.finance_type_expense') )))"></span>
+                                <span class="ml-2 text-gray-900 dark:text-white" x-text="transaction?.source_type === 'allocation' ? @js(__('app.transaction_internal_transfer')) : (transaction?.source_type === 'exchange' ? @js(__('app.transaction_exchange_currency')) : (transaction?.direction === 'in' ? @js( __('app.finance_type_income') ) : @js( __('app.finance_type_expense') )))"></span>
                             </div>
                             <div>
                                 <span class="text-gray-500 dark:text-gray-400">{{ __('app.finance_category_colon') }}</span>
@@ -539,6 +569,8 @@ function transactionsApp() {
             for (let t of this.allTransactions) {
                 const date = new Date(t.date);
                 if (date < start) {
+                    // Skip internal transfers (allocations/exchanges) — they net to 0
+                    if (t.source_type === 'allocation' || t.source_type === 'exchange') continue;
                     const amt = parseFloat(t.amount_uah || t.amount);
                     if (t.direction === 'in') {
                         balanceBefore += amt;
@@ -549,11 +581,11 @@ function transactionsApp() {
             }
 
             let income = 0, expense = 0;
-            let allIn = 0, allOut = 0;
             for (let t of transactions) {
+                // Allocations are internal transfers (IN+OUT net to 0) — skip entirely
+                if (t.source_type === 'allocation') continue;
                 const amt = parseFloat(t.amount_uah || t.amount);
-                if (t.direction === 'in') { allIn += amt; } else { allOut += amt; }
-                if (t.source_type === 'allocation' || t.source_type === 'exchange') continue;
+                if (t.source_type === 'exchange') continue;
                 if (t.direction === 'in') {
                     income += amt;
                 } else {
@@ -565,15 +597,18 @@ function transactionsApp() {
                 balanceBefore,
                 income,
                 expense,
-                balanceAfter: balanceBefore + allIn - allOut
+                balanceAfter: balanceBefore + income - expense
             };
         },
 
         get displayedTransactions() {
             const { balanceBefore } = this.periodStats;
-            // Running balance includes ALL transactions (including allocations/exchanges)
+            // Internal transfers (allocations, exchanges) come in IN+OUT pairs that net to ~0
+            // Exclude them from running balance; show only the OUT row as the "transfer" row
+            const isInternalTransfer = (t) => t.source_type === 'allocation' || t.source_type === 'exchange';
             let totalIn = 0, totalOut = 0;
             for (let t of this.periodTransactions) {
+                if (isInternalTransfer(t)) continue;
                 const amt = parseFloat(t.amount_uah || t.amount);
                 if (t.direction === 'in') totalIn += amt; else totalOut += amt;
             }
@@ -581,12 +616,18 @@ function transactionsApp() {
             let result = [];
 
             for (let t of this.periodTransactions) {
+                // Hide internal transfer IN — only show OUT as the "transfer" row
+                if (isInternalTransfer(t) && t.direction === 'in') continue;
+
                 const balance = currentBalance;
                 const amt = parseFloat(t.amount_uah || t.amount);
-                if (t.direction === 'in') {
-                    currentBalance -= amt;
-                } else {
-                    currentBalance += amt;
+                // Internal transfers don't affect running balance (paired IN+OUT cancel out)
+                if (!isInternalTransfer(t)) {
+                    if (t.direction === 'in') {
+                        currentBalance -= amt;
+                    } else {
+                        currentBalance += amt;
+                    }
                 }
 
                 // Apply sub-filter (direction)

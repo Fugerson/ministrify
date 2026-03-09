@@ -4337,6 +4337,7 @@ return [
     // Transaction types
     'transaction_allocation' => 'Виділення',
     'transaction_allocation_budget' => 'Виділення бюджету',
+    'transaction_internal_transfer' => 'Внутрішній переказ',
     'transaction_exchange' => 'Обмін',
     'transaction_exchange_currency' => 'Обмін валют',
 ];
