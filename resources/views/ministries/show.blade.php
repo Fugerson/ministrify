@@ -2040,6 +2040,7 @@
                                     <div class="flex-1 min-w-0">
                                         <div class="flex items-center gap-2">
                                             <span class="font-semibold text-green-600 dark:text-green-400 whitespace-nowrap" x-text="'+' + new Intl.NumberFormat('uk-UA').format(inc.amount) + ' ' + inc.currency"></span>
+                                            <span x-show="inc.source_type === 'allocation'" class="inline-flex items-center px-1.5 py-0.5 text-[10px] font-medium rounded bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">Виділення</span>
                                             <span class="text-sm text-gray-900 dark:text-white truncate" x-text="inc.description"></span>
                                         </div>
                                         <div class="flex items-center gap-2 mt-0.5">
@@ -5158,7 +5159,7 @@ function budgetPage() {
         },
         get filteredIncome() {
             return this.allTransactions
-                .filter(t => t.direction === 'in' && t.source_type !== 'allocation' && t.month === this.currentMonth && t.year === this.currentYear)
+                .filter(t => t.direction === 'in' && t.month === this.currentMonth && t.year === this.currentYear)
                 .sort((a, b) => b.date.localeCompare(a.date));
         },
         get totalIncome() {
