@@ -209,7 +209,15 @@ function exportButton() {
                                 <div class="text-xs text-gray-500 dark:text-gray-400" x-text="formatWeekday(item.transaction.date)"></div>
                             </td>
                             <td class="px-4 py-3">
-                                <div class="text-sm text-gray-900 dark:text-white" x-text="truncate(item.transaction.description, 40)"></div>
+                                <div class="flex items-center gap-1.5">
+                                    <span class="text-sm text-gray-900 dark:text-white" x-text="truncate(item.transaction.description, 40)"></span>
+                                    <template x-if="item.transaction.source_type === 'allocation'">
+                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300">{{ __('app.transaction_allocation') }}</span>
+                                    </template>
+                                    <template x-if="item.transaction.source_type === 'exchange'">
+                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">{{ __('app.transaction_exchange') }}</span>
+                                    </template>
+                                </div>
                                 <div class="text-xs text-gray-500 dark:text-gray-400" x-show="item.transaction.payment_method" x-text="paymentMethods[item.transaction.payment_method] || item.transaction.payment_method"></div>
                             </td>
                             <td class="px-4 py-3 whitespace-nowrap">
@@ -232,7 +240,7 @@ function exportButton() {
                                 </template>
                             </td>
                             <td class="px-4 py-3 whitespace-nowrap text-right">
-                                <span class="text-sm font-semibold" :class="item.transaction.direction === 'in' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
+                                <span class="text-sm font-semibold" :class="item.transaction.source_type === 'allocation' ? 'text-violet-600 dark:text-violet-400' : (item.transaction.source_type === 'exchange' ? 'text-amber-600 dark:text-amber-400' : (item.transaction.direction === 'in' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'))">
                                     <span x-text="(item.transaction.direction === 'in' ? '+' : '-') + formatNumber(item.transaction.amount)"></span>
                                     <span class="text-xs" x-text="currencySymbol(item.transaction.currency)"></span>
                                 </span>
@@ -318,9 +326,14 @@ function exportButton() {
                     <div class="p-6 space-y-4">
                         <!-- Amount -->
                         <div class="text-center py-4">
-                            <span class="text-3xl font-bold" :class="transaction?.direction === 'in' ? 'text-green-600' : 'text-red-600'"
+                            <span class="text-3xl font-bold" :class="transaction?.source_type === 'allocation' ? 'text-violet-600' : (transaction?.source_type === 'exchange' ? 'text-amber-600' : (transaction?.direction === 'in' ? 'text-green-600' : 'text-red-600'))"
                                   x-text="(transaction?.direction === 'in' ? '+' : '-') + formatNumber(transaction?.amount || 0) + ' ' + currencySymbol(transaction?.currency)">
                             </span>
+                            <template x-if="transaction?.source_type === 'allocation'">
+                                <div class="mt-1">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300">{{ __('app.transaction_allocation_budget') }}</span>
+                                </div>
+                            </template>
                         </div>
 
                         <!-- Details Grid -->
@@ -331,7 +344,7 @@ function exportButton() {
                             </div>
                             <div>
                                 <span class="text-gray-500 dark:text-gray-400">{{ __('app.finance_type_colon') }}</span>
-                                <span class="ml-2 text-gray-900 dark:text-white" x-text="transaction?.direction === 'in' ? @js( __('app.finance_type_income') ) : @js( __('app.finance_type_expense') )"></span>
+                                <span class="ml-2 text-gray-900 dark:text-white" x-text="transaction?.source_type === 'allocation' ? @js(__('app.transaction_allocation_budget')) : (transaction?.source_type === 'exchange' ? @js(__('app.transaction_exchange_currency')) : (transaction?.direction === 'in' ? @js( __('app.finance_type_income') ) : @js( __('app.finance_type_expense') )))"></span>
                             </div>
                             <div>
                                 <span class="text-gray-500 dark:text-gray-400">{{ __('app.finance_category_colon') }}</span>
@@ -536,8 +549,11 @@ function transactionsApp() {
             }
 
             let income = 0, expense = 0;
+            let allIn = 0, allOut = 0;
             for (let t of transactions) {
                 const amt = parseFloat(t.amount_uah || t.amount);
+                if (t.direction === 'in') { allIn += amt; } else { allOut += amt; }
+                if (t.source_type === 'allocation' || t.source_type === 'exchange') continue;
                 if (t.direction === 'in') {
                     income += amt;
                 } else {
@@ -549,13 +565,19 @@ function transactionsApp() {
                 balanceBefore,
                 income,
                 expense,
-                balanceAfter: balanceBefore + income - expense
+                balanceAfter: balanceBefore + allIn - allOut
             };
         },
 
         get displayedTransactions() {
-            const { balanceBefore, income, expense } = this.periodStats;
-            let currentBalance = balanceBefore + income - expense;
+            const { balanceBefore } = this.periodStats;
+            // Running balance includes ALL transactions (including allocations/exchanges)
+            let totalIn = 0, totalOut = 0;
+            for (let t of this.periodTransactions) {
+                const amt = parseFloat(t.amount_uah || t.amount);
+                if (t.direction === 'in') totalIn += amt; else totalOut += amt;
+            }
+            let currentBalance = balanceBefore + totalIn - totalOut;
             let result = [];
 
             for (let t of this.periodTransactions) {

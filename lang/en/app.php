@@ -4872,4 +4872,10 @@ return [
     'settings_multi_currency_info' => 'Enable the currencies you need for accounting. Hryvnia is the main currency and cannot be disabled.',
     'settings_main_currency_required' => 'Main currency (required)',
     'settings_nbu_rates' => 'NBU exchange rates',
+
+    // Transaction types
+    'transaction_allocation' => 'Allocation',
+    'transaction_allocation_budget' => 'Budget Allocation',
+    'transaction_exchange' => 'Exchange',
+    'transaction_exchange_currency' => 'Currency Exchange',
 ];

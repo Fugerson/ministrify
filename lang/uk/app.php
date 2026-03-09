@@ -4333,4 +4333,10 @@ return [
     'settings_multi_currency_info' => 'Увімкніть потрібні валюти для ведення обліку. Гривня є основною валютою і не може бути вимкнена.',
     'settings_main_currency_required' => 'Основна валюта (обов\'язкова)',
     'settings_nbu_rates' => 'Курси НБУ',
+
+    // Transaction types
+    'transaction_allocation' => 'Виділення',
+    'transaction_allocation_budget' => 'Виділення бюджету',
+    'transaction_exchange' => 'Обмін',
+    'transaction_exchange_currency' => 'Обмін валют',
 ];
