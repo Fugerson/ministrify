@@ -5391,6 +5391,20 @@ function budgetPage() {
         // ==================
 
         async openExpenseModal(mode, transactionData) {
+            // Check if ministry has any budget/funds before allowing new expense
+            if (mode === 'create') {
+                const received = (this.budget.total_allocated || 0) + (this.budget.total_income || 0);
+                if (received <= 0) {
+                    if (typeof showToast === 'function') showToast('warning', 'Бюджет не виділено. Спочатку церква має виділити кошти для служіння.');
+                    return;
+                }
+                if (this.balance <= 0) {
+                    if (!confirm('Баланс служіння: ' + this.fmt(this.balance) + ' ₴. Кошти вичерпано. Все одно додати витрату?')) {
+                        return;
+                    }
+                }
+            }
+
             this.expenseMode = mode;
             this.expenseModalTitle = mode === 'create' ? 'Нова витрата' : 'Редагувати витрату';
             this.expenseFiles = [];

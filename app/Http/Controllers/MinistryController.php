@@ -789,6 +789,23 @@ class MinistryController extends Controller
             'receipts.*' => 'file|mimes:jpg,jpeg,png,gif,webp,heic,heif,pdf|max:10240',
         ]);
 
+        // Check if ministry has received any funds
+        $expenseDate = Carbon::parse($validated['date']);
+        $totalReceived = Transaction::where('church_id', $church->id)
+            ->where('ministry_id', $ministry->id)
+            ->where('direction', Transaction::DIRECTION_IN)
+            ->completed()
+            ->whereYear('date', $expenseDate->year)
+            ->whereMonth('date', $expenseDate->month)
+            ->sum(\DB::raw('COALESCE(amount_uah, amount)'));
+
+        if ($totalReceived <= 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Бюджет не виділено. Спочатку церква має виділити кошти для служіння.',
+            ], 422);
+        }
+
         // If custom category name provided, find or create
         $categoryId = $validated['category_id'] ?? null;
         if (!$categoryId && !empty($validated['category_name'])) {
