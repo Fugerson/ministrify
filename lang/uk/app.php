@@ -3605,6 +3605,8 @@ return [
     'songs_found_count' => 'Знайдено:',
     'songs_found_suffix' => 'пісень',
     'songs_reset_filters' => 'Скинути фільтри',
+    'songs_show_filters' => 'Фільтри',
+    'songs_hide_filters' => 'Сховати',
     'songs_nothing_found' => 'Нічого не знайдено',
     'songs_try_change_search' => 'Спробуйте змінити параметри пошуку',
     'songs_library_empty' => 'Бібліотека порожня',

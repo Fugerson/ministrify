@@ -24,13 +24,28 @@
 @section('content')
 <div x-data="songsLibrary()" class="space-y-6">
     <!-- Search & Filters -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
-        <div class="flex flex-wrap gap-3">
-            <div class="flex-1 min-w-[200px] relative">
+    <div x-data="{ showFilters: false }" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
+        <div class="flex gap-3">
+            <div class="flex-1 relative">
                 <input type="text" x-model="search"
                        class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
                        placeholder="{{ __('app.songs_search_placeholder') }}">
             </div>
+            <button x-on:click="showFilters = !showFilters" class="sm:hidden px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-sm text-gray-600 dark:text-gray-300 flex items-center gap-1.5">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+                </svg>
+                <span x-text="showFilters ? '{{ __('app.songs_hide_filters') }}' : '{{ __('app.songs_show_filters') }}'"></span>
+            </button>
+            <select x-model="sortBy"
+                    class="hidden sm:block px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-sm">
+                <option value="title">{{ __('app.songs_sort_by_title') }}</option>
+                <option value="recent">{{ __('app.songs_sort_by_recent') }}</option>
+                <option value="popular">{{ __('app.songs_sort_by_popular') }}</option>
+                <option value="last_used">{{ __('app.songs_sort_by_last_used') }}</option>
+            </select>
+        </div>
+        <div class="flex flex-wrap gap-3 mt-3" :class="{ 'hidden sm:flex': !showFilters }">
             <select x-model="filterKey"
                     class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-sm">
                 <option value="">{{ __('app.songs_all_keys') }}</option>
@@ -78,7 +93,7 @@
                 <option value="no_chords">{{ __('app.songs_without_chords') }}</option>
             </select>
             <select x-model="sortBy"
-                    class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-sm">
+                    class="sm:hidden px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-sm">
                 <option value="title">{{ __('app.songs_sort_by_title') }}</option>
                 <option value="recent">{{ __('app.songs_sort_by_recent') }}</option>
                 <option value="popular">{{ __('app.songs_sort_by_popular') }}</option>

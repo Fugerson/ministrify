@@ -4144,6 +4144,8 @@ return [
     'songs_found_count' => 'Found:',
     'songs_found_suffix' => 'songs',
     'songs_reset_filters' => 'Reset filters',
+    'songs_show_filters' => 'Filters',
+    'songs_hide_filters' => 'Hide',
     'songs_nothing_found' => 'Nothing found',
     'songs_try_change_search' => 'Try changing your search parameters',
     'songs_library_empty' => 'Library is empty',
