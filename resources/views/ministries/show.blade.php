@@ -2007,7 +2007,7 @@
                                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
                                         <p x-show="itemForm.frequency === 'weekly' && itemForm.planned_amount > 0" class="text-xs text-primary-600 dark:text-primary-400 mt-1" x-text="'≈ ' + new Intl.NumberFormat('uk-UA').format(Math.ceil(itemForm.planned_amount * weeksInCurrentMonth)) + ' ₴ за місяць (' + weeksInCurrentMonth + ' тижнів)'"></p>
                                     </div>
-                                    <div>
+                                    <div x-show="itemForm.frequency === 'one_time'" x-transition>
                                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.ministry_planned_date_label') }}</label>
                                         <input type="date" x-model="itemForm.planned_date"
                                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
@@ -5295,7 +5295,7 @@ function budgetPage() {
                     name: this.itemForm.name,
                     planned_amount: this.itemForm.planned_amount,
                     frequency: this.itemForm.frequency || 'one_time',
-                    planned_date: this.itemForm.planned_date || null,
+                    planned_date: this.itemForm.frequency === 'one_time' ? (this.itemForm.planned_date || null) : null,
                     category_id: (this.itemForm.category_id && this.itemForm.category_id !== '__custom__') ? this.itemForm.category_id : null,
                     category_name: (this.itemForm.category_id === '__custom__' && this.itemForm.category_name) ? this.itemForm.category_name : null,
                     notes: this.itemForm.notes || null,
