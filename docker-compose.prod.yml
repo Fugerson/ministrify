@@ -48,6 +48,7 @@ services:
       - RECAPTCHA_SITE_KEY=${RECAPTCHA_SITE_KEY:-}
       - RECAPTCHA_SECRET_KEY=${RECAPTCHA_SECRET_KEY:-}
       - RECAPTCHA_THRESHOLD=${RECAPTCHA_THRESHOLD:-0.5}
+      - GOOGLE_ANALYTICS_ID=${GOOGLE_ANALYTICS_ID:-}
     volumes:
       - app_storage:/var/www/html/storage/app/public
       - ./docker/php/production.ini:/usr/local/etc/php/conf.d/production.ini
