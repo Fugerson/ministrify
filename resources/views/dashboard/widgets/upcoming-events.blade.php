@@ -36,6 +36,12 @@
                 </svg>
             </div>
             <p class="text-gray-500 dark:text-gray-400 text-sm">{{ __('app.no_planned_events_short') }}</p>
+            @can('create', \App\Models\Event::class)
+            <a href="{{ route('events.create') }}" class="inline-flex items-center gap-1.5 mt-3 px-4 py-2 text-sm font-medium text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20 rounded-lg hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                {{ __('app.create_first_event') }}
+            </a>
+            @endcan
         </div>
         @endforelse
     </div>

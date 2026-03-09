@@ -34,6 +34,10 @@ class UserPreferencesController extends Controller
             $preferences['tour_completed'] = $request->boolean('tour_completed');
         }
 
+        if ($request->has('onboarding_banner_dismissed')) {
+            $preferences['onboarding_banner_dismissed'] = $request->boolean('onboarding_banner_dismissed');
+        }
+
         $user->update(['preferences' => $preferences]);
 
         return response()->json(['success' => true]);

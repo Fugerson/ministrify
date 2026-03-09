@@ -4830,4 +4830,27 @@ return [
     'bo_saving' => 'Saving...',
     'bo_delete' => 'Delete',
     'bo_edit_title' => 'Edit period',
+
+    // Onboarding banner
+    'onboarding_welcome' => 'Welcome, :name!',
+    'onboarding_welcome_desc' => 'Complete these steps to set up your church in Ministrify',
+    'onboarding_all_done' => 'All set!',
+    'onboarding_all_done_desc' => 'Your church is configured. Enjoy using Ministrify!',
+    'onboarding_progress' => 'Setup progress',
+    'onboarding_step_profile' => 'Church profile',
+    'onboarding_step_profile_desc' => 'Logo and city',
+    'onboarding_step_people' => 'Add people',
+    'onboarding_step_people_desc' => 'Add church members',
+    'onboarding_step_ministry' => 'Create a team',
+    'onboarding_step_ministry_desc' => 'Organize ministries',
+    'onboarding_step_event' => 'Create an event',
+    'onboarding_step_event_desc' => 'Plan your first event',
+    'onboarding_step_group' => 'Create a group',
+    'onboarding_step_group_desc' => 'Home group or class',
+
+    // Empty widget CTAs
+    'create_first_event' => 'Create first event',
+    'add_first_person' => 'Add first person',
+    'create_first_ministry' => 'Create first team',
+    'create_first_group' => 'Create first group',
 ];

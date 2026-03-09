@@ -4291,4 +4291,27 @@ return [
     'bo_saving' => 'Збереження...',
     'bo_delete' => 'Видалити',
     'bo_edit_title' => 'Редагувати період',
+
+    // Onboarding banner
+    'onboarding_welcome' => 'Вітаємо, :name!',
+    'onboarding_welcome_desc' => 'Виконайте ці кроки, щоб налаштувати вашу церкву в Ministrify',
+    'onboarding_all_done' => 'Все готово!',
+    'onboarding_all_done_desc' => 'Ваша церква налаштована. Бажаємо продуктивної роботи!',
+    'onboarding_progress' => 'Прогрес налаштування',
+    'onboarding_step_profile' => 'Профіль церкви',
+    'onboarding_step_profile_desc' => 'Логотип та місто',
+    'onboarding_step_people' => 'Додати людей',
+    'onboarding_step_people_desc' => 'Внесіть членів церкви',
+    'onboarding_step_ministry' => 'Створити команду',
+    'onboarding_step_ministry_desc' => 'Організуйте служіння',
+    'onboarding_step_event' => 'Створити подію',
+    'onboarding_step_event_desc' => 'Заплануйте першу подію',
+    'onboarding_step_group' => 'Створити групу',
+    'onboarding_step_group_desc' => 'Домашня група або клас',
+
+    // Empty widget CTAs
+    'create_first_event' => 'Створити першу подію',
+    'add_first_person' => 'Додати першу людину',
+    'create_first_ministry' => 'Створити першу команду',
+    'create_first_group' => 'Створити першу групу',
 ];
