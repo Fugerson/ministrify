@@ -4314,4 +4314,23 @@ return [
     'add_first_person' => 'Додати першу людину',
     'create_first_ministry' => 'Створити першу команду',
     'create_first_group' => 'Створити першу групу',
+
+    // Finance Settings - Initial Balance & Multi-currency
+    'settings_initial_balance' => 'Початковий залишок',
+    'settings_initial_balance_desc' => 'Вкажіть залишки на момент початку обліку в системі',
+    'settings_how_it_works' => 'Як це працює:',
+    'settings_initial_balance_info' => 'Залишки будуть додані як початкова транзакція на обрану дату. Всі подальші операції будуть враховувати цей залишок.',
+    'settings_balance_date' => 'Дата залишку',
+    'settings_currency_uah' => 'Гривня',
+    'settings_currency_usd' => 'Долар',
+    'settings_currency_eur' => 'Євро',
+    'settings_currency_uah_full' => 'Українська гривня (UAH)',
+    'settings_currency_usd_full' => 'Долар США (USD)',
+    'settings_currency_eur_full' => 'Євро (EUR)',
+    'settings_multi_currency' => 'Мультивалютний облік',
+    'settings_multi_currency_desc' => 'Ведіть облік у кількох валютах одночасно',
+    'settings_multi_currency_accounting' => 'Мультивалютний облік:',
+    'settings_multi_currency_info' => 'Увімкніть потрібні валюти для ведення обліку. Гривня є основною валютою і не може бути вимкнена.',
+    'settings_main_currency_required' => 'Основна валюта (обов\'язкова)',
+    'settings_nbu_rates' => 'Курси НБУ',
 ];

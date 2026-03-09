@@ -4853,4 +4853,23 @@ return [
     'add_first_person' => 'Add first person',
     'create_first_ministry' => 'Create first team',
     'create_first_group' => 'Create first group',
+
+    // Finance Settings - Initial Balance & Multi-currency
+    'settings_initial_balance' => 'Initial Balance',
+    'settings_initial_balance_desc' => 'Set balances at the start of accounting in the system',
+    'settings_how_it_works' => 'How it works:',
+    'settings_initial_balance_info' => 'Balances will be added as an initial transaction on the selected date. All subsequent operations will take this balance into account.',
+    'settings_balance_date' => 'Balance date',
+    'settings_currency_uah' => 'Hryvnia',
+    'settings_currency_usd' => 'Dollar',
+    'settings_currency_eur' => 'Euro',
+    'settings_currency_uah_full' => 'Ukrainian Hryvnia (UAH)',
+    'settings_currency_usd_full' => 'US Dollar (USD)',
+    'settings_currency_eur_full' => 'Euro (EUR)',
+    'settings_multi_currency' => 'Multi-currency Accounting',
+    'settings_multi_currency_desc' => 'Keep records in multiple currencies simultaneously',
+    'settings_multi_currency_accounting' => 'Multi-currency accounting:',
+    'settings_multi_currency_info' => 'Enable the currencies you need for accounting. Hryvnia is the main currency and cannot be disabled.',
+    'settings_main_currency_required' => 'Main currency (required)',
+    'settings_nbu_rates' => 'NBU exchange rates',
 ];
