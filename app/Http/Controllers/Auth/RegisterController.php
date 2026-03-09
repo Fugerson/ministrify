@@ -36,7 +36,7 @@ class RegisterController extends Controller
         $churches = Church::where('settings->self_registration_enabled', true)
             ->orWhereNull('settings->self_registration_enabled') // Default: allow
             ->orderBy('name')
-            ->get(['id', 'name', 'city']);
+            ->get(['id', 'name', 'city', 'logo']);
 
         return view('auth.join', compact('churches'));
     }

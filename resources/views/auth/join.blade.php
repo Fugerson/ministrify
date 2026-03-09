@@ -13,21 +13,71 @@
     <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ __('auth.select_church_create_account') }}</p>
 </div>
 
-<form method="POST" action="{{ route('join.store') }}" class="space-y-5" x-data="{ showPassword: false }">
+@php
+    $churchCards = $churches->map(function($c) {
+        return ['id' => $c->id, 'name' => $c->name, 'city' => $c->city, 'logo' => $c->logo ? asset('storage/' . $c->logo) : null];
+    })->values();
+@endphp
+<script>
+    window._joinData = {
+        churches: {!! json_encode($churchCards) !!},
+        oldChurchId: '{{ old('church_id', '') }}'
+    };
+</script>
+<form method="POST" action="{{ route('join.store') }}" class="space-y-5" x-data="{ showPassword: false, selectedChurch: window._joinData.oldChurchId, churchSearch: '', churches: window._joinData.churches }" x-init="if(selectedChurch) { $nextTick(() => { let el = document.getElementById('church-' + selectedChurch); if(el) el.scrollIntoView({block:'nearest'}); }) }">
     @csrf
 
-    <!-- Church Select -->
+    <!-- Church Select - Visual Cards -->
     <div>
-        <label for="church_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('auth.your_church') }}</label>
-        <select name="church_id" id="church_id" required
-                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 dark:text-white border-0 rounded-xl focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-primary-500/20 transition-all">
-            <option value="">{{ __('auth.select_church_placeholder') }}</option>
-            @foreach($churches as $church)
-                <option value="{{ $church->id }}" {{ old('church_id') == $church->id ? 'selected' : '' }}>
-                    {{ $church->name }} ({{ $church->city }})
-                </option>
-            @endforeach
-        </select>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('auth.your_church') }}</label>
+        <input type="hidden" name="church_id" id="church_id" x-model="selectedChurch" required>
+
+        <!-- Search -->
+        <div class="relative mb-3" x-show="churches.length > 3">
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+            <input type="text" x-model="churchSearch"
+                   class="w-full pl-9 pr-4 py-2 text-sm bg-gray-50 dark:bg-gray-700 dark:text-white border-0 rounded-lg focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:ring-primary-500/20 transition-all"
+                   placeholder="{{ __('auth.search_church_placeholder') }}">
+        </div>
+
+        <!-- Church Cards Grid -->
+        <div class="grid grid-cols-1 gap-2 max-h-64 overflow-y-auto rounded-xl p-1">
+            <template x-for="church in churches.filter(c => !churchSearch || c.name.toLowerCase().includes(churchSearch.toLowerCase()) || c.city.toLowerCase().includes(churchSearch.toLowerCase()))" :key="church.id">
+                <button type="button"
+                        :id="'church-' + church.id"
+                        x-on:click="selectedChurch = church.id"
+                        :class="selectedChurch == church.id ? 'ring-2 ring-primary-500 bg-primary-50 dark:bg-primary-900/30' : 'bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600'"
+                        class="w-full flex items-center gap-3 p-3 rounded-xl transition-all text-left">
+                    <!-- Logo or placeholder -->
+                    <div class="w-10 h-10 rounded-lg flex-shrink-0 overflow-hidden bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
+                        <template x-if="church.logo">
+                            <img :src="church.logo" :alt="church.name" class="w-full h-full object-cover">
+                        </template>
+                        <template x-if="!church.logo">
+                            <span class="text-lg">⛪</span>
+                        </template>
+                    </div>
+                    <!-- Info -->
+                    <div class="min-w-0 flex-1">
+                        <div class="font-medium text-sm text-gray-900 dark:text-white truncate" x-text="church.name"></div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400" x-text="church.city"></div>
+                    </div>
+                    <!-- Check -->
+                    <svg x-show="selectedChurch == church.id" class="w-5 h-5 text-primary-600 dark:text-primary-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                    </svg>
+                </button>
+            </template>
+        </div>
+
+        <!-- No results -->
+        <p x-show="churchSearch && churches.filter(c => c.name.toLowerCase().includes(churchSearch.toLowerCase()) || c.city.toLowerCase().includes(churchSearch.toLowerCase())).length === 0"
+           class="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
+            {{ __('auth.church_not_found') }}
+        </p>
+
         @error('church_id')
             <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
         @enderror

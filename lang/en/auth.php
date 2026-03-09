@@ -91,6 +91,8 @@ return [
     'select_church_create_account' => 'Select your church and create an account',
     'your_church' => 'Your church',
     'select_church_placeholder' => 'Select a church...',
+    'search_church_placeholder' => 'Search church...',
+    'church_not_found' => 'Church not found',
     'name_placeholder' => 'John Smith',
     'first_select_church' => 'Please select a church first',
     'join_with_google' => 'Join with Google',

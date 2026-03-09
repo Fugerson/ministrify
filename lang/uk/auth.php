@@ -91,6 +91,8 @@ return [
     'select_church_create_account' => 'Оберіть вашу церкву та створіть акаунт',
     'your_church' => 'Ваша церква',
     'select_church_placeholder' => 'Оберіть церкву...',
+    'search_church_placeholder' => 'Пошук церкви...',
+    'church_not_found' => 'Церкву не знайдено',
     'name_placeholder' => 'Іван Петренко',
     'first_select_church' => 'Спочатку оберіть церкву',
     'join_with_google' => 'Приєднатися з Google',
