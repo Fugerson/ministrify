@@ -188,8 +188,9 @@ class Group extends Model
         $recent = $this->attendances()->orderByDesc('date')->take(4)->pluck('members_present')->reverse()->values();
         if ($recent->count() < 2) return $this->computedCache['attendance_trend'] = 'stable';
 
-        $first = $recent->take(2)->avg();
-        $last = $recent->skip(2)->avg() ?: $recent->last();
+        $half = (int) floor($recent->count() / 2);
+        $first = $recent->take($half)->avg();
+        $last = $recent->skip($half)->avg();
 
         if ($last > $first * 1.1) return $this->computedCache['attendance_trend'] = 'up';
         if ($last < $first * 0.9) return $this->computedCache['attendance_trend'] = 'down';

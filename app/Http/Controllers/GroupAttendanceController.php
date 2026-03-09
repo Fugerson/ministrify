@@ -181,15 +181,19 @@ class GroupAttendanceController extends Controller
             ]);
         }
 
-        // Add new members if any
+        // Add new members if any (updateOrCreate prevents duplicates)
         $existingPersonIds = $attendance->records->pluck('person_id')->toArray();
         foreach ($group->members as $member) {
             if (!in_array($member->id, $existingPersonIds)) {
-                AttendanceRecord::create([
-                    'attendance_id' => $attendance->id,
-                    'person_id' => $member->id,
-                    'present' => in_array($member->id, $presentIds),
-                ]);
+                AttendanceRecord::updateOrCreate(
+                    [
+                        'attendance_id' => $attendance->id,
+                        'person_id' => $member->id,
+                    ],
+                    [
+                        'present' => in_array($member->id, $presentIds),
+                    ]
+                );
             }
         }
 
