@@ -2160,19 +2160,6 @@
                     <span class="text-sm font-semibold text-gray-900 dark:text-white" x-text="fmt(totalSum) + ' ₴'"></span>
                 </div>
 
-                <!-- Search & Sort -->
-                <div x-show="allTransactions.length > 0" class="flex flex-col sm:flex-row gap-3 mb-4">
-                    <div class="flex-1">
-                        <input type="text" x-model="search" placeholder="Пошук..."
-                               class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
-                    </div>
-                    <select x-model="sortBy" class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                        <option value="date_desc">Спочатку нові</option>
-                        <option value="date_asc">Спочатку старі</option>
-                        <option value="amount_desc">Сума ↓</option>
-                        <option value="amount_asc">Сума ↑</option>
-                    </select>
-                </div>
 
                 <!-- Expenses Table -->
                 <div class="overflow-x-auto" x-show="filteredTransactions.length > 0">
