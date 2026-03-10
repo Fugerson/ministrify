@@ -3,9 +3,9 @@
         "relation": ["delegate_permission/common.handle_all_urls"],
         "target": {
             "namespace": "android_app",
-            "package_name": "app.ministrify.church",
+            "package_name": "app.ministrify.twa",
             "sha256_cert_fingerprints": [
-                "CB:DC:14:B2:55:E5:5F:9C:B7:F7:BE:D2:09:DA:97:08:07:43:FB:A0:0A:5F:18:F1:66:E9:83:4A:C1:45:14:1C"
+                "1E:9A:EF:3C:A8:01:68:41:11:97:2D:CE:BD:04:98:8B:61:F7:3B:A5:42:19:AB:71:87:5C:0D:53:92:D5:9C:68"
             ]
         }
     }
