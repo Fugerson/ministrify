@@ -6,19 +6,19 @@
 
 @section('schema')
 <script type="application/ld+json">
-{
-    "@context": "https://schema.org",
-    "@type": "WebPage",
-    "name": @js( __('landing.register_church_page') ),
-    "description": @js( __('landing.register_quick_access') ),
-    "potentialAction": {
-        "@type": "RegisterAction",
-        "target": {
-            "@type": "EntryPoint",
-            "urlTemplate": "{{ url('/register-church') }}"
-        }
-    }
-}
+{!! json_encode([
+    '@context' => 'https://schema.org',
+    '@type' => 'WebPage',
+    'name' => __('landing.register_church_page'),
+    'description' => __('landing.register_quick_access'),
+    'potentialAction' => [
+        '@type' => 'RegisterAction',
+        'target' => [
+            '@type' => 'EntryPoint',
+            'urlTemplate' => url('/register-church'),
+        ],
+    ],
+], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) !!}
 </script>
 @endsection
 

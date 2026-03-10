@@ -241,57 +241,56 @@
     {{-- Schema.org Markup --}}
     @yield('schema')
     <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Ministrify",
-        "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Church Management Software",
-        "operatingSystem": "Web, iOS, Android",
-        "description": @js( __('landing.schema_description') ),
-        "url": "{{ url('/') }}",
-        "inLanguage": "{{ app()->getLocale() }}",
-        "author": {
-            "@type": "Organization",
-            "name": "Ministrify",
-            "url": "{{ url('/') }}",
-            "logo": "{{ asset('icon-512x512.png') }}"
-        },
-        "offers": {
-            "@type": "Offer",
-            "availability": "https://schema.org/InStock",
-            "description": @js( __('landing.schema_available') )
-        },
-        "featureList": @js( __('landing.schema_features') )
-    }
+    {!! json_encode([
+        '@context' => 'https://schema.org',
+        '@type' => 'SoftwareApplication',
+        'name' => 'Ministrify',
+        'applicationCategory' => 'BusinessApplication',
+        'applicationSubCategory' => 'Church Management Software',
+        'operatingSystem' => 'Web, iOS, Android',
+        'description' => __('landing.schema_description'),
+        'url' => url('/'),
+        'inLanguage' => app()->getLocale(),
+        'author' => [
+            '@type' => 'Organization',
+            'name' => 'Ministrify',
+            'url' => url('/'),
+            'logo' => asset('icon-512x512.png'),
+        ],
+        'offers' => [
+            '@type' => 'Offer',
+            'availability' => 'https://schema.org/InStock',
+            'description' => __('landing.schema_available'),
+        ],
+        'featureList' => array_map('trim', explode(',', __('landing.schema_features'))),
+    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) !!}
     </script>
     <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "Organization",
-        "name": "Ministrify",
-        "url": "{{ url('/') }}",
-        "logo": "{{ asset('icon-512x512.png') }}",
-        "description": @js( __('landing.schema_org_description') ),
-        "foundingDate": "2024",
-        "foundingLocation": "Ukraine",
-        "areaServed": {
-            "@type": "GeoCircle",
-            "geoMidpoint": {
-                "@type": "GeoCoordinates",
-                "latitude": "48.3794",
-                "longitude": "31.1656"
-            },
-            "geoRadius": "5000000"
-        },
-        "contactPoint": {
-            "@type": "ContactPoint",
-            "contactType": "customer support",
-            "url": "{{ url('/contact') }}",
-            "availableLanguage": ["Ukrainian", "Russian", "English"]
-        },
-        "sameAs": []
-    }
+    {!! json_encode([
+        '@context' => 'https://schema.org',
+        '@type' => 'Organization',
+        'name' => 'Ministrify',
+        'url' => url('/'),
+        'logo' => asset('icon-512x512.png'),
+        'description' => __('landing.schema_org_description'),
+        'foundingDate' => '2024',
+        'foundingLocation' => 'Ukraine',
+        'areaServed' => [
+            '@type' => 'GeoCircle',
+            'geoMidpoint' => [
+                '@type' => 'GeoCoordinates',
+                'latitude' => 48.3794,
+                'longitude' => 31.1656,
+            ],
+            'geoRadius' => '5000 km',
+        ],
+        'contactPoint' => [
+            '@type' => 'ContactPoint',
+            'contactType' => 'customer support',
+            'url' => url('/contact'),
+            'availableLanguage' => ['Ukrainian', 'Russian', 'English'],
+        ],
+    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) !!}
     </script>
 
     {{-- Alpine.js --}}

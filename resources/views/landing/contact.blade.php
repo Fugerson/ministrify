@@ -6,19 +6,19 @@
 
 @section('schema')
 <script type="application/ld+json">
-{
-    "@context": "https://schema.org",
-    "@type": "ContactPage",
-    "name": @js( __('landing.contact_us_page') ),
-    "description": @js( __('landing.contact_team') ),
-    "mainEntity": {
-        "@type": "Organization",
-        "name": "Ministrify",
-        "email": "hello@ministrify.one",
-        "areaServed": "UA",
-        "availableLanguage": ["uk", "ru", "en"]
-    }
-}
+{!! json_encode([
+    '@context' => 'https://schema.org',
+    '@type' => 'ContactPage',
+    'name' => __('landing.contact_us_page'),
+    'description' => __('landing.contact_team'),
+    'mainEntity' => [
+        '@type' => 'Organization',
+        'name' => 'Ministrify',
+        'email' => 'hello@ministrify.one',
+        'areaServed' => 'UA',
+        'availableLanguage' => ['uk', 'ru', 'en'],
+    ],
+], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) !!}
 </script>
 @endsection
 
