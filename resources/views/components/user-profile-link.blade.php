@@ -17,6 +17,19 @@
             {{-- Profile --}}
             <a href="{{ route('my-profile') }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">{{ __('app.my_profile') }}</a>
 
+            {{-- Language switcher --}}
+            @php
+                $currentLocale = app()->getLocale();
+                $otherLocale = $currentLocale === 'uk' ? 'en' : 'uk';
+                $otherFlag = $otherLocale === 'uk' ? '🇺🇦' : '🇬🇧';
+                $otherLabel = $otherLocale === 'en' ? 'English' : 'Українська';
+            @endphp
+            <button onclick="switchLocaleAccount('{{ $otherLocale }}')" class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+                <span>{{ $otherFlag }}</span> {{ $otherLabel }}
+            </button>
+
+            <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
+
             {{-- Logout --}}
             <form method="POST" action="{{ route('logout') }}" class="block">
                 @csrf

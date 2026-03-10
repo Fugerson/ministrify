@@ -286,5 +286,17 @@
             </div>
         </div>
     </footer>
+<script>
+window.switchLocale = function(locale) {
+    const maxAge = 365 * 24 * 60 * 60;
+    document.cookie = 'locale=' + locale + '; path=/; max-age=' + maxAge + '; SameSite=Lax; Secure';
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+    const formData = new FormData();
+    formData.append('_token', csrfToken);
+    fetch('/locale/' + locale, { method: 'POST', credentials: 'include', body: formData })
+        .then(() => location.reload())
+        .catch(err => console.error('Locale switch error:', err));
+};
+</script>
 </body>
 </html>
