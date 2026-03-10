@@ -144,6 +144,7 @@ Route::get('docs', [LandingController::class, 'docs'])->name('landing.docs');
 Route::get('faq', [LandingController::class, 'faq'])->name('landing.faq');
 Route::get('terms', [LandingController::class, 'terms'])->name('landing.terms');
 Route::get('privacy', [LandingController::class, 'privacy'])->name('landing.privacy');
+Route::get('account-deletion', [LandingController::class, 'accountDeletion'])->name('landing.account-deletion');
 
 // Public church mini-sites with rate limiting for forms
 Route::prefix('c/{slug}')->name('public.')->middleware('throttle:60,1')->group(function () {

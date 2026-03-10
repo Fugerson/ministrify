@@ -119,6 +119,15 @@ class LandingController extends Controller
     }
 
     /**
+     * Account deletion page (required by Google Play)
+     */
+    public function accountDeletion()
+    {
+        return Response::view('landing.account-deletion')
+            ->header('Cache-Control', 'public, max-age=3600, must-revalidate');
+    }
+
+    /**
      * Church registration page
      */
     public function register()
