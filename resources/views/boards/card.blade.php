@@ -44,14 +44,14 @@
                         <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/>
                         </svg>
-                        <h3 class="font-medium text-gray-900 dark:text-white">{{ __('Опис') }}</h3>
+                        <h3 class="font-medium text-gray-900 dark:text-white">{{ __('app.board_card_description') }}</h3>
                     </div>
 
                     <div x-show="!editing" @click="editing = true" class="cursor-pointer">
                         @if($card->description)
                             <p class="text-gray-600 dark:text-gray-300 whitespace-pre-wrap">{{ $card->description }}</p>
                         @else
-                            <p class="text-gray-400 dark:text-gray-500 italic">{{ __('Натисніть, щоб додати опис...') }}</p>
+                            <p class="text-gray-400 dark:text-gray-500 italic">{{ __('app.board_card_click_add_desc') }}</p>
                         @endif
                     </div>
 
@@ -61,11 +61,11 @@
                         <div class="flex items-center gap-2 mt-2">
                             <button type="submit" :disabled="saving"
                                     class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50">
-                                {{ __('Зберегти') }}
+                                {{ __('app.board_card_save') }}
                             </button>
                             <button type="button" @click="editing = false"
                                     class="px-4 py-2 text-gray-600 dark:text-gray-400 text-sm font-medium">
-                                {{ __('Скасувати') }}
+                                {{ __('app.board_card_cancel') }}
                             </button>
                         </div>
                     </div>
@@ -79,7 +79,7 @@
                         <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
                         </svg>
-                        <h3 class="font-medium text-gray-900 dark:text-white">{{ __('Чеклист') }}</h3>
+                        <h3 class="font-medium text-gray-900 dark:text-white">{{ __('app.board_card_checklist') }}</h3>
                     </div>
 
                     @if($card->checklistItems->count() > 0)
@@ -111,7 +111,7 @@
                                 {{ $item->title }}
                             </span>
                             <button type="button"
-                                    @click="ajaxDelete('{{ route('boards.cards.checklist.destroy', $item) }}', @js( __('Видалити пункт?') ), () => $el.closest('[data-checklist-item]').remove())"
+                                    @click="ajaxDelete('{{ route('boards.cards.checklist.destroy', $item) }}', @js( __('app.board_delete_item_confirm') ), () => $el.closest('[data-checklist-item]').remove())"
                                     class="opacity-0 group-hover:opacity-100 transition-opacity p-1 text-gray-400 hover:text-red-500">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -129,16 +129,16 @@
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                             </svg>
-                            {{ __('Додати пункт') }}
+                            {{ __('app.board_add_checklist_item') }}
                         </button>
                     </template>
                     <template x-if="adding">
                         <form @submit.prevent="submit($refs.checklistForm)" x-ref="checklistForm">
                             <div class="flex items-center gap-2">
-                                <input type="text" name="title" required autofocus placeholder="{{ __('Назва пункту...') }}"
+                                <input type="text" name="title" required autofocus placeholder="{{ __('app.board_card_item_placeholder') }}"
                                        class="flex-1 px-3 py-2 bg-gray-50 dark:bg-gray-700 border-0 rounded-lg focus:ring-2 focus:ring-primary-500 dark:text-white text-sm">
                                 <button type="submit" :disabled="saving" class="px-3 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg disabled:opacity-50">
-                                    {{ __('Додати') }}
+                                    {{ __('app.board_card_add_btn') }}
                                 </button>
                                 <button type="button" @click="adding = false" class="p-2 text-gray-400 hover:text-gray-600">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -157,17 +157,17 @@
                     <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
                     </svg>
-                    <h3 class="font-medium text-gray-900 dark:text-white">{{ __('Коментарі') }}</h3>
+                    <h3 class="font-medium text-gray-900 dark:text-white">{{ __('app.board_comments') }}</h3>
                 </div>
 
                 <!-- Add comment -->
                 <form @submit.prevent="submit($refs.commentForm)" x-ref="commentForm"
                       x-data="{ ...ajaxForm({ url: '{{ route('boards.cards.comments.store', $card) }}', method: 'POST', resetOnSuccess: true, stayOnPage: true, onSuccess() { _cardAddComment(this); } }) }"
                       class="mb-4">
-                    <textarea name="content" rows="2" required placeholder="{{ __('Написати коментар...') }}"
+                    <textarea name="content" rows="2" required placeholder="{{ __('app.board_write_comment') }}"
                               class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white text-sm"></textarea>
                     <button type="submit" :disabled="saving" class="mt-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50">
-                        {{ __('Коментувати') }}
+                        {{ __('app.board_comment_submit') }}
                     </button>
                 </form>
 
@@ -182,14 +182,14 @@
                             </div>
                             <div class="flex-1">
                                 <div class="flex items-center gap-2">
-                                    <span class="font-medium text-gray-900 dark:text-white text-sm">{{ $comment->user?->name ?? __('Видалений') }}</span>
+                                    <span class="font-medium text-gray-900 dark:text-white text-sm">{{ $comment->user?->name ?? __('app.board_deleted_user') }}</span>
                                     <span class="text-xs text-gray-500 dark:text-gray-400">{{ $comment->created_at->diffForHumans() }}</span>
                                 </div>
                                 <p class="text-gray-600 dark:text-gray-300 text-sm mt-1">{{ $comment->content }}</p>
                             </div>
                             @if($comment->user_id === auth()->id())
                                 <button type="button"
-                                        @click="ajaxDelete('{{ route('boards.comments.destroy', $comment) }}', @js( __('Видалити коментар?') ), () => $el.closest('[data-comment]').remove())"
+                                        @click="ajaxDelete('{{ route('boards.comments.destroy', $comment) }}', @js( __('app.board_delete_comment_confirm') ), () => $el.closest('[data-comment]').remove())"
                                         class="opacity-0 group-hover:opacity-100 transition-opacity p-1 text-gray-400 hover:text-red-500">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
@@ -198,7 +198,7 @@
                             @endif
                         </div>
                     @empty
-                        <p class="text-center text-gray-500 dark:text-gray-400 text-sm py-4">{{ __('Немає коментарів') }}</p>
+                        <p class="text-center text-gray-500 dark:text-gray-400 text-sm py-4">{{ __('app.board_no_comments_card') }}</p>
                     @endforelse
                 </div>
             </div>
@@ -208,7 +208,7 @@
         <div class="space-y-6">
             <!-- Card Details -->
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-5">
-                <h3 class="font-semibold text-gray-900 dark:text-white mb-4">{{ __('Деталі') }}</h3>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.board_details') }}</h3>
 
                 <form @submit.prevent="submit($refs.detailsForm)" x-ref="detailsForm"
                       x-data="{ ...ajaxForm({ url: '{{ route('boards.cards.update', $card) }}', method: 'PUT', stayOnPage: true }) }"
@@ -218,7 +218,7 @@
 
                     <!-- Column -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Колонка') }}</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.board_card_column') }}</label>
                         <select name="column_id"
                                 class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border-0 rounded-lg focus:ring-2 focus:ring-primary-500 dark:text-white text-sm"
                                 @change="submit($refs.detailsForm)">
@@ -232,24 +232,24 @@
 
                     <!-- Priority -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Пріоритет') }}</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.board_card_priority') }}</label>
                         <select name="priority"
                                 class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border-0 rounded-lg focus:ring-2 focus:ring-primary-500 dark:text-white text-sm"
                                 @change="submit($refs.detailsForm)">
-                            <option value="low" {{ $card->priority === 'low' ? 'selected' : '' }}>{{ __('Низький') }}</option>
-                            <option value="medium" {{ $card->priority === 'medium' ? 'selected' : '' }}>{{ __('Середній') }}</option>
-                            <option value="high" {{ $card->priority === 'high' ? 'selected' : '' }}>{{ __('Високий') }}</option>
-                            <option value="urgent" {{ $card->priority === 'urgent' ? 'selected' : '' }}>{{ __('Терміновий') }}</option>
+                            <option value="low" {{ $card->priority === 'low' ? 'selected' : '' }}>{{ __('app.board_priority_low') }}</option>
+                            <option value="medium" {{ $card->priority === 'medium' ? 'selected' : '' }}>{{ __('app.board_priority_medium') }}</option>
+                            <option value="high" {{ $card->priority === 'high' ? 'selected' : '' }}>{{ __('app.board_priority_high') }}</option>
+                            <option value="urgent" {{ $card->priority === 'urgent' ? 'selected' : '' }}>{{ __('app.board_priority_urgent') }}</option>
                         </select>
                     </div>
 
                     <!-- Assignee -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Відповідальний') }}</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.board_card_responsible') }}</label>
                         <select name="assigned_to"
                                 class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border-0 rounded-lg focus:ring-2 focus:ring-primary-500 dark:text-white text-sm"
                                 @change="submit($refs.detailsForm)">
-                            <option value="">{{ __('Не призначено') }}</option>
+                            <option value="">{{ __('app.board_card_not_assigned') }}</option>
                             @foreach($people as $person)
                                 <option value="{{ $person->id }}" {{ $card->assigned_to === $person->id ? 'selected' : '' }}>
                                     {{ $person->full_name }}
@@ -260,7 +260,7 @@
 
                     <!-- Due Date -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Дедлайн') }}</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.board_card_deadline') }}</label>
                         <input type="date" name="due_date"
                                value="{{ $card->due_date?->format('Y-m-d') }}"
                                class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border-0 rounded-lg focus:ring-2 focus:ring-primary-500 dark:text-white text-sm"
@@ -273,18 +273,18 @@
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-5">
                 <div class="space-y-3 text-sm">
                     <div class="flex items-center justify-between text-gray-500 dark:text-gray-400">
-                        <span>{{ __('Створено') }}</span>
+                        <span>{{ __('app.board_card_created') }}</span>
                         <span>{{ $card->created_at->format('d.m.Y H:i') }}</span>
                     </div>
                     @if($card->creator)
                         <div class="flex items-center justify-between text-gray-500 dark:text-gray-400">
-                            <span>{{ __('Автор') }}</span>
+                            <span>{{ __('app.board_card_author') }}</span>
                             <span>{{ $card->creator->name }}</span>
                         </div>
                     @endif
                     @if($card->is_completed)
                         <div class="flex items-center justify-between text-green-600 dark:text-green-400">
-                            <span>{{ __('Завершено') }}</span>
+                            <span>{{ __('app.board_card_completed') }}</span>
                             <span>{{ $card->completed_at?->format('d.m.Y H:i') }}</span>
                         </div>
                     @endif
@@ -293,23 +293,23 @@
 
             <!-- Actions -->
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-5">
-                <h3 class="font-semibold text-gray-900 dark:text-white mb-4">{{ __('Дії') }}</h3>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.board_actions') }}</h3>
                 <div class="space-y-2">
                     <a href="{{ $card->column->board->ministry_id ? route('boards.show', $card->column->board) : route('boards.index') }}"
                        class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300">
                         <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                         </svg>
-                        <span>{{ __('Назад до дошки') }}</span>
+                        <span>{{ __('app.board_back_to_board') }}</span>
                     </a>
 
                     <button type="button"
-                            @click="ajaxDelete('{{ route('boards.cards.destroy', $card) }}', @js( __('Видалити картку?') ), null, '{{ $card->column->board->ministry_id ? route('boards.show', $card->column->board) : route('boards.index') }}')"
+                            @click="ajaxDelete('{{ route('boards.cards.destroy', $card) }}', @js( __('app.board_delete_card_page_confirm') ), null, '{{ $card->column->board->ministry_id ? route('boards.show', $card->column->board) : route('boards.index') }}')"
                             class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-red-600 dark:text-red-400">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                         </svg>
-                        <span>{{ __('Видалити картку') }}</span>
+                        <span>{{ __('app.board_delete_card_btn') }}</span>
                     </button>
                 </div>
             </div>

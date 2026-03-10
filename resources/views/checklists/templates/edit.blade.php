@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Редагувати шаблон')
+@section('title', __('app.edit_template'))
 
 @php
     $templateItemsData = $template->items->map(function($i) {
@@ -14,11 +14,11 @@
 
         <!-- Basic Info -->
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Інформація про шаблон</h2>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.template_info') }}</h2>
 
             <div class="space-y-4">
                 <div>
-                    <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Назва *</label>
+                    <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.name_required') }}</label>
                     <input type="text" name="name" id="name" required
                            value="{{ old('name', $template->name) }}"
                            class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
@@ -28,7 +28,7 @@
                 </div>
 
                 <div>
-                    <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Опис</label>
+                    <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.description') }}</label>
                     <textarea name="description" id="description" rows="2"
                               class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">{{ old('description', $template->description) }}</textarea>
                 </div>
@@ -38,13 +38,13 @@
         <!-- Checklist Items -->
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
             <div class="flex items-center justify-between mb-4">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Пункти чеклиста</h2>
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.checklist_items') }}</h2>
                 <button type="button" @click="addItem()"
                         class="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 font-medium flex items-center gap-1">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                     </svg>
-                    Додати пункт
+                    {{ __('app.add_item') }}
                 </button>
             </div>
 
@@ -56,10 +56,10 @@
                         <div class="flex-1 space-y-2">
                             <input type="hidden" :name="'items[' + index + '][id]'" x-model="item.id">
                             <input type="text" :name="'items[' + index + '][title]'" x-model="item.title"
-                                   placeholder="Назва пункту *" required
+                                   placeholder="{{ __('app.item_title_placeholder') }}" required
                                    class="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:text-white text-sm">
                             <input type="text" :name="'items[' + index + '][description]'" x-model="item.description"
-                                   placeholder="Опис (опціонально)"
+                                   placeholder="{{ __('app.description_optional') }}"
                                    class="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:text-white text-sm">
                         </div>
                         <button type="button" @click="removeItem(index)" x-show="items.length > 1"
@@ -77,7 +77,7 @@
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
-                Додати ще пункт
+                {{ __('app.add_another_item') }}
             </button>
         </div>
 
@@ -86,17 +86,17 @@
             <button type="button"
                     @click="ajaxDelete('{{ route('checklists.templates.destroy', $template) }}', @js( __('messages.confirm_delete_template') ), null, '{{ route('checklists.templates') }}')"
                     class="text-red-600 dark:text-red-400 hover:text-red-700 text-sm font-medium">
-                Видалити шаблон
+                {{ __('app.delete_template') }}
             </button>
 
             <div class="flex items-center gap-3">
                 <a href="{{ route('checklists.templates') }}"
                    class="px-5 py-2.5 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium">
-                    Скасувати
+                    {{ __('app.cancel') }}
                 </a>
                 <button type="submit" :disabled="saving"
                         class="px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors disabled:opacity-50">
-                    Зберегти
+                    {{ __('app.save') }}
                 </button>
             </div>
         </div>

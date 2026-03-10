@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', __('Витрати'))
+@section('title', __('app.expense_list_title'))
 
 @section('actions')
 <a href="{{ route('finances.expenses.create') }}"
@@ -8,13 +8,13 @@
     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
     </svg>
-    {{ __('Витрата') }}
+    {{ __('app.expense_btn') }}
 </a>
 @endsection
 
 @section('content')
 @php
-    $months = [__('Січень'), __('Лютий'), __('Березень'), __('Квітень'), __('Травень'), __('Червень'), __('Липень'), __('Серпень'), __('Вересень'), __('Жовтень'), __('Листопад'), __('Грудень')];
+    $months = [__('app.january'), __('app.february'), __('app.march'), __('app.april'), __('app.may'), __('app.june'), __('app.july'), __('app.august'), __('app.september'), __('app.october'), __('app.november'), __('app.december')];
 @endphp
 
 <div class="space-y-6">
@@ -23,7 +23,7 @@
         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
         </svg>
-        {{ __('До аналітики') }}
+        {{ __('app.expense_to_analytics') }}
     </a>
 
     <!-- Summary card -->
@@ -47,22 +47,22 @@
 
             @if(auth()->user()->canView('finances'))
             <a href="{{ route('finances.index') }}" class="text-primary-600 dark:text-primary-400 hover:text-primary-500 text-sm">
-                {{ __('Повний звіт') }}
+                {{ __('app.expense_full_report') }}
             </a>
             @endif
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
-                <p class="text-sm text-blue-600 dark:text-blue-400">{{ __('Бюджет') }}</p>
+                <p class="text-sm text-blue-600 dark:text-blue-400">{{ __('app.expense_budget') }}</p>
                 <p class="text-2xl font-bold text-blue-700 dark:text-blue-300">{{ number_format($totals['budget'], 0, ',', ' ') }} ₴</p>
             </div>
             <div class="bg-red-50 dark:bg-red-900/20 rounded-lg p-4">
-                <p class="text-sm text-red-600 dark:text-red-400">{{ __('Витрачено') }}</p>
+                <p class="text-sm text-red-600 dark:text-red-400">{{ __('app.expense_spent') }}</p>
                 <p class="text-2xl font-bold text-red-700 dark:text-red-300">{{ number_format($totals['spent'], 0, ',', ' ') }} ₴</p>
             </div>
             <div class="bg-{{ $totals['budget'] - $totals['spent'] < 0 ? 'orange' : 'green' }}-50 dark:bg-{{ $totals['budget'] - $totals['spent'] < 0 ? 'orange' : 'green' }}-900/20 rounded-lg p-4">
-                <p class="text-sm {{ $totals['budget'] - $totals['spent'] < 0 ? 'text-orange-600 dark:text-orange-400' : 'text-green-600 dark:text-green-400' }}">{{ __('Залишок') }}</p>
+                <p class="text-sm {{ $totals['budget'] - $totals['spent'] < 0 ? 'text-orange-600 dark:text-orange-400' : 'text-green-600 dark:text-green-400' }}">{{ __('app.expense_balance') }}</p>
                 <p class="text-2xl font-bold {{ $totals['budget'] - $totals['spent'] < 0 ? 'text-orange-700 dark:text-orange-300' : 'text-green-700 dark:text-green-300' }}">
                     {{ number_format($totals['budget'] - $totals['spent'], 0, ',', ' ') }} ₴
                 </p>
@@ -78,7 +78,7 @@
                 <input type="hidden" name="month" value="{{ $month }}">
                 <select name="ministry" onchange="this.form.submit()"
                         class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
-                    <option value="">{{ __('Всі команди') }}</option>
+                    <option value="">{{ __('app.expense_all_teams') }}</option>
                     @foreach($ministries as $ministry)
                         <option value="{{ $ministry->id }}" {{ request('ministry') == $ministry->id ? 'selected' : '' }}>
                             {{ $ministry->name }}
@@ -92,12 +92,12 @@
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead class="bg-gray-50 dark:bg-gray-900/50">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ __('Дата') }}</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ __('Опис') }}</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ __('Команда') }}</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ __('Категорія') }}</th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ __('Сума') }}</th>
-                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ __('Дії') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ __('app.expense_date') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ __('app.expense_description') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ __('app.expense_team') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ __('app.expense_category') }}</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ __('app.expense_amount') }}</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ __('app.expense_actions') }}</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -123,14 +123,14 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
                                 <a href="{{ route('finances.expenses.edit', $expense) }}" class="text-primary-600 dark:text-primary-400 hover:text-primary-900 dark:hover:text-primary-300">
-                                    {{ __('Редагувати') }}
+                                    {{ __('app.expense_edit') }}
                                 </a>
                             </td>
                         </tr>
                     @empty
                         <tr>
                             <td colspan="6" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
-                                {{ __('Немає витрат за цей місяць') }}
+                                {{ __('app.expense_no_expenses_month') }}
                             </td>
                         </tr>
                     @endforelse

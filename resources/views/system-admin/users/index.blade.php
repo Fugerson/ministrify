@@ -1,18 +1,18 @@
 @extends('layouts.system-admin')
 
-@section('title', 'Користувачі')
+@section('title', __('app.users'))
 
 @section('content')
 <div class="space-y-6">
     <!-- Filters -->
     <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
         <form method="GET" class="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-wrap gap-3 sm:gap-4">
-            <input type="text" name="search" value="{{ request('search') }}" placeholder="Пошук за іменем або email..."
+            <input type="text" name="search" value="{{ request('search') }}" placeholder="{{ __('app.search_by_name_or_email') }}"
                    class="sm:col-span-2 lg:flex-1 lg:min-w-64 px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
 
             <select name="church_id"
                     class="w-full lg:w-auto px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
-                <option value="">Всі церкви</option>
+                <option value="">{{ __('app.all_churches') }}</option>
                 @foreach($churches as $church)
                 <option value="{{ $church->id }}" {{ request('church_id') == $church->id ? 'selected' : '' }}>
                     {{ $church->name }}
@@ -22,10 +22,10 @@
 
             <select name="role"
                     class="w-full lg:w-auto px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
-                <option value="">Всі ролі</option>
-                <option value="admin" {{ request('role') == 'admin' ? 'selected' : '' }}>Адміністратор</option>
-                <option value="leader" {{ request('role') == 'leader' ? 'selected' : '' }}>Лідер</option>
-                <option value="volunteer" {{ request('role') == 'volunteer' ? 'selected' : '' }}>Служитель</option>
+                <option value="">{{ __('app.all_roles') }}</option>
+                <option value="admin" {{ request('role') == 'admin' ? 'selected' : '' }}>{{ __('app.administrator') }}</option>
+                <option value="leader" {{ request('role') == 'leader' ? 'selected' : '' }}>{{ __('app.leader') }}</option>
+                <option value="volunteer" {{ request('role') == 'volunteer' ? 'selected' : '' }}>{{ __('app.volunteer') }}</option>
             </select>
 
             <label class="flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white cursor-pointer">
@@ -43,8 +43,8 @@
             </select>
 
             <div class="flex gap-3 sm:col-span-2 lg:contents">
-                <button type="submit" class="flex-1 lg:flex-none px-6 py-2 bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 text-gray-900 dark:text-white rounded-lg">Фільтрувати</button>
-                <a href="{{ route('system.users.index') }}" class="flex-1 lg:flex-none px-6 py-2 text-center bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-white rounded-lg">Скинути</a>
+                <button type="submit" class="flex-1 lg:flex-none px-6 py-2 bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 text-gray-900 dark:text-white rounded-lg">{{ __('app.filter') }}</button>
+                <a href="{{ route('system.users.index') }}" class="flex-1 lg:flex-none px-6 py-2 text-center bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-white rounded-lg">{{ __('app.reset_filters') }}</a>
             </div>
         </form>
 
@@ -54,11 +54,11 @@
                 <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                 </svg>
-                Видалених: {{ $deletedCount }}
+                {{ __('app.deleted_count') }}: {{ $deletedCount }}
             </span>
             <a href="{{ route('system.users.index', ['only_deleted' => 1]) }}"
                class="text-sm text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 font-medium">
-                Показати видалених →
+                {{ __('app.show_deleted') }} →
             </a>
         </div>
         @endif
@@ -70,10 +70,10 @@
             <table class="w-full">
                 <thead class="bg-gray-50 dark:bg-gray-700/50">
                     <tr>
-                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Користувач</th>
-                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Церква / Роль</th>
-                        <th class="px-6 py-4 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Створено</th>
-                        <th class="px-6 py-4 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Дії</th>
+                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ __('app.user') }}</th>
+                        <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ __('app.church_role') }}</th>
+                        <th class="px-6 py-4 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ __('app.created_at_column') }}</th>
+                        <th class="px-6 py-4 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ __('app.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -92,7 +92,7 @@
                                     <p class="font-medium {{ $user->trashed() ? 'text-red-600 dark:text-red-400 line-through' : 'text-gray-900 dark:text-white' }}">{{ $user->name }}</p>
                                     <p class="text-xs text-gray-500 dark:text-gray-400">{{ $user->email }}</p>
                                     @if($user->trashed())
-                                    <p class="text-xs text-red-500 mt-1">Видалено: {{ $user->deleted_at->format('d.m.Y H:i') }}</p>
+                                    <p class="text-xs text-red-500 mt-1">{{ __('app.deleted_at') }}: {{ $user->deleted_at->format('d.m.Y H:i') }}</p>
                                     @endif
                                 </div>
                             </div>
@@ -105,7 +105,7 @@
                             @if($membership->church)
                             <div class="flex items-center gap-2 {{ !$loop->first ? 'mt-1' : '' }}">
                                 @if($membership->church->id === $user->church_id)
-                                <span class="w-2 h-2 rounded-full bg-green-500 flex-shrink-0" title="Активна"></span>
+                                <span class="w-2 h-2 rounded-full bg-green-500 flex-shrink-0" title="{{ __('app.active') }}"></span>
                                 @else
                                 <span class="w-2 h-2 rounded-full bg-gray-300 dark:bg-gray-600 flex-shrink-0"></span>
                                 @endif
@@ -118,13 +118,13 @@
                                     {{ $membership->role->is_admin_role ? 'bg-red-100 dark:bg-red-600/20 text-red-700 dark:text-red-400' : 'bg-blue-100 dark:bg-blue-600/20 text-blue-700 dark:text-blue-400' }}
                                 ">{{ $membership->role->name }}</span>
                                 @else
-                                <span class="px-2 py-0.5 bg-amber-100 dark:bg-amber-600/20 text-amber-700 dark:text-amber-400 text-xs rounded-full whitespace-nowrap">Очікує</span>
+                                <span class="px-2 py-0.5 bg-amber-100 dark:bg-amber-600/20 text-amber-700 dark:text-amber-400 text-xs rounded-full whitespace-nowrap">{{ __('app.awaiting') }}</span>
                                 @endif
                             </div>
                             @endif
                             @empty
                                 @if(!$user->is_super_admin)
-                                <span class="text-gray-400 dark:text-gray-500 text-sm">Без церкви</span>
+                                <span class="text-gray-400 dark:text-gray-500 text-sm">{{ __('app.no_church') }}</span>
                                 @endif
                             @endforelse
                         </td>
@@ -136,7 +136,7 @@
                                 @if($user->trashed())
                                     <form method="POST" action="{{ route('system.users.restore', $user->id) }}" class="inline">
                                         @csrf
-                                        <button type="submit" class="p-2 text-green-500 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg" title="Відновити">
+                                        <button type="submit" class="p-2 text-green-500 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg" title="{{ __('app.restore') }}">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                                             </svg>
@@ -146,7 +146,7 @@
                                           onsubmit="return confirm(@js( __('messages.confirm_delete_user_warning', ['name' => $user->name]) ))" class="inline">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="p-2 text-red-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg" title="Видалити назавжди">
+                                        <button type="submit" class="p-2 text-red-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg" title="{{ __('app.delete_forever') }}">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                                             </svg>
@@ -156,7 +156,7 @@
                                     @if($user->id !== auth()->id())
                                     <form method="POST" action="{{ route('system.users.impersonate', $user) }}" class="inline">
                                         @csrf
-                                        <button type="submit" class="p-2 text-gray-400 hover:text-green-600 dark:hover:text-green-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="Увійти як {{ $user->name }}">
+                                        <button type="submit" class="p-2 text-gray-400 hover:text-green-600 dark:hover:text-green-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="{{ __('app.login_as', ['name' => $user->name]) }}">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
                                             </svg>
@@ -164,7 +164,7 @@
                                     </form>
                                     @endif
                                     <a href="{{ route('system.users.edit', $user) }}"
-                                       class="p-2 text-gray-400 hover:text-gray-700 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="Редагувати">
+                                       class="p-2 text-gray-400 hover:text-gray-700 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="{{ __('app.edit') }}">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                         </svg>
@@ -174,7 +174,7 @@
                                           onsubmit="return confirm(@js( __('messages.confirm_delete_user', ['name' => $user->name]) ))" class="inline">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="Видалити">
+                                        <button type="submit" class="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="{{ __('app.delete') }}">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                             </svg>
@@ -187,7 +187,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="5" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">Користувачів не знайдено</td>
+                        <td colspan="5" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">{{ __('app.users_not_found') }}</td>
                     </tr>
                     @endforelse
                 </tbody>
@@ -223,7 +223,7 @@
                     @if($user->trashed())
                         <form method="POST" action="{{ route('system.users.restore', $user->id) }}" class="inline">
                             @csrf
-                            <button type="submit" class="p-2 text-green-500 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg" title="Відновити">
+                            <button type="submit" class="p-2 text-green-500 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg" title="{{ __('app.restore') }}">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                                 </svg>
@@ -233,7 +233,7 @@
                               onsubmit="return confirm(@js( __('messages.confirm_delete_user_warning', ['name' => $user->name]) ))" class="inline">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="p-2 text-red-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg" title="Видалити назавжди">
+                            <button type="submit" class="p-2 text-red-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg" title="{{ __('app.delete_forever') }}">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                                 </svg>
@@ -243,7 +243,7 @@
                         @if($user->id !== auth()->id())
                         <form method="POST" action="{{ route('system.users.impersonate', $user) }}" class="inline">
                             @csrf
-                            <button type="submit" class="p-2 text-gray-400 hover:text-green-600 dark:hover:text-green-400 rounded-lg" title="Увійти як {{ $user->name }}">
+                            <button type="submit" class="p-2 text-gray-400 hover:text-green-600 dark:hover:text-green-400 rounded-lg" title="{{ __('app.login_as', ['name' => $user->name]) }}">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
                                 </svg>
@@ -251,7 +251,7 @@
                         </form>
                         @endif
                         <a href="{{ route('system.users.edit', $user) }}"
-                           class="p-2 text-gray-400 hover:text-gray-700 dark:hover:text-white rounded-lg" title="Редагувати">
+                           class="p-2 text-gray-400 hover:text-gray-700 dark:hover:text-white rounded-lg" title="{{ __('app.edit') }}">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                             </svg>
@@ -261,7 +261,7 @@
                               onsubmit="return confirm(@js( __('messages.confirm_delete_user', ['name' => $user->name]) ))" class="inline">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded-lg" title="Видалити">
+                            <button type="submit" class="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded-lg" title="{{ __('app.delete') }}">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                 </svg>
@@ -280,7 +280,7 @@
                 @if($membership->church)
                 <div class="flex items-center gap-1.5">
                     @if($membership->church->id === $user->church_id)
-                    <span class="w-2 h-2 rounded-full bg-green-500 flex-shrink-0" title="Активна"></span>
+                    <span class="w-2 h-2 rounded-full bg-green-500 flex-shrink-0" title="{{ __('app.active') }}"></span>
                     @else
                     <span class="w-2 h-2 rounded-full bg-gray-300 dark:bg-gray-600 flex-shrink-0"></span>
                     @endif
@@ -293,25 +293,25 @@
                         {{ $membership->role->is_admin_role ? 'bg-red-100 dark:bg-red-600/20 text-red-700 dark:text-red-400' : 'bg-blue-100 dark:bg-blue-600/20 text-blue-700 dark:text-blue-400' }}
                     ">{{ $membership->role->name }}</span>
                     @else
-                    <span class="px-2 py-0.5 bg-amber-100 dark:bg-amber-600/20 text-amber-700 dark:text-amber-400 rounded-full whitespace-nowrap">Очікує</span>
+                    <span class="px-2 py-0.5 bg-amber-100 dark:bg-amber-600/20 text-amber-700 dark:text-amber-400 rounded-full whitespace-nowrap">{{ __('app.awaiting') }}</span>
                     @endif
                 </div>
                 @endif
                 @empty
                     @if(!$user->is_super_admin)
-                    <span class="text-gray-400 dark:text-gray-500">Без церкви</span>
+                    <span class="text-gray-400 dark:text-gray-500">{{ __('app.no_church') }}</span>
                     @endif
                 @endforelse
                 <span class="text-gray-400 dark:text-gray-500">{{ $user->created_at->format('d.m.Y') }}</span>
             </div>
 
             @if($user->trashed())
-            <p class="text-xs text-red-500 mt-2">Видалено: {{ $user->deleted_at->format('d.m.Y H:i') }}</p>
+            <p class="text-xs text-red-500 mt-2">{{ __('app.deleted_at') }}: {{ $user->deleted_at->format('d.m.Y H:i') }}</p>
             @endif
         </div>
         @empty
         <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-8 text-center text-gray-500 dark:text-gray-400">
-            Користувачів не знайдено
+            {{ __('app.users_not_found') }}
         </div>
         @endforelse
 

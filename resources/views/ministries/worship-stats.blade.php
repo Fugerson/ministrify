@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Статистика - ' . $ministry->name)
+@section('title', __('app.statistics') . ' - ' . $ministry->name)
 
 @section('content')
 <div class="space-y-6">
@@ -13,17 +13,17 @@
                 </svg>
             </a>
             <div>
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Статистика</h1>
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('app.statistics') }}</h1>
                 <p class="text-sm text-gray-500 dark:text-gray-400">{{ $ministry->name }}</p>
             </div>
         </div>
         <div class="flex items-center gap-2">
             <select id="period" onchange="Livewire.navigate('?period='+this.value)" class="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                <option value="month" {{ $period === 'month' ? 'selected' : '' }}>Цей місяць</option>
-                <option value="3months" {{ $period === '3months' ? 'selected' : '' }}>3 місяці</option>
-                <option value="6months" {{ $period === '6months' ? 'selected' : '' }}>6 місяців</option>
-                <option value="year" {{ $period === 'year' ? 'selected' : '' }}>Рік</option>
-                <option value="all" {{ $period === 'all' ? 'selected' : '' }}>Весь час</option>
+                <option value="month" {{ $period === 'month' ? 'selected' : '' }}>{{ __('app.this_month_period') }}</option>
+                <option value="3months" {{ $period === '3months' ? 'selected' : '' }}>{{ __('app.three_months_period') }}</option>
+                <option value="6months" {{ $period === '6months' ? 'selected' : '' }}>{{ __('app.six_months_period') }}</option>
+                <option value="year" {{ $period === 'year' ? 'selected' : '' }}>{{ __('app.year_period') }}</option>
+                <option value="all" {{ $period === 'all' ? 'selected' : '' }}>{{ __('app.all_time_period') }}</option>
             </select>
         </div>
     </div>
@@ -39,7 +39,7 @@
                 </div>
                 <div>
                     <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['total_events'] }}</p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Подій</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.events_stat') }}</p>
                 </div>
             </div>
         </div>
@@ -53,7 +53,7 @@
                 </div>
                 <div>
                     <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['total_participants'] }}</p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Учасників</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.participants_stat') }}</p>
                 </div>
             </div>
         </div>
@@ -67,7 +67,7 @@
                 </div>
                 <div>
                     <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['total_songs'] }}</p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Пісень зіграно</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.songs_played_stat') }}</p>
                 </div>
             </div>
         </div>
@@ -81,7 +81,7 @@
                 </div>
                 <div>
                     <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['unique_songs'] }}</p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Унікальних пісень</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.unique_songs_stat') }}</p>
                 </div>
             </div>
         </div>
@@ -94,7 +94,7 @@
                 <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                 </svg>
-                Топ учасників
+                {{ __('app.top_participants') }}
             </h2>
             @if(count($topParticipants) > 0)
                 <div class="space-y-3">
@@ -108,19 +108,19 @@
                                 {{ $index + 1 }}
                             </span>
                             <div class="flex-1 min-w-0">
-                                <p class="font-medium text-gray-900 dark:text-white truncate">{{ $participant->person?->full_name ?? 'Видалено' }}</p>
+                                <p class="font-medium text-gray-900 dark:text-white truncate">{{ $participant->person?->full_name ?? __('app.deleted_person_label') }}</p>
                                 <p class="text-xs text-gray-500 dark:text-gray-400">
                                     @foreach($participant->roles as $role)
                                         <span class="inline-block">{{ $role->name }}{{ !$loop->last ? ',' : '' }}</span>
                                     @endforeach
                                 </p>
                             </div>
-                            <span class="text-sm font-semibold text-gray-900 dark:text-white">{{ $participant->count }} {{ trans_choice('раз|рази|разів', $participant->count) }}</span>
+                            <span class="text-sm font-semibold text-gray-900 dark:text-white">{{ $participant->count }} {{ trans_choice(__('app.plural_time'), $participant->count) }}</span>
                         </div>
                     @endforeach
                 </div>
             @else
-                <p class="text-sm text-gray-500 dark:text-gray-400 text-center py-4">Немає даних</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 text-center py-4">{{ __('app.no_data_available') }}</p>
             @endif
         </div>
 
@@ -130,7 +130,7 @@
                 <svg class="w-5 h-5 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
                 </svg>
-                Популярні пісні
+                {{ __('app.popular_songs') }}
             </h2>
             @if(count($topSongs) > 0)
                 <div class="space-y-3">
@@ -149,12 +149,12 @@
                                     <p class="text-xs text-gray-500 dark:text-gray-400">{{ $song->author }}</p>
                                 @endif
                             </div>
-                            <span class="text-sm font-semibold text-gray-900 dark:text-white">{{ $song->play_count }} {{ trans_choice('раз|рази|разів', $song->play_count) }}</span>
+                            <span class="text-sm font-semibold text-gray-900 dark:text-white">{{ $song->play_count }} {{ trans_choice(__('app.plural_time'), $song->play_count) }}</span>
                         </div>
                     @endforeach
                 </div>
             @else
-                <p class="text-sm text-gray-500 dark:text-gray-400 text-center py-4">Немає даних</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 text-center py-4">{{ __('app.no_data_available') }}</p>
             @endif
         </div>
 
@@ -165,7 +165,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/>
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/>
                 </svg>
-                Розподіл по ролях
+                {{ __('app.role_distribution') }}
             </h2>
             @if(count($roleStats) > 0)
                 <div class="space-y-3">
@@ -183,7 +183,7 @@
                     @endforeach
                 </div>
             @else
-                <p class="text-sm text-gray-500 dark:text-gray-400 text-center py-4">Немає даних</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 text-center py-4">{{ __('app.no_data_available') }}</p>
             @endif
         </div>
 
@@ -193,7 +193,7 @@
                 <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
-                Останні події
+                {{ __('app.recent_events') }}
             </h2>
             @if(count($recentEvents) > 0)
                 <div class="space-y-3">
@@ -205,15 +205,15 @@
                                     <p class="text-xs text-gray-500 dark:text-gray-400">{{ $event->date->translatedFormat('j M Y') }}</p>
                                 </div>
                                 <div class="text-right">
-                                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ $event->songs_count }} пісень</p>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ $event->team_count }} учасників</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ $event->songs_count }} {{ __('app.count_songs') }}</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ $event->team_count }} {{ __('app.count_participants') }}</p>
                                 </div>
                             </div>
                         </a>
                     @endforeach
                 </div>
             @else
-                <p class="text-sm text-gray-500 dark:text-gray-400 text-center py-4">Немає даних</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 text-center py-4">{{ __('app.no_data_available') }}</p>
             @endif
         </div>
     </div>

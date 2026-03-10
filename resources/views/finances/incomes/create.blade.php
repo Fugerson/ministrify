@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Додати надходження')
+@section('title', __('app.add_income'))
 
 @section('content')
 <div class="max-w-2xl mx-auto" x-data="incomeCreateForm()">
@@ -8,12 +8,12 @@
         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
         </svg>
-        Назад
+        {{ __('app.back') }}
     </a>
 
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Нове надходження</h2>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.new_income') }}</h2>
         </div>
 
         <form @submit.prevent="submitForm" class="p-6 space-y-6" x-ref="form">
@@ -22,7 +22,7 @@
                 <!-- Amount -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Сума <span class="text-red-500">*</span>
+                        {{ __('app.amount_required') }} <span class="text-red-500">*</span>
                     </label>
                     <div class="flex gap-2">
                         <div class="relative flex-1">
@@ -44,9 +44,9 @@
                     </div>
                     <template x-if="currency !== 'UAH' && exchangeRates[currency]">
                         <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                            Курс НБУ: 1 <span x-text="currency"></span> = <span x-text="exchangeRates[currency]?.toFixed(2)"></span> ₴
+                            {{ __('app.nbu_rate') }}: 1 <span x-text="currency"></span> = <span x-text="exchangeRates[currency]?.toFixed(2)"></span> ₴
                             @if(\App\Models\ExchangeRate::getLatestRateDate())
-                                <span class="text-gray-400">({{ __('станом на') }} {{ \App\Models\ExchangeRate::getLatestRateDate() }})</span>
+                                <span class="text-gray-400">({{ __('app.as_of') }} {{ \App\Models\ExchangeRate::getLatestRateDate() }})</span>
                             @endif
                         </p>
                     </template>
@@ -58,7 +58,7 @@
                 <!-- Date -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Дата <span class="text-red-500">*</span>
+                        {{ __('app.date_required') }} <span class="text-red-500">*</span>
                     </label>
                     <input type="date" name="date" value="{{ old('date', now()->format('Y-m-d')) }}" required
                            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
@@ -71,7 +71,7 @@
             <!-- Category -->
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Категорія <span class="text-red-500">*</span>
+                    {{ __('app.category') }} <span class="text-red-500">*</span>
                 </label>
                 @php
                     $categoriesWithIcon = $categories->map(function($c) {
@@ -87,8 +87,8 @@
                     valueKey="id"
                     colorKey="color"
                     :searchKeys="['name', 'display_name']"
-                    placeholder="Пошук категорії..."
-                    nullText="Оберіть категорію"
+                    placeholder="{{ __('app.search_category') }}"
+                    nullText="{{ __('app.select_category') }}"
                     :nullable="false"
                     required
                 />
@@ -100,13 +100,14 @@
             <!-- Payment Method -->
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Спосіб оплати <span class="text-red-500">*</span>
+                    {{ __('app.payment_method_label') }} <span class="text-red-500">*</span>
                 </label>
                 <div class="grid grid-cols-2 gap-3">
-                    @foreach(['cash' => '💵 Готівка', 'card' => '💳 Картка'] as $value => $label)
+                    @php $paymentMethods = ['cash' => __('app.cash_payment'), 'card' => __('app.card_payment')]; @endphp
+                    @foreach($paymentMethods as $value => $label)
                         <label class="relative flex items-center justify-center px-4 py-3 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                             <input type="radio" name="payment_method" value="{{ $value }}" {{ old('payment_method', 'cash') == $value ? 'checked' : '' }} class="sr-only peer">
-                            <span class="text-sm text-gray-700 dark:text-gray-300 peer-checked:text-primary-600 dark:peer-checked:text-primary-400 peer-checked:font-medium">{{ $label }}</span>
+                            <span class="text-sm text-gray-700 dark:text-gray-300 peer-checked:text-primary-600 dark:peer-checked:text-primary-400 peer-checked:font-medium">{{ $value === 'cash' ? '💵' : '💳' }} {{ $label }}</span>
                             <div class="absolute inset-0 border-2 border-transparent peer-checked:border-primary-500 rounded-lg pointer-events-none"></div>
                         </label>
                     @endforeach
@@ -119,28 +120,28 @@
             <!-- Notes -->
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Нотатки
+                    {{ __('app.notes_label_simple') }}
                 </label>
                 <textarea name="notes" rows="3"
                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                          placeholder="Внутрішні нотатки...">{{ old('notes') }}</textarea>
+                          placeholder="{{ __('app.internal_notes_placeholder') }}">{{ old('notes') }}</textarea>
             </div>
 
             <!-- Submit -->
             <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
                 <a href="{{ route('finances.transactions', ['filter' => 'income']) }}"
                    class="w-full sm:w-auto px-4 py-2 text-center text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
-                    Скасувати
+                    {{ __('app.cancel') }}
                 </a>
                 <button type="submit" :disabled="saving"
                         class="w-full sm:w-auto px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
-                    <span x-show="!saving">Зберегти</span>
+                    <span x-show="!saving">{{ __('app.save') }}</span>
                     <span x-show="saving" class="flex items-center justify-center gap-2">
                         <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
                         </svg>
-                        Збереження...
+                        {{ __('app.saving') }}
                     </span>
                 </button>
             </div>
@@ -170,17 +171,17 @@ function incomeCreateForm() {
                 if (!response.ok) {
                     if (response.status === 422 && data.errors) {
                         this.errors = data.errors;
-                        showToast('error', 'Перевірте правильність заповнення форми.');
+                        showToast('error', @js(__('app.check_form_errors')));
                     } else {
-                        showToast('error', data.message || 'Помилка збереження.');
+                        showToast('error', data.message || @js(__('app.save_error')));
                     }
                     this.saving = false;
                     return;
                 }
-                showToast('success', data.message || 'Збережено!');
+                showToast('success', data.message || @js(__('app.saved')));
                 setTimeout(() => Livewire.navigate(data.redirect_url), 800);
             } catch (e) {
-                showToast('error', 'Помилка з\'єднання з сервером.');
+                showToast('error', @js(__('app.connection_error')));
                 this.saving = false;
             }
         }

@@ -1,6 +1,6 @@
 @extends('layouts.system-admin')
 
-@section('title', 'Активність')
+@section('title', __('app.sa_activity'))
 
 @section('content')
 <div class="space-y-6" x-data="activityLog()">
@@ -9,11 +9,11 @@
         <div class="flex gap-1 bg-white dark:bg-gray-800 rounded-xl p-1 border border-gray-200 dark:border-gray-700">
             <a href="{{ route('system.activity-log', ['tab' => 'actions']) }}"
                class="px-4 py-2 rounded-lg text-sm font-medium transition-colors {{ $tab === 'actions' ? 'bg-indigo-600 text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
-                Журнал дій
+                {{ __('app.sa_actions_log') }}
             </a>
             <a href="{{ route('system.activity-log', ['tab' => 'visits']) }}"
                class="px-4 py-2 rounded-lg text-sm font-medium transition-colors {{ $tab === 'visits' ? 'bg-indigo-600 text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
-                Навігація
+                {{ __('app.sa_navigation') }}
             </a>
         </div>
 
@@ -22,7 +22,7 @@
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
             </svg>
-            Очистити все
+            {{ __('app.sa_clear_all') }}
         </button>
     </div>
 
@@ -30,16 +30,16 @@
     <div x-show="selectedIds.length > 0" x-cloak
          class="bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-700 rounded-xl p-3 flex items-center justify-between">
         <span class="text-sm font-medium text-indigo-900 dark:text-indigo-200">
-            Обрано: <span x-text="selectedIds.length" class="font-bold"></span>
+            {{ __('app.sa_selected') }}: <span x-text="selectedIds.length" class="font-bold"></span>
         </span>
         <div class="flex gap-2">
             <button @click="selectedIds = []; selectAll = false"
                     class="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                Скасувати
+                {{ __('app.cancel') }}
             </button>
             <button @click="deleteSelected()"
                     class="px-3 py-1.5 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
-                Видалити обрані
+                {{ __('app.sa_delete_selected') }}
             </button>
         </div>
     </div>
@@ -59,12 +59,12 @@
         <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
             <form method="GET" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 <input type="hidden" name="tab" value="visits">
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="Пошук (URL, ім'я, маршрут)..."
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="{{ __('app.sa_search_url_name') }}"
                        class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
 
                 <select name="church_id"
                         class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
-                    <option value="">Всі церкви</option>
+                    <option value="">{{ __('app.sa_all_churches') }}</option>
                     @foreach($churches as $church)
                     <option value="{{ $church->id }}" {{ request('church_id') == $church->id ? 'selected' : '' }}>
                         {{ $church->name }}
@@ -79,8 +79,8 @@
                        class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white">
 
                 <div class="flex gap-2 md:col-span-3 lg:col-span-4">
-                    <button type="submit" class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors">Фільтрувати</button>
-                    <a href="{{ route('system.activity-log', ['tab' => 'visits']) }}" class="px-4 py-2 bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 text-gray-900 dark:text-white rounded-lg transition-colors">Скинути</a>
+                    <button type="submit" class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors">{{ __('app.sa_filter') }}</button>
+                    <a href="{{ route('system.activity-log', ['tab' => 'visits']) }}" class="px-4 py-2 bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 text-gray-900 dark:text-white rounded-lg transition-colors">{{ __('app.sa_reset') }}</a>
                 </div>
             </form>
         </div>
@@ -94,11 +94,11 @@
                         <span class="text-white text-sm font-bold">{{ mb_substr($filteredUser->name, 0, 1) }}</span>
                     </div>
                     <div>
-                        <span class="text-sm font-medium text-indigo-900 dark:text-indigo-200">Навігація користувача:</span>
+                        <span class="text-sm font-medium text-indigo-900 dark:text-indigo-200">{{ __('app.sa_user_navigation') }}:</span>
                         <span class="text-sm font-bold text-indigo-900 dark:text-white">{{ $filteredUser->name }}</span>
                     </div>
                 </div>
-                <a href="{{ route('system.activity-log', ['tab' => 'visits']) }}" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">Показати всіх</a>
+                <a href="{{ route('system.activity-log', ['tab' => 'visits']) }}" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">{{ __('app.sa_show_all') }}</a>
             </div>
             @endif
         @endif
@@ -107,19 +107,19 @@
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 text-center">
                 <p class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{{ $visits->total() }}</p>
-                <p class="text-gray-500 dark:text-gray-400 text-sm">Всього переглядів</p>
+                <p class="text-gray-500 dark:text-gray-400 text-sm">{{ __('app.sa_total_views') }}</p>
             </div>
             <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 text-center">
                 <p class="text-2xl font-bold text-green-600 dark:text-green-400">{{ $visits->pluck('user_id')->unique()->count() }}</p>
-                <p class="text-gray-500 dark:text-gray-400 text-sm">Користувачів на сторінці</p>
+                <p class="text-gray-500 dark:text-gray-400 text-sm">{{ __('app.sa_users_on_page') }}</p>
             </div>
             <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 text-center">
                 <p class="text-2xl font-bold text-purple-600 dark:text-purple-400">{{ $visits->pluck('route_name')->unique()->filter()->count() }}</p>
-                <p class="text-gray-500 dark:text-gray-400 text-sm">Унікальних сторінок</p>
+                <p class="text-gray-500 dark:text-gray-400 text-sm">{{ __('app.sa_unique_pages') }}</p>
             </div>
             <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 text-center">
                 <p class="text-2xl font-bold text-amber-600 dark:text-amber-400">{{ $visits->pluck('church_id')->unique()->filter()->count() }}</p>
-                <p class="text-gray-500 dark:text-gray-400 text-sm">Церков на сторінці</p>
+                <p class="text-gray-500 dark:text-gray-400 text-sm">{{ __('app.sa_churches_on_page') }}</p>
             </div>
         </div>
 
@@ -134,10 +134,10 @@
                                        @change="toggleSelectAll({{ json_encode($visits->pluck('id')->toArray()) }})"
                                        class="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-indigo-600 focus:ring-indigo-500">
                             </th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Час</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Користувач</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase hidden md:table-cell">Церква</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Сторінка</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">{{ __('app.sa_time') }}</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">{{ __('app.sa_user') }}</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase hidden md:table-cell">{{ __('app.church') }}</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">{{ __('app.sa_page') }}</th>
                             <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase hidden lg:table-cell">IP</th>
                         </tr>
                     </thead>
@@ -200,7 +200,7 @@
                                 <svg class="w-12 h-12 mx-auto mb-3 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
                                 </svg>
-                                Записів не знайдено
+                                {{ __('app.sa_no_records') }}
                             </td>
                         </tr>
                         @endforelse
@@ -222,12 +222,12 @@
         <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
             <form method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <input type="hidden" name="tab" value="actions">
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="Пошук..."
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="{{ __('app.search') }}..."
                        class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
 
                 <select name="church_id"
                         class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
-                    <option value="">Всі церкви</option>
+                    <option value="">{{ __('app.sa_all_churches') }}</option>
                     @foreach($churches as $church)
                     <option value="{{ $church->id }}" {{ request('church_id') == $church->id ? 'selected' : '' }}>
                         {{ $church->name }}
@@ -236,34 +236,34 @@
                 </select>
 
                 <select name="action" class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
-                    <option value="">Всі дії</option>
-                    <option value="created" {{ request('action') == 'created' ? 'selected' : '' }}>Створено</option>
-                    <option value="updated" {{ request('action') == 'updated' ? 'selected' : '' }}>Оновлено</option>
-                    <option value="deleted" {{ request('action') == 'deleted' ? 'selected' : '' }}>Видалено</option>
-                    <option value="restored" {{ request('action') == 'restored' ? 'selected' : '' }}>Відновлено</option>
-                    <option value="login" {{ request('action') == 'login' ? 'selected' : '' }}>Вхід</option>
-                    <option value="logout" {{ request('action') == 'logout' ? 'selected' : '' }}>Вихід</option>
-                    <option value="registered" {{ request('action') == 'registered' ? 'selected' : '' }}>Реєстрація</option>
-                    <option value="joined_church" {{ request('action') == 'joined_church' ? 'selected' : '' }}>Приєднання до церкви</option>
+                    <option value="">{{ __('app.sa_all_actions') }}</option>
+                    <option value="created" {{ request('action') == 'created' ? 'selected' : '' }}>{{ __('app.sa_action_created') }}</option>
+                    <option value="updated" {{ request('action') == 'updated' ? 'selected' : '' }}>{{ __('app.sa_action_updated') }}</option>
+                    <option value="deleted" {{ request('action') == 'deleted' ? 'selected' : '' }}>{{ __('app.sa_action_deleted') }}</option>
+                    <option value="restored" {{ request('action') == 'restored' ? 'selected' : '' }}>{{ __('app.sa_action_restored') }}</option>
+                    <option value="login" {{ request('action') == 'login' ? 'selected' : '' }}>{{ __('app.sa_action_login') }}</option>
+                    <option value="logout" {{ request('action') == 'logout' ? 'selected' : '' }}>{{ __('app.sa_action_logout') }}</option>
+                    <option value="registered" {{ request('action') == 'registered' ? 'selected' : '' }}>{{ __('app.sa_action_registered') }}</option>
+                    <option value="joined_church" {{ request('action') == 'joined_church' ? 'selected' : '' }}>{{ __('app.sa_action_joined_church') }}</option>
                 </select>
 
                 @php
                     $modelOptions = [
-                        'Person' => 'Члени', 'User' => 'Користувачі', 'Event' => 'Події',
-                        'Ministry' => 'Служіння', 'Group' => 'Групи',
-                        'Transaction' => 'Транзакції', 'DonationCampaign' => 'Кампанії пожертв',
-                        'OnlineDonation' => 'Онлайн-пожертви',
-                        'Board' => 'Дошки', 'BoardCard' => 'Картки',
-                        'BlogPost' => 'Блог-пости', 'Sermon' => 'Проповіді', 'Song' => 'Пісні',
-                        'Gallery' => 'Галереї', 'StaffMember' => 'Співробітники',
-                        'EventRegistration' => 'Реєстрації', 'PrayerRequest' => 'Молитовні потреби',
-                        'Announcement' => 'Оголошення', 'Assignment' => 'Призначення',
-                        'Attendance' => 'Відвідуваність', 'ChurchRole' => 'Церковні ролі',
-                        'Church' => 'Церква', 'SupportTicket' => 'Тікети підтримки',
+                        'Person' => __('app.sa_model_person'), 'User' => __('app.sa_model_user'), 'Event' => __('app.sa_model_event'),
+                        'Ministry' => __('app.sa_model_ministry'), 'Group' => __('app.sa_model_group'),
+                        'Transaction' => __('app.sa_model_transaction'), 'DonationCampaign' => __('app.sa_model_donation_campaign'),
+                        'OnlineDonation' => __('app.sa_model_online_donation'),
+                        'Board' => __('app.sa_model_board'), 'BoardCard' => __('app.sa_model_board_card'),
+                        'BlogPost' => __('app.sa_model_blog_post'), 'Sermon' => __('app.sa_model_sermon'), 'Song' => __('app.sa_model_song'),
+                        'Gallery' => __('app.sa_model_gallery'), 'StaffMember' => __('app.sa_model_staff_member'),
+                        'EventRegistration' => __('app.sa_model_event_registration'), 'PrayerRequest' => __('app.sa_model_prayer_request'),
+                        'Announcement' => __('app.sa_model_announcement'), 'Assignment' => __('app.sa_model_assignment'),
+                        'Attendance' => __('app.sa_model_attendance'), 'ChurchRole' => __('app.sa_model_church_role'),
+                        'Church' => __('app.sa_model_church'), 'SupportTicket' => __('app.sa_model_support_ticket'),
                     ];
                 @endphp
                 <select name="model" class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
-                    <option value="">Всі типи</option>
+                    <option value="">{{ __('app.sa_all_types') }}</option>
                     @foreach($modelOptions as $key => $label)
                         <option value="{{ $key }}" {{ request('model') == $key ? 'selected' : '' }}>{{ $label }}</option>
                     @endforeach
@@ -276,8 +276,8 @@
                        class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white">
 
                 <div class="flex gap-2 md:col-span-2">
-                    <button type="submit" class="flex-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors">Фільтрувати</button>
-                    <a href="{{ route('system.activity-log', ['tab' => 'actions']) }}" class="px-4 py-2 bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 text-gray-900 dark:text-white rounded-lg transition-colors">Скинути</a>
+                    <button type="submit" class="flex-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors">{{ __('app.sa_filter') }}</button>
+                    <a href="{{ route('system.activity-log', ['tab' => 'actions']) }}" class="px-4 py-2 bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 text-gray-900 dark:text-white rounded-lg transition-colors">{{ __('app.sa_reset') }}</a>
                 </div>
             </form>
         </div>
@@ -291,11 +291,11 @@
                         <span class="text-white text-sm font-bold">{{ mb_substr($filteredUser->name, 0, 1) }}</span>
                     </div>
                     <div>
-                        <span class="text-sm font-medium text-indigo-900 dark:text-indigo-200">Дії користувача:</span>
+                        <span class="text-sm font-medium text-indigo-900 dark:text-indigo-200">{{ __('app.sa_user_actions') }}:</span>
                         <span class="text-sm font-bold text-indigo-900 dark:text-white">{{ $filteredUser->name }}</span>
                     </div>
                 </div>
-                <a href="{{ route('system.activity-log', ['tab' => 'actions']) }}" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">Показати всіх</a>
+                <a href="{{ route('system.activity-log', ['tab' => 'actions']) }}" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">{{ __('app.sa_show_all') }}</a>
             </div>
             @endif
         @endif
@@ -304,19 +304,19 @@
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 text-center">
                 <p class="text-2xl font-bold text-green-600 dark:text-green-400">{{ $logs->where('action', 'created')->count() }}</p>
-                <p class="text-gray-500 dark:text-gray-400 text-sm">Створено</p>
+                <p class="text-gray-500 dark:text-gray-400 text-sm">{{ __('app.sa_action_created') }}</p>
             </div>
             <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 text-center">
                 <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ $logs->where('action', 'updated')->count() }}</p>
-                <p class="text-gray-500 dark:text-gray-400 text-sm">Оновлено</p>
+                <p class="text-gray-500 dark:text-gray-400 text-sm">{{ __('app.sa_action_updated') }}</p>
             </div>
             <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 text-center">
                 <p class="text-2xl font-bold text-red-600 dark:text-red-400">{{ $logs->where('action', 'deleted')->count() }}</p>
-                <p class="text-gray-500 dark:text-gray-400 text-sm">Видалено</p>
+                <p class="text-gray-500 dark:text-gray-400 text-sm">{{ __('app.sa_action_deleted') }}</p>
             </div>
             <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 text-center">
                 <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $logs->total() }}</p>
-                <p class="text-gray-500 dark:text-gray-400 text-sm">Всього</p>
+                <p class="text-gray-500 dark:text-gray-400 text-sm">{{ __('app.sa_total') }}</p>
             </div>
         </div>
 
@@ -327,7 +327,7 @@
                 <input type="checkbox" x-model="selectAll"
                        @change="toggleSelectAll({{ json_encode($logs->pluck('id')->toArray()) }})"
                        class="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-indigo-600 focus:ring-indigo-500">
-                <span class="text-xs text-gray-500 dark:text-gray-400">Обрати все на сторінці</span>
+                <span class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.sa_select_all_on_page') }}</span>
             </div>
 
             <div class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -406,7 +406,7 @@
                                 <!-- Changes Details -->
                                 @if($log->action === 'updated' && count($changes) > 0)
                                     <div class="mt-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg p-3">
-                                        <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-2">Зміни:</div>
+                                        <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-2">{{ __('app.sa_changes') }}:</div>
                                         <div class="space-y-1.5">
                                             @foreach($changes as $change)
                                                 <div class="flex items-start gap-2 text-sm">
@@ -422,7 +422,7 @@
                                     </div>
                                 @elseif($log->action === 'created' && $log->new_values)
                                     <div class="mt-3 bg-green-50 dark:bg-green-900/20 rounded-lg p-3">
-                                        <div class="text-xs font-semibold text-green-600 dark:text-green-400 uppercase mb-2">Створено з даними:</div>
+                                        <div class="text-xs font-semibold text-green-600 dark:text-green-400 uppercase mb-2">{{ __('app.sa_created_with_data') }}:</div>
                                         <div class="grid grid-cols-1 md:grid-cols-2 gap-1.5">
                                             @php
                                                 $skip = ['id', 'church_id', 'created_at', 'updated_at', 'deleted_at', 'password', 'remember_token', 'email_verified_at'];
@@ -435,7 +435,7 @@
                                                         @if(is_array($value))
                                                             {{ json_encode($value, JSON_UNESCAPED_UNICODE) }}
                                                         @elseif(is_bool($value))
-                                                            {{ $value ? 'Так' : 'Ні' }}
+                                                            {{ $value ? __('app.yes') : __('app.no') }}
                                                         @else
                                                             {{ Str::limit((string)$value, 50) }}
                                                         @endif
@@ -443,13 +443,13 @@
                                                 </div>
                                             @endforeach
                                             @if($newVals->count() > 10)
-                                                <div class="text-xs text-gray-500 col-span-2">+{{ $newVals->count() - 10 }} полів</div>
+                                                <div class="text-xs text-gray-500 col-span-2">+{{ $newVals->count() - 10 }} {{ __('app.sa_fields') }}</div>
                                             @endif
                                         </div>
                                     </div>
                                 @elseif($log->action === 'deleted' && $log->old_values)
                                     <div class="mt-3 bg-red-50 dark:bg-red-900/20 rounded-lg p-3">
-                                        <div class="text-xs font-semibold text-red-600 dark:text-red-400 uppercase mb-2">Видалено запис:</div>
+                                        <div class="text-xs font-semibold text-red-600 dark:text-red-400 uppercase mb-2">{{ __('app.sa_deleted_record') }}:</div>
                                         <div class="grid grid-cols-1 md:grid-cols-2 gap-1.5">
                                             @php
                                                 $skip = ['id', 'church_id', 'created_at', 'updated_at', 'deleted_at', 'password', 'remember_token', 'email_verified_at'];
@@ -462,7 +462,7 @@
                                                         @if(is_array($value))
                                                             {{ json_encode($value, JSON_UNESCAPED_UNICODE) }}
                                                         @elseif(is_bool($value))
-                                                            {{ $value ? 'Так' : 'Ні' }}
+                                                            {{ $value ? __('app.yes') : __('app.no') }}
                                                         @else
                                                             {{ Str::limit((string)$value, 50) }}
                                                         @endif
@@ -470,31 +470,31 @@
                                                 </div>
                                             @endforeach
                                             @if($oldVals->count() > 10)
-                                                <div class="text-xs text-gray-500 col-span-2">+{{ $oldVals->count() - 10 }} полів</div>
+                                                <div class="text-xs text-gray-500 col-span-2">+{{ $oldVals->count() - 10 }} {{ __('app.sa_fields') }}</div>
                                             @endif
                                         </div>
                                     </div>
                                 @elseif($log->action === 'login')
                                     <div class="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                                        Вхід в систему
+                                        {{ __('app.sa_login_to_system') }}
                                         @if($log->user_agent)
                                             <span class="text-xs text-gray-400 dark:text-gray-500 ml-2">{{ Str::limit($log->user_agent, 60) }}</span>
                                         @endif
                                     </div>
                                 @elseif($log->action === 'logout')
                                     <div class="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                                        Вихід з системи
+                                        {{ __('app.sa_logout_from_system') }}
                                     </div>
                                 @elseif($log->action === 'registered')
                                     <div class="mt-2 text-sm text-green-600 dark:text-green-400">
-                                        Новий користувач зареєструвався
+                                        {{ __('app.sa_new_user_registered') }}
                                         @if($log->user_agent)
                                             <span class="text-xs text-gray-400 dark:text-gray-500 ml-2">{{ Str::limit($log->user_agent, 60) }}</span>
                                         @endif
                                     </div>
                                 @elseif($log->action === 'joined_church')
                                     <div class="mt-2 text-sm text-green-600 dark:text-green-400">
-                                        Користувач приєднався до церкви
+                                        {{ __('app.sa_user_joined_church') }}
                                         @if($log->user_agent)
                                             <span class="text-xs text-gray-400 dark:text-gray-500 ml-2">{{ Str::limit($log->user_agent, 60) }}</span>
                                         @endif
@@ -514,7 +514,7 @@
                         <svg class="w-12 h-12 mx-auto mb-3 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                         </svg>
-                        Записів не знайдено
+                        {{ __('app.sa_no_records') }}
                     </div>
                 @endforelse
             </div>
@@ -554,7 +554,7 @@ function activityLog() {
         },
 
         deleteSelected() {
-            if (!confirm(`Видалити ${this.selectedIds.length} записів?`)) return;
+            if (!confirm(@js(__('app.sa_confirm_delete_records')) + ` (${this.selectedIds.length})?`)) return;
             this.$refs.deleteAction.value = 'selected';
             this.$refs.deleteIds.value = JSON.stringify(this.selectedIds);
             this.$refs.deleteForm.submit();
@@ -562,8 +562,8 @@ function activityLog() {
 
         deleteAll() {
             const tab = '{{ $tab }}';
-            const label = tab === 'visits' ? 'навігації' : 'журналу дій';
-            if (!confirm(`Видалити ВСІ записи ${label}? Ця дія незворотна.`)) return;
+            const label = tab === 'visits' ? @js(__('app.sa_navigation_label')) : @js(__('app.sa_actions_log_label'));
+            if (!confirm(@js(__('app.sa_confirm_delete_all_prefix')) + ` ${label}? ` + @js(__('app.sa_irreversible_action')))) return;
             this.$refs.deleteAction.value = 'all';
             this.$refs.deleteForm.submit();
         }

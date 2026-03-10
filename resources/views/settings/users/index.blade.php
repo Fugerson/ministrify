@@ -1,17 +1,17 @@
 @extends('layouts.app')
 
-@section('title', 'Користувачі')
+@section('title', __('app.users_title'))
 
 @section('content')
 <div class="space-y-6">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">Користувачі</h1>
+        <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{{ __('app.users_title') }}</h1>
         @if(auth()->user()->canEdit('settings'))
         <a href="{{ route('settings.users.create') }}" class="inline-flex items-center justify-center px-4 py-2.5 sm:py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 text-sm font-medium">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
             </svg>
-            Запросити
+            {{ __('app.sa_invite') }}
         </a>
         @endif
     </div>
@@ -29,7 +29,7 @@
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
-                Очікують доступу ({{ $pendingUsers->count() }})
+                {{ __('app.awaiting_access') }} ({{ $pendingUsers->count() }})
             </h2>
         </div>
         <div class="divide-y divide-yellow-200 dark:divide-yellow-800">
@@ -48,7 +48,7 @@
                     <!-- Role selector (hidden by default) -->
                     <div x-show="showRoleSelect" x-cloak class="flex items-center gap-2">
                         <select x-model="selectedRole" class="text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
-                            <option value="">Оберіть роль</option>
+                            <option value="">{{ __('app.select_role_placeholder') }}</option>
                             @foreach($churchRoles as $role)
                             <option value="{{ $role->id }}">{{ $role->name }}</option>
                             @endforeach
@@ -62,7 +62,7 @@
                             }).then(() => location.reload())"
                             :disabled="!selectedRole"
                             class="px-3 py-1.5 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed">
-                            Зберегти
+                            {{ __('app.save') }}
                         </button>
                         <button @click="showRoleSelect = false" class="p-1.5 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -77,14 +77,14 @@
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                             </svg>
-                            <span class="hidden sm:inline">Надати</span>
+                            <span class="hidden sm:inline">{{ __('app.grant_btn') }}</span>
                         </button>
                         <button @click="ajaxDelete('{{ route('settings.users.destroy', $user) }}', @js( __('messages.confirm_reject_request_from', ['name' => addslashes($user->name)]) ), () => location.reload())"
                                 class="px-3 py-1.5 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 flex items-center gap-1">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                             </svg>
-                            <span class="hidden sm:inline">Відхилити</span>
+                            <span class="hidden sm:inline">{{ __('app.reject_btn') }}</span>
                         </button>
                     </div>
                 </div>
@@ -113,16 +113,16 @@
         <!-- Per page selector -->
         <div class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
             <span class="text-sm text-gray-500 dark:text-gray-400">
-                Всього: <span class="font-medium text-gray-900 dark:text-white" x-text="totalRows"></span>
+                {{ __('app.total_label') }} <span class="font-medium text-gray-900 dark:text-white" x-text="totalRows"></span>
             </span>
             <div class="flex items-center gap-2">
-                <span class="text-sm text-gray-500 dark:text-gray-400">На сторінці:</span>
+                <span class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.per_page_label') }}</span>
                 <select x-model="perPage" @change="setPerPage($event.target.value)"
                         class="text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white py-1 pl-2 pr-7">
                     <option value="25">25</option>
                     <option value="50">50</option>
                     <option value="100">100</option>
-                    <option value="0">Всі</option>
+                    <option value="0">{{ __('app.all_option') }}</option>
                 </select>
             </div>
         </div>
@@ -130,11 +130,11 @@
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead class="bg-gray-50 dark:bg-gray-700">
                     <tr>
-                        <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Імʼя</th>
-                        <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase hidden md:table-cell">Email</th>
-                        <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Роль</th>
-                        <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase hidden sm:table-cell">Статус</th>
-                        <th class="px-3 md:px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Дії</th>
+                        <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ __('app.name_column_header') }}</th>
+                        <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase hidden md:table-cell">{{ __('app.email') }}</th>
+                        <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ __('app.role_column_header') }}</th>
+                        <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase hidden sm:table-cell">{{ __('app.status_column_header') }}</th>
+                        <th class="px-3 md:px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ __('app.actions_column_header') }}</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -182,7 +182,7 @@
                                         });
                                         if (res.ok || res.status === 302) {
                                             const data = await res.json().catch(() => ({}));
-                                            showToast('success', data.message || 'Збережено!');
+                                            showToast('success', data.message || @js(__('app.saved')));
                                             // Update displayed role name
                                             const sel = this.$el.querySelector('select');
                                             const roleName = sel.options[sel.selectedIndex].text;
@@ -207,21 +207,21 @@
                                 @if($user->churchRole)
                                 <button @click="editing = true" class="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full cursor-pointer hover:opacity-80 transition-opacity"
                                         style="background-color: {{ $user->churchRole->color }}30; color: {{ $user->churchRole->color }}"
-                                        title="Натисніть щоб змінити роль">
+                                        title="{{ __('app.click_to_change_role') }}">
                                     {{ $user->churchRole->name }}
                                     <svg class="w-3 h-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                                 </button>
                                 @else
                                 <button @click="editing = true" class="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 cursor-pointer hover:opacity-80 transition-opacity"
-                                        title="Натисніть щоб призначити роль">
-                                    Без ролі
+                                        title="{{ __('app.click_to_assign_role') }}">
+                                    {{ __('app.no_role') }}
                                     <svg class="w-3 h-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                                 </button>
                                 @endif
                             </div>
                             <div x-show="editing" x-cloak class="flex items-center gap-1">
                                 <select x-model="selectedRoleId" class="text-xs rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white py-1 pl-2 pr-7">
-                                    <option value="">Без ролі</option>
+                                    <option value="">{{ __('app.no_role') }}</option>
                                     @foreach($churchRoles as $role)
                                     <option value="{{ $role->id }}">{{ $role->name }}</option>
                                     @endforeach
@@ -253,7 +253,7 @@
                             </span>
                             @else
                             <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
-                                Без ролі
+                                {{ __('app.no_role') }}
                             </span>
                             @endif
                             @endif
@@ -261,7 +261,7 @@
                         <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap hidden sm:table-cell">
                             <span class="inline-flex items-center text-sm text-green-600 dark:text-green-400">
                                 <span class="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
-                                <span class="hidden md:inline">Активний</span>
+                                <span class="hidden md:inline">{{ __('app.active_status') }}</span>
                             </span>
                         </td>
                         <td class="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -279,7 +279,7 @@
                                 </svg>
                             </button>
                             @else
-                            <span class="text-gray-400 dark:text-gray-500 text-xs">Це ви</span>
+                            <span class="text-gray-400 dark:text-gray-500 text-xs">{{ __('app.this_is_you_label') }}</span>
                             @endif
                             @endif
                         </td>
@@ -291,7 +291,7 @@
         <!-- Pagination -->
         <div x-show="totalPages > 1" class="px-4 py-3 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
             <span class="text-sm text-gray-500 dark:text-gray-400">
-                Сторінка <span x-text="currentPage"></span> з <span x-text="totalPages"></span>
+                {{ __('app.page_x_of_y') }} <span x-text="currentPage"></span> / <span x-text="totalPages"></span>
             </span>
             <div class="flex items-center gap-1">
                 <button @click="currentPage = Math.max(1, currentPage - 1)" :disabled="currentPage === 1"
@@ -307,7 +307,7 @@
     </div>
 
     <a href="{{ route('settings.index') }}" class="inline-block text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
-        &larr; Назад до налаштувань
+        &larr; {{ __('app.back_to_settings') }}
     </a>
 </div>
 @endsection

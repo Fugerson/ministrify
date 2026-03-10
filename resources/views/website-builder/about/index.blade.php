@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Про нас')
+@section('title', __('app.wb_about_title'))
 
 @section('content')
 <div class="max-w-4xl mx-auto space-y-6">
@@ -12,8 +12,8 @@
             </svg>
         </a>
         <div>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Про нас</h1>
-            <p class="text-gray-600 dark:text-gray-400">Розкажіть про вашу церкву</p>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('app.wb_about_title') }}</h1>
+            <p class="text-gray-600 dark:text-gray-400">{{ __('app.wb_about_subtitle') }}</p>
         </div>
     </div>
 
@@ -22,11 +22,11 @@
         <!-- Mission -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Місія</h2>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Чому існує ваша церква</p>
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.wb_mission') }}</h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.wb_mission_subtitle') }}</p>
             </div>
             <div class="p-6">
-                <textarea name="mission" rows="4" placeholder="Наша місія — поширювати Євангеліє..."
+                <textarea name="mission" rows="4" placeholder="{{ __('app.wb_mission_placeholder') }}"
                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">{{ $aboutContent['mission'] ?? '' }}</textarea>
             </div>
         </div>
@@ -34,11 +34,11 @@
         <!-- Vision -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Візія</h2>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Ким ви хочете стати</p>
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.wb_vision') }}</h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.wb_vision_subtitle') }}</p>
             </div>
             <div class="p-6">
-                <textarea name="vision" rows="4" placeholder="Ми бачимо церкву, яка..."
+                <textarea name="vision" rows="4" placeholder="{{ __('app.wb_vision_placeholder') }}"
                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">{{ $aboutContent['vision'] ?? '' }}</textarea>
             </div>
         </div>
@@ -47,11 +47,11 @@
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700" x-data="{ values: {{ json_encode($aboutContent['values'] ?? ['']) }} }">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                 <div>
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Цінності</h2>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Що для вас важливо</p>
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.wb_values') }}</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.wb_values_subtitle') }}</p>
                 </div>
                 <button type="button" @click="values.push('')" class="px-3 py-1.5 text-sm bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 rounded-lg hover:bg-primary-200 dark:hover:bg-primary-900/50 transition-colors">
-                    + Додати цінність
+                    {{ __('app.wb_add_value') }}
                 </button>
             </div>
             <div class="p-6 space-y-3">
@@ -73,11 +73,11 @@
         <!-- History -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Історія</h2>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Розкажіть про шлях вашої церкви</p>
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.wb_history') }}</h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.wb_history_subtitle') }}</p>
             </div>
             <div class="p-6">
-                <textarea name="history" rows="8" placeholder="Наша церква була заснована..."
+                <textarea name="history" rows="8" placeholder="{{ __('app.wb_history_placeholder') }}"
                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">{{ $aboutContent['history'] ?? '' }}</textarea>
             </div>
         </div>
@@ -85,18 +85,18 @@
         <!-- Beliefs -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Віровчення</h2>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Основи вашої віри</p>
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.wb_beliefs') }}</h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.wb_beliefs_subtitle') }}</p>
             </div>
             <div class="p-6">
-                <textarea name="beliefs" rows="8" placeholder="Ми віримо..."
+                <textarea name="beliefs" rows="8" placeholder="{{ __('app.wb_beliefs_placeholder') }}"
                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">{{ $aboutContent['beliefs'] ?? '' }}</textarea>
             </div>
         </div>
 
         <div class="flex justify-end">
             <button type="submit" :disabled="saving" class="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
-                Зберегти
+                {{ __('app.save') }}
             </button>
         </div>
     </form>

@@ -92,6 +92,6 @@ class SectionController extends Controller
         $allSettings[$validated['section_id']] = $validated['settings'];
         $church->setPublicSiteSetting('section_settings', $allSettings);
 
-        return response()->json(['success' => true, 'message' => 'Налаштування секції оновлено']);
+        return response()->json(['success' => true, 'message' => __('app.settings_section_updated')]);
     }
 }

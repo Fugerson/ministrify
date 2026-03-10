@@ -21,7 +21,7 @@
     <!-- Breadcrumb -->
     <nav class="mb-8">
         <ol class="flex items-center gap-2 text-sm">
-            <li><a href="{{ route('public.church', $church->slug) }}" class="text-gray-500 hover:text-primary-600">{{ __('Головна') }}</a></li>
+            <li><a href="{{ route('public.church', $church->slug) }}" class="text-gray-500 hover:text-primary-600">{{ __('app.home') }}</a></li>
             <li class="text-gray-400">/</li>
             <li class="text-gray-900 font-medium">{{ $ministry->name }}</li>
         </ol>
@@ -44,7 +44,7 @@
             <div class="flex items-start justify-between mb-6">
                 <div>
                     <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-2">{{ $ministry->name }}</h1>
-                    <p class="text-gray-500">{{ __(':count учасників', ['count' => $ministry->members_count]) }}</p>
+                    <p class="text-gray-500">{{ __('app.public_ministry_members_count', ['count' => $ministry->members_count]) }}</p>
                 </div>
             </div>
 
@@ -58,7 +58,7 @@
                         @endif
                     </div>
                     <div>
-                        <p class="text-sm text-gray-500">{{ __('Лідер команди') }}</p>
+                        <p class="text-sm text-gray-500">{{ __('app.public_ministry_leader') }}</p>
                         <p class="font-semibold text-gray-900">{{ $ministry->leader->full_name }}</p>
                     </div>
                 </div>
@@ -72,7 +72,7 @@
 
             @if($ministry->positions->count() > 0)
                 <div class="mb-8">
-                    <h3 class="font-semibold text-gray-900 mb-4">{{ __('Позиції в команді') }}</h3>
+                    <h3 class="font-semibold text-gray-900 mb-4">{{ __('app.public_ministry_positions') }}</h3>
                     <div class="flex flex-wrap gap-2">
                         @foreach($ministry->positions as $position)
                             <span class="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-sm">{{ $position->name }}</span>
@@ -84,7 +84,7 @@
             <!-- Upcoming Events -->
             @if($upcomingEvents->count() > 0)
                 <div class="mb-8">
-                    <h3 class="font-semibold text-gray-900 mb-4">{{ __('Найближчі події команди') }}</h3>
+                    <h3 class="font-semibold text-gray-900 mb-4">{{ __('app.public_ministry_upcoming_events') }}</h3>
                     <div class="space-y-3">
                         @foreach($upcomingEvents as $event)
                             <a href="{{ route('public.event', [$church->slug, $event]) }}"
@@ -112,13 +112,13 @@
                     <div class="bg-primary-50 rounded-2xl p-6">
                         <div class="flex items-center justify-between mb-4">
                             <div>
-                                <h3 class="font-semibold text-gray-900">{{ __('Приєднатися до команди') }}</h3>
-                                <p class="text-sm text-gray-600">{{ __("Заповніть форму і ми зв'яжемося з вами") }}</p>
+                                <h3 class="font-semibold text-gray-900">{{ __('app.public_ministry_join') }}</h3>
+                                <p class="text-sm text-gray-600">{{ __('app.public_ministry_join_desc') }}</p>
                             </div>
                             <button @click="showForm = !showForm"
                                     class="px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors">
-                                <span x-show="!showForm">{{ __('Подати заявку') }}</span>
-                                <span x-show="showForm">{{ __('Приховати форму') }}</span>
+                                <span x-show="!showForm">{{ __('app.public_ministry_submit_application') }}</span>
+                                <span x-show="showForm">{{ __('app.public_event_hide_form') }}</span>
                             </button>
                         </div>
 
@@ -140,44 +140,44 @@
                                 <x-spam-protection action="join_ministry" />
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">{{ __("Ім'я") }} *</label>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('app.first_name') }} *</label>
                                         <input type="text" name="first_name" required value="{{ old('first_name') }}"
                                                class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                                     </div>
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('Прізвище') }} *</label>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('app.last_name') }} *</label>
                                         <input type="text" name="last_name" required value="{{ old('last_name') }}"
                                                class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                                     </div>
                                 </div>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('Email') }} *</label>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
                                         <input type="email" name="email" required value="{{ old('email') }}"
                                                class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                                     </div>
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('Телефон') }}</label>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('app.phone') }}</label>
                                         <input type="tel" name="phone" value="{{ old('phone') }}"
                                                class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                                     </div>
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('Ваші навички та досвід') }}</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('app.public_ministry_skills') }}</label>
                                     <textarea name="skills" rows="2"
                                               class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500">{{ old('skills') }}</textarea>
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('Повідомлення') }}</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('app.tg_message') }}</label>
                                     <textarea name="message" rows="3"
                                               class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500">{{ old('message') }}</textarea>
                                 </div>
                                 <button type="submit" :disabled="submitting"
                                         class="w-full py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors disabled:opacity-50">
-                                    <span x-show="!submitting">{{ __('Надіслати заявку') }}</span>
+                                    <span x-show="!submitting">{{ __('app.public_ministry_send_application') }}</span>
                                     <span x-show="submitting" class="inline-flex items-center justify-center gap-2">
                                         <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
-                                        {{ __('Надсилання...') }}
+                                        {{ __('app.public_ministry_submitting') }}
                                     </span>
                                 </button>
                             </form>
@@ -194,7 +194,7 @@
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
             </svg>
-            {{ __('Повернутись на головну') }}
+            {{ __('app.public_ministry_back_to_home') }}
         </a>
     </div>
 </div>

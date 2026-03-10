@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Секції сторінки')
+@section('title', __('app.wb_page_sections'))
 
 @section('content')
 <div class="max-w-4xl mx-auto space-y-6" x-data="sectionsManager()">
@@ -13,8 +13,8 @@
                 </svg>
             </a>
             <div>
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Секції сторінки</h1>
-                <p class="text-gray-600 dark:text-gray-400">Увімкніть та впорядкуйте секції сайту</p>
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('app.wb_page_sections') }}</h1>
+                <p class="text-gray-600 dark:text-gray-400">{{ __('app.wb_page_sections_subtitle') }}</p>
             </div>
         </div>
 
@@ -24,7 +24,7 @@
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            <span x-text="saving ? 'Збереження...' : 'Зберегти порядок'"></span>
+            <span x-text="saving ? @js(__('app.wb_saving')) : @js(__('app.wb_save_order'))"></span>
         </button>
     </div>
 
@@ -41,7 +41,7 @@
                 <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
                 </svg>
-                Перетягуйте секції для зміни порядку
+                {{ __('app.wb_drag_to_reorder') }}
             </p>
         </div>
 
@@ -168,8 +168,8 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
             <div class="text-sm text-blue-700 dark:text-blue-300">
-                <p class="font-medium">Порядок секцій</p>
-                <p class="mt-1">Перетягуйте секції щоб змінити їх порядок на сайті. Вимкнені секції не відображаються на публічному сайті, але залишаються налаштованими.</p>
+                <p class="font-medium">{{ __('app.wb_section_order_title') }}</p>
+                <p class="mt-1">{{ __('app.wb_section_order_info') }}</p>
             </div>
         </div>
     </div>

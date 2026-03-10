@@ -111,6 +111,32 @@ class ChurchRolePermission extends Model
     ];
 
     /**
+     * Get modules with translated labels and descriptions
+     */
+    public static function getTranslatedModules(): array
+    {
+        $modules = self::MODULES;
+        foreach ($modules as $key => &$module) {
+            $module['label'] = __('app.perm_module_' . $key);
+            $module['description'] = __('app.perm_module_' . $key . '_desc');
+        }
+        return $modules;
+    }
+
+    /**
+     * Get actions with translated labels
+     */
+    public static function getTranslatedActions(): array
+    {
+        return [
+            'view' => __('app.perm_action_view'),
+            'create' => __('app.perm_action_create'),
+            'edit' => __('app.perm_action_edit'),
+            'delete' => __('app.perm_action_delete'),
+        ];
+    }
+
+    /**
      * Get allowed actions for a specific module
      */
     public static function getAllowedActions(string $module): array

@@ -1,10 +1,10 @@
 @extends('layouts.system-admin')
 
-@section('title', 'Задачі')
+@section('title', __('app.sa_tasks_title'))
 
 @section('actions')
 <a href="{{ route('system.tasks.create') }}" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors">
-    + Нова задача
+    + {{ __('app.sa_new_task') }}
 </a>
 @endsection
 
@@ -15,7 +15,7 @@
         <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-gray-500 dark:text-gray-400 text-sm">Беклог</p>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">{{ __('app.sa_status_backlog') }}</p>
                     <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['backlog'] }}</p>
                 </div>
                 <div class="w-10 h-10 bg-gray-100 dark:bg-gray-500/20 rounded-lg flex items-center justify-center">
@@ -28,7 +28,7 @@
         <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-gray-500 dark:text-gray-400 text-sm">До виконання</p>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">{{ __('app.sa_status_todo') }}</p>
                     <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['todo'] }}</p>
                 </div>
                 <div class="w-10 h-10 bg-blue-100 dark:bg-blue-500/20 rounded-lg flex items-center justify-center">
@@ -41,7 +41,7 @@
         <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-gray-500 dark:text-gray-400 text-sm">В роботі</p>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">{{ __('app.sa_status_in_progress') }}</p>
                     <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['in_progress'] }}</p>
                 </div>
                 <div class="w-10 h-10 bg-yellow-100 dark:bg-yellow-500/20 rounded-lg flex items-center justify-center">
@@ -54,7 +54,7 @@
         <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-gray-500 dark:text-gray-400 text-sm">Тестування</p>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">{{ __('app.sa_status_testing') }}</p>
                     <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['testing'] }}</p>
                 </div>
                 <div class="w-10 h-10 bg-purple-100 dark:bg-purple-500/20 rounded-lg flex items-center justify-center">
@@ -67,7 +67,7 @@
         <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-gray-500 dark:text-gray-400 text-sm">Виконано</p>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">{{ __('app.sa_status_done') }}</p>
                     <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['done'] }}</p>
                 </div>
                 <div class="w-10 h-10 bg-green-100 dark:bg-green-500/20 rounded-lg flex items-center justify-center">
@@ -84,34 +84,34 @@
         <form action="{{ route('system.tasks.index') }}" method="GET" class="flex flex-wrap gap-4">
             <div class="flex-1 min-w-[200px]">
                 <input type="text" name="search" value="{{ request('search') }}"
-                       placeholder="Пошук..."
+                       placeholder="{{ __('app.search') }}..."
                        class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
             </div>
             <select name="status" class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500">
-                <option value="">Активні</option>
-                <option value="all" {{ request('status') === 'all' ? 'selected' : '' }}>Всі</option>
-                <option value="backlog" {{ request('status') === 'backlog' ? 'selected' : '' }}>Беклог</option>
-                <option value="todo" {{ request('status') === 'todo' ? 'selected' : '' }}>До виконання</option>
-                <option value="in_progress" {{ request('status') === 'in_progress' ? 'selected' : '' }}>В роботі</option>
-                <option value="testing" {{ request('status') === 'testing' ? 'selected' : '' }}>Тестування</option>
-                <option value="done" {{ request('status') === 'done' ? 'selected' : '' }}>Виконано</option>
+                <option value="">{{ __('app.sa_filter_active') }}</option>
+                <option value="all" {{ request('status') === 'all' ? 'selected' : '' }}>{{ __('app.sa_filter_all') }}</option>
+                <option value="backlog" {{ request('status') === 'backlog' ? 'selected' : '' }}>{{ __('app.sa_status_backlog') }}</option>
+                <option value="todo" {{ request('status') === 'todo' ? 'selected' : '' }}>{{ __('app.sa_status_todo') }}</option>
+                <option value="in_progress" {{ request('status') === 'in_progress' ? 'selected' : '' }}>{{ __('app.sa_status_in_progress') }}</option>
+                <option value="testing" {{ request('status') === 'testing' ? 'selected' : '' }}>{{ __('app.sa_status_testing') }}</option>
+                <option value="done" {{ request('status') === 'done' ? 'selected' : '' }}>{{ __('app.sa_status_done') }}</option>
             </select>
             <select name="type" class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500">
-                <option value="">Всі типи</option>
-                <option value="bug" {{ request('type') === 'bug' ? 'selected' : '' }}>Баг</option>
-                <option value="feature" {{ request('type') === 'feature' ? 'selected' : '' }}>Фіча</option>
-                <option value="improvement" {{ request('type') === 'improvement' ? 'selected' : '' }}>Покращення</option>
-                <option value="other" {{ request('type') === 'other' ? 'selected' : '' }}>Інше</option>
+                <option value="">{{ __('app.sa_filter_all_types') }}</option>
+                <option value="bug" {{ request('type') === 'bug' ? 'selected' : '' }}>{{ __('app.sa_type_bug') }}</option>
+                <option value="feature" {{ request('type') === 'feature' ? 'selected' : '' }}>{{ __('app.sa_type_feature') }}</option>
+                <option value="improvement" {{ request('type') === 'improvement' ? 'selected' : '' }}>{{ __('app.sa_type_improvement') }}</option>
+                <option value="other" {{ request('type') === 'other' ? 'selected' : '' }}>{{ __('app.sa_type_other') }}</option>
             </select>
             <select name="priority" class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500">
-                <option value="">Всі пріоритети</option>
-                <option value="critical" {{ request('priority') === 'critical' ? 'selected' : '' }}>Критичний</option>
-                <option value="high" {{ request('priority') === 'high' ? 'selected' : '' }}>Високий</option>
-                <option value="normal" {{ request('priority') === 'normal' ? 'selected' : '' }}>Нормальний</option>
-                <option value="low" {{ request('priority') === 'low' ? 'selected' : '' }}>Низький</option>
+                <option value="">{{ __('app.sa_filter_all_priorities') }}</option>
+                <option value="critical" {{ request('priority') === 'critical' ? 'selected' : '' }}>{{ __('app.sa_priority_critical') }}</option>
+                <option value="high" {{ request('priority') === 'high' ? 'selected' : '' }}>{{ __('app.sa_priority_high') }}</option>
+                <option value="normal" {{ request('priority') === 'normal' ? 'selected' : '' }}>{{ __('app.sa_priority_normal') }}</option>
+                <option value="low" {{ request('priority') === 'low' ? 'selected' : '' }}>{{ __('app.sa_priority_low') }}</option>
             </select>
             <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors">
-                Фільтрувати
+                {{ __('app.filter') }}
             </button>
         </form>
     </div>
@@ -123,9 +123,9 @@
                 <svg class="w-12 h-12 text-gray-400 dark:text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
                 </svg>
-                <p class="text-gray-500 dark:text-gray-400">Немає задач</p>
+                <p class="text-gray-500 dark:text-gray-400">{{ __('app.sa_no_tasks') }}</p>
                 <a href="{{ route('system.tasks.create') }}" class="inline-block mt-4 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors">
-                    Створити першу задачу
+                    {{ __('app.sa_create_first_task') }}
                 </a>
             </div>
         @else
@@ -133,12 +133,12 @@
             <table class="w-full">
                 <thead class="bg-gray-50 dark:bg-gray-700/50">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider whitespace-nowrap">Задача</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Тип</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Пріоритет</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Статус</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Виконавець</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Дії</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider whitespace-nowrap">{{ __('app.sa_col_task') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('app.sa_col_type') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('app.sa_col_priority') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('app.sa_col_status') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('app.sa_col_assignee') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('app.sa_col_actions') }}</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -149,12 +149,12 @@
                                     <p class="text-gray-900 dark:text-white font-medium">{{ $task->title }}</p>
                                     @if($task->supportTicket)
                                         <a href="{{ route('system.support.show', $task->supportTicket) }}" class="text-sm text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300">
-                                            Тікет #{{ $task->supportTicket->id }}
+                                            {{ __('app.sa_ticket_prefix') }} #{{ $task->supportTicket->id }}
                                         </a>
                                     @endif
                                     @if($task->due_date)
                                         <p class="text-sm {{ $task->due_date->isPast() && $task->status !== 'done' ? 'text-red-600 dark:text-red-400' : 'text-gray-500 dark:text-gray-400' }}">
-                                            Дедлайн: {{ $task->due_date->format('d.m.Y') }}
+                                            {{ __('app.sa_deadline') }}: {{ $task->due_date->format('d.m.Y') }}
                                         </p>
                                     @endif
                                 </div>
@@ -175,11 +175,11 @@
                                     @method('PATCH')
                                     <select name="status" onchange="this.form.submit()"
                                             class="px-2 py-1 text-xs font-medium rounded-full border-0 bg-{{ $task->status_color }}-500/20 text-{{ $task->status_color }}-400 focus:ring-2 focus:ring-indigo-500 cursor-pointer">
-                                        <option value="backlog" {{ $task->status === 'backlog' ? 'selected' : '' }}>Беклог</option>
-                                        <option value="todo" {{ $task->status === 'todo' ? 'selected' : '' }}>До виконання</option>
-                                        <option value="in_progress" {{ $task->status === 'in_progress' ? 'selected' : '' }}>В роботі</option>
-                                        <option value="testing" {{ $task->status === 'testing' ? 'selected' : '' }}>Тестування</option>
-                                        <option value="done" {{ $task->status === 'done' ? 'selected' : '' }}>Виконано</option>
+                                        <option value="backlog" {{ $task->status === 'backlog' ? 'selected' : '' }}>{{ __('app.sa_status_backlog') }}</option>
+                                        <option value="todo" {{ $task->status === 'todo' ? 'selected' : '' }}>{{ __('app.sa_status_todo') }}</option>
+                                        <option value="in_progress" {{ $task->status === 'in_progress' ? 'selected' : '' }}>{{ __('app.sa_status_in_progress') }}</option>
+                                        <option value="testing" {{ $task->status === 'testing' ? 'selected' : '' }}>{{ __('app.sa_status_testing') }}</option>
+                                        <option value="done" {{ $task->status === 'done' ? 'selected' : '' }}>{{ __('app.sa_status_done') }}</option>
                                     </select>
                                 </form>
                             </td>

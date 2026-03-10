@@ -1,13 +1,13 @@
 @extends('layouts.app')
 
-@section('title', 'Опікуну')
+@section('title', __('app.shepherds_page_title'))
 
 @section('content')
 <div class="max-w-4xl mx-auto space-y-6" x-data="shepherdsManager()">
     <div class="flex items-center justify-between">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Опікуни</h1>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Виберіть людей, які можуть бути опікунами для членів церкви</p>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('app.shepherds_page_title') }}</h1>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ __('app.shepherds_page_desc') }}</p>
         </div>
     </div>
 
@@ -19,7 +19,7 @@
                     <svg class="w-12 h-12 mx-auto mb-4 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
                     </svg>
-                    <p>Немає опікунів. Додайте першого опікуна нижче.</p>
+                    <p>{{ __('app.no_shepherds_msg') }}</p>
                 </div>
             </template>
             <template x-for="shepherd in shepherds" :key="shepherd.id">
@@ -53,7 +53,7 @@
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
                             </svg>
-                            <span x-text="shepherd.sheep_count + ' підопічних'"></span>
+                            <span x-text="shepherd.sheep_count + ' ' + @js(__('app.n_wards'))"></span>
                         </span>
                     </div>
 
@@ -61,7 +61,7 @@
                     <div class="opacity-0 group-hover:opacity-100 transition-opacity">
                         <button @click="removeShepherd(shepherd)"
                                 class="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600"
-                                title="Прибрати статус опікуна">
+                                :title="@js(__('app.remove_shepherd_status'))">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                             </svg>
@@ -84,7 +84,7 @@
                                @keydown.arrow-down.prevent="highlightNext()"
                                @keydown.arrow-up.prevent="highlightPrev()"
                                @keydown.enter.prevent="selectHighlighted()"
-                               placeholder="Почніть вводити ім'я..."
+                               placeholder="{{ __('app.start_typing_name') }}"
                                class="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 dark:text-white">
 
                         <!-- Dropdown -->
@@ -115,7 +115,7 @@
                                     <a :href="'/people/' + person.id"
                                        @click.stop
                                        class="p-2 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600"
-                                       title="Переглянути профіль">
+                                       title="{{ __('app.view_profile') }}">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                                         </svg>
@@ -127,7 +127,7 @@
                         <!-- No results -->
                         <div x-show="isOpen && searchQuery.length > 0 && filteredPeople.length === 0"
                              class="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-xl shadow-lg p-4 text-center text-gray-500 dark:text-gray-400">
-                            Нікого не знайдено
+                            {{ __('app.no_one_found') }}
                         </div>
                     </div>
                     <button @click="addSelected()"
@@ -136,7 +136,7 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                         </svg>
-                        Додати
+                        {{ __('app.add') }}
                     </button>
                 </div>
             </div>
@@ -150,11 +150,11 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
             <div class="text-sm text-blue-800 dark:text-blue-200">
-                <p class="font-medium">Про опікунів:</p>
+                <p class="font-medium">{{ __('app.about_shepherds') }}</p>
                 <ul class="mt-1 list-disc list-inside space-y-1 text-blue-700 dark:text-blue-300">
-                    <li>Опікуни - це люди, які духовно опікуються іншими членами церкви</li>
-                    <li>Кожному члену церкви можна призначити одного опікуна з цього списку</li>
-                    <li>Призначити опікуна можна в профілі людини або в таблиці людей</li>
+                    <li>{{ __('app.shepherd_info_1') }}</li>
+                    <li>{{ __('app.shepherd_info_2') }}</li>
+                    <li>{{ __('app.shepherd_info_3') }}</li>
                 </ul>
             </div>
         </div>
@@ -164,13 +164,23 @@
         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
         </svg>
-        Назад до налаштувань
+        {{ __('app.back_to_settings') }}
     </a>
 </div>
 
 @push('scripts')
 <script>
 function shepherdsManager() {
+    const translations = {
+        shepherdAdded: @js(__('app.shepherd_added_toast')),
+        errorAdding: @js(__('app.error_adding')),
+        connectionError: @js(__('app.connection_error')),
+        confirmRemove: @js(__('app.confirm_remove_shepherd')),
+        confirmRemoveWarning: @js(__('app.confirm_remove_shepherd_warning')),
+        shepherdRemoved: @js(__('app.shepherd_removed_toast')),
+        errorDeleting: @js(__('app.error_deleting')),
+    };
+
     return {
         shepherds: @json($shepherdsJson),
         availablePeople: @json($availablePeopleJson),
@@ -238,21 +248,21 @@ function shepherdsManager() {
                         this.searchQuery = '';
                         this.selectedPerson = null;
                         this.highlightedIndex = 0;
-                        if (window.showGlobalToast) showGlobalToast('Опікуна додано', 'success');
+                        if (window.showGlobalToast) showGlobalToast(translations.shepherdAdded, 'success');
                     }
                 } else {
                     const data = await response.json().catch(() => ({}));
-                    alert(data.message || 'Помилка при додаванні');
+                    alert(data.message || translations.errorAdding);
                 }
             } catch (error) {
-                alert('Помилка з\'єднання');
+                alert(translations.connectionError);
             }
         },
 
         async removeShepherd(shepherd) {
-            let message = `Прибрати статус опікуна у "${shepherd.full_name}"?`;
+            let message = translations.confirmRemove.replace(':name', shepherd.full_name);
             if (shepherd.sheep_count > 0) {
-                message += `\n\nУвага: у цієї людини ${shepherd.sheep_count} підопічних. Вони будуть відв'язані від опікуна.`;
+                message += '\n\n' + translations.confirmRemoveWarning.replace(':count', shepherd.sheep_count);
             }
 
             if (!confirm(message)) return;
@@ -279,13 +289,13 @@ function shepherdsManager() {
                     });
                     // Sort available people by name
                     this.availablePeople.sort((a, b) => a.full_name.localeCompare(b.full_name));
-                    if (window.showGlobalToast) showGlobalToast('Статус опікуна прибрано', 'success');
+                    if (window.showGlobalToast) showGlobalToast(translations.shepherdRemoved, 'success');
                 } else {
                     const data = await response.json().catch(() => ({}));
-                    alert(data.message || 'Помилка при видаленні');
+                    alert(data.message || translations.errorDeleting);
                 }
             } catch (error) {
-                alert('Помилка з\'єднання');
+                alert(translations.connectionError);
             }
         }
     }

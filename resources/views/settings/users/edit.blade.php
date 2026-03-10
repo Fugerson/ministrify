@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
-@section('title', 'Редагувати користувача')
+@section('title', __('app.edit_user_title'))
 
 @section('content')
 <div class="max-w-2xl mx-auto">
     <div class="flex items-center justify-between mb-6">
-        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Редагувати користувача</h1>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('app.edit_user_title') }}</h1>
     </div>
 
     @php
@@ -39,17 +39,17 @@
           @submit.prevent="submitForm()">
 
         <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Прив'язати до людини</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('app.link_to_person_label') }}</label>
             <div class="mt-1">
                 <x-person-select
                     name="person_id"
                     :people="$people"
                     :selected="old('person_id', $user->person?->id)"
-                    placeholder="Почніть вводити ім'я..."
-                    null-text="Відв'язати"
+                    :placeholder="__('app.start_typing_name')"
+                    :null-text="__('app.unlink_text')"
                 />
             </div>
-            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Якщо обрати людину, дані візьмуться з її профілю</p>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('app.link_person_hint') }}</p>
         </div>
 
         <!-- Show selected person info -->
@@ -66,7 +66,7 @@
         <div x-show="personSelected && !personSelected?.email" x-cloak class="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-4">
             <p class="text-sm text-amber-700 dark:text-amber-300">
                 <span class="font-medium" x-text="personSelected?.full_name"></span>
-                — немає email. Додайте email в профілі людини.
+                {{ __('app.no_email_warning') }}
             </p>
         </div>
 
@@ -74,7 +74,7 @@
         <div x-show="!personSelected" x-cloak>
             <div class="space-y-6">
                 <div>
-                    <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Ім'я</label>
+                    <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('app.first_name') }}</label>
                     <input type="text" name="name" id="name" value="{{ old('name', $user->name) }}" x-bind:required="!personSelected"
                         class="mt-1 block w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-transparent rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white"
                         :class="errors.name ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : ''">
@@ -82,7 +82,7 @@
                 </div>
 
                 <div>
-                    <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+                    <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('app.email') }}</label>
                     <input type="email" name="email" id="email" value="{{ old('email', $user->email) }}" x-bind:required="!personSelected"
                         class="mt-1 block w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-transparent rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white"
                         :class="errors.email ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : ''">
@@ -92,12 +92,12 @@
         </div>
 
         <div>
-            <label for="church_role_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Роль</label>
+            <label for="church_role_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('app.role') }}</label>
             <select name="church_role_id" id="church_role_id"
                 class="mt-1 block w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-transparent rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white"
                 :class="errors.church_role_id ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : ''">
                 <option value="" {{ old('church_role_id', $user->church_role_id) === null ? 'selected' : '' }}>
-                    Очікує підтвердження (без доступу)
+                    {{ __('app.sa_awaiting_no_access') }}
                 </option>
                 @foreach($churchRoles as $role)
                 <option value="{{ $role->id }}" {{ old('church_role_id', $user->church_role_id) == $role->id ? 'selected' : '' }}>
@@ -109,17 +109,17 @@
         </div>
 
         <div>
-            <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Новий пароль (залиште порожнім щоб не змінювати)</label>
+            <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('app.new_password_label') }}</label>
             <input type="password" name="password" id="password"
                 class="mt-1 block w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
             <template x-if="errors.password"><p class="mt-1 text-sm text-red-500" x-text="errors.password[0]"></p></template>
         </div>
 
         <div class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2 sm:gap-3">
-            <a href="{{ route('settings.users.index') }}" class="w-full sm:w-auto px-4 py-2 text-center text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Скасувати</a>
+            <a href="{{ route('settings.users.index') }}" class="w-full sm:w-auto px-4 py-2 text-center text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">{{ __('app.cancel') }}</a>
             <button type="submit" :disabled="saving" class="w-full sm:w-auto px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 disabled:opacity-50">
-                <span x-show="!saving">Зберегти</span>
-                <span x-show="saving" x-cloak>Збереження...</span>
+                <span x-show="!saving">{{ __('app.save') }}</span>
+                <span x-show="saving" x-cloak>{{ __('app.saving') }}</span>
             </button>
         </div>
 
@@ -144,22 +144,22 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
                         </div>
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white text-center mb-2">Надати доступ?</h3>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white text-center mb-2">{{ __('app.grant_access_confirm_title') }}</h3>
                         <p class="text-sm text-gray-600 dark:text-gray-400 text-center mb-1">
-                            Ви збираєтесь надати користувачу <strong>{{ $user->name }}</strong> роль:
+                            {!! __('app.grant_access_confirm_text', ['name' => '<strong>' . e($user->name) . '</strong>']) !!}
                         </p>
                         <p class="text-center font-semibold text-primary-600 dark:text-primary-400 mb-4" x-text="selectedRoleName"></p>
                         <p class="text-sm text-gray-500 dark:text-gray-400 text-center mb-6">
-                            Користувач отримає email-сповіщення про надання доступу.
+                            {{ __('app.grant_access_email_notice') }}
                         </p>
                         <div class="flex gap-3">
                             <button type="button" @click="showConfirm = false"
                                     class="flex-1 px-4 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 font-medium transition-colors">
-                                Скасувати
+                                {{ __('app.cancel') }}
                             </button>
                             <button type="button" @click="showConfirm = false; submit($refs.f);"
                                     class="flex-1 px-4 py-2.5 bg-green-600 text-white rounded-xl hover:bg-green-700 font-medium transition-colors">
-                                Так, надати доступ
+                                {{ __('app.yes_grant_access') }}
                             </button>
                         </div>
                     </div>
@@ -175,12 +175,12 @@
 
         <div class="flex items-center justify-between mb-4">
             <div>
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Додаткові права</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Персональні права понад роль користувача</p>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.additional_permissions_title') }}</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ __('app.personal_permissions_desc') }}</p>
             </div>
             <button type="button" @click="showModal = true"
                     class="px-4 py-2 text-sm font-medium text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-900/30 rounded-xl hover:bg-purple-100 dark:hover:bg-purple-900/50 transition-colors">
-                Налаштувати
+                {{ __('app.configure_btn') }}
             </button>
         </div>
 
@@ -192,7 +192,7 @@
                 </span>
             </template>
         </div>
-        <p x-show="!hasOverrides()" class="text-sm text-gray-400 dark:text-gray-500">Додаткових прав не призначено</p>
+        <p x-show="!hasOverrides()" class="text-sm text-gray-400 dark:text-gray-500">{{ __('app.no_overrides_assigned') }}</p>
 
         {{-- Permissions Modal --}}
         <div x-show="showModal" x-cloak
@@ -213,7 +213,7 @@
 
                     <div class="p-6">
                         <div class="flex items-center justify-between mb-1">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Налаштування прав</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.permissions_setup_title') }}</h3>
                             <button type="button" @click="showModal = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -221,7 +221,7 @@
                             </button>
                         </div>
                         <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                            Роль: <span class="font-medium text-gray-700 dark:text-gray-300" x-text="roleName"></span>
+                            {{ __('app.role_prefix') }} <span class="font-medium text-gray-700 dark:text-gray-300" x-text="roleName"></span>
                         </p>
 
                         {{-- Legend --}}
@@ -230,15 +230,15 @@
                                 <span class="w-4 h-4 rounded bg-green-100 dark:bg-green-900/40 border border-green-300 dark:border-green-700 flex items-center justify-center">
                                     <svg class="w-3 h-3 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
                                 </span>
-                                Від ролі
+                                {{ __('app.from_role') }}
                             </span>
                             <span class="inline-flex items-center gap-1">
                                 <span class="w-4 h-4 rounded bg-purple-100 dark:bg-purple-900/40 border-2 border-purple-400 dark:border-purple-500"></span>
-                                Додатково
+                                {{ __('app.additional_label') }}
                             </span>
                             <span class="inline-flex items-center gap-1">
                                 <span class="w-4 h-4 rounded bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-300 dark:text-gray-600">&mdash;</span>
-                                Недоступно
+                                {{ __('app.unavailable_perm') }}
                             </span>
                         </div>
 
@@ -247,11 +247,11 @@
                             <table class="w-full text-sm">
                                 <thead>
                                     <tr class="border-b border-gray-200 dark:border-gray-700">
-                                        <th class="text-left py-2 pr-4 font-medium text-gray-600 dark:text-gray-400">Модуль</th>
-                                        <th class="text-center py-2 px-2 font-medium text-gray-600 dark:text-gray-400 w-20">Перегляд</th>
-                                        <th class="text-center py-2 px-2 font-medium text-gray-600 dark:text-gray-400 w-20">Створ.</th>
-                                        <th class="text-center py-2 px-2 font-medium text-gray-600 dark:text-gray-400 w-20">Редаг.</th>
-                                        <th class="text-center py-2 px-2 font-medium text-gray-600 dark:text-gray-400 w-20">Видал.</th>
+                                        <th class="text-left py-2 pr-4 font-medium text-gray-600 dark:text-gray-400">{{ __('app.module_column') }}</th>
+                                        <th class="text-center py-2 px-2 font-medium text-gray-600 dark:text-gray-400 w-20">{{ __('app.view_column') }}</th>
+                                        <th class="text-center py-2 px-2 font-medium text-gray-600 dark:text-gray-400 w-20">{{ __('app.create_short') }}</th>
+                                        <th class="text-center py-2 px-2 font-medium text-gray-600 dark:text-gray-400 w-20">{{ __('app.edit_short') }}</th>
+                                        <th class="text-center py-2 px-2 font-medium text-gray-600 dark:text-gray-400 w-20">{{ __('app.delete_short') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-100 dark:divide-gray-700/50">
@@ -294,13 +294,13 @@
                     <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 flex items-center justify-end gap-3">
                         <button type="button" @click="showModal = false"
                                 class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
-                            Скасувати
+                            {{ __('app.cancel') }}
                         </button>
                         <button type="button" @click="saveOverrides()"
                                 :disabled="saving"
                                 class="px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-xl hover:bg-purple-700 disabled:opacity-50 transition-colors">
-                            <span x-show="!saving">Зберегти</span>
-                            <span x-show="saving" x-cloak>Збереження...</span>
+                            <span x-show="!saving">{{ __('app.save') }}</span>
+                            <span x-show="saving" x-cloak>{{ __('app.saving') }}</span>
                         </button>
                     </div>
                 </div>
@@ -309,10 +309,10 @@
     </div>
 
     @php
-        $modulesJson = collect(\App\Models\ChurchRolePermission::MODULES)->map(function($m, $k) {
+        $modulesJson = collect(\App\Models\ChurchRolePermission::getTranslatedModules())->map(function($m, $k) {
             return ['key' => $k, 'label' => $m['label'], 'actions' => $m['actions']];
         })->values();
-        $actionsJson = \App\Models\ChurchRolePermission::ACTIONS;
+        $actionsJson = \App\Models\ChurchRolePermission::getTranslatedActions();
         $rolePermsJson = $user->churchRole ? $user->churchRole->getAllPermissions() : [];
         $overridesJson = $user->permission_overrides ?? (object)[];
     @endphp
@@ -321,7 +321,7 @@
         return {
             showModal: false,
             saving: false,
-            roleName: @json($user->churchRole?->name ?? 'Без ролі'),
+            roleName: @json($user->churchRole?->name ?? __('app.no_role')),
             rolePermissions: @json($rolePermsJson),
             overrides: JSON.parse(@json(json_encode($overridesJson))),
             modules: @json($modulesJson),

@@ -7,11 +7,11 @@
         this.errors[index] = {};
 
         if (person.email && !this.isValidEmail(person.email)) {
-            this.errors[index].email = 'Невірний email';
+            this.errors[index].email = @js(__('app.invalid_email'));
         }
 
         if (person.phone && !this.isValidPhone(person.phone)) {
-            this.errors[index].phone = 'Невірний телефон';
+            this.errors[index].phone = @js(__('app.invalid_phone'));
         }
     },
 
@@ -51,8 +51,8 @@
                 </svg>
             </div>
             <div>
-                <p class="text-[10px] font-bold uppercase tracking-wider text-primary-600 dark:text-primary-400 mb-0.5">КРОК 4 - ОПЦІЙНО</p>
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Додайте людей</h2>
+                <p class="text-[10px] font-bold uppercase tracking-wider text-primary-600 dark:text-primary-400 mb-0.5">{{ __('app.onboarding_step4_optional') }}</p>
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('app.onboarding_add_people') }}</h2>
             </div>
         </div>
     </div>
@@ -66,8 +66,8 @@
                     </svg>
                 </div>
                 <div>
-                    <p class="font-semibold text-green-800 dark:text-green-200">У вас вже є {{ $peopleCount }} {{ trans_choice('людина|людини|людей', $peopleCount) }}</p>
-                    <p class="text-sm text-green-600 dark:text-green-300">Ви можете пропустити цей крок або додати ще</p>
+                    <p class="font-semibold text-green-800 dark:text-green-200">{{ __('app.you_already_have') }} {{ $peopleCount }} {{ trans_choice(__('app.plural_person'), $peopleCount) }}</p>
+                    <p class="text-sm text-green-600 dark:text-green-300">{{ __('app.onboarding_skip_or_add_more') }}</p>
                 </div>
             </div>
         </div>
@@ -80,8 +80,8 @@
                     </svg>
                 </div>
                 <div>
-                    <p class="font-semibold text-blue-800 dark:text-blue-200">Цей крок необов'язковий</p>
-                    <p class="text-sm text-blue-600 dark:text-blue-300">Можете пропустити і додати людей пізніше</p>
+                    <p class="font-semibold text-blue-800 dark:text-blue-200">{{ __('app.onboarding_step_optional') }}</p>
+                    <p class="text-sm text-blue-600 dark:text-blue-300">{{ __('app.onboarding_skip_add_people_later') }}</p>
                 </div>
             </div>
         </div>
@@ -101,7 +101,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                 </svg>
             </div>
-            <span :class="mode === 'manual' ? 'text-primary-700 dark:text-primary-300 font-semibold' : 'text-gray-700 dark:text-gray-300'" class="transition-colors">Вручну</span>
+            <span :class="mode === 'manual' ? 'text-primary-700 dark:text-primary-300 font-semibold' : 'text-gray-700 dark:text-gray-300'" class="transition-colors">{{ __('app.onboarding_manually') }}</span>
         </button>
         <a href="{{ route('migration.planning-center') }}"
                 class="group flex items-center justify-center gap-3 p-5 border-2 rounded-2xl transition-all duration-300 bg-white dark:bg-slate-700 border-gray-200 dark:border-slate-600 hover:border-primary-300 hover:shadow-lg hover:scale-[1.02]">
@@ -111,8 +111,8 @@
                 </svg>
             </div>
             <div class="text-left">
-                <span class="text-gray-700 dark:text-gray-300 group-hover:text-primary-600 dark:group-hover:text-primary-400 font-medium transition-colors block">Імпорт CSV</span>
-                <span class="text-xs text-gray-500 dark:text-gray-400">з мапінгом колонок</span>
+                <span class="text-gray-700 dark:text-gray-300 group-hover:text-primary-600 dark:group-hover:text-primary-400 font-medium transition-colors block">{{ __('app.onboarding_import_csv') }}</span>
+                <span class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.onboarding_with_column_mapping') }}</span>
             </div>
             <svg class="w-4 h-4 text-gray-400 group-hover:text-primary-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
@@ -130,7 +130,7 @@
                     <div class="flex items-center justify-between mb-4">
                         <span class="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
                             <span class="w-8 h-8 rounded-xl bg-gradient-to-br from-primary-500 to-emerald-600 text-white flex items-center justify-center text-sm font-bold shadow" x-text="index + 1"></span>
-                            Людина
+                            {{ __('app.person') }}
                         </span>
                         <button type="button"
                                 x-show="people.length > 1"
@@ -151,7 +151,7 @@
                             <input type="text"
                                    :name="'people[' + index + '][first_name]'"
                                    x-model="person.first_name"
-                                   placeholder="Ім'я"
+                                   placeholder="{{ __('app.first_name') }}"
                                    class="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all">
                         </div>
                         <div class="relative">
@@ -163,7 +163,7 @@
                             <input type="text"
                                    :name="'people[' + index + '][last_name]'"
                                    x-model="person.last_name"
-                                   placeholder="Прізвище"
+                                   placeholder="{{ __('app.last_name') }}"
                                    class="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all">
                         </div>
                         <div>
@@ -198,7 +198,7 @@
                                        x-model="person.phone"
                                        @blur="validatePerson(index)"
                                        :class="errors[index]?.phone ? 'ring-2 ring-red-500 border-red-500' : ''"
-                                       placeholder="Телефон"
+                                       placeholder="{{ __('app.phone') }}"
                                        class="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all">
                             </div>
                             <p x-show="errors[index]?.phone" x-text="errors[index]?.phone" class="mt-1.5 text-xs text-red-500 flex items-center gap-1">
@@ -218,13 +218,13 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                     </svg>
                 </div>
-                <span class="font-medium">Додати ще людину</span>
+                <span class="font-medium">{{ __('app.onboarding_add_another_person') }}</span>
             </button>
 
             <!-- People counter -->
             <div x-show="hasValidPeople" class="mt-4 p-4 bg-gradient-to-r from-primary-50 to-emerald-50 dark:from-primary-900/20 dark:to-emerald-900/20 rounded-xl text-center">
                 <p class="text-sm text-gray-600 dark:text-gray-400">
-                    <span class="font-bold text-primary-600 dark:text-primary-400 text-lg" x-text="people.filter(p => p.first_name.trim()).length"></span> людей буде додано
+                    <span class="font-bold text-primary-600 dark:text-primary-400 text-lg" x-text="people.filter(p => p.first_name.trim()).length"></span> {{ __('app.onboarding_people_will_be_added') }}
                 </p>
             </div>
         </div>

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Проповіді')
+@section('title', __('app.wb_sermons_title'))
 
 @section('content')
 <div class="max-w-6xl mx-auto space-y-6">
@@ -13,20 +13,20 @@
                 </svg>
             </a>
             <div>
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Проповіді</h1>
-                <p class="text-gray-600 dark:text-gray-400">Медіа-контент церкви</p>
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('app.wb_sermons_title') }}</h1>
+                <p class="text-gray-600 dark:text-gray-400">{{ __('app.wb_sermons_subtitle') }}</p>
             </div>
         </div>
         @if(auth()->user()->canEdit('website'))
         <div class="flex gap-2">
             <a href="{{ route('website-builder.sermons.series.index') }}" class="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                Серії
+                {{ __('app.wb_series') }}
             </a>
             <a href="{{ route('website-builder.sermons.create') }}" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors flex items-center gap-2">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
-                Додати проповідь
+                {{ __('app.wb_add_sermon') }}
             </a>
         </div>
         @endif
@@ -41,11 +41,11 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
             </div>
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Проповідей ще немає</h3>
-            <p class="text-gray-500 dark:text-gray-400 mt-1">Додайте відео або аудіо проповіді</p>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.wb_no_sermons_yet') }}</h3>
+            <p class="text-gray-500 dark:text-gray-400 mt-1">{{ __('app.wb_add_sermon_hint') }}</p>
             @if(auth()->user()->canEdit('website'))
             <a href="{{ route('website-builder.sermons.create') }}" class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors mt-4">
-                Додати проповідь
+                {{ __('app.wb_add_sermon') }}
             </a>
             @endif
         </div>
@@ -82,7 +82,7 @@
                             @if($sermon->series)
                                 <span class="px-2 py-0.5 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 rounded text-xs">{{ $sermon->series->title }}</span>
                             @endif
-                            <span>{{ $sermon->speaker?->name ?? 'Спікер' }}</span>
+                            <span>{{ $sermon->speaker?->name ?? __('app.wb_speaker_default') }}</span>
                             <span>&middot;</span>
                             <span>{{ $sermon->sermon_date->format('d.m.Y') }}</span>
                         </div>
@@ -91,14 +91,14 @@
                     <!-- Type Icons -->
                     <div class="flex items-center gap-2">
                         @if($sermon->hasVideo())
-                            <span class="p-1.5 bg-red-100 dark:bg-red-900/30 rounded-full" title="Відео">
+                            <span class="p-1.5 bg-red-100 dark:bg-red-900/30 rounded-full" title="{{ __('app.wb_video') }}">
                                 <svg class="w-4 h-4 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                                 </svg>
                             </span>
                         @endif
                         @if($sermon->hasAudio())
-                            <span class="p-1.5 bg-blue-100 dark:bg-blue-900/30 rounded-full" title="Аудіо">
+                            <span class="p-1.5 bg-blue-100 dark:bg-blue-900/30 rounded-full" title="{{ __('app.wb_audio') }}">
                                 <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/>
                                 </svg>
@@ -108,7 +108,7 @@
 
                     <!-- Status -->
                     <span class="px-2 py-1 text-xs font-medium rounded-full {{ $sermon->is_public ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400' }}">
-                        {{ $sermon->is_public ? 'Публічна' : 'Прихована' }}
+                        {{ $sermon->is_public ? __('app.wb_public') : __('app.wb_hidden') }}
                     </span>
 
                     <!-- Actions -->

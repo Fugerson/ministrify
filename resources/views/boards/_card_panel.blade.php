@@ -22,7 +22,7 @@
             <div class="h-full bg-white dark:bg-gray-900 shadow-xl flex flex-col">
                 <template x-if="cardPanel.loading">
                     <div class="flex-1 flex items-center justify-center">
-                        <div class="text-gray-500">Завантаження...</div>
+                        <div class="text-gray-500">{{ __('app.board_loading') }}</div>
                     </div>
                 </template>
 
@@ -34,7 +34,7 @@
                             </svg>
                             <p class="text-gray-500 dark:text-gray-400 text-sm" x-text="cardPanel.error"></p>
                             <button @click="closePanel()" class="mt-4 px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white border border-gray-300 dark:border-gray-600 rounded-lg">
-                                Закрити
+                                {{ __('app.board_close') }}
                             </button>
                         </div>
                     </div>
@@ -72,14 +72,14 @@
                                                           'bg-yellow-500': cardPanel.data.card.priority === 'medium',
                                                           'bg-gray-400': cardPanel.data.card.priority === 'low'
                                                       }"></span>
-                                                <span x-text="{'urgent': 'Терміново', 'high': 'Високий', 'medium': 'Середній', 'low': 'Низький'}[cardPanel.data.card.priority]"></span>
+                                                <span x-text="{'urgent': @js(__('app.board_urgent')), 'high': @js(__('app.board_high')), 'medium': @js(__('app.board_medium')), 'low': @js(__('app.board_low'))}[cardPanel.data.card.priority]"></span>
                                             </span>
                                         </template>
 
                                         <template x-if="cardPanel.data.card.is_completed">
                                             <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300">
                                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                                Завершено
+                                                {{ __('app.board_completed') }}
                                             </span>
                                         </template>
                                     </div>
@@ -87,7 +87,7 @@
                                     <div class="flex items-center gap-2">
                                         <span class="text-sm font-mono text-gray-400 dark:text-gray-500 cursor-pointer hover:text-primary-500 transition-colors"
                                               @click="navigator.clipboard.writeText('#' + cardPanel.data.card.id)"
-                                              title="Натисніть щоб скопіювати">
+                                              title="{{ __('app.board_click_to_copy') }}">
                                             #<span x-text="cardPanel.data.card.id"></span>
                                         </span>
                                         <input type="text" x-model="cardPanel.data.card.title"
@@ -98,22 +98,22 @@
                                 </div>
                                 <div class="flex items-center gap-2">
                                     @if(auth()->user()->canEdit('boards'))
-                                    <button type="button" @click="$refs.cardFileInput.click()" class="p-2 rounded-lg text-gray-400 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors" title="Прикріпити файл">
+                                    <button type="button" @click="$refs.cardFileInput.click()" class="p-2 rounded-lg text-gray-400 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors" title="{{ __('app.board_attach_file') }}">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
                                     </button>
                                     <button @click="toggleCardComplete()"
                                             class="p-2 rounded-lg transition-colors"
                                             :class="cardPanel.data.card.is_completed ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' : 'text-gray-400 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20'"
-                                            title="Позначити як завершене (C)">
+                                            title="{{ __('app.board_mark_complete') }}">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                         </svg>
                                     </button>
                                     @endif
                                     @if(auth()->user()->canDelete('boards'))
-                                    <button @click="if(confirm('Видалити цю картку?')) { deleteCard(cardPanel.data.card.id); closePanel(); }"
+                                    <button @click="if(confirm(@js(__('app.board_delete_card_confirm')))) { deleteCard(cardPanel.data.card.id); closePanel(); }"
                                             class="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                                            title="Видалити картку">
+                                            title="{{ __('app.board_delete_card') }}">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                         </svg>
@@ -140,11 +140,11 @@
                                     <div>
                                         <label class="flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/></svg>
-                                            Опис
+                                            {{ __('app.board_card_description') }}
                                         </label>
                                         <textarea x-model="cardPanel.data.card.description"
                                                   @blur="saveCardField('description', cardPanel.data.card.description)"
-                                                  rows="4" placeholder="Додайте детальний опис завдання..."
+                                                  rows="4" placeholder="{{ __('app.board_add_description') }}"
                                                   class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm dark:text-white resize-none"></textarea>
                                     </div>
 
@@ -153,7 +153,7 @@
                                         <div class="flex items-center justify-between mb-3">
                                             <label class="flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-gray-400">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-                                                Чеклист
+                                                {{ __('app.board_checklist') }}
                                             </label>
                                             <template x-if="cardPanel.data.checklist.length > 0">
                                                 <span class="text-xs text-gray-400" x-text="`${cardPanel.data.checklist.filter(i => i.is_completed).length}/${cardPanel.data.checklist.length}`"></span>
@@ -197,13 +197,13 @@
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                                     </svg>
-                                                    Додати пункт
+                                                    {{ __('app.board_add_item') }}
                                                 </button>
                                             </template>
                                             <template x-if="adding">
                                                 <div class="flex items-center gap-2">
                                                     <input type="text" x-model="newItem" @keydown.enter="addChecklistItem(newItem); newItem=''; adding=false"
-                                                           @keydown.escape="adding=false" placeholder="Назва пункту..." autofocus
+                                                           @keydown.escape="adding=false" placeholder="{{ __('app.board_item_name_placeholder') }}" autofocus
                                                            class="flex-1 px-2 py-1 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-sm dark:text-white">
                                                     <button @click="addChecklistItem(newItem); newItem=''; adding=false" class="px-2 py-1 bg-primary-600 text-white text-sm rounded">OK</button>
                                                     <button @click="adding=false" class="p-1 text-gray-400 hover:text-gray-600">
@@ -222,7 +222,7 @@
                                         <div class="flex items-center justify-between mb-3">
                                             <label class="flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-gray-400">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
-                                                Файли
+                                                {{ __('app.board_files') }}
                                                 <template x-if="cardPanel.data.attachments && cardPanel.data.attachments.length > 0">
                                                     <span class="px-1.5 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-xs" x-text="cardPanel.data.attachments.length"></span>
                                                 </template>
@@ -230,7 +230,7 @@
                                             @if(auth()->user()->canEdit('boards'))
                                             <label class="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 cursor-pointer flex items-center gap-1">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                                                Додати
+                                                {{ __('app.board_add_btn') }}
                                                 <input type="file" multiple class="hidden" @change="uploadAttachments($event)">
                                             </label>
                                             @endif
@@ -261,7 +261,7 @@
                                                 </div>
                                             </template>
                                             <template x-if="!cardPanel.data.attachments || cardPanel.data.attachments.length === 0">
-                                                <p class="text-center text-gray-400 text-xs py-2">Немає файлів</p>
+                                                <p class="text-center text-gray-400 text-xs py-2">{{ __('app.board_no_files') }}</p>
                                             </template>
                                         </div>
                                     </div>
@@ -271,7 +271,7 @@
                                         <div class="flex items-center justify-between mb-3">
                                             <label class="flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-gray-400">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
-                                                Пов'язані
+                                                {{ __('app.board_related') }}
                                                 <template x-if="cardPanel.data.related_cards && cardPanel.data.related_cards.length > 0">
                                                     <span class="px-1.5 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-xs" x-text="cardPanel.data.related_cards.length"></span>
                                                 </template>
@@ -279,14 +279,14 @@
                                             @if(auth()->user()->canEdit('boards'))
                                             <button @click="showLinkSearch = !showLinkSearch" class="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 flex items-center gap-1">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                                                Зв'язати
+                                                {{ __('app.board_link') }}
                                             </button>
                                             @endif
                                         </div>
 
                                         <template x-if="showLinkSearch">
                                             <div class="mb-3">
-                                                <input type="text" x-model="linkSearch" placeholder="Пошук завдання..."
+                                                <input type="text" x-model="linkSearch" placeholder="{{ __('app.board_search_task_placeholder') }}"
                                                        class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm dark:text-white mb-2">
                                                 <div class="max-h-32 overflow-y-auto space-y-1">
                                                     <template x-for="card in (cardPanel.data.available_cards || []).filter(c => !linkSearch || c.title.toLowerCase().includes(linkSearch.toLowerCase())).slice(0, 10)" :key="card.id">
@@ -323,7 +323,7 @@
                                     <div>
                                         <label class="flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-gray-400 mb-3">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
-                                            Коментарі
+                                            {{ __('app.board_comments') }}
                                             <template x-if="cardPanel.data.comments && cardPanel.data.comments.length > 0">
                                                 <span class="px-1.5 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-xs" x-text="cardPanel.data.comments.length"></span>
                                             </template>
@@ -331,7 +331,7 @@
 
                                         <!-- Add comment (uses parent churchBoard scope — no nested x-data) -->
                                         <div class="mb-4">
-                                            <textarea x-model="commentText" rows="2" placeholder="Написати коментар..."
+                                            <textarea x-model="commentText" rows="2" placeholder="{{ __('app.board_write_comment') }}"
                                                       @keydown.cmd.enter="submitComment()"
                                                       @keydown.ctrl.enter="submitComment()"
                                                       class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm dark:text-white resize-none"></textarea>
@@ -356,7 +356,7 @@
                                             <div class="flex items-center gap-2 mt-2">
                                                 <button type="button" @click="submitComment()" :disabled="!commentText.trim() && commentFileNames.length === 0"
                                                         class="px-3 py-1.5 bg-primary-600 text-white text-sm rounded-lg disabled:opacity-50">
-                                                    Коментувати
+                                                    {{ __('app.board_comment_btn') }}
                                                 </button>
                                                 <button type="button" @click="$refs.commentFileInput.click()"
                                                         class="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
@@ -379,7 +379,7 @@
                                                             <span class="font-medium text-gray-900 dark:text-white text-sm" x-text="comment.user_name"></span>
                                                             <span class="text-xs text-gray-500" x-text="comment.created_at"></span>
                                                             <template x-if="comment.is_edited">
-                                                                <span class="text-xs text-gray-400">(ред.)</span>
+                                                                <span class="text-xs text-gray-400">{{ __('app.board_edited') }}</span>
                                                             </template>
                                                         </div>
                                                         <template x-if="!editing">
@@ -401,13 +401,13 @@
                                                                     </div>
                                                                 </template>
                                                                 <div class="flex items-center gap-2 mt-1">
-                                                                    <button @click="updateComment(comment, editContent); editing=false" class="px-2 py-1 bg-primary-600 text-white text-xs rounded">Зберегти</button>
-                                                                    <button @click="editing=false; editContent=comment.content; editFileNames=[]; _editCommentFiles=[]" class="px-2 py-1 text-gray-500 text-xs">Скасувати</button>
+                                                                    <button @click="updateComment(comment, editContent); editing=false" class="px-2 py-1 bg-primary-600 text-white text-xs rounded">{{ __('app.board_save') }}</button>
+                                                                    <button @click="editing=false; editContent=comment.content; editFileNames=[]; _editCommentFiles=[]" class="px-2 py-1 text-gray-500 text-xs">{{ __('app.board_cancel') }}</button>
                                                                     <input type="file" multiple accept="image/*,.heic,.heif,.pdf,.doc,.docx,.xls,.xlsx,.zip,.rar"
                                                                            x-ref="editFileInput"
                                                                            @change="onEditFilesChange($event)"
                                                                            class="hidden">
-                                                                    <button type="button" @click="$refs.editFileInput.click()" class="p-1 text-gray-400 hover:text-primary-600 ml-auto" title="Прикріпити файл">
+                                                                    <button type="button" @click="$refs.editFileInput.click()" class="p-1 text-gray-400 hover:text-primary-600 ml-auto" title="{{ __('app.board_attach_file') }}">
                                                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
                                                                     </button>
                                                                 </div>
@@ -430,7 +430,7 @@
                                                                         <template x-if="comment.is_mine">
                                                                             <button @click.prevent.stop="deleteCommentAttachment(comment, attIdx)"
                                                                                     class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover/att:opacity-100 transition-opacity shadow hover:bg-red-600"
-                                                                                    title="Видалити вкладення">
+                                                                                    title="{{ __('app.board_delete_attachment') }}">
                                                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                                                                             </button>
                                                                         </template>
@@ -456,7 +456,7 @@
                                                 </div>
                                             </template>
                                             <template x-if="cardPanel.data.comments.length === 0">
-                                                <p class="text-center text-gray-400 text-sm py-4">Немає коментарів</p>
+                                                <p class="text-center text-gray-400 text-sm py-4">{{ __('app.board_no_comments') }}</p>
                                             </template>
                                         </div>
                                     </div>
@@ -465,7 +465,7 @@
                                     <div x-data="{ showAll: false }">
                                         <label class="flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-gray-400 mb-3">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                            Історія
+                                            {{ __('app.board_history') }}
                                         </label>
                                         <div class="space-y-2">
                                             <template x-for="(activity, idx) in (showAll ? cardPanel.data.activities : (cardPanel.data.activities || []).slice(0, 5))" :key="activity.id">
@@ -473,10 +473,10 @@
                                                     <span class="w-5 h-5 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0 text-[10px]" x-text="activity.user_initial"></span>
                                                     <div class="flex-1 min-w-0">
                                                         <span class="font-medium text-gray-700 dark:text-gray-300" x-text="activity.user_name"></span>
-                                                        <span x-text="activity.description || ({'updated': 'оновив', 'moved': 'перемістив', 'assigned': 'призначив', 'created': 'створив', 'completed': 'завершив'}[activity.action] || activity.action)"></span>
+                                                        <span x-text="activity.description || ({'updated': @js(__('app.board_action_updated')), 'moved': @js(__('app.board_action_moved')), 'assigned': @js(__('app.board_action_assigned')), 'created': @js(__('app.board_action_created')), 'completed': @js(__('app.board_action_completed'))}[activity.action] || activity.action)"></span>
                                                         <template x-if="activity.field && !activity.description">
                                                             <span>
-                                                                <span class="text-gray-400" x-text="({'title': 'назву', 'description': 'опис', 'priority': 'пріоритет', 'due_date': 'дедлайн', 'column_id': 'статус', 'epic_id': 'проєкт', 'assigned_to': 'виконавця'}[activity.field] || activity.field)"></span>
+                                                                <span class="text-gray-400" x-text="({'title': @js(__('app.board_field_title')), 'description': @js(__('app.board_field_description')), 'priority': @js(__('app.board_field_priority')), 'due_date': @js(__('app.board_field_deadline')), 'column_id': @js(__('app.board_field_status')), 'epic_id': @js(__('app.board_field_project')), 'assigned_to': @js(__('app.board_field_assignee'))}[activity.field] || activity.field)"></span>
                                                                 <template x-if="activity.old_value">
                                                                     <span>: <span class="line-through" x-text="activity.old_value"></span> &rarr; <span x-text="activity.new_value || '—'"></span></span>
                                                                 </template>
@@ -488,11 +488,11 @@
                                             </template>
                                             <template x-if="(cardPanel.data.activities || []).length > 5 && !showAll">
                                                 <button @click="showAll = true" class="text-xs text-primary-600 hover:text-primary-700">
-                                                    Показати все (<span x-text="cardPanel.data.activities.length"></span>)
+                                                    {{ __('app.board_show_all', ['count' => '']) }}<span x-text="'(' + cardPanel.data.activities.length + ')'"></span>
                                                 </button>
                                             </template>
                                             <template x-if="!cardPanel.data.activities || cardPanel.data.activities.length === 0">
-                                                <p class="text-center text-gray-400 text-xs py-2">Немає активності</p>
+                                                <p class="text-center text-gray-400 text-xs py-2">{{ __('app.board_no_activity') }}</p>
                                             </template>
                                         </div>
                                     </div>
@@ -505,7 +505,7 @@
                                         <div>
                                             <label class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mb-1.5">
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-                                                Статус
+                                                {{ __('app.board_status') }}
                                             </label>
                                             <select x-model="cardPanel.data.card.column_id" @change="saveCardField('column_id', cardPanel.data.card.column_id)"
                                                     class="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm dark:text-white">
@@ -519,11 +519,11 @@
                                         <div>
                                             <label class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mb-1.5">
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
-                                                Проєкт
+                                                {{ __('app.board_project') }}
                                             </label>
                                             <select x-model="cardPanel.data.card.epic_id" @change="saveCardField('epic_id', cardPanel.data.card.epic_id)"
                                                     class="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm dark:text-white">
-                                                <option value="">Без проєкту</option>
+                                                <option value="">{{ __('app.board_no_project') }}</option>
                                                 <template x-for="epic in epics" :key="epic.id">
                                                     <option :value="epic.id" x-text="epic.name"></option>
                                                 </template>
@@ -561,12 +561,12 @@
                                         }">
                                             <label class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mb-1.5">
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                                                Відповідальний
+                                                {{ __('app.board_responsible') }}
                                             </label>
                                             <div class="relative">
                                                 <button type="button" @click="updatePosition(); open = !open; $nextTick(() => open && $refs.panelSearchInput.focus())"
                                                         class="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-left flex items-center justify-between dark:text-white">
-                                                    <span x-show="!selectedPerson" class="text-gray-500">Не призначено</span>
+                                                    <span x-show="!selectedPerson" class="text-gray-500">{{ __('app.board_not_assigned') }}</span>
                                                     <template x-if="selectedPerson">
                                                         <span class="flex items-center gap-2">
                                                             <span class="w-5 h-5 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-xs text-primary-600 dark:text-primary-400" x-text="selectedPerson.name.charAt(0)"></span>
@@ -583,14 +583,14 @@
                                                      class="fixed z-[9999] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg overflow-hidden">
                                                     <div class="p-2 border-b border-gray-200 dark:border-gray-700">
                                                         <input type="text" x-model="search" x-ref="panelSearchInput"
-                                                               placeholder="Пошук..."
+                                                               placeholder="{{ __('app.board_search_short') }}"
                                                                class="w-full px-2 py-1.5 bg-gray-50 dark:bg-gray-700 border-0 rounded text-sm dark:text-white focus:ring-1 focus:ring-primary-500">
                                                     </div>
                                                     <div class="max-h-40 overflow-y-auto">
                                                         <button type="button" @click="select('')"
                                                                 class="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
                                                             <span class="w-5 h-5 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center text-xs">-</span>
-                                                            <span class="text-gray-500 dark:text-gray-400">Не призначено</span>
+                                                            <span class="text-gray-500 dark:text-gray-400">{{ __('app.board_not_assigned') }}</span>
                                                         </button>
                                                         <template x-for="person in filtered" :key="person.id">
                                                             <button type="button" @click="select(person.id)"
@@ -609,28 +609,28 @@
                                         <div>
                                             <label class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mb-1.5">
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"/></svg>
-                                                Пріоритет
+                                                {{ __('app.board_priority') }}
                                             </label>
                                             <div class="flex gap-1">
                                                 <button @click="cardPanel.data.card.priority = 'low'; saveCardField('priority', 'low')"
                                                         class="flex-1 px-2 py-1.5 text-xs rounded-lg transition-colors"
                                                         :class="cardPanel.data.card.priority === 'low' ? 'bg-gray-600 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'">
-                                                    Низ.
+                                                    {{ __('app.board_priority_low_short') }}
                                                 </button>
                                                 <button @click="cardPanel.data.card.priority = 'medium'; saveCardField('priority', 'medium')"
                                                         class="flex-1 px-2 py-1.5 text-xs rounded-lg transition-colors"
                                                         :class="cardPanel.data.card.priority === 'medium' ? 'bg-yellow-500 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'">
-                                                    Сер.
+                                                    {{ __('app.board_priority_medium_short') }}
                                                 </button>
                                                 <button @click="cardPanel.data.card.priority = 'high'; saveCardField('priority', 'high')"
                                                         class="flex-1 px-2 py-1.5 text-xs rounded-lg transition-colors"
                                                         :class="cardPanel.data.card.priority === 'high' ? 'bg-orange-500 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'">
-                                                    Вис.
+                                                    {{ __('app.board_priority_high_short') }}
                                                 </button>
                                                 <button @click="cardPanel.data.card.priority = 'urgent'; saveCardField('priority', 'urgent')"
                                                         class="flex-1 px-2 py-1.5 text-xs rounded-lg transition-colors"
                                                         :class="cardPanel.data.card.priority === 'urgent' ? 'bg-red-500 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'">
-                                                    Терм.
+                                                    {{ __('app.board_priority_urgent_short') }}
                                                 </button>
                                             </div>
                                         </div>
@@ -639,7 +639,7 @@
                                         <div>
                                             <label class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mb-1.5">
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                                Дедлайн
+                                                {{ __('app.board_deadline') }}
                                             </label>
                                             <input type="date" x-model="cardPanel.data.card.due_date" @change="saveCardField('due_date', cardPanel.data.card.due_date)"
                                                    class="w-full px-3 py-2 bg-white dark:bg-gray-800 border rounded-lg text-sm dark:text-white"
@@ -659,8 +659,8 @@
                                                        @change="cardPanel.data.card.show_in_general = $event.target.checked; saveCardField('show_in_general', $event.target.checked ? 1 : 0)"
                                                        class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700">
                                                 <div>
-                                                    <span class="text-sm text-gray-700 dark:text-gray-300">Показувати в загальних</span>
-                                                    <p class="text-xs text-gray-400 dark:text-gray-500">Завдання з'явиться на загальній дошці</p>
+                                                    <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('app.board_show_in_general') }}</span>
+                                                    <p class="text-xs text-gray-400 dark:text-gray-500">{{ __('app.board_task_will_show_general') }}</p>
                                                 </div>
                                             </label>
                                         </div>
@@ -673,7 +673,7 @@
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                                             </svg>
-                                            Дублювати
+                                            {{ __('app.board_duplicate') }}
                                         </button>
                                         @endif
                                         @if(auth()->user()->canDelete('boards'))
@@ -681,7 +681,7 @@
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                             </svg>
-                                            Видалити
+                                            {{ __('app.delete') }}
                                         </button>
                                         @endif
                                     </div>
@@ -712,6 +712,6 @@
     </button>
     <a :href="lightboxUrl" target="_blank" @click.stop class="absolute bottom-4 right-4 px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-sm rounded-lg flex items-center gap-2 transition-colors">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-        Відкрити
+        {{ __('app.board_open') }}
     </a>
 </div>

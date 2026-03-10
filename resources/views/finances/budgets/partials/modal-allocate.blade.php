@@ -17,13 +17,13 @@
              x-transition:enter-end="opacity-100 scale-100"
              @click.stop>
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                Виділити бюджет: <span x-text="allocateMinistryName"></span>
+                {{ __('app.allocate_budget_label') }} <span x-text="allocateMinistryName"></span>
             </h3>
 
             <form @submit.prevent="submitAllocation()" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" title="Сума, яка буде переведена з церковного рахунку на рахунок команди">
-                        Сума *
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" title="{{ __('app.allocate_tooltip') }}">
+                        {{ __('app.amount_required') }}
                     </label>
                     <div class="flex gap-2">
                         <input type="number" x-model="allocateForm.amount" required min="0.01" step="0.01"
@@ -40,19 +40,19 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Спосіб оплати
+                        {{ __('app.payment_method_label') }}
                     </label>
                     <select x-model="allocateForm.payment_method"
                             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500">
-                        <option value="">Не вказано</option>
-                        <option value="cash">Готівка</option>
-                        <option value="card">Картка</option>
+                        <option value="">{{ __('app.not_specified') }}</option>
+                        <option value="cash">{{ __('app.cash_payment') }}</option>
+                        <option value="card">{{ __('app.card_payment') }}</option>
                     </select>
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Дата *
+                        {{ __('app.date_required') }}
                     </label>
                     <input type="date" x-model="allocateForm.date" required
                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500">
@@ -60,7 +60,7 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Нотатки
+                        {{ __('app.notes') }}
                     </label>
                     <textarea x-model="allocateForm.notes" rows="2" maxlength="500"
                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500"></textarea>
@@ -69,12 +69,12 @@
                 <div class="flex justify-end gap-3 pt-2">
                     <button type="button" @click="showAllocateModal = false"
                             class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
-                        Скасувати
+                        {{ __('app.cancel') }}
                     </button>
                     <button type="submit" :disabled="allocateSaving"
                             class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
-                        <span x-show="!allocateSaving">Виділити</span>
-                        <span x-show="allocateSaving">Збереження...</span>
+                        <span x-show="!allocateSaving">{{ __('app.allocate_btn') }}</span>
+                        <span x-show="allocateSaving">{{ __('app.saving') }}</span>
                     </button>
                 </div>
             </form>

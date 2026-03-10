@@ -52,7 +52,7 @@ window.expenseEditModal = function() {
                 this.existingAttachments = t.attachments || [];
                 if (this.$refs.fileInput) this.$refs.fileInput.value = '';
             } catch (e) {
-                showToast('error', 'Помилка завантаження');
+                showToast('error', '{{ __('app.loading_error') }}');
                 this.modalOpen = false;
             } finally {
                 this.loadingData = false;
@@ -66,14 +66,14 @@ window.expenseEditModal = function() {
             for (const file of files) {
                 if (accepted.length >= 10) break;
                 if (file.size > maxSize) {
-                    rejected.push(file.name + ' (' + (file.size / 1024 / 1024).toFixed(1) + ' МБ)');
+                    rejected.push(file.name + ' (' + (file.size / 1024 / 1024).toFixed(1) + ' MB)');
                     continue;
                 }
                 accepted.push(file);
             }
             this.selectedFiles = accepted;
             if (rejected.length) {
-                showToast('error', 'Файл занадто великий (макс. 10 МБ): ' + rejected.join(', '));
+                showToast('error', '{{ __('app.file_too_large', ['size' => '10 MB', 'files' => '']) }}' + rejected.join(', '));
             }
         },
         removeFile(index) {
@@ -119,7 +119,7 @@ window.expenseEditModal = function() {
                     body: formData
                 });
                 if (response.status === 413) {
-                    showToast('error', 'Файл занадто великий для завантаження. Максимум 10 МБ на файл.');
+                    showToast('error', '{{ __('app.file_too_large_upload', ['size' => '10 MB']) }}');
                     return;
                 }
 
@@ -130,12 +130,12 @@ window.expenseEditModal = function() {
                     setTimeout(() => location.reload(), 500);
                 } else if (response.status === 422) {
                     const errorMsgs = Object.values(data.errors || {}).flat();
-                    showToast('error', errorMsgs.length ? errorMsgs[0] : (data.message || 'Помилка валідації'));
+                    showToast('error', errorMsgs.length ? errorMsgs[0] : (data.message || '{{ __('app.validation_error') }}'));
                 } else {
-                    showToast('error', data.message || 'Помилка збереження');
+                    showToast('error', data.message || '{{ __('app.save_error') }}');
                 }
             } catch (e) {
-                showToast('error', 'Помилка збереження. Перевірте розмір файлів (макс. 10 МБ).');
+                showToast('error', '{{ __('app.check_file_sizes', ['size' => '10 MB']) }}');
             } finally {
                 this.loading = false;
             }
@@ -161,7 +161,7 @@ window.expenseEditModal = function() {
                  x-transition:enter-end="opacity-100 scale-100"
                  @click.stop>
                 <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Редагувати витрату</h3>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.edit_expense_title') }}</h3>
                     <button @click="modalOpen = false" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -179,7 +179,7 @@ window.expenseEditModal = function() {
 
                 <form x-show="!loadingData" @submit.prevent="submit()" class="p-6 space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Сума *</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.amount_required') }}</label>
                         <div class="flex gap-2">
                             <input type="number" x-model="formData.amount" step="0.01" min="0.01" required
                                    class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
@@ -192,38 +192,38 @@ window.expenseEditModal = function() {
                         </div>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Опис *</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.description_required') }}</label>
                         <input type="text" x-model="formData.description" required maxlength="255"
                                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Дата *</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.date_required') }}</label>
                         <input type="date" x-model="formData.date" required
                                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Категорія</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.category') }}</label>
                         <select x-model="formData.category_id"
                                 :class="{ 'hidden': formData.category_id === '__custom__' }"
                                 class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                            <option value="">Без категорії</option>
+                            <option value="">{{ __('app.no_category') }}</option>
                             @foreach($expenseCategories ?? [] as $cat)
                                 <option value="{{ $cat->id }}">{{ $cat->icon_emoji ?? '💸' }} {{ $cat->name }}</option>
                             @endforeach
-                            <option value="__custom__">Інше (ввести вручну)...</option>
+                            <option value="__custom__">{{ __('app.other_enter_custom') }}</option>
                         </select>
                         <div x-show="formData.category_id === '__custom__'" class="flex gap-2">
-                            <input type="text" x-model="formData.category_name" placeholder="Назва категорії..."
+                            <input type="text" x-model="formData.category_name" placeholder="{{ __('app.category_name_placeholder') }}"
                                    class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
                             <button type="button" @click="formData.category_id = ''; formData.category_name = ''"
                                     class="px-3 py-2 text-gray-500 hover:text-red-500 border border-gray-300 dark:border-gray-600 rounded-xl">✕</button>
                         </div>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Команда</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.team_label') }}</label>
                         <select x-model="formData.ministry_id"
                                 class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                            <option value="">Без команди</option>
+                            <option value="">{{ __('app.no_team') }}</option>
                             @foreach($ministries as $m)
                                 <option value="{{ $m['ministry']->id }}">{{ $m['ministry']->name }}</option>
                             @endforeach
@@ -232,7 +232,7 @@ window.expenseEditModal = function() {
 
                     <!-- Existing Attachments -->
                     <div x-show="existingAttachments.length > 0">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Прикріплені чеки</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.attached_receipts') }}</label>
                         <div class="space-y-2">
                             <template x-for="att in existingAttachments" :key="att.id">
                                 <div class="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded-lg"
@@ -272,10 +272,10 @@ window.expenseEditModal = function() {
 
                     <!-- File Upload -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Додати чеки</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.add_receipts') }}</label>
                         <input type="file" x-ref="fileInput" @change="handleFileSelect" multiple accept="image/*,.heic,.heif,.pdf"
                                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-sm file:bg-primary-50 file:text-primary-700 dark:file:bg-primary-900/30 dark:file:text-primary-300">
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Максимум 10 файлів по 10 МБ (JPG, PNG, HEIC, PDF)</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('app.max_files_upload_hint') }}</p>
                             <!-- Selected files preview -->
                             <div x-show="selectedFiles.length > 0" class="mt-2 space-y-1">
                                 <template x-for="(file, index) in selectedFiles" :key="index">
@@ -294,12 +294,12 @@ window.expenseEditModal = function() {
                     <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
                         <button type="button" @click="modalOpen = false"
                                 class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl">
-                            Скасувати
+                            {{ __('app.cancel') }}
                         </button>
                         <button type="submit" :disabled="loading"
                                 class="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl disabled:opacity-50">
-                            <span x-show="!loading">Зберегти</span>
-                            <span x-show="loading">Збереження...</span>
+                            <span x-show="!loading">{{ __('app.save') }}</span>
+                            <span x-show="loading">{{ __('app.saving') }}</span>
                         </button>
                     </div>
                 </form>

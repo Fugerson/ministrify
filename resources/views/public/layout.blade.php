@@ -152,11 +152,11 @@
                 <div class="hidden md:flex items-center gap-1">
                     <a href="{{ route('public.church', $church->slug) }}"
                        class="px-4 py-2 text-sm font-medium text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors">
-                        {{ __('Головна') }}
+                        {{ __('app.public_home') }}
                     </a>
                     <a href="{{ route('public.events', $church->slug) }}"
                        class="px-4 py-2 text-sm font-medium text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors">
-                        {{ __('Події') }}
+                        {{ __('app.public_events') }}
                     </a>
                     {{-- TODO: Розкоментувати після бета-тестування
                     <a href="{{ route('public.donate', $church->slug) }}"
@@ -182,8 +182,8 @@
         <!-- Mobile menu -->
         <div x-show="mobileOpen" x-cloak class="md:hidden border-t border-gray-100">
             <div class="px-4 py-3 space-y-1">
-                <a href="{{ route('public.church', $church->slug) }}" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg">{{ __('Головна') }}</a>
-                <a href="{{ route('public.events', $church->slug) }}" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg">{{ __('Події') }}</a>
+                <a href="{{ route('public.church', $church->slug) }}" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg">{{ __('app.public_home') }}</a>
+                <a href="{{ route('public.events', $church->slug) }}" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg">{{ __('app.public_events') }}</a>
                 {{-- TODO: Розкоментувати після бета-тестування
                 <a href="{{ route('public.donate', $church->slug) }}" class="block px-4 py-2.5 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg text-center mt-3">{{ __('Пожертвувати') }}</a>
                 --}}
@@ -249,7 +249,7 @@
                 </div>
 
                 <div>
-                    <h4 class="font-semibold mb-4">{{ __('Контакти') }}</h4>
+                    <h4 class="font-semibold mb-4">{{ __('app.contacts') }}</h4>
                     <ul class="space-y-2 text-sm text-gray-400">
                         @if($church->address)
                             <li class="flex items-start gap-2">

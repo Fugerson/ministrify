@@ -13,7 +13,7 @@
                 @if($board->ministry)
                     <a href="{{ route('ministries.show', $board->ministry) }}?tab=board"
                        class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                       title="Назад до команди">
+                       title="{{ __('app.board_back_to_team') }}">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                         </svg>
@@ -30,7 +30,7 @@
                 <div>
                     <h1 class="text-xl font-bold text-gray-900 dark:text-white">{{ $board->display_name }}</h1>
                     <p class="text-sm text-gray-500 dark:text-gray-400">
-                        {{ $board->ministry_id ? 'Дошка команди' : 'Всі завдання команд в одному місці' }}
+                        {{ $board->ministry_id ? __('app.board_team_board') : __('app.board_all_tasks_in_one_place') }}
                     </p>
                 </div>
             </div>
@@ -42,7 +42,7 @@
         <div class="flex items-center gap-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-2 shadow-sm">
             <!-- Search -->
             <div class="relative flex-1 min-w-0 sm:min-w-[180px] sm:max-w-xs" x-data="{ showDropdown: false }" @click.away="showDropdown = false">
-                <input type="text" x-model="searchQuery" placeholder="Пошук... (/)"
+                <input type="text" x-model="searchQuery" placeholder="{{ __('app.board_search_placeholder') }}"
                        x-ref="searchInput"
                        @focus="showDropdown = true"
                        @keydown.escape="showDropdown = false; $el.blur()"
@@ -57,7 +57,7 @@
                 <div x-show="showDropdown && searchQuery.length > 0" x-transition
                      class="absolute z-50 mt-1 w-full sm:w-80 max-w-[calc(100vw-2rem)] max-h-72 overflow-y-auto bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl">
                     <template x-if="filteredCards.length === 0">
-                        <div class="p-3 text-sm text-gray-500 dark:text-gray-400 text-center">Нічого не знайдено</div>
+                        <div class="p-3 text-sm text-gray-500 dark:text-gray-400 text-center">{{ __('app.board_nothing_found') }}</div>
                     </template>
                     <template x-for="card in filteredCards.slice(0, 10)" :key="card.id">
                         <button @click="openCard(card.id); showDropdown = false; searchQuery = ''"
@@ -87,7 +87,7 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
                     </svg>
-                    <span class="hidden sm:inline">Фільтри</span>
+                    <span class="hidden sm:inline">{{ __('app.board_filters') }}</span>
                     <span x-show="activeFilterCount > 0"
                           class="min-w-[18px] h-[18px] flex items-center justify-center text-[10px] font-bold rounded-full bg-primary-600 text-white"
                           x-text="activeFilterCount"></span>
@@ -102,12 +102,12 @@
                             <button @click="applyPreset('my')"
                                     class="flex-1 px-3 py-2 text-xs font-medium rounded-lg transition-colors text-center"
                                     :class="activePreset === 'my' ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300' : 'bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'">
-                                Mої завдання
+                                {{ __('app.board_my_tasks') }}
                             </button>
                             <button @click="applyPreset('overdue')"
                                     class="flex-1 px-3 py-2 text-xs font-medium rounded-lg transition-colors text-center"
                                     :class="activePreset === 'overdue' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' : 'bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'">
-                                Прострочені
+                                {{ __('app.board_overdue') }}
                             </button>
                         </div>
 
@@ -115,7 +115,7 @@
 
                         <!-- Epic -->
                         <div>
-                            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">Проєкт</label>
+                            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">{{ __('app.board_project') }}</label>
                             <div class="flex flex-wrap gap-1.5">
                                 <template x-for="epic in epics" :key="epic.id">
                                     <button @click="filters.epic = filters.epic == String(epic.id) ? '' : String(epic.id)"
@@ -135,25 +135,25 @@
 
                         <!-- Priority -->
                         <div>
-                            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Пріоритет</label>
+                            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('app.board_priority') }}</label>
                             <select x-model="filters.priority"
                                     class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm dark:text-white focus:ring-2 focus:ring-primary-500">
-                                <option value="">Всі</option>
-                                <option value="urgent">Терміново</option>
-                                <option value="high">Високий</option>
-                                <option value="medium">Середній</option>
-                                <option value="low">Низький</option>
+                                <option value="">{{ __('app.board_all') }}</option>
+                                <option value="urgent">{{ __('app.board_urgent') }}</option>
+                                <option value="high">{{ __('app.board_high') }}</option>
+                                <option value="medium">{{ __('app.board_medium') }}</option>
+                                <option value="low">{{ __('app.board_low') }}</option>
                             </select>
                         </div>
 
                         <!-- Assignee -->
                         <div>
-                            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Виконавець</label>
+                            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('app.board_assignee') }}</label>
                             <select x-model="filters.assignee"
                                     class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm dark:text-white focus:ring-2 focus:ring-primary-500">
-                                <option value="">Всі</option>
-                                <option value="me">Мої завдання</option>
-                                <option value="unassigned">Без виконавця</option>
+                                <option value="">{{ __('app.board_all') }}</option>
+                                <option value="me">{{ __('app.board_my_tasks_short') }}</option>
+                                <option value="unassigned">{{ __('app.board_unassigned') }}</option>
                                 @foreach($people as $person)
                                     <option value="{{ $person->id }}">{{ $person->full_name }}</option>
                                 @endforeach
@@ -162,10 +162,10 @@
 
                         <!-- Ministry -->
                         <div>
-                            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Команда</label>
+                            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('app.board_team') }}</label>
                             <select x-model="filters.ministry"
                                     class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm dark:text-white focus:ring-2 focus:ring-primary-500">
-                                <option value="">Всі команди</option>
+                                <option value="">{{ __('app.board_all_teams') }}</option>
                                 @foreach($ministries as $ministry)
                                     <option value="{{ $ministry->id }}">{{ $ministry->name }}</option>
                                 @endforeach
@@ -175,7 +175,7 @@
                         <!-- Clear -->
                         <template x-if="activeFilterCount > 0">
                             <button @click="clearFilters()" class="w-full px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors font-medium">
-                                Скинути всі фільтри
+                                {{ __('app.board_clear_all_filters') }}
                             </button>
                         </template>
                     </div>
@@ -205,7 +205,7 @@
                 </template>
                 <template x-if="filters.ministry">
                     <button @click="filters.ministry = ''" class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 whitespace-nowrap">
-                        <span x-text="ministriesList.find(m => m.id == filters.ministry)?.name || 'Команда'"></span>
+                        <span x-text="ministriesList.find(m => m.id == filters.ministry)?.name || @js(__('app.board_team'))"></span>
                         <svg class="w-3 h-3 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
                 </template>
@@ -220,7 +220,7 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
-                <span class="hidden sm:inline">Завдання</span>
+                <span class="hidden sm:inline">{{ __('app.board_task') }}</span>
                 <kbd class="hidden sm:inline px-1.5 py-0.5 text-[10px] font-mono bg-primary-500 rounded">N</kbd>
             </button>
             @endif
@@ -230,7 +230,7 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
                 </svg>
-                <span class="hidden sm:inline">Проєкт</span>
+                <span class="hidden sm:inline">{{ __('app.board_project') }}</span>
             </button>
 
         </div>
@@ -281,13 +281,13 @@
                                             <button @click="renameColumn({{ $column->id }}, '{{ addslashes($column->name) }}'); colMenu = false"
                                                     class="w-full px-3 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center gap-2">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                                Перейменувати
+                                                {{ __('app.board_rename') }}
                                             </button>
                                             @if(auth()->user()->canDelete('boards'))
                                             <button @click="deleteColumn({{ $column->id }}); colMenu = false"
                                                     class="w-full px-3 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                                Видалити
+                                                {{ __('app.delete') }}
                                             </button>
                                             @endif
                                         </div>
@@ -357,15 +357,15 @@
                                             @if($card->priority === 'urgent')
                                                 <span class="priority-badge inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300 font-medium">
                                                     <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
-                                                    Терм.
+                                                    {{ __('app.board_urgent_short') }}
                                                 </span>
                                             @elseif($card->priority === 'high')
                                                 <span class="priority-badge inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300 font-medium">
                                                     <span class="w-1.5 h-1.5 rounded-full bg-orange-500"></span>
-                                                    Вис.
+                                                    {{ __('app.board_high_short') }}
                                                 </span>
                                             @elseif($card->priority === 'medium')
-                                                <span class="priority-badge w-1.5 h-1.5 rounded-full bg-yellow-500" title="Середній"></span>
+                                                <span class="priority-badge w-1.5 h-1.5 rounded-full bg-yellow-500" title="{{ __('app.board_medium') }}"></span>
                                             @endif
 
                                             <!-- Due date -->
@@ -442,7 +442,7 @@
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                 </svg>
-                                <span>Додати завдання</span>
+                                <span>{{ __('app.board_add_task') }}</span>
                             </button>
                         </div>
                         @endif
@@ -456,7 +456,7 @@
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                         </svg>
-                        <span class="text-sm font-medium">Додати колонку</span>
+                        <span class="text-sm font-medium">{{ __('app.board_add_column') }}</span>
                     </button>
                 </div>
                 @endif
@@ -545,7 +545,7 @@ function churchBoard() {
         peopleList: @json($people->map(fn($p) => ['id' => $p->id, 'name' => $p->full_name, 'photo' => $p->photo ? Storage::url($p->photo) : null])),
         ministriesList: @json($ministries->map(fn($m) => ['id' => $m->id, 'name' => $m->name])),
         filterLabels: {
-            priority: { urgent: 'Терміново', high: 'Високий', medium: 'Середній', low: 'Низький' }
+            priority: { urgent: @js(__('app.board_urgent')), high: @js(__('app.board_high')), medium: @js(__('app.board_medium')), low: @js(__('app.board_low')) }
         },
         showShortcuts: false,
         myPersonId: {{ auth()->user()->person?->id ?? 'null' }},
@@ -567,8 +567,8 @@ function churchBoard() {
         },
 
         getAssigneeLabel(val) {
-            if (val === 'me') return 'Мої';
-            if (val === 'unassigned') return 'Без виконавця';
+            if (val === 'me') return @js(__('app.board_my_short'));
+            if (val === 'unassigned') return @js(__('app.board_unassigned'));
             const p = this.peopleList.find(p => p.id == val);
             return p ? p.name : val;
         },
@@ -846,7 +846,7 @@ function churchBoard() {
 
                         // Close modal and show toast
                         this.addCardModal.open = false;
-                        if (window.showGlobalToast) showGlobalToast('Завдання створено', 'success');
+                        if (window.showGlobalToast) showGlobalToast(@js(__('app.board_task_created')), 'success');
                     }
                 }
             } catch (error) {
@@ -916,9 +916,9 @@ function churchBoard() {
 
         getPriorityBadgeHtml(priority) {
             const badges = {
-                'urgent': '<span class="priority-badge inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300 font-medium"><span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>Терм.</span>',
-                'high': '<span class="priority-badge inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300 font-medium"><span class="w-1.5 h-1.5 rounded-full bg-orange-500"></span>Вис.</span>',
-                'medium': '<span class="priority-badge w-1.5 h-1.5 rounded-full bg-yellow-500" title="Середній"></span>'
+                'urgent': '<span class="priority-badge inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300 font-medium"><span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>' + @js(__('app.board_urgent_short')) + '</span>',
+                'high': '<span class="priority-badge inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300 font-medium"><span class="w-1.5 h-1.5 rounded-full bg-orange-500"></span>' + @js(__('app.board_high_short')) + '</span>',
+                'medium': '<span class="priority-badge w-1.5 h-1.5 rounded-full bg-yellow-500" title="' + @js(__('app.board_medium')) + '"></span>'
             };
             return badges[priority] || '';
         },
@@ -961,8 +961,8 @@ function churchBoard() {
 
                 if (!response.ok) {
                     this.cardPanel.error = response.status === 403
-                        ? 'У вас немає доступу до цього завдання'
-                        : 'Помилка завантаження завдання';
+                        ? @js(__('app.board_no_access'))
+                        : @js(__('app.board_error_loading_task'));
                     return;
                 }
 
@@ -981,7 +981,7 @@ function churchBoard() {
                 this.cardPanel.data = data;
             } catch (e) {
                 console.error('Error loading card:', e);
-                this.cardPanel.error = 'Помилка завантаження завдання';
+                this.cardPanel.error = @js(__('app.board_error_loading_task'));
             } finally {
                 this.cardPanel.loading = false;
 
@@ -1133,7 +1133,7 @@ function churchBoard() {
         },
 
         async addColumn() {
-            const name = prompt('Назва нової колонки:');
+            const name = prompt(@js(__('app.board_new_column_name')));
             if (!name || !name.trim()) return;
             try {
                 const response = await fetch(`/boards/{{ $board->id }}/columns`, {
@@ -1142,12 +1142,12 @@ function churchBoard() {
                     body: JSON.stringify({ name: name.trim() })
                 });
                 if (response.ok) { window.location.reload(); }
-                else { const data = await response.json().catch(() => ({})); if (window.showGlobalToast) showGlobalToast(data.message || 'Помилка', 'error'); }
+                else { const data = await response.json().catch(() => ({})); if (window.showGlobalToast) showGlobalToast(data.message || @js(__('app.board_error')), 'error'); }
             } catch (e) { console.error(e); }
         },
 
         async renameColumn(columnId, currentName) {
-            const name = prompt('Нова назва колонки:', currentName);
+            const name = prompt(@js(__('app.board_new_column_rename')), currentName);
             if (!name || !name.trim() || name.trim() === currentName) return;
             try {
                 const response = await fetch(`/boards/columns/${columnId}`, {
@@ -1158,13 +1158,13 @@ function churchBoard() {
                 if (response.ok) {
                     const header = document.querySelector(`.kanban-column[data-column-id="${columnId}"] h3`);
                     if (header) header.textContent = name.trim();
-                    if (window.showGlobalToast) showGlobalToast('Колонку перейменовано', 'success');
-                } else { const data = await response.json().catch(() => ({})); if (window.showGlobalToast) showGlobalToast(data.message || 'Помилка', 'error'); }
+                    if (window.showGlobalToast) showGlobalToast(@js(__('app.board_column_renamed')), 'success');
+                } else { const data = await response.json().catch(() => ({})); if (window.showGlobalToast) showGlobalToast(data.message || @js(__('app.board_error')), 'error'); }
             } catch (e) { console.error(e); }
         },
 
         async deleteColumn(columnId) {
-            if (!confirm('Видалити цю колонку? Колонка повинна бути порожньою.')) return;
+            if (!confirm(@js(__('app.board_delete_column_confirm')))) return;
             try {
                 const response = await fetch(`/boards/columns/${columnId}`, {
                     method: 'DELETE',
@@ -1172,8 +1172,8 @@ function churchBoard() {
                 });
                 if (response.ok) {
                     document.querySelector(`.kanban-column[data-column-id="${columnId}"]`)?.remove();
-                    if (window.showGlobalToast) showGlobalToast('Колонку видалено', 'success');
-                } else { const data = await response.json().catch(() => ({})); if (window.showGlobalToast) showGlobalToast(data.message || 'Неможливо видалити колонку з картками', 'error'); }
+                    if (window.showGlobalToast) showGlobalToast(@js(__('app.board_column_deleted')), 'success');
+                } else { const data = await response.json().catch(() => ({})); if (window.showGlobalToast) showGlobalToast(data.message || @js(__('app.board_cannot_delete_column_with_cards')), 'error'); }
             } catch (e) { console.error(e); }
         },
 
@@ -1312,7 +1312,7 @@ function churchBoard() {
                 });
 
                 if (!response.ok) {
-                    if (window.showGlobalToast) showGlobalToast('Помилка при видаленні', 'error');
+                    if (window.showGlobalToast) showGlobalToast(@js(__('app.board_error_deleting')), 'error');
                     return;
                 }
 
@@ -1429,17 +1429,17 @@ function churchBoard() {
                 });
 
                 if (!response.ok) {
-                    if (window.showGlobalToast) showGlobalToast('Помилка завантаження файлу', 'error');
+                    if (window.showGlobalToast) showGlobalToast(@js(__('app.board_error_uploading_file')), 'error');
                     return;
                 }
                 const result = await response.json().catch(() => ({}));
                 if (result.success) {
                     this.cardPanel.data.attachments.push(result.attachment);
-                    if (window.showGlobalToast) showGlobalToast('Файл завантажено', 'success');
+                    if (window.showGlobalToast) showGlobalToast(@js(__('app.board_file_uploaded')), 'success');
                 }
             } catch (e) {
                 console.error('Upload error:', e);
-                if (window.showGlobalToast) showGlobalToast('Помилка завантаження', 'error');
+                if (window.showGlobalToast) showGlobalToast(@js(__('app.board_error_uploading')), 'error');
             }
 
             event.target.value = '';
@@ -1475,7 +1475,7 @@ function churchBoard() {
             }
 
             if (uploaded > 0 && window.showGlobalToast) {
-                showGlobalToast(`Завантажено ${uploaded} файл(ів)`, 'success');
+                showGlobalToast(@js(__('app.board_uploaded_files')).replace(':count', uploaded), 'success');
             }
             event.target.value = '';
         },
@@ -1564,7 +1564,7 @@ function churchBoard() {
                     });
 
                     this.closePanel();
-                    if (window.showGlobalToast) showGlobalToast('Завдання дубльовано', 'success');
+                    if (window.showGlobalToast) showGlobalToast(@js(__('app.board_task_duplicated')), 'success');
                 }
             } catch (error) {
                 console.error('Duplicate error:', error);
@@ -1625,7 +1625,7 @@ function churchBoard() {
                 if (!response.ok) {
                     const errText = await response.text();
                     console.error('Comment error:', response.status, errText);
-                    if (window.showGlobalToast) showGlobalToast('Помилка при додаванні коментаря', 'error');
+                    if (window.showGlobalToast) showGlobalToast(@js(__('app.board_error_adding_comment')), 'error');
                     return;
                 }
 
@@ -1636,7 +1636,7 @@ function churchBoard() {
                 }
             } catch (e) {
                 console.error('Comment error:', e);
-                if (window.showGlobalToast) showGlobalToast('Помилка: ' + e.message, 'error');
+                if (window.showGlobalToast) showGlobalToast(@js(__('app.board_error_prefix')) + e.message, 'error');
             }
         },
 
@@ -1667,7 +1667,7 @@ function churchBoard() {
                         this.closePanel();
                     }
 
-                    if (window.showGlobalToast) showGlobalToast('Завдання видалено', 'success');
+                    if (window.showGlobalToast) showGlobalToast(@js(__('app.board_task_deleted')), 'success');
                 }
             } catch (error) {
                 console.error('Delete error:', error);
@@ -1704,7 +1704,7 @@ function churchBoard() {
                     console.error(`HTTP ${response.status}: ${response.statusText}`);
                     const errorText = await response.text();
                     console.error('Response body:', errorText);
-                    if (window.showGlobalToast) showGlobalToast('Помилка при створенні проєкту', 'error');
+                    if (window.showGlobalToast) showGlobalToast(@js(__('app.board_error_creating_project')), 'error');
                     return;
                 }
 
@@ -1727,13 +1727,13 @@ function churchBoard() {
                     this.editingEpic = null;
                     this.newEpic = { name: '', color: '#6366f1', description: '', showInGeneral: false };
 
-                    if (window.showGlobalToast) showGlobalToast('Проєкт створено', 'success');
+                    if (window.showGlobalToast) showGlobalToast(@js(__('app.board_project_created')), 'success');
                 } else {
                     console.error('No success in response:', result);
                 }
             } catch (error) {
                 console.error('createEpic error:', error);
-                if (window.showGlobalToast) showGlobalToast('Помилка: ' + error.message, 'error');
+                if (window.showGlobalToast) showGlobalToast(@js(__('app.board_error_prefix')) + error.message, 'error');
             } finally {
                 this.epicModalLoading = false;
             }
@@ -1761,7 +1761,7 @@ function churchBoard() {
 
                 if (!response.ok) {
                     console.error(`HTTP ${response.status}: ${response.statusText}`);
-                    if (window.showGlobalToast) showGlobalToast('Помилка при оновленні проєкту', 'error');
+                    if (window.showGlobalToast) showGlobalToast(@js(__('app.board_error_updating_project')), 'error');
                     return;
                 }
 
@@ -1799,13 +1799,13 @@ function churchBoard() {
                     this.editingEpic = null;
                     this.newEpic = { name: '', color: '#6366f1', description: '', showInGeneral: false };
 
-                    if (window.showGlobalToast) showGlobalToast('Проєкт оновлено', 'success');
+                    if (window.showGlobalToast) showGlobalToast(@js(__('app.board_project_updated')), 'success');
                 } else {
                     console.error('No success in response:', result);
                 }
             } catch (error) {
                 console.error('updateEpic error:', error);
-                if (window.showGlobalToast) showGlobalToast('Помилка: ' + error.message, 'error');
+                if (window.showGlobalToast) showGlobalToast(@js(__('app.board_error_prefix')) + error.message, 'error');
             } finally {
                 this.epicModalLoading = false;
             }
@@ -1848,7 +1848,7 @@ function churchBoard() {
                         }
                     });
 
-                    if (window.showGlobalToast) showGlobalToast('Проєкт видалено', 'success');
+                    if (window.showGlobalToast) showGlobalToast(@js(__('app.board_project_deleted')), 'success');
                 }
             } catch (error) {
                 console.error('Error:', error);

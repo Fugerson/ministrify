@@ -39,8 +39,8 @@
                 </svg>
             </div>
             <div>
-                <p class="text-[10px] font-bold uppercase tracking-wider text-primary-600 dark:text-primary-400 mb-0.5">КРОК 3 - ОПЦІЙНО</p>
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Виберіть команду</h2>
+                <p class="text-[10px] font-bold uppercase tracking-wider text-primary-600 dark:text-primary-400 mb-0.5">{{ __('app.onboarding_step3_optional') }}</p>
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('app.onboarding_choose_team') }}</h2>
             </div>
         </div>
     </div>
@@ -54,8 +54,8 @@
                     </svg>
                 </div>
                 <div>
-                    <p class="font-semibold text-green-800 dark:text-green-200">У вас вже є {{ $ministries->count() }} {{ trans_choice('команда|команди|команд', $ministries->count()) }}</p>
-                    <p class="text-sm text-green-600 dark:text-green-300">Ви можете пропустити цей крок або додати ще</p>
+                    <p class="font-semibold text-green-800 dark:text-green-200">{{ __('app.you_already_have') }} {{ $ministries->count() }} {{ trans_choice(__('app.plural_team'), $ministries->count()) }}</p>
+                    <p class="text-sm text-green-600 dark:text-green-300">{{ __('app.onboarding_skip_or_add_more') }}</p>
                 </div>
             </div>
         </div>
@@ -68,8 +68,8 @@
                     </svg>
                 </div>
                 <div>
-                    <p class="font-semibold text-blue-800 dark:text-blue-200">Цей крок необов'язковий</p>
-                    <p class="text-sm text-blue-600 dark:text-blue-300">Можете пропустити і створити команду пізніше</p>
+                    <p class="font-semibold text-blue-800 dark:text-blue-200">{{ __('app.onboarding_step_optional') }}</p>
+                    <p class="text-sm text-blue-600 dark:text-blue-300">{{ __('app.onboarding_skip_create_team_later') }}</p>
                 </div>
             </div>
         </div>
@@ -89,21 +89,21 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                     </svg>
                 </div>
-                Оберіть команду
-                <span class="text-sm font-normal text-gray-500 dark:text-gray-400">(можна декілька)</span>
+                {{ __('app.onboarding_select_team') }}
+                <span class="text-sm font-normal text-gray-500 dark:text-gray-400">{{ __('app.onboarding_multiple_allowed') }}</span>
             </h4>
 
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 @foreach([
-                    ['name' => 'Прославлення', 'icon' => '🎸'],
-                    ['name' => 'Звук та техніка', 'icon' => '🎧'],
-                    ['name' => 'Дитяча церква', 'icon' => '👶'],
-                    ['name' => 'Привітання', 'icon' => '👋'],
-                    ['name' => 'Молодь', 'icon' => '🔥'],
-                    ['name' => 'Медіа', 'icon' => '📸'],
-                    ['name' => 'Молитва', 'icon' => '🙏'],
-                    ['name' => 'Догляд', 'icon' => '❤️'],
-                    ['name' => 'Євангелізм', 'icon' => '📖'],
+                    ['name' => __('app.ministry_worship'), 'icon' => '🎸'],
+                    ['name' => __('app.ministry_sound_tech'), 'icon' => '🎧'],
+                    ['name' => __('app.ministry_kids_church'), 'icon' => '👶'],
+                    ['name' => __('app.ministry_greeting'), 'icon' => '👋'],
+                    ['name' => __('app.ministry_youth'), 'icon' => '🔥'],
+                    ['name' => __('app.ministry_media'), 'icon' => '📸'],
+                    ['name' => __('app.ministry_prayer'), 'icon' => '🙏'],
+                    ['name' => __('app.ministry_care'), 'icon' => '❤️'],
+                    ['name' => __('app.ministry_evangelism'), 'icon' => '📖'],
                 ] as $suggestion)
                     <button type="button"
                             @click="toggleMinistry('{{ $suggestion['name'] }}')"
@@ -130,19 +130,19 @@
                 <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
-                Або додайте своє
+                {{ __('app.onboarding_or_add_custom') }}
             </h4>
             <div class="flex gap-2">
                 <input type="text"
                        x-model="customMinistry"
                        @keydown.enter.prevent="addCustom()"
                        class="flex-1 px-4 py-2.5 border border-gray-200 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                       placeholder="Назва команди...">
+                       placeholder="{{ __('app.onboarding_team_name_placeholder') }}">
                 <button type="button"
                         @click="addCustom()"
                         :disabled="!customMinistry.trim()"
                         class="px-4 py-2.5 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-300 dark:disabled:bg-slate-600 text-white font-medium rounded-xl transition-colors">
-                    Додати
+                    {{ __('app.add') }}
                 </button>
             </div>
         </div>
@@ -155,7 +155,7 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
-                    Обрано команд: <span x-text="selectedMinistries.length"></span>
+                    {{ __('app.onboarding_teams_selected') }}: <span x-text="selectedMinistries.length"></span>
                 </h4>
             </div>
             <div class="flex flex-wrap gap-2">

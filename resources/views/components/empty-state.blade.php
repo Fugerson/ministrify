@@ -1,9 +1,9 @@
 @props([
-    'title' => __('Нічого не знайдено'),
+    'title' => __('app.nothing_found'),
     'description' => null,
     'icon' => 'inbox',
     'action' => null,
-    'actionText' => __('Додати'),
+    'actionText' => __('app.add'),
     'actionIcon' => 'plus'
 ])
 

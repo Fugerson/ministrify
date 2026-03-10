@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Свідчення')
+@section('title', __('app.wb_testimonials_title'))
 
 @section('content')
 <div class="max-w-6xl mx-auto space-y-6" x-data="{ showModal: false, editingTestimonial: null }">
@@ -13,8 +13,8 @@
                 </svg>
             </a>
             <div>
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Свідчення</h1>
-                <p class="text-gray-600 dark:text-gray-400">Історії членів церкви</p>
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('app.wb_testimonials_title') }}</h1>
+                <p class="text-gray-600 dark:text-gray-400">{{ __('app.wb_testimonials_subtitle') }}</p>
             </div>
         </div>
         @if(auth()->user()->canEdit('website'))
@@ -22,7 +22,7 @@
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
             </svg>
-            Додати свідчення
+            {{ __('app.wb_add_testimonial') }}
         </button>
         @endif
     </div>
@@ -35,8 +35,8 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
                 </svg>
             </div>
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Свідчень ще немає</h3>
-            <p class="text-gray-500 dark:text-gray-400 mt-1">Додайте історії членів церкви</p>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.wb_no_testimonials_yet') }}</h3>
+            <p class="text-gray-500 dark:text-gray-400 mt-1">{{ __('app.wb_add_member_stories') }}</p>
         </div>
     @else
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -66,7 +66,7 @@
 
                     <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                         <span class="px-2 py-1 text-xs font-medium rounded-full {{ $testimonial->is_public ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400' }}">
-                            {{ $testimonial->is_public ? 'Публічне' : 'Приховане' }}
+                            {{ $testimonial->is_public ? __('app.wb_public_testimonial') : __('app.wb_hidden_testimonial') }}
                         </span>
                         @if(auth()->user()->canEdit('website'))
                         <div class="flex gap-1">
@@ -103,37 +103,37 @@
                          try {
                              const resp = await fetch(url, { method: 'POST', headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'Accept': 'application/json' }, body: formData });
                              const data = await resp.json().catch(() => ({}));
-                             if (!resp.ok) { if (resp.status === 422 && data.errors) this.errors = data.errors; showToast('error', data.message || 'Помилка.'); this.saving = false; return; }
-                             showToast('success', data.message || 'Збережено!');
+                             if (!resp.ok) { if (resp.status === 422 && data.errors) this.errors = data.errors; showToast('error', data.message || @js(__('app.wb_error'))); this.saving = false; return; }
+                             showToast('success', data.message || @js(__('app.wb_saved')));
                              setTimeout(() => location.reload(), 600);
-                         } catch(e) { showToast('error', \"Помилка з'єднання.\"); this.saving = false; }
+                         } catch(e) { showToast('error', @js(__('app.wb_connection_error'))); this.saving = false; }
                      }
                  }">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4" x-text="editingTestimonial ? 'Редагувати свідчення' : 'Додати свідчення'"></h3>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4" x-text="editingTestimonial ? @js(__('app.wb_edit_testimonial')) : @js(__('app.wb_add_testimonial'))"></h3>
                 <form @submit.prevent="submitTestimonial($refs.testimonialForm)" x-ref="testimonialForm">
 
                     <div class="space-y-4">
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Ім'я *</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.wb_name') }} *</label>
                                 <input type="text" name="author_name" :value="editingTestimonial?.author_name || ''" required
                                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Роль</label>
-                                <input type="text" name="author_role" :value="editingTestimonial?.author_role || ''" placeholder="Член церкви"
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.wb_role') }}</label>
+                                <input type="text" name="author_role" :value="editingTestimonial?.author_role || ''" placeholder="{{ __('app.wb_church_member_placeholder') }}"
                                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                             </div>
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Свідчення *</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.wb_testimony') }} *</label>
                             <textarea name="content" rows="4" required
                                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" x-text="editingTestimonial?.content || ''"></textarea>
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Фото</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.photo') }}</label>
                             <div x-data="{ fileName: '' }" class="relative">
                                 <input type="file" name="author_photo" accept="image/*,.heic,.heif" class="sr-only" x-ref="photoInput" @change="fileName = $event.target.files[0]?.name || ''">
                                 <label @click="$refs.photoInput.click()" class="flex items-center gap-3 px-4 py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl cursor-pointer hover:border-primary-400 dark:hover:border-primary-500 hover:bg-primary-50/50 dark:hover:bg-primary-900/10 transition-all group">
@@ -141,7 +141,7 @@
                                         <svg class="w-5 h-5 text-gray-400 group-hover:text-primary-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                                     </div>
                                     <div class="flex-1 min-w-0">
-                                        <p x-show="!fileName" class="text-sm font-medium text-gray-700 dark:text-gray-300">Обрати фото</p>
+                                        <p x-show="!fileName" class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('app.wb_select_photo') }}</p>
                                         <p x-show="fileName" x-text="fileName" class="text-sm font-medium text-primary-600 dark:text-primary-400 truncate"></p>
                                         <p class="text-xs text-gray-500 dark:text-gray-400">PNG, JPG, WebP</p>
                                     </div>
@@ -152,16 +152,16 @@
                         <label class="flex items-center">
                             <input type="checkbox" name="is_public" value="1" :checked="editingTestimonial?.is_public ?? true"
                                    class="rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500">
-                            <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Показувати на сайті</span>
+                            <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">{{ __('app.wb_show_on_site') }}</span>
                         </label>
                     </div>
 
                     <div class="flex justify-end gap-3 mt-6">
                         <button type="button" @click="showModal = false" class="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                            Скасувати
+                            {{ __('app.cancel') }}
                         </button>
                         <button type="submit" :disabled="saving" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
-                            Зберегти
+                            {{ __('app.save') }}
                         </button>
                     </div>
                 </form>

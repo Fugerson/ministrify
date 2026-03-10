@@ -15,7 +15,7 @@
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $gallery->title }}</h1>
                 <p class="text-gray-600 dark:text-gray-400">
-                    {{ $photos->count() }} {{ trans_choice('фото|фото|фото', $photos->count()) }}
+                    {{ $photos->count() }} {{ trans_choice(__('app.plural_photo'), $photos->count()) }}
                     @if($gallery->event_date)
                         &middot; {{ $gallery->event_date->format('d.m.Y') }}
                     @endif
@@ -27,7 +27,7 @@
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                 </svg>
-                Редагувати
+                {{ __('app.edit') }}
             </a>
         </div>
     </div>
@@ -42,7 +42,7 @@
     <!-- Upload photos -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6"
          x-data="{ ...ajaxForm({ url: '{{ route('website-builder.gallery.photos.upload', $gallery) }}', method: 'POST', onSuccess() { setTimeout(() => location.reload(), 600); } }) }">
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Завантажити фото</h3>
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.upload_photos') }}</h3>
         <form @submit.prevent="submit($refs.uploadForm)" x-ref="uploadForm">
             <div class="flex items-center gap-4">
                 <label class="flex-1 flex items-center justify-center px-4 py-8 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:border-primary-400 dark:hover:border-primary-500 transition-colors">
@@ -50,8 +50,8 @@
                         <svg class="w-8 h-8 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                         </svg>
-                        <span class="text-sm text-gray-600 dark:text-gray-400">Натисніть для вибору фото (до 50 файлів)</span>
-                        <span class="text-xs text-gray-400 dark:text-gray-500 block mt-1">JPG, PNG, GIF, WebP, HEIC &middot; до 5MB кожне</span>
+                        <span class="text-sm text-gray-600 dark:text-gray-400">{{ __('app.click_to_select_photos') }}</span>
+                        <span class="text-xs text-gray-400 dark:text-gray-500 block mt-1">{{ __('app.photo_formats_hint') }}</span>
                     </div>
                     <input type="file" name="photos[]" multiple accept="image/*,.heic,.heif" class="hidden">
                 </label>
@@ -61,13 +61,13 @@
             <div class="mt-4 flex justify-end">
                 <button type="submit" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50"
                         :disabled="saving">
-                    <span x-show="!saving">Завантажити</span>
+                    <span x-show="!saving">{{ __('app.upload') }}</span>
                     <span x-show="saving" class="flex items-center gap-2">
                         <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
                         </svg>
-                        Завантаження...
+                        {{ __('app.loading') }}
                     </span>
                 </button>
             </div>
@@ -82,8 +82,8 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                 </svg>
             </div>
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Фото ще немає</h3>
-            <p class="text-gray-500 dark:text-gray-400 mt-1">Завантажте перші фото в альбом</p>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.no_photos_yet') }}</h3>
+            <p class="text-gray-500 dark:text-gray-400 mt-1">{{ __('app.upload_first_photos') }}</p>
         </div>
     @else
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">

@@ -51,12 +51,12 @@
                 <button type="button"
                         @click="ajaxAction('{{ route('boards.archive', $board) }}', 'POST').then(() => setTimeout(() => Livewire.navigate('{{ route('boards.index') }}'), 600))"
                         class="text-yellow-600 dark:text-yellow-400 hover:text-yellow-700 text-sm font-medium">
-                    {{ __('Архівувати') }}
+                    {{ __('app.archive') }}
                 </button>
                 <button type="button"
-                        @click="ajaxDelete('{{ route('boards.destroy', $board) }}', @js( __('Видалити цю дошку? Всі картки будуть втрачені.') ), null, '{{ route('boards.index') }}')"
+                        @click="ajaxDelete('{{ route('boards.destroy', $board) }}', @js( __('app.delete_board_confirm') ), null, '{{ route('boards.index') }}')"
                         class="text-red-600 dark:text-red-400 hover:text-red-700 text-sm font-medium">
-                    {{ __('Видалити') }}
+                    {{ __('app.delete') }}
                 </button>
                 @endif
             </div>
@@ -64,11 +64,11 @@
             <div class="flex items-center gap-3">
                 <a href="{{ route('boards.show', $board) }}"
                    class="px-5 py-2.5 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium">
-                    {{ __('Скасувати') }}
+                    {{ __('app.cancel') }}
                 </a>
                 <button type="submit" :disabled="saving"
                         class="px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors disabled:opacity-50">
-                    {{ __('Зберегти') }}
+                    {{ __('app.save') }}
                 </button>
             </div>
         </div>

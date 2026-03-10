@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Музичні події - ' . $ministry->name)
+@section('title', __('app.worship_events_title') . ' - ' . $ministry->name)
 
 @section('content')
 <div class="space-y-6">
@@ -13,7 +13,7 @@
                 </svg>
             </a>
             <div>
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Музичні події</h1>
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('app.worship_events_title') }}</h1>
                 <p class="text-sm text-gray-500 dark:text-gray-400">{{ $ministry->name }}</p>
             </div>
         </div>
@@ -21,7 +21,7 @@
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
             </svg>
-            Статистика
+            {{ __('app.statistics') }}
         </a>
     </div>
 
@@ -49,10 +49,10 @@
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
                                                 </svg>
-                                                {{ $event->songs->count() }} {{ trans_choice('пісня|пісні|пісень', $event->songs->count()) }}
+                                                {{ $event->songs->count() }} {{ trans_choice(__('app.plural_song'), $event->songs->count()) }}
                                             </span>
                                         @else
-                                            <span class="text-xs text-gray-400 dark:text-gray-500">Пісні не додані</span>
+                                            <span class="text-xs text-gray-400 dark:text-gray-500">{{ __('app.songs_not_added') }}</span>
                                         @endif
 
                                         @if($event->ministryTeams->count() > 0)
@@ -60,10 +60,10 @@
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
                                                 </svg>
-                                                {{ $event->ministryTeams->count() }} {{ trans_choice('учасник|учасники|учасників', $event->ministryTeams->count()) }}
+                                                {{ $event->ministryTeams->count() }} {{ trans_choice(__('app.plural_member'), $event->ministryTeams->count()) }}
                                             </span>
                                         @else
-                                            <span class="text-xs text-gray-400 dark:text-gray-500">Команда не вказана</span>
+                                            <span class="text-xs text-gray-400 dark:text-gray-500">{{ __('app.team_not_specified') }}</span>
                                         @endif
                                     </div>
                                 </div>
@@ -82,9 +82,9 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
                     </svg>
                 </div>
-                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">Немає музичних подій</h3>
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">{{ __('app.no_worship_events') }}</h3>
                 <p class="text-sm text-gray-500 dark:text-gray-400">
-                    Створіть подію з галочкою "Подія з музичним супроводом"
+                    {{ __('app.create_event_with_music') }}
                 </p>
             </div>
         @endif

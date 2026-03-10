@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Шаблони чеклистів')
+@section('title', __('app.checklist_templates_title'))
 
 @section('actions')
 <a href="{{ route('checklists.templates.create') }}"
@@ -8,7 +8,7 @@
     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
     </svg>
-    Новий шаблон
+    {{ __('app.new_template') }}
 </a>
 @endsection
 
@@ -21,7 +21,7 @@
         </svg>
         <div>
             <p class="text-sm text-blue-700 dark:text-blue-300">
-                Шаблони чеклистів допомагають організувати підготовку до подій. Створіть шаблон один раз і використовуйте для будь-якої події.
+                {{ __('app.checklist_templates_info') }}
             </p>
         </div>
     </div>
@@ -63,14 +63,14 @@
                             </div>
                         @endforeach
                         @if($template->items->count() > 4)
-                            <p class="text-xs text-gray-400 dark:text-gray-500 pl-6">+ ще {{ $template->items->count() - 4 }} пунктів</p>
+                            <p class="text-xs text-gray-400 dark:text-gray-500 pl-6">+ {{ __('app.more_items', ['count' => $template->items->count() - 4]) }}</p>
                         @endif
                     </div>
                 </div>
 
                 <div class="px-5 py-3 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-700">
                     <div class="flex items-center justify-between text-sm">
-                        <span class="text-gray-500 dark:text-gray-400">{{ $template->items->count() }} пунктів</span>
+                        <span class="text-gray-500 dark:text-gray-400">{{ $template->items->count() }} {{ __('app.items_count') }}</span>
                     </div>
                 </div>
             </div>
@@ -81,14 +81,14 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
                     </svg>
                 </div>
-                <h3 class="font-medium text-gray-900 dark:text-white mb-2">Немає шаблонів</h3>
-                <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Створіть перший шаблон чеклиста для подій</p>
+                <h3 class="font-medium text-gray-900 dark:text-white mb-2">{{ __('app.no_templates') }}</h3>
+                <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">{{ __('app.create_first_template') }}</p>
                 <a href="{{ route('checklists.templates.create') }}"
                    class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-xl transition-colors">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                     </svg>
-                    Створити шаблон
+                    {{ __('app.create_template') }}
                 </a>
             </div>
         @endforelse

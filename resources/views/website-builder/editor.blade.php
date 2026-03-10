@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Редактор сайту')
+@section('title', __('app.wb_site_editor'))
 
 @section('content')
 <div x-data="siteEditor()" x-cloak class="fixed inset-0 flex flex-col bg-gray-100 dark:bg-gray-900" style="z-index: 50;">
@@ -11,10 +11,10 @@
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                 </svg>
-                <span class="text-sm font-medium">Назад</span>
+                <span class="text-sm font-medium">{{ __('app.back') }}</span>
             </a>
             <div class="w-px h-6 bg-gray-200 dark:bg-gray-700"></div>
-            <h1 class="text-sm font-semibold text-gray-900 dark:text-white">Конструктор сайту</h1>
+            <h1 class="text-sm font-semibold text-gray-900 dark:text-white">{{ __('app.wb_site_constructor') }}</h1>
         </div>
 
         <div class="flex items-center gap-3">
@@ -41,7 +41,7 @@
                     :class="hasChanges ? 'bg-primary-600 text-white hover:bg-primary-700' : 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400'">
                 <svg x-show="saving" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                 <svg x-show="!saving" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                <span x-text="saving ? 'Збереження...' : 'Зберегти'"></span>
+                <span x-text="saving ? @js(__('app.wb_saving')) : @js(__('app.save'))"></span>
             </button>
         </div>
     </div>
@@ -53,13 +53,13 @@
             {{-- Sidebar tabs --}}
             <div class="flex border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
                 <button @click="activeTab = 'sections'" :class="activeTab === 'sections' ? 'text-primary-600 border-primary-600' : 'text-gray-500 dark:text-gray-400 border-transparent hover:text-gray-700 dark:hover:text-gray-300'" class="flex-1 py-3 text-sm font-medium border-b-2 transition-colors">
-                    Секції
+                    {{ __('app.wb_sections_tab') }}
                 </button>
                 <button @click="activeTab = 'design'" :class="activeTab === 'design' ? 'text-primary-600 border-primary-600' : 'text-gray-500 dark:text-gray-400 border-transparent hover:text-gray-700 dark:hover:text-gray-300'" class="flex-1 py-3 text-sm font-medium border-b-2 transition-colors">
-                    Дизайн
+                    {{ __('app.wb_design_tab') }}
                 </button>
                 <button @click="activeTab = 'content'" :class="activeTab === 'content' ? 'text-primary-600 border-primary-600' : 'text-gray-500 dark:text-gray-400 border-transparent hover:text-gray-700 dark:hover:text-gray-300'" class="flex-1 py-3 text-sm font-medium border-b-2 transition-colors">
-                    Контент
+                    {{ __('app.wb_content_tab') }}
                 </button>
             </div>
 
@@ -67,7 +67,7 @@
             <div class="flex-1 overflow-y-auto">
                 {{-- Sections tab --}}
                 <div x-show="activeTab === 'sections'" class="p-4 space-y-1" x-ref="sectionList">
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">Перетягніть для зміни порядку. Натисніть для налаштувань.</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">{{ __('app.wb_drag_for_order') }}</p>
 
                     <template x-for="(section, index) in sections" :key="section.id">
                         <div class="group" :data-section-id="section.id">
@@ -101,11 +101,11 @@
                                     <template x-if="!['service_times', 'contact'].includes(section.id)">
                                         <div class="space-y-3">
                                             <div>
-                                                <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Заголовок секції</label>
+                                                <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">{{ __('app.wb_section_title_label') }}</label>
                                                 <input type="text" x-model="sectionSettings[section.id].title" @input="markChanged()" class="w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary-500 focus:border-primary-500" :placeholder="section.name">
                                             </div>
                                             <div>
-                                                <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Підзаголовок</label>
+                                                <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">{{ __('app.wb_section_subtitle_label') }}</label>
                                                 <input type="text" x-model="sectionSettings[section.id].subtitle" @input="markChanged()" class="w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary-500 focus:border-primary-500">
                                             </div>
                                         </div>
@@ -114,28 +114,28 @@
                                     {{-- About: link to content editor --}}
                                     <template x-if="section.id === 'about'">
                                         <p class="text-xs text-gray-500 dark:text-gray-400">
-                                            <a href="{{ route('website-builder.about.edit') }}" class="text-primary-600 hover:underline">Редагувати контент (місія, візія) &rarr;</a>
+                                            <a href="{{ route('website-builder.about.edit') }}" class="text-primary-600 hover:underline">{{ __('app.wb_edit_content_mission_vision') }} &rarr;</a>
                                         </p>
                                     </template>
 
                                     {{-- Service times hint --}}
                                     <template x-if="section.id === 'service_times'">
                                         <div>
-                                            <p class="text-xs text-gray-500 dark:text-gray-400">Розклад служінь налаштовується в загальних налаштуваннях церкви.</p>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.wb_service_times_hint') }}</p>
                                         </div>
                                     </template>
 
                                     {{-- Contact hint --}}
                                     <template x-if="section.id === 'contact'">
                                         <div>
-                                            <p class="text-xs text-gray-500 dark:text-gray-400">Контактна інформація береться з налаштувань церкви.</p>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.wb_contact_hint') }}</p>
                                         </div>
                                     </template>
 
                                     {{-- Content management links --}}
                                     <template x-if="contentLinks[section.id]">
                                         <div class="pt-2 border-t border-gray-200 dark:border-gray-600">
-                                            <a :href="contentLinks[section.id]" class="text-xs text-primary-600 hover:underline">Керувати контентом &rarr;</a>
+                                            <a :href="contentLinks[section.id]" class="text-xs text-primary-600 hover:underline">{{ __('app.wb_manage_content') }} &rarr;</a>
                                         </div>
                                     </template>
                                 </div>
@@ -151,8 +151,8 @@
                             <svg class="w-5 h-5 text-pink-600 dark:text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/></svg>
                         </div>
                         <div>
-                            <p class="text-sm font-medium text-gray-900 dark:text-white">Кольори та стиль</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Налаштувати дизайн</p>
+                            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ __('app.wb_colors_and_style') }}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.wb_customize_design') }}</p>
                         </div>
                     </a>
 
@@ -161,8 +161,8 @@
                             <svg class="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/></svg>
                         </div>
                         <div>
-                            <p class="text-sm font-medium text-gray-900 dark:text-white">Шаблони</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Обрати стиль сайту</p>
+                            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ __('app.wb_templates') }}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.wb_choose_site_style') }}</p>
                         </div>
                     </a>
                 </div>
@@ -173,35 +173,35 @@
                         <div class="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center flex-shrink-0">
                             <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         </div>
-                        <span class="text-sm text-gray-900 dark:text-white">Про нас</span>
+                        <span class="text-sm text-gray-900 dark:text-white">{{ __('app.wb_about_us') }}</span>
                     </a>
 
                     <a href="{{ route('website-builder.team.index') }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                         <div class="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0">
                             <svg class="w-4 h-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                         </div>
-                        <span class="text-sm text-gray-900 dark:text-white">Команда</span>
+                        <span class="text-sm text-gray-900 dark:text-white">{{ __('app.wb_team') }}</span>
                     </a>
 
                     <a href="{{ route('website-builder.sermons.index') }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                         <div class="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center flex-shrink-0">
                             <svg class="w-4 h-4 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         </div>
-                        <span class="text-sm text-gray-900 dark:text-white">Проповіді</span>
+                        <span class="text-sm text-gray-900 dark:text-white">{{ __('app.wb_sermons') }}</span>
                     </a>
 
                     <a href="{{ route('website-builder.gallery.index') }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                         <div class="w-8 h-8 rounded-lg bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center flex-shrink-0">
                             <svg class="w-4 h-4 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                         </div>
-                        <span class="text-sm text-gray-900 dark:text-white">Галерея</span>
+                        <span class="text-sm text-gray-900 dark:text-white">{{ __('app.wb_gallery') }}</span>
                     </a>
 
                     <a href="{{ route('website-builder.blog.index') }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                         <div class="w-8 h-8 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center flex-shrink-0">
                             <svg class="w-4 h-4 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>
                         </div>
-                        <span class="text-sm text-gray-900 dark:text-white">Блог</span>
+                        <span class="text-sm text-gray-900 dark:text-white">{{ __('app.wb_blog') }}</span>
                     </a>
 
                     <a href="{{ route('website-builder.faq.index') }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
@@ -215,14 +215,14 @@
                         <div class="w-8 h-8 rounded-lg bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center flex-shrink-0">
                             <svg class="w-4 h-4 text-violet-600 dark:text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
                         </div>
-                        <span class="text-sm text-gray-900 dark:text-white">Свідчення</span>
+                        <span class="text-sm text-gray-900 dark:text-white">{{ __('app.wb_testimonials_title') }}</span>
                     </a>
 
                     <a href="{{ route('events.index') }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                         <div class="w-8 h-8 rounded-lg bg-teal-100 dark:bg-teal-900/30 flex items-center justify-center flex-shrink-0">
                             <svg class="w-4 h-4 text-teal-600 dark:text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                         </div>
-                        <span class="text-sm text-gray-900 dark:text-white">Події</span>
+                        <span class="text-sm text-gray-900 dark:text-white">{{ __('app.wb_events') }}</span>
                     </a>
                 </div>
             </div>
@@ -380,9 +380,9 @@ function siteEditor() {
 
                 this.hasChanges = false;
                 this.refreshPreview();
-                this.notify('Зміни збережено!', 'success');
+                this.notify(@js(__('app.wb_changes_saved')), 'success');
             } catch (error) {
-                this.notify('Помилка збереження: ' + error.message, 'error');
+                this.notify(@js(__('app.wb_save_error')) + error.message, 'error');
             } finally {
                 this.saving = false;
             }

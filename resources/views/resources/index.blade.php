@@ -1,13 +1,13 @@
 @extends('layouts.app')
 
-@section('title', 'Ресурси')
+@section('title', __('app.resources'))
 
 @section('content')
 <div class="space-y-6" x-data="resourcesManager()">
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Ресурси</h1>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('app.resources') }}</h1>
 
             <!-- Breadcrumbs -->
             <nav class="flex items-center gap-2 mt-2 text-sm">
@@ -16,7 +16,7 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
                     </svg>
-                    Корінь
+                    {{ __('app.root') }}
                 </a>
                 @foreach($breadcrumbs as $crumb)
                 <span class="text-gray-400">/</span>
@@ -40,7 +40,7 @@
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
                 </svg>
-                Нова папка
+                {{ __('app.new_folder') }}
             </button>
 
             <!-- Upload button -->
@@ -48,7 +48,7 @@
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
                 </svg>
-                Завантажити
+                {{ __('app.upload') }}
                 <input type="file" class="hidden" @change="uploadFile($event)" multiple>
             </label>
         </div>
@@ -65,9 +65,9 @@
             <div class="flex-1">
                 <p class="text-sm font-medium {{ $storagePercent > 90 ? 'text-red-800 dark:text-red-200' : 'text-yellow-800 dark:text-yellow-200' }}">
                     @if($storagePercent > 90)
-                        Сховище майже заповнене! Залишилось {{ number_format(($storageLimit - $storageUsed) / 1024 / 1024, 1) }} MB
+                        {{ __('app.storage_almost_full', ['remaining' => number_format(($storageLimit - $storageUsed) / 1024 / 1024, 1)]) }}
                     @else
-                        Використано {{ number_format($storageUsed / 1024 / 1024, 0) }} MB з {{ number_format($storageLimit / 1024 / 1024, 0) }} MB
+                        {{ __('app.storage_used_of', ['used' => number_format($storageUsed / 1024 / 1024, 0), 'total' => number_format($storageLimit / 1024 / 1024, 0)]) }}
                     @endif
                 </p>
             </div>
@@ -84,16 +84,16 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
                 </svg>
             </div>
-            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">Папка порожня</h3>
-            <p class="text-gray-500 dark:text-gray-400 mb-4">Створіть папку або завантажте файли</p>
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">{{ __('app.folder_empty') }}</h3>
+            <p class="text-gray-500 dark:text-gray-400 mb-4">{{ __('app.create_folder_or_upload') }}</p>
             @if(auth()->user()->canCreate('resources'))
             <div class="flex items-center justify-center gap-3">
                 <button @click="showCreateFolder = true"
                         class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
-                    Створити папку
+                    {{ __('app.create_folder') }}
                 </button>
                 <label class="px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors cursor-pointer">
-                    Завантажити файл
+                    {{ __('app.upload_file') }}
                     <input type="file" class="hidden" @change="uploadFile($event)" multiple>
                 </label>
             </div>
@@ -104,9 +104,9 @@
         <table class="w-full">
             <thead class="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
                 <tr>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">Назва</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase hidden sm:table-cell">Розмір</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase hidden md:table-cell">Дата</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ __('app.name_label') }}</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase hidden sm:table-cell">{{ __('app.size_label') }}</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase hidden md:table-cell">{{ __('app.date') }}</th>
                     <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase w-16"></th>
                 </tr>
             </thead>
@@ -185,17 +185,17 @@
         <div class="min-h-screen px-4 flex items-center justify-center">
             <div class="fixed inset-0 bg-black/50" @click="showCreateFolder = false"></div>
             <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full p-6">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Нова папка</h3>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.new_folder') }}</h3>
                 <form @submit.prevent="submit($refs.createFolderForm)" x-ref="createFolderForm"
                       x-data="{ ...ajaxForm({ url: '{{ route('resources.folder.create') }}', method: 'POST', stayOnPage: true, resetOnSuccess: true, onSuccess(data) { _addResourceFolder(this, data); } }) }">
                     <input type="hidden" name="parent_id" value="{{ $folder?->id }}">
 
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Назва</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.name_label') }}</label>
                             <input type="text" name="name" required autofocus
                                    class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white"
-                                   placeholder="Назва папки...">
+                                   placeholder="{{ __('app.folder_name_placeholder') }}">
                             <template x-if="errors.name">
                                 <p class="text-red-500 text-sm mt-1" x-text="errors.name[0]"></p>
                             </template>
@@ -205,10 +205,10 @@
                     <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3 mt-6">
                         <button type="button" @click="showCreateFolder = false"
                                 class="w-full sm:w-auto px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900">
-                            Скасувати
+                            {{ __('app.cancel') }}
                         </button>
                         <button type="submit" :disabled="saving" class="w-full sm:w-auto px-4 py-2 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700">
-                            Створити
+                            {{ __('app.create') }}
                         </button>
                     </div>
                 </form>
@@ -226,7 +226,7 @@
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
             </svg>
-            Перейменувати
+            {{ __('app.rename') }}
         </button>
         @endif
         @if(auth()->user()->canDelete('resources'))
@@ -234,7 +234,7 @@
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
             </svg>
-            Видалити
+            {{ __('app.delete') }}
         </button>
         @endif
     </div>
@@ -244,21 +244,21 @@
         <div class="min-h-screen px-4 flex items-center justify-center">
             <div class="fixed inset-0 bg-black/50" @click="showRename = false"></div>
             <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full p-6">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Перейменувати</h3>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.rename') }}</h3>
                 <form @submit.prevent="submitRename()">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Нова назва</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.new_name') }}</label>
                         <input type="text" x-model="renameName" required x-ref="renameInput"
                                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white"
-                               placeholder="Назва...">
+                               placeholder="{{ __('app.name_label') }}...">
                     </div>
                     <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3 mt-6">
                         <button type="button" @click="showRename = false"
                                 class="w-full sm:w-auto px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900">
-                            Скасувати
+                            {{ __('app.cancel') }}
                         </button>
                         <button type="submit" class="w-full sm:w-auto px-4 py-2 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700">
-                            Зберегти
+                            {{ __('app.save') }}
                         </button>
                     </div>
                 </form>
@@ -304,7 +304,7 @@
                     <template x-if="!previewFile?.mime?.startsWith('image/') && !previewFile?.mime?.startsWith('audio/') && !previewFile?.mime?.startsWith('video/') && previewFile?.mime !== 'application/pdf'">
                         <div class="text-center py-8">
                             <span class="text-6xl block mb-4" x-text="previewFile?.icon"></span>
-                            <p class="text-gray-500 dark:text-gray-400">Попередній перегляд недоступний</p>
+                            <p class="text-gray-500 dark:text-gray-400">{{ __('app.preview_unavailable') }}</p>
                         </div>
                     </template>
                 </div>
@@ -313,15 +313,15 @@
                 <div class="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
                     <div class="flex items-center justify-between">
                         <div class="text-sm text-gray-500 dark:text-gray-400">
-                            Завантажено: <span x-text="previewFile?.createdAt"></span>
-                            <span x-show="previewFile?.creator">від <span x-text="previewFile?.creator"></span></span>
+                            {{ __('app.uploaded_at') }}: <span x-text="previewFile?.createdAt"></span>
+                            <span x-show="previewFile?.creator">{{ __('app.by_author') }} <span x-text="previewFile?.creator"></span></span>
                         </div>
                         <a :href="previewFile?.downloadUrl"
                            class="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                             </svg>
-                            Завантажити
+                            {{ __('app.download') }}
                         </a>
                     </div>
                 </div>
@@ -351,7 +351,7 @@ function _addResourceFolder(ctx, data) {
     var dateStr = String(today.getDate()).padStart(2,'0') + '.' + String(today.getMonth()+1).padStart(2,'0') + '.' + today.getFullYear();
     tr.innerHTML = '\x3Ctd class="px-4 py-3">\x3Cdiv class="flex items-center gap-3">\x3Csvg class="w-5 h-5 text-yellow-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">\x3Cpath d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"/>\x3C/svg>\x3Cspan class="text-sm font-medium text-gray-900 dark:text-white resource-name">' + safeName + '\x3C/span>\x3C/div>\x3C/td>\x3Ctd class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 hidden sm:table-cell">\u2014\x3C/td>\x3Ctd class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 hidden md:table-cell">' + dateStr + '\x3C/td>\x3Ctd class="px-4 py-3 text-right">\x3C/td>';
     tbody.insertBefore(tr, tbody.firstChild);
-    if (window.showGlobalToast) showGlobalToast('Папку створено', 'success');
+    if (window.showGlobalToast) showGlobalToast(@js(__('app.folder_created')), 'success');
 }
 
 function _addResourceFile(fileName) {
@@ -367,7 +367,7 @@ function _addResourceFile(fileName) {
     var dateStr = String(today.getDate()).padStart(2,'0') + '.' + String(today.getMonth()+1).padStart(2,'0') + '.' + today.getFullYear();
     tr.innerHTML = '\x3Ctd class="px-4 py-3">\x3Cdiv class="flex items-center gap-3">\x3Csvg class="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">\x3Cpath stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>\x3C/svg>\x3Cspan class="text-sm font-medium text-gray-900 dark:text-white resource-name">' + safeName + '\x3C/span>\x3C/div>\x3C/td>\x3Ctd class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 hidden sm:table-cell">\x3C/td>\x3Ctd class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 hidden md:table-cell">' + dateStr + '\x3C/td>\x3Ctd class="px-4 py-3 text-right">\x3C/td>';
     tbody.insertBefore(tr, tbody.firstChild);
-    if (window.showGlobalToast) showGlobalToast('Файл завантажено', 'success');
+    if (window.showGlobalToast) showGlobalToast(@js(__('app.file_uploaded')), 'success');
 }
 
 function resourcesManager() {
@@ -432,10 +432,10 @@ function resourcesManager() {
                         _addResourceFile(file.name);
                     } else {
                         const data = await response.json().catch(() => ({}));
-                        alert(data.message || 'Помилка завантаження');
+                        alert(data.message || @js(__('app.upload_error')));
                     }
                 } catch (error) {
-                    alert('Помилка завантаження');
+                    alert(@js(__('app.upload_error')));
                 }
             }
 

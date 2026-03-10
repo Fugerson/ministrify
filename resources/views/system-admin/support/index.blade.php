@@ -1,6 +1,6 @@
 @extends('layouts.system-admin')
 
-@section('title', 'Підтримка - Kanban')
+@section('title', __('app.sa_support_kanban'))
 
 @section('content')
 <div x-data="supportKanban()" x-init="init()" class="h-[calc(100vh-160px)]">
@@ -8,19 +8,19 @@
     <div class="mb-4 space-y-3">
         <div class="flex items-center justify-between flex-wrap gap-4">
             <div>
-                <h1 class="text-xl font-bold text-gray-900 dark:text-white">Підтримка</h1>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Тікети від адміністраторів церков</p>
+                <h1 class="text-xl font-bold text-gray-900 dark:text-white">{{ __('app.sa_support') }}</h1>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.sa_tickets_from_admins') }}</p>
             </div>
             <div class="flex items-center gap-4">
                 <div class="text-sm text-gray-500 dark:text-gray-400">
-                    Всього: <span class="font-semibold text-gray-900 dark:text-white" x-text="allTickets.length"></span>
+                    {{ __('app.total_label') }} <span class="font-semibold text-gray-900 dark:text-white" x-text="allTickets.length"></span>
                 </div>
                 <button @click="showCreateModal = true"
                         class="flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                     </svg>
-                    Мій тікет
+                    {{ __('app.sa_my_ticket') }}
                 </button>
             </div>
         </div>
@@ -29,7 +29,7 @@
         <div class="flex items-center gap-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-2 shadow-sm">
             <!-- Search -->
             <div class="relative flex-1 min-w-0 sm:min-w-[180px] sm:max-w-xs">
-                <input type="text" x-model="searchQuery" placeholder="Пошук..."
+                <input type="text" x-model="searchQuery" placeholder="{{ __('app.search') }}..."
                        class="w-full pl-9 pr-4 py-2 bg-gray-50 dark:bg-gray-900 border-0 rounded-lg text-sm dark:text-white focus:ring-2 focus:ring-primary-500 placeholder-gray-400">
                 <svg class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
@@ -41,26 +41,26 @@
             <!-- Filter by Category -->
             <select x-model="filters.category"
                     class="px-3 py-2 bg-gray-50 dark:bg-gray-900 border-0 rounded-lg text-sm dark:text-white focus:ring-2 focus:ring-primary-500">
-                <option value="">Всі категорії</option>
-                <option value="bug">🐛 Помилки</option>
-                <option value="question">❓ Питання</option>
-                <option value="feature">💡 Пропозиції</option>
-                <option value="other">📝 Інше</option>
+                <option value="">{{ __('app.sa_all_categories') }}</option>
+                <option value="bug">{{ __('app.sa_cat_bugs') }}</option>
+                <option value="question">{{ __('app.sa_cat_questions') }}</option>
+                <option value="feature">{{ __('app.sa_cat_features') }}</option>
+                <option value="other">{{ __('app.sa_cat_other') }}</option>
             </select>
 
             <!-- Filter by Priority -->
             <select x-model="filters.priority"
                     class="px-3 py-2 bg-gray-50 dark:bg-gray-900 border-0 rounded-lg text-sm dark:text-white focus:ring-2 focus:ring-primary-500 hidden sm:block">
-                <option value="">Всі пріоритети</option>
-                <option value="urgent">🔴 Терміново</option>
-                <option value="high">🟠 Високий</option>
-                <option value="normal">🟡 Нормальний</option>
-                <option value="low">⚪ Низький</option>
+                <option value="">{{ __('app.sa_all_priorities') }}</option>
+                <option value="urgent">{{ __('app.sa_pri_urgent') }}</option>
+                <option value="high">{{ __('app.sa_pri_high') }}</option>
+                <option value="normal">{{ __('app.sa_pri_normal') }}</option>
+                <option value="low">{{ __('app.sa_pri_low') }}</option>
             </select>
 
             <template x-if="hasActiveFilters">
                 <button @click="clearFilters()" class="px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
-                    Скинути
+                    {{ __('app.sa_reset_filters') }}
                 </button>
             </template>
         </div>
@@ -68,14 +68,14 @@
 
     <!-- Kanban Board -->
     <div class="flex gap-4 h-full overflow-x-auto pb-4">
-        <!-- Column: До роботи -->
+        <!-- Column: Todo -->
         <div class="kanban-column flex-shrink-0 w-[calc(100vw-2rem)] sm:w-80 bg-gray-50/80 dark:bg-gray-800/50 rounded-xl flex flex-col border border-gray-200/50 dark:border-gray-700/50">
             <div class="relative">
                 <div class="absolute top-0 left-0 right-0 h-1 rounded-t-xl bg-blue-500"></div>
                 <div class="p-3 pt-4 flex items-center justify-between">
                     <div class="flex items-center gap-2">
                         <div class="w-2 h-2 rounded-full bg-blue-500"></div>
-                        <h3 class="font-semibold text-gray-800 dark:text-white text-sm">До роботи</h3>
+                        <h3 class="font-semibold text-gray-800 dark:text-white text-sm">{{ __('app.sa_col_todo') }}</h3>
                         <span class="text-xs text-gray-400 dark:text-gray-500 bg-gray-200/50 dark:bg-gray-700/50 px-2 py-0.5 rounded-full font-medium"
                               x-text="todoTickets.length"></span>
                     </div>
@@ -93,20 +93,20 @@
                         <svg class="w-10 h-10 mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
                         </svg>
-                        <p class="text-sm">Немає нових тікетів</p>
+                        <p class="text-sm">{{ __('app.sa_no_new_tickets') }}</p>
                     </div>
                 </template>
             </div>
         </div>
 
-        <!-- Column: В процесі -->
+        <!-- Column: In Progress -->
         <div class="kanban-column flex-shrink-0 w-[calc(100vw-2rem)] sm:w-80 bg-gray-50/80 dark:bg-gray-800/50 rounded-xl flex flex-col border border-gray-200/50 dark:border-gray-700/50">
             <div class="relative">
                 <div class="absolute top-0 left-0 right-0 h-1 rounded-t-xl bg-yellow-500"></div>
                 <div class="p-3 pt-4 flex items-center justify-between">
                     <div class="flex items-center gap-2">
                         <div class="w-2 h-2 rounded-full bg-yellow-500"></div>
-                        <h3 class="font-semibold text-gray-800 dark:text-white text-sm">В процесі</h3>
+                        <h3 class="font-semibold text-gray-800 dark:text-white text-sm">{{ __('app.sa_col_in_progress') }}</h3>
                         <span class="text-xs text-gray-400 dark:text-gray-500 bg-gray-200/50 dark:bg-gray-700/50 px-2 py-0.5 rounded-full font-medium"
                               x-text="inProgressTickets.length"></span>
                     </div>
@@ -124,20 +124,20 @@
                         <svg class="w-10 h-10 mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
-                        <p class="text-sm">Нічого в роботі</p>
+                        <p class="text-sm">{{ __('app.sa_nothing_in_progress') }}</p>
                     </div>
                 </template>
             </div>
         </div>
 
-        <!-- Column: Готово -->
+        <!-- Column: Done -->
         <div class="kanban-column flex-shrink-0 w-[calc(100vw-2rem)] sm:w-80 bg-gray-50/80 dark:bg-gray-800/50 rounded-xl flex flex-col border border-gray-200/50 dark:border-gray-700/50">
             <div class="relative">
                 <div class="absolute top-0 left-0 right-0 h-1 rounded-t-xl bg-green-500"></div>
                 <div class="p-3 pt-4 flex items-center justify-between">
                     <div class="flex items-center gap-2">
                         <div class="w-2 h-2 rounded-full bg-green-500"></div>
-                        <h3 class="font-semibold text-gray-800 dark:text-white text-sm">Готово</h3>
+                        <h3 class="font-semibold text-gray-800 dark:text-white text-sm">{{ __('app.sa_col_done') }}</h3>
                         <span class="text-xs text-gray-400 dark:text-gray-500 bg-gray-200/50 dark:bg-gray-700/50 px-2 py-0.5 rounded-full font-medium"
                               x-text="doneTickets.length"></span>
                     </div>
@@ -155,7 +155,7 @@
                         <svg class="w-10 h-10 mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
-                        <p class="text-sm">Виконаних немає</p>
+                        <p class="text-sm">{{ __('app.sa_no_done_tickets') }}</p>
                     </div>
                 </template>
             </div>
@@ -191,7 +191,7 @@
 
                 <!-- Header -->
                 <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Новий тікет</h3>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.sa_new_ticket') }}</h3>
                     <button @click="showCreateModal = false" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -202,46 +202,46 @@
                 <!-- Body -->
                 <div class="p-6 space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Тема</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.sa_ticket_subject') }}</label>
                         <input type="text" x-model="createForm.subject"
                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
-                               placeholder="Опишіть проблему коротко">
+                               placeholder="{{ __('app.sa_ticket_subject_placeholder') }}">
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Категорія</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.sa_ticket_category') }}</label>
                             <select x-model="createForm.category"
                                     class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
-                                <option value="bug">🐛 Помилка</option>
-                                <option value="feature">💡 Фіча</option>
-                                <option value="question">❓ Питання</option>
-                                <option value="other">📝 Інше</option>
+                                <option value="bug">{{ __('app.sa_cat_bug_emoji') }}</option>
+                                <option value="feature">{{ __('app.sa_cat_feature_emoji') }}</option>
+                                <option value="question">{{ __('app.sa_cat_question_emoji') }}</option>
+                                <option value="other">{{ __('app.sa_cat_other_emoji') }}</option>
                             </select>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Пріоритет</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.sa_ticket_priority') }}</label>
                             <select x-model="createForm.priority"
                                     class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
-                                <option value="low">⚪ Низький</option>
-                                <option value="normal">🟡 Нормальний</option>
-                                <option value="high">🟠 Високий</option>
-                                <option value="urgent">🔴 Терміновий</option>
+                                <option value="low">{{ __('app.sa_pri_low_emoji') }}</option>
+                                <option value="normal">{{ __('app.sa_pri_normal_emoji') }}</option>
+                                <option value="high">{{ __('app.sa_pri_high_emoji') }}</option>
+                                <option value="urgent">{{ __('app.sa_pri_urgent_emoji') }}</option>
                             </select>
                         </div>
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Опис</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.sa_ticket_description') }}</label>
                         <textarea x-model="createForm.message" rows="4"
                                   @paste="handlePaste($event)"
                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
-                                  placeholder="Детальний опис... (Ctrl+V для вставки скріншоту)"></textarea>
+                                  placeholder="{{ __('app.sa_ticket_desc_placeholder') }}"></textarea>
                     </div>
 
                     <!-- Attachments -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Файли</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.sa_ticket_files') }}</label>
                         <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-3 text-center hover:border-primary-500 transition-colors"
                              @dragover.prevent="$el.classList.add('border-primary-500')"
                              @dragleave.prevent="$el.classList.remove('border-primary-500')"
@@ -253,7 +253,7 @@
                                 <svg class="w-6 h-6 mx-auto text-gray-400 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                 </svg>
-                                <p class="text-xs text-gray-500 dark:text-gray-400">Перетягніть або натисніть • Ctrl+V для скріншоту</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.sa_ticket_drag_or_click') }}</p>
                             </label>
                         </div>
                         <!-- Preview attached files -->
@@ -288,13 +288,13 @@
                 <div class="flex justify-end gap-3 px-6 py-4 border-t border-gray-200 dark:border-gray-700">
                     <button @click="showCreateModal = false"
                             class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                        Скасувати
+                        {{ __('app.cancel') }}
                     </button>
                     <button @click="createTicket()"
                             :disabled="createLoading || !createForm.subject || !createForm.message"
                             class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                        <span x-show="!createLoading">Створити</span>
-                        <span x-show="createLoading">Збереження...</span>
+                        <span x-show="!createLoading">{{ __('app.create') }}</span>
+                        <span x-show="createLoading">{{ __('app.saving') }}</span>
                     </button>
                 </div>
             </div>
@@ -314,6 +314,9 @@ function supportKanban() {
         },
         updateUrl: '{{ route("system.support.update.status") }}',
         csrfToken: document.querySelector('meta[name="csrf-token"]').content,
+        _myTicketLabel: @js(__('app.sa_my_ticket_label')),
+        _priUrgentShort: @js(__('app.sa_pri_urgent_short')),
+        _priHighShort: @js(__('app.sa_pri_high_short')),
 
         get hasActiveFilters() {
             return this.searchQuery || this.filters.category || this.filters.priority;
@@ -374,7 +377,7 @@ function supportKanban() {
         renderTicketCard(ticket, isDone = false) {
             const categoryClass = this.getCategoryClass(ticket.category);
             const priorityBadge = (ticket.priority === 'urgent' || ticket.priority === 'high')
-                ? `<span class="px-1.5 py-0.5 text-[10px] font-medium rounded bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-300">${ticket.priority === 'urgent' ? 'Терм.' : 'Вис.'}</span>`
+                ? `<span class="px-1.5 py-0.5 text-[10px] font-medium rounded bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-300">${ticket.priority === 'urgent' ? this._priUrgentShort : this._priHighShort}</span>`
                 : '';
             const unreadBadge = ticket.unread > 0
                 ? `<span class="ml-auto px-1.5 py-0.5 text-[10px] font-bold bg-red-500 text-white rounded-full">${ticket.unread}</span>`
@@ -390,7 +393,7 @@ function supportKanban() {
                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
-                    Мій тікет
+                    ${this._myTicketLabel}
                 </div>` : '');
 
             return `

@@ -90,8 +90,8 @@ class SettingsController extends Controller
             'people_count' => $role->people_count,
         ]);
 
-        $permissionModules = ChurchRolePermission::MODULES;
-        $permissionActions = ChurchRolePermission::ACTIONS;
+        $permissionModules = ChurchRolePermission::getTranslatedModules();
+        $permissionActions = ChurchRolePermission::getTranslatedActions();
 
         // Available people for person linking (pending user approvals)
         $availablePeople = Person::where('church_id', $church->id)
@@ -140,14 +140,14 @@ class SettingsController extends Controller
             'updated_fields' => array_keys($validated),
         ]);
 
-        return $this->successResponse($request, 'Налаштування церкви оновлено.');
+        return $this->successResponse($request, __('app.settings_church_updated'));
     }
 
     public function updateTelegram(Request $request)
     {
         // Telegram bot is now configured globally via .env
         // This method is kept for backwards compatibility
-        return $this->successResponse(request(), 'Telegram бот налаштовується централізовано адміністратором системи.');
+        return $this->successResponse(request(), __('app.telegram_bot_centrally_configured'));
     }
 
     public function testTelegram()
@@ -244,7 +244,7 @@ class SettingsController extends Controller
             'notifications' => $settings['notifications'],
         ]);
 
-        return $this->successResponse($request, 'Налаштування сповіщень оновлено.');
+        return $this->successResponse($request, __('app.settings_notifications_updated'));
     }
 
     public function updateSelfRegistration(Request $request)
@@ -306,7 +306,7 @@ class SettingsController extends Controller
             'slug' => $validated['slug'],
         ]);
 
-        return $this->successResponse($request, 'Налаштування публічного сайту оновлено.');
+        return $this->successResponse($request, __('app.settings_public_site_updated'));
     }
 
     /**
@@ -357,7 +357,7 @@ class SettingsController extends Controller
             'monobank_enabled' => $validated['monobank_enabled'] ?? false,
         ]);
 
-        return $this->successResponse($request, 'Налаштування платежів оновлено.');
+        return $this->successResponse($request, __('app.settings_payments_updated'));
     }
 
     /**
@@ -508,7 +508,7 @@ class SettingsController extends Controller
             app(NbuExchangeRateService::class)->getCurrentRates();
         }
 
-        return $this->successResponse($request, 'Налаштування валют оновлено.');
+        return $this->successResponse($request, __('app.settings_currency_updated'));
     }
 
     /**

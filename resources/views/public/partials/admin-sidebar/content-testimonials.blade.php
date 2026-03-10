@@ -12,7 +12,7 @@
     <div x-show="!cnt.testimonials.loading && cnt.testimonials.editing === null">
         <button x-on:click="contentNew('testimonials', { author_name: '', author_role: '', content: '', author_photo: null, _photoPreview: null })"
                 class="w-full mb-2 px-3 py-1.5 text-xs font-medium text-primary-600 bg-primary-50 rounded-lg hover:bg-primary-100 transition-colors">
-            + Додати свідчення
+            {{ __('app.sb_add_testimonial') }}
         </button>
         <div class="space-y-1.5 max-h-64 overflow-y-auto">
             <template x-for="item in cnt.testimonials.items" :key="item.id">
@@ -24,14 +24,14 @@
                         <p x-text="item.author_name" class="text-xs font-medium text-gray-800 truncate"></p>
                         <p x-text="item.content" class="text-[10px] text-gray-500 line-clamp-2 mt-0.5"></p>
                         <div class="flex gap-2 mt-1">
-                            <button x-on:click="contentEdit('testimonials', item, ['author_name', 'author_role', 'content']); cnt.testimonials.form._photoPreview = item.author_photo ? '/storage/' + item.author_photo : null; cnt.testimonials.form.author_photo = null;" class="text-[10px] text-blue-500 hover:text-blue-700">Ред.</button>
-                            <button x-on:click="contentDeleteItem('testimonials', item.id)" class="text-[10px] text-red-500 hover:text-red-700">Вид.</button>
+                            <button x-on:click="contentEdit('testimonials', item, ['author_name', 'author_role', 'content']); cnt.testimonials.form._photoPreview = item.author_photo ? '/storage/' + item.author_photo : null; cnt.testimonials.form.author_photo = null;" class="text-[10px] text-blue-500 hover:text-blue-700">{{ __('app.sb_edit_btn') }}</button>
+                            <button x-on:click="contentDeleteItem('testimonials', item.id)" class="text-[10px] text-red-500 hover:text-red-700">{{ __('app.sb_delete_btn') }}</button>
                         </div>
                     </div>
                 </div>
             </template>
         </div>
-        <p x-show="cnt.testimonials.loaded && cnt.testimonials.items.length === 0" class="text-xs text-gray-400 text-center py-2">Немає свідчень</p>
+        <p x-show="cnt.testimonials.loaded && cnt.testimonials.items.length === 0" class="text-xs text-gray-400 text-center py-2">{{ __('app.sb_no_testimonials') }}</p>
     </div>
 
     {{-- Edit/New form --}}
@@ -41,28 +41,28 @@
                 <img :src="cnt.testimonials.form._photoPreview" class="w-10 h-10 rounded-full object-cover">
             </template>
             <label class="text-[10px] text-primary-600 hover:text-primary-800 cursor-pointer font-medium">
-                Фото (необов'язково)
+                {{ __('app.sb_photo_optional') }}
                 <input type="file" accept="image/*" class="hidden" x-on:change="
                     const file = $event.target.files[0];
                     if (file) { cnt.testimonials.form.author_photo = file; cnt.testimonials.form._photoPreview = URL.createObjectURL(file); }
                 ">
             </label>
         </div>
-        <input x-model="cnt.testimonials.form.author_name" type="text" placeholder="Ім'я автора"
+        <input x-model="cnt.testimonials.form.author_name" type="text" placeholder="{{ __('app.sb_author_name_ph') }}"
                class="w-full text-xs border border-gray-300 rounded-lg px-2.5 py-1.5 focus:ring-1 focus:ring-primary-500 focus:border-primary-500">
-        <input x-model="cnt.testimonials.form.author_role" type="text" placeholder="Роль / позиція (необов'язково)"
+        <input x-model="cnt.testimonials.form.author_role" type="text" placeholder="{{ __('app.sb_author_role_ph') }}"
                class="w-full text-xs border border-gray-300 rounded-lg px-2.5 py-1.5 focus:ring-1 focus:ring-primary-500 focus:border-primary-500">
-        <textarea x-model="cnt.testimonials.form.content" placeholder="Текст свідчення" rows="3"
+        <textarea x-model="cnt.testimonials.form.content" placeholder="{{ __('app.sb_testimonial_text_ph') }}" rows="3"
                   class="w-full text-xs border border-gray-300 rounded-lg px-2.5 py-1.5 focus:ring-1 focus:ring-primary-500 focus:border-primary-500 resize-y"></textarea>
         <div class="flex gap-2">
             <button x-on:click="contentSaveItem('testimonials', true)" :disabled="contentSaving"
                     class="flex-1 px-3 py-1.5 text-xs font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 disabled:opacity-50">
-                <span x-show="!contentSaving">Зберегти</span>
+                <span x-show="!contentSaving">{{ __('app.sb_save') }}</span>
                 <span x-show="contentSaving">...</span>
             </button>
             <button x-on:click="contentCancel('testimonials')"
                     class="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200">
-                Скасувати
+                {{ __('app.sb_cancel') }}
             </button>
         </div>
     </div>

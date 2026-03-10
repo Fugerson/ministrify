@@ -2,10 +2,10 @@
     'name' => 'person_id',
     'people' => collect(),
     'selected' => null,
-    'placeholder' => __('Почніть вводити ім\'я...'),
+    'placeholder' => __('app.start_typing_name'),
     'required' => false,
     'nullable' => true,
-    'nullText' => __('Не вибрано'),
+    'nullText' => __('app.not_selected'),
     'showPhoto' => true,
     'showRole' => true,
 ])
@@ -111,7 +111,7 @@
         <svg class="w-8 h-8 mx-auto mb-2 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
         </svg>
-        {{ __('Нікого не знайдено') }}
+        {{ __('app.no_one_found') }}
     </div>
 </div>
 

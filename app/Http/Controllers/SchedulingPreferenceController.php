@@ -58,7 +58,7 @@ class SchedulingPreferenceController extends Controller
         $preference = $person->getOrCreateSchedulingPreference();
         $preference->update($validated);
 
-        return $this->successResponse($request, 'Налаштування збережено');
+        return $this->successResponse($request, __('app.scheduling_preferences_saved'));
     }
 
     /**

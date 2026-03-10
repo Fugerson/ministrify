@@ -17,7 +17,7 @@
                     <svg class="w-5 h-5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
                     </svg>
-                    <span x-text="editingEpic ? 'Редагувати проєкт' : 'Новий проєкт'"></span>
+                    <span x-text="editingEpic ? @js(__('app.board_edit_project')) : @js(__('app.board_new_project'))"></span>
                 </h3>
                 <button @click="showEpicModal = false; editingEpic = null" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -30,15 +30,15 @@
                 <div class="space-y-4">
                     <!-- Name -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Назва *</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.board_name_label') }}</label>
                         <input type="text" x-model="newEpic.name" required
-                               placeholder="Наприклад: Q1 2026 Goals"
+                               placeholder="{{ __('app.board_name_example') }}"
                                class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm dark:text-white focus:ring-2 focus:ring-primary-500">
                     </div>
 
                     <!-- Color -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Колір</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.board_color') }}</label>
                         <div class="flex items-center gap-2">
                             <input type="color" x-model="newEpic.color"
                                    class="w-10 h-10 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer">
@@ -55,9 +55,9 @@
 
                     <!-- Description -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Опис</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.board_description_label') }}</label>
                         <textarea x-model="newEpic.description" rows="2"
-                                  placeholder="Короткий опис цілей проєкту..."
+                                  placeholder="{{ __('app.board_short_description') }}"
                                   class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm dark:text-white resize-none"></textarea>
                     </div>
 
@@ -67,8 +67,8 @@
                             <input type="checkbox" x-model="newEpic.showInGeneral"
                                    class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700">
                             <div>
-                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Показувати в загальних</span>
-                                <p class="text-xs text-gray-400 dark:text-gray-500">Всі завдання цього проєкту з'являться на загальній дошці</p>
+                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('app.board_show_in_general_label') }}</span>
+                                <p class="text-xs text-gray-400 dark:text-gray-500">{{ __('app.board_all_tasks_of_project') }}</p>
                             </div>
                         </label>
                     </template>
@@ -77,7 +77,7 @@
                 <div class="flex items-center justify-end gap-3 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
                     <button type="button" @click="showEpicModal = false; editingEpic = null"
                             class="px-4 py-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 font-medium">
-                        Скасувати
+                        {{ __('app.board_cancel') }}
                     </button>
                     <button type="submit" :disabled="!newEpic.name.trim() || epicModalLoading"
                             class="px-5 py-2 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 disabled:opacity-50 flex items-center gap-2">
@@ -92,7 +92,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x-bind:d="editingEpic ? 'M5 13l4 4L19 7' : 'M12 4v16m8-8H4'"/>
                             </svg>
                         </template>
-                        <span x-text="editingEpic ? 'Зберегти' : 'Створити'"></span>
+                        <span x-text="editingEpic ? @js(__('app.board_save')) : @js(__('app.board_create'))"></span>
                     </button>
                 </div>
             </form>

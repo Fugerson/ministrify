@@ -25,21 +25,21 @@
     ];
 
     $defaultSections = [
-        ['id' => 'hero', 'enabled' => true, 'order' => 0, 'label' => 'Hero секція'],
-        ['id' => 'service_times', 'enabled' => true, 'order' => 1, 'label' => 'Розклад служінь'],
-        ['id' => 'about', 'enabled' => true, 'order' => 2, 'label' => 'Про нас'],
-        ['id' => 'pastor_message', 'enabled' => false, 'order' => 3, 'label' => 'Слово пастора'],
-        ['id' => 'leadership', 'enabled' => true, 'order' => 4, 'label' => 'Команда лідерів'],
-        ['id' => 'events', 'enabled' => true, 'order' => 5, 'label' => 'Події'],
-        ['id' => 'sermons', 'enabled' => false, 'order' => 6, 'label' => 'Проповіді'],
-        ['id' => 'ministries', 'enabled' => true, 'order' => 7, 'label' => 'Служіння'],
-        ['id' => 'groups', 'enabled' => true, 'order' => 8, 'label' => 'Малі групи'],
-        ['id' => 'gallery', 'enabled' => true, 'order' => 9, 'label' => 'Галерея'],
-        ['id' => 'testimonials', 'enabled' => false, 'order' => 10, 'label' => 'Свідчення'],
-        ['id' => 'blog', 'enabled' => false, 'order' => 11, 'label' => 'Блог'],
-        ['id' => 'faq', 'enabled' => false, 'order' => 12, 'label' => 'FAQ'],
-        ['id' => 'donations', 'enabled' => false, 'order' => 13, 'label' => 'Пожертви'],
-        ['id' => 'contact', 'enabled' => true, 'order' => 14, 'label' => 'Контакти'],
+        ['id' => 'hero', 'enabled' => true, 'order' => 0, 'label' => __('app.sb_section_hero')],
+        ['id' => 'service_times', 'enabled' => true, 'order' => 1, 'label' => __('app.sb_section_service_times')],
+        ['id' => 'about', 'enabled' => true, 'order' => 2, 'label' => __('app.sb_section_about')],
+        ['id' => 'pastor_message', 'enabled' => false, 'order' => 3, 'label' => __('app.sb_section_pastor_message')],
+        ['id' => 'leadership', 'enabled' => true, 'order' => 4, 'label' => __('app.sb_section_leadership')],
+        ['id' => 'events', 'enabled' => true, 'order' => 5, 'label' => __('app.sb_section_events')],
+        ['id' => 'sermons', 'enabled' => false, 'order' => 6, 'label' => __('app.sb_section_sermons')],
+        ['id' => 'ministries', 'enabled' => true, 'order' => 7, 'label' => __('app.sb_section_ministries')],
+        ['id' => 'groups', 'enabled' => true, 'order' => 8, 'label' => __('app.sb_section_groups')],
+        ['id' => 'gallery', 'enabled' => true, 'order' => 9, 'label' => __('app.sb_section_gallery')],
+        ['id' => 'testimonials', 'enabled' => false, 'order' => 10, 'label' => __('app.sb_section_testimonials')],
+        ['id' => 'blog', 'enabled' => false, 'order' => 11, 'label' => __('app.sb_section_blog')],
+        ['id' => 'faq', 'enabled' => false, 'order' => 12, 'label' => __('app.sb_section_faq')],
+        ['id' => 'donations', 'enabled' => false, 'order' => 13, 'label' => __('app.sb_section_donations')],
+        ['id' => 'contact', 'enabled' => true, 'order' => 14, 'label' => __('app.sb_section_contact')],
     ];
 
     $sectionLabels = collect($defaultSections)->pluck('label', 'id')->toArray();
@@ -67,7 +67,7 @@
              x-transition:leave-end="opacity-0 translate-y-2"
              class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-md text-gray-900 dark:text-white rounded-2xl shadow-2xl px-4 py-3 flex items-center gap-3 max-w-[90vw]">
             <div class="text-sm text-gray-500 dark:text-white/70 hidden sm:block">
-                Перетягуйте секції для зміни порядку
+                {{ __('app.sb_drag_sections_hint') }}
             </div>
             <button @click="saveEditMode()" :disabled="saving"
                     class="px-4 py-2 text-sm font-medium bg-green-500 hover:bg-green-600 disabled:opacity-50 text-white rounded-xl transition-colors flex items-center gap-1.5 flex-shrink-0">
@@ -82,11 +82,11 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                     </svg>
                 </template>
-                <span x-text="saving ? 'Збереження...' : 'Зберегти'"></span>
+                <span x-text="saving ? @js(__('app.sb_saving')) : @js(__('app.sb_save'))"></span>
             </button>
             <button @click="cancelEditMode()"
                     class="px-4 py-2 text-sm font-medium bg-gray-100 hover:bg-gray-200 dark:bg-white/10 dark:hover:bg-white/20 text-gray-700 dark:text-white rounded-xl transition-colors flex-shrink-0">
-                Скасувати
+                {{ __('app.sb_cancel') }}
             </button>
         </div>
 
@@ -100,11 +100,11 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                 </svg>
-                <span x-text="editMode ? 'Редагування...' : 'Редагувати сайт'"></span>
+                <span x-text="editMode ? @js(__('app.sb_editing')) : @js(__('app.sb_edit_site'))"></span>
             </button>
             <button x-show="!editMode" @click="open = true"
                     class="w-10 h-10 bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 rounded-xl shadow-lg flex items-center justify-center transition-all"
-                    title="Налаштування сайту">
+                    title="{{ __('app.sb_site_settings') }}">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -139,7 +139,7 @@
     >
         {{-- Header --}}
         <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50 flex-shrink-0">
-            <h2 class="text-base font-semibold text-gray-900">Редактор сайту</h2>
+            <h2 class="text-base font-semibold text-gray-900">{{ __('app.sb_site_editor') }}</h2>
             <div class="flex items-center gap-2">
                 <button
                     @click="saveAll()"
@@ -157,7 +157,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                         </svg>
                     </template>
-                    <span x-text="saving ? 'Збереження...' : 'Зберегти'"></span>
+                    <span x-text="saving ? @js(__('app.sb_saving')) : @js(__('app.sb_save'))"></span>
                 </button>
                 <button @click="open = false" class="p-1.5 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -170,13 +170,13 @@
         {{-- Tabs --}}
         <div class="flex border-b border-gray-200 flex-shrink-0">
             <button @click="activeTab = 'design'" :class="activeTab === 'design' ? 'border-primary-500 text-primary-600' : 'border-transparent text-gray-500 hover:text-gray-700'" class="flex-1 py-2.5 text-sm font-medium border-b-2 transition-colors">
-                Дизайн
+                {{ __('app.sb_design') }}
             </button>
             <button @click="activeTab = 'sections'" :class="activeTab === 'sections' ? 'border-primary-500 text-primary-600' : 'border-transparent text-gray-500 hover:text-gray-700'" class="flex-1 py-2.5 text-sm font-medium border-b-2 transition-colors">
-                Секції
+                {{ __('app.sb_sections') }}
             </button>
             <button @click="activeTab = 'content'" :class="activeTab === 'content' ? 'border-primary-500 text-primary-600' : 'border-transparent text-gray-500 hover:text-gray-700'" class="flex-1 py-2.5 text-sm font-medium border-b-2 transition-colors">
-                Контент
+                {{ __('app.sb_content') }}
             </button>
         </div>
 
@@ -202,11 +202,11 @@
                 {{-- Templates Accordion --}}
                 <div class="border border-gray-200 rounded-lg overflow-hidden">
                     <button @click="accordion.templates = !accordion.templates" class="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors text-left">
-                        <span class="text-sm font-medium text-gray-900">Готові шаблони</span>
+                        <span class="text-sm font-medium text-gray-900">{{ __('app.sb_ready_templates') }}</span>
                         <svg :class="accordion.templates && 'rotate-180'" class="w-4 h-4 text-gray-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                     </button>
                     <div x-show="accordion.templates" x-transition class="px-4 py-3">
-                        <p class="text-xs text-gray-500 mb-3">Оберіть шаблон для миттєвого попереднього перегляду. Збережіть щоб застосувати.</p>
+                        <p class="text-xs text-gray-500 mb-3">{{ __('app.sb_template_hint') }}</p>
                         <div class="grid grid-cols-2 gap-2">
                             <template x-for="tpl in templates" :key="tpl.id">
                                 <button @click="applyTemplate(tpl)"
@@ -233,11 +233,11 @@
                 {{-- Colors Accordion --}}
                 <div class="border border-gray-200 rounded-lg overflow-hidden">
                     <button @click="accordion.colors = !accordion.colors" class="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors text-left">
-                        <span class="text-sm font-medium text-gray-900">Кольори</span>
+                        <span class="text-sm font-medium text-gray-900">{{ __('app.sb_colors') }}</span>
                         <svg :class="accordion.colors && 'rotate-180'" class="w-4 h-4 text-gray-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                     </button>
                     <div x-show="accordion.colors" x-transition class="px-4 py-3 space-y-3">
-                        @foreach(['primary' => 'Основний', 'secondary' => 'Додатковий', 'accent' => 'Акцент', 'background' => 'Фон', 'text' => 'Текст', 'heading' => 'Заголовки'] as $key => $label)
+                        @foreach(['primary' => __('app.sb_color_primary'), 'secondary' => __('app.sb_color_secondary'), 'accent' => __('app.sb_color_accent'), 'background' => __('app.sb_color_background'), 'text' => __('app.sb_color_text'), 'heading' => __('app.sb_color_headings')] as $key => $label)
                         <div class="flex items-center justify-between">
                             <label class="text-sm text-gray-600">{{ $label }}</label>
                             <div class="flex items-center gap-2">
@@ -252,12 +252,12 @@
                 {{-- Fonts Accordion --}}
                 <div class="border border-gray-200 rounded-lg overflow-hidden">
                     <button @click="accordion.fonts = !accordion.fonts" class="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors text-left">
-                        <span class="text-sm font-medium text-gray-900">Шрифти</span>
+                        <span class="text-sm font-medium text-gray-900">{{ __('app.sb_fonts') }}</span>
                         <svg :class="accordion.fonts && 'rotate-180'" class="w-4 h-4 text-gray-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                     </button>
                     <div x-show="accordion.fonts" x-transition class="px-4 py-3 space-y-3">
                         <div>
-                            <label class="text-sm text-gray-600 mb-1 block">Заголовки</label>
+                            <label class="text-sm text-gray-600 mb-1 block">{{ __('app.sb_font_headings') }}</label>
                             <select x-model="fontValues.heading" @change="previewFonts()" class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2">
                                 @foreach($availableFonts as $font)
                                     <option value="{{ $font }}">{{ $font }}</option>
@@ -265,7 +265,7 @@
                             </select>
                         </div>
                         <div>
-                            <label class="text-sm text-gray-600 mb-1 block">Основний текст</label>
+                            <label class="text-sm text-gray-600 mb-1 block">{{ __('app.sb_font_body') }}</label>
                             <select x-model="fontValues.body" @change="previewFonts()" class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2">
                                 @foreach($availableFonts as $font)
                                     <option value="{{ $font }}">{{ $font }}</option>
@@ -278,28 +278,28 @@
                 {{-- Hero Accordion --}}
                 <div class="border border-gray-200 rounded-lg overflow-hidden">
                     <button @click="accordion.hero = !accordion.hero" class="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors text-left">
-                        <span class="text-sm font-medium text-gray-900">Hero секція</span>
+                        <span class="text-sm font-medium text-gray-900">{{ __('app.sb_hero_section') }}</span>
                         <svg :class="accordion.hero && 'rotate-180'" class="w-4 h-4 text-gray-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                     </button>
                     <div x-show="accordion.hero" x-transition class="px-4 py-3 space-y-3">
                         <div>
-                            <label class="text-sm text-gray-600 mb-1 block">Заголовок</label>
-                            <input type="text" x-model="heroValues.title" @input="previewHero()" class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2" placeholder="Назва церкви">
+                            <label class="text-sm text-gray-600 mb-1 block">{{ __('app.sb_heading') }}</label>
+                            <input type="text" x-model="heroValues.title" @input="previewHero()" class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2" placeholder="{{ __('app.sb_church_name_ph') }}">
                         </div>
                         <div>
-                            <label class="text-sm text-gray-600 mb-1 block">Підзаголовок</label>
-                            <textarea x-model="heroValues.subtitle" @input="previewHero()" rows="2" class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2" placeholder="Опис"></textarea>
+                            <label class="text-sm text-gray-600 mb-1 block">{{ __('app.sb_subtitle') }}</label>
+                            <textarea x-model="heroValues.subtitle" @input="previewHero()" rows="2" class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2" placeholder="{{ __('app.sb_description_ph') }}"></textarea>
                         </div>
                         <div>
-                            <label class="text-sm text-gray-600 mb-1 block">Текст кнопки CTA</label>
-                            <input type="text" x-model="heroValues.cta_text" @input="previewHero()" class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2" placeholder="Наші події">
+                            <label class="text-sm text-gray-600 mb-1 block">{{ __('app.sb_cta_text') }}</label>
+                            <input type="text" x-model="heroValues.cta_text" @input="previewHero()" class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2" placeholder="{{ __('app.sb_our_events') }}">
                         </div>
                         <div>
-                            <label class="text-sm text-gray-600 mb-1 block">Посилання CTA</label>
+                            <label class="text-sm text-gray-600 mb-1 block">{{ __('app.sb_cta_url') }}</label>
                             <input type="text" x-model="heroValues.cta_url" class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2" placeholder="https://...">
                         </div>
                         <div>
-                            <label class="text-sm text-gray-600 mb-1 block">Затемнення фону: <span x-text="heroValues.overlay_opacity + '%'"></span></label>
+                            <label class="text-sm text-gray-600 mb-1 block">{{ __('app.sb_overlay_label') }}: <span x-text="heroValues.overlay_opacity + '%'"></span></label>
                             <input type="range" x-model="heroValues.overlay_opacity" @input="previewHeroOverlay()" min="0" max="100" step="5" class="w-full">
                         </div>
                     </div>
@@ -308,20 +308,20 @@
                 {{-- Navigation Accordion --}}
                 <div class="border border-gray-200 rounded-lg overflow-hidden">
                     <button @click="accordion.navigation = !accordion.navigation" class="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors text-left">
-                        <span class="text-sm font-medium text-gray-900">Навігація</span>
+                        <span class="text-sm font-medium text-gray-900">{{ __('app.sb_navigation') }}</span>
                         <svg :class="accordion.navigation && 'rotate-180'" class="w-4 h-4 text-gray-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                     </button>
                     <div x-show="accordion.navigation" x-transition class="px-4 py-3 space-y-3">
                         <div>
-                            <label class="text-sm text-gray-600 mb-1 block">Стиль</label>
+                            <label class="text-sm text-gray-600 mb-1 block">{{ __('app.sb_style') }}</label>
                             <select x-model="navValues.style" class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2">
-                                <option value="transparent">Прозорий</option>
-                                <option value="solid">Суцільний</option>
-                                <option value="minimal">Мінімальний</option>
+                                <option value="transparent">{{ __('app.sb_nav_transparent') }}</option>
+                                <option value="solid">{{ __('app.sb_nav_solid') }}</option>
+                                <option value="minimal">{{ __('app.sb_nav_minimal') }}</option>
                             </select>
                         </div>
                         <div class="flex items-center justify-between">
-                            <label class="text-sm text-gray-600">Фіксована навігація</label>
+                            <label class="text-sm text-gray-600">{{ __('app.sb_nav_sticky') }}</label>
                             <button @click="navValues.sticky = !navValues.sticky" :class="navValues.sticky ? 'bg-primary-600' : 'bg-gray-300'" class="relative w-10 h-5 rounded-full transition-colors">
                                 <span :class="navValues.sticky ? 'translate-x-5' : 'translate-x-0.5'" class="absolute top-0.5 left-0 w-4 h-4 bg-white rounded-full shadow transition-transform"></span>
                             </button>
@@ -332,21 +332,21 @@
                 {{-- Footer Accordion --}}
                 <div class="border border-gray-200 rounded-lg overflow-hidden">
                     <button @click="accordion.footer = !accordion.footer" class="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors text-left">
-                        <span class="text-sm font-medium text-gray-900">Футер</span>
+                        <span class="text-sm font-medium text-gray-900">{{ __('app.sb_footer') }}</span>
                         <svg :class="accordion.footer && 'rotate-180'" class="w-4 h-4 text-gray-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                     </button>
                     <div x-show="accordion.footer" x-transition class="px-4 py-3 space-y-3">
                         <div>
-                            <label class="text-sm text-gray-600 mb-1 block">Стиль</label>
+                            <label class="text-sm text-gray-600 mb-1 block">{{ __('app.sb_style') }}</label>
                             <select x-model="footerValues.style" class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2">
-                                <option value="simple">Простий</option>
-                                <option value="centered">По центру</option>
-                                <option value="multi-column">Багатоколонковий</option>
+                                <option value="simple">{{ __('app.sb_footer_simple') }}</option>
+                                <option value="centered">{{ __('app.sb_footer_centered') }}</option>
+                                <option value="multi-column">{{ __('app.sb_footer_multi') }}</option>
                             </select>
                         </div>
                         <div>
-                            <label class="text-sm text-gray-600 mb-1 block">Текст копірайту</label>
-                            <input type="text" x-model="footerValues.copyright_text" class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2" placeholder="© 2024 Назва церкви">
+                            <label class="text-sm text-gray-600 mb-1 block">{{ __('app.sb_copyright_text') }}</label>
+                            <input type="text" x-model="footerValues.copyright_text" class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2" placeholder="{{ __('app.sb_copyright_ph') }}">
                         </div>
                     </div>
                 </div>
@@ -355,14 +355,14 @@
 
             {{-- ========== SECTIONS TAB ========== --}}
             <div x-show="activeTab === 'sections'" class="p-4">
-                <p class="text-xs text-gray-500 mb-3">Перетягуйте для зміни порядку. Зміни застосуються після збереження та перезавантаження.</p>
+                <p class="text-xs text-gray-500 mb-3">{{ __('app.sb_sections_hint') }}</p>
                 <div x-ref="sectionsList" class="space-y-2">
                     @foreach($sections as $section)
                         <div data-id="{{ $section['id'] }}" data-enabled="{{ $section['enabled'] ? '1' : '0' }}" data-layout="{{ $section['layout'] ?? 'full' }}" class="flex items-center gap-3 px-3 py-2.5 bg-gray-50 rounded-lg border border-gray-200 group">
                             <svg class="drag-handle w-4 h-4 text-gray-400 flex-shrink-0 cursor-grab active:cursor-grabbing" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"/></svg>
                             <span class="flex-1 text-sm text-gray-700">{{ $section['label'] }}</span>
                             @if(($section['layout'] ?? 'full') === 'half')
-                                <span class="text-[10px] text-gray-400 px-1.5 py-0.5 bg-gray-200 rounded" title="Половина ширини">½</span>
+                                <span class="text-[10px] text-gray-400 px-1.5 py-0.5 bg-gray-200 rounded" title="{{ __('app.sb_half_width') }}">½</span>
                             @endif
                             <button @click="toggleSection($el)" :class="$el.parentElement.dataset.enabled === '1' ? 'bg-primary-600' : 'bg-gray-300'" class="relative w-9 h-5 rounded-full transition-colors flex-shrink-0">
                                 <span :class="$el.parentElement.dataset.enabled === '1' ? 'translate-x-4' : 'translate-x-0.5'" class="absolute top-0.5 left-0 w-4 h-4 bg-white rounded-full shadow transition-transform"></span>
@@ -377,12 +377,12 @@
 
                 @php
                     $contentPanels = [
-                        ['key' => 'about', 'label' => 'Про нас', 'partial' => 'public.partials.admin-sidebar.content-about'],
-                        ['key' => 'team', 'label' => 'Команда', 'partial' => 'public.partials.admin-sidebar.content-team', 'cnt' => true],
-                        ['key' => 'sermons', 'label' => 'Проповіді', 'partial' => 'public.partials.admin-sidebar.content-sermons', 'cnt' => true],
-                        ['key' => 'gallery', 'label' => 'Галерея', 'partial' => 'public.partials.admin-sidebar.content-gallery', 'cnt' => true],
+                        ['key' => 'about', 'label' => __('app.sb_about_us'), 'partial' => 'public.partials.admin-sidebar.content-about'],
+                        ['key' => 'team', 'label' => __('app.sb_team'), 'partial' => 'public.partials.admin-sidebar.content-team', 'cnt' => true],
+                        ['key' => 'sermons', 'label' => __('app.sb_sermons'), 'partial' => 'public.partials.admin-sidebar.content-sermons', 'cnt' => true],
+                        ['key' => 'gallery', 'label' => __('app.sb_gallery'), 'partial' => 'public.partials.admin-sidebar.content-gallery', 'cnt' => true],
                         ['key' => 'faq', 'label' => 'FAQ', 'partial' => 'public.partials.admin-sidebar.content-faq', 'cnt' => true],
-                        ['key' => 'testimonials', 'label' => 'Свідчення', 'partial' => 'public.partials.admin-sidebar.content-testimonials', 'cnt' => true],
+                        ['key' => 'testimonials', 'label' => __('app.sb_testimonials'), 'partial' => 'public.partials.admin-sidebar.content-testimonials', 'cnt' => true],
                     ];
                 @endphp
 
@@ -413,14 +413,14 @@
                 <div class="pt-2 space-y-1.5">
                     <a href="{{ route('website-builder.blog.index') }}" target="_blank" rel="noopener noreferrer"
                        class="flex items-center justify-between px-3 py-2 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors group">
-                        <span class="text-sm text-gray-700">Блог</span>
+                        <span class="text-sm text-gray-700">{{ __('app.sb_blog') }}</span>
                         <svg class="w-4 h-4 text-gray-400 group-hover:text-primary-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                         </svg>
                     </a>
                     <a href="{{ route('events.index') }}" target="_blank" rel="noopener noreferrer"
                        class="flex items-center justify-between px-3 py-2 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors group">
-                        <span class="text-sm text-gray-700">Події</span>
+                        <span class="text-sm text-gray-700">{{ __('app.sb_events') }}</span>
                         <svg class="w-4 h-4 text-gray-400 group-hover:text-primary-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                         </svg>
@@ -454,49 +454,49 @@ document.addEventListener('alpine:init', () => {
         templates: [
             {
                 id: 'classic',
-                name: 'Класичний',
+                name: @js(__('app.sb_tpl_classic')),
                 colors: { primary: '#3b82f6', secondary: '#10b981', accent: '#f59e0b', background: '#ffffff', text: '#1f2937', heading: '#111827' },
                 fonts: { heading: 'Inter', body: 'Inter' },
             },
             {
                 id: 'warm',
-                name: 'Теплий',
+                name: @js(__('app.sb_tpl_warm')),
                 colors: { primary: '#ea580c', secondary: '#d97706', accent: '#dc2626', background: '#fffbeb', text: '#44403c', heading: '#1c1917' },
                 fonts: { heading: 'Playfair Display', body: 'Lato' },
             },
             {
                 id: 'nature',
-                name: 'Природа',
+                name: @js(__('app.sb_tpl_nature')),
                 colors: { primary: '#059669', secondary: '#0d9488', accent: '#ca8a04', background: '#f0fdf4', text: '#1e3a2f', heading: '#064e3b' },
                 fonts: { heading: 'Merriweather', body: 'Open Sans' },
             },
             {
                 id: 'elegant',
-                name: 'Елегантний',
+                name: @js(__('app.sb_tpl_elegant')),
                 colors: { primary: '#7c3aed', secondary: '#6366f1', accent: '#ec4899', background: '#faf5ff', text: '#374151', heading: '#1e1b4b' },
                 fonts: { heading: 'Playfair Display', body: 'DM Sans' },
             },
             {
                 id: 'minimal',
-                name: 'Мінімалізм',
+                name: @js(__('app.sb_tpl_minimal')),
                 colors: { primary: '#374151', secondary: '#6b7280', accent: '#3b82f6', background: '#ffffff', text: '#4b5563', heading: '#111827' },
                 fonts: { heading: 'Space Grotesk', body: 'Inter' },
             },
             {
                 id: 'modern',
-                name: 'Сучасний',
+                name: @js(__('app.sb_tpl_modern')),
                 colors: { primary: '#e11d48', secondary: '#0ea5e9', accent: '#f59e0b', background: '#ffffff', text: '#334155', heading: '#0f172a' },
                 fonts: { heading: 'Montserrat', body: 'Nunito' },
             },
             {
                 id: 'ocean',
-                name: 'Океан',
+                name: @js(__('app.sb_tpl_ocean')),
                 colors: { primary: '#0284c7', secondary: '#0891b2', accent: '#06b6d4', background: '#f0f9ff', text: '#1e3a5f', heading: '#0c4a6e' },
                 fonts: { heading: 'Poppins', body: 'Open Sans' },
             },
             {
                 id: 'sunset',
-                name: 'Захід сонця',
+                name: @js(__('app.sb_tpl_sunset')),
                 colors: { primary: '#db2777', secondary: '#e11d48', accent: '#f97316', background: '#fff1f2', text: '#4c1d4e', heading: '#3b0764' },
                 fonts: { heading: 'Oswald', body: 'Lato' },
             },
@@ -528,7 +528,7 @@ document.addEventListener('alpine:init', () => {
         heroValues: {
             title: @json($hero['title'] ?? $church->name),
             subtitle: @json($hero['subtitle'] ?? $church->public_description ?? ''),
-            cta_text: @json($hero['cta_text'] ?? 'Наші події'),
+            cta_text: @json($hero['cta_text'] ?? __('app.sb_our_events')),
             cta_url: @json($hero['cta_url'] ?? ''),
             overlay_opacity: @json($hero['overlay_opacity'] ?? 70),
         },
@@ -675,7 +675,7 @@ document.addEventListener('alpine:init', () => {
                 sessionStorage.setItem('adminEditMode', '1');
                 window.location.reload();
             } catch (e) {
-                this.showPageToast('Помилка: ' + e.message);
+                this.showPageToast(@js(__('app.sb_error_prefix')) + e.message);
             } finally {
                 this.saving = false;
             }
@@ -740,7 +740,7 @@ document.addEventListener('alpine:init', () => {
                 scrollSpeed: 15,
                 onEnd: () => {
                     this.syncSidebarFromPage();
-                    this.showPageToast('Порядок змінено. Натисніть "Зберегти" щоб застосувати.');
+                    this.showPageToast(@js(__('app.sb_order_changed')));
                 },
             });
         },
@@ -807,7 +807,7 @@ document.addEventListener('alpine:init', () => {
                 container.insertBefore(wrapper.nextElementSibling, wrapper);
             }
             this.syncSidebarFromPage();
-            this.showPageToast('Порядок змінено. Натисніть "Зберегти" щоб застосувати.');
+            this.showPageToast(@js(__('app.sb_order_changed')));
         },
 
         // Save per-section background color
@@ -817,9 +817,9 @@ document.addEventListener('alpine:init', () => {
                     section_id: sectionId,
                     settings: { bg_color: color },
                 });
-                this.showPageToast('Колір фону збережено');
+                this.showPageToast(@js(__('app.sb_bg_saved')));
             } catch (e) {
-                this.showPageToast('Помилка: ' + e.message);
+                this.showPageToast(@js(__('app.sb_error_prefix')) + e.message);
             }
         },
 
@@ -836,9 +836,9 @@ document.addEventListener('alpine:init', () => {
                     const section = wrapper.querySelector('section');
                     if (section) section.style.backgroundColor = '';
                 }
-                this.showPageToast('Колір фону скинуто');
+                this.showPageToast(@js(__('app.sb_bg_reset')));
             } catch (e) {
-                this.showPageToast('Помилка: ' + e.message);
+                this.showPageToast(@js(__('app.sb_error_prefix')) + e.message);
             }
         },
 
@@ -901,7 +901,7 @@ document.addEventListener('alpine:init', () => {
                 s.items = json.items || [];
                 s.loaded = true;
             } catch (e) {
-                this.showToast('Помилка завантаження: ' + e.message, 'error');
+                this.showToast(@js(__('app.sb_loading_error')) + ': ' + e.message, 'error');
             } finally {
                 s.loading = false;
             }
@@ -933,26 +933,26 @@ document.addEventListener('alpine:init', () => {
             this.contentSaving = true;
             try {
                 await this.cntFetch(url, method, s.form, hasFiles);
-                this.showToast(isNew ? 'Додано' : 'Оновлено', 'success');
+                this.showToast(isNew ? @js(__('app.sb_added')) : @js(__('app.sb_updated')), 'success');
                 s.editing = null;
                 s.form = {};
                 s.loaded = false;
                 await this.loadContent(section);
             } catch (e) {
-                this.showToast('Помилка: ' + e.message, 'error');
+                this.showToast(@js(__('app.sb_error_prefix')) + e.message, 'error');
             } finally {
                 this.contentSaving = false;
             }
         },
 
         async contentDeleteItem(section, id) {
-            if (!confirm('Видалити цей елемент?')) return;
+            if (!confirm(@js(__('app.sb_delete_confirm')))) return;
             try {
                 await this.cntFetch(this.contentRoutes[section] + '/' + id, 'DELETE');
-                this.showToast('Видалено', 'success');
+                this.showToast(@js(__('app.sb_deleted')), 'success');
                 this.cnt[section].items = this.cnt[section].items.filter(i => i.id !== id);
             } catch (e) {
-                this.showToast('Помилка: ' + e.message, 'error');
+                this.showToast(@js(__('app.sb_error_prefix')) + e.message, 'error');
             }
         },
 
@@ -966,7 +966,7 @@ document.addEventListener('alpine:init', () => {
                 const res = await fetch(url, { method, headers });
                 if (!res.ok) {
                     const err = await res.json().catch(() => ({}));
-                    throw new Error(err.message || 'Помилка видалення');
+                    throw new Error(err.message || @js(__('app.sb_delete_error')));
                 }
                 return res.json();
             }
@@ -994,7 +994,7 @@ document.addEventListener('alpine:init', () => {
             const res = await fetch(url, { method: sendMethod, headers, body });
             if (!res.ok) {
                 const err = await res.json().catch(() => ({}));
-                throw new Error(err.message || 'Помилка збереження');
+                throw new Error(err.message || @js(__('app.sb_save_error')));
             }
             return res.json();
         },
@@ -1005,9 +1005,9 @@ document.addEventListener('alpine:init', () => {
                 const data = { ...this.aboutForm };
                 data.values = (data.values || []).filter(v => v && v.trim());
                 await this.cntFetch(this.contentRoutes.about, 'PUT', data);
-                this.showToast('Розділ "Про нас" збережено', 'success');
+                this.showToast(@js(__('app.sb_about_saved')), 'success');
             } catch (e) {
-                this.showToast('Помилка: ' + e.message, 'error');
+                this.showToast(@js(__('app.sb_error_prefix')) + e.message, 'error');
             } finally {
                 this.contentSaving = false;
             }
@@ -1159,7 +1159,7 @@ document.addEventListener('alpine:init', () => {
             // Apply fonts
             this.fontValues = { ...tpl.fonts };
             this.previewFonts();
-            this.showToast('Шаблон "' + tpl.name + '" застосовано для перегляду. Збережіть щоб зафіксувати.', 'success');
+            this.showToast(@js(__('app.sb_tpl_applied')).replace(':name', tpl.name), 'success');
         },
 
         // --- Save ---
@@ -1181,7 +1181,7 @@ document.addEventListener('alpine:init', () => {
             });
             if (!res.ok) {
                 const err = await res.json().catch(() => ({}));
-                throw new Error(err.message || 'Помилка збереження');
+                throw new Error(err.message || @js(__('app.sb_save_error')));
             }
             return res.json();
         },
@@ -1203,7 +1203,7 @@ document.addEventListener('alpine:init', () => {
             });
             if (!res.ok) {
                 const err = await res.json().catch(() => ({}));
-                throw new Error(err.message || 'Помилка збереження');
+                throw new Error(err.message || @js(__('app.sb_save_error')));
             }
             return res.json();
         },
@@ -1214,11 +1214,11 @@ document.addEventListener('alpine:init', () => {
 
             try {
                 await this.postFormData(@json(route('website-builder.design.colors')), this.colorValues);
-            } catch (e) { errors.push('Кольори: ' + e.message); }
+            } catch (e) { errors.push(@js(__('app.sb_colors_label')) + e.message); }
 
             try {
                 await this.postFormData(@json(route('website-builder.design.fonts')), this.fontValues);
-            } catch (e) { errors.push('Шрифти: ' + e.message); }
+            } catch (e) { errors.push(@js(__('app.sb_fonts_label')) + e.message); }
 
             try {
                 await this.postFormData(@json(route('website-builder.design.hero')), {
@@ -1228,26 +1228,26 @@ document.addEventListener('alpine:init', () => {
                     cta_url: this.heroValues.cta_url,
                     overlay_opacity: this.heroValues.overlay_opacity,
                 });
-            } catch (e) { errors.push('Hero: ' + e.message); }
+            } catch (e) { errors.push(@js(__('app.sb_hero_label')) + e.message); }
 
             try {
                 await this.postFormData(@json(route('website-builder.design.navigation')), {
                     style: this.navValues.style,
                     sticky: this.navValues.sticky,
                 });
-            } catch (e) { errors.push('Навігація: ' + e.message); }
+            } catch (e) { errors.push(@js(__('app.sb_nav_label')) + e.message); }
 
             try {
                 await this.postFormData(@json(route('website-builder.design.footer')), {
                     style: this.footerValues.style,
                     copyright_text: this.footerValues.copyright_text,
                 });
-            } catch (e) { errors.push('Футер: ' + e.message); }
+            } catch (e) { errors.push(@js(__('app.sb_footer_label')) + e.message); }
 
             try {
                 const sectionsData = this.getSectionsFromDom();
                 await this.postData(@json(route('website-builder.sections.update')), { sections: sectionsData });
-            } catch (e) { errors.push('Секції: ' + e.message); }
+            } catch (e) { errors.push(@js(__('app.sb_sections_label')) + e.message); }
 
             this.saving = false;
 

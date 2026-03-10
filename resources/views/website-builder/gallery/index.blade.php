@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Галерея')
+@section('title', __('app.wb_gallery'))
 
 @section('content')
 <div class="max-w-6xl mx-auto space-y-6">
@@ -13,8 +13,8 @@
                 </svg>
             </a>
             <div>
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Фотогалерея</h1>
-                <p class="text-gray-600 dark:text-gray-400">Керуйте фотоальбомами церкви</p>
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('app.wb_gallery_title') }}</h1>
+                <p class="text-gray-600 dark:text-gray-400">{{ __('app.wb_gallery_subtitle') }}</p>
             </div>
         </div>
         @if(auth()->user()->canEdit('website'))
@@ -22,7 +22,7 @@
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
             </svg>
-            Новий альбом
+            {{ __('app.wb_new_album') }}
         </a>
         @endif
     </div>
@@ -40,11 +40,11 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                 </svg>
             </div>
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Альбомів ще немає</h3>
-            <p class="text-gray-500 dark:text-gray-400 mt-1">Створіть перший фотоальбом</p>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.wb_no_albums_yet') }}</h3>
+            <p class="text-gray-500 dark:text-gray-400 mt-1">{{ __('app.wb_create_first_album') }}</p>
             @if(auth()->user()->canEdit('website'))
             <a href="{{ route('website-builder.gallery.create') }}" class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors mt-4">
-                Створити альбом
+                {{ __('app.wb_create_album') }}
             </a>
             @endif
         </div>
@@ -63,7 +63,7 @@
                             </div>
                         @endif
                         <div class="absolute bottom-2 right-2 px-2 py-1 bg-black/60 text-white text-xs rounded">
-                            {{ $gallery->photos_count }} фото
+                            {{ $gallery->photos_count }} {{ __('app.sb_photos_count') }}
                         </div>
                     </a>
                     <div class="p-4">
@@ -75,12 +75,12 @@
                                 @endif
                             </div>
                             <span class="px-2 py-1 text-xs font-medium rounded-full {{ $gallery->is_public ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400' }}">
-                                {{ $gallery->is_public ? 'Публічний' : 'Прихований' }}
+                                {{ $gallery->is_public ? __('app.wb_public') : __('app.wb_hidden') }}
                             </span>
                         </div>
                         <div class="flex gap-2 mt-3">
                             <a href="{{ route('website-builder.gallery.show', $gallery) }}" class="flex-1 px-3 py-2 text-center text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors">
-                                Переглянути
+                                {{ __('app.wb_view_album') }}
                             </a>
                             @if(auth()->user()->canEdit('website'))
                             <a href="{{ route('website-builder.gallery.edit', $gallery) }}" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">

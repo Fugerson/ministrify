@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', $ministry->name . ' - Цілі та задачі')
+@section('title', $ministry->name . ' - ' . __('app.goals_and_tasks_title'))
 
 @section('actions')
 <a href="{{ route('ministries.show', $ministry) }}"
@@ -8,7 +8,7 @@
     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
     </svg>
-    Назад
+    {{ __('app.back') }}
 </a>
 @endsection
 
@@ -22,7 +22,7 @@
             @endif
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $ministry->name }}</h1>
-                <p class="text-gray-500 dark:text-gray-400">Цілі та задачі</p>
+                <p class="text-gray-500 dark:text-gray-400">{{ __('app.goals_and_tasks_title') }}</p>
             </div>
         </div>
     </div>
@@ -31,27 +31,27 @@
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
             <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['total_goals'] }}</p>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Всього цілей</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.total_goals_stat') }}</p>
         </div>
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
             <p class="text-2xl font-bold text-blue-600">{{ $stats['active_goals'] }}</p>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Активних</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.active_goals_stat') }}</p>
         </div>
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
             <p class="text-2xl font-bold text-green-600">{{ $stats['completed_goals'] }}</p>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Виконано</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.completed_goals_stat') }}</p>
         </div>
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
             <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['total_tasks'] }}</p>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Всього задач</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.total_tasks_stat') }}</p>
         </div>
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
             <p class="text-2xl font-bold text-green-600">{{ $stats['completed_tasks'] }}</p>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Виконано</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.completed_tasks_stat') }}</p>
         </div>
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
             <p class="text-2xl font-bold text-red-600">{{ $stats['overdue_tasks'] }}</p>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Прострочено</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.overdue_tasks_stat') }}</p>
         </div>
     </div>
 
@@ -66,13 +66,13 @@
                     </svg>
                 </div>
                 <div>
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Бачення</h2>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Куди ми рухаємось</p>
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.vision_section') }}</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.where_we_heading_goal') }}</p>
                 </div>
             </div>
             @can('contribute-ministry', $ministry)
             <button @click="editingVision = !editingVision" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 text-sm">
-                <span x-text="editingVision ? 'Скасувати' : 'Редагувати'"></span>
+                <span x-text="editingVision ? @js(__('app.cancel')) : @js(__('app.edit'))"></span>
             </button>
             @endcan
         </div>
@@ -81,17 +81,17 @@
             @if($ministry->vision)
                 <div class="prose prose-sm dark:prose-invert max-w-none text-gray-700 dark:text-gray-300 whitespace-pre-line">{{ $ministry->vision }}</div>
             @else
-                <p class="text-gray-500 dark:text-gray-400 italic">Бачення ще не визначено</p>
+                <p class="text-gray-500 dark:text-gray-400 italic">{{ __('app.vision_not_defined') }}</p>
             @endif
         </div>
 
         @can('contribute-ministry', $ministry)
         <form x-show="editingVision" @submit.prevent="submitVision($refs.visionForm)" x-ref="visionForm" class="space-y-3">
-            <textarea name="vision" rows="4" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Опишіть бачення вашого служіння...">{{ $ministry->vision }}</textarea>
+            <textarea name="vision" rows="4" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="{{ __('app.describe_vision_placeholder') }}">{{ $ministry->vision }}</textarea>
             <div class="flex justify-end">
                 <button type="submit" :disabled="savingVision" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg disabled:opacity-50">
-                    <span x-show="!savingVision">Зберегти</span>
-                    <span x-show="savingVision">Збереження...</span>
+                    <span x-show="!savingVision">{{ __('app.save') }}</span>
+                    <span x-show="savingVision">{{ __('app.saving') }}</span>
                 </button>
             </div>
         </form>
@@ -101,20 +101,20 @@
     <!-- Goals and Tasks -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
         <div class="p-6 border-b border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Цілі</h2>
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.goals_heading') }}</h2>
             @can('contribute-ministry', $ministry)
             <div class="flex gap-2">
                 <button @click="showTaskModal = true; taskForm.goal_id = ''" class="inline-flex items-center px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg transition-colors">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                     </svg>
-                    Додати задачу
+                    {{ __('app.add_task_btn') }}
                 </button>
                 <button @click="showGoalModal = true; resetGoalForm()" class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                     </svg>
-                    Додати ціль
+                    {{ __('app.add_goal_btn') }}
                 </button>
             </div>
             @endcan
@@ -291,7 +291,7 @@
                                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                     </svg>
-                                    Додати задачу
+                                    {{ __('app.add_task_btn') }}
                                 </button>
                             </div>
                             @endcan
@@ -305,13 +305,13 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
                     </div>
-                    <p class="text-gray-500 dark:text-gray-400 mb-4">Цілей ще немає</p>
+                    <p class="text-gray-500 dark:text-gray-400 mb-4">{{ __('app.no_goals_yet') }}</p>
                     @can('contribute-ministry', $ministry)
                     <button @click="showGoalModal = true; resetGoalForm()" class="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                         </svg>
-                        Створити першу ціль
+                        {{ __('app.create_first_goal') }}
                     </button>
                     @endcan
                 </div>
@@ -325,7 +325,7 @@
         <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="showGoalModal = false"></div>
         <div class="absolute inset-4 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-full md:max-w-lg bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white" x-text="editingGoalId ? 'Редагувати ціль' : 'Нова ціль'"></h3>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white" x-text="editingGoalId ? @js(__('app.edit_goal_title')) : @js(__('app.new_goal_title'))"></h3>
                 <button @click="showGoalModal = false" class="p-2 text-gray-400 hover:text-gray-500">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -334,20 +334,20 @@
             </div>
             <form @submit.prevent="submitGoal($refs.goalForm)" x-ref="goalForm" class="p-6 space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Назва *</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.name_required') }}</label>
                     <input type="text" name="title" x-model="goalForm.title" required class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
                     <template x-if="goalErrors.title"><p class="mt-1 text-sm text-red-500" x-text="goalErrors.title[0]"></p></template>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Опис</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.description') }}</label>
                     <textarea name="description" x-model="goalForm.description" rows="3" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"></textarea>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Період</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.period_field') }}</label>
                         @php $y = date('Y'); @endphp
                         <select name="period" x-model="goalForm.period" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
-                            <option value="">Не вказано</option>
+                            <option value="">{{ __('app.not_specified') }}</option>
                             @foreach([$y, $y + 1] as $year)
                                 <option value="Q1 {{ $year }}">Q1 {{ $year }}</option>
                                 <option value="Q2 {{ $year }}">Q2 {{ $year }}</option>
@@ -360,36 +360,36 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Дедлайн</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.deadline_field') }}</label>
                         <input type="date" name="due_date" x-model="goalForm.due_date" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Пріоритет</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.priority_field') }}</label>
                         <select name="priority" x-model="goalForm.priority" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
-                            <option value="low">Низький</option>
-                            <option value="medium">Середній</option>
-                            <option value="high">Високий</option>
+                            <option value="low">{{ __('app.priority_low') }}</option>
+                            <option value="medium">{{ __('app.priority_medium') }}</option>
+                            <option value="high">{{ __('app.priority_high') }}</option>
                         </select>
                     </div>
                     <div x-show="editingGoalId">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Статус</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.status_field') }}</label>
                         <select name="status" x-model="goalForm.status" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
-                            <option value="active">Активна</option>
-                            <option value="completed">Виконана</option>
-                            <option value="on_hold">На паузі</option>
-                            <option value="cancelled">Скасована</option>
+                            <option value="active">{{ __('app.goal_status_active') }}</option>
+                            <option value="completed">{{ __('app.goal_status_completed') }}</option>
+                            <option value="on_hold">{{ __('app.goal_on_hold') }}</option>
+                            <option value="cancelled">{{ __('app.goal_cancelled') }}</option>
                         </select>
                     </div>
                 </div>
                 <div class="flex gap-3 pt-4">
                     <button type="button" @click="showGoalModal = false" class="flex-1 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-xl">
-                        Скасувати
+                        {{ __('app.cancel') }}
                     </button>
                     <button type="submit" :disabled="savingGoal" class="flex-1 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl disabled:opacity-50">
-                        <span x-show="!savingGoal" x-text="editingGoalId ? 'Зберегти' : 'Створити'"></span>
-                        <span x-show="savingGoal">Збереження...</span>
+                        <span x-show="!savingGoal" x-text="editingGoalId ? @js(__('app.save')) : @js(__('app.create'))"></span>
+                        <span x-show="savingGoal">{{ __('app.saving') }}</span>
                     </button>
                 </div>
             </form>
@@ -403,7 +403,7 @@
         <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="showTaskModal = false"></div>
         <div class="absolute inset-4 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-full md:max-w-lg bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white" x-text="editingTaskId ? 'Редагувати задачу' : 'Нова задача'"></h3>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white" x-text="editingTaskId ? @js(__('app.edit_task_title')) : @js(__('app.new_task_title'))"></h3>
                 <button @click="showTaskModal = false" class="p-2 text-gray-400 hover:text-gray-500">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -412,18 +412,18 @@
             </div>
             <form @submit.prevent="submitTask($refs.taskForm)" x-ref="taskForm" class="p-6 space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Назва *</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.name_required') }}</label>
                     <input type="text" name="title" x-model="taskForm.title" required class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
                     <template x-if="taskErrors.title"><p class="mt-1 text-sm text-red-500" x-text="taskErrors.title[0]"></p></template>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Опис</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.description') }}</label>
                     <textarea name="description" x-model="taskForm.description" rows="2" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"></textarea>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Ціль</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.goal_label') }}</label>
                     <select name="goal_id" x-model="taskForm.goal_id" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
-                        <option value="">Без цілі</option>
+                        <option value="">{{ __('app.without_goal') }}</option>
                         @foreach($ministry->goals as $goal)
                             <option value="{{ $goal->id }}">{{ $goal->title }}</option>
                         @endforeach
@@ -431,44 +431,44 @@
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Виконавець</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.assignee_field') }}</label>
                         <select name="assigned_to" x-model="taskForm.assigned_to" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
-                            <option value="">Не призначено</option>
+                            <option value="">{{ __('app.not_assigned_option') }}</option>
                             @foreach($members as $member)
                                 <option value="{{ $member->id }}">{{ $member->full_name }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Дедлайн</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.deadline_field') }}</label>
                         <input type="date" name="due_date" x-model="taskForm.due_date" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Пріоритет</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.priority_field') }}</label>
                         <select name="priority" x-model="taskForm.priority" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
-                            <option value="low">Низький</option>
-                            <option value="medium">Середній</option>
-                            <option value="high">Високий</option>
+                            <option value="low">{{ __('app.priority_low') }}</option>
+                            <option value="medium">{{ __('app.priority_medium') }}</option>
+                            <option value="high">{{ __('app.priority_high') }}</option>
                         </select>
                     </div>
                     <div x-show="editingTaskId">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Статус</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.status_field') }}</label>
                         <select name="status" x-model="taskForm.status" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
-                            <option value="todo">До виконання</option>
-                            <option value="in_progress">В процесі</option>
-                            <option value="done">Виконано</option>
+                            <option value="todo">{{ __('app.task_status_todo') }}</option>
+                            <option value="in_progress">{{ __('app.task_status_in_progress') }}</option>
+                            <option value="done">{{ __('app.task_status_done') }}</option>
                         </select>
                     </div>
                 </div>
                 <div class="flex gap-3 pt-4">
                     <button type="button" @click="showTaskModal = false" class="flex-1 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-xl">
-                        Скасувати
+                        {{ __('app.cancel') }}
                     </button>
                     <button type="submit" :disabled="savingTask" class="flex-1 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl disabled:opacity-50">
-                        <span x-show="!savingTask" x-text="editingTaskId ? 'Зберегти' : 'Створити'"></span>
-                        <span x-show="savingTask">Збереження...</span>
+                        <span x-show="!savingTask" x-text="editingTaskId ? @js(__('app.save')) : @js(__('app.create'))"></span>
+                        <span x-show="savingTask">{{ __('app.saving') }}</span>
                     </button>
                 </div>
             </form>
@@ -485,6 +485,12 @@ function goalsManager() {
     const taskStoreUrl = '{{ route('ministries.tasks.store', $ministry) }}';
     const taskUpdateUrlTemplate = '{{ route('ministries.tasks.update', [$ministry, ':id']) }}';
     const visionUrl = '{{ route('ministries.vision.update', $ministry) }}';
+    const _t = {
+        save_error: @json(__('app.save_error')),
+        saved: @json(__('app.saved_msg')),
+        connection_error: @json(__('app.connection_error')),
+        check_form: @json(__('app.check_form_errors')),
+    };
 
     async function ajaxSubmit(url, method, formEl) {
         const formData = new FormData(formEl);
@@ -574,15 +580,15 @@ function goalsManager() {
             try {
                 const { response, data } = await ajaxSubmit(visionUrl, 'POST', formEl);
                 if (!response.ok) {
-                    showToast('error', data.message || 'Помилка збереження.');
+                    showToast('error', data.message || _t.save_error);
                     this.savingVision = false;
                     return;
                 }
-                showToast('success', data.message || 'Збережено!');
+                showToast('success', data.message || _t.saved);
                 this.editingVision = false;
                 this.savingVision = false;
             } catch (e) {
-                showToast('error', "Помилка з'єднання з сервером.");
+                showToast('error', _t.connection_error);
                 this.savingVision = false;
             }
         },
@@ -599,18 +605,18 @@ function goalsManager() {
                 if (!response.ok) {
                     if (response.status === 422 && data.errors) {
                         this.goalErrors = data.errors;
-                        showToast('error', data.message || 'Перевірте правильність заповнення.');
+                        showToast('error', data.message || _t.check_form);
                     } else {
-                        showToast('error', data.message || 'Помилка збереження.');
+                        showToast('error', data.message || _t.save_error);
                     }
                     this.savingGoal = false;
                     return;
                 }
-                showToast('success', data.message || 'Збережено!');
+                showToast('success', data.message || _t.saved);
                 this.showGoalModal = false;
                 setTimeout(() => location.reload(), 600);
             } catch (e) {
-                showToast('error', "Помилка з'єднання з сервером.");
+                showToast('error', _t.connection_error);
                 this.savingGoal = false;
             }
         },
@@ -627,18 +633,18 @@ function goalsManager() {
                 if (!response.ok) {
                     if (response.status === 422 && data.errors) {
                         this.taskErrors = data.errors;
-                        showToast('error', data.message || 'Перевірте правильність заповнення.');
+                        showToast('error', data.message || _t.check_form);
                     } else {
-                        showToast('error', data.message || 'Помилка збереження.');
+                        showToast('error', data.message || _t.save_error);
                     }
                     this.savingTask = false;
                     return;
                 }
-                showToast('success', data.message || 'Збережено!');
+                showToast('success', data.message || _t.saved);
                 this.showTaskModal = false;
                 setTimeout(() => location.reload(), 600);
             } catch (e) {
-                showToast('error', "Помилка з'єднання з сервером.");
+                showToast('error', _t.connection_error);
                 this.savingTask = false;
             }
         }

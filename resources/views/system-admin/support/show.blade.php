@@ -9,7 +9,7 @@
         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
         </svg>
-        Назад до списку
+        {{ __('app.sa_back_to_list') }}
     </a>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -44,17 +44,17 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/>
                                         </svg>
                                     @else
-                                        <span class="text-gray-900 dark:text-white">{{ mb_substr($message->user?->name ?? $ticket->guest_name ?? 'Г', 0, 1) }}</span>
+                                        <span class="text-gray-900 dark:text-white">{{ mb_substr($message->user?->name ?? $ticket->guest_name ?? __('app.guest'), 0, 1) }}</span>
                                     @endif
                                 </div>
                                 <div class="flex-1 min-w-0">
                                     <div class="flex items-center gap-2 mb-2">
                                         <span class="font-medium text-gray-900 dark:text-white">
-                                            {{ $message->user?->name ?? $ticket->guest_name ?? 'Гість' }}
+                                            {{ $message->user?->name ?? $ticket->guest_name ?? __('app.guest') }}
                                         </span>
                                         @if($message->is_internal)
                                             <span class="px-2 py-0.5 text-xs font-medium rounded bg-yellow-500/20 text-yellow-600 dark:text-yellow-400">
-                                                Внутрішня нотатка
+                                                {{ __('app.sa_internal_note') }}
                                             </span>
                                         @endif
                                         <span class="text-sm text-gray-500 dark:text-gray-400">
@@ -71,29 +71,29 @@
 
             <!-- Reply Form -->
             <div class="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-                <h2 class="font-semibold text-gray-900 dark:text-white mb-4">Відповісти</h2>
+                <h2 class="font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.sa_reply') }}</h2>
                 <form action="{{ route('system.support.reply', $ticket) }}" method="POST">
                     @csrf
                     <textarea name="message" rows="4" required
-                              placeholder="Напишіть відповідь..."
+                              placeholder="{{ __('app.sa_reply_placeholder') }}"
                               class="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 mb-4"></textarea>
 
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-4">
                             <label class="flex items-center gap-2 text-gray-500 dark:text-gray-400 cursor-pointer">
                                 <input type="checkbox" name="is_internal" value="1" class="rounded bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500">
-                                <span class="text-sm">Внутрішня нотатка</span>
+                                <span class="text-sm">{{ __('app.sa_internal_note') }}</span>
                             </label>
                             <select name="status" class="px-3 py-1 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500">
-                                <option value="">Не змінювати статус</option>
-                                <option value="in_progress">В роботі</option>
-                                <option value="waiting">Очікує відповіді</option>
-                                <option value="resolved">Вирішено</option>
-                                <option value="closed">Закрито</option>
+                                <option value="">{{ __('app.sa_no_status_change') }}</option>
+                                <option value="in_progress">{{ __('app.sa_status_in_progress') }}</option>
+                                <option value="waiting">{{ __('app.sa_status_waiting') }}</option>
+                                <option value="resolved">{{ __('app.sa_status_resolved') }}</option>
+                                <option value="closed">{{ __('app.sa_status_closed') }}</option>
                             </select>
                         </div>
                         <button type="submit" class="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">
-                            Надіслати
+                            {{ __('app.send') }}
                         </button>
                     </div>
                 </form>
@@ -105,25 +105,25 @@
             <!-- User Info -->
             <div class="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
                 <h3 class="font-semibold text-gray-900 dark:text-white mb-4">
-                    {{ $ticket->user ? 'Користувач' : 'Гість (контактна форма)' }}
+                    {{ $ticket->user ? __('app.sa_user_label') : __('app.sa_guest_contact') }}
                 </h3>
                 <div class="space-y-3">
                     <div>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Ім'я</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.first_name') }}</p>
                         <p class="text-gray-900 dark:text-white">{{ $ticket->user?->name ?? $ticket->guest_name }}</p>
                     </div>
                     <div>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Email</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.email') }}</p>
                         <p class="text-gray-900 dark:text-white">{{ $ticket->user?->email ?? $ticket->guest_email }}</p>
                     </div>
                     @if($ticket->user)
                         <div>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Церква</p>
-                            <p class="text-gray-900 dark:text-white">{{ $ticket->church?->name ?? 'Без церкви' }}</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.sa_church_label') }}</p>
+                            <p class="text-gray-900 dark:text-white">{{ $ticket->church?->name ?? __('app.sa_no_church') }}</p>
                         </div>
                     @endif
                     <div>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Створено</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.created') }}</p>
                         <p class="text-gray-900 dark:text-white">{{ $ticket->created_at->format('d.m.Y H:i') }}</p>
                     </div>
                 </div>
@@ -131,36 +131,36 @@
 
             <!-- Ticket Actions -->
             <div class="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-                <h3 class="font-semibold text-gray-900 dark:text-white mb-4">Керування</h3>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.sa_management') }}</h3>
                 <form action="{{ route('system.support.update', $ticket) }}" method="POST" class="space-y-4">
                     @csrf
                     @method('PUT')
 
                     <div>
-                        <label class="block text-sm text-gray-500 dark:text-gray-400 mb-1">Статус</label>
+                        <label class="block text-sm text-gray-500 dark:text-gray-400 mb-1">{{ __('app.status_label') }}</label>
                         <select name="status" class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
-                            <option value="open" {{ $ticket->status === 'open' ? 'selected' : '' }}>Відкритий</option>
-                            <option value="in_progress" {{ $ticket->status === 'in_progress' ? 'selected' : '' }}>В роботі</option>
-                            <option value="waiting" {{ $ticket->status === 'waiting' ? 'selected' : '' }}>Очікує відповіді</option>
-                            <option value="resolved" {{ $ticket->status === 'resolved' ? 'selected' : '' }}>Вирішено</option>
-                            <option value="closed" {{ $ticket->status === 'closed' ? 'selected' : '' }}>Закрито</option>
+                            <option value="open" {{ $ticket->status === 'open' ? 'selected' : '' }}>{{ __('app.sa_status_open') }}</option>
+                            <option value="in_progress" {{ $ticket->status === 'in_progress' ? 'selected' : '' }}>{{ __('app.sa_status_in_progress') }}</option>
+                            <option value="waiting" {{ $ticket->status === 'waiting' ? 'selected' : '' }}>{{ __('app.sa_status_waiting') }}</option>
+                            <option value="resolved" {{ $ticket->status === 'resolved' ? 'selected' : '' }}>{{ __('app.sa_status_resolved') }}</option>
+                            <option value="closed" {{ $ticket->status === 'closed' ? 'selected' : '' }}>{{ __('app.sa_status_closed') }}</option>
                         </select>
                     </div>
 
                     <div>
-                        <label class="block text-sm text-gray-500 dark:text-gray-400 mb-1">Пріоритет</label>
+                        <label class="block text-sm text-gray-500 dark:text-gray-400 mb-1">{{ __('app.sa_ticket_priority') }}</label>
                         <select name="priority" class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
-                            <option value="low" {{ $ticket->priority === 'low' ? 'selected' : '' }}>Низький</option>
-                            <option value="normal" {{ $ticket->priority === 'normal' ? 'selected' : '' }}>Нормальний</option>
-                            <option value="high" {{ $ticket->priority === 'high' ? 'selected' : '' }}>Високий</option>
-                            <option value="urgent" {{ $ticket->priority === 'urgent' ? 'selected' : '' }}>Терміновий</option>
+                            <option value="low" {{ $ticket->priority === 'low' ? 'selected' : '' }}>{{ __('app.sa_priority_low') }}</option>
+                            <option value="normal" {{ $ticket->priority === 'normal' ? 'selected' : '' }}>{{ __('app.sa_priority_normal') }}</option>
+                            <option value="high" {{ $ticket->priority === 'high' ? 'selected' : '' }}>{{ __('app.sa_priority_high') }}</option>
+                            <option value="urgent" {{ $ticket->priority === 'urgent' ? 'selected' : '' }}>{{ __('app.sa_priority_urgent') }}</option>
                         </select>
                     </div>
 
                     <div>
-                        <label class="block text-sm text-gray-500 dark:text-gray-400 mb-1">Призначено</label>
+                        <label class="block text-sm text-gray-500 dark:text-gray-400 mb-1">{{ __('app.sa_assigned_to') }}</label>
                         <select name="assigned_to" class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
-                            <option value="">Не призначено</option>
+                            <option value="">{{ __('app.sa_not_assigned') }}</option>
                             @foreach($admins as $admin)
                                 <option value="{{ $admin->id }}" {{ $ticket->assigned_to === $admin->id ? 'selected' : '' }}>
                                     {{ $admin->name }}
@@ -170,7 +170,7 @@
                     </div>
 
                     <button type="submit" class="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-white rounded-lg transition-colors">
-                        Оновити
+                        {{ __('app.update') }}
                     </button>
                 </form>
             </div>

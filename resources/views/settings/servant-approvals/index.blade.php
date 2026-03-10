@@ -1,16 +1,16 @@
 @extends('layouts.app')
 
-@section('title', 'Одобрення служителів')
+@section('title', __('app.servant_approvals'))
 
 @section('content')
 <div class="max-w-6xl mx-auto px-4 py-8">
     <!-- Header -->
     <div class="mb-8">
         <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            {{ __('Одобрення служителів') }}
+            {{ __('app.servant_approvals') }}
         </h1>
         <p class="text-gray-600 dark:text-gray-400">
-            {{ __('Керуйте заявками користувачів на роль служителя та інші ролі') }}
+            {{ __('app.manage_servant_requests') }}
         </p>
     </div>
 
@@ -29,7 +29,7 @@
     @if ($servantPending->isEmpty() && $churchRolePending->isEmpty())
         <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-8">
             <p class="text-blue-800 dark:text-blue-200">
-                {{ __('Всі заявки одобрені! Немає очікуючих користувачів.') }}
+                {{ __('app.all_requests_approved') }}
             </p>
         </div>
     @endif
@@ -39,7 +39,7 @@
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow mb-8">
             <div class="border-b border-gray-200 dark:border-gray-700 px-6 py-4">
                 <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
-                    {{ __('Заявки на роль служителя') }} ({{ $servantPending->count() }})
+                    {{ __('app.servant_role_requests') }} ({{ $servantPending->count() }})
                 </h2>
             </div>
 
@@ -67,13 +67,13 @@
                                     <p class="text-sm text-gray-600 dark:text-gray-300 ml-15">{{ $user->person->phone }}</p>
                                 @endif
                                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                                    {{ __('Заявка від') }}: {{ $user->created_at->format('d.m.Y H:i') }}
+                                    {{ __('app.request_from') }}: {{ $user->created_at->format('d.m.Y H:i') }}
                                 </p>
                             </div>
 
                             <div class="text-right">
                                 <span class="inline-block px-3 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 text-sm rounded-full font-medium">
-                                    {{ __('Очікує одобрення') }}
+                                    {{ __('app.pending_approval') }}
                                 </span>
                             </div>
                         </div>
@@ -85,11 +85,11 @@
                         <div class="flex gap-3 mt-4">
                             <button x-on:click="approve(null)"
                                     class="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition">
-                                {{ __('Одобрити як волонтера') }}
+                                {{ __('app.approve_as_volunteer') }}
                             </button>
                             <button onclick="showRejectModal({{ $user->id }})"
                                     class="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition">
-                                {{ __('Відхилити') }}
+                                {{ __('app.reject') }}
                             </button>
                         </div>
                     </div>
@@ -103,7 +103,7 @@
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
             <div class="border-b border-gray-200 dark:border-gray-700 px-6 py-4">
                 <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
-                    {{ __('Заявки на інші ролі') }} ({{ $churchRolePending->count() }})
+                    {{ __('app.other_role_requests') }} ({{ $churchRolePending->count() }})
                 </h2>
             </div>
 
@@ -129,14 +129,14 @@
                                 </div>
                                 @if ($user->requestedChurchRole)
                                     <p class="text-sm text-gray-700 dark:text-gray-300 mt-2">
-                                        {{ __('Запитана роль') }}: <span class="font-medium">{{ $user->requestedChurchRole->name }}</span>
+                                        {{ __('app.requested_role') }}: <span class="font-medium">{{ $user->requestedChurchRole->name }}</span>
                                     </p>
                                 @endif
                             </div>
 
                             <div class="text-right">
                                 <span class="inline-block px-3 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 text-sm rounded-full font-medium">
-                                    {{ __('Очікує') }}
+                                    {{ __('app.pending') }}
                                 </span>
                             </div>
                         </div>
@@ -147,7 +147,7 @@
                         <!-- Action Buttons -->
                         <div class="flex gap-3 mt-4">
                             <select x-ref="roleSelect" class="flex-1 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg border border-gray-300 dark:border-gray-600">
-                                <option value="">{{ __('-- Оберіть роль для одобрення --') }}</option>
+                                <option value="">{{ __('app.select_role_for_approval') }}</option>
                                 @foreach ($churchRoles as $role)
                                     <option value="{{ $role->id }}"
                                             @if ($user->requestedChurchRole?->id === $role->id) selected @endif>
@@ -157,11 +157,11 @@
                             </select>
                             <button x-on:click="approve($refs.roleSelect.value)"
                                     class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition">
-                                {{ __('Одобрити') }}
+                                {{ __('app.approve') }}
                             </button>
                             <button onclick="showRejectModal({{ $user->id }})"
                                     class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition">
-                                {{ __('Відхилити') }}
+                                {{ __('app.reject') }}
                             </button>
                         </div>
                     </div>
@@ -176,7 +176,7 @@
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-md w-full mx-4">
         <div class="border-b border-gray-200 dark:border-gray-700 px-6 py-4">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                {{ __('Відхилити заявку') }}
+                {{ __('app.reject_request') }}
             </h3>
         </div>
 
@@ -185,22 +185,22 @@
 
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {{ __('Причина відхилення (необов\'язково)') }}
+                    {{ __('app.rejection_reason_optional') }}
                 </label>
                 <textarea name="reason"
                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                           rows="4"
-                          placeholder="{{ __('Введіть причину для користувача...') }}"></textarea>
+                          placeholder="{{ __('app.enter_reason_for_user') }}"></textarea>
             </div>
 
             <div class="flex gap-3">
                 <button type="button" onclick="closeRejectModal()"
                         class="flex-1 px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white rounded-lg font-medium hover:bg-gray-400 dark:hover:bg-gray-500 transition">
-                    {{ __('Скасувати') }}
+                    {{ __('app.cancel') }}
                 </button>
                 <button type="submit"
                         class="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition">
-                    {{ __('Відхилити') }}
+                    {{ __('app.reject') }}
                 </button>
             </div>
         </form>
@@ -247,7 +247,7 @@ function personLinker(userId, suggestedMatches) {
                 // For servant approvals roleId is null — use default volunteer role
                 // For church role approvals, roleId must be selected
                 if (roleId === '') {
-                    alert(@js( __("Виберіть роль для одобрення") ));
+                    alert(@js( __('app.select_role_alert') ));
                     return;
                 }
             }
@@ -271,10 +271,10 @@ function personLinker(userId, suggestedMatches) {
                     alert(data.message);
                     location.reload();
                 } else {
-                    alert(@js(__("Помилка") ) + ': ' + data.message);
+                    alert(@js(__('app.error') ) + ': ' + data.message);
                 }
             })
-            .catch(err => alert(@js(__("Помилка запиту") ) + ': ' + err));
+            .catch(err => alert(@js(__('app.request_error') ) + ': ' + err));
         }
     };
 }
@@ -312,10 +312,10 @@ onPageReady(function() {
                     alert(data.message);
                     location.reload();
                 } else {
-                    alert(@js(__("Помилка") ) + ': ' + data.message);
+                    alert(@js(__('app.error') ) + ': ' + data.message);
                 }
             })
-            .catch(err => alert(@js(__("Помилка запиту") ) + ': ' + err));
+            .catch(err => alert(@js(__('app.request_error') ) + ': ' + err));
         });
     }
 });

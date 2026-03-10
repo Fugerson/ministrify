@@ -29,8 +29,8 @@ class RolePermissionController extends Controller
 
         return view('settings.permissions', [
             'churchRoles' => $churchRoles,
-            'modules' => ChurchRolePermission::MODULES,
-            'actions' => ChurchRolePermission::ACTIONS,
+            'modules' => ChurchRolePermission::getTranslatedModules(),
+            'actions' => ChurchRolePermission::getTranslatedActions(),
             'permissions' => $permissions,
         ]);
     }

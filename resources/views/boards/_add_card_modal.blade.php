@@ -30,8 +30,8 @@
                                 </svg>
                             </div>
                             <div>
-                                <h2 class="text-lg font-bold text-gray-900 dark:text-white">Нове завдання</h2>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Створіть нову картку</p>
+                                <h2 class="text-lg font-bold text-gray-900 dark:text-white">{{ __('app.board_new_task') }}</h2>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.board_create_new_card') }}</p>
                             </div>
                         </div>
                         <button @click="addCardModal.open = false"
@@ -48,17 +48,17 @@
                     <div class="p-6 space-y-5">
                         <!-- Title -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Назва *</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.board_title_label') }}</label>
                             <input type="text" x-model="addCardModal.title" x-ref="addCardTitle" required
-                                   placeholder="Що потрібно зробити?"
+                                   placeholder="{{ __('app.board_what_needs_to_be_done') }}"
                                    class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:text-white text-lg">
                         </div>
 
                         <!-- Description -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Опис</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.board_description_label') }}</label>
                             <textarea x-model="addCardModal.description" rows="3"
-                                      placeholder="Детальний опис завдання..."
+                                      placeholder="{{ __('app.board_detailed_description') }}"
                                       class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:text-white resize-none"></textarea>
                         </div>
 
@@ -66,7 +66,7 @@
                         <div class="grid grid-cols-2 gap-4">
                             <!-- Column -->
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Колонка</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.board_column') }}</label>
                                 <select x-model="addCardModal.columnId"
                                         class="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:text-white">
                                     @foreach($board->columns as $column)
@@ -77,10 +77,10 @@
 
                             <!-- Epic -->
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Проєкт</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.board_project') }}</label>
                                 <select x-model="addCardModal.epicId"
                                         class="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:text-white">
-                                    <option value="">Без проєкту</option>
+                                    <option value="">{{ __('app.board_no_project_option') }}</option>
                                     <template x-for="epic in epics" :key="epic.id">
                                         <option :value="epic.id" x-text="epic.name"></option>
                                     </template>
@@ -90,14 +90,14 @@
 
                         <!-- Priority -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Пріоритет</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.board_priority') }}</label>
                             <div class="grid grid-cols-4 gap-2">
                                 <label class="relative">
                                     <input type="radio" x-model="addCardModal.priority" value="low" class="peer sr-only">
                                     <div class="p-3 text-center rounded-xl border-2 cursor-pointer transition-all
                                                 peer-checked:border-gray-500 peer-checked:bg-gray-50 dark:peer-checked:bg-gray-800
                                                 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600">
-                                        <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Низький</span>
+                                        <span class="text-sm font-medium text-gray-600 dark:text-gray-400">{{ __('app.board_low_priority') }}</span>
                                     </div>
                                 </label>
                                 <label class="relative">
@@ -105,7 +105,7 @@
                                     <div class="p-3 text-center rounded-xl border-2 cursor-pointer transition-all
                                                 peer-checked:border-yellow-500 peer-checked:bg-yellow-50 dark:peer-checked:bg-yellow-900/20
                                                 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600">
-                                        <span class="text-sm font-medium text-yellow-600 dark:text-yellow-400">Середній</span>
+                                        <span class="text-sm font-medium text-yellow-600 dark:text-yellow-400">{{ __('app.board_medium_priority') }}</span>
                                     </div>
                                 </label>
                                 <label class="relative">
@@ -113,7 +113,7 @@
                                     <div class="p-3 text-center rounded-xl border-2 cursor-pointer transition-all
                                                 peer-checked:border-orange-500 peer-checked:bg-orange-50 dark:peer-checked:bg-orange-900/20
                                                 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600">
-                                        <span class="text-sm font-medium text-orange-600 dark:text-orange-400">Високий</span>
+                                        <span class="text-sm font-medium text-orange-600 dark:text-orange-400">{{ __('app.board_high_priority') }}</span>
                                     </div>
                                 </label>
                                 <label class="relative">
@@ -121,7 +121,7 @@
                                     <div class="p-3 text-center rounded-xl border-2 cursor-pointer transition-all
                                                 peer-checked:border-red-500 peer-checked:bg-red-50 dark:peer-checked:bg-red-900/20
                                                 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600">
-                                        <span class="text-sm font-medium text-red-600 dark:text-red-400">Терміново</span>
+                                        <span class="text-sm font-medium text-red-600 dark:text-red-400">{{ __('app.board_urgent_priority') }}</span>
                                     </div>
                                 </label>
                             </div>
@@ -132,7 +132,7 @@
                             @if(!$board->ministry_id)
                             <!-- Ministry -->
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Команда</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.board_team') }}</label>
                                 <x-searchable-select
                                     name="ministry_id_temp"
                                     :items="$ministries"
@@ -140,8 +140,8 @@
                                     labelKey="name"
                                     valueKey="id"
                                     colorKey="color"
-                                    placeholder="Пошук команди..."
-                                    nullText="Без команди"
+                                    placeholder="{{ __('app.board_search_team') }}"
+                                    nullText="{{ __('app.board_no_team') }}"
                                     nullable
                                     x-on:select-changed="addCardModal.ministryId = $event.detail.value || ''"
                                 />
@@ -150,7 +150,7 @@
 
                             <!-- Due Date -->
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Дедлайн</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.board_deadline') }}</label>
                                 <input type="date" x-model="addCardModal.dueDate"
                                        class="w-full px-3 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:text-white">
                             </div>
@@ -189,11 +189,11 @@
                                 this.search = '';
                             }
                         }">
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Виконавець</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.board_assignee') }}</label>
                             <div class="relative">
                                 <button type="button" @click="updatePosition(); open = !open; $nextTick(() => open && $refs.searchInput.focus())"
                                         class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-left flex items-center justify-between dark:text-white">
-                                    <span x-show="!selectedPerson" class="text-gray-500">Оберіть виконавця...</span>
+                                    <span x-show="!selectedPerson" class="text-gray-500">{{ __('app.board_select_assignee') }}</span>
                                     <template x-if="selectedPerson">
                                         <span class="flex items-center gap-2">
                                             <template x-if="selectedPerson.photo">
@@ -215,7 +215,7 @@
                                      class="fixed z-[9999] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg overflow-hidden">
                                     <div class="p-2 border-b border-gray-200 dark:border-gray-700">
                                         <input type="text" x-model="search" x-ref="searchInput"
-                                               placeholder="Пошук..."
+                                               placeholder="{{ __('app.board_search_short') }}"
                                                class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border-0 rounded-lg text-sm dark:text-white focus:ring-2 focus:ring-primary-500">
                                     </div>
                                     <div class="max-h-48 overflow-y-auto">
@@ -223,7 +223,7 @@
                                                 class="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
                                                 :class="!addCardModal.assignedTo ? 'bg-primary-50 dark:bg-primary-900/20' : ''">
                                             <span class="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center text-xs">-</span>
-                                            <span class="text-gray-500 dark:text-gray-400">Без виконавця</span>
+                                            <span class="text-gray-500 dark:text-gray-400">{{ __('app.board_unassigned') }}</span>
                                         </button>
                                         <template x-for="person in filtered" :key="person.id">
                                             <button type="button" @click="select(person.id)"
@@ -249,7 +249,7 @@
                         <div class="flex items-center justify-end gap-3">
                             <button type="button" @click="addCardModal.open = false"
                                     class="px-5 py-2.5 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                                Скасувати
+                                {{ __('app.board_cancel') }}
                             </button>
                             <button type="submit" :disabled="addCardModal.loading || !addCardModal.title.trim()"
                                     class="px-6 py-2.5 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 transition-colors disabled:opacity-50 flex items-center gap-2">
@@ -262,7 +262,7 @@
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                 </svg>
-                                Створити
+                                {{ __('app.board_create') }}
                             </button>
                         </div>
                     </div>

@@ -4,10 +4,10 @@
     'selected' => null,
     'labelKey' => 'name',
     'valueKey' => 'id',
-    'placeholder' => __('Почніть вводити...'),
+    'placeholder' => __('app.start_typing'),
     'required' => false,
     'nullable' => true,
-    'nullText' => __('Не вибрано'),
+    'nullText' => __('app.not_selected'),
     'searchKeys' => null,
     'icon' => null,
     'colorKey' => null,
@@ -107,7 +107,7 @@
         <svg class="w-8 h-8 mx-auto mb-2 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
         </svg>
-        {{ __('Нічого не знайдено') }}
+        {{ __('app.nothing_found') }}
     </div>
 </div>
 

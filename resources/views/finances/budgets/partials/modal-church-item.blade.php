@@ -22,33 +22,33 @@
 
             <form x-on:submit.prevent="saveChurchItem()" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" title="Назва для ідентифікації статті: напр. Оренда, Комунальні, Літній табір">{{ __('app.budget_item_name') }} *</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" title="{{ __('app.budget_item_name_tooltip') }}">{{ __('app.budget_item_name') }} *</label>
                     <input type="text" x-model="churchItemForm.name" required maxlength="255"
                            placeholder="{{ __('app.budget_item_name') }}"
                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" title="Прив'яжіть категорію транзакцій — факт буде рахуватись автоматично з транзакцій цієї категорії">Категорія</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" title="{{ __('app.budget_category_tooltip') }}">{{ __('app.category') }}</label>
                     <select x-model="churchItemForm.category_id"
                             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
-                        <option value="">Без категорії</option>
+                        <option value="">{{ __('app.no_category') }}</option>
                         @foreach($expenseCategories ?? [] as $cat)
                             <option value="{{ $cat->id }}">{{ $cat->icon_emoji ?? '💸' }} {{ $cat->name }}</option>
                         @endforeach
                     </select>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Категорія — {{ __('app.actual') }}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('app.category') }} — {{ __('app.actual') }}</p>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" title="Оберіть тип: щомісячна (однакова сума кожен місяць) або одноразова (тільки в одному місяці)">{{ __('app.budget_item_type') }} *</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" title="{{ __('app.budget_type_tooltip') }}">{{ __('app.budget_item_type') }} *</label>
                     <div class="flex gap-4">
-                        <label class="flex items-center gap-2 cursor-pointer" title="Однакова сума кожен місяць протягом року (напр. оренда, зарплати)">
+                        <label class="flex items-center gap-2 cursor-pointer" title="{{ __('app.budget_recurring_tooltip') }}">
                             <input type="radio" x-model="churchItemForm.is_recurring" value="1"
                                    class="text-primary-600 focus:ring-primary-500">
                             <span class="text-sm text-gray-700 dark:text-gray-300">🔄 {{ __('app.monthly') }}</span>
                         </label>
-                        <label class="flex items-center gap-2 cursor-pointer" title="Витрата тільки в одному конкретному місяці (напр. літній табір, конференція)">
+                        <label class="flex items-center gap-2 cursor-pointer" title="{{ __('app.budget_onetime_tooltip') }}">
                             <input type="radio" x-model="churchItemForm.is_recurring" value="0"
                                    class="text-primary-600 focus:ring-primary-500">
                             <span class="text-sm text-gray-700 dark:text-gray-300">☀️ {{ __('app.one_time') }}</span>
@@ -58,7 +58,7 @@
 
                 {{-- Recurring: amount per month --}}
                 <div x-show="churchItemForm.is_recurring == '1'">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" title="Ця сума буде запланована на кожен місяць року (×12)">{{ __('app.amount_per_month') }} (₴) *</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" title="{{ __('app.budget_amount_monthly_tooltip') }}">{{ __('app.amount_per_month') }} (₴) *</label>
                     <input type="number" x-model="churchItemForm.amount" min="0" step="1"
                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
                 </div>
@@ -66,23 +66,23 @@
                 {{-- One-time: month + amount --}}
                 <div x-show="churchItemForm.is_recurring == '0'" class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" title="В якому місяці заплановано цю витрату">{{ __('app.select_month') }} *</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" title="{{ __('app.budget_onetime_month_tooltip') }}">{{ __('app.select_month') }} *</label>
                         <select x-model="churchItemForm.one_time_month"
                                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
-                            @foreach([1 => 'Січень', 2 => 'Лютий', 3 => 'Березень', 4 => 'Квітень', 5 => 'Травень', 6 => 'Червень', 7 => 'Липень', 8 => 'Серпень', 9 => 'Вересень', 10 => 'Жовтень', 11 => 'Листопад', 12 => 'Грудень'] as $m => $name)
+                            @foreach([1 => __('app.january'), 2 => __('app.february'), 3 => __('app.march'), 4 => __('app.april'), 5 => __('app.may'), 6 => __('app.june'), 7 => __('app.july'), 8 => __('app.august'), 9 => __('app.september'), 10 => __('app.october'), 11 => __('app.november'), 12 => __('app.december')] as $m => $name)
                                 <option value="{{ $m }}">{{ $name }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Сума (₴) *</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.amount') }} (₴) *</label>
                         <input type="number" x-model="churchItemForm.one_time_amount" min="0" step="1"
                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Примітки</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.notes') }}</label>
                     <textarea x-model="churchItemForm.notes" rows="2" maxlength="500"
                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"></textarea>
                 </div>
@@ -95,7 +95,7 @@
                     <button type="submit" :disabled="churchItemSaving"
                             class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
                         <span x-show="!churchItemSaving" x-text="churchItemMode === 'create' ? @js( __('ui.add') ) : @js( __('ui.save') )"></span>
-                        <span x-show="churchItemSaving">Збереження...</span>
+                        <span x-show="churchItemSaving">{{ __('app.saving') }}</span>
                     </button>
                 </div>
             </form>

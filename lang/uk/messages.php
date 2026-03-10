@@ -131,6 +131,7 @@ return [
 
     // Finance/Expenses
     'finance' => 'Фінанси',
+    'finances' => 'Фінанси',
     'expenses' => 'Видатки',
     'incomes' => 'Доходи',
     'transactions' => 'Операції',

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Налаштування планування')
+@section('title', __('app.scheduling_preferences'))
 
 @section('content')
 <div class="max-w-3xl mx-auto space-y-6">
@@ -12,8 +12,8 @@
             </svg>
         </a>
         <div>
-            <h1 class="text-xl font-semibold text-gray-900 dark:text-white">Налаштування планування</h1>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Вкажіть ваші бажані параметри для розкладу подій</p>
+            <h1 class="text-xl font-semibold text-gray-900 dark:text-white">{{ __('app.scheduling_preferences') }}</h1>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.scheduling_preferences_desc') }}</p>
         </div>
     </div>
 
@@ -26,7 +26,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                 </svg>
-                Загальні налаштування
+                {{ __('app.general_settings') }}
             </h2>
 
             <div class="space-y-4">
@@ -34,37 +34,37 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label for="max_times_per_month" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Максимум разів на місяць
+                            {{ __('app.max_times_per_month') }}
                         </label>
                         <input type="number" name="max_times_per_month" id="max_times_per_month"
                                value="{{ old('max_times_per_month', $preference->max_times_per_month) }}"
-                               min="1" max="30" placeholder="Без обмежень"
+                               min="1" max="30" :placeholder="__('app.no_limit')"
                                class="w-full rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-primary-500 focus:ring-primary-500">
                         <template x-if="errors.max_times_per_month"><p class="mt-1 text-sm text-red-500" x-text="errors.max_times_per_month[0]"></p></template>
-                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Залиште порожнім, якщо без обмежень</p>
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('app.leave_empty_no_limit') }}</p>
                     </div>
 
                     <div>
                         <label for="preferred_times_per_month" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Бажано разів на місяць
+                            {{ __('app.preferred_times_per_month') }}
                         </label>
                         <input type="number" name="preferred_times_per_month" id="preferred_times_per_month"
                                value="{{ old('preferred_times_per_month', $preference->preferred_times_per_month) }}"
-                               min="0" max="30" placeholder="Не вказано"
+                               min="0" max="30" :placeholder="__('app.not_specified')"
                                class="w-full rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-primary-500 focus:ring-primary-500">
                         <template x-if="errors.preferred_times_per_month"><p class="mt-1 text-sm text-red-500" x-text="errors.preferred_times_per_month[0]"></p></template>
-                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Ідеальна кількість подій</p>
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('app.ideal_event_count') }}</p>
                     </div>
                 </div>
 
                 <!-- Prefer with person -->
                 <div>
                     <label for="prefer_with_person_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Служити разом з
+                        {{ __('app.serve_with') }}
                     </label>
                     <select name="prefer_with_person_id" id="prefer_with_person_id"
                             class="w-full rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-primary-500 focus:ring-primary-500">
-                        <option value="">Немає переваг</option>
+                        <option value="">{{ __('app.no_preference') }}</option>
                         @foreach($otherPeople as $otherPerson)
                             <option value="{{ $otherPerson->id }}"
                                     {{ old('prefer_with_person_id', $preference->prefer_with_person_id) == $otherPerson->id ? 'selected' : '' }}>
@@ -73,16 +73,16 @@
                         @endforeach
                     </select>
                     <template x-if="errors.prefer_with_person_id"><p class="mt-1 text-sm text-red-500" x-text="errors.prefer_with_person_id[0]"></p></template>
-                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Виберіть особу, з якою бажаєте служити разом</p>
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('app.serve_with_desc') }}</p>
                 </div>
 
                 <!-- Household preference -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Сімейні налаштування
+                        {{ __('app.household_settings') }}
                     </label>
                     <div class="space-y-2">
-                        @foreach(['none' => 'Не враховувати', 'together' => 'Служити разом з родиною', 'separate' => 'Служити окремо від родини'] as $value => $label)
+                        @foreach(['none' => __('app.household_none'), 'together' => __('app.household_together'), 'separate' => __('app.household_separate')] as $value => $label)
                         <label class="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer">
                             <input type="radio" name="household_preference" value="{{ $value }}"
                                    {{ old('household_preference', $preference->household_preference) === $value ? 'checked' : '' }}
@@ -97,7 +97,7 @@
                 <!-- Notes -->
                 <div>
                     <label for="scheduling_notes" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Додаткові примітки
+                        {{ __('app.additional_notes') }}
                     </label>
                     <textarea name="scheduling_notes" id="scheduling_notes" rows="3"
                               class="w-full rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-primary-500 focus:ring-primary-500">{{ old('scheduling_notes', $preference->scheduling_notes) }}</textarea>
@@ -110,8 +110,8 @@
         <div class="flex justify-end">
             <button type="submit" :disabled="saving"
                     class="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors disabled:opacity-50">
-                <span x-show="!saving">Зберегти налаштування</span>
-                <span x-show="saving">Збереження...</span>
+                <span x-show="!saving">{{ __('app.save_settings') }}</span>
+                <span x-show="saving">{{ __('app.saving') }}</span>
             </button>
         </div>
     </form>
@@ -123,10 +123,10 @@
             <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
             </svg>
-            Налаштування за командами
+            {{ __('app.ministry_settings') }}
         </h2>
         <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
-            Встановіть окремі ліміти для кожної команди (перезаписує загальні налаштування)
+            {{ __('app.ministry_settings_desc') }}
         </p>
 
         <div class="space-y-4">
@@ -158,7 +158,7 @@
                                 this.open = false;
                             }
                         } catch (e) {
-                            alert('Помилка збереження');
+                            alert(@js(__('app.save_error')));
                         }
                         this.loading = false;
                     }
@@ -177,7 +177,7 @@
                         <div class="flex items-center gap-2">
                             @if($ministryPref)
                                 <span class="text-xs text-gray-500 dark:text-gray-400">
-                                    Макс: {{ $ministryPref->max_times_per_month ?? '∞' }}
+                                    {{ __('app.max_short') }}: {{ $ministryPref->max_times_per_month ?? '∞' }}
                                 </span>
                             @endif
                             <svg class="w-5 h-5 text-gray-400 transition-transform" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -189,26 +189,26 @@
                     <div x-show="open" x-collapse class="border-t border-gray-200 dark:border-gray-600 p-4 bg-gray-50 dark:bg-gray-700/30">
                         <div class="grid grid-cols-2 gap-4 mb-4">
                             <div>
-                                <label class="block text-xs text-gray-600 dark:text-gray-400 mb-1">Максимум на місяць</label>
+                                <label class="block text-xs text-gray-600 dark:text-gray-400 mb-1">{{ __('app.max_per_month') }}</label>
                                 <input type="number" x-model="max" min="1" max="30" placeholder="∞"
                                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm">
                             </div>
                             <div>
-                                <label class="block text-xs text-gray-600 dark:text-gray-400 mb-1">Бажано на місяць</label>
+                                <label class="block text-xs text-gray-600 dark:text-gray-400 mb-1">{{ __('app.preferred_per_month') }}</label>
                                 <input type="number" x-model="preferred" min="0" max="30" placeholder="-"
                                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm">
                             </div>
                         </div>
                         <button @click="save()" :disabled="loading" type="button"
                                 class="w-full px-3 py-2 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 text-white text-sm font-medium rounded-lg transition-colors">
-                            <span x-show="!loading">Зберегти</span>
-                            <span x-show="loading">Збереження...</span>
+                            <span x-show="!loading">{{ __('app.save') }}</span>
+                            <span x-show="loading">{{ __('app.saving') }}</span>
                         </button>
 
                         <!-- Positions within ministry -->
                         @if($ministry->positions->isNotEmpty())
                         <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
-                            <p class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">Позиції:</p>
+                            <p class="text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">{{ __('app.positions') }}:</p>
                             <div class="space-y-2">
                                 @foreach($ministry->positions as $position)
                                     @php
@@ -235,7 +235,7 @@
                                                 });
                                                 this.expanded = false;
                                             } catch (e) {
-                                                alert('Помилка');
+                                                alert(@js(__('app.error')));
                                             }
                                             this.posLoading = false;
                                         }
@@ -243,12 +243,12 @@
                                         <button @click="expanded = !expanded" type="button" class="w-full flex items-center justify-between text-sm">
                                             <span class="text-gray-700 dark:text-gray-300">{{ $position->name }}</span>
                                             @if($positionPref)
-                                                <span class="text-xs text-gray-400">Макс: {{ $positionPref->max_times_per_month ?? '∞' }}</span>
+                                                <span class="text-xs text-gray-400">{{ __('app.max_short') }}: {{ $positionPref->max_times_per_month ?? '∞' }}</span>
                                             @endif
                                         </button>
                                         <div x-show="expanded" x-collapse class="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
                                             <div class="flex gap-2">
-                                                <input type="number" x-model="posMax" min="1" max="30" placeholder="Макс"
+                                                <input type="number" x-model="posMax" min="1" max="30" placeholder="{{ __('app.max_short') }}"
                                                        class="flex-1 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-xs">
                                                 <button @click="savePosition()" :disabled="posLoading" type="button"
                                                         class="px-3 py-1 bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 rounded-lg text-xs">
@@ -270,21 +270,21 @@
 
     <!-- Quick Links -->
     <div class="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4">
-        <h3 class="font-medium text-blue-800 dark:text-blue-200 mb-2">Пов'язані налаштування</h3>
+        <h3 class="font-medium text-blue-800 dark:text-blue-200 mb-2">{{ __('app.related_settings') }}</h3>
         <div class="flex flex-wrap gap-2">
             <a href="{{ route('blockouts.index') }}"
                class="inline-flex items-center gap-1 px-3 py-1.5 bg-white dark:bg-gray-800 rounded-lg text-sm text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-gray-700 transition-colors">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
                 </svg>
-                Періоди недоступності
+                {{ __('app.unavailability_periods') }}
             </a>
             <a href="{{ route('my-profile') }}"
                class="inline-flex items-center gap-1 px-3 py-1.5 bg-white dark:bg-gray-800 rounded-lg text-sm text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-gray-700 transition-colors">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                 </svg>
-                Мій профіль
+                {{ __('app.my_profile') }}
             </a>
         </div>
     </div>

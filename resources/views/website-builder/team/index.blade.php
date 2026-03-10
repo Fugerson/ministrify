@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Команда')
+@section('title', __('app.wb_team'))
 
 @section('content')
 <div class="max-w-6xl mx-auto space-y-6">
@@ -13,8 +13,8 @@
                 </svg>
             </a>
             <div>
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Команда лідерів</h1>
-                <p class="text-gray-600 dark:text-gray-400">Керуйте публічним профілем вашої команди</p>
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('app.wb_team_leaders') }}</h1>
+                <p class="text-gray-600 dark:text-gray-400">{{ __('app.wb_team_subtitle') }}</p>
             </div>
         </div>
         @if(auth()->user()->canEdit('website'))
@@ -22,7 +22,7 @@
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
             </svg>
-            Додати члена
+            {{ __('app.wb_add_team_member') }}
         </a>
         @endif
     </div>
@@ -35,14 +35,14 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
                 </svg>
             </div>
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Команду ще не додано</h3>
-            <p class="text-gray-500 dark:text-gray-400 mt-1">Додайте пасторів та лідерів вашої церкви</p>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.wb_no_team_yet') }}</h3>
+            <p class="text-gray-500 dark:text-gray-400 mt-1">{{ __('app.wb_add_team_hint') }}</p>
             @if(auth()->user()->canEdit('website'))
             <a href="{{ route('website-builder.team.create') }}" class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors mt-4">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
-                Додати першого
+                {{ __('app.wb_add_first') }}
             </a>
             @endif
         </div>
@@ -81,7 +81,7 @@
 
                             <!-- Category Badge -->
                             <span class="px-2 py-1 text-xs font-medium rounded-full {{ $member->is_public ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400' }}">
-                                {{ $member->is_public ? 'Публічний' : 'Прихований' }}
+                                {{ $member->is_public ? __('app.wb_public') : __('app.wb_hidden') }}
                             </span>
 
                             <!-- Actions -->

@@ -12,7 +12,7 @@
     <div x-show="!cnt.sermons.loading && cnt.sermons.editing === null">
         <button x-on:click="contentNew('sermons', { title: '', sermon_date: '', youtube_url: '', speaker_id: '', description: '' })"
                 class="w-full mb-2 px-3 py-1.5 text-xs font-medium text-primary-600 bg-primary-50 rounded-lg hover:bg-primary-100 transition-colors">
-            + Додати проповідь
+            {{ __('app.sb_add_sermon') }}
         </button>
         <div class="space-y-1.5 max-h-64 overflow-y-auto">
             <template x-for="item in cnt.sermons.items" :key="item.id">
@@ -23,43 +23,43 @@
                         <span x-show="item.speaker?.name" x-text="item.speaker?.name" class="text-[10px] text-gray-400"></span>
                     </div>
                     <div class="flex gap-2 mt-1">
-                        <button x-on:click="contentEdit('sermons', item, ['title', 'sermon_date', 'youtube_url', 'speaker_id', 'description'])" class="text-[10px] text-blue-500 hover:text-blue-700">Ред.</button>
-                        <button x-on:click="contentDeleteItem('sermons', item.id)" class="text-[10px] text-red-500 hover:text-red-700">Вид.</button>
+                        <button x-on:click="contentEdit('sermons', item, ['title', 'sermon_date', 'youtube_url', 'speaker_id', 'description'])" class="text-[10px] text-blue-500 hover:text-blue-700">{{ __('app.sb_edit_btn') }}</button>
+                        <button x-on:click="contentDeleteItem('sermons', item.id)" class="text-[10px] text-red-500 hover:text-red-700">{{ __('app.sb_delete_btn') }}</button>
                     </div>
                 </div>
             </template>
         </div>
-        <p x-show="cnt.sermons.loaded && cnt.sermons.items.length === 0" class="text-xs text-gray-400 text-center py-2">Немає проповідей</p>
+        <p x-show="cnt.sermons.loaded && cnt.sermons.items.length === 0" class="text-xs text-gray-400 text-center py-2">{{ __('app.sb_no_sermons') }}</p>
     </div>
 
     {{-- Edit/New form --}}
     <div x-show="cnt.sermons.editing !== null" class="space-y-2">
-        <input x-model="cnt.sermons.form.title" type="text" placeholder="Назва проповіді"
+        <input x-model="cnt.sermons.form.title" type="text" placeholder="{{ __('app.sb_sermon_title_ph') }}"
                class="w-full text-xs border border-gray-300 rounded-lg px-2.5 py-1.5 focus:ring-1 focus:ring-primary-500 focus:border-primary-500">
         <input x-model="cnt.sermons.form.sermon_date" type="date"
                class="w-full text-xs border border-gray-300 rounded-lg px-2.5 py-1.5 focus:ring-1 focus:ring-primary-500 focus:border-primary-500">
-        <input x-model="cnt.sermons.form.speaker_id" type="text" placeholder="Спікер"
+        <input x-model="cnt.sermons.form.speaker_id" type="text" placeholder="{{ __('app.sb_speaker_ph') }}"
                class="w-full text-xs border border-gray-300 rounded-lg px-2.5 py-1.5 focus:ring-1 focus:ring-primary-500 focus:border-primary-500">
-        <input x-model="cnt.sermons.form.youtube_url" type="url" placeholder="URL відео (YouTube тощо)"
+        <input x-model="cnt.sermons.form.youtube_url" type="url" placeholder="{{ __('app.sb_video_url_ph') }}"
                class="w-full text-xs border border-gray-300 rounded-lg px-2.5 py-1.5 focus:ring-1 focus:ring-primary-500 focus:border-primary-500">
-        <textarea x-model="cnt.sermons.form.description" placeholder="Опис (необов'язково)" rows="2"
+        <textarea x-model="cnt.sermons.form.description" placeholder="{{ __('app.sb_description_optional_ph') }}" rows="2"
                   class="w-full text-xs border border-gray-300 rounded-lg px-2.5 py-1.5 focus:ring-1 focus:ring-primary-500 focus:border-primary-500 resize-y"></textarea>
         <div class="flex gap-2">
             <button x-on:click="contentSaveItem('sermons')" :disabled="contentSaving"
                     class="flex-1 px-3 py-1.5 text-xs font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 disabled:opacity-50">
-                <span x-show="!contentSaving">Зберегти</span>
+                <span x-show="!contentSaving">{{ __('app.sb_save') }}</span>
                 <span x-show="contentSaving">...</span>
             </button>
             <button x-on:click="contentCancel('sermons')"
                     class="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200">
-                Скасувати
+                {{ __('app.sb_cancel') }}
             </button>
         </div>
     </div>
 
     {{-- Full editor link --}}
     <a href="{{ route('website-builder.sermons.index') }}" target="_blank" class="flex items-center justify-center gap-1 text-[10px] text-gray-500 hover:text-primary-600 mt-1">
-        <span>Повний редактор (аудіо, серії)</span>
+        <span>{{ __('app.sb_full_editor_sermons') }}</span>
         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
     </a>
 </div>

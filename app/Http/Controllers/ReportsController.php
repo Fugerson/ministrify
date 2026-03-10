@@ -93,7 +93,7 @@ class ReportsController extends Controller
             ->toArray();
 
         // Days starting from Monday (Ukrainian convention)
-        $weekdays = [2 => __('Пн'), 3 => __('Вт'), 4 => __('Ср'), 5 => __('Чт'), 6 => __('Пт'), 7 => __('Сб'), 1 => __('Нд')];
+        $weekdays = [2 => __('app.day_mon'), 3 => __('app.day_tue'), 4 => __('app.day_wed'), 5 => __('app.day_thu'), 6 => __('app.day_fri'), 7 => __('app.day_sat'), 1 => __('app.day_sun')];
         $weekdayStats = [];
         foreach ($weekdays as $d => $label) {
             $weekdayStats[] = [

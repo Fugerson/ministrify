@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'FAQ')
+@section('title', __('app.faq'))
 
 @section('content')
 <div class="max-w-4xl mx-auto space-y-6" x-data="{ showModal: false, editingFaq: null }">
@@ -13,8 +13,8 @@
                 </svg>
             </a>
             <div>
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Часті питання (FAQ)</h1>
-                <p class="text-gray-600 dark:text-gray-400">Відповіді на популярні питання</p>
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('app.wb_faq_title') }}</h1>
+                <p class="text-gray-600 dark:text-gray-400">{{ __('app.wb_faq_subtitle') }}</p>
             </div>
         </div>
         @if(auth()->user()->canEdit('website'))
@@ -22,7 +22,7 @@
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
             </svg>
-            Додати FAQ
+            {{ __('app.wb_add_faq') }}
         </button>
         @endif
     </div>
@@ -35,8 +35,8 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
             </div>
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">FAQ ще не додано</h3>
-            <p class="text-gray-500 dark:text-gray-400 mt-1">Додайте відповіді на часті питання</p>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.wb_no_faq_yet') }}</h3>
+            <p class="text-gray-500 dark:text-gray-400 mt-1">{{ __('app.wb_add_faq_answers') }}</p>
         </div>
     @else
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
@@ -57,7 +57,7 @@
                                 @endif
                             </div>
                             <span class="px-2 py-1 text-xs font-medium rounded-full {{ $faq->is_public ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400' }}">
-                                {{ $faq->is_public ? 'Публічний' : 'Прихований' }}
+                                {{ $faq->is_public ? __('app.wb_public') : __('app.wb_hidden') }}
                             </span>
                             @if(auth()->user()->canEdit('website'))
                             <div class="flex gap-1">
@@ -95,30 +95,30 @@
                          try {
                              const resp = await fetch(url, { method: 'POST', headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'Accept': 'application/json' }, body: formData });
                              const data = await resp.json().catch(() => ({}));
-                             if (!resp.ok) { if (resp.status === 422 && data.errors) this.errors = data.errors; showToast('error', data.message || 'Помилка.'); this.saving = false; return; }
-                             showToast('success', data.message || 'Збережено!');
+                             if (!resp.ok) { if (resp.status === 422 && data.errors) this.errors = data.errors; showToast('error', data.message || @js(__('app.wb_error'))); this.saving = false; return; }
+                             showToast('success', data.message || @js(__('app.wb_saved')));
                              setTimeout(() => location.reload(), 600);
-                         } catch(e) { showToast('error', \"Помилка з'єднання.\"); this.saving = false; }
+                         } catch(e) { showToast('error', @js(__('app.wb_connection_error'))); this.saving = false; }
                      }
                  }">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4" x-text="editingFaq ? 'Редагувати FAQ' : 'Додати FAQ'"></h3>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4" x-text="editingFaq ? @js(__('app.wb_edit_faq')) : @js(__('app.wb_add_faq'))"></h3>
                 <form @submit.prevent="submitFaq($refs.faqForm)" x-ref="faqForm">
 
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Питання *</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.wb_question') }} *</label>
                             <input type="text" name="question" :value="editingFaq?.question || ''" required
                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Відповідь *</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.wb_answer') }} *</label>
                             <textarea name="answer" rows="4" required
                                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" x-text="editingFaq?.answer || ''"></textarea>
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Категорія</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.category') }}</label>
                             <input type="text" name="category" :value="editingFaq?.category || ''"
                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                         </div>
@@ -126,16 +126,16 @@
                         <label class="flex items-center">
                             <input type="checkbox" name="is_public" value="1" :checked="editingFaq?.is_public ?? true"
                                    class="rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500">
-                            <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Показувати на сайті</span>
+                            <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">{{ __('app.wb_show_on_site') }}</span>
                         </label>
                     </div>
 
                     <div class="flex justify-end gap-3 mt-6">
                         <button type="button" @click="showModal = false" class="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                            Скасувати
+                            {{ __('app.cancel') }}
                         </button>
                         <button type="submit" :disabled="saving" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
-                            Зберегти
+                            {{ __('app.save') }}
                         </button>
                     </div>
                 </form>

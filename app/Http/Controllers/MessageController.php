@@ -77,15 +77,15 @@ class MessageController extends Controller
         $skippedNoTelegram = $allRecipients->count() - $recipients->count();
 
         if ($recipients->isEmpty()) {
-            $msg = __('Немає отримувачів з Telegram');
+            $msg = __('app.no_telegram_recipients');
             if ($skippedNoTelegram > 0) {
-                $msg .= ' (' . __(':count без Telegram', ['count' => $skippedNoTelegram]) . ')';
+                $msg .= ' (' . __('app.count_without_telegram', ['count' => $skippedNoTelegram]) . ')';
             }
             return $this->errorResponse($request, $msg);
         }
 
         if (!config('services.telegram.bot_token')) {
-            return $this->errorResponse($request, 'Telegram бот не налаштовано. Перейдіть в Налаштування → Інтеграції.');
+            return $this->errorResponse($request, __('app.telegram_bot_not_configured'));
         }
 
         $telegram = TelegramService::make();

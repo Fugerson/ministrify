@@ -415,12 +415,12 @@ class Person extends Model
         $diff = $this->joined_date->diff(now());
 
         if ($diff->y > 0) {
-            return $diff->y . ' ' . trans_choice('рік|роки|років', $diff->y);
+            return $diff->y . ' ' . trans_choice(__('app.plural_year'), $diff->y);
         }
         if ($diff->m > 0) {
-            return $diff->m . ' ' . trans_choice('місяць|місяці|місяців', $diff->m);
+            return $diff->m . ' ' . trans_choice(__('app.plural_month'), $diff->m);
         }
-        return $diff->d . ' ' . trans_choice('день|дні|днів', $diff->d);
+        return $diff->d . ' ' . trans_choice(__('app.plural_day'), $diff->d);
     }
 
     public function getFullNameAttribute(): string
