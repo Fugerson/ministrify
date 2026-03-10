@@ -25,7 +25,7 @@
                     <li><strong>Step 4:</strong> Confirm the deletion when prompted</li>
                 </ol>
 
-                <p>Alternatively, you can send a deletion request to <a href="mailto:hello@ministrify.one" class="text-blue-600 dark:text-blue-400">hello@ministrify.one</a> from the email address associated with your account.</p>
+                <p>Alternatively, you can send a deletion request to <a href="mailto:support@ministrify.app" class="text-blue-600 dark:text-blue-400">support@ministrify.app</a> from the email address associated with your account.</p>
 
                 <h2 class="text-2xl font-semibold text-gray-900 dark:text-white mt-8">What Data Will Be Deleted</h2>
 
@@ -51,7 +51,7 @@
 
                 <h2 class="text-2xl font-semibold text-gray-900 dark:text-white mt-8">Contact</h2>
 
-                <p>If you have questions about data deletion, contact us at <a href="mailto:hello@ministrify.one" class="text-blue-600 dark:text-blue-400">hello@ministrify.one</a>.</p>
+                <p>If you have questions about data deletion, contact us at <a href="mailto:support@ministrify.app" class="text-blue-600 dark:text-blue-400">support@ministrify.app</a>.</p>
             </div>
         </div>
     </div>
