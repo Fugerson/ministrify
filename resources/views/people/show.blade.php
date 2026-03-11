@@ -1477,6 +1477,7 @@ function avatarUpload() {
         handleFileSelect(event) {
             const file = event.target.files[0];
             if (!file) return;
+            const fileInput = event.target;
             const reader = new FileReader();
             reader.onload = (e) => {
                 window.dispatchEvent(new CustomEvent('photo-cropper-open', {
@@ -1484,10 +1485,9 @@ function avatarUpload() {
                         imageUrl: e.target.result,
                         callback: (blob) => {
                             this.preview = URL.createObjectURL(blob);
-                            const input = this.$el.querySelector('input[type="file"]');
                             const dt = new DataTransfer();
                             dt.items.add(new File([blob], 'photo.jpg', { type: 'image/jpeg' }));
-                            input.files = dt.files;
+                            fileInput.files = dt.files;
                         }
                     }
                 }));

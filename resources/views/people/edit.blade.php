@@ -302,7 +302,7 @@ function avatarUpload() {
         handleFileSelect(event) {
             const file = event.target.files[0];
             if (file) {
-                this.openCropper(file);
+                this.openCropper(file, event.target);
             }
         },
 
@@ -310,11 +310,12 @@ function avatarUpload() {
             this.isDragging = false;
             const file = event.dataTransfer.files[0];
             if (file && file.type.startsWith('image/')) {
-                this.openCropper(file);
+                const fileInput = this.$el.querySelector('input[type="file"]');
+                this.openCropper(file, fileInput);
             }
         },
 
-        openCropper(file) {
+        openCropper(file, fileInput) {
             const reader = new FileReader();
             reader.onload = (e) => {
                 window.dispatchEvent(new CustomEvent('photo-cropper-open', {
@@ -323,11 +324,9 @@ function avatarUpload() {
                         callback: (blob) => {
                             this.croppedBlob = blob;
                             this.preview = URL.createObjectURL(blob);
-                            // Set cropped file to input
-                            const input = this.$el.querySelector('input[type="file"]');
                             const dt = new DataTransfer();
                             dt.items.add(new File([blob], 'photo.jpg', { type: 'image/jpeg' }));
-                            input.files = dt.files;
+                            fileInput.files = dt.files;
                         }
                     }
                 }));
