@@ -86,6 +86,33 @@ class FinanceController extends Controller
             ->value('total') ?? 0;
         $currentBalance = $initialBalance + $allTimeIncome - $allTimeExpense;
 
+        // Calculate "committed to teams" — unspent allocation balances per ministry
+        $allocationsByMinistryAll = Transaction::where('church_id', $church->id)
+            ->where('direction', Transaction::DIRECTION_IN)
+            ->where('source_type', Transaction::SOURCE_ALLOCATION)
+            ->completed()
+            ->whereNotNull('ministry_id')
+            ->selectRaw('ministry_id, SUM(COALESCE(amount_uah, amount)) as total')
+            ->groupBy('ministry_id')
+            ->pluck('total', 'ministry_id');
+
+        $spentByMinistryAll = Transaction::where('church_id', $church->id)
+            ->where('direction', Transaction::DIRECTION_OUT)
+            ->whereNotIn('source_type', $excludeTypes)
+            ->completed()
+            ->whereNotNull('ministry_id')
+            ->selectRaw('ministry_id, SUM(COALESCE(amount_uah, amount)) as total')
+            ->groupBy('ministry_id')
+            ->pluck('total', 'ministry_id');
+
+        $committedToTeams = 0;
+        foreach ($allocationsByMinistryAll as $ministryId => $allocated) {
+            $spent = $spentByMinistryAll[$ministryId] ?? 0;
+            $unspent = max(0, (float) $allocated - (float) $spent);
+            $committedToTeams += $unspent;
+        }
+        $availableBalance = $currentBalance - $committedToTeams;
+
         // Calculate balances per currency (all time) — include ALL transactions (exchanges are real currency movements)
         $allTimeIncomeByCurrency = Transaction::where('church_id', $church->id)
             ->incoming()->completed()
@@ -261,6 +288,7 @@ class FinanceController extends Controller
             'totalIncome', 'totalExpense', 'periodBalance',
             'initialBalance', 'initialBalanceDate', 'currentBalance',
             'allTimeIncome', 'allTimeExpense',
+            'committedToTeams', 'availableBalance',
             'incomeByCurrency', 'expenseByCurrency', 'balancesByCurrency',
             'exchangeRates', 'enabledCurrencies',
             'monthlyData',

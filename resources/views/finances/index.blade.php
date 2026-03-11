@@ -99,6 +99,18 @@
                     <span>{{ __('app.total_expense_label') }}</span>
                     <span class="font-medium text-red-200 whitespace-nowrap">{{ number_format($allTimeExpense, 0, ',', ' ') }} ₴</span>
                 </div>
+                @if($committedToTeams > 0)
+                <div class="mt-2 pt-2 border-t border-white/20 space-y-1">
+                    <div class="flex justify-between gap-4">
+                        <span>{{ __('app.committed_to_teams') }}</span>
+                        <span class="font-medium text-yellow-200 whitespace-nowrap">{{ number_format($committedToTeams, 0, ',', ' ') }} ₴</span>
+                    </div>
+                    <div class="flex justify-between gap-4">
+                        <span class="font-semibold">{{ __('app.available_balance') }}</span>
+                        <span class="font-bold whitespace-nowrap">{{ number_format($availableBalance, 0, ',', ' ') }} ₴</span>
+                    </div>
+                </div>
+                @endif
             </div>
 
             @if(count($incomeByCurrency) > 1 || count($expenseByCurrency) > 1 || !empty($incomeByCurrency['USD']) || !empty($incomeByCurrency['EUR']) || !empty($expenseByCurrency['USD']) || !empty($expenseByCurrency['EUR']))

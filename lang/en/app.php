@@ -413,6 +413,8 @@ return [
     'initial_balance' => 'Initial balance',
     'total_income_label' => '+ Total income:',
     'total_expense_label' => '- Total expenses:',
+    'committed_to_teams' => 'Allocated to teams:',
+    'available_balance' => 'Available balance:',
     'period_flow_by_currency' => 'Period flow by currency:',
     'set_initial_balance' => 'Set initial balance',
     'period_result' => 'Period result',
