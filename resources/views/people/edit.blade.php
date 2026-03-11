@@ -289,17 +289,20 @@
     </form>
 </div>
 
+<x-photo-cropper-modal />
+
 <script>
 function avatarUpload() {
     return {
         preview: null,
         isDragging: false,
         existingPhoto: {{ $person->photo ? 'true' : 'false' }},
+        croppedBlob: null,
 
         handleFileSelect(event) {
             const file = event.target.files[0];
             if (file) {
-                this.showPreview(file);
+                this.openCropper(file);
             }
         },
 
@@ -307,18 +310,27 @@ function avatarUpload() {
             this.isDragging = false;
             const file = event.dataTransfer.files[0];
             if (file && file.type.startsWith('image/')) {
-                const input = this.$el.querySelector('input[type="file"]');
-                const dataTransfer = new DataTransfer();
-                dataTransfer.items.add(file);
-                input.files = dataTransfer.files;
-                this.showPreview(file);
+                this.openCropper(file);
             }
         },
 
-        showPreview(file) {
+        openCropper(file) {
             const reader = new FileReader();
             reader.onload = (e) => {
-                this.preview = e.target.result;
+                window.dispatchEvent(new CustomEvent('photo-cropper-open', {
+                    detail: {
+                        imageUrl: e.target.result,
+                        callback: (blob) => {
+                            this.croppedBlob = blob;
+                            this.preview = URL.createObjectURL(blob);
+                            // Set cropped file to input
+                            const input = this.$el.querySelector('input[type="file"]');
+                            const dt = new DataTransfer();
+                            dt.items.add(new File([blob], 'photo.jpg', { type: 'image/jpeg' }));
+                            input.files = dt.files;
+                        }
+                    }
+                }));
             };
             reader.readAsDataURL(file);
         },
@@ -326,6 +338,7 @@ function avatarUpload() {
         removePhoto() {
             this.preview = null;
             this.existingPhoto = false;
+            this.croppedBlob = null;
             this.$refs.removePhotoInput.value = '1';
             const input = this.$el.querySelector('input[type="file"]');
             input.value = '';

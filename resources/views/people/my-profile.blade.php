@@ -25,20 +25,32 @@
                           async uploadPhoto(event) {
                               const file = event.target.files[0];
                               if (!file) return;
-                              this.uploading = true;
-                              const formData = new FormData();
-                              formData.append('photo', file);
-                              try {
-                                  const res = await fetch('{{ route('my-profile.photo') }}', {
-                                      method: 'POST',
-                                      headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'Accept': 'application/json' },
-                                      body: formData
-                                  });
-                                  const data = await res.json();
-                                  if (res.ok) this.photoUrl = data.photo_url;
-                              } catch (e) { console.error(e); }
-                              this.uploading = false;
                               event.target.value = '';
+                              // Open cropper
+                              const reader = new FileReader();
+                              reader.onload = (e) => {
+                                  window.dispatchEvent(new CustomEvent('photo-cropper-open', {
+                                      detail: {
+                                          imageUrl: e.target.result,
+                                          callback: async (blob) => {
+                                              this.uploading = true;
+                                              const formData = new FormData();
+                                              formData.append('photo', new File([blob], 'photo.jpg', { type: 'image/jpeg' }));
+                                              try {
+                                                  const res = await fetch('{{ route('my-profile.photo') }}', {
+                                                      method: 'POST',
+                                                      headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'Accept': 'application/json' },
+                                                      body: formData
+                                                  });
+                                                  const data = await res.json();
+                                                  if (res.ok) this.photoUrl = data.photo_url;
+                                              } catch (e) { console.error(e); }
+                                              this.uploading = false;
+                                          }
+                                      }
+                                  }));
+                              };
+                              reader.readAsDataURL(file);
                           },
                           async removePhoto() {
                               this.uploading = true;
@@ -804,4 +816,6 @@
         </div>
     </div>
 </div>
+
+<x-photo-cropper-modal />
 @endsection

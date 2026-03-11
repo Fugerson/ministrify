@@ -6261,4 +6261,8 @@ return [
     // Schedule
     'weeks_count' => 'Weeks',
     'weeks_short' => 'wk',
+
+    // Photo Cropper
+    'crop_photo_title' => 'Crop photo',
+    'crop_confirm' => 'Done',
 ];

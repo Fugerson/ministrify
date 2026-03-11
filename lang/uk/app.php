@@ -6094,4 +6094,8 @@ return [
     // Schedule
     'weeks_count' => 'Тижнів',
     'weeks_short' => 'тиж',
+
+    // Photo Cropper
+    'crop_photo_title' => 'Обрізати фото',
+    'crop_confirm' => 'Готово',
 ];

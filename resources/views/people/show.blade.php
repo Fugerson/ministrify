@@ -1476,15 +1476,21 @@ function avatarUpload() {
 
         handleFileSelect(event) {
             const file = event.target.files[0];
-            if (file) {
-                this.showPreview(file);
-            }
-        },
-
-        showPreview(file) {
+            if (!file) return;
             const reader = new FileReader();
             reader.onload = (e) => {
-                this.preview = e.target.result;
+                window.dispatchEvent(new CustomEvent('photo-cropper-open', {
+                    detail: {
+                        imageUrl: e.target.result,
+                        callback: (blob) => {
+                            this.preview = URL.createObjectURL(blob);
+                            const input = this.$el.querySelector('input[type="file"]');
+                            const dt = new DataTransfer();
+                            dt.items.add(new File([blob], 'photo.jpg', { type: 'image/jpeg' }));
+                            input.files = dt.files;
+                        }
+                    }
+                }));
             };
             reader.readAsDataURL(file);
         },
@@ -1650,4 +1656,6 @@ onPageReady(function() {
 });
 </script>
 @endpush
+
+<x-photo-cropper-modal />
 @endsection

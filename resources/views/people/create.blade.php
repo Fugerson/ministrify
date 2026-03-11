@@ -28,11 +28,36 @@
 
                 <div class="md:col-span-2">
                     <label for="photo" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.photo') }}</label>
-                    <div x-data="{ fileName: '' }" class="relative">
-                        <input type="file" name="photo" id="photo" accept="image/*,.heic,.heif" class="sr-only" x-ref="photoInput" @change="fileName = $event.target.files[0]?.name || ''">
+                    <div x-data="{ fileName: '', preview: null }" class="relative">
+                        <input type="file" name="photo" id="photo" accept="image/*,.heic,.heif" class="sr-only" x-ref="photoInput"
+                               @change="
+                                   const file = $event.target.files[0];
+                                   if (!file) return;
+                                   const reader = new FileReader();
+                                   reader.onload = (e) => {
+                                       window.dispatchEvent(new CustomEvent('photo-cropper-open', {
+                                           detail: {
+                                               imageUrl: e.target.result,
+                                               callback: (blob) => {
+                                                   preview = URL.createObjectURL(blob);
+                                                   fileName = 'photo.jpg';
+                                                   const dt = new DataTransfer();
+                                                   dt.items.add(new File([blob], 'photo.jpg', { type: 'image/jpeg' }));
+                                                   $refs.photoInput.files = dt.files;
+                                               }
+                                           }
+                                       }));
+                                   };
+                                   reader.readAsDataURL(file);
+                               ">
                         <label @click="$refs.photoInput.click()" class="flex items-center gap-3 px-4 py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl cursor-pointer hover:border-primary-400 dark:hover:border-primary-500 hover:bg-primary-50/50 dark:hover:bg-primary-900/10 transition-all group">
-                            <div class="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center group-hover:bg-primary-100 dark:group-hover:bg-primary-900/30 transition-colors">
-                                <svg class="w-5 h-5 text-gray-400 group-hover:text-primary-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                            <div class="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center group-hover:bg-primary-100 dark:group-hover:bg-primary-900/30 transition-colors overflow-hidden">
+                                <template x-if="preview">
+                                    <img :src="preview" class="w-full h-full object-cover">
+                                </template>
+                                <template x-if="!preview">
+                                    <svg class="w-5 h-5 text-gray-400 group-hover:text-primary-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                                </template>
                             </div>
                             <div class="flex-1 min-w-0">
                                 <p x-show="!fileName" class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('app.choose_photo_btn') }}</p>
@@ -313,4 +338,6 @@ function personCreateForm() {
     }
 }
 </script>
+
+<x-photo-cropper-modal />
 @endsection
