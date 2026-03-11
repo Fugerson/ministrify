@@ -1,5 +1,4 @@
 {{-- Photo Cropper Modal --}}
-{{-- Usage: include once on page, then call window.openPhotoCropper(file, callback) --}}
 <div x-data="photoCropperModal()" x-show="open" x-cloak
      class="fixed inset-0 z-[9999] flex items-center justify-center p-4"
      @photo-cropper-open.window="openCropper($event.detail)"
@@ -43,15 +42,16 @@ function photoCropperModal() {
         open: false,
         cropper: null,
         callback: null,
+        originalFile: null,
 
         openCropper(detail) {
             this.callback = detail.callback;
+            this.originalFile = detail.originalFile || null;
             this.open = true;
 
             this.$nextTick(() => {
                 const img = this.$refs.cropImage;
 
-                // Destroy previous instance
                 if (this.cropper) {
                     this.cropper.destroy();
                     this.cropper = null;
@@ -71,11 +71,9 @@ function photoCropperModal() {
                     });
                 };
 
-                // Set onload BEFORE src to avoid race condition with data URLs
                 img.onload = () => initCropper();
                 img.src = detail.imageUrl;
 
-                // Fallback: if image already complete (cached/data URL loaded sync)
                 if (img.complete && img.naturalWidth > 0) {
                     img.onload = null;
                     initCropper();
@@ -95,7 +93,7 @@ function photoCropperModal() {
 
             canvas.toBlob((blob) => {
                 if (this.callback) {
-                    this.callback(blob);
+                    this.callback(blob, this.originalFile);
                 }
                 this.close();
             }, 'image/jpeg', 0.92);
@@ -112,6 +110,7 @@ function photoCropperModal() {
             }
             this.open = false;
             this.callback = null;
+            this.originalFile = null;
         }
     };
 }

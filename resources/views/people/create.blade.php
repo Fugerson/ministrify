@@ -33,23 +33,29 @@
                                @change="
                                    const file = $event.target.files[0];
                                    if (!file) return;
+                                   const originalFile = file;
                                    const reader = new FileReader();
                                    reader.onload = (e) => {
                                        window.dispatchEvent(new CustomEvent('photo-cropper-open', {
                                            detail: {
                                                imageUrl: e.target.result,
+                                               originalFile: originalFile,
                                                callback: (blob) => {
                                                    preview = URL.createObjectURL(blob);
                                                    fileName = 'photo.jpg';
                                                    const dt = new DataTransfer();
                                                    dt.items.add(new File([blob], 'photo.jpg', { type: 'image/jpeg' }));
                                                    $refs.photoInput.files = dt.files;
+                                                   const dtFull = new DataTransfer();
+                                                   dtFull.items.add(originalFile);
+                                                   $refs.photoFullInput.files = dtFull.files;
                                                }
                                            }
                                        }));
                                    };
                                    reader.readAsDataURL(file);
                                ">
+                        <input type="file" name="photo_full" class="sr-only" x-ref="photoFullInput">
                         <label @click="$refs.photoInput.click()" class="flex items-center gap-3 px-4 py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl cursor-pointer hover:border-primary-400 dark:hover:border-primary-500 hover:bg-primary-50/50 dark:hover:bg-primary-900/10 transition-all group">
                             <div class="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center group-hover:bg-primary-100 dark:group-hover:bg-primary-900/30 transition-colors overflow-hidden">
                                 <template x-if="preview">

@@ -149,7 +149,7 @@ window.expenseModal = function() {
                 }
                 if (this.isEdit) { fd.append('_method', 'PUT'); }
 
-                const response = await fetch(url.replace(/\/([^\/]+)$/, this.isEdit ? '/$1' : ''), {
+                const response = await fetch(url, {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,

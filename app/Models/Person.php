@@ -121,6 +121,7 @@ class Person extends Model
         'telegram_username',
         'telegram_chat_id',
         'photo',
+        'photo_full',
         'address',
         'birth_date',
         'anniversary',

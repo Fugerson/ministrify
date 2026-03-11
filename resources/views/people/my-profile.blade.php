@@ -25,6 +25,7 @@
                           async uploadPhoto(event) {
                               const file = event.target.files[0];
                               if (!file) return;
+                              const originalFile = file;
                               event.target.value = '';
                               // Open cropper
                               const reader = new FileReader();
@@ -32,10 +33,12 @@
                                   window.dispatchEvent(new CustomEvent('photo-cropper-open', {
                                       detail: {
                                           imageUrl: e.target.result,
+                                          originalFile: originalFile,
                                           callback: async (blob) => {
                                               this.uploading = true;
                                               const formData = new FormData();
                                               formData.append('photo', new File([blob], 'photo.jpg', { type: 'image/jpeg' }));
+                                              formData.append('photo_full', originalFile);
                                               try {
                                                   const res = await fetch('{{ route('my-profile.photo') }}', {
                                                       method: 'POST',

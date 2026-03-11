@@ -88,11 +88,21 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                             </svg>
                         </button>
+                        @if($person->photo_full || $person->photo)
+                        <button type="button" x-show="!preview && existingPhoto" @click.prevent="window.dispatchEvent(new CustomEvent('open-full-photo'))"
+                                class="absolute -bottom-1 -right-1 w-6 h-6 bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors z-10 shadow-sm border border-gray-200 dark:border-gray-600">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+                            </svg>
+                        </button>
+                        @endif
                         <input type="hidden" name="remove_photo" x-ref="removePhotoInput" value="0">
+                        <input type="file" name="photo_full" class="sr-only" x-ref="photoFullInput">
                     @else
                         @if($person->photo)
-                            <img class="w-24 h-24 rounded-2xl object-cover border-4 border-white dark:border-gray-800 shadow-lg"
-                                 src="{{ Storage::url($person->photo) }}" alt="">
+                            <img class="w-24 h-24 rounded-2xl object-cover border-4 border-white dark:border-gray-800 shadow-lg cursor-pointer"
+                                 src="{{ Storage::url($person->photo) }}" alt=""
+                                 @click="window.dispatchEvent(new CustomEvent('open-full-photo'))">
                         @else
                             <div class="w-24 h-24 rounded-2xl bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-600 dark:to-gray-700 flex items-center justify-center border-4 border-white dark:border-gray-800 shadow-lg">
                                 <span class="text-3xl font-bold text-gray-500 dark:text-gray-300">{{ mb_substr($person->first_name, 0, 1) }}</span>
@@ -1478,16 +1488,23 @@ function avatarUpload() {
             const file = event.target.files[0];
             if (!file) return;
             const fileInput = event.target;
+            const originalFile = file;
             const reader = new FileReader();
             reader.onload = (e) => {
                 window.dispatchEvent(new CustomEvent('photo-cropper-open', {
                     detail: {
                         imageUrl: e.target.result,
+                        originalFile: originalFile,
                         callback: (blob) => {
                             this.preview = URL.createObjectURL(blob);
+                            // Set cropped photo to photo input
                             const dt = new DataTransfer();
                             dt.items.add(new File([blob], 'photo.jpg', { type: 'image/jpeg' }));
                             fileInput.files = dt.files;
+                            // Set original photo to photo_full input
+                            const dtFull = new DataTransfer();
+                            dtFull.items.add(originalFile);
+                            this.$refs.photoFullInput.files = dtFull.files;
                             // Trigger auto-save
                             fileInput.dispatchEvent(new Event('change', { bubbles: true }));
                         }
@@ -1503,6 +1520,7 @@ function avatarUpload() {
             this.$refs.removePhotoInput.value = '1';
             const input = this.$el.querySelector('input[type="file"]');
             if (input) input.value = '';
+            this.$refs.photoFullInput.value = '';
             this.autoSave();
         }
     }
@@ -1658,6 +1676,23 @@ onPageReady(function() {
 });
 </script>
 @endpush
+
+{{-- Full Photo Lightbox --}}
+@if($person->photo_full || $person->photo)
+<div x-data="{ showFullPhoto: false }" @open-full-photo.window="showFullPhoto = true" x-cloak>
+    <div x-show="showFullPhoto" class="fixed inset-0 z-[9998] flex items-center justify-center p-4" @keydown.escape.window="showFullPhoto = false">
+        <div class="absolute inset-0 bg-black/80" @click="showFullPhoto = false"></div>
+        <div class="relative max-w-3xl max-h-[90vh]">
+            <img src="{{ Storage::url($person->photo_full ?? $person->photo) }}" class="max-w-full max-h-[85vh] rounded-lg shadow-2xl object-contain">
+            <button @click="showFullPhoto = false" class="absolute -top-3 -right-3 w-8 h-8 bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full flex items-center justify-center shadow-lg hover:bg-gray-100 dark:hover:bg-gray-600">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+</div>
+@endif
 
 <x-photo-cropper-modal />
 @endsection

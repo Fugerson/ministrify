@@ -52,6 +52,7 @@
                     </label>
                 </div>
                 <input type="hidden" name="remove_photo" x-ref="removePhotoInput" value="0">
+                <input type="file" name="photo_full" class="sr-only" x-ref="photoFullInput">
             </div>
             <template x-if="errors.photo"><p class="mt-1 text-xs text-red-500" x-text="errors.photo[0]"></p></template>
         </div>
@@ -316,17 +317,23 @@ function avatarUpload() {
         },
 
         openCropper(file, fileInput) {
+            const originalFile = file;
             const reader = new FileReader();
             reader.onload = (e) => {
                 window.dispatchEvent(new CustomEvent('photo-cropper-open', {
                     detail: {
                         imageUrl: e.target.result,
+                        originalFile: originalFile,
                         callback: (blob) => {
                             this.croppedBlob = blob;
                             this.preview = URL.createObjectURL(blob);
                             const dt = new DataTransfer();
                             dt.items.add(new File([blob], 'photo.jpg', { type: 'image/jpeg' }));
                             fileInput.files = dt.files;
+                            // Set original photo to photo_full input
+                            const dtFull = new DataTransfer();
+                            dtFull.items.add(originalFile);
+                            this.$refs.photoFullInput.files = dtFull.files;
                         }
                     }
                 }));
@@ -341,6 +348,7 @@ function avatarUpload() {
             this.$refs.removePhotoInput.value = '1';
             const input = this.$el.querySelector('input[type="file"]');
             input.value = '';
+            this.$refs.photoFullInput.value = '';
         }
     }
 }

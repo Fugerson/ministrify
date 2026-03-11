@@ -209,6 +209,7 @@ class PersonController extends Controller
             'church_role_id' => ['nullable', \Illuminate\Validation\Rule::exists('church_roles', 'id')->where('church_id', $this->getCurrentChurch()->id)],
             'notes' => 'nullable|string|max:5000',
             'photo' => 'nullable|mimes:jpg,jpeg,png,gif,webp,heic,heif|max:2048',
+            'photo_full' => 'nullable|mimes:jpg,jpeg,png,gif,webp,heic,heif|max:5120',
             'tags' => 'nullable|array',
             'ministries' => 'nullable|array',
         ]);
@@ -221,6 +222,18 @@ class PersonController extends Controller
                 $request->file('photo'),
                 'people'
             );
+            // Store full original photo
+            if ($request->hasFile('photo_full')) {
+                $validated['photo_full'] = $this->imageService->store(
+                    $request->file('photo_full'),
+                    'people',
+                    1200
+                );
+            } else {
+                unset($validated['photo_full']);
+            }
+        } else {
+            unset($validated['photo_full']);
         }
 
         // Handle empty church_role_id
@@ -501,6 +514,7 @@ class PersonController extends Controller
                 'church_role_id' => ['nullable', \Illuminate\Validation\Rule::exists('church_roles', 'id')->where('church_id', $this->getCurrentChurch()->id)],
                 'notes' => 'nullable|string|max:5000',
                 'photo' => 'nullable|mimes:jpg,jpeg,png,gif,webp,heic,heif|max:5120',
+                'photo_full' => 'nullable|mimes:jpg,jpeg,png,gif,webp,heic,heif|max:5120',
                 'tags' => 'nullable|array',
                 'ministries' => 'nullable|array',
             ]);
@@ -513,18 +527,30 @@ class PersonController extends Controller
                 'address' => 'nullable|string|max:500',
                 'birth_date' => 'nullable|date',
                 'photo' => 'nullable|mimes:jpg,jpeg,png,gif,webp,heic,heif|max:5120',
+                'photo_full' => 'nullable|mimes:jpg,jpeg,png,gif,webp,heic,heif|max:5120',
             ]);
         }
 
         // Handle photo upload with WebP conversion
         if ($request->hasFile('photo')) {
             try {
-                // Delete old photo
+                // Delete old photos
                 $this->imageService->delete($person->photo);
+                $this->imageService->delete($person->photo_full);
                 $validated['photo'] = $this->imageService->storeProfilePhoto(
                     $request->file('photo'),
                     'people'
                 );
+                // Store full original photo
+                if ($request->hasFile('photo_full')) {
+                    $validated['photo_full'] = $this->imageService->store(
+                        $request->file('photo_full'),
+                        'people',
+                        1200
+                    );
+                } else {
+                    unset($validated['photo_full']);
+                }
             } catch (\Exception $e) {
                 \Log::error('Photo upload failed in update', [
                     'person_id' => $person->id,
@@ -533,12 +559,16 @@ class PersonController extends Controller
                     'file_mime' => $request->file('photo')->getMimeType(),
                     'error' => $e->getMessage(),
                 ]);
-                // Don't return early — continue saving other fields (tags, etc.)
+                unset($validated['photo_full']);
             }
         } elseif ($request->input('remove_photo') === '1') {
-            // Remove photo if requested
+            // Remove photos if requested
             $this->imageService->delete($person->photo);
+            $this->imageService->delete($person->photo_full);
             $validated['photo'] = null;
+            $validated['photo_full'] = null;
+        } else {
+            unset($validated['photo_full']);
         }
 
         // Handle empty church_role_id (users with edit permission only)
@@ -765,15 +795,26 @@ class PersonController extends Controller
 
         if ($request->input('remove') === '1') {
             $this->imageService->delete($person->photo);
-            $person->update(['photo' => null]);
+            $this->imageService->delete($person->photo_full);
+            $person->update(['photo' => null, 'photo_full' => null]);
             return response()->json(['photo_url' => null]);
         }
 
-        $request->validate(['photo' => 'required|mimes:jpg,jpeg,png,gif,webp,heic,heif|max:5120']);
+        $request->validate([
+            'photo' => 'required|mimes:jpg,jpeg,png,gif,webp,heic,heif|max:5120',
+            'photo_full' => 'nullable|mimes:jpg,jpeg,png,gif,webp,heic,heif|max:5120',
+        ]);
 
         $this->imageService->delete($person->photo);
+        $this->imageService->delete($person->photo_full);
         $path = $this->imageService->storeProfilePhoto($request->file('photo'), 'people');
-        $person->update(['photo' => $path]);
+
+        $updateData = ['photo' => $path];
+        if ($request->hasFile('photo_full')) {
+            $fullPath = $this->imageService->store($request->file('photo_full'), 'people', 1200);
+            $updateData['photo_full'] = $fullPath;
+        }
+        $person->update($updateData);
 
         return response()->json(['photo_url' => Storage::url($path)]);
     }
