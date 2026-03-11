@@ -28,9 +28,13 @@
                     class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
                 {{ __('app.back') }}
             </button>
-            <button type="button" @click="confirm()"
-                    class="px-5 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">
-                {{ __('app.crop_confirm') }}
+            <button type="button" @click="confirm()" :disabled="!ready || confirming"
+                    class="px-5 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
+                <span x-show="!confirming">{{ __('app.crop_confirm') }}</span>
+                <span x-show="confirming" class="flex items-center gap-2">
+                    <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                    ...
+                </span>
             </button>
         </div>
     </div>
@@ -43,14 +47,19 @@ function photoCropperModal() {
         cropper: null,
         callback: null,
         originalFile: null,
+        ready: false,
+        confirming: false,
 
         openCropper(detail) {
             this.callback = detail.callback;
             this.originalFile = detail.originalFile || null;
+            this.ready = false;
+            this.confirming = false;
             this.open = true;
 
             this.$nextTick(() => {
                 const img = this.$refs.cropImage;
+                if (!img) return;
 
                 // Destroy previous cropper
                 if (this.cropper) {
@@ -59,8 +68,11 @@ function photoCropperModal() {
                 }
 
                 const self = this;
-                const initCropper = () => {
-                    if (self.cropper) return; // prevent double init
+
+                // Create a new Image to avoid caching/onload issues
+                const tempImg = new Image();
+                tempImg.onload = function() {
+                    img.src = tempImg.src;
                     self.cropper = new Cropper(img, {
                         aspectRatio: 1,
                         viewMode: 1,
@@ -71,45 +83,75 @@ function photoCropperModal() {
                         background: false,
                         responsive: true,
                         guides: true,
+                        ready: function() {
+                            self.ready = true;
+                        }
                     });
                 };
-
-                // Reset src to force onload even if same image
-                img.src = '';
-                img.onload = () => initCropper();
-                // Use setTimeout to ensure src='' is processed before setting new src
-                setTimeout(() => {
-                    img.src = detail.imageUrl;
-                }, 10);
+                tempImg.src = detail.imageUrl;
             });
         },
 
         confirm() {
-            if (!this.cropper) {
-                console.warn('Cropper not initialized');
-                return;
+            if (!this.cropper || !this.ready || this.confirming) return;
+            this.confirming = true;
+
+            try {
+                const canvas = this.cropper.getCroppedCanvas({
+                    width: 800,
+                    height: 800,
+                    imageSmoothingEnabled: true,
+                    imageSmoothingQuality: 'high',
+                });
+
+                if (!canvas) {
+                    // Fallback: use toDataURL approach
+                    const canvas2 = this.cropper.getCroppedCanvas();
+                    if (!canvas2) {
+                        alert('Помилка обрізки фото. Спробуйте ще раз.');
+                        this.confirming = false;
+                        return;
+                    }
+                    this._finishWithCanvas(canvas2);
+                    return;
+                }
+
+                this._finishWithCanvas(canvas);
+            } catch (e) {
+                console.error('Crop error:', e);
+                alert('Помилка обрізки: ' + e.message);
+                this.confirming = false;
             }
+        },
 
-            const canvas = this.cropper.getCroppedCanvas({
-                width: 800,
-                height: 800,
-                imageSmoothingEnabled: true,
-                imageSmoothingQuality: 'high',
-            });
-
-            if (!canvas) {
-                console.warn('getCroppedCanvas returned null');
-                return;
-            }
-
+        _finishWithCanvas(canvas) {
             const callback = this.callback;
             const originalFile = this.originalFile;
-            canvas.toBlob((blob) => {
+            const self = this;
+
+            // Try toBlob first, fallback to manual conversion
+            if (canvas.toBlob) {
+                canvas.toBlob(function(blob) {
+                    if (blob && callback) {
+                        callback(blob, originalFile);
+                    }
+                    self.close();
+                }, 'image/jpeg', 0.92);
+            } else {
+                // Fallback for older browsers
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+                const byteString = atob(dataUrl.split(',')[1]);
+                const ab = new ArrayBuffer(byteString.length);
+                const ia = new Uint8Array(ab);
+                for (let i = 0; i < byteString.length; i++) {
+                    ia[i] = byteString.charCodeAt(i);
+                }
+                const blob = new Blob([ab], { type: 'image/jpeg' });
                 if (callback) {
                     callback(blob, originalFile);
                 }
-                this.close();
-            }, 'image/jpeg', 0.92);
+                self.close();
+            }
         },
 
         cancel() {
@@ -124,6 +166,8 @@ function photoCropperModal() {
             this.open = false;
             this.callback = null;
             this.originalFile = null;
+            this.ready = false;
+            this.confirming = false;
         }
     };
 }
