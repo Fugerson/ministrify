@@ -19,7 +19,7 @@
         </div>
 
         <div class="p-4">
-            <div class="w-full" style="max-height: 60vh; overflow: hidden;">
+            <div class="w-full" style="max-height: 60vh;">
                 <img x-ref="cropImage" src="" style="max-width: 100%; display: block;">
             </div>
         </div>
@@ -50,12 +50,14 @@ function photoCropperModal() {
 
             this.$nextTick(() => {
                 const img = this.$refs.cropImage;
-                img.src = detail.imageUrl;
 
-                img.onload = () => {
-                    if (this.cropper) {
-                        this.cropper.destroy();
-                    }
+                // Destroy previous instance
+                if (this.cropper) {
+                    this.cropper.destroy();
+                    this.cropper = null;
+                }
+
+                const initCropper = () => {
                     this.cropper = new Cropper(img, {
                         aspectRatio: 1,
                         viewMode: 1,
@@ -68,6 +70,16 @@ function photoCropperModal() {
                         guides: true,
                     });
                 };
+
+                // Set onload BEFORE src to avoid race condition with data URLs
+                img.onload = () => initCropper();
+                img.src = detail.imageUrl;
+
+                // Fallback: if image already complete (cached/data URL loaded sync)
+                if (img.complete && img.naturalWidth > 0) {
+                    img.onload = null;
+                    initCropper();
+                }
             });
         },
 
