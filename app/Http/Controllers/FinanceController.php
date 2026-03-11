@@ -1159,7 +1159,7 @@ class FinanceController extends Controller
         // Exclude allocation transactions — they are transfers, not real expenses
         $spendingRaw = Transaction::where('church_id', $church->id)
             ->where('direction', Transaction::DIRECTION_OUT)
-            ->where('source_type', '!=', Transaction::SOURCE_ALLOCATION)
+            ->whereNotIn('source_type', [Transaction::SOURCE_ALLOCATION, Transaction::SOURCE_EXCHANGE])
             ->completed()
             ->forMonth($year, $month)
             ->whereNotNull('ministry_id')
@@ -1323,10 +1323,19 @@ class FinanceController extends Controller
             $churchBudgetTotals['annual_actual'] = $churchBudget->getActualSpendingForYear();
         }
 
-        // Grand total = church + ministry
+        // Grand total: use total actual spending to avoid double-counting
+        // (transactions with ministry_id may also match church budget categories)
+        $totalActualSpending = (float) (Transaction::where('church_id', $church->id)
+            ->where('direction', Transaction::DIRECTION_OUT)
+            ->whereNotIn('source_type', [Transaction::SOURCE_ALLOCATION, Transaction::SOURCE_EXCHANGE])
+            ->completed()
+            ->forMonth($year, $month)
+            ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')
+            ->value('total') ?? 0);
+
         $grandTotals = [
             'planned' => $churchBudgetTotals['planned'] + $totals['budget'],
-            'actual' => $churchBudgetTotals['actual'] + $totals['spent'],
+            'actual' => round($totalActualSpending),
         ];
         $grandTotals['difference'] = $grandTotals['planned'] - $grandTotals['actual'];
         $grandTotals['percentage'] = $grandTotals['planned'] > 0
@@ -1397,13 +1406,12 @@ class FinanceController extends Controller
                 $ministryPlanned += $mb->getEffectiveBudget();
             }
 
-            // Ministry actual spending
-            $ministryActual = (float) (Transaction::where('church_id', $church->id)
+            // Total actual spending for the church (all expenses, excluding exchange/allocation)
+            $totalActual = (float) (Transaction::where('church_id', $church->id)
                 ->where('direction', Transaction::DIRECTION_OUT)
-                ->where('source_type', '!=', Transaction::SOURCE_ALLOCATION)
+                ->whereNotIn('source_type', [Transaction::SOURCE_ALLOCATION, Transaction::SOURCE_EXCHANGE])
                 ->completed()
                 ->forMonth($y, $m)
-                ->whereNotNull('ministry_id')
                 ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')
                 ->value('total') ?? 0);
 
@@ -1416,16 +1424,6 @@ class FinanceController extends Controller
                 }
             }
 
-            // Church actual
-            $churchActual = (float) (Transaction::where('church_id', $church->id)
-                ->where('direction', Transaction::DIRECTION_OUT)
-                ->whereNull('ministry_id')
-                ->whereNotIn('source_type', [Transaction::SOURCE_ALLOCATION, Transaction::SOURCE_EXCHANGE])
-                ->completed()
-                ->forMonth($y, $m)
-                ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')
-                ->value('total') ?? 0);
-
             $monthNames = [1 => 'Січ', 2 => 'Лют', 3 => 'Бер', 4 => 'Кві', 5 => 'Тра', 6 => 'Чер',
                            7 => 'Лип', 8 => 'Сер', 9 => 'Вер', 10 => 'Жов', 11 => 'Лис', 12 => 'Гру'];
 
@@ -1434,7 +1432,7 @@ class FinanceController extends Controller
                 'year' => $y,
                 'month' => $m,
                 'planned' => round($churchPlanned + $ministryPlanned),
-                'actual' => round($churchActual + $ministryActual),
+                'actual' => round($totalActual),
             ];
         }
 
