@@ -196,7 +196,7 @@ function exportButton() {
                         <th @click="toggleSort('amount')" class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-700 dark:hover:text-gray-200 select-none">
                             <span class="inline-flex items-center justify-end gap-1">{{ __('app.finance_amount_header') }} <template x-if="sortColumn === 'amount'"><svg class="w-3 h-3" :class="sortDir === 'asc' && 'rotate-180'" fill="currentColor" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg></template></span>
                         </th>
-                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider" x-show="subFilter === ''">{{ __('app.finance_balance_header') }}</th>
+                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider" x-show="subFilter === '' && sortColumn === 'date'">{{ __('app.finance_balance_header') }}</th>
                         <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-16"></th>
                     </tr>
                 </thead>
@@ -264,7 +264,7 @@ function exportButton() {
                                     </span>
                                 </template>
                             </td>
-                            <td class="px-4 py-3 whitespace-nowrap text-right" x-show="subFilter === ''">
+                            <td class="px-4 py-3 whitespace-nowrap text-right" x-show="subFilter === '' && sortColumn === 'date'">
                                 <span class="text-sm font-medium" :class="item.balance >= 0 ? 'text-gray-900 dark:text-white' : 'text-red-600'" x-text="formatNumber(item.balance) + ' ₴'"></span>
                             </td>
                             <td class="px-4 py-3 whitespace-nowrap text-center">

@@ -71,10 +71,10 @@ class ChurchBudgetItem extends Model
 
         $year = $year ?? $this->churchBudget->year;
 
+        // Match by category regardless of ministry — church budget tracks all expenses in this category
         return (float) (Transaction::where('church_id', $this->church_id)
             ->where('direction', Transaction::DIRECTION_OUT)
             ->where('category_id', $this->category_id)
-            ->whereNull('ministry_id')
             ->whereNotIn('source_type', [Transaction::SOURCE_ALLOCATION, Transaction::SOURCE_EXCHANGE])
             ->completed()
             ->whereYear('date', $year)
@@ -91,10 +91,10 @@ class ChurchBudgetItem extends Model
 
         $year = $year ?? $this->churchBudget->year;
 
+        // Match by category regardless of ministry — same logic as getActualSpendingForMonth
         return Transaction::where('church_id', $this->church_id)
             ->where('direction', Transaction::DIRECTION_OUT)
             ->where('category_id', $this->category_id)
-            ->whereNull('ministry_id')
             ->whereNotIn('source_type', [Transaction::SOURCE_ALLOCATION, Transaction::SOURCE_EXCHANGE])
             ->completed()
             ->whereYear('date', $year)

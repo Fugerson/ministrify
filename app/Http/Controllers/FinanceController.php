@@ -382,11 +382,14 @@ class FinanceController extends Controller
             ->orderBy('first_name')
             ->get();
 
-        // Current balance (all time) - in UAH
+        // Current balance (all time) - in UAH, excluding exchange/allocation (they net to ~0)
+        $excludeTypes = ['exchange', 'budget_allocation'];
         $currentBalance = $balanceBeforeYear
             + (Transaction::where('church_id', $church->id)->incoming()->completed()
+                ->whereNotIn('source_type', $excludeTypes)
                 ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')->value('total') ?? 0)
             - (Transaction::where('church_id', $church->id)->outgoing()->completed()
+                ->whereNotIn('source_type', $excludeTypes)
                 ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')->value('total') ?? 0);
 
         // Initial period from request or default to month
@@ -444,17 +447,30 @@ class FinanceController extends Controller
     private function calculateBalanceBeforeDate(int $churchId, $date): float
     {
         $church = Church::find($churchId);
-        $initialBalance = (float) ($church->initial_balance ?? 0);
 
+        // Use multi-currency initial balances (same as index() and transactions())
+        $allInitialBalances = $church->getAllInitialBalances();
+        $initialBalance = 0;
+        foreach ($allInitialBalances as $currency => $amount) {
+            if ($currency === 'UAH') {
+                $initialBalance += $amount;
+            } else {
+                $initialBalance += ExchangeRate::toUah($amount, $currency, $church->initial_balance_date);
+            }
+        }
+
+        $excludeTypes = ['exchange', 'budget_allocation'];
         $income = Transaction::where('church_id', $churchId)
             ->incoming()->completed()
             ->where('date', '<', $date)
+            ->whereNotIn('source_type', $excludeTypes)
             ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')
             ->value('total') ?? 0;
 
         $expense = Transaction::where('church_id', $churchId)
             ->outgoing()->completed()
             ->where('date', '<', $date)
+            ->whereNotIn('source_type', $excludeTypes)
             ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')
             ->value('total') ?? 0;
 

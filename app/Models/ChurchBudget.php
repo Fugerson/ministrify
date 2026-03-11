@@ -66,27 +66,32 @@ class ChurchBudget extends Model
 
     public function getActualSpendingForMonth(int $month): float
     {
-        return (float) (Transaction::where('church_id', $this->church_id)
+        // Sum actual spending for all budget items that have categories
+        $itemsSpending = $this->items->sum(fn ($item) => $item->getActualSpendingForMonth($month, $this->year));
+
+        // Also count uncategorized church-level expenses (no ministry, no category matching any budget item)
+        $itemCategoryIds = $this->items->pluck('category_id')->filter()->toArray();
+        $uncategorized = (float) (Transaction::where('church_id', $this->church_id)
             ->where('direction', Transaction::DIRECTION_OUT)
             ->whereNull('ministry_id')
+            ->when(!empty($itemCategoryIds), fn ($q) => $q->whereNotIn('category_id', $itemCategoryIds))
             ->whereNotIn('source_type', [Transaction::SOURCE_ALLOCATION, Transaction::SOURCE_EXCHANGE])
             ->completed()
             ->whereYear('date', $this->year)
             ->whereMonth('date', $month)
             ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')
             ->value('total') ?? 0);
+
+        return $itemsSpending + $uncategorized;
     }
 
     public function getActualSpendingForYear(): float
     {
-        return (float) (Transaction::where('church_id', $this->church_id)
-            ->where('direction', Transaction::DIRECTION_OUT)
-            ->whereNull('ministry_id')
-            ->whereNotIn('source_type', [Transaction::SOURCE_ALLOCATION, Transaction::SOURCE_EXCHANGE])
-            ->completed()
-            ->whereYear('date', $this->year)
-            ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')
-            ->value('total') ?? 0);
+        $total = 0;
+        for ($m = 1; $m <= 12; $m++) {
+            $total += $this->getActualSpendingForMonth($m);
+        }
+        return $total;
     }
 
     public static function getOrCreate(int $churchId, int $year): self
