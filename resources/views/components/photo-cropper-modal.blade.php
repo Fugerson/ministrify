@@ -52,13 +52,16 @@ function photoCropperModal() {
             this.$nextTick(() => {
                 const img = this.$refs.cropImage;
 
+                // Destroy previous cropper
                 if (this.cropper) {
                     this.cropper.destroy();
                     this.cropper = null;
                 }
 
+                const self = this;
                 const initCropper = () => {
-                    this.cropper = new Cropper(img, {
+                    if (self.cropper) return; // prevent double init
+                    self.cropper = new Cropper(img, {
                         aspectRatio: 1,
                         viewMode: 1,
                         dragMode: 'move',
@@ -71,18 +74,21 @@ function photoCropperModal() {
                     });
                 };
 
+                // Reset src to force onload even if same image
+                img.src = '';
                 img.onload = () => initCropper();
-                img.src = detail.imageUrl;
-
-                if (img.complete && img.naturalWidth > 0) {
-                    img.onload = null;
-                    initCropper();
-                }
+                // Use setTimeout to ensure src='' is processed before setting new src
+                setTimeout(() => {
+                    img.src = detail.imageUrl;
+                }, 10);
             });
         },
 
         confirm() {
-            if (!this.cropper) return;
+            if (!this.cropper) {
+                console.warn('Cropper not initialized');
+                return;
+            }
 
             const canvas = this.cropper.getCroppedCanvas({
                 width: 800,
@@ -91,9 +97,16 @@ function photoCropperModal() {
                 imageSmoothingQuality: 'high',
             });
 
+            if (!canvas) {
+                console.warn('getCroppedCanvas returned null');
+                return;
+            }
+
+            const callback = this.callback;
+            const originalFile = this.originalFile;
             canvas.toBlob((blob) => {
-                if (this.callback) {
-                    this.callback(blob, this.originalFile);
+                if (callback) {
+                    callback(blob, originalFile);
                 }
                 this.close();
             }, 'image/jpeg', 0.92);
