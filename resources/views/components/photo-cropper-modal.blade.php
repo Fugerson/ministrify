@@ -61,15 +61,12 @@ function photoCropperModal() {
                 const img = this.$refs.cropImage;
                 if (!img) return;
 
-                // Destroy previous cropper
                 if (this.cropper) {
                     this.cropper.destroy();
                     this.cropper = null;
                 }
 
                 const self = this;
-
-                // Create a new Image to avoid caching/onload issues
                 const tempImg = new Image();
                 tempImg.onload = function() {
                     img.src = tempImg.src;
@@ -83,6 +80,8 @@ function photoCropperModal() {
                         background: false,
                         responsive: true,
                         guides: true,
+                        checkCrossOrigin: false,
+                        checkOrientation: false,
                         ready: function() {
                             self.ready = true;
                         }
@@ -100,45 +99,15 @@ function photoCropperModal() {
                 const canvas = this.cropper.getCroppedCanvas({
                     width: 800,
                     height: 800,
-                    imageSmoothingEnabled: true,
-                    imageSmoothingQuality: 'high',
                 });
 
                 if (!canvas) {
-                    // Fallback: use toDataURL approach
-                    const canvas2 = this.cropper.getCroppedCanvas();
-                    if (!canvas2) {
-                        alert('Помилка обрізки фото. Спробуйте ще раз.');
-                        this.confirming = false;
-                        return;
-                    }
-                    this._finishWithCanvas(canvas2);
+                    alert('Canvas error — null');
+                    this.confirming = false;
                     return;
                 }
 
-                this._finishWithCanvas(canvas);
-            } catch (e) {
-                console.error('Crop error:', e);
-                alert('Помилка обрізки: ' + e.message);
-                this.confirming = false;
-            }
-        },
-
-        _finishWithCanvas(canvas) {
-            const callback = this.callback;
-            const originalFile = this.originalFile;
-            const self = this;
-
-            // Try toBlob first, fallback to manual conversion
-            if (canvas.toBlob) {
-                canvas.toBlob(function(blob) {
-                    if (blob && callback) {
-                        callback(blob, originalFile);
-                    }
-                    self.close();
-                }, 'image/jpeg', 0.92);
-            } else {
-                // Fallback for older browsers
+                // Synchronous approach — no async toBlob
                 const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
                 const byteString = atob(dataUrl.split(',')[1]);
                 const ab = new ArrayBuffer(byteString.length);
@@ -147,10 +116,15 @@ function photoCropperModal() {
                     ia[i] = byteString.charCodeAt(i);
                 }
                 const blob = new Blob([ab], { type: 'image/jpeg' });
-                if (callback) {
-                    callback(blob, originalFile);
+
+                if (this.callback) {
+                    this.callback(blob, this.originalFile);
                 }
-                self.close();
+                this.close();
+            } catch (e) {
+                console.error('Crop error:', e);
+                alert('Crop error: ' + e.message);
+                this.confirming = false;
             }
         },
 
