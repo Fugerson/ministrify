@@ -1285,7 +1285,6 @@ class FinanceController extends Controller
                 $actualByCategory = Transaction::where('church_id', $church->id)
                     ->where('direction', Transaction::DIRECTION_OUT)
                     ->whereIn('category_id', $categoryIds)
-                    ->whereNull('ministry_id')
                     ->whereNotIn('source_type', [Transaction::SOURCE_ALLOCATION, Transaction::SOURCE_EXCHANGE])
                     ->completed()
                     ->whereYear('date', $year)
