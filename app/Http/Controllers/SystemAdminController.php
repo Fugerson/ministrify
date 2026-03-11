@@ -22,6 +22,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use App\Mail\SupportTicketReply;
+use App\Services\ImageService;
 
 class SystemAdminController extends Controller
 {
@@ -942,12 +943,30 @@ class SystemAdminController extends Controller
             'message' => 'required|string|max:10000',
             'is_internal' => 'boolean',
             'status' => 'nullable|in:open,in_progress,waiting,resolved,closed',
+            'attachments.*' => 'nullable|file|mimes:jpg,jpeg,png,gif,webp,heic,heif,pdf|max:5120',
         ]);
+
+        // Handle attachments
+        $attachments = null;
+        if ($request->hasFile('attachments')) {
+            $attachments = [];
+            foreach ($request->file('attachments') as $file) {
+                $stored = ImageService::storeWithHeicConversion($file, "support/{$ticket->id}");
+                $attachments[] = [
+                    'name' => $file->getClientOriginalName(),
+                    'path' => $stored['path'],
+                    'size' => $stored['size'],
+                    'mime' => $stored['mime_type'],
+                ];
+            }
+            $attachments = $attachments ?: null;
+        }
 
         $message = SupportMessage::create([
             'ticket_id' => $ticket->id,
             'user_id' => auth()->id(),
             'message' => $validated['message'],
+            'attachments' => $attachments,
             'is_from_admin' => true,
             'is_internal' => $request->boolean('is_internal'),
         ]);
