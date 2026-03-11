@@ -1483,8 +1483,13 @@ function avatarUpload() {
         preview: null,
         isDragging: false,
         existingPhoto: {{ $person->photo ? 'true' : 'false' }},
+        _skipCropper: false,
 
         handleFileSelect(event) {
+            if (this._skipCropper) {
+                this._skipCropper = false;
+                return;
+            }
             const file = event.target.files[0];
             if (!file) return;
             const fileInput = event.target;
@@ -1497,6 +1502,7 @@ function avatarUpload() {
                         originalFile: originalFile,
                         callback: (blob) => {
                             this.preview = URL.createObjectURL(blob);
+                            this._skipCropper = true;
                             // Set cropped photo to photo input
                             const dt = new DataTransfer();
                             dt.items.add(new File([blob], 'photo.jpg', { type: 'image/jpeg' }));
@@ -1505,7 +1511,7 @@ function avatarUpload() {
                             const dtFull = new DataTransfer();
                             dtFull.items.add(originalFile);
                             this.$refs.photoFullInput.files = dtFull.files;
-                            // Trigger auto-save
+                            // Trigger auto-save (bubbles to parent @change="autoSave()")
                             fileInput.dispatchEvent(new Event('change', { bubbles: true }));
                         }
                     }
