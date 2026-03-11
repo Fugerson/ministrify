@@ -292,11 +292,15 @@ window.expenseModal = function() {
                                 @endforeach
                                 <option value="__custom__">{{ __('app.other_enter_manually') }}</option>
                             </select>
-                            <div x-show="formData.category_id === '__custom__'" class="flex gap-2 relative z-10">
+                            <div x-show="formData.category_id === '__custom__'" class="relative">
                                 <input type="text" x-model="formData.category_name" placeholder="{{ __('app.category_name_placeholder') }}"
-                                       class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                                       class="w-full px-3 py-2 pr-9 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
                                 <button type="button" @click="formData.category_id = ''; formData.category_name = ''"
-                                        class="px-3 py-2 text-gray-500 hover:text-red-500 border border-gray-300 dark:border-gray-600 rounded-xl transition-colors">&#x2715;</button>
+                                        class="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-red-500 rounded-full transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                </button>
                             </div>
                         </div>
                         <div>
