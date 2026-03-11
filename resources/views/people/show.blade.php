@@ -1488,6 +1488,8 @@ function avatarUpload() {
                             const dt = new DataTransfer();
                             dt.items.add(new File([blob], 'photo.jpg', { type: 'image/jpeg' }));
                             fileInput.files = dt.files;
+                            // Trigger auto-save
+                            fileInput.dispatchEvent(new Event('change', { bubbles: true }));
                         }
                     }
                 }));
