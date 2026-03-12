@@ -113,10 +113,13 @@ class FinanceController extends Controller
         }
         $availableBalance = $currentBalance - $committedToTeams;
 
-        // Calculate balances per currency (all time) — exclude exchange/allocation to avoid orphaned transaction imbalance
+        // Calculate balances per currency (all time)
+        // INCLUDE exchange transactions (they track real currency movement EUR→UAH)
+        // EXCLUDE only allocation (internal budget transfers, not real money movement)
+        $currencyExcludeTypes = [Transaction::SOURCE_ALLOCATION];
         $allTimeIncomeByCurrency = Transaction::where('church_id', $church->id)
             ->incoming()->completed()
-            ->whereNotIn('source_type', $excludeTypes)
+            ->whereNotIn('source_type', $currencyExcludeTypes)
             ->selectRaw('COALESCE(currency, "UAH") as currency, SUM(amount) as total')
             ->groupBy('currency')
             ->pluck('total', 'currency')
@@ -124,7 +127,7 @@ class FinanceController extends Controller
 
         $allTimeExpenseByCurrency = Transaction::where('church_id', $church->id)
             ->outgoing()->completed()
-            ->whereNotIn('source_type', $excludeTypes)
+            ->whereNotIn('source_type', $currencyExcludeTypes)
             ->selectRaw('COALESCE(currency, "UAH") as currency, SUM(amount) as total')
             ->groupBy('currency')
             ->pluck('total', 'currency')
@@ -147,11 +150,11 @@ class FinanceController extends Controller
             $balancesByCurrency[$curr] = $initialBal + $income - $expense;
         }
 
-        // Get balances by currency for the period (exclude exchange/allocation for display)
+        // Get balances by currency for the period (include exchange for proper currency tracking)
         $incomeQueryForCurrency = Transaction::where('church_id', $church->id)->incoming()->completed()
-            ->whereNotIn('source_type', $excludeTypes);
+            ->whereNotIn('source_type', $currencyExcludeTypes);
         $expenseQueryForCurrency = Transaction::where('church_id', $church->id)->outgoing()->completed()
-            ->whereNotIn('source_type', $excludeTypes);
+            ->whereNotIn('source_type', $currencyExcludeTypes);
 
         if ($month) {
             $incomeQueryForCurrency->forMonth($year, $month);
