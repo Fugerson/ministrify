@@ -228,7 +228,7 @@
                                                     <span class="w-1 h-4 rounded-full flex-shrink-0" :style="'background:' + (ministry.color || '#6B7280')"></span>
                                                     <span class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wide truncate max-w-[80px] sm:max-w-none"
                                                           :style="'color:' + (ministry.color || '#6B7280')"
-                                                          x-text="(ministry.icon ? ministry.icon + ' ' : '') + ministry.name"></span>
+                                                          x-text="ministry.name"></span>
                                                     <span class="text-[10px] text-gray-400 dark:text-gray-500" x-text="'(' + ministry.roles.length + ')'"></span>
                                                 </div>
                                                 <template x-if="canSelfSignup(ministry)">
@@ -242,12 +242,7 @@
                                         {{-- Role Row --}}
                                         <template x-if="row.type === 'role'">
                                             <div class="flex items-center gap-2 pl-6">
-                                                <template x-if="row.role.icon">
-                                                    <span class="text-sm flex-shrink-0" x-text="row.role.icon"></span>
-                                                </template>
-                                                <template x-if="!row.role.icon">
-                                                    <span class="w-1.5 h-1.5 rounded-full flex-shrink-0 bg-gray-300 dark:bg-gray-600"></span>
-                                                </template>
+                                                <span class="w-1.5 h-1.5 rounded-full flex-shrink-0 bg-gray-300 dark:bg-gray-600"></span>
                                                 <span class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 truncate max-w-[70px] sm:max-w-none" x-text="row.role.name"></span>
                                             </div>
                                         </template>
@@ -355,7 +350,7 @@
             <div class="flex items-center justify-between">
                 <div class="min-w-0">
                     <div class="text-xs font-semibold text-gray-900 dark:text-white truncate"
-                         x-text="dropdown.role?.icon ? dropdown.role.icon + ' ' + dropdown.role?.name : dropdown.role?.name"></div>
+                         x-text="dropdown.role?.name"></div>
                     <div class="text-[10px] text-gray-500 dark:text-gray-400"
                          x-text="dropdown.event?.dayOfWeek + ' ' + dropdown.event?.dateLabel + (dropdown.event?.time ? ', ' + dropdown.event?.time : '')"></div>
                 </div>

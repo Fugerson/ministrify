@@ -227,7 +227,7 @@ function exportButton() {
                                 <template x-if="item.transaction.category">
                                     <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium"
                                           :style="'background-color: ' + item.transaction.category.color + '20; color: ' + item.transaction.category.color">
-                                        <span x-text="(item.transaction.category.icon || '') + ' ' + item.transaction.category.name"></span>
+                                        <span x-text="item.transaction.category.name"></span>
                                     </span>
                                 </template>
                                 <template x-if="!item.transaction.category">

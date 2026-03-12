@@ -66,7 +66,7 @@
                                 @if($event->ministry)
                                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
                                           style="background-color: {{ $event->ministry->color }}30; color: {{ $event->ministry->color }}">
-                                        {{ $event->ministry->icon }} {{ $event->ministry->name }}
+                                        {{ $event->ministry->name }}
                                     </span>
                                 @endif
                                 @if($event->is_public)

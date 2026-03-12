@@ -20,11 +20,7 @@
                     </a>
                     <div class="w-9 h-9 rounded-lg flex items-center justify-center text-base"
                          style="background-color: {{ $board->display_color }}20">
-                        @if($board->ministry->icon)
-                            {{ $board->ministry->icon }}
-                        @else
-                            <span class="w-3 h-3 rounded-full" style="background-color: {{ $board->display_color }}"></span>
-                        @endif
+                        <span class="w-3 h-3 rounded-full" style="background-color: {{ $board->display_color }}"></span>
                     </div>
                 @endif
                 <div>
