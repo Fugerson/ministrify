@@ -302,18 +302,14 @@
     {{-- Locale Switcher Function --}}
     <script>
     window.switchLocale = function(locale) {
-        console.log('🌐 Switching locale to:', locale);
+        console.log('Switching locale to:', locale);
 
         // Set HTTP cookie immediately (1 year expiry)
         const maxAge = 365 * 24 * 60 * 60;
         document.cookie = 'locale=' + locale + '; path=/; max-age=' + maxAge + '; SameSite=Lax; Secure';
 
-        // Verify cookie was set
-        console.log('🍪 Cookie set, checking document.cookie:', document.cookie);
-
         // Get CSRF token from meta tag
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
-        console.log('🔐 CSRF token:', csrfToken ? 'found' : 'NOT FOUND!');
 
         // Send to server to save user preference
         const formData = new FormData();
@@ -324,15 +320,10 @@
             credentials: 'include',
             body: formData
         })
-        .then(r => {
-            console.log('✅ Server response:', r.status);
-            return r.json();
-        })
-        .then(data => console.log('📦 Response:', data))
-        .catch(err => console.error('❌ Error:', err));
+        .then(r => r.json())
+        .catch(err => console.error('Locale switch error:', err));
 
-        // Reload after 2 seconds so you can see the logs
-        console.log('🔄 Reloading page in 2 seconds...');
+        // Reload after brief delay
         setTimeout(() => location.reload(), 2000);
     };
     </script>

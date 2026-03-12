@@ -46,12 +46,12 @@
                         <label class="flex items-center gap-2 cursor-pointer" title="{{ __('app.budget_recurring_tooltip') }}">
                             <input type="radio" x-model="churchItemForm.is_recurring" value="1"
                                    class="text-primary-600 focus:ring-primary-500">
-                            <span class="text-sm text-gray-700 dark:text-gray-300">🔄 {{ __('app.monthly') }}</span>
+                            <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('app.monthly') }}</span>
                         </label>
                         <label class="flex items-center gap-2 cursor-pointer" title="{{ __('app.budget_onetime_tooltip') }}">
                             <input type="radio" x-model="churchItemForm.is_recurring" value="0"
                                    class="text-primary-600 focus:ring-primary-500">
-                            <span class="text-sm text-gray-700 dark:text-gray-300">☀️ {{ __('app.one_time') }}</span>
+                            <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('app.one_time') }}</span>
                         </label>
                     </div>
                 </div>
@@ -113,8 +113,8 @@
                     <button type="button"
                             x-on:click="churchItemForm.use_custom_amounts = !churchItemForm.use_custom_amounts"
                             class="text-xs text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 hover:underline">
-                        <span x-show="!churchItemForm.use_custom_amounts">📊 {{ __('app.set_different_by_month') }}</span>
-                        <span x-show="churchItemForm.use_custom_amounts">🔄 {{ __('app.same_amount_monthly') }}</span>
+                        <span x-show="!churchItemForm.use_custom_amounts">{{ __('app.set_different_by_month') }}</span>
+                        <span x-show="churchItemForm.use_custom_amounts">{{ __('app.same_amount_monthly') }}</span>
                     </button>
                 </div>
 

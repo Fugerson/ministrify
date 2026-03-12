@@ -56,7 +56,7 @@
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-3 md:p-6">
             <div class="flex flex-col sm:flex-row items-center sm:items-start">
                 <div class="w-10 h-10 md:w-12 md:h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <span class="text-lg md:text-2xl">🙏</span>
+                    <svg class="w-5 h-5 md:w-6 md:h-6 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
                 </div>
                 <div class="sm:ml-3 md:ml-4 mt-2 sm:mt-0 text-center sm:text-left">
                     <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400">{{ __('app.prayer_stat_prayers') }}</p>
@@ -93,12 +93,12 @@
                         <div class="flex flex-wrap items-center gap-1.5 md:gap-2 mb-2">
                             @if($request->is_urgent)
                                 <span class="px-2 py-1 bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 text-xs font-medium rounded-full">
-                                    🔥 {{ __('app.prayer_badge_urgent') }}
+                                    {{ __('app.prayer_badge_urgent') }}
                                 </span>
                             @endif
                             @if(!$request->is_public)
                                 <span class="px-2 py-1 bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400 text-xs font-medium rounded-full">
-                                    🔒 {{ __('app.prayer_badge_private') }}
+                                    {{ __('app.prayer_badge_private') }}
                                 </span>
                             @endif
                             <span class="px-2 py-1 bg-{{ $request->status_color }}-100 text-{{ $request->status_color }}-700 dark:bg-{{ $request->status_color }}-900/30 dark:text-{{ $request->status_color }}-400 text-xs font-medium rounded-full">
@@ -122,7 +122,7 @@
                             <span>{{ $request->created_at->diffForHumans() }}</span>
                             <span class="mx-2">•</span>
                             <span class="flex items-center">
-                                🙏 {{ $request->prayer_count }}
+                                {{ $request->prayer_count }}
                             </span>
                         </div>
                     </div>
@@ -134,7 +134,7 @@
                                     :disabled="prayed"
                                     class="w-full sm:w-auto px-4 py-2 bg-primary-50 hover:bg-primary-100 dark:bg-primary-900/20 dark:hover:bg-primary-900/40 text-primary-600 dark:text-primary-400 rounded-lg font-medium text-sm transition-colors"
                                     :class="{ 'opacity-50': prayed }">
-                                🙏 <span x-text="prayed ? @json(__('app.prayer_prayed')) : @json(__('app.prayer_praying'))"></span>
+                                <span x-text="prayed ? @json(__('app.prayer_prayed')) : @json(__('app.prayer_praying'))"></span>
                             </button>
                         </div>
                     @endif
@@ -143,7 +143,7 @@
         @empty
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-12 text-center">
                 <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span class="text-3xl">🙏</span>
+                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
                 </div>
                 <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">{{ __('app.prayer_no_requests') }}</h3>
                 <p class="text-gray-500 dark:text-gray-400 mb-4">{{ __('app.prayer_no_requests_desc') }}</p>
@@ -167,8 +167,7 @@
                 {{-- Header --}}
                 <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
-                        <span class="text-2xl mr-2">🙏</span>
-                        {{ __('app.prayer_new_title') }}
+                                                {{ __('app.prayer_new_title') }}
                     </h2>
                     <button type="button" onclick="closeCreatePrayerRequestModal()" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -206,7 +205,7 @@
                             <input type="checkbox" name="is_urgent" value="1"
                                    class="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500">
                             <div>
-                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">🔥 {{ __('app.prayer_urgent') }}</span>
+                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('app.prayer_urgent') }}</span>
                                 <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.prayer_urgent_desc') }}</p>
                             </div>
                         </label>
@@ -215,7 +214,7 @@
                             <input type="checkbox" name="is_public" value="1" checked
                                    class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500">
                             <div>
-                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">👥 {{ __('app.prayer_public') }}</span>
+                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('app.prayer_public') }}</span>
                                 <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.prayer_public_desc') }}</p>
                             </div>
                         </label>
@@ -224,7 +223,7 @@
                             <input type="checkbox" name="is_anonymous" value="1"
                                    class="w-4 h-4 text-gray-600 border-gray-300 rounded focus:ring-gray-500">
                             <div>
-                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">🎭 {{ __('app.prayer_anonymous') }}</span>
+                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('app.prayer_anonymous') }}</span>
                                 <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.prayer_anonymous_desc') }}</p>
                             </div>
                         </label>

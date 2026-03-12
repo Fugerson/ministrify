@@ -284,7 +284,7 @@
                                                         </div>
                                                     </template>
                                                     <template x-if="getCellNotes(ministry.id, row.role, event.id)">
-                                                        <div class="text-[10px] text-amber-500 dark:text-amber-400 truncate max-w-[120px] mt-0.5" :title="getCellNotes(ministry.id, row.role, event.id)" x-text="'💬 ' + getCellNotes(ministry.id, row.role, event.id)"></div>
+                                                        <div class="text-[10px] text-amber-500 dark:text-amber-400 truncate max-w-[120px] mt-0.5" :title="getCellNotes(ministry.id, row.role, event.id)" x-text="getCellNotes(ministry.id, row.role, event.id)"></div>
                                                     </template>
                                                     <template x-if="getCellPersons(ministry.id, row.role, event.id).length === 0">
                                                         <div class="flex items-center justify-center w-full h-full">

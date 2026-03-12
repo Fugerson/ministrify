@@ -95,15 +95,15 @@
 
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 @foreach([
-                    ['name' => __('app.ministry_worship'), 'icon' => '🎸'],
-                    ['name' => __('app.ministry_sound_tech'), 'icon' => '🎧'],
-                    ['name' => __('app.ministry_kids_church'), 'icon' => '👶'],
-                    ['name' => __('app.ministry_greeting'), 'icon' => '👋'],
-                    ['name' => __('app.ministry_youth'), 'icon' => '🔥'],
-                    ['name' => __('app.ministry_media'), 'icon' => '📸'],
-                    ['name' => __('app.ministry_prayer'), 'icon' => '🙏'],
-                    ['name' => __('app.ministry_care'), 'icon' => '❤️'],
-                    ['name' => __('app.ministry_evangelism'), 'icon' => '📖'],
+                    ['name' => __('app.ministry_worship')],
+                    ['name' => __('app.ministry_sound_tech')],
+                    ['name' => __('app.ministry_kids_church')],
+                    ['name' => __('app.ministry_greeting')],
+                    ['name' => __('app.ministry_youth')],
+                    ['name' => __('app.ministry_media')],
+                    ['name' => __('app.ministry_prayer')],
+                    ['name' => __('app.ministry_care')],
+                    ['name' => __('app.ministry_evangelism')],
                 ] as $suggestion)
                     <button type="button"
                             @click="toggleMinistry('{{ $suggestion['name'] }}')"
@@ -111,7 +111,6 @@
                                 ? 'bg-gradient-to-r from-primary-500 to-primary-700 text-white border-transparent shadow-lg shadow-primary-500/30 scale-[1.02]'
                                 : 'bg-white dark:bg-slate-700 border-gray-200 dark:border-slate-600 text-gray-700 dark:text-gray-300 hover:border-primary-300 dark:hover:border-primary-600 hover:shadow-md'"
                             class="relative flex items-center gap-2 px-4 py-3 border rounded-xl text-sm font-medium transition-all duration-200">
-                        <span class="text-lg">{{ $suggestion['icon'] }}</span>
                         <span>{{ $suggestion['name'] }}</span>
                         <span x-show="isSelected('{{ $suggestion['name'] }}')"
                               class="absolute -top-1.5 -right-1.5 w-5 h-5 bg-green-500 text-white rounded-full flex items-center justify-center shadow-md">

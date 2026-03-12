@@ -439,7 +439,7 @@
                                                class="block px-1.5 py-0.5 rounded text-xs truncate transition-colors hover:opacity-80 {{ $isPast && !$isToday ? 'opacity-60' : '' }}"
                                                style="background-color: {{ $item->ministry?->color ?? '#8b5cf6' }}30; color: {{ $item->ministry?->color ?? '#8b5cf6' }};">
                                                 <span class="hidden lg:inline">{{ $item->time ? \Carbon\Carbon::parse($item->time)->format('H:i') : '' }}</span>
-                                                📋 {{ Str::limit($item->title, 12) }}
+                                                {{ Str::limit($item->title, 12) }}
                                             </a>
                                         @else
                                             <a href="{{ route('events.show', $item->original) }}"

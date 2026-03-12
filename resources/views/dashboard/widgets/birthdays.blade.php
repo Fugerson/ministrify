@@ -4,7 +4,7 @@
     <div class="flex items-center justify-between mb-3">
         <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-pink-100 dark:bg-pink-900 flex items-center justify-center">
-                <span class="text-xl">🎂</span>
+                <svg class="w-5 h-5 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 15.546c-.523 0-1.046.151-1.5.454a2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0A1.75 1.75 0 003 15.546V12a9 9 0 0118 0v3.546zM12 3v2m0 0a3 3 0 013 3H9a3 3 0 013-3z"/></svg>
             </div>
             <div>
                 <h3 class="font-semibold text-gray-900 dark:text-white">{{ __('app.birthdays_title') }}</h3>
@@ -46,7 +46,7 @@
                 <div>
                     <p class="text-sm font-medium text-gray-900 dark:text-white">
                         <span x-text="person.name"></span>
-                        <template x-if="person.is_today"><span class="ml-1">🎉</span></template>
+                        <template x-if="person.is_today"><span class="ml-1 text-yellow-500 font-bold">!</span></template>
                     </p>
                     <p class="text-xs" :class="person.is_today ? 'text-yellow-600 dark:text-yellow-400 font-medium' : 'text-gray-500 dark:text-gray-400'" x-text="person.is_today ? todayExcl : person.day + ' ' + person.month_short"></p>
                 </div>

@@ -14,8 +14,7 @@
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
-                <span class="text-2xl mr-2">🙏</span>
-                {{ __('app.prayer_new_title') }}
+                                {{ __('app.prayer_new_title') }}
             </h2>
         </div>
 
@@ -50,7 +49,7 @@
                     <input type="checkbox" name="is_urgent" value="1" {{ old('is_urgent') ? 'checked' : '' }}
                            class="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500">
                     <div>
-                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">🔥 {{ __('app.prayer_urgent') }}</span>
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('app.prayer_urgent') }}</span>
                         <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.prayer_urgent_desc') }}</p>
                     </div>
                 </label>
@@ -59,7 +58,7 @@
                     <input type="checkbox" name="is_public" value="1" {{ old('is_public', true) ? 'checked' : '' }}
                            class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500">
                     <div>
-                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">👥 {{ __('app.prayer_public') }}</span>
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('app.prayer_public') }}</span>
                         <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.prayer_public_desc') }}</p>
                     </div>
                 </label>
@@ -68,7 +67,7 @@
                     <input type="checkbox" name="is_anonymous" value="1" {{ old('is_anonymous') ? 'checked' : '' }}
                            class="w-4 h-4 text-gray-600 border-gray-300 rounded focus:ring-gray-500">
                     <div>
-                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">🎭 {{ __('app.prayer_anonymous') }}</span>
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('app.prayer_anonymous') }}</span>
                         <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.prayer_anonymous_desc') }}</p>
                     </div>
                 </label>

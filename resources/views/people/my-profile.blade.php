@@ -749,12 +749,11 @@
                             <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $assignment->event->date->format('d.m') }} - {{ $assignment->event->ministry?->name ?? $assignment->event->title }}</p>
                             <p class="text-xs text-gray-500 dark:text-gray-400">{{ $assignment->position?->name }}</p>
                         </div>
-                        <span class="text-lg">
-                            @if($assignment->status === 'confirmed') ✅
-                            @elseif($assignment->status === 'declined') ❌
-                            @else ⏳
-                            @endif
-                        </span>
+                        <span class="w-3 h-3 rounded-full inline-block
+                            @if($assignment->status === 'confirmed') bg-green-500
+                            @elseif($assignment->status === 'declined') bg-red-500
+                            @else bg-yellow-500
+                            @endif"></span>
                     </div>
                     @endif
                     @endforeach
@@ -785,16 +784,9 @@
                     @foreach($activeBlockouts as $blockout)
                     <div class="flex items-center gap-3 py-2 border-b border-gray-200 dark:border-gray-700 last:border-0">
                         <div class="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
-                            <span class="text-sm">
-                                @switch($blockout->reason)
-                                    @case('vacation') 🏖️ @break
-                                    @case('travel') ✈️ @break
-                                    @case('sick') 🏥 @break
-                                    @case('family') 👨‍👩‍👧 @break
-                                    @case('work') 💼 @break
-                                    @default 📅
-                                @endswitch
-                            </span>
+                            <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
+                            </svg>
                         </div>
                         <div class="flex-1">
                             <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $blockout->date_range }}</p>

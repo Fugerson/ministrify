@@ -590,7 +590,7 @@
             <div class="mt-5 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-800">
                 <p class="text-sm font-medium text-blue-900 dark:text-blue-300 mb-3">{{ __('app.settings_tg_capabilities') }}</p>
 
-                <p class="text-xs font-medium text-blue-800 dark:text-blue-200 mb-1">📬 {{ __('app.settings_tg_notifications') }}</p>
+                <p class="text-xs font-medium text-blue-800 dark:text-blue-200 mb-1">{{ __('app.settings_tg_notifications') }}</p>
                 <ul class="text-sm text-blue-700 dark:text-blue-400 space-y-1 mb-3">
                     <li>• {{ __('app.settings_tg_notif_new_assignment') }}</li>
                     <li>• {{ __('app.settings_tg_notif_day_before') }}</li>
@@ -599,14 +599,14 @@
                     <li>• {{ __('app.settings_tg_notif_leader_decline') }}</li>
                 </ul>
 
-                <p class="text-xs font-medium text-blue-800 dark:text-blue-200 mb-1">✅ {{ __('app.settings_tg_confirmations') }}</p>
+                <p class="text-xs font-medium text-blue-800 dark:text-blue-200 mb-1">{{ __('app.settings_tg_confirmations') }}</p>
                 <ul class="text-sm text-blue-700 dark:text-blue-400 space-y-1 mb-3">
                     <li>• {{ __('app.settings_tg_confirm_buttons') }}</li>
                     <li>• {{ __('app.settings_tg_confirm_responsibilities') }}</li>
                     <li>• {{ __('app.settings_tg_confirm_plan') }}</li>
                 </ul>
 
-                <p class="text-xs font-medium text-blue-800 dark:text-blue-200 mb-1">📋 {{ __('app.settings_tg_commands') }}</p>
+                <p class="text-xs font-medium text-blue-800 dark:text-blue-200 mb-1">{{ __('app.settings_tg_commands') }}</p>
                 <ul class="text-sm text-blue-700 dark:text-blue-400 space-y-1 mb-3">
                     <li>• <code class="bg-blue-100 dark:bg-blue-800 px-1 rounded">/schedule</code> — {{ __('app.settings_tg_cmd_schedule') }}</li>
                     <li>• <code class="bg-blue-100 dark:bg-blue-800 px-1 rounded">/next</code> — {{ __('app.settings_tg_cmd_next') }}</li>
@@ -614,7 +614,7 @@
                     <li>• <code class="bg-blue-100 dark:bg-blue-800 px-1 rounded">/help</code> — {{ __('app.settings_tg_cmd_help') }}</li>
                 </ul>
 
-                <p class="text-xs font-medium text-blue-800 dark:text-blue-200 mb-1">🔗 {{ __('app.settings_tg_connection') }}</p>
+                <p class="text-xs font-medium text-blue-800 dark:text-blue-200 mb-1">{{ __('app.settings_tg_connection') }}</p>
                 <ul class="text-sm text-blue-700 dark:text-blue-400 space-y-1">
                     <li>• {{ __('app.settings_tg_connect_username') }}</li>
                     <li>• {{ __('app.settings_tg_connect_code') }}</li>

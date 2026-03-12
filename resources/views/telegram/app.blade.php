@@ -263,7 +263,7 @@
     <!-- Not linked state -->
     <template x-if="!person && !loadingInit">
         <div class="error-banner">
-            <div style="font-size: 48px; margin-bottom: 16px;">🔗</div>
+            <div style="font-size: 48px; margin-bottom: 16px;"></div>
             <h2 x-text="_tmaI18n.account_not_linked"></h2>
             <p x-html="_tmaI18n.link_instructions"></p>
         </div>
@@ -283,14 +283,14 @@
             <div class="tab-content" x-show="tab === 'events'" x-cloak>
                 <div class="section-header">
                     <span x-text="_tmaI18n.upcoming_events"></span>
-                    <button class="btn-refresh" @click="refreshTab('events')">↻</button>
+                    <button class="btn-refresh" @click="refreshTab('events')">&#8635;</button>
                 </div>
                 <template x-if="loading.events">
                     <div class="loading"><div class="spinner"></div></div>
                 </template>
                 <template x-if="!loading.events && events.length === 0">
                     <div class="empty-state">
-                        <div class="empty-state-icon">📅</div>
+                        <div class="empty-state-icon"></div>
                         <span x-text="_tmaI18n.no_events_30days"></span>
                     </div>
                 </template>
@@ -312,8 +312,8 @@
                                             <span x-show="event.is_service" class="badge badge-service" x-text="event.service_type || _tmaI18n.tab_assignments"></span>
                                         </div>
                                         <div class="card-meta" style="display: flex; gap: 12px; flex-wrap: wrap;">
-                                            <span x-show="event.time">🕐 <span x-text="event.time + (event.end_time ? ' — ' + event.end_time : '')"></span></span>
-                                            <span x-show="event.location">📍 <span x-text="event.location"></span></span>
+                                            <span x-show="event.time"><span x-text="event.time + (event.end_time ? ' — ' + event.end_time : '')"></span></span>
+                                            <span x-show="event.location"><span x-text="event.location"></span></span>
                                         </div>
                                         <div class="expand-text" x-show="event._expanded && event.notes" x-text="event.notes" x-transition></div>
                                     </div>
@@ -328,14 +328,14 @@
             <div class="tab-content" x-show="tab === 'assignments'" x-cloak>
                 <div class="section-header">
                     <span x-text="_tmaI18n.my_assignments"></span>
-                    <button class="btn-refresh" @click="refreshTab('assignments')">↻</button>
+                    <button class="btn-refresh" @click="refreshTab('assignments')">&#8635;</button>
                 </div>
                 <template x-if="loading.assignments">
                     <div class="loading"><div class="spinner"></div></div>
                 </template>
                 <template x-if="!loading.assignments && allAssignmentsEmpty">
                     <div class="empty-state">
-                        <div class="empty-state-icon">✨</div>
+                        <div class="empty-state-icon"></div>
                         <span x-text="_tmaI18n.no_active_assignments"></span>
                     </div>
                 </template>
@@ -351,8 +351,8 @@
                             <span class="badge" :class="'badge-' + item.status" x-text="item.status_label"></span>
                         </div>
                         <div class="card-meta" style="display: flex; gap: 12px; flex-wrap: wrap;">
-                            <span>📅 <span x-text="item.event.date_formatted"></span></span>
-                            <span x-show="item.event.time">🕐 <span x-text="item.event.time"></span></span>
+                            <span><span x-text="item.event.date_formatted"></span></span>
+                            <span x-show="item.event.time"><span x-text="item.event.time"></span></span>
                             <span x-show="item.event.ministry" x-text="item.event.ministry?.name"></span>
                         </div>
                         <div class="btn-group" x-show="item.status === 'pending'">
@@ -376,8 +376,8 @@
                             <span class="badge" :class="'badge-' + item.status" x-text="item.status_label"></span>
                         </div>
                         <div class="card-meta" style="display: flex; gap: 12px;">
-                            <span>📅 <span x-text="item.event.date_formatted"></span></span>
-                            <span x-show="item.event.time">🕐 <span x-text="item.event.time"></span></span>
+                            <span><span x-text="item.event.date_formatted"></span></span>
+                            <span x-show="item.event.time"><span x-text="item.event.time"></span></span>
                         </div>
                         <div class="btn-group" x-show="item.status === 'pending'">
                             <button class="btn btn-confirm btn-sm" @click="confirmResponsibility(item.id)" :disabled="item._loading">✓ <span x-text="_tmaI18n.confirm"></span></button>
@@ -402,12 +402,12 @@
                             <span class="badge" :class="'badge-' + item.status" x-text="statusLabel(item.status)"></span>
                         </div>
                         <div x-show="item.song" class="badge badge-song" style="margin-top: 6px;">
-                            🎵 <span x-text="item.song?.title"></span>
+                            <span x-text="item.song?.title"></span>
                             <span x-show="item.song?.key" x-text="'(' + item.song?.key + ')'"></span>
                         </div>
                         <div class="card-meta" style="display: flex; gap: 12px; flex-wrap: wrap;">
-                            <span>📅 <span x-text="item.event.date_formatted"></span></span>
-                            <span x-show="item.event.time">🕐 <span x-text="item.event.time"></span></span>
+                            <span><span x-text="item.event.date_formatted"></span></span>
+                            <span x-show="item.event.time"><span x-text="item.event.time"></span></span>
                         </div>
                         <div class="btn-group" x-show="item.status === 'pending'">
                             <button class="btn btn-confirm btn-sm" @click="confirmPlanItem(item.id)" :disabled="item._loading">✓ <span x-text="_tmaI18n.confirm"></span></button>
@@ -421,14 +421,14 @@
             <div class="tab-content" x-show="tab === 'announcements'" x-cloak>
                 <div class="section-header">
                     <span x-text="_tmaI18n.announcements"></span>
-                    <button class="btn-refresh" @click="refreshTab('announcements')">↻</button>
+                    <button class="btn-refresh" @click="refreshTab('announcements')">&#8635;</button>
                 </div>
                 <template x-if="loading.announcements">
                     <div class="loading"><div class="spinner"></div></div>
                 </template>
                 <template x-if="!loading.announcements && announcements.length === 0">
                     <div class="empty-state">
-                        <div class="empty-state-icon">📢</div>
+                        <div class="empty-state-icon"></div>
                         <span x-text="_tmaI18n.no_announcements"></span>
                     </div>
                 </template>
@@ -437,7 +437,7 @@
                         <div class="card-header">
                             <div class="card-title" x-text="a.title"></div>
                             <div style="display: flex; gap: 4px;">
-                                <span x-show="a.is_pinned" class="badge badge-pin">📌</span>
+                                <span x-show="a.is_pinned" class="badge badge-pin"><span x-text="_tmaI18n.pinned || 'Pin'"></span></span>
                             </div>
                         </div>
                         <div class="card-text" x-html="formatText(a.content)"></div>
@@ -450,14 +450,14 @@
             <div class="tab-content" x-show="tab === 'prayers'" x-cloak>
                 <div class="section-header">
                     <span x-text="_tmaI18n.prayer_needs"></span>
-                    <button class="btn-refresh" @click="refreshTab('prayers')">↻</button>
+                    <button class="btn-refresh" @click="refreshTab('prayers')">&#8635;</button>
                 </div>
                 <template x-if="loading.prayers">
                     <div class="loading"><div class="spinner"></div></div>
                 </template>
                 <template x-if="!loading.prayers && prayers.length === 0">
                     <div class="empty-state">
-                        <div class="empty-state-icon">🙏</div>
+                        <div class="empty-state-icon"></div>
                         <span x-text="_tmaI18n.no_active_prayers"></span>
                     </div>
                 </template>
@@ -465,7 +465,7 @@
                     <div class="card">
                         <div class="card-header">
                             <div class="card-title" x-text="p.title"></div>
-                            <span x-show="p.is_urgent" class="badge badge-urgent">🔥 <span x-text="_tmaI18n.urgent"></span></span>
+                            <span x-show="p.is_urgent" class="badge badge-urgent"><span x-text="_tmaI18n.urgent"></span></span>
                         </div>
                         <div class="card-text" x-text="p.description"></div>
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
@@ -473,9 +473,9 @@
                                 <span x-text="p.author_name"></span> · <span x-text="p.created_at"></span>
                             </div>
                             <div style="display: flex; align-items: center; gap: 8px;">
-                                <span style="font-size: 13px; color: var(--tg-hint);">🙏 <span x-text="p.prayer_count"></span></span>
+                                <span style="font-size: 13px; color: var(--tg-hint);"><span x-text="p.prayer_count"></span></span>
                                 <button class="btn btn-pray btn-sm" @click="pray(p)" :disabled="p._prayed">
-                                    <span x-text="p._prayed ? ('✓ ' + _tmaI18n.prayed) : ('🙏 ' + _tmaI18n.pray)"></span>
+                                    <span x-text="p._prayed ? _tmaI18n.prayed : _tmaI18n.pray"></span>
                                 </button>
                             </div>
                         </div>
@@ -527,9 +527,9 @@
                                     <div class="card">
                                         <div class="card-title" x-text="g.name"></div>
                                         <div class="card-meta" style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 4px;">
-                                            <span x-show="g.meeting_day">📅 <span x-text="g.meeting_day"></span></span>
-                                            <span x-show="g.meeting_time">🕐 <span x-text="g.meeting_time"></span></span>
-                                            <span x-show="g.meeting_location">📍 <span x-text="g.meeting_location"></span></span>
+                                            <span x-show="g.meeting_day"><span x-text="g.meeting_day"></span></span>
+                                            <span x-show="g.meeting_time"><span x-text="g.meeting_time"></span></span>
+                                            <span x-show="g.meeting_location"><span x-text="g.meeting_location"></span></span>
                                         </div>
                                     </div>
                                 </template>
@@ -554,8 +554,8 @@
 
                         <!-- Birthdays -->
                         <div class="section-header">
-                            <span>🎂 <span x-text="_tmaI18n.birthdays"></span></span>
-                            <button class="btn-refresh" @click="loadBirthdays()">↻</button>
+                            <span><span x-text="_tmaI18n.birthdays"></span></span>
+                            <button class="btn-refresh" @click="loadBirthdays()">&#8635;</button>
                         </div>
                         <template x-if="loading.birthdays">
                             <div class="loading"><div class="spinner"></div></div>
@@ -576,7 +576,7 @@
                                             </div>
                                         </div>
                                         <div>
-                                            <span x-show="b.is_today" class="badge badge-today" x-text="'🎉 ' + _tmaI18n.today"></span>
+                                            <span x-show="b.is_today" class="badge badge-today" x-text="_tmaI18n.today"></span>
                                             <span x-show="!b.is_today" style="font-size: 12px; color: var(--tg-hint);" x-text="_tmaI18n.in_days.replace(':days', b.days_until)"></span>
                                         </div>
                                     </div>

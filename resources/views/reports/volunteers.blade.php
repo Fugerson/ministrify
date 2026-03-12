@@ -42,7 +42,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Top Volunteers -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">🏆 {{ __('app.reports_top_volunteers') }}</h3>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.reports_top_volunteers') }}</h3>
             <div class="space-y-3">
                 @foreach($topVolunteers as $index => $person)
                     <div class="flex items-center justify-between p-3 rounded-lg {{ $index < 3 ? 'bg-yellow-50 dark:bg-yellow-900/20' : 'bg-gray-50 dark:bg-gray-700/50' }}">

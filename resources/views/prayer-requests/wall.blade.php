@@ -5,7 +5,7 @@
 @section('content')
 <div class="max-w-4xl mx-auto">
     <div class="text-center mb-8">
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">🙏 {{ __('app.prayer_wall') }}</h1>
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">{{ __('app.prayer_wall') }}</h1>
         <p class="text-gray-600 dark:text-gray-400">{{ __('app.prayer_wall_subtitle') }}</p>
     </div>
 
@@ -23,7 +23,7 @@
                         <div class="flex-1">
                             @if($request->is_urgent)
                                 <span class="inline-block px-2 py-1 bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 text-xs font-medium rounded-full mb-2">
-                                    🔥 {{ __('app.prayer_badge_urgent') }}
+                                    {{ __('app.prayer_badge_urgent') }}
                                 </span>
                             @endif
                             <h3 class="font-semibold text-gray-900 dark:text-white">{{ $request->title }}</h3>
@@ -38,7 +38,7 @@
                                     :disabled="prayed"
                                     class="flex flex-col items-center px-3 py-2 bg-primary-50 hover:bg-primary-100 dark:bg-primary-900/20 dark:hover:bg-primary-900/40 text-primary-600 dark:text-primary-400 rounded-lg transition-colors"
                                     :class="{ 'opacity-50': prayed }">
-                                <span class="text-2xl">🙏</span>
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
                                 <span class="text-xs font-medium" x-text="prayerCount"></span>
                             </button>
                         </div>

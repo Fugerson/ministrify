@@ -169,7 +169,7 @@
                             <div class="w-8 h-8 rounded-lg flex items-center justify-center"
                                  style="background-color: {{ $ministry->color ?? '#3b82f6' }}30;">
                                 <span class="text-lg" style="color: {{ $ministry->color ?? '#3b82f6' }};">
-                                    {{ $ministry->icon ?? '⛪' }}
+                                    {{ mb_substr($ministry->name, 0, 1) }}
                                 </span>
                             </div>
                             <span class="font-medium text-gray-900 dark:text-white">{{ $ministry->name }}</span>

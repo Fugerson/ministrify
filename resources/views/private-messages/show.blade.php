@@ -49,7 +49,7 @@
                     <p class="text-xs mt-1 {{ $message->sender_id === auth()->id() ? 'text-primary-200' : 'text-gray-400' }}">
                         {{ $message->created_at->format('H:i') }}
                         @if($message->sender_id === auth()->id() && $message->read_at)
-                            <span class="ml-1">✓✓</span>
+                            <svg class="w-3 h-3 ml-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                         @endif
                     </p>
                 </div>

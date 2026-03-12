@@ -172,7 +172,7 @@
                                                 </template>
                                                 {{-- Cell-level notes icon --}}
                                                 <template x-if="getCellNotes(ministry.id, role, event.id)">
-                                                    <div class="text-[10px] text-amber-500 dark:text-amber-400 truncate max-w-[120px] mt-0.5" :title="getCellNotes(ministry.id, role, event.id)" x-text="'💬 ' + getCellNotes(ministry.id, role, event.id)"></div>
+                                                    <div class="text-[10px] text-amber-500 dark:text-amber-400 truncate max-w-[120px] mt-0.5" :title="getCellNotes(ministry.id, role, event.id)" x-text="getCellNotes(ministry.id, role, event.id)"></div>
                                                 </template>
                                                 {{-- Empty cell --}}
                                                 <template x-if="getCellPersons(ministry.id, role, event.id).length === 0">

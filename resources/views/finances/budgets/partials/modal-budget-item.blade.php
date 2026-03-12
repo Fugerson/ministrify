@@ -47,7 +47,7 @@
                         <input type="text" x-model="itemForm.category_name" placeholder="{{ __('app.category_name_placeholder') }}"
                                class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
                         <button type="button" @click="itemForm.category_id = ''; itemForm.category_name = ''"
-                                class="px-3 py-2 text-gray-500 hover:text-red-500 border border-gray-300 dark:border-gray-600 rounded-lg">✕</button>
+                                class="px-3 py-2 text-gray-500 hover:text-red-500 border border-gray-300 dark:border-gray-600 rounded-lg">&times;</button>
                     </div>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('app.category_auto_hint') }}</p>
                 </div>

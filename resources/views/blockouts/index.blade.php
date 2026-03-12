@@ -44,32 +44,16 @@
                 <div class="flex-1">
                     <div class="flex items-center gap-3">
                         <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
-                            @switch($blockout->reason)
-                                @case('vacation')
-                                    <span class="text-xl">🏖️</span>
-                                    @break
-                                @case('travel')
-                                    <span class="text-xl">✈️</span>
-                                    @break
-                                @case('sick')
-                                    <span class="text-xl">🏥</span>
-                                    @break
-                                @case('family')
-                                    <span class="text-xl">👨‍👩‍👧</span>
-                                    @break
-                                @case('work')
-                                    <span class="text-xl">💼</span>
-                                    @break
-                                @default
-                                    <span class="text-xl">📅</span>
-                            @endswitch
+                            <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
+                            </svg>
                         </div>
                         <div>
                             <div class="flex items-center gap-2">
                                 <span class="font-medium text-gray-900 dark:text-white">{{ $blockout->date_range }}</span>
                                 @if($blockout->recurrence !== 'none')
                                 <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
-                                    🔄 {{ \App\Models\BlockoutDate::RECURRENCE_OPTIONS[$blockout->recurrence] }}
+                                    {{ \App\Models\BlockoutDate::RECURRENCE_OPTIONS[$blockout->recurrence] }}
                                 </span>
                                 @endif
                             </div>

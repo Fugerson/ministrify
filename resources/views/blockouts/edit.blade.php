@@ -106,16 +106,7 @@
                            class="sr-only"
                            onchange="updateReasonSelection()">
                     <div class="text-center">
-                        <span class="text-2xl block mb-1">
-                            @switch($value)
-                                @case('vacation') 🏖️ @break
-                                @case('travel') ✈️ @break
-                                @case('sick') 🏥 @break
-                                @case('family') 👨‍👩‍👧 @break
-                                @case('work') 💼 @break
-                                @default 📅
-                            @endswitch
-                        </span>
+                        <span class="text-sm font-bold block mb-1 text-gray-500 dark:text-gray-400 uppercase">{{ mb_substr($label, 0, 3) }}</span>
                         <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $label }}</span>
                     </div>
                     <div class="absolute top-2 right-2 {{ old('reason', $blockout->reason) === $value ? '' : 'hidden' }} check-icon">

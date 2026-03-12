@@ -19,12 +19,12 @@
                     <div class="flex items-center gap-2 mb-2">
                         @if($prayerRequest->is_urgent)
                             <span class="px-2 py-1 bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 text-xs font-medium rounded-full">
-                                🔥 {{ __('app.prayer_badge_urgent') }}
+                                {{ __('app.prayer_badge_urgent') }}
                             </span>
                         @endif
                         @if(!$prayerRequest->is_public)
                             <span class="px-2 py-1 bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400 text-xs font-medium rounded-full">
-                                🔒 {{ __('app.prayer_badge_private') }}
+                                {{ __('app.prayer_badge_private') }}
                             </span>
                         @endif
                         <span id="prayer-status-badge" class="px-2 py-1 bg-{{ $prayerRequest->status_color }}-100 text-{{ $prayerRequest->status_color }}-700 dark:bg-{{ $prayerRequest->status_color }}-900/30 dark:text-{{ $prayerRequest->status_color }}-400 text-xs font-medium rounded-full">
@@ -53,7 +53,7 @@
 
             <div class="mt-6 flex items-center text-sm text-gray-500 dark:text-gray-400">
                 <div class="w-8 h-8 bg-primary-100 dark:bg-primary-900/30 rounded-full flex items-center justify-center mr-3">
-                    <span>🙏</span>
+                    <svg class="w-4 h-4 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
                 </div>
                 <div>
                     <p class="font-medium text-gray-900 dark:text-white">{{ $prayerRequest->author_name }}</p>
@@ -80,8 +80,7 @@
         <div class="px-4 sm:px-6 py-3 sm:py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
-                    <span class="text-xl mr-2">🙏</span>
-                    <span>{{ trans_choice(__('app.prayer_people_praying'), $prayerRequest->prayer_count, ['count' => $prayerRequest->prayer_count]) }}</span>
+                                        <span>{{ trans_choice(__('app.prayer_people_praying'), $prayerRequest->prayer_count, ['count' => $prayerRequest->prayer_count]) }}</span>
                 </div>
 
                 <div id="prayer-actions" class="flex items-center space-x-3" x-data="{ prayed: {{ $hasPrayed ? 'true' : 'false' }}, prayerCount: {{ $prayerRequest->prayer_count }} }">
@@ -91,14 +90,14 @@
                                 :disabled="prayed"
                                 class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-medium text-sm transition-colors"
                                 :class="{ 'opacity-50 cursor-not-allowed': prayed }">
-                            🙏 <span x-text="prayed ? @json(__('app.prayer_already_prayed')) : @json(__('app.prayer_pray_for_this'))"></span>
+                            <span x-text="prayed ? @json(__('app.prayer_already_prayed')) : @json(__('app.prayer_pray_for_this'))"></span>
                         </button>
 
                         @if($prayerRequest->user_id === auth()->id() || auth()->user()->hasRole(['admin', 'leader']))
                             <button type="button"
                                     onclick="document.getElementById('answerModal').classList.remove('hidden')"
                                     class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium text-sm transition-colors">
-                                ✓ {{ __('app.prayer_answer_received') }}
+                                {{ __('app.prayer_answer_received') }}
                             </button>
                         @endif
                     @endif

@@ -46,7 +46,7 @@
             </select>
 
             <button @click="clearFilters()" x-show="hasFilters" x-cloak class="text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
-                ✕
+                &times;
             </button>
 
             <!-- Divider -->

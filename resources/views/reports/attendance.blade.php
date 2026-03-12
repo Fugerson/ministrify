@@ -67,7 +67,7 @@
 
         <!-- Top Attendees -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">🏆 {{ __('app.reports_top_attendees') }}</h3>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.reports_top_attendees') }}</h3>
             <div class="space-y-3">
                 @foreach($topAttendees as $index => $person)
                     <div class="flex items-center justify-between">

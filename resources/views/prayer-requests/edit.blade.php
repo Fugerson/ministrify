@@ -48,19 +48,19 @@
                 <label class="flex items-center space-x-3 cursor-pointer">
                     <input type="checkbox" name="is_urgent" value="1" {{ old('is_urgent', $prayerRequest->is_urgent) ? 'checked' : '' }}
                            class="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500">
-                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">🔥 {{ __('app.prayer_urgent') }}</span>
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('app.prayer_urgent') }}</span>
                 </label>
 
                 <label class="flex items-center space-x-3 cursor-pointer">
                     <input type="checkbox" name="is_public" value="1" {{ old('is_public', $prayerRequest->is_public) ? 'checked' : '' }}
                            class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500">
-                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">👥 {{ __('app.prayer_public') }}</span>
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('app.prayer_public') }}</span>
                 </label>
 
                 <label class="flex items-center space-x-3 cursor-pointer">
                     <input type="checkbox" name="is_anonymous" value="1" {{ old('is_anonymous', $prayerRequest->is_anonymous) ? 'checked' : '' }}
                            class="w-4 h-4 text-gray-600 border-gray-300 rounded focus:ring-gray-500">
-                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">🎭 {{ __('app.prayer_anonymous') }}</span>
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('app.prayer_anonymous') }}</span>
                 </label>
             </div>
 

@@ -182,7 +182,7 @@
                             <div class="relative" x-data="{ open: false }">
                                 <button @click="open = !open" type="button"
                                         class="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg flex items-center gap-1">
-                                    📋 {{ __('app.schedule_template') }}
+                                    {{ __('app.schedule_template') }}
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                                     </svg>
@@ -217,13 +217,13 @@
                             {{-- Save as Template Button --}}
                             <button type="button" @click="showSaveModal = true"
                                     class="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="{{ __('app.schedule_save_as_template') }}">
-                                💾 {{ __('app.schedule_save') }}
+                                {{ __('app.schedule_save') }}
                             </button>
                             @endif
 
                             <a href="{{ route('events.plan.print', $event) }}" target="_blank"
                                class="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="{{ __('app.schedule_print') }}">
-                                🖨️ {{ __('app.schedule_print') }}
+                                {{ __('app.schedule_print') }}
                             </a>
 
                             {{-- Save Template Modal --}}
@@ -711,7 +711,7 @@
                                         @endforeach
                                     </div>
                                     @if($roleNote)
-                                        <div class="text-xs text-gray-400 dark:text-gray-500 mt-0.5 ml-0.5">💬 {{ $roleNote }}</div>
+                                        <div class="text-xs text-gray-400 dark:text-gray-500 mt-0.5 ml-0.5">{{ $roleNote }}</div>
                                     @endif
                                 </div>
                             @endforeach
@@ -1384,7 +1384,7 @@ function titleEditor(itemId, initialTitle, existingSongId = null) {
                 const song = SONGS_DATA.find(s => s.id == songId);
                 if (song) {
                     const keyBadge = song.key ? `<span class="ml-1 px-1.5 py-0.5 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-xs rounded font-mono">${escapeHtml(song.key)}</span>` : '';
-                    return `<a href="/songs/${song.id}" class="inline-flex items-center gap-1 text-primary-600 dark:text-primary-400 hover:underline font-medium whitespace-nowrap" onclick="event.stopPropagation()"><span>🎵</span><span>${escapeHtml(song.title)}</span>${keyBadge}</a>`;
+                    return `<a href="/songs/${song.id}" class="inline-flex items-center gap-1 text-primary-600 dark:text-primary-400 hover:underline font-medium whitespace-nowrap" onclick="event.stopPropagation()"><span>${escapeHtml(song.title)}</span>${keyBadge}</a>`;
                 }
                 return `<span class="text-red-500">' + @js(__("app.schedule_song_not_found") ) + '</span>`;
             });
@@ -1440,7 +1440,7 @@ function updateSongCellDOM(itemId, songId, title, songKey) {
                 <div class="flex items-center gap-2" x-data="{ editing: false }">
                     <template x-if="!editing">
                         <div class="flex items-center gap-2 cursor-pointer" @click="editing = true" title=@js( __('app.click_to_change_song') )>
-                            <span class="text-lg">🎵</span>
+                            <svg class="w-4 h-4 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>
                             <a href="/songs/${songId}" class="text-sm text-primary-600 dark:text-primary-400 hover:underline font-medium" @click.stop>${escapeHtml(title)}</a>
                             ${keyBadge}
                             <button type="button" @click.stop="if(confirm(@js(__('messages.confirm_remove_song')))) { updateFieldWithSong(${itemId}, null, ''); editing = false; }" class="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-500" title=@js( __("app.schedule_remove_song") )>
@@ -1525,7 +1525,7 @@ function showGlobalToast(message, type = 'success') {
 
     toast.className = `${bgColor} text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-3 transform translate-x-full transition-transform duration-300`;
     toast.innerHTML = `
-        <span class="text-lg">${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</span>
+        <span class="text-lg"></span>
         <span>${message}</span>
     `;
 
@@ -2417,10 +2417,10 @@ async function sendTelegramNotify(itemId, button) {
     };
 
     const statusIcons = {
-        'confirmed': '✅',
-        'pending': '⏳',
-        'declined': '❌',
-        'open': '📋'
+        'confirmed': '',
+        'pending': '',
+        'declined': '',
+        'open': ''
     };
 
     function showToast(message, type = 'success') {
@@ -2474,9 +2474,8 @@ async function sendTelegramNotify(itemId, button) {
             // Show toast for new responses
             if (data.new_responses && data.new_responses.length > 0) {
                 data.new_responses.forEach(resp => {
-                    const emoji = resp.status === 'confirmed' ? '✅' : '❌';
                     const action = resp.status === 'confirmed' ? @js( __("app.schedule_confirmed_action") ) : @js( __("app.schedule_declined_action") );
-                    showToast(`${emoji} ${resp.person_name} ${action}: ${resp.name}`, resp.status === 'confirmed' ? 'success' : 'error');
+                    showToast(`${resp.person_name} ${action}: ${resp.name}`, resp.status === 'confirmed' ? 'success' : 'error');
                 });
 
                 // Play notification sound (optional)

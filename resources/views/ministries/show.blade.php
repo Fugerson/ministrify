@@ -228,8 +228,8 @@
 
                                                 {{-- Summary bar --}}
                                                 <div class="px-3 py-1.5 flex items-center gap-3 text-[11px] text-gray-500 dark:text-gray-400 border-b border-gray-50 dark:border-gray-700/50">
-                                                    <span x-text="'🎵 ' + event.songsCount + ' ' + @js(__('app.songs_lowercase'))"></span>
-                                                    <span x-text="'👥 ' + event.teamCount"></span>
+                                                    <span x-text="event.songsCount + ' ' + @js(__('app.songs_lowercase'))"></span>
+                                                    <span x-text="event.teamCount"></span>
                                                 </div>
 
                                                 {{-- Card body: flat member list --}}
@@ -243,12 +243,11 @@
                                                     <template x-for="roleGroup in getEventRoles(event.id)" :key="'rg-'+event.id+'-'+roleGroup.roleId">
                                                         <template x-for="member in roleGroup.members" :key="'m-'+member.id">
                                                             <div class="flex items-center gap-1.5 py-0.5">
-                                                                <span x-show="roleGroup.roleIcon" x-text="roleGroup.roleIcon" class="text-xs flex-shrink-0" :title="roleGroup.roleName"></span>
-                                                                <span x-show="!roleGroup.roleIcon" class="w-4 h-4 flex-shrink-0 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center text-[9px] text-gray-500 dark:text-gray-400" x-text="roleGroup.roleName.charAt(0)"></span>
+                                                                <span class="w-4 h-4 flex-shrink-0 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center text-[9px] text-gray-500 dark:text-gray-400" x-text="roleGroup.roleName.charAt(0)"></span>
                                                                 <span class="text-xs text-gray-700 dark:text-gray-300 truncate" x-text="member.person_name"></span>
-                                                                <span x-show="member.status === 'confirmed'" class="text-[10px] flex-shrink-0">✅</span>
-                                                                <span x-show="member.status === 'declined'" class="text-[10px] flex-shrink-0">❌</span>
-                                                                <span x-show="member.status === 'pending'" class="text-[10px] flex-shrink-0">⏳</span>
+                                                                <span x-show="member.status === 'confirmed'" class="w-3 h-3 flex-shrink-0 rounded-full bg-green-500"></span>
+                                                                <span x-show="member.status === 'declined'" class="w-3 h-3 flex-shrink-0 rounded-full bg-red-500"></span>
+                                                                <span x-show="member.status === 'pending'" class="w-3 h-3 flex-shrink-0 rounded-full bg-yellow-500"></span>
                                                             </div>
                                                         </template>
                                                     </template>
@@ -289,8 +288,7 @@
                                                         <template x-for="role in gridData.roles" :key="'signup-'+event.id+'-'+role.id">
                                                             <button @click.stop="selfSignup(event.id, role.id)"
                                                                 class="w-full text-left px-3 py-1.5 text-xs text-gray-700 dark:text-gray-200 hover:bg-purple-50 dark:hover:bg-purple-900/30 flex items-center gap-2 transition-colors">
-                                                                <span x-show="role.icon" x-text="role.icon" class="text-sm"></span>
-                                                                <span x-show="!role.icon" class="w-4 h-4 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center text-[9px]" x-text="role.name.charAt(0)"></span>
+                                                                <span class="w-4 h-4 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center text-[9px]" x-text="role.name.charAt(0)"></span>
                                                                 <span x-text="role.name"></span>
                                                             </button>
                                                         </template>
@@ -1180,7 +1178,7 @@
                                             result.push({
                                                 roleId: role.id,
                                                 roleName: role.name,
-                                                roleIcon: role.icon,
+                                                roleIcon: role.name.charAt(0),
                                                 members: members
                                             });
                                         }
@@ -2028,7 +2026,7 @@
                                             <input type="text" x-model="itemForm.category_name" placeholder="{{ __('app.ministry_category_name_placeholder') }}"
                                                    class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
                                             <button type="button" @click="itemForm.category_id = ''; itemForm.category_name = ''"
-                                                    class="px-3 py-2 text-gray-500 hover:text-red-500 border border-gray-300 dark:border-gray-600 rounded-lg">✕</button>
+                                                    class="px-3 py-2 text-gray-500 hover:text-red-500 border border-gray-300 dark:border-gray-600 rounded-lg">&times;</button>
                                         </div>
                                         <p class="text-xs text-gray-500 mt-1">{{ __('app.ministry_category_auto_hint') }}</p>
                                     </div>
@@ -3862,7 +3860,7 @@
                     <hr class="border-gray-200 dark:border-gray-700">
 
                     <!-- Ministry Roles Settings (AJAX) -->
-                    <div x-data="ministryRolesManager()" x-init="init(@js($ministryRoles->map(fn($r) => ['id' => $r->id, 'name' => $r->name, 'icon' => $r->icon ?? '', 'color' => $r->color ?? '#3b82f6'])->values()), '{{ route('ministries.ministry-roles.store', $ministry) }}', '{{ url('ministries/' . $ministry->id . '/ministry-roles') }}')">
+                    <div x-data="ministryRolesManager()" x-init="init(@js($ministryRoles->map(fn($r) => ['id' => $r->id, 'name' => $r->name, 'color' => $r->color ?? '#3b82f6'])->values()), '{{ route('ministries.ministry-roles.store', $ministry) }}', '{{ url('ministries/' . $ministry->id . '/ministry-roles') }}')">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Ролі служіння</h3>
                         <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
                             @if($ministry->is_worship_ministry)
@@ -3881,7 +3879,7 @@
                                             <div class="flex items-center gap-3">
                                                 <div class="w-9 h-9 rounded-lg flex items-center justify-center text-base"
                                                      :style="`background-color: ${role.color}20; color: ${role.color}`"
-                                                     x-text="role.icon || role.name.charAt(0)"></div>
+                                                     x-text="role.name.charAt(0)"></div>
                                                 <span class="font-medium text-gray-900 dark:text-white text-sm" x-text="role.name"></span>
                                             </div>
                                             <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -3917,18 +3915,11 @@
                             <div class="p-3 border-t border-gray-200 dark:border-gray-600">
                                 <div class="flex flex-wrap gap-2">
                                     <input type="text" x-model="newName" placeholder="Назва ролі (напр. Камера, Звук)"
-                                           @keydown.enter.prevent="addRole(newName, newIcon, newColor)"
+                                           @keydown.enter.prevent="addRole(newName, newColor)"
                                            class="flex-1 min-w-[150px] px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                                    <div class="relative w-14">
-                                        <input type="text" x-model="newIcon" placeholder="🔧" maxlength="5"
-                                               class="w-full px-2 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-center">
-                                        <button type="button" x-show="newIcon" @click="newIcon = ''"
-                                                class="absolute -right-1 -top-1 w-4 h-4 bg-gray-300 dark:bg-gray-500 hover:bg-red-500 text-white rounded-full flex items-center justify-center text-[10px] leading-none transition-colors"
-                                                title="Очистити">×</button>
-                                    </div>
                                     <input type="color" x-model="newColor"
                                            class="w-10 h-10 rounded-lg border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                    <button type="button" @click="addRole(newName, newIcon, newColor)"
+                                    <button type="button" @click="addRole(newName, newColor)"
                                             :disabled="!newName || loading"
                                             class="px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 disabled:opacity-50 transition-colors">
                                         <span x-show="!loading">{{ __('app.add') }}</span>
@@ -3944,10 +3935,10 @@
                                 <h4 class="text-sm font-medium text-blue-800 dark:text-blue-300 mb-2">Швидке додавання:</h4>
                                 <div class="flex flex-wrap gap-2">
                                     <template x-for="def in availableDefaults" :key="def.name">
-                                        <button type="button" @click="addRole(def.name, def.icon, def.color)"
+                                        <button type="button" @click="addRole(def.name, def.color)"
                                                 :disabled="loading"
                                                 class="px-2.5 py-1 text-xs bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600 transition-colors disabled:opacity-50">
-                                            <span x-text="def.icon + ' ' + def.name"></span>
+                                            <span x-text="def.name"></span>
                                         </button>
                                     </template>
                                 </div>
@@ -3964,26 +3955,10 @@
                                         <input type="text" x-model="editName" @keydown.enter.prevent="saveEdit()"
                                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                                     </div>
-                                    <div class="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Іконка</label>
-                                            <div class="relative">
-                                                <input type="text" x-model="editIcon" maxlength="5"
-                                                       class="w-full px-3 py-2 pr-8 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-center">
-                                                <button type="button" x-show="editIcon" @click="editIcon = ''"
-                                                        class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 transition-colors"
-                                                        title="Очистити іконку">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                                    </svg>
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Колір</label>
-                                            <input type="color" x-model="editColor"
-                                                   class="w-full h-10 rounded-lg border border-gray-300 dark:border-gray-600 cursor-pointer">
-                                        </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Колір</label>
+                                        <input type="color" x-model="editColor"
+                                               class="w-full h-10 rounded-lg border border-gray-300 dark:border-gray-600 cursor-pointer">
                                     </div>
                                 </div>
                                 <div class="flex justify-end gap-2 mt-6">
@@ -4853,37 +4828,35 @@ function ministryRolesManager() {
         roles: [],
         defaultRoles: {!! $ministry->is_worship_ministry ? "
             [
-                {icon: '🎤', name: 'Ведучий вокал', color: '#dc2626'},
-                {icon: '🎤', name: 'Бек-вокал', color: '#f97316'},
-                {icon: '🎸', name: 'Акустична гітара', color: '#84cc16'},
-                {icon: '🎸', name: 'Електрогітара', color: '#22c55e'},
-                {icon: '🎸', name: 'Бас', color: '#14b8a6'},
-                {icon: '🥁', name: 'Барабани', color: '#06b6d4'},
-                {icon: '🎹', name: 'Клавіші', color: '#8b5cf6'},
-                {icon: '🎚', name: 'Звук', color: '#3b82f6'},
-                {icon: '💻', name: 'Медіа', color: '#6366f1'},
+                {name: 'Ведучий вокал', color: '#dc2626'},
+                {name: 'Бек-вокал', color: '#f97316'},
+                {name: 'Акустична гітара', color: '#84cc16'},
+                {name: 'Електрогітара', color: '#22c55e'},
+                {name: 'Бас', color: '#14b8a6'},
+                {name: 'Барабани', color: '#06b6d4'},
+                {name: 'Клавіші', color: '#8b5cf6'},
+                {name: 'Звук', color: '#3b82f6'},
+                {name: 'Медіа', color: '#6366f1'},
             ]" : "
             [
-                {icon: '📹', name: 'Камера 1', color: '#dc2626'},
-                {icon: '📹', name: 'Камера 2', color: '#f97316'},
-                {icon: '🎚', name: 'Звук', color: '#3b82f6'},
-                {icon: '💻', name: 'Стрім', color: '#8b5cf6'},
-                {icon: '📺', name: 'Презентація', color: '#22c55e'},
-                {icon: '☕', name: 'Бариста', color: '#92400e'},
-                {icon: '🙏', name: 'Привітання', color: '#ec4899'},
-                {icon: '🎤', name: 'Ведучий', color: '#14b8a6'},
+                {name: 'Камера 1', color: '#dc2626'},
+                {name: 'Камера 2', color: '#f97316'},
+                {name: 'Звук', color: '#3b82f6'},
+                {name: 'Стрім', color: '#8b5cf6'},
+                {name: 'Презентація', color: '#22c55e'},
+                {name: 'Бариста', color: '#92400e'},
+                {name: 'Привітання', color: '#ec4899'},
+                {name: 'Ведучий', color: '#14b8a6'},
             ]"
         !!},
         storeUrl: '',
         baseUrl: '',
         newName: '',
-        newIcon: '',
         newColor: '#3b82f6',
         loading: false,
         showEditModal: false,
         editId: null,
         editName: '',
-        editIcon: '',
         editColor: '',
 
         init(roles, storeUrl, baseUrl) {
@@ -4896,13 +4869,12 @@ function ministryRolesManager() {
             return this.defaultRoles.filter(d => !this.roles.some(r => r.name === d.name));
         },
 
-        async addRole(name, icon, color) {
+        async addRole(name, color) {
             if (!name || this.loading) return;
             this.loading = true;
 
             const formData = new FormData();
             formData.append('name', name);
-            formData.append('icon', icon || '');
             formData.append('color', color || '#3b82f6');
 
             try {
@@ -4917,9 +4889,8 @@ function ministryRolesManager() {
 
                 if (res.ok) {
                     const data = await res.json();
-                    this.roles.push({id: data.id, name, icon: icon || '', color: color || '#3b82f6'});
+                    this.roles.push({id: data.id, name, color: color || '#3b82f6'});
                     this.newName = '';
-                    this.newIcon = '';
                     this.newColor = '#3b82f6';
                 }
             } catch (e) {
@@ -4932,7 +4903,6 @@ function ministryRolesManager() {
         openEdit(role) {
             this.editId = role.id;
             this.editName = role.name;
-            this.editIcon = role.icon;
             this.editColor = role.color;
             this.showEditModal = true;
         },
@@ -4944,7 +4914,6 @@ function ministryRolesManager() {
             const formData = new FormData();
             formData.append('_method', 'PUT');
             formData.append('name', this.editName);
-            formData.append('icon', this.editIcon || '');
             formData.append('color', this.editColor || '#3b82f6');
 
             try {
@@ -4961,7 +4930,6 @@ function ministryRolesManager() {
                     const role = this.roles.find(r => r.id === this.editId);
                     if (role) {
                         role.name = this.editName;
-                        role.icon = this.editIcon || '';
                         role.color = this.editColor || '#3b82f6';
                     }
                     this.showEditModal = false;

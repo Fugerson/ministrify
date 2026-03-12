@@ -241,7 +241,7 @@
                             @if($recurringItems->isNotEmpty())
                             <tr class="bg-blue-50/50 dark:bg-blue-900/10">
                                 <td colspan="{{ auth()->user()->canEdit('finances') ? 6 : 5 }}" class="px-6 py-2">
-                                    <span class="text-xs font-semibold text-blue-700 dark:text-blue-300 uppercase tracking-wider">🔄 {{ __('app.budget_recurring_group') }}</span>
+                                    <span class="text-xs font-semibold text-blue-700 dark:text-blue-300 uppercase tracking-wider">{{ __('app.budget_recurring_group') }}</span>
                                 </td>
                             </tr>
                             @foreach($recurringItems as $cbi)
@@ -253,7 +253,7 @@
                             @if($onetimeItems->isNotEmpty())
                             <tr class="bg-amber-50/50 dark:bg-amber-900/10">
                                 <td colspan="{{ auth()->user()->canEdit('finances') ? 6 : 5 }}" class="px-6 py-2">
-                                    <span class="text-xs font-semibold text-amber-700 dark:text-amber-300 uppercase tracking-wider">☀️ {{ __('app.budget_onetime_group') }}</span>
+                                    <span class="text-xs font-semibold text-amber-700 dark:text-amber-300 uppercase tracking-wider">{{ __('app.budget_onetime_group') }}</span>
                                 </td>
                             </tr>
                             @foreach($onetimeItems as $cbi)
