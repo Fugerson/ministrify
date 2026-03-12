@@ -1806,21 +1806,21 @@
     @if(session('success'))
         <script>
             onPageReady(function() {
-                showToast('success', '{{ session('success') }}');
+                showToast('success', @js(session('success')));
             });
         </script>
     @endif
     @if(session('error'))
         <script>
             onPageReady(function() {
-                showToast('error', '{{ session('error') }}');
+                showToast('error', @js(session('error')));
             });
         </script>
     @endif
     @if(session('warning'))
         <script>
             onPageReady(function() {
-                showToast('warning', '{{ session('warning') }}');
+                showToast('warning', @js(session('warning')));
             });
         </script>
     @endif

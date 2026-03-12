@@ -136,10 +136,19 @@ class DesignController extends Controller
 
         $css = $validated['custom_css'];
         if ($css) {
-            // Strip any </style> tags and <script> injections to prevent XSS
-            $css = preg_replace('/<\s*\/?\s*style\b[^>]*>/i', '', $css);
-            $css = preg_replace('/<\s*script\b[^>]*>.*?<\s*\/\s*script\s*>/is', '', $css);
-            $css = preg_replace('/<\s*script\b/i', '', $css);
+            // Strip all HTML tags to prevent injection
+            $css = strip_tags($css);
+
+            // Remove dangerous CSS functions and properties
+            $dangerous = [
+                '/expression\s*\(/i',
+                '/javascript\s*:/i',
+                '/behavior\s*:/i',
+                '/-moz-binding\s*:/i',
+                '/@import\s+url\s*\(\s*["\']?\s*data:/i',
+                '/url\s*\(\s*["\']?\s*javascript:/i',
+            ];
+            $css = preg_replace($dangerous, '/* blocked */', $css);
         }
 
         $church->setPublicSiteSetting('custom_css', $css);

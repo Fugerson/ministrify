@@ -576,13 +576,13 @@ class BoardController extends Controller
 
             return response()->json([
                 'card' => $card,
-                'column_name' => $card->column->name,
-                'columns' => $card->column->board->columns,
+                'column_name' => $card->column?->name ?? '',
+                'columns' => $card->column?->board?->columns ?? [],
                 'comments' => $card->comments->map(fn($c) => [
                     'id' => $c->id,
                     'content' => $c->content,
-                    'user_name' => $c->user->name,
-                    'user_initial' => mb_substr($c->user->name, 0, 1),
+                    'user_name' => $c->user?->name ?? __('common.deleted'),
+                    'user_initial' => mb_substr($c->user?->name ?? '?', 0, 1),
                     'created_at' => $c->created_at->diffForHumans(),
                     'created_at_full' => $c->created_at->format('d.m.Y H:i'),
                     'updated_at' => $c->updated_at->diffForHumans(),
@@ -634,8 +634,8 @@ class BoardController extends Controller
                     'old_value' => $a->old_value,
                     'new_value' => $a->new_value,
                     'description' => $a->description,
-                    'user_name' => $a->user->name ?? 'Система',
-                    'user_initial' => mb_substr($a->user->name ?? 'С', 0, 1),
+                    'user_name' => $a->user?->name ?? 'Система',
+                    'user_initial' => mb_substr($a->user?->name ?? 'С', 0, 1),
                     'created_at' => $a->created_at->diffForHumans(),
                     'created_at_full' => $a->created_at->format('d.m.Y H:i'),
                     'metadata' => $a->metadata,

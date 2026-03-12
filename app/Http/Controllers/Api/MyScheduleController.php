@@ -23,7 +23,7 @@ class MyScheduleController extends Controller
             ], 200);
         }
 
-        $churchId = $user->church_id;
+        $churchId = $this->getCurrentChurch()->id;
 
         $responsibilities = $user->person->responsibilities()
             ->with(['event.ministry:id,name,color'])

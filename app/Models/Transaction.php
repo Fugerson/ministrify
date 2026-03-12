@@ -147,6 +147,16 @@ class Transaction extends Model
         static::saving(function (Transaction $transaction) {
             $transaction->calculateAmountUah();
         });
+
+        // Cascade soft-delete paired exchange transaction
+        static::deleting(function (Transaction $transaction) {
+            if ($transaction->source_type === self::SOURCE_EXCHANGE && $transaction->related_transaction_id) {
+                $related = self::find($transaction->related_transaction_id);
+                if ($related && !$related->trashed()) {
+                    $related->delete();
+                }
+            }
+        });
     }
 
     /**

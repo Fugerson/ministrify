@@ -113,9 +113,10 @@ class FinanceController extends Controller
         }
         $availableBalance = $currentBalance - $committedToTeams;
 
-        // Calculate balances per currency (all time) — include ALL transactions (exchanges are real currency movements)
+        // Calculate balances per currency (all time) — exclude exchange/allocation to avoid orphaned transaction imbalance
         $allTimeIncomeByCurrency = Transaction::where('church_id', $church->id)
             ->incoming()->completed()
+            ->whereNotIn('source_type', $excludeTypes)
             ->selectRaw('COALESCE(currency, "UAH") as currency, SUM(amount) as total')
             ->groupBy('currency')
             ->pluck('total', 'currency')
@@ -123,6 +124,7 @@ class FinanceController extends Controller
 
         $allTimeExpenseByCurrency = Transaction::where('church_id', $church->id)
             ->outgoing()->completed()
+            ->whereNotIn('source_type', $excludeTypes)
             ->selectRaw('COALESCE(currency, "UAH") as currency, SUM(amount) as total')
             ->groupBy('currency')
             ->pluck('total', 'currency')
@@ -256,14 +258,15 @@ class FinanceController extends Controller
         // === NEW: Active Campaigns ===
         $activeCampaigns = DonationCampaign::where('church_id', $church->id)
             ->where('is_active', true)
-            ->orderByDesc('created_at')
+            ->orderByDesc('start_date')
             ->limit(3)
             ->get();
 
         // === NEW: Payment Methods Breakdown ===
         $paymentMethodsQuery = Transaction::where('church_id', $church->id)
             ->incoming()
-            ->completed();
+            ->completed()
+            ->whereNotIn('source_type', $excludeTypes);
 
         if ($month) {
             $paymentMethodsQuery->forMonth($year, $month);
@@ -359,7 +362,7 @@ class FinanceController extends Controller
                     $t->ministry?->name ?? '-',
                     $t->description,
                     $t->person ? $t->person->first_name . ' ' . $t->person->last_name : '-',
-                    ($t->direction === 'in' ? '+' : '-') . number_format($t->amount, 2, ',', ''),
+                    ($t->direction === 'in' ? '+' : '-') . number_format($t->amount_uah ?? $t->amount, 2, ',', ''),
                     $t->currency ?? 'UAH',
                     Transaction::PAYMENT_METHODS[$t->payment_method] ?? $t->payment_method ?? '-',
                 ], ';');
@@ -411,7 +414,7 @@ class FinanceController extends Controller
             ->get();
 
         // Current balance (all time) - in UAH, excluding exchange/allocation (they net to ~0)
-        $excludeTypes = ['exchange', 'budget_allocation'];
+        $excludeTypes = ['exchange', 'allocation'];
         $currentBalance = $balanceBeforeYear
             + (Transaction::where('church_id', $church->id)->incoming()->completed()
                 ->whereNotIn('source_type', $excludeTypes)
@@ -487,7 +490,7 @@ class FinanceController extends Controller
             }
         }
 
-        $excludeTypes = ['exchange', 'budget_allocation'];
+        $excludeTypes = ['exchange', 'allocation'];
         $income = Transaction::where('church_id', $churchId)
             ->incoming()->completed()
             ->where('date', '<', $date)

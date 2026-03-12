@@ -14,6 +14,18 @@ class Group extends Model
 {
     use HasFactory, SoftDeletes, Auditable;
 
+    protected static function booted(): void
+    {
+        // Auto-add leader as member when leader_id is set/changed
+        static::saved(function (Group $group) {
+            if ($group->leader_id && $group->wasChanged('leader_id')) {
+                $group->members()->syncWithoutDetaching([
+                    $group->leader_id => ['role' => 'leader'],
+                ]);
+            }
+        });
+    }
+
     /**
      * Cached computed attributes to prevent N+1 queries
      */
@@ -79,6 +91,23 @@ class Group extends Model
         'is_public' => 'boolean',
         'allow_join_requests' => 'boolean',
     ];
+
+    public function getMeetingDayNameAttribute(): ?string
+    {
+        if (!$this->meeting_day) return null;
+
+        $days = [
+            'monday' => __('app.monday'),
+            'tuesday' => __('app.tuesday'),
+            'wednesday' => __('app.wednesday'),
+            'thursday' => __('app.thursday'),
+            'friday' => __('app.friday'),
+            'saturday' => __('app.saturday'),
+            'sunday' => __('app.sunday'),
+        ];
+
+        return $days[$this->meeting_day] ?? $this->meeting_day;
+    }
 
     public function getStatusLabelAttribute(): string
     {
@@ -173,7 +202,7 @@ class Group extends Model
         $attendances = $this->attendances()->take(10)->get();
         if ($attendances->isEmpty()) return $this->computedCache['average_attendance'] = 0;
 
-        return $this->computedCache['average_attendance'] = round($attendances->avg('members_present'), 1);
+        return $this->computedCache['average_attendance'] = round($attendances->avg(fn($a) => $a->members_present ?? $a->total_count ?? 0), 1);
     }
 
     /**
@@ -185,7 +214,7 @@ class Group extends Model
             return $this->computedCache['attendance_trend'];
         }
 
-        $recent = $this->attendances()->orderByDesc('date')->take(4)->pluck('members_present')->reverse()->values();
+        $recent = $this->attendances()->orderByDesc('date')->take(4)->get()->map(fn($a) => $a->members_present ?? $a->total_count ?? 0)->reverse()->values();
         if ($recent->count() < 2) return $this->computedCache['attendance_trend'] = 'stable';
 
         $half = (int) floor($recent->count() / 2);
@@ -219,10 +248,10 @@ class Group extends Model
             $group->computedCache['last_attendance'] = $groupAttendances->first();
             $group->computedCache['average_attendance'] = $groupAttendances->isEmpty()
                 ? 0
-                : round($groupAttendances->avg('members_present'), 1);
+                : round($groupAttendances->avg(fn($a) => $a->members_present ?? $a->total_count ?? 0), 1);
 
             // Calculate trend
-            $recent = $groupAttendances->take(4)->pluck('members_present')->reverse()->values();
+            $recent = $groupAttendances->take(4)->map(fn($a) => $a->members_present ?? $a->total_count ?? 0)->reverse()->values();
             if ($recent->count() < 2) {
                 $group->computedCache['attendance_trend'] = 'stable';
             } else {

@@ -76,6 +76,7 @@ class EventResponsibilityController extends Controller
 
     public function update(Request $request, EventResponsibility $responsibility)
     {
+        abort_unless(auth()->user()->canEdit('events'), 403);
         $event = $responsibility->event;
         $this->authorizeChurch($event);
 
@@ -91,6 +92,7 @@ class EventResponsibilityController extends Controller
 
     public function destroy(Request $request, EventResponsibility $responsibility)
     {
+        abort_unless(auth()->user()->canEdit('events'), 403);
         $event = $responsibility->event;
         $this->authorizeChurch($event);
 

@@ -15,6 +15,18 @@ class Ministry extends Model
 {
     use HasFactory, SoftDeletes, Auditable;
 
+    protected static function booted(): void
+    {
+        // Auto-add leader as member when leader_id is set/changed
+        static::saved(function (Ministry $ministry) {
+            if ($ministry->leader_id && $ministry->wasChanged('leader_id')) {
+                $ministry->members()->syncWithoutDetaching([
+                    $ministry->leader_id => ['role' => 'leader'],
+                ]);
+            }
+        });
+    }
+
     // Visibility options
     public const VISIBILITY_PUBLIC = 'public';      // Everyone can see
     public const VISIBILITY_MEMBERS = 'members';    // Only members can see

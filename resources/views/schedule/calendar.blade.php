@@ -724,7 +724,7 @@
                             </svg>
                             {{ __('app.recurrence') }}
                             <span x-show="recurrenceType" x-cloak class="text-xs text-primary-600 dark:text-primary-400 font-medium"
-                                  x-text="recurrenceType ? '(' + ({'daily':@json(__('app.recurrence_daily_js')),'weekly':@json(__('app.recurrence_weekly_js')),'biweekly':@json(__('app.recurrence_biweekly_js')),'monthly':@json(__('app.recurrence_monthly_js')),'yearly':@json(__('app.recurrence_yearly_js')),'weekdays':@json(__('app.recurrence_weekdays_js')),'custom':@json(__('app.recurrence_custom_js'))}[recurrenceType] || '') + ')' : ''"></span>
+                                  x-text="recurrenceType ? '(' + ({'daily':@js(__('app.recurrence_daily_js')),'weekly':@js(__('app.recurrence_weekly_js')),'biweekly':@js(__('app.recurrence_biweekly_js')),'monthly':@js(__('app.recurrence_monthly_js')),'yearly':@js(__('app.recurrence_yearly_js')),'weekdays':@js(__('app.recurrence_weekdays_js')),'custom':@js(__('app.recurrence_custom_js'))}[recurrenceType] || '') + ')' : ''"></span>
                         </button>
 
                         <div x-show="showRecurrence" x-collapse class="mt-3 space-y-3">

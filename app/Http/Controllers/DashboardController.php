@@ -213,6 +213,7 @@ class DashboardController extends Controller
             if ($isAdmin) {
                 $data['pendingUsers'] = DB::table('church_user')
                     ->join('users', 'users.id', '=', 'church_user.user_id')
+                    ->whereNull('users.deleted_at')
                     ->where('church_user.church_id', $church->id)
                     ->whereNull('church_user.church_role_id')
                     ->select('users.id', 'users.name', 'users.email', 'church_user.person_id', 'church_user.joined_at')
@@ -370,7 +371,7 @@ class DashboardController extends Controller
                 ->join('people', 'ministry_person.person_id', '=', 'people.id')
                 ->whereNull('people.deleted_at')
                 ->whereIn('ministry_id', $ministryIds)
-                ->where('ministry_person.created_at', '<', $threeMonthsAgo)
+                ->where(DB::raw('COALESCE(ministry_person.joined_at, ministry_person.created_at)'), '<', $threeMonthsAgo)
                 ->distinct('person_id')->count('person_id');
 
             $ministriesList = $church->ministries()->withCount('members')->orderByDesc('members_count')->get();
@@ -503,7 +504,11 @@ class DashboardController extends Controller
             ->where('status', 'pending')
             ->with(['event.ministry', 'position'])
             ->whereHas('event', fn($q) => $q->where('date', '>=', now()))
-            ->orderBy('created_at', 'desc')
+            ->orderBy(
+                \App\Models\Event::select('date')
+                    ->whereColumn('events.id', 'rotation_assignments.event_id')
+                    ->limit(1)
+            )
             ->limit(5)
             ->get();
     }
@@ -580,6 +585,7 @@ class DashboardController extends Controller
         $sixMonthsAgo = now()->subMonths(5)->startOfMonth();
         $financialRaw = Transaction::where('church_id', $church->id)
             ->completed()
+            ->whereNotIn('source_type', [Transaction::SOURCE_EXCHANGE, Transaction::SOURCE_ALLOCATION])
             ->where('date', '>=', $sixMonthsAgo)
             ->selectRaw('YEAR(date) as year, MONTH(date) as month, direction, SUM(COALESCE(amount_uah, amount)) as total')
             ->groupBy('year', 'month', 'direction')
@@ -804,8 +810,8 @@ class DashboardController extends Controller
                 $groupAttendance = $attendanceData->get($group->id, collect());
 
                 $lastAttendance = $groupAttendance->first();
-                $avgAttendance = $groupAttendance->avg('members_present') ?? 0;
-                $recentCounts = $groupAttendance->take(4)->pluck('members_present')->reverse()->values()->toArray();
+                $avgAttendance = $groupAttendance->avg(fn($a) => $a->members_present ?? $a->total_count ?? 0) ?? 0;
+                $recentCounts = $groupAttendance->take(4)->map(fn($a) => $a->members_present ?? $a->total_count ?? 0)->reverse()->values()->toArray();
 
                 $trend = 'stable';
                 if (count($recentCounts) >= 2) {
@@ -1137,12 +1143,12 @@ class DashboardController extends Controller
         return $groups->map(function ($group) use ($attendanceData) {
                 $groupAttendance = $attendanceData->get($group->id, collect());
 
-                $avgAttendance = $groupAttendance->avg('members_present') ?? 0;
+                $avgAttendance = $groupAttendance->avg(fn($a) => $a->members_present ?? $a->total_count ?? 0) ?? 0;
                 $attendanceRate = $group->members_count > 0
                     ? round($avgAttendance / $group->members_count * 100)
                     : 0;
 
-                $last4 = $groupAttendance->sortBy('date')->take(-4)->pluck('members_present')->toArray();
+                $last4 = $groupAttendance->sortBy('date')->take(-4)->map(fn($a) => $a->members_present ?? $a->total_count ?? 0)->toArray();
                 while (count($last4) < 4) {
                     array_unshift($last4, 0);
                 }

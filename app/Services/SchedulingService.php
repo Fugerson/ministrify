@@ -394,6 +394,7 @@ class SchedulingService
         $monthEnd = $event->date->copy()->endOfMonth();
 
         $monthlyCount = Assignment::where('person_id', $person->id)
+            ->whereNotIn('status', ['declined'])
             ->whereHas('event', fn($q) => $q->whereBetween('date', [$monthStart, $monthEnd]))
             ->count();
 
@@ -403,9 +404,10 @@ class SchedulingService
 
         // Check rest days since last assignment
         $lastAssignment = Assignment::where('person_id', $person->id)
+            ->whereNotIn('status', ['declined'])
             ->whereHas('event', fn($q) => $q->where('date', '<', $event->date))
             ->with('event')
-            ->latest('id')
+            ->orderByDesc(Event::select('date')->whereColumn('events.id', 'assignments.event_id'))
             ->first();
 
         if ($lastAssignment && $lastAssignment->event) {
@@ -676,6 +678,7 @@ class SchedulingService
         $person->update([
             'last_scheduled_at' => now(),
             'times_scheduled_this_month' => Assignment::where('person_id', $person->id)
+                ->whereNotIn('status', ['declined'])
                 ->whereHas('event', fn($q) => $q
                     ->whereMonth('date', $event->date->month)
                     ->whereYear('date', $event->date->year)

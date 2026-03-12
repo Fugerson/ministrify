@@ -649,12 +649,13 @@
 <script>
 function budgetsPage() {
     // Restore saved filters if page loaded without explicit params
+    let _shouldRedirect = false;
     const _urlParams = new URLSearchParams(window.location.search);
     if (!_urlParams.has('year') && !_urlParams.has('month')) {
         const _saved = filterStorage.load('finance_budgets', { month: 0, year: 0 });
         if (_saved.month > 0 && _saved.year > 0) {
+            _shouldRedirect = true;
             Livewire.navigate(`{{ route('finances.budgets') }}?year=${_saved.year}&month=${_saved.month}`);
-            return {};
         }
     }
 
@@ -669,6 +670,8 @@ function budgetsPage() {
         expandedMinistries: [],
 
         init() {
+            if (_shouldRedirect) return;
+
             // Save current filters
             filterStorage.save('finance_budgets', { month: Number(this.month), year: Number(this.year) });
 

@@ -75,7 +75,7 @@ class ReportsController extends Controller
 
             $monthlyData[] = [
                 'month' => Carbon::create($year, $m)->translatedFormat('M'),
-                'count' => $sessionsQuery->sum('members_present'),
+                'count' => (clone $sessionsQuery)->selectRaw('SUM(COALESCE(members_present, total_count, 0)) as total')->value('total') ?? 0,
                 'unique_people' => $uniquePeople,
             ];
         }
@@ -87,7 +87,7 @@ class ReportsController extends Controller
             $weekdayQuery->whereHas('attendable', fn($q) => $q->where('ministry_id', $ministryId));
         }
         $weekdayData = (clone $weekdayQuery)
-            ->selectRaw('DAYOFWEEK(date) as day, SUM(members_present) as count')
+            ->selectRaw('DAYOFWEEK(date) as day, SUM(COALESCE(members_present, total_count, 0)) as count')
             ->groupBy('day')
             ->pluck('count', 'day')
             ->toArray();
@@ -172,9 +172,12 @@ class ReportsController extends Controller
         $monthlyData = [];
         $cumulativeBalance = 0;
         for ($m = 1; $m <= 12; $m++) {
+            $excludeTypes = [Transaction::SOURCE_EXCHANGE, Transaction::SOURCE_ALLOCATION];
+
             $income = Transaction::where('church_id', $church->id)
                 ->incoming()
                 ->completed()
+                ->whereNotIn('source_type', $excludeTypes)
                 ->whereYear('date', $year)
                 ->whereMonth('date', $m)
                 ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')
@@ -183,6 +186,7 @@ class ReportsController extends Controller
             $expense = Transaction::where('church_id', $church->id)
                 ->outgoing()
                 ->completed()
+                ->whereNotIn('source_type', $excludeTypes)
                 ->whereYear('date', $year)
                 ->whereMonth('date', $m)
                 ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')
@@ -202,6 +206,7 @@ class ReportsController extends Controller
         // Year over year comparison
         $currentYear = Transaction::where('church_id', $church->id)
             ->completed()
+            ->whereNotIn('source_type', $excludeTypes)
             ->whereYear('date', $year)
             ->selectRaw("
                 SUM(CASE WHEN direction = 'in' THEN COALESCE(amount_uah, amount) ELSE 0 END) as income,
@@ -211,6 +216,7 @@ class ReportsController extends Controller
 
         $prevYear = Transaction::where('church_id', $church->id)
             ->completed()
+            ->whereNotIn('source_type', $excludeTypes)
             ->whereYear('date', $year - 1)
             ->selectRaw("
                 SUM(CASE WHEN direction = 'in' THEN COALESCE(amount_uah, amount) ELSE 0 END) as income,
@@ -233,6 +239,7 @@ class ReportsController extends Controller
         $incomeByCategory = Transaction::where('church_id', $church->id)
             ->incoming()
             ->completed()
+            ->whereNotIn('source_type', $excludeTypes)
             ->whereYear('date', $year)
             ->with('category')
             ->selectRaw('category_id, SUM(COALESCE(amount_uah, amount)) as total')
@@ -244,6 +251,7 @@ class ReportsController extends Controller
         $expenseByMinistry = Transaction::where('church_id', $church->id)
             ->outgoing()
             ->completed()
+            ->whereNotIn('source_type', $excludeTypes)
             ->whereYear('date', $year)
             ->with('ministry')
             ->selectRaw('ministry_id, SUM(COALESCE(amount_uah, amount)) as total')

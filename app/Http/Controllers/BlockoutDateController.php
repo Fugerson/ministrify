@@ -290,7 +290,7 @@ class BlockoutDateController extends Controller
             })
             ->with('event')
             ->get()
-            ->filter(fn($a) => $blockout->coversDateTime($a->event->date, $a->event->time));
+            ->filter(fn($a) => $a->event && $blockout->coversDateTime($a->event->date, $a->event->time));
 
         // Auto-decline these assignments
         foreach ($conflicting as $assignment) {

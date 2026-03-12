@@ -73,10 +73,14 @@ class WorshipTeamController extends Controller
                 ->distinct('person_id')
                 ->count('person_id'),
             'total_songs' => \DB::table('event_songs')
-                ->whereIn('event_id', $eventIds)
+                ->join('events', 'event_songs.event_id', '=', 'events.id')
+                ->whereNull('events.deleted_at')
+                ->whereIn('event_songs.event_id', $eventIds)
                 ->count(),
             'unique_songs' => \DB::table('event_songs')
-                ->whereIn('event_id', $eventIds)
+                ->join('events', 'event_songs.event_id', '=', 'events.id')
+                ->whereNull('events.deleted_at')
+                ->whereIn('event_songs.event_id', $eventIds)
                 ->distinct('song_id')
                 ->count('song_id'),
         ];
@@ -96,10 +100,12 @@ class WorshipTeamController extends Controller
 
         // Preload all roles for participants to avoid N+1
         $allRoleIds = \DB::table('event_ministry_team')
-            ->whereIn('person_id', $personIds)
-            ->where('ministry_id', $ministry->id)
-            ->whereIn('event_id', $eventIds)
-            ->select('person_id', 'ministry_role_id')
+            ->join('events', 'event_ministry_team.event_id', '=', 'events.id')
+            ->whereNull('events.deleted_at')
+            ->whereIn('event_ministry_team.person_id', $personIds)
+            ->where('event_ministry_team.ministry_id', $ministry->id)
+            ->whereIn('event_ministry_team.event_id', $eventIds)
+            ->select('event_ministry_team.person_id', 'event_ministry_team.ministry_role_id')
             ->distinct()
             ->get()
             ->groupBy('person_id');
@@ -214,7 +220,7 @@ class WorshipTeamController extends Controller
                     'team' => $songTeam->map(fn($t) => [
                         'id' => $t->id,
                         'person_id' => $t->person_id,
-                        'person_name' => $t->person->full_name,
+                        'person_name' => $t->person?->full_name ?? __('common.deleted'),
                         'role_id' => $t->ministry_role_id,
                         'role_name' => $t->ministryRole?->name ?? '',
                     ])->values(),
@@ -223,7 +229,7 @@ class WorshipTeamController extends Controller
             'generalTeam' => $generalTeam->map(fn($t) => [
                 'id' => $t->id,
                 'person_id' => $t->person_id,
-                'person_name' => $t->person->full_name,
+                'person_name' => $t->person?->full_name ?? __('common.deleted'),
                 'role_id' => $t->ministry_role_id,
                 'role_name' => $t->ministryRole?->name ?? '',
             ])->values(),

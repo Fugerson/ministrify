@@ -288,7 +288,7 @@ class ChecklistController extends Controller
     {
         $checklist->loadMissing('event');
         $church = $this->getCurrentChurch();
-        if ($checklist->event->church_id !== $church->id) {
+        if (!$checklist->event || $checklist->event->church_id !== $church->id) {
             abort(403);
         }
     }
@@ -297,7 +297,7 @@ class ChecklistController extends Controller
     {
         $item->loadMissing('eventChecklist.event');
         $church = $this->getCurrentChurch();
-        if ($item->eventChecklist->event->church_id !== $church->id) {
+        if (!$item->eventChecklist?->event || $item->eventChecklist->event->church_id !== $church->id) {
             abort(403);
         }
     }

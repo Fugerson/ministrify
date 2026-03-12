@@ -165,7 +165,8 @@ class Attendance extends Model
             return 0;
         }
 
-        return round(($this->members_present / $totalMembers) * 100, 1);
+        $present = $this->members_present ?? $this->total_count ?? 0;
+        return round(($present / $totalMembers) * 100, 1);
     }
 
     public function getEntityNameAttribute(): string

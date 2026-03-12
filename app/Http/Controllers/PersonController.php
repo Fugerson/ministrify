@@ -329,7 +329,7 @@ class PersonController extends Controller
         // Allow viewing own profile without permission
         $isOwnProfile = auth()->user()->person && auth()->user()->person->id === $person->id;
 
-        $person->load(['tags', 'ministries.positions', 'groups', 'user', 'churchRoleRelation', 'shepherd', 'sheep', 'assignments' => function ($q) {
+        $person->load(['tags', 'ministries.positions', 'groups', 'user', 'churchRoleRelation', 'shepherd', 'sheep.churchRoleRelation', 'assignments' => function ($q) {
             $q->whereHas('event', fn($eq) => $eq->where('date', '>=', now()->subMonths(3)))
               ->with(['event.ministry', 'position']);
         }]);

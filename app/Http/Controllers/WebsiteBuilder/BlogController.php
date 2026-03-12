@@ -43,6 +43,7 @@ class BlogController extends Controller
 
     public function store(Request $request)
     {
+        abort_unless(auth()->user()->canEdit('website'), 403);
         $church = $this->getChurchOrFail();
 
         $validated = $request->validate([

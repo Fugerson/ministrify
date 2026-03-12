@@ -12,6 +12,7 @@ class ShepherdController extends Controller
      */
     public function index()
     {
+        abort_unless(auth()->user()->canView('people'), 403);
         $church = $this->getCurrentChurch();
 
         // Redirect if feature is disabled
