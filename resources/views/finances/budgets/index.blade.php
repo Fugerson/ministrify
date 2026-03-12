@@ -742,6 +742,8 @@ function budgetsPage() {
             one_time_month: {{ $month }},
             one_time_amount: '',
             notes: '',
+            use_custom_amounts: false,
+            custom_amounts: {1:'',2:'',3:'',4:'',5:'',6:'',7:'',8:'',9:'',10:'',11:'',12:''},
         },
 
         // Church budget transactions modal
@@ -1055,14 +1057,24 @@ function budgetsPage() {
                 const monthKeys = Object.keys(amounts);
                 const isRecurring = itemData.is_recurring;
 
+                // Check if amounts vary across months (custom per-month)
+                const vals = Object.values(amounts);
+                const allSame = isRecurring && vals.length > 1 && vals.every(v => v === vals[0]);
+                const hasCustomAmounts = isRecurring && vals.length > 1 && !allSame;
+
+                const customAmounts = {};
+                for (let m = 1; m <= 12; m++) customAmounts[m] = amounts[String(m)] || '';
+
                 this.churchItemForm = {
                     name: itemData.name,
                     category_id: itemData.category_id || '',
                     is_recurring: isRecurring ? '1' : '0',
-                    amount: isRecurring && monthKeys.length > 0 ? amounts[monthKeys[0]] : '',
+                    amount: isRecurring && !hasCustomAmounts && monthKeys.length > 0 ? amounts[monthKeys[0]] : '',
                     one_time_month: !isRecurring && monthKeys.length > 0 ? monthKeys[0] : this.month,
                     one_time_amount: !isRecurring && monthKeys.length > 0 ? amounts[monthKeys[0]] : '',
                     notes: itemData.notes || '',
+                    use_custom_amounts: hasCustomAmounts,
+                    custom_amounts: customAmounts,
                 };
             } else {
                 this.churchItemForm = {
@@ -1073,6 +1085,8 @@ function budgetsPage() {
                     one_time_month: this.month,
                     one_time_amount: '',
                     notes: '',
+                    use_custom_amounts: false,
+                    custom_amounts: {1:'',2:'',3:'',4:'',5:'',6:'',7:'',8:'',9:'',10:'',11:'',12:''},
                 };
             }
 
@@ -1095,7 +1109,14 @@ function budgetsPage() {
                     notes: this.churchItemForm.notes || null,
                 };
 
-                if (isRecurring) {
+                if (isRecurring && this.churchItemForm.use_custom_amounts) {
+                    body.amounts_custom = {};
+                    for (let m = 1; m <= 12; m++) {
+                        const v = parseFloat(this.churchItemForm.custom_amounts[m]);
+                        if (v > 0) body.amounts_custom[m] = v;
+                    }
+                    body.amount = 0; // satisfy validation
+                } else if (isRecurring) {
                     body.amount = this.churchItemForm.amount;
                 } else {
                     body.one_time_month = this.churchItemForm.one_time_month;

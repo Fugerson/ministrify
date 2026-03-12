@@ -847,6 +847,7 @@ return [
     'remaining' => 'Remaining',
     'used_percent' => '% Used',
     'annual_total' => 'Annual Total',
+    'different_by_month' => 'Different amounts',
     'add_budget_item' => 'Add Item',
     'edit_budget_item' => 'Edit Item',
     'budget_item_name' => 'Item Name',

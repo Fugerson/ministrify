@@ -2273,11 +2273,21 @@ class FinanceController extends Controller
             'amount' => 'required_if:is_recurring,true|nullable|numeric|min:0',
             'one_time_month' => 'required_if:is_recurring,false|nullable|integer|min:1|max:12',
             'one_time_amount' => 'required_if:is_recurring,false|nullable|numeric|min:0',
+            'amounts_custom' => 'nullable|array',
+            'amounts_custom.*' => 'nullable|numeric|min:0',
             'notes' => 'nullable|string|max:500',
         ]);
 
         // Build amounts JSON
-        if ($validated['is_recurring']) {
+        if (!empty($validated['amounts_custom'])) {
+            $amounts = [];
+            foreach ($validated['amounts_custom'] as $m => $val) {
+                $m = (int) $m;
+                if ($m >= 1 && $m <= 12 && $val > 0) {
+                    $amounts[(string) $m] = (float) $val;
+                }
+            }
+        } elseif ($validated['is_recurring']) {
             $amounts = [];
             for ($m = 1; $m <= 12; $m++) {
                 $amounts[(string) $m] = (float) $validated['amount'];

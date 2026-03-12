@@ -855,6 +855,7 @@ return [
     'remaining' => 'Залишок',
     'used_percent' => '% використання',
     'annual_total' => 'Річний підсумок',
+    'different_by_month' => 'Різні суми',
     'add_budget_item' => 'Додати статтю',
     'edit_budget_item' => 'Редагувати статтю',
     'budget_item_name' => 'Назва статті',
