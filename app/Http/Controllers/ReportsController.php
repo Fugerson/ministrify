@@ -262,10 +262,10 @@ class ReportsController extends Controller
         $church = $this->getCurrentChurch();
         $year = $request->get('year', now()->year);
 
-        // Top volunteers by assignments
+        // Top volunteers by assignments (include soft-deleted events for historical reports)
         $topVolunteers = Person::where('church_id', $church->id)
-            ->whereHas('assignments', fn($q) => $q->whereHas('event', fn($e) => $e->whereYear('date', $year)))
-            ->withCount(['assignments' => fn($q) => $q->whereHas('event', fn($e) => $e->whereYear('date', $year))])
+            ->whereHas('assignments', fn($q) => $q->whereHas('event', fn($e) => $e->withTrashed()->whereYear('date', $year)))
+            ->withCount(['assignments' => fn($q) => $q->whereHas('event', fn($e) => $e->withTrashed()->whereYear('date', $year))])
             ->orderByDesc('assignments_count')
             ->take(15)
             ->get();
@@ -274,12 +274,14 @@ class ReportsController extends Controller
         $monthlyData = [];
         for ($m = 1; $m <= 12; $m++) {
             $assignments = Assignment::whereHas('event', fn($q) => $q
+                ->withTrashed()
                 ->where('church_id', $church->id)
                 ->whereYear('date', $year)
                 ->whereMonth('date', $m)
             )->count();
 
             $uniqueVolunteers = Assignment::whereHas('event', fn($q) => $q
+                ->withTrashed()
                 ->where('church_id', $church->id)
                 ->whereYear('date', $year)
                 ->whereMonth('date', $m)
@@ -294,12 +296,12 @@ class ReportsController extends Controller
 
         // Volunteer distribution by ministry
         $byMinistry = Assignment::whereHas('event', fn($q) => $q
+            ->withTrashed()
             ->where('church_id', $church->id)
             ->whereYear('date', $year)
         )
         ->join('events', 'assignments.event_id', '=', 'events.id')
         ->join('ministries', 'events.ministry_id', '=', 'ministries.id')
-        ->whereNull('events.deleted_at')
         ->whereNull('ministries.deleted_at')
         ->selectRaw('ministries.name, ministries.color, COUNT(*) as count')
         ->groupBy('ministries.id', 'ministries.name', 'ministries.color')
@@ -308,8 +310,8 @@ class ReportsController extends Controller
 
         // People who haven't volunteered in 3+ months
         $inactiveVolunteers = Person::where('church_id', $church->id)
-            ->whereHas('assignments', fn($q) => $q->whereHas('event', fn($e) => $e->where('date', '<', now()->subMonths(3))))
-            ->whereDoesntHave('assignments', fn($q) => $q->whereHas('event', fn($e) => $e->where('date', '>=', now()->subMonths(3))))
+            ->whereHas('assignments', fn($q) => $q->whereHas('event', fn($e) => $e->withTrashed()->where('date', '<', now()->subMonths(3))))
+            ->whereDoesntHave('assignments', fn($q) => $q->whereHas('event', fn($e) => $e->withTrashed()->where('date', '>=', now()->subMonths(3))))
             ->take(20)
             ->get();
 

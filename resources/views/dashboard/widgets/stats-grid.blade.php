@@ -88,10 +88,12 @@
         <p class="text-xs text-gray-400 dark:text-gray-500 mb-2">{{ __('app.ministers') }}</p>
         <div class="mt-2 space-y-1.5 max-h-32 overflow-y-auto">
             @foreach($stats['ministries_list'] as $ministry)
-            <div class="flex items-center justify-between text-xs">
-                <span class="text-gray-600 dark:text-gray-400 truncate mr-2">{{ $ministry->name }}</span>
-                <span class="font-semibold text-gray-700 dark:text-gray-300 flex-shrink-0">{{ $ministry->members_count }}</span>
-            </div>
+                @if($ministry->members_count > 0)
+                <div class="flex items-center justify-between text-xs">
+                    <span class="text-gray-600 dark:text-gray-400 truncate mr-2">{{ $ministry->name }}</span>
+                    <span class="font-semibold text-gray-700 dark:text-gray-300 flex-shrink-0">{{ $ministry->members_count }}</span>
+                </div>
+                @endif
             @endforeach
         </div>
     </a>

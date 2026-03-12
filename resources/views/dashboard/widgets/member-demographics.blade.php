@@ -63,6 +63,7 @@
                 'youth' => ['bg' => 'bg-blue-400 dark:bg-blue-500', 'text' => 'text-blue-600 dark:text-blue-400', 'label' => __('app.youth_age')],
                 'adults' => ['bg' => 'bg-green-400 dark:bg-green-500', 'text' => 'text-green-600 dark:text-green-400', 'label' => __('app.adults_age')],
                 'seniors' => ['bg' => 'bg-gray-400 dark:bg-gray-500', 'text' => 'text-gray-600 dark:text-gray-400', 'label' => __('app.seniors_age')],
+                'unknown' => ['bg' => 'bg-gray-300 dark:bg-gray-600', 'text' => 'text-gray-500 dark:text-gray-500', 'label' => __('app.unknown_age')],
             ];
         @endphp
         <div class="space-y-3">
@@ -71,6 +72,7 @@
                     $count = $ageGroups[$key] ?? 0;
                     $percent = $maxAge > 0 ? round($count / $maxAge * 100) : 0;
                 @endphp
+                @if($count > 0 || $key !== 'unknown')
                 <div>
                     <div class="flex items-center justify-between mb-1">
                         <span class="text-xs font-medium {{ $color['text'] }}">{{ $color['label'] }}</span>
@@ -80,6 +82,7 @@
                         <div class="h-full rounded-full {{ $color['bg'] }} transition-all duration-500" style="width: {{ $percent }}%; min-width: {{ $count > 0 ? '4px' : '0' }}"></div>
                     </div>
                 </div>
+                @endif
             @endforeach
         </div>
     </div>

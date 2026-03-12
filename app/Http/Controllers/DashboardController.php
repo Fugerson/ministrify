@@ -513,15 +513,19 @@ class DashboardController extends Controller
         return $this->cacheService->remember('need_attention', $church, function () use ($church) {
             $threeWeeksAgo = now()->subWeeks(3);
 
-            return Person::where('church_id', $church->id)
+            $query = Person::where('church_id', $church->id)
                 ->whereIn('membership_status', [Person::STATUS_MEMBER, Person::STATUS_SERVANT, Person::STATUS_LEADER, Person::STATUS_ACTIVE])
                 ->whereHas('attendanceRecords', fn($q) => $q->where('present', true))
                 ->whereDoesntHave('attendanceRecords', function ($q) use ($threeWeeksAgo) {
                     $q->whereHas('attendance', fn($aq) => $aq->where('date', '>=', $threeWeeksAgo))
                       ->where('present', true);
-                })
-                ->limit(5)
-                ->get();
+                });
+
+            $totalCount = $query->count();
+            $people = $query->limit(5)->get();
+            $people->totalNeedAttention = $totalCount;
+
+            return $people;
         });
     }
 
@@ -754,6 +758,7 @@ class DashboardController extends Controller
                     'youth' => (int) ($ageGroups->youth ?? 0),
                     'adults' => (int) ($ageGroups->adults ?? 0),
                     'seniors' => (int) ($ageGroups->seniors ?? 0),
+                    'unknown' => (int) (($genderStats->total ?? 0) - ($genderStats->with_birthdate ?? 0)),
                 ],
             ];
         });

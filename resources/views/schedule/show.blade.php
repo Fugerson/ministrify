@@ -26,8 +26,8 @@
 <div class="max-w-7xl mx-auto space-y-6">
     <!-- Header (Editable) -->
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6" x-data="eventEditor()">
-        <div class="flex items-start justify-between gap-4">
-            <div class="flex items-center flex-1">
+        <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+            <div class="flex items-center flex-1 min-w-0">
                 <button onclick="history.back()" title="{{ __('app.schedule_back_to_schedule') }}"
                         class="w-10 h-10 mr-3 flex items-center justify-center rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 transition-colors shrink-0">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -40,7 +40,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                     </svg>
                 </div>
-                <div class="ml-4 flex-1">
+                <div class="ml-4 flex-1 min-w-0">
                     @if($canEdit)
                     <input type="text" x-model="title" @change="saveField('title', title)"
                            class="text-2xl font-bold text-gray-900 dark:text-white bg-transparent border-0 border-b border-transparent hover:border-gray-300 dark:hover:border-gray-600 focus:border-primary-500 focus:ring-0 w-full p-0 pb-1">
@@ -530,11 +530,11 @@
                 {{-- Add new row --}}
                 @if($canEdit)
                 <div class="p-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-700/30">
-                    <form @submit.prevent="addItem()" class="flex items-center gap-2">
+                    <form @submit.prevent="addItem()" class="flex flex-wrap items-center gap-2">
                         <input type="time" x-model="newItem.start_time"
                                class="min-w-[6rem] px-2 py-2 text-sm font-semibold text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-700 rounded-lg focus:ring-2 focus:ring-primary-500 cursor-pointer">
                         {{-- Title with song autocomplete --}}
-                        <div class="flex-1 relative">
+                        <div class="flex-1 min-w-[150px] relative">
                             <input type="text" x-model="newItem.title"
                                    @input="checkForSongTrigger($event.target.value)"
                                    @focus="if(newItem.title.match(/song-/i)) showSongs = true"
@@ -609,8 +609,8 @@
                             </div>
                         </div>
                         <input type="text" x-model="newItem.notes" placeholder="{{ __('app.schedule_comment_placeholder') }}"
-                               class="w-32 px-2 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">
-                        <button type="submit" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm rounded-lg font-medium">
+                               class="w-32 min-w-[80px] px-2 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">
+                        <button type="submit" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm rounded-lg font-medium whitespace-nowrap">
                             {{ __('app.schedule_add_btn') }}
                         </button>
                     </form>

@@ -32,6 +32,13 @@
         </div>
         @endforeach
     </div>
+    @if(($needAttention->totalNeedAttention ?? 0) > 5)
+    <div class="px-4 py-3 border-t border-gray-100 dark:border-gray-700 text-center">
+        <a href="{{ route('reports.attendance') }}" class="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 font-medium">
+            {{ __('app.show_all') }} ({{ $needAttention->totalNeedAttention }})
+        </a>
+    </div>
+    @endif
     @else
     <div class="p-8 text-center">
         <div class="w-12 h-12 rounded-xl bg-green-100 dark:bg-green-900/50 flex items-center justify-center mx-auto mb-3">

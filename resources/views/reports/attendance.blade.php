@@ -78,7 +78,7 @@
                             </span>
                             <span class="ml-3 text-sm font-medium text-gray-900 dark:text-white">{{ $person->full_name }}</span>
                         </div>
-                        <span class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.reports_visits_count', ['count' => $person->attendance_records_count]) }}</span>
+                        <span class="text-sm text-gray-500 dark:text-gray-400">{{ trans_choice('app.reports_visits_count', $person->attendance_records_count, ['count' => $person->attendance_records_count]) }}</span>
                     </div>
                 @endforeach
             </div>
