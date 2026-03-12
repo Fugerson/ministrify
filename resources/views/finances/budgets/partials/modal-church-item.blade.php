@@ -12,7 +12,7 @@
     <div class="flex items-center justify-center min-h-screen p-4">
         <div class="fixed inset-0 bg-black/50" x-on:click="showChurchItemModal = false"></div>
 
-        <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-lg w-full p-6"
+        <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto"
              x-transition:enter="ease-out duration-200"
              x-transition:enter-start="opacity-0 scale-95"
              x-transition:enter-end="opacity-100 scale-100"
@@ -57,48 +57,65 @@
                 </div>
 
                 {{-- Recurring: amount per month --}}
-                <div x-show="churchItemForm.is_recurring == '1'">
-                    {{-- Toggle: same amount vs custom per month --}}
-                    <div class="flex items-center justify-between mb-2">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300" title="{{ __('app.budget_amount_monthly_tooltip') }}">{{ __('app.amount_per_month') }} (₴) *</label>
-                        <label class="flex items-center gap-1.5 cursor-pointer select-none">
-                            <span class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.different_by_month') }}</span>
-                            <div class="relative" x-on:click="churchItemForm.use_custom_amounts = !churchItemForm.use_custom_amounts">
-                                <div class="w-8 h-4.5 rounded-full transition-colors" :class="churchItemForm.use_custom_amounts ? 'bg-primary-600' : 'bg-gray-300 dark:bg-gray-600'"></div>
-                                <div class="absolute top-0.5 left-0.5 w-3.5 h-3.5 bg-white rounded-full shadow transition-transform" :class="churchItemForm.use_custom_amounts ? 'translate-x-3.5' : ''"></div>
-                            </div>
-                        </label>
-                    </div>
-
+                <div x-show="churchItemForm.is_recurring == '1'" class="space-y-3">
                     {{-- Same amount for all months --}}
                     <div x-show="!churchItemForm.use_custom_amounts">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" title="{{ __('app.budget_amount_monthly_tooltip') }}">{{ __('app.amount_per_month') }} (₴) *</label>
                         <input type="number" x-model="churchItemForm.amount" min="0" step="1"
                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
                     </div>
 
                     {{-- Custom amounts per month --}}
-                    <div x-show="churchItemForm.use_custom_amounts" class="space-y-1.5">
-                        <div class="grid grid-cols-2 gap-x-3 gap-y-1.5">
+                    <div x-show="churchItemForm.use_custom_amounts">
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('app.amount_per_month') }} (₴) *</label>
+                            <button type="button"
+                                    x-on:click="
+                                        const val = prompt(@js(__('app.fill_all_months_prompt')));
+                                        if (val !== null && !isNaN(val)) {
+                                            for (let m = 1; m <= 12; m++) churchItemForm.custom_amounts[m] = val;
+                                        }
+                                    "
+                                    class="text-xs text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium">
+                                {{ __('app.fill_all') }}
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-3 sm:grid-cols-4 gap-2">
                             @foreach([
                                 1 => __('app.month_short_jan'), 2 => __('app.month_short_feb'), 3 => __('app.month_short_mar'),
                                 4 => __('app.month_short_apr'), 5 => __('app.month_short_may'), 6 => __('app.month_short_jun'),
                                 7 => __('app.month_short_jul'), 8 => __('app.month_short_aug'), 9 => __('app.month_short_sep'),
                                 10 => __('app.month_short_oct'), 11 => __('app.month_short_nov'), 12 => __('app.month_short_dec')
                             ] as $m => $label)
-                                <div class="flex items-center gap-2">
-                                    <span class="text-xs text-gray-500 dark:text-gray-400 w-10 shrink-0">{{ $label }}</span>
+                                <div class="relative">
+                                    <label class="absolute -top-2 left-2 px-1 text-[10px] font-medium bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 z-10">{{ $label }}</label>
                                     <input type="number" x-model="churchItemForm.custom_amounts[{{ $m }}]" min="0" step="1"
                                            placeholder="0"
-                                           class="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                                           class="w-full px-2 pt-2.5 pb-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 text-center">
                                 </div>
                             @endforeach
                         </div>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 text-right">
-                            {{ __('app.annual_total') }}:
-                            <span class="font-medium text-gray-700 dark:text-gray-300"
-                                  x-text="Object.values(churchItemForm.custom_amounts).reduce((s,v) => s + (parseFloat(v) || 0), 0).toLocaleString('uk-UA') + ' ₴'"></span>
-                        </p>
+                        <div class="flex items-center justify-between mt-2">
+                            <p class="text-xs text-gray-500 dark:text-gray-400">
+                                {{ __('app.annual_total') }}:
+                                <span class="font-semibold text-gray-700 dark:text-gray-300"
+                                      x-text="Object.values(churchItemForm.custom_amounts).reduce((s,v) => s + (parseFloat(v) || 0), 0).toLocaleString('uk-UA') + ' ₴'"></span>
+                            </p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">
+                                ⌀
+                                <span class="font-medium"
+                                      x-text="Math.round(Object.values(churchItemForm.custom_amounts).reduce((s,v) => s + (parseFloat(v) || 0), 0) / 12).toLocaleString('uk-UA') + ' ₴/{{ __('app.month_short') }}'"></span>
+                            </p>
+                        </div>
                     </div>
+
+                    {{-- Toggle link --}}
+                    <button type="button"
+                            x-on:click="churchItemForm.use_custom_amounts = !churchItemForm.use_custom_amounts"
+                            class="text-xs text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 hover:underline">
+                        <span x-show="!churchItemForm.use_custom_amounts">📊 {{ __('app.set_different_by_month') }}</span>
+                        <span x-show="churchItemForm.use_custom_amounts">🔄 {{ __('app.same_amount_monthly') }}</span>
+                    </button>
                 </div>
 
                 {{-- One-time: month + amount --}}
