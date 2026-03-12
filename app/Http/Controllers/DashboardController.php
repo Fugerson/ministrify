@@ -506,7 +506,7 @@ class DashboardController extends Controller
             ->whereHas('event', fn($q) => $q->where('date', '>=', now()))
             ->orderBy(
                 \App\Models\Event::select('date')
-                    ->whereColumn('events.id', 'rotation_assignments.event_id')
+                    ->whereColumn('events.id', 'assignments.event_id')
                     ->limit(1)
             )
             ->limit(5)
