@@ -288,7 +288,7 @@ window.expenseModal = function() {
                                     class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
                                 <option value="">{{ __('app.no_category') }}</option>
                                 @foreach($expenseCategories ?? [] as $cat)
-                                    <option value="{{ $cat->id }}">{{ $cat->icon ?? '💸' }} {{ $cat->name }}</option>
+                                    <option value="{{ $cat->id }}">{{ $cat->name }}</option>
                                 @endforeach
                                 <option value="__custom__">{{ __('app.other_enter_manually') }}</option>
                             </select>
@@ -321,12 +321,12 @@ window.expenseModal = function() {
                             <label class="relative flex items-center justify-center px-4 py-3 border rounded-xl cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                                    :class="formData.payment_method === 'card' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-300 dark:border-gray-600'">
                                 <input type="radio" x-model="formData.payment_method" value="card" class="sr-only">
-                                <span class="text-sm" :class="formData.payment_method === 'card' ? 'text-primary-600 dark:text-primary-400 font-medium' : 'text-gray-700 dark:text-gray-300'">💳 {{ __('app.card_payment') }}</span>
+                                <span class="text-sm" :class="formData.payment_method === 'card' ? 'text-primary-600 dark:text-primary-400 font-medium' : 'text-gray-700 dark:text-gray-300'">{{ __('app.card_payment') }}</span>
                             </label>
                             <label class="relative flex items-center justify-center px-4 py-3 border rounded-xl cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                                    :class="formData.payment_method === 'cash' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-300 dark:border-gray-600'">
                                 <input type="radio" x-model="formData.payment_method" value="cash" class="sr-only">
-                                <span class="text-sm" :class="formData.payment_method === 'cash' ? 'text-primary-600 dark:text-primary-400 font-medium' : 'text-gray-700 dark:text-gray-300'">💵 {{ __('app.cash_payment') }}</span>
+                                <span class="text-sm" :class="formData.payment_method === 'cash' ? 'text-primary-600 dark:text-primary-400 font-medium' : 'text-gray-700 dark:text-gray-300'">{{ __('app.cash_payment') }}</span>
                             </label>
                         </div>
                     </div>

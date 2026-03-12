@@ -60,25 +60,7 @@ class TransactionCategory extends Model
 
     public function getIconEmojiAttribute(): string
     {
-        $map = [
-            'heart' => '❤️',
-            'gift' => '🎁',
-            'star' => '⭐',
-            'dots-horizontal' => '•••',
-            'home' => '🏠',
-            'lightning-bolt' => '⚡',
-            'desktop-computer' => '🖥️',
-            'users' => '👥',
-            'truck' => '🚛',
-        ];
-
-        $icon = $this->icon;
-
-        if (!$icon) {
-            return $this->type === self::TYPE_EXPENSE ? '📦' : '💰';
-        }
-
-        return $map[$icon] ?? $icon;
+        return '';
     }
 
     public function getTotalThisMonthAttribute(): float

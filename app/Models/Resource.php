@@ -122,27 +122,7 @@ class Resource extends Model
 
     public function getIconAttribute(): string
     {
-        if ($this->isFolder()) {
-            return $this->attributes['icon'] ?? '📁';
-        }
-
-        if ($this->isDocument()) {
-            return '📝';
-        }
-
-        // Determine icon based on mime type
-        $mime = $this->mime_type ?? '';
-
-        if (str_starts_with($mime, 'image/')) return '🖼️';
-        if (str_starts_with($mime, 'audio/')) return '🎵';
-        if (str_starts_with($mime, 'video/')) return '🎬';
-        if (str_contains($mime, 'pdf')) return '📄';
-        if (str_contains($mime, 'word') || str_contains($mime, 'document')) return '📝';
-        if (str_contains($mime, 'excel') || str_contains($mime, 'spreadsheet')) return '📊';
-        if (str_contains($mime, 'powerpoint') || str_contains($mime, 'presentation')) return '📽️';
-        if (str_contains($mime, 'zip') || str_contains($mime, 'rar')) return '🗜️';
-
-        return '📎';
+        return $this->attributes['icon'] ?? '';
     }
 
     public function getBreadcrumbs(): array

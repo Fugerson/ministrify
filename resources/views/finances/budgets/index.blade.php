@@ -471,7 +471,7 @@
                                                     <td class="px-3 py-2.5">
                                                         <div class="font-medium text-gray-900 dark:text-white">{{ $bi['name'] }}</div>
                                                         @if($bi['category'])
-                                                            <div class="text-xs text-gray-500">{{ $bi['category']->icon_emoji ?? '' }} {{ $bi['category']->name }}</div>
+                                                            <div class="text-xs text-gray-500">{{ $bi['category']->name }}</div>
                                                         @endif
                                                     </td>
                                                     <td class="px-3 py-2.5 text-right whitespace-nowrap text-gray-700 dark:text-gray-300">

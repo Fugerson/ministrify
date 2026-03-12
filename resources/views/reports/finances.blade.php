@@ -74,7 +74,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Income by Category -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">💰 {{ __('app.reports_income_by_category') }}</h3>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.reports_income_by_category') }}</h3>
             @if($incomeByCategory->count() > 0)
                 @php $totalIncome = $incomeByCategory->sum('total'); @endphp
                 <div class="space-y-3">
@@ -82,7 +82,7 @@
                         @php $percent = $totalIncome > 0 ? ($item->total / $totalIncome * 100) : 0; @endphp
                         <div>
                             <div class="flex items-center justify-between mb-1">
-                                <span class="text-sm text-gray-700 dark:text-gray-300">{{ $item->category?->icon ?? '💵' }} {{ $item->category?->name ?? __('app.reports_no_category') }}</span>
+                                <span class="text-sm text-gray-700 dark:text-gray-300">{{ $item->category?->name ?? __('app.reports_no_category') }}</span>
                                 <span class="text-sm font-medium text-gray-900 dark:text-white">{{ number_format($item->total, 0, ',', ' ') }} ₴</span>
                             </div>
                             <div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2">
@@ -98,7 +98,7 @@
 
         <!-- Expense by Ministry -->
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">📊 {{ __('app.reports_expense_by_team') }}</h3>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.reports_expense_by_team') }}</h3>
             @if($expenseByMinistry->count() > 0)
                 @php $totalExpense = $expenseByMinistry->sum('total'); @endphp
                 <div class="space-y-3">

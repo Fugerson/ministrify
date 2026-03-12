@@ -23,24 +23,13 @@
                   x-data="{ ...ajaxForm({ url: '{{ route('settings.income-categories.store') }}', method: 'POST', resetOnSuccess: true, stayOnPage: true, onSuccess() { _addIncomeCategory(this); } }) }"
                   class="mb-6 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
                 <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-4">{{ __('app.add_category') }}</h3>
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                         <input type="text" name="name" placeholder="{{ __('app.category_name_placeholder') }}" required
                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
                         <template x-if="errors.name">
                             <p class="mt-1 text-sm text-red-600" x-text="errors.name[0]"></p>
                         </template>
-                    </div>
-                    <div class="relative">
-                        <input type="text" name="icon" placeholder="{{ __('app.emoji_label') }}" maxlength="10"
-                               class="w-full px-3 py-2 pr-8 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
-                               oninput="this.nextElementSibling.style.display = this.value ? '' : 'none'">
-                        <button type="button" style="display:none"
-                                onclick="const i=this.previousElementSibling; i.value=''; i.focus(); this.style.display='none'"
-                                class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 transition-colors"
-                                title="{{ __('app.clear_btn') }}">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                        </button>
                     </div>
                     <div>
                         <input type="color" name="color" value="#3B82F6"
@@ -61,7 +50,7 @@
                         <div x-show="!editing" class="flex items-center justify-between">
                             <div class="flex items-center space-x-4">
                                 <div class="w-10 h-10 rounded-full flex items-center justify-center text-lg" style="background-color: {{ $category->color }}20">
-                                    {{ $category->icon_emoji }}
+                                    <div class="w-4 h-4 rounded-full" style="background-color: {{ $category->color }}"></div>
                                 </div>
                                 <div>
                                     <p class="font-medium text-gray-900 dark:text-white">{{ $category->name }}</p>
@@ -90,22 +79,12 @@
                         <form x-show="editing"
                               @submit.prevent="submit($refs.editForm{{ $category->id }})" x-ref="editForm{{ $category->id }}"
                               x-data="{ ...ajaxForm({ url: '{{ route('settings.income-categories.update', $category) }}', method: 'PUT', stayOnPage: true, onSuccess() { _updateIncomeCategory(this); } }) }">
-                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div>
                                     <input type="text" name="name" value="{{ $category->name }}" required
                                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
                                 </div>
-                                <div class="relative">
-                                    <input type="text" name="icon" value="{{ $category->icon_emoji }}" maxlength="10"
-                                           class="w-full px-3 py-2 pr-8 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
-                                           oninput="this.nextElementSibling.style.display = this.value ? '' : 'none'">
-                                    <button type="button" {!! $category->icon_emoji ? '' : 'style="display:none"' !!}
-                                            onclick="const i=this.previousElementSibling; i.value=''; i.focus(); this.style.display='none'"
-                                            class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 transition-colors"
-                                            title="{{ __('app.clear_btn') }}">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                                    </button>
-                                </div>
+                                {{-- emoji field removed --}}
                                 <div>
                                     <input type="color" name="color" value="{{ $category->color }}"
                                            class="w-full h-10 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer">
@@ -132,18 +111,16 @@
 function _addIncomeCategory(ctx) {
     var form = ctx.$refs.addForm;
     var name = form.querySelector('[name="name"]').value;
-    var icon = form.querySelector('[name="icon"]').value || '';
     var color = form.querySelector('[name="color"]').value || '#3B82F6';
     var list = document.getElementById('categories-list');
     if (!list) { window.location.reload(); return; }
     var empty = list.querySelector('.text-center.text-gray-500');
     if (empty) empty.remove();
     var safeName = name.replace(/&/g, '\x26amp;').replace(/</g, '\x26lt;').replace(/>/g, '\x26gt;');
-    var safeIcon = icon.replace(/&/g, '\x26amp;').replace(/</g, '\x26lt;').replace(/>/g, '\x26gt;');
     var el = document.createElement('div');
     el.setAttribute('data-category', '');
     el.className = 'border border-gray-200 dark:border-gray-700 rounded-lg p-4';
-    el.innerHTML = '\x3Cdiv class="flex items-center justify-between">\x3Cdiv class="flex items-center space-x-4">\x3Cdiv class="w-10 h-10 rounded-full flex items-center justify-center text-lg" style="background-color: ' + color + '20">' + safeIcon + '\x3C/div>\x3Cdiv>\x3Cp class="font-medium text-gray-900 dark:text-white">' + safeName + '\x3C/p>\x3Cp class="text-xs text-gray-500 dark:text-gray-400 mt-1">0 ' + @js(__('app.entries_count') ) + '\x3C/p>\x3C/div>\x3C/div>\x3C/div>';
+    el.innerHTML = '\x3Cdiv class="flex items-center justify-between">\x3Cdiv class="flex items-center space-x-4">\x3Cdiv class="w-10 h-10 rounded-full flex items-center justify-center text-lg" style="background-color: ' + color + '20">\x3Cdiv class="w-4 h-4 rounded-full" style="background-color: ' + color + '">\x3C/div>\x3C/div>\x3Cdiv>\x3Cp class="font-medium text-gray-900 dark:text-white">' + safeName + '\x3C/p>\x3Cp class="text-xs text-gray-500 dark:text-gray-400 mt-1">0 ' + @js(__('app.entries_count') ) + '\x3C/p>\x3C/div>\x3C/div>\x3C/div>';
     list.appendChild(el);
 }
 
@@ -152,12 +129,11 @@ function _updateIncomeCategory(ctx) {
     if (!cat) return;
     var form = ctx.$el;
     var name = form.querySelector('[name="name"]').value;
-    var icon = form.querySelector('[name="icon"]').value || '';
     var color = form.querySelector('[name="color"]').value || '#3B82F6';
     var nameEl = cat.querySelector('.font-medium.text-gray-900');
     if (nameEl) nameEl.textContent = name;
     var iconEl = cat.querySelector('.w-10.h-10');
-    if (iconEl) { iconEl.textContent = icon; iconEl.style.backgroundColor = color + '20'; }
+    if (iconEl) { iconEl.style.backgroundColor = color + '20'; var dot = iconEl.querySelector('.w-4.h-4'); if (dot) dot.style.backgroundColor = color; }
     var editing = cat.__x ? cat.__x.$data : (cat._x_dataStack ? cat._x_dataStack[0] : null);
     if (editing) editing.editing = false;
 }

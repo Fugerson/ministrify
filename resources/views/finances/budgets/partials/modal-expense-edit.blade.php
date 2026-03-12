@@ -208,7 +208,7 @@ window.expenseEditModal = function() {
                                 class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                             <option value="">{{ __('app.no_category') }}</option>
                             @foreach($expenseCategories ?? [] as $cat)
-                                <option value="{{ $cat->id }}">{{ $cat->icon_emoji ?? '💸' }} {{ $cat->name }}</option>
+                                <option value="{{ $cat->id }}">{{ $cat->name }}</option>
                             @endforeach
                             <option value="__custom__">{{ __('app.other_enter_custom') }}</option>
                         </select>

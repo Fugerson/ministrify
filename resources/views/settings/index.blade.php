@@ -1332,7 +1332,7 @@
         <div x-show="showForm" x-cloak class="p-4 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
             <form @submit.prevent="submit($refs.catCreateForm)" x-ref="catCreateForm"
                   x-data="{ ...ajaxForm({ url: '{{ route('settings.transaction-categories.store') }}', method: 'POST', onSuccess: () => location.reload() }) }">
-                <div class="grid grid-cols-1 sm:grid-cols-5 gap-3">
+                <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
                     <div>
                         <input type="text" name="name" placeholder="{{ __('app.settings_name_placeholder') }}" required
                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500">
@@ -1343,10 +1343,6 @@
                             <option value="income">{{ __('app.settings_income') }}</option>
                             <option value="expense">{{ __('app.settings_expense') }}</option>
                         </select>
-                    </div>
-                    <div>
-                        <input type="text" name="icon" placeholder="{{ __('app.settings_emoji') }}" maxlength="10"
-                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500">
                     </div>
                     <div>
                         <input type="color" name="color" value="#3B82F6"

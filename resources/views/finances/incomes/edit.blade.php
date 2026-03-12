@@ -82,7 +82,7 @@
                 </label>
                 @php
                     $categoriesWithIcon = $categories->map(function($c) {
-                        $c->display_name = ($c->icon ?? '') . ' ' . $c->name;
+                        $c->display_name = $c->name;
                         return $c;
                     });
                 @endphp
@@ -114,7 +114,7 @@
                     @foreach($paymentMethods as $value => $label)
                         <label class="relative flex items-center justify-center px-4 py-3 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                             <input type="radio" name="payment_method" value="{{ $value }}" {{ old('payment_method', $income->payment_method) == $value ? 'checked' : '' }} class="sr-only peer">
-                            <span class="text-sm text-gray-700 dark:text-gray-300 peer-checked:text-primary-600 dark:peer-checked:text-primary-400 peer-checked:font-medium">{{ $value === 'cash' ? '💵' : '💳' }} {{ $label }}</span>
+                            <span class="text-sm text-gray-700 dark:text-gray-300 peer-checked:text-primary-600 dark:peer-checked:text-primary-400 peer-checked:font-medium">{{ $label }}</span>
                             <div class="absolute inset-0 border-2 border-transparent peer-checked:border-primary-500 rounded-lg pointer-events-none"></div>
                         </label>
                     @endforeach

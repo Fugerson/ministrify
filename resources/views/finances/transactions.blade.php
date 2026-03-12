@@ -121,7 +121,7 @@ function exportButton() {
                     class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
                 <option value="">{{ __('app.all_categories') }}</option>
                 @foreach($categories as $cat)
-                    <option value="{{ $cat->id }}">{{ $cat->icon ?? '' }} {{ $cat->name }}</option>
+                    <option value="{{ $cat->id }}">{{ $cat->name }}</option>
                 @endforeach
             </select>
 

@@ -258,7 +258,7 @@
                             <div>
                                 <div class="flex items-center justify-between mb-1">
                                     <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                        {{ $cat->icon ?? '💰' }} {{ $cat->name }}
+                                        {{ $cat->name }}
                                     </span>
                                     <span class="text-sm font-semibold text-gray-900 dark:text-white">
                                         {{ number_format($cat->total_amount, 0, ',', ' ') }} ₴

@@ -3,7 +3,7 @@
     <td class="px-6 py-4">
         <div class="font-medium text-gray-900 dark:text-white">{{ $cbi['name'] }}</div>
         @if($cbi['category'])
-            <div class="text-xs text-gray-500">{{ $cbi['category']->icon_emoji ?? '' }} {{ $cbi['category']->name }}</div>
+            <div class="text-xs text-gray-500">{{ $cbi['category']->name }}</div>
         @elseif($cbi['planned'] > 0)
             <div class="text-xs text-amber-600 dark:text-amber-400">{{ __('app.budget_no_category_warning') }}</div>
         @endif
