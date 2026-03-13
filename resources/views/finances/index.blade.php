@@ -48,7 +48,7 @@
     </div>
 
     <!-- Current Balance Card - Multi-currency -->
-    <div id="finance-balance" class="bg-gradient-to-br {{ $currentBalance >= 0 ? 'from-indigo-600 to-purple-600' : 'from-orange-500 to-red-500' }} rounded-xl shadow-lg p-4 sm:p-6 text-white">
+    <div id="finance-balance" class="bg-gradient-to-br {{ ($currentBalance - $committedToTeams) >= 0 ? 'from-indigo-600 to-purple-600' : 'from-orange-500 to-red-500' }} rounded-xl shadow-lg p-4 sm:p-6 text-white">
         <div>
             <p class="text-indigo-100 text-sm font-medium mb-3">{{ __('app.current_cash_balance') }}</p>
 
@@ -58,11 +58,16 @@
             @endphp
 
             <!-- Show balance for each currency -->
+            @php
+                $displayUahBalance = $committedToTeams > 0
+                    ? ($balancesByCurrency['UAH'] ?? 0) - $committedToTeams
+                    : ($balancesByCurrency['UAH'] ?? 0);
+            @endphp
             <div class="flex flex-wrap gap-4 items-baseline">
                 @foreach(['UAH', 'USD', 'EUR'] as $code)
                     @if(isset($balancesByCurrency[$code]) && ($balancesByCurrency[$code] != 0 || $code === 'UAH'))
                         @php
-                            $balance = $balancesByCurrency[$code];
+                            $balance = $code === 'UAH' ? $displayUahBalance : $balancesByCurrency[$code];
                             $symbol = $currencySymbols[$code];
                         @endphp
                         <div class="@if($code === 'UAH') @else bg-white/10 rounded-lg px-4 py-2 @endif">
@@ -80,19 +85,19 @@
 
             @if($hasMultipleCurrencies)
             <p class="text-xs text-indigo-200 mt-2">
-                {{ __('app.equivalent_uah') }} {{ number_format($currentBalance, 0, ',', ' ') }} ₴
+                {{ __('app.equivalent_uah') }} {{ number_format($currentBalance - $committedToTeams, 0, ',', ' ') }} ₴
             </p>
             @endif
 
             @if($committedToTeams > 0)
             <div class="mt-4 text-sm text-indigo-100 space-y-1 max-w-sm">
                 <div class="flex justify-between gap-4">
-                    <span>{{ __('app.committed_to_teams') }}</span>
-                    <span class="font-medium text-yellow-200 whitespace-nowrap">{{ number_format($committedToTeams, 0, ',', ' ') }} ₴</span>
+                    <span>{{ __('app.full_balance') }}</span>
+                    <span class="font-medium whitespace-nowrap">{{ number_format($balancesByCurrency['UAH'] ?? 0, 0, ',', ' ') }} ₴</span>
                 </div>
                 <div class="flex justify-between gap-4">
-                    <span class="font-semibold">{{ __('app.available_balance') }}</span>
-                    <span class="font-bold whitespace-nowrap">{{ number_format($availableBalance, 0, ',', ' ') }} ₴</span>
+                    <span>{{ __('app.committed_to_teams') }}</span>
+                    <span class="font-medium text-yellow-200 whitespace-nowrap">-{{ number_format($committedToTeams, 0, ',', ' ') }} ₴</span>
                 </div>
             </div>
             @endif
@@ -128,24 +133,6 @@
                 @endforeach
             </div>
 
-            @if(count($balanceByMethod) > 1)
-            <div class="mt-3 pt-3 border-t border-white/20">
-                <p class="text-xs text-indigo-200 mb-2">{{ __('app.balance_by_method') }}</p>
-                <div class="flex flex-wrap gap-3">
-                    @php
-                        $methodLabels = ['card' => __('app.payment_card'), 'cash' => __('app.payment_cash'), 'bank' => __('app.payment_bank')];
-                    @endphp
-                    @foreach($balanceByMethod as $method => $data)
-                    <div class="bg-white/10 rounded-lg px-3 py-1.5 text-sm">
-                        <span class="font-medium">{{ $methodLabels[$method] ?? $method }}:</span>
-                        <span class="{{ $data['balance'] >= 0 ? 'text-green-200' : 'text-red-200' }}">
-                            {{ number_format($data['balance'], 0, ',', ' ') }} ₴
-                        </span>
-                    </div>
-                    @endforeach
-                </div>
-            </div>
-            @endif
 
             @if(count($incomeByCurrency) > 1 || count($expenseByCurrency) > 1 || !empty($incomeByCurrency['USD']) || !empty($incomeByCurrency['EUR']) || !empty($expenseByCurrency['USD']) || !empty($expenseByCurrency['EUR']))
             <div class="mt-3 pt-3 border-t border-white/20">

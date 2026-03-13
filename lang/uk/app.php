@@ -419,6 +419,7 @@ return [
     'total_expense_label' => '- Всього витрат:',
     'committed_to_teams' => 'В бюджетах команд:',
     'available_balance' => 'Вільний залишок:',
+    'full_balance' => 'Повний баланс:',
     'period_flow_by_currency' => 'Рух за період по валютах:',
     'set_initial_balance' => 'Вказати початковий баланс',
     'period_result' => 'Результат за період',

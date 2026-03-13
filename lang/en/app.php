@@ -415,6 +415,7 @@ return [
     'total_expense_label' => '- Total expenses:',
     'committed_to_teams' => 'In team budgets:',
     'available_balance' => 'Available balance:',
+    'full_balance' => 'Full balance:',
     'period_flow_by_currency' => 'Period flow by currency:',
     'set_initial_balance' => 'Set initial balance',
     'period_result' => 'Period result',
