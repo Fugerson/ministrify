@@ -530,20 +530,22 @@
                 {{-- Add new row --}}
                 @if($canEdit)
                 <div class="p-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-700/30">
-                    <form @submit.prevent="addItem()" class="flex flex-wrap items-center gap-2">
+                    <form @submit.prevent="addItem()" class="flex flex-wrap items-start gap-2">
                         <input type="time" x-model="newItem.start_time"
                                class="min-w-[6rem] px-2 py-2 text-sm font-semibold text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-700 rounded-lg focus:ring-2 focus:ring-primary-500 cursor-pointer">
                         {{-- Title with song autocomplete --}}
                         <div class="flex-1 min-w-[150px] relative">
-                            <input type="text" x-model="newItem.title"
-                                   @input="checkForSongTrigger($event.target.value)"
+                            <textarea x-model="newItem.title"
+                                   @input="checkForSongTrigger($event.target.value); $el.style.height='auto'; $el.style.height=$el.scrollHeight+'px'"
                                    @focus="if(newItem.title.match(/song-/i)) showSongs = true"
                                    @keydown.escape="showSongs = false"
                                    @keydown.arrow-down.prevent="if(showSongs) songIndex = Math.min(songIndex + 1, filteredSongsForNew().length - 1)"
                                    @keydown.arrow-up.prevent="if(showSongs) songIndex = Math.max(songIndex - 1, 0)"
                                    @keydown.enter.prevent="if(showSongs && filteredSongsForNew().length) { selectSongForNew(filteredSongsForNew()[songIndex]); } else { $el.form.requestSubmit(); }"
                                    placeholder="{{ __('app.schedule_what_happens_placeholder') }}" required
-                                   class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">
+                                   rows="1"
+                                   class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg resize-none"
+                                   style="overflow: hidden;"></textarea>
                             <div x-show="showSongs" x-transition @click.away="showSongs = false"
                                  class="absolute left-0 right-0 top-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto">
                                 <template x-if="SONGS_DATA.length === 0">
