@@ -98,21 +98,54 @@
             @endif
 
             <div class="mt-4 text-sm text-indigo-100 space-y-1 max-w-sm">
-                @if($initialBalance > 0)
-                <div class="flex justify-between gap-4">
-                    <span>{{ __('app.initial_balance') }}{{ $initialBalanceDate ? ' (' . $initialBalanceDate->format('d.m.Y') . ')' : '' }}:</span>
-                    <span class="font-medium whitespace-nowrap">{{ number_format($initialBalance, 0, ',', ' ') }} ₴</span>
-                </div>
-                @endif
-                <div class="flex justify-between gap-4">
-                    <span>{{ __('app.total_income_label') }}</span>
-                    <span class="font-medium text-green-200 whitespace-nowrap">{{ number_format($allTimeIncome, 0, ',', ' ') }} ₴</span>
-                </div>
-                <div class="flex justify-between gap-4">
-                    <span>{{ __('app.total_expense_label') }}</span>
-                    <span class="font-medium text-red-200 whitespace-nowrap">{{ number_format($allTimeExpense, 0, ',', ' ') }} ₴</span>
+                @foreach(['UAH', 'USD', 'EUR'] as $bCode)
+                    @if(isset($balancesByCurrency[$bCode]) && ($balancesByCurrency[$bCode] != 0 || $bCode === 'UAH'))
+                        @php
+                            $bSymbol = $currencySymbols[$bCode];
+                            $bInitial = $initialBalances[$bCode] ?? 0;
+                            $bIncome = $allTimeIncomeByCurrency[$bCode] ?? 0;
+                            $bExpense = $allTimeExpenseByCurrency[$bCode] ?? 0;
+                        @endphp
+                        @if($bCode !== 'UAH')
+                        <div class="mt-2 pt-2 border-t border-white/10"></div>
+                        <p class="text-xs text-indigo-200 font-medium">{{ $bCode }}</p>
+                        @endif
+                        @if($bInitial > 0)
+                        <div class="flex justify-between gap-4">
+                            <span>{{ __('app.initial_balance') }}{{ $initialBalanceDate ? ' (' . $initialBalanceDate->format('d.m.Y') . ')' : '' }}:</span>
+                            <span class="font-medium whitespace-nowrap">{{ number_format($bInitial, 0, ',', ' ') }} {{ $bSymbol }}</span>
+                        </div>
+                        @endif
+                        <div class="flex justify-between gap-4">
+                            <span>{{ __('app.total_income_label') }}</span>
+                            <span class="font-medium text-green-200 whitespace-nowrap">{{ number_format($bIncome, 0, ',', ' ') }} {{ $bSymbol }}</span>
+                        </div>
+                        <div class="flex justify-between gap-4">
+                            <span>{{ __('app.total_expense_label') }}</span>
+                            <span class="font-medium text-red-200 whitespace-nowrap">{{ number_format($bExpense, 0, ',', ' ') }} {{ $bSymbol }}</span>
+                        </div>
+                    @endif
+                @endforeach
+            </div>
+
+            @if(count($balanceByMethod) > 1)
+            <div class="mt-3 pt-3 border-t border-white/20">
+                <p class="text-xs text-indigo-200 mb-2">{{ __('app.balance_by_method') }}</p>
+                <div class="flex flex-wrap gap-3">
+                    @php
+                        $methodLabels = ['card' => __('app.payment_card'), 'cash' => __('app.payment_cash'), 'bank' => __('app.payment_bank')];
+                    @endphp
+                    @foreach($balanceByMethod as $method => $data)
+                    <div class="bg-white/10 rounded-lg px-3 py-1.5 text-sm">
+                        <span class="font-medium">{{ $methodLabels[$method] ?? $method }}:</span>
+                        <span class="{{ $data['balance'] >= 0 ? 'text-green-200' : 'text-red-200' }}">
+                            {{ number_format($data['balance'], 0, ',', ' ') }} ₴
+                        </span>
+                    </div>
+                    @endforeach
                 </div>
             </div>
+            @endif
 
             @if(count($incomeByCurrency) > 1 || count($expenseByCurrency) > 1 || !empty($incomeByCurrency['USD']) || !empty($incomeByCurrency['EUR']) || !empty($expenseByCurrency['USD']) || !empty($expenseByCurrency['EUR']))
             <div class="mt-3 pt-3 border-t border-white/20">

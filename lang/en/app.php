@@ -428,6 +428,8 @@ return [
     'recent_incomes' => 'Recent income',
     'payment_cash' => 'Cash',
     'payment_card' => 'Card',
+    'payment_bank' => 'Bank',
+    'balance_by_method' => 'Balance by payment method (UAH)',
     'no_incomes' => 'No income',
     'no_expenses' => 'No expenses',
     'activity_feed' => 'Activity feed',

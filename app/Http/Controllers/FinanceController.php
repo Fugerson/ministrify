@@ -113,6 +113,30 @@ class FinanceController extends Controller
         }
         $availableBalance = $currentBalance - $committedToTeams;
 
+        // Balance breakdown by payment method (all-time, UAH only, excl allocation)
+        $balanceByMethod = [];
+        foreach (['card', 'cash', 'bank'] as $method) {
+            $methodIn = Transaction::where('church_id', $church->id)
+                ->incoming()->completed()
+                ->where('currency', 'UAH')
+                ->where('payment_method', $method)
+                ->whereNotIn('source_type', [Transaction::SOURCE_ALLOCATION])
+                ->sum('amount');
+            $methodOut = Transaction::where('church_id', $church->id)
+                ->outgoing()->completed()
+                ->where('currency', 'UAH')
+                ->where('payment_method', $method)
+                ->whereNotIn('source_type', [Transaction::SOURCE_ALLOCATION])
+                ->sum('amount');
+            if ($methodIn > 0 || $methodOut > 0) {
+                $balanceByMethod[$method] = [
+                    'in' => $methodIn,
+                    'out' => $methodOut,
+                    'balance' => $methodIn - $methodOut,
+                ];
+            }
+        }
+
         // Calculate balances per currency (all time)
         // INCLUDE exchange transactions (they track real currency movement EUR→UAH)
         // EXCLUDE only allocation (internal budget transfers, not real money movement)
@@ -296,6 +320,8 @@ class FinanceController extends Controller
             'allTimeIncome', 'allTimeExpense',
             'committedToTeams', 'availableBalance',
             'incomeByCurrency', 'expenseByCurrency', 'balancesByCurrency',
+            'allTimeIncomeByCurrency', 'allTimeExpenseByCurrency',
+            'initialBalances', 'balanceByMethod',
             'exchangeRates', 'enabledCurrencies',
             'monthlyData',
             'incomeByCategory', 'expenseByCategory', 'expenseByMinistry',

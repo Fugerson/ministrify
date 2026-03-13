@@ -433,6 +433,8 @@ return [
     'no_category' => 'Без категорії',
     'payment_cash' => 'Готівка',
     'payment_card' => 'Картка',
+    'payment_bank' => 'Банк',
+    'balance_by_method' => 'Баланс за способом оплати (UAH)',
     'no_incomes' => 'Немає надходжень',
     'no_expenses' => 'Немає витрат',
     'activity_feed' => 'Стрічка активності',
