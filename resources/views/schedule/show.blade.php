@@ -320,11 +320,11 @@
                                                           @keydown.escape="editing = false; showSongs = false"
                                                           @keydown.arrow-down.prevent="if(showSongs) songIndex = Math.min(songIndex + 1, filteredSongs().length - 1)"
                                                           @keydown.arrow-up.prevent="if(showSongs) songIndex = Math.max(songIndex - 1, 0)"
-                                                          @keydown.enter.prevent="if(showSongs && filteredSongs().length) { insertSongLink(filteredSongs()[songIndex]); } else { saveTitle(); editing = false; }"
+                                                          @keydown.enter="if(showSongs && filteredSongs().length) { $event.preventDefault(); insertSongLink(filteredSongs()[songIndex]); } else if($event.ctrlKey || $event.metaKey) { $event.preventDefault(); saveTitle(); editing = false; }"
                                                           placeholder="{{ __('app.schedule_text_song_placeholder') }}"
-                                                          rows="1"
-                                                          class="w-full px-1 py-1 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-700 border border-primary-300 focus:ring-1 focus:ring-primary-500 rounded resize-none break-words"
-                                                          style="word-wrap: break-word; overflow-wrap: break-word;"></textarea>
+                                                          rows="2"
+                                                          class="w-full px-1 py-1 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-700 border border-primary-300 focus:ring-1 focus:ring-primary-500 rounded resize-y break-words"
+                                                          style="word-wrap: break-word; overflow-wrap: break-word; min-height: 2.5rem;"></textarea>
                                                 <div x-show="showSongs" x-transition
                                                      class="absolute left-0 right-0 top-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto">
                                                     <template x-if="SONGS_DATA.length === 0">
@@ -541,11 +541,11 @@
                                    @keydown.escape="showSongs = false"
                                    @keydown.arrow-down.prevent="if(showSongs) songIndex = Math.min(songIndex + 1, filteredSongsForNew().length - 1)"
                                    @keydown.arrow-up.prevent="if(showSongs) songIndex = Math.max(songIndex - 1, 0)"
-                                   @keydown.enter.prevent="if(showSongs && filteredSongsForNew().length) { selectSongForNew(filteredSongsForNew()[songIndex]); } else { $el.form.requestSubmit(); }"
+                                   @keydown.enter="if(showSongs && filteredSongsForNew().length) { $event.preventDefault(); selectSongForNew(filteredSongsForNew()[songIndex]); } else if($event.ctrlKey || $event.metaKey) { $event.preventDefault(); $el.form.requestSubmit(); }"
                                    placeholder="{{ __('app.schedule_what_happens_placeholder') }}" required
-                                   rows="1"
-                                   class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg resize-none"
-                                   style="overflow: hidden;"></textarea>
+                                   rows="2"
+                                   class="w-full px-3 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg resize-y"
+                                   style="min-height: 2.5rem;"></textarea>
                             <div x-show="showSongs" x-transition @click.away="showSongs = false"
                                  class="absolute left-0 right-0 top-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto">
                                 <template x-if="SONGS_DATA.length === 0">
@@ -1380,6 +1380,9 @@ function titleEditor(itemId, initialTitle, existingSongId = null) {
 
             // Escape HTML first
             let html = text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+            // Convert newlines to <br> for display
+            html = html.replace(/\n/g, '<br>');
 
             // Replace [song-ID] with actual song links
             html = html.replace(/\[song-(\d+)\]/g, (match, songId) => {
