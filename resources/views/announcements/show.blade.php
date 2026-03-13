@@ -65,14 +65,14 @@
                 </svg>
                 {{ __('app.ann_edit') }}
             </a>
-            <button @click="ajaxAction('{{ route('announcements.pin', $announcement) }}', 'POST').then(() => { const s = $el.querySelector('span'); const t = s.textContent.trim(); s.textContent = t === @json(__('app.ann_unpin')) ? @json(' ' . __('app.ann_pin')) : @json(' ' . __('app.ann_unpin')); })"
+            <button @click="ajaxAction('{{ route('announcements.pin', $announcement) }}', 'POST').then(() => { const s = $el.querySelector('span'); const t = s.textContent.trim(); s.textContent = t === {!! json_encode(__('app.ann_unpin')) !!} ? {!! json_encode(' ' . __('app.ann_pin')) !!} : {!! json_encode(' ' . __('app.ann_unpin')) !!}; })"
                     class="inline-flex items-center px-4 py-2 bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-200 font-medium rounded-xl">
                 <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M10 2a1 1 0 011 1v1.323l3.954.99a1 1 0 01.756.97v.01a1 1 0 01-.756.97L11 8.253V17a1 1 0 11-2 0V8.253L5.046 7.263a1 1 0 010-1.94L9 4.323V3a1 1 0 011-1z"/>
                 </svg>
                 <span>{{ $announcement->is_pinned ? __('app.ann_unpin') : __('app.ann_pin') }}</span>
             </button>
-            <button @click="ajaxDelete('{{ route('announcements.destroy', $announcement) }}', @js( __('messages.confirm_delete_announcement') ), null, '{{ route('announcements.index') }}')"
+            <button @click="ajaxDelete('{{ route('announcements.destroy', $announcement) }}', {!! json_encode(__('messages.confirm_delete_announcement')) !!}, null, '{{ route('announcements.index') }}')"
                     class="inline-flex items-center px-4 py-2 bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50 text-red-700 dark:text-red-400 font-medium rounded-xl ml-auto">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>

@@ -81,7 +81,7 @@
 
                 @if(auth()->user()->canEdit('announcements'))
                 <div class="px-6 py-3 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-700 flex items-center gap-2">
-                    <button @click="ajaxAction('{{ route('announcements.pin', $announcement) }}', 'POST').then(() => { const t = $el.textContent.trim(); $el.textContent = t === @json(__('app.ann_unpin')) ? @json(__('app.ann_pin')) : @json(__('app.ann_unpin')); })"
+                    <button @click="ajaxAction('{{ route('announcements.pin', $announcement) }}', 'POST').then(() => { const t = $el.textContent.trim(); $el.textContent = t === {!! json_encode(__('app.ann_unpin')) !!} ? {!! json_encode(__('app.ann_pin')) !!} : {!! json_encode(__('app.ann_unpin')) !!}; })"
                             class="text-sm text-gray-500 hover:text-amber-600 dark:text-gray-400 dark:hover:text-amber-400">
                         {{ $announcement->is_pinned ? __('app.ann_unpin') : __('app.ann_pin') }}
                     </button>
@@ -90,7 +90,7 @@
                         {{ __('app.ann_edit') }}
                     </a>
                     <span class="text-gray-300 dark:text-gray-600">|</span>
-                    <button @click="ajaxDelete('{{ route('announcements.destroy', $announcement) }}', @js( __('messages.confirm_delete_announcement') ), () => $el.closest('.rounded-2xl').remove())"
+                    <button @click="ajaxDelete('{{ route('announcements.destroy', $announcement) }}', {!! json_encode(__('messages.confirm_delete_announcement')) !!}, () => $el.closest('.rounded-2xl').remove())"
                             class="text-sm text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400">
                         {{ __('app.ann_delete') }}
                     </button>
