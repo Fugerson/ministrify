@@ -6111,4 +6111,7 @@ return [
     // Photo Cropper
     'crop_photo_title' => 'Обрізати фото',
     'crop_confirm' => 'Готово',
+
+    // Profile
+    'profile_not_found' => 'Ваш профіль не знайдено. Зверніться до адміністратора.',
 ];

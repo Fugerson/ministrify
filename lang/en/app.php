@@ -6278,4 +6278,7 @@ return [
     // Photo Cropper
     'crop_photo_title' => 'Crop photo',
     'crop_confirm' => 'Done',
+
+    // Profile
+    'profile_not_found' => 'Your profile was not found. Please contact the administrator.',
 ];

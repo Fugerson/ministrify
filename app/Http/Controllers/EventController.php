@@ -657,7 +657,7 @@ class EventController extends Controller
         $user = auth()->user();
 
         if (!$user->person) {
-            return $this->errorResponse($request, 'Ваш профіль не знайдено.');
+            return redirect()->route('dashboard')->with('error', __('app.profile_not_found'));
         }
 
         $responsibilities = $user->person->responsibilities()
