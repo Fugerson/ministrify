@@ -97,7 +97,7 @@
                 </div>
                 <div class="flex justify-between gap-4">
                     <span>{{ __('app.committed_to_teams') }}</span>
-                    <span class="font-medium text-yellow-200 whitespace-nowrap">-{{ number_format($committedToTeams, 0, ',', ' ') }} ₴</span>
+                    <span class="font-medium text-yellow-200 whitespace-nowrap">{{ number_format($committedToTeams, 0, ',', ' ') }} ₴</span>
                 </div>
             </div>
             @endif
