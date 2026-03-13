@@ -228,4 +228,5 @@ return [
     'related_tasks' => 'Related Tasks',
     'no_found' => 'No one found',
     'statistics' => 'Statistics',
+    'cannot_remove_leader' => 'Cannot remove the leader from the group. Change the leader first.',
 ];

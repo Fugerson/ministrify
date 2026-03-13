@@ -801,7 +801,7 @@ class DashboardController extends Controller
             $attendanceData = Attendance::where('attendable_type', Group::class)
                 ->whereIn('attendable_id', $groupIds)
                 ->where('date', '>=', $eightWeeksAgo)
-                ->select('attendable_id', 'date', 'members_present', 'total_members')
+                ->select('attendable_id', 'date', 'members_present', 'total_members', 'total_count')
                 ->orderByDesc('date')
                 ->get()
                 ->groupBy('attendable_id');
@@ -1135,7 +1135,7 @@ class DashboardController extends Controller
         $attendanceData = Attendance::where('attendable_type', Group::class)
             ->whereIn('attendable_id', $groupIds)
             ->where('date', '>=', $fourWeeksAgo)
-            ->select('attendable_id', 'date', 'members_present', 'total_members')
+            ->select('attendable_id', 'date', 'members_present', 'total_members', 'total_count')
             ->orderBy('date')
             ->get()
             ->groupBy('attendable_id');

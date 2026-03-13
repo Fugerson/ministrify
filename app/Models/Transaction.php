@@ -156,6 +156,20 @@ class Transaction extends Model
                     $related->delete();
                 }
             }
+
+            // Decrement allocated_budget when allocation transaction is deleted
+            if ($transaction->source_type === self::SOURCE_ALLOCATION
+                && $transaction->direction === self::DIRECTION_IN
+                && $transaction->ministry_id
+            ) {
+                $budget = \App\Models\MinistryBudget::where('ministry_id', $transaction->ministry_id)
+                    ->where('church_id', $transaction->church_id)
+                    ->first();
+
+                if ($budget && $budget->allocated_budget > 0) {
+                    $budget->decrement('allocated_budget', min($transaction->amount_uah ?? $transaction->amount, $budget->allocated_budget));
+                }
+            }
         });
     }
 

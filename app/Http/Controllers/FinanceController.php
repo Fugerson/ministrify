@@ -367,7 +367,7 @@ class FinanceController extends Controller
                     $t->ministry?->name ?? '-',
                     $t->description,
                     $t->person ? $t->person->first_name . ' ' . $t->person->last_name : '-',
-                    ($t->direction === 'in' ? '+' : '-') . number_format($t->amount_uah ?? $t->amount, 2, ',', ''),
+                    ($t->direction === 'in' ? '+' : '-') . number_format($t->amount, 2, ',', ''),
                     $t->currency ?? 'UAH',
                     Transaction::PAYMENT_METHODS[$t->payment_method] ?? $t->payment_method ?? '-',
                 ], ';');

@@ -182,9 +182,9 @@ class GroupController extends Controller
         $this->authorize('update', $group);
         abort_unless($person->church_id === $this->getCurrentChurch()->id, 404);
 
-        // Clear leader_id if removing the current leader
+        // Prevent removing the leader from group
         if ($group->leader_id === $person->id) {
-            $group->update(['leader_id' => null]);
+            return $this->errorResponse($request, __('messages.cannot_remove_leader'));
         }
 
         $group->members()->detach($person->id);
