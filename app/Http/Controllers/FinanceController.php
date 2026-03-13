@@ -2096,9 +2096,7 @@ class FinanceController extends Controller
         $lastMonthEnd = $now->copy()->subMonth()->endOfMonth();
 
         // Single optimized query for all income stats
-        $stats = DB::table('transactions')
-            ->where('church_id', $churchId)
-            ->whereNull('deleted_at')
+        $stats = Transaction::where('church_id', $churchId)
             ->where('direction', Transaction::DIRECTION_IN)
             ->where('status', Transaction::STATUS_COMPLETED)
             ->whereNotIn('source_type', [Transaction::SOURCE_EXCHANGE, Transaction::SOURCE_ALLOCATION])
@@ -2124,9 +2122,7 @@ class FinanceController extends Controller
             ->first();
 
         // Total transactions this month (includes both income and expense)
-        $totalTransactions = DB::table('transactions')
-            ->where('church_id', $churchId)
-            ->whereNull('deleted_at')
+        $totalTransactions = Transaction::where('church_id', $churchId)
             ->where('status', Transaction::STATUS_COMPLETED)
             ->where('date', '>=', $thisMonthStart)
             ->count();

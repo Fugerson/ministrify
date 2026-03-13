@@ -475,7 +475,7 @@ class DashboardController extends Controller
         $fourWeeksAgo = now()->subWeeks(3)->startOfWeek(Carbon::MONDAY);
         $attendanceRaw = Attendance::where('church_id', $church->id)
             ->where('date', '>=', $fourWeeksAgo)
-            ->selectRaw('DATE_FORMAT(date, "%x%v") as week_key, MIN(date) as week_start, SUM(COALESCE(members_present, total_count)) as total')
+            ->selectRaw('DATE_FORMAT(date, "%x%v") as week_key, MIN(date) as week_start, SUM(COALESCE(total_count, members_present)) as total')
             ->groupBy('week_key')
             ->orderBy('week_key')
             ->get()
@@ -810,8 +810,8 @@ class DashboardController extends Controller
                 $groupAttendance = $attendanceData->get($group->id, collect());
 
                 $lastAttendance = $groupAttendance->first();
-                $avgAttendance = $groupAttendance->avg(fn($a) => $a->members_present ?? $a->total_count ?? 0) ?? 0;
-                $recentCounts = $groupAttendance->take(4)->map(fn($a) => $a->members_present ?? $a->total_count ?? 0)->reverse()->values()->toArray();
+                $avgAttendance = $groupAttendance->avg(fn($a) => $a->total_count ?? $a->members_present ?? 0) ?? 0;
+                $recentCounts = $groupAttendance->take(4)->map(fn($a) => $a->total_count ?? $a->members_present ?? 0)->reverse()->values()->toArray();
 
                 $trend = 'stable';
                 if (count($recentCounts) >= 2) {
@@ -1143,12 +1143,12 @@ class DashboardController extends Controller
         return $groups->map(function ($group) use ($attendanceData) {
                 $groupAttendance = $attendanceData->get($group->id, collect());
 
-                $avgAttendance = $groupAttendance->avg(fn($a) => $a->members_present ?? $a->total_count ?? 0) ?? 0;
+                $avgAttendance = $groupAttendance->avg(fn($a) => $a->total_count ?? $a->members_present ?? 0) ?? 0;
                 $attendanceRate = $group->members_count > 0
                     ? round($avgAttendance / $group->members_count * 100)
                     : 0;
 
-                $last4 = $groupAttendance->sortBy('date')->take(-4)->map(fn($a) => $a->members_present ?? $a->total_count ?? 0)->toArray();
+                $last4 = $groupAttendance->sortBy('date')->take(-4)->map(fn($a) => $a->total_count ?? $a->members_present ?? 0)->toArray();
                 while (count($last4) < 4) {
                     array_unshift($last4, 0);
                 }
@@ -1307,7 +1307,7 @@ class DashboardController extends Controller
         $twelveMonthsAgo = now()->subMonths(11)->startOfMonth();
         $attendanceRaw = Attendance::where('church_id', $church->id)
             ->where('date', '>=', $twelveMonthsAgo)
-            ->selectRaw('YEAR(date) as year, MONTH(date) as month, AVG(COALESCE(members_present, total_count)) as avg_count')
+            ->selectRaw('YEAR(date) as year, MONTH(date) as month, AVG(COALESCE(total_count, members_present)) as avg_count')
             ->groupBy('year', 'month')
             ->get()
             ->keyBy(fn($item) => $item->year . '-' . $item->month);

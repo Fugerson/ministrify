@@ -157,13 +157,16 @@ class AttendanceController extends Controller
             'present' => 'nullable|array',
         ]);
 
-        $attendance->update([
-            'total_count' => $validated['total_count'],
-            'notes' => $validated['notes'] ?? null,
-        ]);
-
-        // Update attendance records in a transaction to prevent data loss
+        // Update attendance records in a transaction with row-level locking
         DB::transaction(function () use ($attendance, $validated) {
+            // Lock the attendance row to prevent concurrent updates
+            $attendance = Attendance::lockForUpdate()->find($attendance->id);
+
+            $attendance->update([
+                'total_count' => $validated['total_count'],
+                'notes' => $validated['notes'] ?? null,
+            ]);
+
             $attendance->records()->delete();
 
             if (!empty($validated['present'])) {
@@ -181,9 +184,9 @@ class AttendanceController extends Controller
                     ]);
                 }
             }
-        });
 
-        $attendance->recalculateCounts();
+            $attendance->recalculateCounts();
+        });
 
         return $this->successResponse($request, 'Відвідуваність оновлено.', 'attendance.show', ['attendance' => $attendance->id]);
     }

@@ -165,7 +165,7 @@ class Attendance extends Model
             return 0;
         }
 
-        $present = $this->members_present ?? $this->total_count ?? 0;
+        $present = $this->total_count ?? $this->members_present ?? 0;
         return round(($present / $totalMembers) * 100, 1);
     }
 
@@ -223,8 +223,7 @@ class Attendance extends Model
 
         $this->update([
             'members_present' => $membersPresent,
-            // Only update total_count if it was not manually set higher (preserve manual counts)
-            'total_count' => max($this->total_count ?? 0, $calculatedTotal),
+            'total_count' => $calculatedTotal,
         ]);
     }
 

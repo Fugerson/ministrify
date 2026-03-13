@@ -202,7 +202,7 @@ class Group extends Model
         $attendances = $this->attendances()->take(10)->get();
         if ($attendances->isEmpty()) return $this->computedCache['average_attendance'] = 0;
 
-        return $this->computedCache['average_attendance'] = round($attendances->avg(fn($a) => $a->members_present ?? $a->total_count ?? 0), 1);
+        return $this->computedCache['average_attendance'] = round($attendances->avg(fn($a) => $a->total_count ?? $a->members_present ?? 0), 1);
     }
 
     /**
@@ -214,7 +214,7 @@ class Group extends Model
             return $this->computedCache['attendance_trend'];
         }
 
-        $recent = $this->attendances()->orderByDesc('date')->take(4)->get()->map(fn($a) => $a->members_present ?? $a->total_count ?? 0)->reverse()->values();
+        $recent = $this->attendances()->orderByDesc('date')->take(4)->get()->map(fn($a) => $a->total_count ?? $a->members_present ?? 0)->reverse()->values();
         if ($recent->count() < 2) return $this->computedCache['attendance_trend'] = 'stable';
 
         $half = (int) floor($recent->count() / 2);
@@ -248,10 +248,10 @@ class Group extends Model
             $group->computedCache['last_attendance'] = $groupAttendances->first();
             $group->computedCache['average_attendance'] = $groupAttendances->isEmpty()
                 ? 0
-                : round($groupAttendances->avg(fn($a) => $a->members_present ?? $a->total_count ?? 0), 1);
+                : round($groupAttendances->avg(fn($a) => $a->total_count ?? $a->members_present ?? 0), 1);
 
             // Calculate trend
-            $recent = $groupAttendances->take(4)->map(fn($a) => $a->members_present ?? $a->total_count ?? 0)->reverse()->values();
+            $recent = $groupAttendances->take(4)->map(fn($a) => $a->total_count ?? $a->members_present ?? 0)->reverse()->values();
             if ($recent->count() < 2) {
                 $group->computedCache['attendance_trend'] = 'stable';
             } else {

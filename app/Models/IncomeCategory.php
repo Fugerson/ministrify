@@ -44,6 +44,6 @@ class IncomeCategory extends Model
         return $this->incomes()
             ->whereYear('date', now()->year)
             ->whereMonth('date', now()->month)
-            ->sum('amount');
+            ->sum('amount_uah');
     }
 }

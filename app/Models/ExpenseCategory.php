@@ -32,6 +32,6 @@ class ExpenseCategory extends Model
         return $this->expenses()
             ->whereYear('date', now()->year)
             ->whereMonth('date', now()->month)
-            ->sum('amount');
+            ->sum('amount_uah');
     }
 }

@@ -44,11 +44,6 @@ class DonationCampaign extends Model
 
     public function getRaisedAmountAttribute(): float
     {
-        // Use cached collected_amount if available, otherwise calculate
-        if ($this->collected_amount > 0) {
-            return (float) $this->collected_amount;
-        }
-
         return (float) $this->transactions()
             ->where('status', 'completed')
             ->where('direction', 'in')

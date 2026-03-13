@@ -75,7 +75,7 @@ class ReportsController extends Controller
 
             $monthlyData[] = [
                 'month' => Carbon::create($year, $m)->translatedFormat('M'),
-                'count' => (clone $sessionsQuery)->selectRaw('SUM(COALESCE(members_present, total_count, 0)) as total')->value('total') ?? 0,
+                'count' => (clone $sessionsQuery)->selectRaw('SUM(COALESCE(total_count, members_present, 0)) as total')->value('total') ?? 0,
                 'unique_people' => $uniquePeople,
             ];
         }
@@ -87,7 +87,7 @@ class ReportsController extends Controller
             $weekdayQuery->whereHas('attendable', fn($q) => $q->where('ministry_id', $ministryId));
         }
         $weekdayData = (clone $weekdayQuery)
-            ->selectRaw('DAYOFWEEK(date) as day, SUM(COALESCE(members_present, total_count, 0)) as count')
+            ->selectRaw('DAYOFWEEK(date) as day, SUM(COALESCE(total_count, members_present, 0)) as count')
             ->groupBy('day')
             ->pluck('count', 'day')
             ->toArray();
