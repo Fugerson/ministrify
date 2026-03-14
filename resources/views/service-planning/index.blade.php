@@ -36,7 +36,7 @@
                                 <input type="checkbox" :checked="!hiddenEventTitles.has(title)"
                                        @change="toggleEventTitleFilter(title)"
                                        class="rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500">
-                                <span class="text-sm text-gray-700 dark:text-gray-300 truncate" x-text="title"></span>
+                                <span class="text-sm truncate" :class="title === noTeamKey ? 'text-gray-400 dark:text-gray-500 italic' : 'text-gray-700 dark:text-gray-300'" x-text="title === noTeamKey ? noTeamLabel : title"></span>
                                 <span class="text-[10px] text-gray-400 dark:text-gray-500 ml-auto flex-shrink-0"
                                       x-text="eventCountByTitle(title)"></span>
                             </label>
@@ -630,23 +630,34 @@ function servicePlanningMatrix() {
         // Event ministry filter
         filteredEvents() {
             if (this.hiddenEventTitles.size === 0) return this.allEvents;
-            return this.allEvents.filter(e => !this.hiddenEventTitles.has(e.ministryName));
+            return this.allEvents.filter(e => {
+                if (!e.ministryName) return !this.hiddenEventTitles.has(this.noTeamKey);
+                return !this.hiddenEventTitles.has(e.ministryName);
+            });
         },
+
+        noTeamLabel: @json(__('app.sp_without_team')),
+        noTeamKey: '__no_team__',
 
         buildUniqueEventTitles() {
             const seen = new Set();
             const titles = [];
+            let hasNoTeam = false;
             for (const e of this.allEvents) {
-                if (e.ministryName && !seen.has(e.ministryName)) {
+                if (!e.ministryName) {
+                    hasNoTeam = true;
+                } else if (!seen.has(e.ministryName)) {
                     seen.add(e.ministryName);
                     titles.push(e.ministryName);
                 }
             }
             titles.sort();
+            if (hasNoTeam) titles.push(this.noTeamKey);
             this.uniqueEventTitles = titles;
         },
 
         eventCountByTitle(title) {
+            if (title === this.noTeamKey) return this.allEvents.filter(e => !e.ministryName).length;
             return this.allEvents.filter(e => e.ministryName === title).length;
         },
 

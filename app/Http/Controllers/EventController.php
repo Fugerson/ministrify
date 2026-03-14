@@ -886,10 +886,9 @@ class EventController extends Controller
 
         $monthNames = ['', 'січ', 'лют', 'бер', 'кві', 'тра', 'чер', 'лип', 'сер', 'вер', 'жов', 'лис', 'гру'];
 
-        // 1. Load all service events for the period (only events linked to a ministry)
+        // 1. Load all service events for the period
         $rawEvents = Event::where('church_id', $church->id)
             ->where('is_service', true)
-            ->whereNotNull('ministry_id')
             ->whereBetween('date', [$startDate, $endDate])
             ->with('ministry:id,name,color')
             ->orderBy('date')

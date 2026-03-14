@@ -5028,6 +5028,7 @@ return [
     'sp_show_all' => 'Показати все',
     'sp_hide_all' => 'Приховати все',
     'sp_no_events_to_filter' => 'Немає подій для фільтрації',
+    'sp_without_team' => 'Без команди',
     'sp_create_events_hint' => 'Створіть події типу "Служіння" в розкладі',
     'sp_add_roles_hint' => 'Додайте ролі до команд через налаштування команди',
     'public_event_registration' => 'Реєстрація на подію',
