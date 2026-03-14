@@ -41,6 +41,7 @@ class PersonController extends Controller
         $church = $this->getCurrentChurch();
 
         $query = Person::where('church_id', $church->id)
+            ->where('membership_status', '!=', Person::STATUS_GUEST)
             ->with(['tags', 'ministries', 'churchRoleRelation', 'shepherd']);
 
         // Search
@@ -1224,6 +1225,7 @@ class PersonController extends Controller
         $church = $this->getCurrentChurch();
 
         $people = Person::where('church_id', $church->id)
+            ->where('membership_status', '!=', Person::STATUS_GUEST)
             ->with('ministries')
             ->orderBy('last_name')
             ->orderBy('first_name')

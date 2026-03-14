@@ -27,6 +27,7 @@ class SearchController extends Controller
         // Search people
         if ($user->canView('people')) {
             $people = Person::where('church_id', $churchId)
+                ->where('membership_status', '!=', Person::STATUS_GUEST)
                 ->where(function ($q) use ($search) {
                     $q->where('first_name', 'like', "%{$search}%")
                       ->orWhere('last_name', 'like', "%{$search}%")

@@ -20,6 +20,7 @@ class TelegramChatController extends Controller
 
         // Get people with Telegram linked, with their latest message
         $conversations = Person::where('church_id', $church->id)
+            ->where('membership_status', '!=', Person::STATUS_GUEST)
             ->whereNotNull('telegram_chat_id')
             ->withCount(['telegramMessages as unread_count' => function ($query) {
                 $query->where('direction', 'incoming')->where('is_read', false);

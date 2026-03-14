@@ -454,6 +454,7 @@ class DashboardController extends Controller
     private function loadBirthdaysThisMonth($church)
     {
         return Person::where('church_id', $church->id)
+            ->where('membership_status', '!=', Person::STATUS_GUEST)
             ->whereNotNull('birth_date')
             ->whereMonth('birth_date', now()->month)
             ->get()
@@ -646,6 +647,7 @@ class DashboardController extends Controller
         return $this->cacheService->remember('growth', $church, function () use ($church) {
             $sixMonthsAgo = now()->subMonths(5)->startOfMonth();
             $growthRaw = Person::where('church_id', $church->id)
+                ->where('membership_status', '!=', Person::STATUS_GUEST)
                 ->whereRaw('COALESCE(joined_date, first_visit_date, created_at) >= ?', [$sixMonthsAgo])
                 ->selectRaw('YEAR(COALESCE(joined_date, first_visit_date, created_at)) as year, MONTH(COALESCE(joined_date, first_visit_date, created_at)) as month, COUNT(*) as count')
                 ->groupBy('year', 'month')
@@ -777,6 +779,7 @@ class DashboardController extends Controller
         $startOfMonth = now()->startOfMonth()->toDateString();
 
         return Person::where('church_id', $church->id)
+            ->where('membership_status', '!=', Person::STATUS_GUEST)
             ->whereRaw('COALESCE(joined_date, first_visit_date, created_at) >= ?', [$startOfMonth])
             ->orderByDesc(DB::raw('COALESCE(joined_date, first_visit_date, created_at)'))
             ->limit(8)
@@ -1226,6 +1229,7 @@ class DashboardController extends Controller
 
         $today = now();
         $people = Person::where('church_id', $church->id)
+            ->where('membership_status', '!=', Person::STATUS_GUEST)
             ->whereNotNull('birth_date')
             ->whereMonth('birth_date', $month)
             ->get()
@@ -1331,10 +1335,12 @@ class DashboardController extends Controller
         $twelveMonthsAgo = now()->subMonths(11)->startOfMonth();
 
         $cumulative = Person::where('church_id', $church->id)
+            ->where('membership_status', '!=', Person::STATUS_GUEST)
             ->whereRaw('COALESCE(joined_date, first_visit_date, created_at) < ?', [$twelveMonthsAgo])
             ->count();
 
         $growthRaw = Person::where('church_id', $church->id)
+            ->where('membership_status', '!=', Person::STATUS_GUEST)
             ->whereRaw('COALESCE(joined_date, first_visit_date, created_at) >= ?', [$twelveMonthsAgo])
             ->selectRaw('YEAR(COALESCE(joined_date, first_visit_date, created_at)) as year, MONTH(COALESCE(joined_date, first_visit_date, created_at)) as month, COUNT(*) as count')
             ->groupBy('year', 'month')
