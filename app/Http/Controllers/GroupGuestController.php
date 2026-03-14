@@ -23,7 +23,7 @@ class GroupGuestController extends Controller
         $validated = $request->validate([
             'first_name' => 'required|string|max:255',
             'last_name' => 'nullable|string|max:255',
-            'age' => 'nullable|integer|min:0|max:150',
+            'birth_date' => 'nullable|date|before_or_equal:today',
             'photo' => 'nullable|image|max:5120',
             'notes' => 'nullable|string|max:1000',
         ]);
@@ -50,7 +50,7 @@ class GroupGuestController extends Controller
         $validated = $request->validate([
             'first_name' => 'required|string|max:255',
             'last_name' => 'nullable|string|max:255',
-            'age' => 'nullable|integer|min:0|max:150',
+            'birth_date' => 'nullable|date|before_or_equal:today',
             'photo' => 'nullable|image|max:5120',
             'notes' => 'nullable|string|max:1000',
         ]);

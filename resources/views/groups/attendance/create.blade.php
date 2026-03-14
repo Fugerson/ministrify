@@ -80,9 +80,6 @@
                             <img src="{{ Storage::url($guest->photo) }}" alt="" class="w-6 h-6 rounded-full object-cover">
                             @endif
                             <span class="text-gray-900 dark:text-white">{{ $guest->full_name }}</span>
-                            @if($guest->age)
-                            <span class="text-xs text-gray-500 dark:text-gray-400">({{ $guest->age }})</span>
-                            @endif
                         </div>
                     </label>
                     @endforeach

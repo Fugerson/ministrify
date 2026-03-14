@@ -18,12 +18,12 @@ class GroupGuest extends Model
         'first_name',
         'last_name',
         'photo',
-        'age',
+        'birth_date',
         'notes',
     ];
 
     protected $casts = [
-        'age' => 'integer',
+        'birth_date' => 'date',
     ];
 
     public function group(): BelongsTo
@@ -41,6 +41,11 @@ class GroupGuest extends Model
         return $this->belongsToMany(Attendance::class, 'group_guest_attendance')
             ->withPivot('present')
             ->withTimestamps();
+    }
+
+    public function getAgeAttribute(): ?int
+    {
+        return $this->birth_date ? $this->birth_date->age : null;
     }
 
     public function getFullNameAttribute(): string

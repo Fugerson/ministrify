@@ -709,8 +709,8 @@
                                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl dark:text-white focus:ring-2 focus:ring-primary-500">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.group_guest_age') }}</label>
-                        <input type="number" name="age" min="0" max="150"
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.date_of_birth') }}</label>
+                        <input type="date" name="birth_date" max="{{ now()->format('Y-m-d') }}"
                                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl dark:text-white focus:ring-2 focus:ring-primary-500">
                     </div>
                     <div>
@@ -825,9 +825,6 @@
                             <input type="checkbox" name="guests_present[]" value="{{ $guest->id }}"
                                    class="w-5 h-5 rounded border-gray-300 text-orange-600 focus:ring-orange-500">
                             <span class="ml-3 text-sm text-gray-900 dark:text-white">{{ $guest->full_name }}</span>
-                            @if($guest->age)
-                            <span class="ml-auto text-xs text-gray-500 dark:text-gray-400">({{ $guest->age }})</span>
-                            @endif
                         </label>
                         @endforeach
                     </div>
@@ -883,8 +880,8 @@
                                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl dark:text-white focus:ring-2 focus:ring-primary-500">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.group_guest_age') }}</label>
-                        <input type="number" name="age" value="{{ $guest->age }}" min="0" max="150"
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.date_of_birth') }}</label>
+                        <input type="date" name="birth_date" value="{{ $guest->birth_date?->format('Y-m-d') }}" max="{{ now()->format('Y-m-d') }}"
                                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl dark:text-white focus:ring-2 focus:ring-primary-500">
                     </div>
                     <div>
