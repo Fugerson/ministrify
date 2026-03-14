@@ -1,138 +1,107 @@
 <div class="space-y-4" x-data="servicePlanningMatrix()" x-init="loadData()">
 
-    {{-- Header --}}
+    {{-- Controls: Filter + View toggle + Navigation --}}
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 px-3 sm:px-4 py-3">
-        {{-- Row 1: Title + View toggle --}}
-        <div class="flex items-center justify-between gap-2 mb-2 sm:mb-0">
-            <div class="flex items-center gap-2">
-                <h1 class="text-sm sm:text-lg font-semibold text-gray-900 dark:text-white truncate">{{ __('app.service_planning') }}</h1>
-
-                {{-- Event type filter --}}
-                <div class="relative" x-data="{ filterOpen: false }">
-                    <button @click="filterOpen = !filterOpen" type="button"
-                        class="flex items-center gap-1 px-2 py-1.5 text-xs sm:text-sm rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
-                        </svg>
-                        <span class="hidden sm:inline">{{ __('app.filter') }}</span>
-                        <template x-if="hiddenEventTitles.size > 0">
-                            <span class="w-4 h-4 flex items-center justify-center text-[9px] font-bold bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400 rounded-full"
-                                  x-text="hiddenEventTitles.size"></span>
-                        </template>
-                    </button>
-                    <div x-show="filterOpen" @click.outside="filterOpen = false"
-                         x-transition
-                         class="absolute left-0 top-full mt-1 z-30 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 w-72 py-1 max-h-80 overflow-y-auto">
-                        <template x-if="uniqueEventTitles.length === 0">
-                            <div class="px-3 py-3 text-center text-sm text-gray-500 dark:text-gray-400">{{ __('app.sp_no_events_to_filter') }}</div>
-                        </template>
-                        <template x-for="title in uniqueEventTitles" :key="title">
-                            <label class="flex items-center gap-2.5 px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors">
-                                <input type="checkbox" :checked="!hiddenEventTitles.has(title)"
-                                       @change="toggleEventTitleFilter(title)"
-                                       class="rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500">
-                                <span class="text-sm truncate" :class="title === noTeamKey ? 'text-gray-400 dark:text-gray-500 italic' : 'text-gray-700 dark:text-gray-300'" x-text="title === noTeamKey ? noTeamLabel : title"></span>
-                                <span class="text-[10px] text-gray-400 dark:text-gray-500 ml-auto flex-shrink-0"
-                                      x-text="eventCountByTitle(title)"></span>
-                            </label>
-                        </template>
-                        <template x-if="uniqueEventTitles.length > 1">
-                            <div class="border-t border-gray-200 dark:border-gray-700 mt-1 pt-1 px-3 py-1.5 flex gap-2">
-                                <button @click="showAllEventTitles()" type="button" class="text-xs text-primary-600 dark:text-primary-400 hover:underline">{{ __('app.sp_show_all') }}</button>
-                                <span class="text-gray-300 dark:text-gray-600">|</span>
-                                <button @click="hideAllEventTitles()" type="button" class="text-xs text-gray-500 dark:text-gray-400 hover:underline">{{ __('app.sp_hide_all') }}</button>
-                            </div>
-                        </template>
+        <div class="flex items-center justify-between gap-2 flex-wrap">
+        <div class="flex items-center gap-2">
+        <div class="relative" x-data="{ filterOpen: false }">
+            <button @click="filterOpen = !filterOpen" type="button"
+                class="flex items-center gap-1 px-2 py-1.5 text-xs sm:text-sm rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+                </svg>
+                <span class="hidden sm:inline">{{ __('app.filter') }}</span>
+                <template x-if="hiddenEventTitles.size > 0">
+                    <span class="w-4 h-4 flex items-center justify-center text-[9px] font-bold bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400 rounded-full"
+                          x-text="hiddenEventTitles.size"></span>
+                </template>
+            </button>
+            <div x-show="filterOpen" @click.outside="filterOpen = false"
+                 x-transition
+                 class="absolute left-0 top-full mt-1 z-30 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 w-72 py-1 max-h-80 overflow-y-auto">
+                <template x-if="uniqueEventTitles.length === 0">
+                    <div class="px-3 py-3 text-center text-sm text-gray-500 dark:text-gray-400">{{ __('app.sp_no_events_to_filter') }}</div>
+                </template>
+                <template x-for="title in uniqueEventTitles" :key="title">
+                    <label class="flex items-center gap-2.5 px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors">
+                        <input type="checkbox" :checked="!hiddenEventTitles.has(title)"
+                               @change="toggleEventTitleFilter(title)"
+                               class="rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500">
+                        <span class="text-sm truncate" :class="title === noTeamKey ? 'text-gray-400 dark:text-gray-500 italic' : 'text-gray-700 dark:text-gray-300'" x-text="title === noTeamKey ? noTeamLabel : title"></span>
+                        <span class="text-[10px] text-gray-400 dark:text-gray-500 ml-auto flex-shrink-0"
+                              x-text="eventCountByTitle(title)"></span>
+                    </label>
+                </template>
+                <template x-if="uniqueEventTitles.length > 1">
+                    <div class="border-t border-gray-200 dark:border-gray-700 mt-1 pt-1 px-3 py-1.5 flex gap-2">
+                        <button @click="showAllEventTitles()" type="button" class="text-xs text-primary-600 dark:text-primary-400 hover:underline">{{ __('app.sp_show_all') }}</button>
+                        <span class="text-gray-300 dark:text-gray-600">|</span>
+                        <button @click="hideAllEventTitles()" type="button" class="text-xs text-gray-500 dark:text-gray-400 hover:underline">{{ __('app.sp_hide_all') }}</button>
                     </div>
-                </div>
-            </div>
-
-            <div class="flex items-center gap-2 flex-shrink-0">
-                {{-- View mode toggle --}}
-                <div class="flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg p-0.5">
-                    <button @click="switchToWeek()" type="button"
-                        :class="viewMode === 'week' ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'"
-                        class="px-2.5 py-1 text-xs font-medium rounded-md transition-all">
-                        {{ __('app.week') }}
-                    </button>
-                    <button @click="switchToMonth()" type="button"
-                        :class="viewMode === 'month' ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'"
-                        class="px-2.5 py-1 text-xs font-medium rounded-md transition-all">
-                        {{ __('app.month') }}
-                    </button>
-                </div>
+                </template>
             </div>
         </div>
 
-        {{-- Row 2: Date navigation (separate row on mobile) --}}
-        <div class="flex items-center justify-center gap-1" x-data="{ pickerOpen: false, pickerYear: new Date().getFullYear() }">
-            <button @click="prevPeriod()" type="button"
-               class="w-9 h-9 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 rounded-lg transition-colors">
-                <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                </svg>
-            </button>
+            {{-- View mode toggle --}}
+            <div class="flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg p-0.5">
+                <button @click="switchToWeek()" type="button"
+                    :class="viewMode === 'week' ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'"
+                    class="px-2.5 py-1 text-xs font-medium rounded-md transition-all">
+                    {{ __('app.week') }}
+                </button>
+                <button @click="switchToMonth()" type="button"
+                    :class="viewMode === 'month' ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'"
+                    class="px-2.5 py-1 text-xs font-medium rounded-md transition-all">
+                    {{ __('app.month') }}
+                </button>
+            </div>
+        </div>
 
-            {{-- Clickable date label → opens month picker --}}
-            <div class="relative">
-                <button @click="pickerOpen = !pickerOpen; pickerYear = startDate.getFullYear()" type="button"
-                    class="flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold text-gray-900 dark:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors whitespace-nowrap">
-                    <span x-text="periodLabel"></span>
-                    <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            {{-- Date navigation --}}
+            <div class="flex items-center gap-1">
+                <button @click="prevPeriod()" type="button"
+                   class="w-9 h-9 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                     </svg>
                 </button>
-
-                {{-- Month/year picker dropdown --}}
-                <div x-show="pickerOpen" @click.outside="pickerOpen = false" x-transition
-                     class="absolute left-1/2 -translate-x-1/2 sm:left-auto sm:translate-x-0 sm:right-0 top-full mt-1 z-30 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 p-3 min-w-[240px]">
-
-                    {{-- Year navigation --}}
-                    <div class="flex items-center justify-between mb-3">
-                        <button @click="pickerYear--" type="button"
-                            class="w-8 h-8 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                            <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                            </svg>
-                        </button>
-                        <span class="text-sm font-bold text-gray-900 dark:text-white" x-text="pickerYear"></span>
-                        <button @click="pickerYear++" type="button"
-                            class="w-8 h-8 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                            <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                            </svg>
-                        </button>
-                    </div>
-
-                    {{-- Month grid 3x4 --}}
-                    <div class="grid grid-cols-3 gap-1.5 mb-3">
-                        <template x-for="(month, index) in ['Січ','Лют','Бер','Кві','Тра','Чер','Лип','Сер','Вер','Жов','Лис','Гру']" :key="index">
-                            <button @click="pickMonth(pickerYear, index); pickerOpen = false" type="button"
-                                :class="startDate.getFullYear() === pickerYear && startDate.getMonth() === index
-                                    ? 'bg-primary-500 text-white font-bold'
-                                    : (pickerYear === new Date().getFullYear() && index === new Date().getMonth()
-                                        ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 font-medium'
-                                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700')"
-                                class="px-2 py-2 rounded-lg text-sm transition-colors">
-                                <span x-text="month"></span>
-                            </button>
-                        </template>
-                    </div>
-
-                    {{-- Today button --}}
-                    <button @click="goToday(); pickerOpen = false" type="button"
-                        class="w-full py-1.5 text-xs font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/30 rounded-lg transition-colors pt-2 border-t border-gray-200 dark:border-gray-700">
-                        {{ __('common.today') }}
+                <div class="relative" x-data="{ pickerOpen: false, pickerYear: new Date().getFullYear() }">
+                    <button @click="pickerOpen = !pickerOpen; pickerYear = startDate.getFullYear()" type="button"
+                        class="flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold text-gray-900 dark:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors whitespace-nowrap">
+                        <span x-text="periodLabel"></span>
+                        <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
                     </button>
+                    <div x-show="pickerOpen" @click.outside="pickerOpen = false" x-transition
+                         class="absolute left-1/2 -translate-x-1/2 top-full mt-1 z-30 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 p-3 min-w-[240px]">
+                        <div class="flex items-center justify-between mb-3">
+                            <button @click="pickerYear--" type="button" class="w-8 h-8 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"><svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg></button>
+                            <span class="text-sm font-bold text-gray-900 dark:text-white" x-text="pickerYear"></span>
+                            <button @click="pickerYear++" type="button" class="w-8 h-8 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"><svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></button>
+                        </div>
+                        <div class="grid grid-cols-3 gap-1.5 mb-3">
+                            <template x-for="(month, index) in @js(explode(',', __('app.cal_months_short')))" :key="index">
+                                <button @click="pickMonth(pickerYear, index); pickerOpen = false" type="button"
+                                    :class="startDate.getFullYear() === pickerYear && startDate.getMonth() === index ? 'bg-primary-500 text-white font-bold' : (pickerYear === new Date().getFullYear() && index === new Date().getMonth() ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 font-medium' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700')"
+                                    class="px-2 py-2 rounded-lg text-sm transition-colors">
+                                    <span x-text="month"></span>
+                                </button>
+                            </template>
+                        </div>
+                        <button @click="goToday(); pickerOpen = false" type="button"
+                            class="w-full py-1.5 text-xs font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/30 rounded-lg transition-colors pt-2 border-t border-gray-200 dark:border-gray-700">
+                            {{ __('common.today') }}
+                        </button>
+                    </div>
                 </div>
+                <button @click="nextPeriod()" type="button"
+                   class="w-9 h-9 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </button>
             </div>
-
-            <button @click="nextPeriod()" type="button"
-               class="w-9 h-9 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 rounded-lg transition-colors">
-                <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                </svg>
-            </button>
         </div>
     </div>
 
