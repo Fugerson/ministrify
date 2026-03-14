@@ -4990,6 +4990,7 @@ return [
     'sp_show_all' => 'Show all',
     'sp_hide_all' => 'Hide all',
     'sp_no_events_to_filter' => 'No events to filter',
+    'sp_without_team' => 'Without team',
     'sp_create_events_hint' => 'Create "Service" type events in the schedule',
     'sp_add_roles_hint' => 'Add roles to teams via team settings',
 
