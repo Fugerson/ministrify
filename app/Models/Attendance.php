@@ -94,14 +94,6 @@ class Attendance extends Model
         return $this->hasMany(AttendanceRecord::class);
     }
 
-    public function guestAttendances(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
-    {
-        return $this->belongsToMany(GroupGuest::class, 'group_guest_attendance')
-            ->withTrashed()
-            ->withPivot('present')
-            ->withTimestamps();
-    }
-
     public function recorder(): BelongsTo
     {
         return $this->belongsTo(User::class, 'recorded_by');

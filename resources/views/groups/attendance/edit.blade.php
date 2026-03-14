@@ -29,7 +29,7 @@
                        class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl focus:ring-2 focus:ring-primary-500 dark:text-white">
             </div>
 
-            <!-- Members Checklist -->
+            <!-- Members & Guests Checklist -->
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ __('app.group_present_members') }}</label>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -41,30 +41,16 @@
                         <span class="ml-3 text-gray-900 dark:text-white">{{ $member->full_name }}</span>
                         @if($member->pivot->role !== 'member')
                         <span class="ml-auto text-xs text-gray-500 dark:text-gray-400">
-                            {{ $member->pivot->role === 'leader' ? __('app.leader') : __('app.assistant_role') }}
+                            @if($member->pivot->role === 'leader') {{ __('app.leader') }}
+                            @elseif($member->pivot->role === 'assistant') {{ __('app.assistant_role') }}
+                            @elseif($member->pivot->role === 'guest') {{ __('app.group_role_guest') }}
+                            @endif
                         </span>
                         @endif
                     </label>
                     @endforeach
                 </div>
             </div>
-
-            <!-- Guests Checklist -->
-            @if($group->guests->count() > 0)
-            <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ __('app.group_present_guests') }}</label>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    @foreach($group->guests->sortBy('first_name') as $guest)
-                    <label class="flex items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-xl cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
-                        <input type="checkbox" name="guests_present[]" value="{{ $guest->id }}"
-                               {{ in_array($guest->id, $guestsPresentIds) ? 'checked' : '' }}
-                               class="w-5 h-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500">
-                        <span class="ml-3 text-gray-900 dark:text-white">{{ $guest->full_name }}</span>
-                    </label>
-                    @endforeach
-                </div>
-            </div>
-            @endif
 
             <div>
                 <label for="guests_count" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.group_guests_count') }}</label>

@@ -54,11 +54,13 @@ class Group extends Model
     public const ROLE_LEADER = 'leader';
     public const ROLE_ASSISTANT = 'assistant';
     public const ROLE_MEMBER = 'member';
+    public const ROLE_GUEST = 'guest';
 
     public const ROLES = [
         self::ROLE_LEADER => 'Лідер',
         self::ROLE_ASSISTANT => 'Помічник',
         self::ROLE_MEMBER => 'Учасник',
+        self::ROLE_GUEST => 'Гість',
     ];
 
     public static function getRoles(): array
@@ -67,6 +69,7 @@ class Group extends Model
             self::ROLE_LEADER => __('app.role_leader'),
             self::ROLE_ASSISTANT => __('app.role_assistant'),
             self::ROLE_MEMBER => __('app.role_member'),
+            self::ROLE_GUEST => __('app.group_role_guest'),
         ];
     }
 
@@ -163,9 +166,12 @@ class Group extends Model
             ->withTimestamps();
     }
 
-    public function guests(): HasMany
+    public function guests(): BelongsToMany
     {
-        return $this->hasMany(GroupGuest::class);
+        return $this->belongsToMany(Person::class)
+            ->withPivot(['role', 'joined_at'])
+            ->wherePivot('role', self::ROLE_GUEST)
+            ->withTimestamps();
     }
 
     /**

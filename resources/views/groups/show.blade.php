@@ -543,7 +543,7 @@
                         <img src="{{ Storage::url($guest->photo) }}" alt="{{ $guest->full_name }}" class="w-10 h-10 rounded-full object-cover" loading="lazy">
                         @else
                         <div class="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center">
-                            <span class="text-white text-sm font-semibold">{{ $guest->initials }}</span>
+                            <span class="text-white text-sm font-semibold">{{ mb_substr($guest->first_name, 0, 1) }}{{ mb_substr($guest->last_name ?? '', 0, 1) }}</span>
                         </div>
                         @endif
                         <div>
@@ -796,7 +796,7 @@
                     </div>
                 </div>
 
-                <!-- Members Checklist -->
+                <!-- Members & Guests Checklist -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.group_present_members') }}</label>
                     <div class="max-h-60 overflow-y-auto space-y-1.5 pr-1">
@@ -807,29 +807,16 @@
                             <span class="ml-3 text-sm text-gray-900 dark:text-white">{{ $member->full_name }}</span>
                             @if($member->pivot->role !== 'member')
                             <span class="ml-auto text-xs text-gray-500 dark:text-gray-400">
-                                {{ $member->pivot->role === 'leader' ? __('app.leader') : __('app.assistant_role') }}
+                                @if($member->pivot->role === 'leader') {{ __('app.leader') }}
+                                @elseif($member->pivot->role === 'assistant') {{ __('app.assistant_role') }}
+                                @elseif($member->pivot->role === 'guest') {{ __('app.group_role_guest') }}
+                                @endif
                             </span>
                             @endif
                         </label>
                         @endforeach
                     </div>
                 </div>
-
-                <!-- Guests Checklist -->
-                @if($group->guests->count() > 0)
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.group_present_guests') }}</label>
-                    <div class="max-h-40 overflow-y-auto space-y-1.5 pr-1">
-                        @foreach($group->guests->sortBy('first_name') as $guest)
-                        <label class="flex items-center p-2.5 bg-gray-50 dark:bg-gray-700 rounded-xl cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
-                            <input type="checkbox" name="guests_present[]" value="{{ $guest->id }}"
-                                   class="w-5 h-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500">
-                            <span class="ml-3 text-sm text-gray-900 dark:text-white">{{ $guest->full_name }}</span>
-                        </label>
-                        @endforeach
-                    </div>
-                </div>
-                @endif
 
                 <div>
                     <label for="modal_att_notes" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.notes') }}</label>

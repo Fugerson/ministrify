@@ -51,7 +51,7 @@ class GroupAttendanceController extends Controller
         $this->checkAttendanceEnabled();
         $this->authorize('update', $group);
 
-        $group->load(['members', 'guests']);
+        $group->load('members');
 
         // Check if attendance already exists for today
         $existingToday = $group->attendances()->whereDate('date', today())->first();
@@ -72,14 +72,11 @@ class GroupAttendanceController extends Controller
             'guests_count' => 'nullable|integer|min:0',
             'present' => 'nullable|array',
             'present.*' => [Rule::exists('people', 'id')->where('church_id', $this->getCurrentChurch()->id)],
-            'guests_present' => 'nullable|array',
-            'guests_present.*' => ['integer', Rule::exists('group_guests', 'id')->where('group_id', $group->id)],
         ]);
 
         $presentIds = $validated['present'] ?? [];
-        $guestsPresentIds = $validated['guests_present'] ?? [];
 
-        return DB::transaction(function () use ($request, $group, $validated, $presentIds, $guestsPresentIds) {
+        return DB::transaction(function () use ($request, $group, $validated, $presentIds) {
             // Check for duplicate with lock to prevent race condition
             $existing = $group->attendances()
                 ->whereDate('date', $validated['date'])
@@ -99,8 +96,22 @@ class GroupAttendanceController extends Controller
             }
 
             $anonymousGuests = (int) ($validated['guests_count'] ?? 0);
-            $namedGuestsPresent = count($guestsPresentIds);
-            $guestsCount = $namedGuestsPresent + $anonymousGuests;
+
+            // Count present members vs guests
+            $allMembers = $group->members()->get();
+            $membersPresent = 0;
+            $guestsPresent = 0;
+            foreach ($allMembers as $member) {
+                if (in_array($member->id, $presentIds)) {
+                    if ($member->pivot->role === Group::ROLE_GUEST) {
+                        $guestsPresent++;
+                    } else {
+                        $membersPresent++;
+                    }
+                }
+            }
+
+            $totalGuests = $guestsPresent + $anonymousGuests;
 
             // Create unified attendance record
             $attendance = $group->createAttendance([
@@ -108,27 +119,20 @@ class GroupAttendanceController extends Controller
                 'time' => $validated['time'] ?? null,
                 'location' => $validated['location'] ?? $group->location,
                 'notes' => $validated['notes'] ?? null,
-                'guests_count' => $guestsCount,
+                'guests_count' => $totalGuests,
                 'anonymous_guests_count' => $anonymousGuests,
-                'members_present' => count($presentIds),
-                'total_count' => count($presentIds) + $guestsCount,
+                'members_present' => $membersPresent,
+                'total_count' => $membersPresent + $totalGuests,
                 'recorded_by' => auth()->id(),
             ]);
 
-            // Create attendance records for members
-            foreach ($group->members as $member) {
+            // Create attendance records for ALL members (including guests)
+            foreach ($allMembers as $member) {
                 AttendanceRecord::create([
                     'attendance_id' => $attendance->id,
                     'person_id' => $member->id,
                     'present' => in_array($member->id, $presentIds),
                     'checked_in_at' => in_array($member->id, $presentIds) ? now()->format('H:i') : null,
-                ]);
-            }
-
-            // Create attendance records for guests
-            foreach ($group->guests as $guest) {
-                $attendance->guestAttendances()->attach($guest->id, [
-                    'present' => in_array($guest->id, $guestsPresentIds),
                 ]);
             }
 
@@ -142,7 +146,8 @@ class GroupAttendanceController extends Controller
         $this->authorize('view', $group);
         abort_unless($attendance->attendable_id === $group->id && $attendance->attendable_type === Group::class, 404);
 
-        $attendance->load(['records.person', 'recorder', 'guestAttendances']);
+        $attendance->load(['records.person', 'recorder']);
+        $group->load('members');
 
         return view('groups.attendance.show', compact('group', 'attendance'));
     }
@@ -153,13 +158,12 @@ class GroupAttendanceController extends Controller
         $this->authorize('update', $group);
         abort_unless($attendance->attendable_id === $group->id && $attendance->attendable_type === Group::class, 404);
 
-        $group->load(['members', 'guests']);
-        $attendance->load(['records', 'guestAttendances']);
+        $group->load('members');
+        $attendance->load('records');
 
         $presentIds = $attendance->records->where('present', true)->pluck('person_id')->toArray();
-        $guestsPresentIds = $attendance->guestAttendances->where('pivot.present', true)->pluck('id')->toArray();
 
-        return view('groups.attendance.edit', compact('group', 'attendance', 'presentIds', 'guestsPresentIds'));
+        return view('groups.attendance.edit', compact('group', 'attendance', 'presentIds'));
     }
 
     public function update(Request $request, Group $group, Attendance $attendance)
@@ -176,25 +180,36 @@ class GroupAttendanceController extends Controller
             'guests_count' => 'nullable|integer|min:0',
             'present' => 'nullable|array',
             'present.*' => [Rule::exists('people', 'id')->where('church_id', $this->getCurrentChurch()->id)],
-            'guests_present' => 'nullable|array',
-            'guests_present.*' => ['integer', Rule::exists('group_guests', 'id')->where('group_id', $group->id)],
         ]);
 
         $presentIds = $validated['present'] ?? [];
-        $guestsPresentIds = $validated['guests_present'] ?? [];
         $anonymousGuests = (int) ($validated['guests_count'] ?? 0);
-        $namedGuestsPresent = count($guestsPresentIds);
-        $guestsCount = $namedGuestsPresent + $anonymousGuests;
+
+        // Count present members vs guests
+        $allMembers = $group->members()->get();
+        $membersPresent = 0;
+        $guestsPresent = 0;
+        foreach ($allMembers as $member) {
+            if (in_array($member->id, $presentIds)) {
+                if ($member->pivot->role === Group::ROLE_GUEST) {
+                    $guestsPresent++;
+                } else {
+                    $membersPresent++;
+                }
+            }
+        }
+
+        $totalGuests = $guestsPresent + $anonymousGuests;
 
         $attendance->update([
             'date' => $validated['date'],
             'time' => $validated['time'] ?? null,
             'location' => $validated['location'] ?? null,
             'notes' => $validated['notes'] ?? null,
-            'guests_count' => $guestsCount,
+            'guests_count' => $totalGuests,
             'anonymous_guests_count' => $anonymousGuests,
-            'members_present' => count($presentIds),
-            'total_count' => count($presentIds) + $guestsCount,
+            'members_present' => $membersPresent,
+            'total_count' => $membersPresent + $totalGuests,
         ]);
 
         // Update records
@@ -204,9 +219,9 @@ class GroupAttendanceController extends Controller
             ]);
         }
 
-        // Add new members if any (updateOrCreate prevents duplicates)
+        // Add new members if any
         $existingPersonIds = $attendance->records->pluck('person_id')->toArray();
-        foreach ($group->members as $member) {
+        foreach ($allMembers as $member) {
             if (!in_array($member->id, $existingPersonIds)) {
                 AttendanceRecord::updateOrCreate(
                     [
@@ -219,14 +234,6 @@ class GroupAttendanceController extends Controller
                 );
             }
         }
-
-        // Sync guest attendance
-        $group->load('guests');
-        $syncData = [];
-        foreach ($group->guests as $guest) {
-            $syncData[$guest->id] = ['present' => in_array($guest->id, $guestsPresentIds)];
-        }
-        $attendance->guestAttendances()->sync($syncData);
 
         return $this->successResponse($request, 'Відвідуваність оновлено.', 'groups.show', ['group' => $group->id]);
     }
@@ -250,7 +257,7 @@ class GroupAttendanceController extends Controller
         $this->checkAttendanceEnabled();
         $this->authorize('update', $group);
 
-        $group->load(['members', 'guests']);
+        $group->load('members');
 
         // Get or create today's attendance
         $attendance = $group->attendances()->whereDate('date', today())->first();
@@ -263,7 +270,7 @@ class GroupAttendanceController extends Controller
                 'recorded_by' => auth()->id(),
             ]);
 
-            // Create empty records for all members
+            // Create empty records for ALL members (including guests)
             foreach ($group->members as $member) {
                 AttendanceRecord::create([
                     'attendance_id' => $attendance->id,
@@ -271,20 +278,15 @@ class GroupAttendanceController extends Controller
                     'present' => false,
                 ]);
             }
-
-            // Create empty records for all guests
-            foreach ($group->guests as $guest) {
-                $attendance->guestAttendances()->attach($guest->id, ['present' => false]);
-            }
         }
 
-        $attendance->load(['records.person', 'guestAttendances']);
+        $attendance->load('records.person');
 
         return view('groups.attendance.checkin', compact('group', 'attendance'));
     }
 
     /**
-     * Toggle member presence via AJAX
+     * Toggle person presence via AJAX (works for both members and guests)
      */
     public function togglePresence(Request $request, Group $group, Attendance $attendance)
     {
@@ -312,8 +314,8 @@ class GroupAttendanceController extends Controller
             ]);
         }
 
-        // Update attendance counts
-        $this->recalculateWithGuests($attendance);
+        // Recalculate counts
+        $this->recalculateCounts($attendance, $group);
 
         return response()->json([
             'success' => true,
@@ -325,48 +327,17 @@ class GroupAttendanceController extends Controller
     }
 
     /**
-     * Toggle guest presence via AJAX
+     * Recalculate attendance counts based on roles
      */
-    public function toggleGuestPresence(Request $request, Group $group, Attendance $attendance)
+    private function recalculateCounts(Attendance $attendance, Group $group): void
     {
-        $this->checkAttendanceEnabled();
-        $this->authorize('update', $group);
-        abort_unless($attendance->attendable_id === $group->id && $attendance->attendable_type === Group::class, 404);
+        // Get guest person IDs for this group
+        $guestPersonIds = $group->guests()->pluck('people.id')->toArray();
 
-        $validated = $request->validate([
-            'guest_id' => ['required', 'integer', Rule::exists('group_guests', 'id')->where('group_id', $group->id)],
-        ]);
+        $allPresent = $attendance->records()->where('present', true)->pluck('person_id')->toArray();
 
-        $guestId = $validated['guest_id'];
-        $existing = $attendance->guestAttendances()->where('group_guest_id', $guestId)->first();
-
-        if ($existing) {
-            $newPresent = !$existing->pivot->present;
-            $attendance->guestAttendances()->updateExistingPivot($guestId, ['present' => $newPresent]);
-        } else {
-            $newPresent = true;
-            $attendance->guestAttendances()->attach($guestId, ['present' => true]);
-        }
-
-        // Recalculate counts
-        $this->recalculateWithGuests($attendance);
-
-        return response()->json([
-            'success' => true,
-            'present' => $newPresent,
-            'guests_count' => $attendance->guests_count,
-            'members_present' => $attendance->members_present,
-            'total_count' => $attendance->total_count,
-        ]);
-    }
-
-    /**
-     * Recalculate attendance counts including guests
-     */
-    private function recalculateWithGuests(Attendance $attendance): void
-    {
-        $membersPresent = $attendance->records()->where('present', true)->count();
-        $namedGuestsPresent = $attendance->guestAttendances()->withoutTrashed()->wherePivot('present', true)->count();
+        $membersPresent = count(array_diff($allPresent, $guestPersonIds));
+        $namedGuestsPresent = count(array_intersect($allPresent, $guestPersonIds));
         $anonymousGuests = $attendance->anonymous_guests_count ?? 0;
         $totalGuests = $namedGuestsPresent + $anonymousGuests;
 

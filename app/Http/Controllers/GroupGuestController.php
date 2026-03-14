@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Group;
-use App\Models\GroupGuest;
+use App\Models\Person;
 use App\Services\ImageService;
 use Illuminate\Http\Request;
 
@@ -31,21 +31,24 @@ class GroupGuestController extends Controller
         if ($request->hasFile('photo')) {
             $validated['photo'] = $this->imageService->storeProfilePhoto(
                 $request->file('photo'),
-                'guests'
+                'people'
             );
         }
 
         $validated['church_id'] = $this->getCurrentChurch()->id;
+        $validated['membership_status'] = 'guest';
 
-        $group->guests()->create($validated);
+        $person = Person::create($validated);
+
+        $group->members()->attach($person->id, ['role' => Group::ROLE_GUEST]);
 
         return $this->successResponse($request, __('messages.guest_added'), 'groups.show', ['group' => $group->id]);
     }
 
-    public function update(Request $request, Group $group, GroupGuest $guest)
+    public function update(Request $request, Group $group, Person $guest)
     {
         $this->authorize('update', $group);
-        abort_unless($guest->group_id === $group->id, 404);
+        abort_unless($group->guests()->where('people.id', $guest->id)->exists(), 404);
 
         $validated = $request->validate([
             'first_name' => 'required|string|max:255',
@@ -59,7 +62,7 @@ class GroupGuestController extends Controller
             $this->imageService->delete($guest->photo);
             $validated['photo'] = $this->imageService->storeProfilePhoto(
                 $request->file('photo'),
-                'guests'
+                'people'
             );
         }
 
@@ -68,12 +71,13 @@ class GroupGuestController extends Controller
         return $this->successResponse($request, __('messages.guest_updated'), 'groups.show', ['group' => $group->id]);
     }
 
-    public function destroy(Request $request, Group $group, GroupGuest $guest)
+    public function destroy(Request $request, Group $group, Person $guest)
     {
         $this->authorize('update', $group);
-        abort_unless($guest->group_id === $group->id, 404);
+        abort_unless($group->guests()->where('people.id', $guest->id)->exists(), 404);
 
-        $guest->delete();
+        // Remove from group (detach pivot)
+        $group->members()->detach($guest->id);
 
         return $this->successResponse($request, __('messages.guest_deleted'), 'groups.show', ['group' => $group->id]);
     }

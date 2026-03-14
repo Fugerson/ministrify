@@ -3223,6 +3223,7 @@ return [
     'group_guests_present_count' => 'гостей присутні',
     'group_no_guests' => 'Ще немає гостей',
     'group_guest_age_suffix' => 'р.',
+    'group_role_guest' => 'Гість',
     'group_present_members' => 'Присутні учасники',
     'group_notes_placeholder' => 'Що обговорювали, молитовні потреби...',
     'group_edit_record' => 'Редагувати запис',

@@ -3663,6 +3663,7 @@ return [
     'group_guests_present_count' => 'guests present',
     'group_no_guests' => 'No guests yet',
     'group_guest_age_suffix' => 'y.o.',
+    'group_role_guest' => 'Guest',
     'group_present_members' => 'Present members',
     'group_notes_placeholder' => 'What was discussed, prayer needs...',
     'group_edit_record' => 'Edit record',
