@@ -67,6 +67,9 @@
                     </button>
                 </div>
 
+                {{-- Planning: controls teleported here from _matrix.blade.php --}}
+                <div x-show="activeTab === 'planning'" id="sp-controls-slot" class="contents"></div>
+
                 {{-- Calendar: Week/Month toggle --}}
                 <div x-show="activeTab === 'calendar'" class="flex items-center gap-3">
                     <div class="w-px h-6 bg-gray-300 dark:bg-gray-600 hidden sm:block"></div>
@@ -658,7 +661,7 @@
 
     {{-- Service Planning Content --}}
     <div x-show="activeTab === 'planning'" x-cloak>
-        @include('service-planning._matrix')
+        @include('service-planning._matrix', ['embedded' => true])
     </div>
 
 </div>

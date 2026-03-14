@@ -88,9 +88,9 @@ class PersonController extends Controller
 
         // Calculate statistics using database aggregation (optimized)
         $today = now();
-        $statsQuery = Person::where('church_id', $church->id);
+        $statsQuery = Person::where('church_id', $church->id)->where('membership_status', '!=', Person::STATUS_GUEST);
 
-        // Total count
+        // Total count (excludes guests — they belong to groups, not church members list)
         $totalCount = (clone $statsQuery)->count();
 
         // Age statistics - calculated at DB level

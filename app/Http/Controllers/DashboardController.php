@@ -327,7 +327,7 @@ class DashboardController extends Controller
         $cacheKey = "dashboard_stats_{$church->id}";
 
         return Cache::remember($cacheKey, 1800, function () use ($church) {
-            $peopleQuery = Person::where('church_id', $church->id);
+            $peopleQuery = Person::where('church_id', $church->id)->where('membership_status', '!=', Person::STATUS_GUEST);
             $today = now();
             $threeMonthsAgo = now()->subMonths(3);
             $ministryIds = $church->ministries()->pluck('id');
@@ -347,6 +347,7 @@ class DashboardController extends Controller
             $ageStatsRaw = DB::table('people')
                 ->where('church_id', $church->id)
                 ->whereNull('deleted_at')
+                ->where('membership_status', '!=', Person::STATUS_GUEST)
                 ->whereNotNull('birth_date')
                 ->selectRaw("
                     SUM(CASE WHEN TIMESTAMPDIFF(YEAR, birth_date, ?) <= 12 THEN 1 ELSE 0 END) as children,
@@ -366,6 +367,7 @@ class DashboardController extends Controller
             ];
 
             $peopleTrend = Person::where('church_id', $church->id)
+                ->where('membership_status', '!=', Person::STATUS_GUEST)
                 ->whereRaw('COALESCE(first_visit_date, created_at) >= ?', [$threeMonthsAgo])->count();
             $volunteersThreeMonthsAgo = DB::table('ministry_person')
                 ->join('people', 'ministry_person.person_id', '=', 'people.id')
@@ -1002,7 +1004,7 @@ class DashboardController extends Controller
 
     private function loadFamilyStats($church): array
     {
-        $totalPeople = Person::where('church_id', $church->id)->count();
+        $totalPeople = Person::where('church_id', $church->id)->where('membership_status', '!=', Person::STATUS_GUEST)->count();
 
         $totalRelationships = FamilyRelationship::whereHas('person', fn($q) => $q->where('church_id', $church->id))
             ->count();
