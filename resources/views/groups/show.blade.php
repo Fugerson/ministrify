@@ -88,10 +88,14 @@
     </div>
 
     <!-- Stats Row -->
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
             <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $group->members->count() }}</div>
             <div class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.members') }}</div>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+            <div class="text-2xl font-bold text-orange-600 dark:text-orange-400">{{ $group->guests->count() }}</div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.group_guests_list') }}</div>
         </div>
         @if($currentChurch->attendance_enabled)
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
@@ -515,6 +519,76 @@
             @endif
         </div>
 
+        <!-- Guests -->
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                <h3 class="font-semibold text-gray-900 dark:text-white">{{ __('app.group_guests_list') }} ({{ $group->guests->count() }})</h3>
+                @can('update', $group)
+                <button type="button" onclick="document.getElementById('addGuestModal').classList.remove('hidden')"
+                        class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/30 rounded-lg transition-colors">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                    </svg>
+                    {{ __('app.group_add_guest') }}
+                </button>
+                @endcan
+            </div>
+
+            @if($group->guests->count() > 0)
+            <div class="divide-y divide-gray-200 dark:divide-gray-700">
+                @foreach($group->guests->sortBy('first_name') as $guest)
+                <div class="p-4 flex items-center justify-between group/guest">
+                    <div class="flex items-center gap-3">
+                        @if($guest->photo)
+                        <img src="{{ Storage::url($guest->photo) }}" alt="{{ $guest->full_name }}" class="w-10 h-10 rounded-full object-cover" loading="lazy">
+                        @else
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center">
+                            <span class="text-white text-sm font-semibold">{{ $guest->initials }}</span>
+                        </div>
+                        @endif
+                        <div>
+                            <p class="font-medium text-gray-900 dark:text-white text-sm">{{ $guest->full_name }}</p>
+                            <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                                @if($guest->age)
+                                <span>{{ $guest->age }} {{ __('app.group_guest_age_suffix') }}</span>
+                                @endif
+                                @if($guest->notes)
+                                <span>{{ Str::limit($guest->notes, 30) }}</span>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                    @can('update', $group)
+                    <div class="flex items-center gap-1 opacity-0 group-hover/guest:opacity-100 transition-opacity">
+                        <button type="button" onclick="document.getElementById('editGuestModal{{ $guest->id }}').classList.remove('hidden')"
+                                class="p-1.5 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                        </button>
+                        <button @click="ajaxDelete('{{ route('groups.guests.destroy', [$group, $guest]) }}', @js(__('messages.confirm_delete_guest')))"
+                                class="p-1.5 text-gray-400 hover:text-red-500 dark:hover:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                        </button>
+                    </div>
+                    @endcan
+                </div>
+                @endforeach
+            </div>
+            @else
+            <div class="p-8 text-center text-gray-500 dark:text-gray-400">
+                <svg class="w-12 h-12 mx-auto mb-3 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                </svg>
+                <p>{{ __('app.group_no_guests') }}</p>
+                @can('update', $group)
+                <button type="button" onclick="document.getElementById('addGuestModal').classList.remove('hidden')"
+                        class="mt-3 text-sm text-primary-600 dark:text-primary-400 hover:underline">
+                    {{ __('app.group_add_guest') }}
+                </button>
+                @endcan
+            </div>
+            @endif
+        </div>
+
         <!-- Recent Attendance -->
         @if($currentChurch->attendance_enabled)
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
@@ -613,6 +687,62 @@
 </div>
 @endcan
 
+<!-- Add Guest Modal -->
+@can('update', $group)
+<div id="addGuestModal" class="hidden fixed inset-0 z-50 overflow-y-auto">
+    <div class="min-h-screen px-4 flex items-center justify-center">
+        <div class="fixed inset-0 bg-black/50" onclick="document.getElementById('addGuestModal').classList.add('hidden')"></div>
+        <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full p-4 sm:p-6">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.group_add_guest') }}</h3>
+            <form @submit.prevent="submit($refs.addGuestForm)" x-ref="addGuestForm"
+                  x-data="{ ...ajaxForm({url: '{{ route('groups.guests.store', $group) }}', method: 'POST', stayOnPage: true, onSuccess() { window.location.reload(); }}) }"
+                  enctype="multipart/form-data">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.group_guest_first_name') }} *</label>
+                        <input type="text" name="first_name" required
+                               class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl dark:text-white focus:ring-2 focus:ring-primary-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.group_guest_last_name') }}</label>
+                        <input type="text" name="last_name"
+                               class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl dark:text-white focus:ring-2 focus:ring-primary-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.group_guest_age') }}</label>
+                        <input type="number" name="age" min="0" max="150"
+                               class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl dark:text-white focus:ring-2 focus:ring-primary-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.group_guest_photo') }}</label>
+                        <input type="file" name="photo" accept="image/*"
+                               class="w-full text-sm text-gray-500 dark:text-gray-400 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-medium file:bg-primary-50 file:text-primary-600 dark:file:bg-primary-900/30 dark:file:text-primary-400 hover:file:bg-primary-100">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.group_guest_notes') }}</label>
+                        <textarea name="notes" rows="2"
+                                  class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl dark:text-white focus:ring-2 focus:ring-primary-500"></textarea>
+                    </div>
+                </div>
+                <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3 mt-6">
+                    <button type="button" onclick="document.getElementById('addGuestModal').classList.add('hidden')"
+                            class="w-full sm:w-auto px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900">
+                        {{ __('app.cancel') }}
+                    </button>
+                    <button type="submit" :disabled="saving" class="w-full sm:w-auto px-4 py-2 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 disabled:opacity-50">
+                        <span x-show="!saving">{{ __('app.add') }}</span>
+                        <span x-show="saving" class="inline-flex items-center gap-2">
+                            <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                            {{ __('app.saving') }}
+                        </span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endcan
+
 <!-- Record Attendance Modal -->
 @can('update', $group)
 <div id="recordAttendanceModal" class="hidden fixed inset-0 z-50 overflow-y-auto">
@@ -685,6 +815,25 @@
                     </div>
                 </div>
 
+                <!-- Guests Checklist -->
+                @if($group->guests->count() > 0)
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.group_present_guests') }}</label>
+                    <div class="max-h-40 overflow-y-auto space-y-1.5 pr-1">
+                        @foreach($group->guests->sortBy('first_name') as $guest)
+                        <label class="flex items-center p-2.5 bg-orange-50 dark:bg-orange-900/10 rounded-xl cursor-pointer hover:bg-orange-100 dark:hover:bg-orange-900/20 transition-colors">
+                            <input type="checkbox" name="guests_present[]" value="{{ $guest->id }}"
+                                   class="w-5 h-5 rounded border-gray-300 text-orange-600 focus:ring-orange-500">
+                            <span class="ml-3 text-sm text-gray-900 dark:text-white">{{ $guest->full_name }}</span>
+                            @if($guest->age)
+                            <span class="ml-auto text-xs text-gray-500 dark:text-gray-400">({{ $guest->age }})</span>
+                            @endif
+                        </label>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
+
                 <div>
                     <label for="modal_att_notes" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.notes') }}</label>
                     <textarea name="notes" id="modal_att_notes" rows="2"
@@ -709,6 +858,69 @@
         </div>
     </div>
 </div>
+@endcan
+
+<!-- Edit Guest Modals -->
+@can('update', $group)
+@foreach($group->guests as $guest)
+<div id="editGuestModal{{ $guest->id }}" class="hidden fixed inset-0 z-50 overflow-y-auto">
+    <div class="min-h-screen px-4 flex items-center justify-center">
+        <div class="fixed inset-0 bg-black/50" onclick="document.getElementById('editGuestModal{{ $guest->id }}').classList.add('hidden')"></div>
+        <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full p-4 sm:p-6">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.group_edit_guest') }}</h3>
+            <form @submit.prevent="submit($refs['editGuestForm{{ $guest->id }}'])" x-ref="editGuestForm{{ $guest->id }}"
+                  x-data="{ ...ajaxForm({url: '{{ route('groups.guests.update', [$group, $guest]) }}', method: 'PUT', stayOnPage: true, onSuccess() { window.location.reload(); }}) }"
+                  enctype="multipart/form-data">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.group_guest_first_name') }} *</label>
+                        <input type="text" name="first_name" value="{{ $guest->first_name }}" required
+                               class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl dark:text-white focus:ring-2 focus:ring-primary-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.group_guest_last_name') }}</label>
+                        <input type="text" name="last_name" value="{{ $guest->last_name }}"
+                               class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl dark:text-white focus:ring-2 focus:ring-primary-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.group_guest_age') }}</label>
+                        <input type="number" name="age" value="{{ $guest->age }}" min="0" max="150"
+                               class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl dark:text-white focus:ring-2 focus:ring-primary-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.group_guest_photo') }}</label>
+                        @if($guest->photo)
+                        <div class="mb-2">
+                            <img src="{{ Storage::url($guest->photo) }}" alt="" class="w-16 h-16 rounded-xl object-cover">
+                        </div>
+                        @endif
+                        <input type="file" name="photo" accept="image/*"
+                               class="w-full text-sm text-gray-500 dark:text-gray-400 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-medium file:bg-primary-50 file:text-primary-600 dark:file:bg-primary-900/30 dark:file:text-primary-400 hover:file:bg-primary-100">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.group_guest_notes') }}</label>
+                        <textarea name="notes" rows="2"
+                                  class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl dark:text-white focus:ring-2 focus:ring-primary-500">{{ $guest->notes }}</textarea>
+                    </div>
+                </div>
+                <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3 mt-6">
+                    <button type="button" onclick="document.getElementById('editGuestModal{{ $guest->id }}').classList.add('hidden')"
+                            class="w-full sm:w-auto px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900">
+                        {{ __('app.cancel') }}
+                    </button>
+                    <button type="submit" :disabled="saving" class="w-full sm:w-auto px-4 py-2 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 disabled:opacity-50">
+                        <span x-show="!saving">{{ __('app.save') }}</span>
+                        <span x-show="saving" class="inline-flex items-center gap-2">
+                            <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                            {{ __('app.saving') }}
+                        </span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endforeach
 @endcan
 
 @endsection

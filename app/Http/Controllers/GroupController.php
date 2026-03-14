@@ -73,7 +73,7 @@ class GroupController extends Controller
     {
         $this->authorize('view', $group);
 
-        $group->load(['leader', 'members', 'attendances' => fn($q) => $q->orderByDesc('date')->limit(10)]);
+        $group->load(['leader', 'members', 'guests', 'attendances' => fn($q) => $q->orderByDesc('date')->limit(10)]);
 
         $availablePeople = Person::where('church_id', $this->getCurrentChurch()->id)
             ->whereNotIn('id', $group->members->pluck('id'))

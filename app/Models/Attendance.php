@@ -38,6 +38,7 @@ class Attendance extends Model
         'total_count',
         'members_present',
         'guests_count',
+        'anonymous_guests_count',
         'recorded_by',
         'total_members',
         'notes',
@@ -91,6 +92,14 @@ class Attendance extends Model
     public function records(): HasMany
     {
         return $this->hasMany(AttendanceRecord::class);
+    }
+
+    public function guestAttendances(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(GroupGuest::class, 'group_guest_attendance')
+            ->withTrashed()
+            ->withPivot('present')
+            ->withTimestamps();
     }
 
     public function recorder(): BelongsTo

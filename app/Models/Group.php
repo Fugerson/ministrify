@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Group extends Model
@@ -162,10 +163,15 @@ class Group extends Model
             ->withTimestamps();
     }
 
+    public function guests(): HasMany
+    {
+        return $this->hasMany(GroupGuest::class);
+    }
+
     /**
      * Get all attendances for this group (unified system)
      */
-    public function attendances(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    public function attendances(): MorphMany
     {
         return $this->morphMany(Attendance::class, 'attendable');
     }
@@ -284,6 +290,7 @@ class Group extends Model
             'total_count' => $data['total_count'] ?? 0,
             'members_present' => $data['members_present'] ?? 0,
             'guests_count' => $data['guests_count'] ?? 0,
+            'anonymous_guests_count' => $data['anonymous_guests_count'] ?? 0,
             'total_members' => $this->members()->count(),
             'recorded_by' => $data['recorded_by'] ?? auth()->id(),
             'notes' => $data['notes'] ?? null,

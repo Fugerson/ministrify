@@ -72,6 +72,62 @@
         </div>
     </div>
 
+    <!-- Guests List -->
+    @if($group->guests->count() > 0)
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
+        <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+            <div>
+                <h3 class="font-semibold text-gray-900 dark:text-white">{{ __('app.group_guests_list') }}</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.group_tap_to_mark') }}</p>
+            </div>
+            <div class="text-right">
+                <div class="text-xl font-bold text-orange-600 dark:text-orange-400" id="guestsCount">{{ $attendance->guestAttendances->where('pivot.present', true)->count() }}</div>
+                <div class="text-xs text-gray-500">{{ __('app.group_guests_present_count') }}</div>
+            </div>
+        </div>
+        <div class="divide-y divide-gray-200 dark:divide-gray-700">
+            @foreach($group->guests->sortBy('first_name') as $guest)
+            @php
+                $guestRecord = $attendance->guestAttendances->firstWhere('id', $guest->id);
+                $isGuestPresent = $guestRecord ? $guestRecord->pivot->present : false;
+            @endphp
+            <button type="button"
+                    onclick="toggleGuestPresence({{ $guest->id }}, this)"
+                    data-guest-id="{{ $guest->id }}"
+                    class="w-full p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all {{ $isGuestPresent ? 'bg-green-50 dark:bg-green-900/20' : '' }}">
+                <div class="flex items-center">
+                    @if($guest->photo)
+                    <div class="mr-4">
+                        <img src="{{ Storage::url($guest->photo) }}" alt="{{ $guest->full_name }}" class="w-12 h-12 rounded-full object-cover" loading="lazy">
+                    </div>
+                    @else
+                    <div class="w-12 h-12 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center mr-4">
+                        <span class="text-lg font-medium text-orange-600 dark:text-orange-400">{{ $guest->initials }}</span>
+                    </div>
+                    @endif
+                    <div class="text-left">
+                        <p class="font-medium text-gray-900 dark:text-white">{{ $guest->full_name }}</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                            {{ __('app.group_guests_list') }}
+                            @if($guest->age)
+                            · {{ $guest->age }} {{ __('app.group_guest_age_suffix') }}
+                            @endif
+                        </p>
+                    </div>
+                </div>
+                <div class="guest-check-indicator {{ $isGuestPresent ? '' : 'opacity-0' }} transition-opacity">
+                    <div class="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                    </div>
+                </div>
+            </button>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
     <!-- Quick Actions -->
     <div class="flex gap-3">
         <button type="button" onclick="markAllPresent()" class="flex-1 px-4 py-3 bg-green-600 text-white rounded-xl font-medium hover:bg-green-700 transition-colors">
@@ -87,6 +143,7 @@
 const groupId = {{ $group->id }};
 const attendanceId = {{ $attendance->id }};
 const toggleUrl = '{{ route("groups.attendance.toggle", [$group, $attendance]) }}';
+const toggleGuestUrl = '{{ route("groups.attendance.toggle-guest", [$group, $attendance]) }}';
 const csrfToken = '{{ csrf_token() }}';
 
 async function togglePresence(personId, button) {
@@ -119,13 +176,52 @@ async function togglePresence(personId, button) {
     }
 }
 
+async function toggleGuestPresence(guestId, button) {
+    try {
+        const response = await fetch(toggleGuestUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ guest_id: guestId })
+        });
+
+        const data = await response.json().catch(() => ({}));
+
+        if (data.success) {
+            const indicator = button.querySelector('.guest-check-indicator');
+            if (data.present) {
+                button.classList.add('bg-green-50', 'dark:bg-green-900/20');
+                indicator.classList.remove('opacity-0');
+            } else {
+                button.classList.remove('bg-green-50', 'dark:bg-green-900/20');
+                indicator.classList.add('opacity-0');
+            }
+            const guestsCountEl = document.getElementById('guestsCount');
+            if (guestsCountEl) guestsCountEl.textContent = data.guests_count;
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
 async function markAllPresent() {
-    const buttons = document.querySelectorAll('[data-person-id]');
-    for (const button of buttons) {
+    const memberButtons = document.querySelectorAll('[data-person-id]');
+    for (const button of memberButtons) {
         const indicator = button.querySelector('.check-indicator');
-        if (indicator.classList.contains('opacity-0')) {
+        if (indicator && indicator.classList.contains('opacity-0')) {
             await togglePresence(button.dataset.personId, button);
-            await new Promise(r => setTimeout(r, 100)); // Small delay for UX
+            await new Promise(r => setTimeout(r, 100));
+        }
+    }
+    const guestButtons = document.querySelectorAll('[data-guest-id]');
+    for (const button of guestButtons) {
+        const indicator = button.querySelector('.guest-check-indicator');
+        if (indicator && indicator.classList.contains('opacity-0')) {
+            await toggleGuestPresence(button.dataset.guestId, button);
+            await new Promise(r => setTimeout(r, 100));
         }
     }
 }

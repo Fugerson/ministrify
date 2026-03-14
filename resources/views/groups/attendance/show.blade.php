@@ -85,10 +85,10 @@
         @endif
     </div>
 
-    <!-- Attendance List -->
+    <!-- Members Attendance List -->
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
         <div class="p-4 border-b border-gray-200 dark:border-gray-700">
-            <h3 class="font-semibold text-gray-900 dark:text-white">{{ __('app.group_presence') }}</h3>
+            <h3 class="font-semibold text-gray-900 dark:text-white">{{ __('app.group_presence') }} — {{ __('app.members') }}</h3>
         </div>
         <div class="divide-y divide-gray-200 dark:divide-gray-700">
             @foreach($attendance->records->sortByDesc('present') as $record)
@@ -136,5 +136,56 @@
             @endforeach
         </div>
     </div>
+
+    <!-- Guests Attendance List -->
+    @if($attendance->guestAttendances->count() > 0)
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
+        <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+            <h3 class="font-semibold text-gray-900 dark:text-white">{{ __('app.group_presence') }} — {{ __('app.group_guests_list') }}
+                <span class="text-sm font-normal text-gray-500 dark:text-gray-400 ml-2">
+                    {{ $attendance->guestAttendances->where('pivot.present', true)->count() }} / {{ $attendance->guestAttendances->count() }}
+                </span>
+            </h3>
+        </div>
+        <div class="divide-y divide-gray-200 dark:divide-gray-700">
+            @foreach($attendance->guestAttendances->sortByDesc('pivot.present') as $guest)
+            <div class="p-4 flex items-center justify-between {{ $guest->pivot->present ? '' : 'opacity-50' }}">
+                <div class="flex items-center">
+                    @if($guest->photo)
+                    <img src="{{ Storage::url($guest->photo) }}" alt="{{ $guest->full_name }}" class="w-10 h-10 rounded-full object-cover mr-3" loading="lazy">
+                    @else
+                    <div class="w-10 h-10 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center mr-3">
+                        <span class="text-sm font-medium text-orange-600 dark:text-orange-400">{{ $guest->initials }}</span>
+                    </div>
+                    @endif
+                    <div>
+                        <p class="font-medium text-gray-900 dark:text-white">{{ $guest->full_name }}</p>
+                        @if($guest->age)
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ $guest->age }} {{ __('app.group_guest_age_suffix') }}</p>
+                        @endif
+                    </div>
+                </div>
+                <div>
+                    @if($guest->pivot->present)
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-sm font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        {{ __('app.group_present') }}
+                    </span>
+                    @else
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-sm font-medium bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                        {{ __('app.group_absent') }}
+                    </span>
+                    @endif
+                </div>
+            </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
 </div>
 @endsection

@@ -868,6 +868,11 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
     Route::delete('groups/{group}/members/{person}', [GroupController::class, 'removeMember'])->name('groups.members.remove');
     Route::put('groups/{group}/members/{person}/role', [GroupController::class, 'updateMemberRole'])->name('groups.members.role');
 
+    // Group Guests
+    Route::post('groups/{group}/guests', [\App\Http\Controllers\GroupGuestController::class, 'store'])->name('groups.guests.store');
+    Route::put('groups/{group}/guests/{guest}', [\App\Http\Controllers\GroupGuestController::class, 'update'])->name('groups.guests.update');
+    Route::delete('groups/{group}/guests/{guest}', [\App\Http\Controllers\GroupGuestController::class, 'destroy'])->name('groups.guests.destroy');
+
     // Group Attendance
     Route::prefix('groups/{group}/attendance')->name('groups.attendance.')->group(function () {
         Route::get('/', [\App\Http\Controllers\GroupAttendanceController::class, 'index'])->name('index');
@@ -879,6 +884,7 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
         Route::put('{attendance}', [\App\Http\Controllers\GroupAttendanceController::class, 'update'])->name('update');
         Route::delete('{attendance}', [\App\Http\Controllers\GroupAttendanceController::class, 'destroy'])->name('destroy');
         Route::post('{attendance}/toggle', [\App\Http\Controllers\GroupAttendanceController::class, 'togglePresence'])->name('toggle');
+        Route::post('{attendance}/toggle-guest', [\App\Http\Controllers\GroupAttendanceController::class, 'toggleGuestPresence'])->name('toggle-guest');
     });
 
     // Global Search
