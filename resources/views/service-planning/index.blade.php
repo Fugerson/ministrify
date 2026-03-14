@@ -27,7 +27,10 @@
                     </button>
                     <div x-show="filterOpen" @click.outside="filterOpen = false"
                          x-transition
-                         class="absolute right-0 sm:left-0 top-full mt-1 z-30 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 w-72 py-1 max-h-80 overflow-y-auto">
+                         class="absolute left-0 top-full mt-1 z-30 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 w-72 py-1 max-h-80 overflow-y-auto">
+                        <template x-if="uniqueEventTitles.length === 0">
+                            <div class="px-3 py-3 text-center text-sm text-gray-500 dark:text-gray-400">{{ __('app.sp_no_events_to_filter') }}</div>
+                        </template>
                         <template x-for="title in uniqueEventTitles" :key="title">
                             <label class="flex items-center gap-2.5 px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors">
                                 <input type="checkbox" :checked="!hiddenEventTitles.has(title)"
