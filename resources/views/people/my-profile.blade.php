@@ -655,7 +655,7 @@
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                         @foreach($menuPositions as $position)
                             <button type="button" @click="setPosition('{{ $position['id'] }}')" :disabled="saving"
-                                    class="w-full p-4 rounded-xl border-2 transition-all hover:scale-[1.02]"
+                                    class="w-full p-4 rounded-xl border-2 transition-all hover:scale-[1.02] {{ in_array($position['id'], ['top', 'bottom']) ? 'hidden md:block' : '' }}"
                                     :class="currentPosition === '{{ $position['id'] }}' ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'">
                                 <div class="h-16 mb-3">
                                     {!! $position['icon'] !!}
