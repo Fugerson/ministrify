@@ -1422,7 +1422,7 @@
         </aside>
 
         <!-- Main Content -->
-        <div id="main-content" class="main-content-area flex-1 min-w-0 {{ $menuPosition === 'top' ? 'lg:pt-16 pb-0' : 'pb-16' }} {{ $menuPosition === 'bottom' ? 'lg:pb-20' : 'lg:pb-0' }}"
+        <div id="main-content" class="main-content-area flex-1 min-w-0 {{ $menuPosition === 'bottom' ? 'pb-16' : ($menuPosition === 'top' ? 'lg:pt-16 pb-0' : 'pb-0') }} {{ $menuPosition === 'bottom' ? 'lg:pb-20' : 'lg:pb-0' }}"
              x-data="{ sidebarCollapsed: localStorage.getItem('sidebar_collapsed') === 'true' }"
              x-on:sidebar-toggle.window="sidebarCollapsed = $event.detail"
              :class="sidebarCollapsed ? '{{ $menuPosition === 'right' ? 'lg:pr-16' : 'lg:pl-16' }}' : '{{ $menuPosition === 'right' ? 'lg:pr-64' : 'lg:pl-64' }}'">
@@ -1520,7 +1520,7 @@
         </div>
 
         <!-- Mobile Bottom Navigation -->
-        <nav class="{{ $menuPosition === 'top' ? 'hidden' : 'lg:hidden' }} fixed bottom-0 left-0 right-0 z-30 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 safe-bottom">
+        <nav class="{{ $menuPosition !== 'bottom' ? 'hidden' : 'lg:hidden' }} fixed bottom-0 left-0 right-0 z-30 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 safe-bottom">
             <div class="flex items-center justify-around h-14 px-1">
                 <a wire:navigate href="{{ route('dashboard') }}" class="flex flex-col items-center justify-center w-full py-1 {{ request()->routeIs('dashboard') ? 'text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400' }}">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
@@ -1553,7 +1553,7 @@
 
         <!-- FAB (Quick Actions) -->
         @if(auth()->user()->canCreate('people') || auth()->user()->can('create', \App\Models\Event::class) || auth()->user()->canCreate('groups') || auth()->user()->canCreate('finances'))
-        <div id="fab-button" class="fixed right-4 {{ $menuPosition === 'top' ? 'bottom-6' : 'bottom-20 lg:bottom-6' }} z-50" x-data="{ open: false }">
+        <div id="fab-button" class="fixed right-4 {{ $menuPosition === 'bottom' ? 'bottom-20 lg:bottom-6' : 'bottom-6' }} z-50" x-data="{ open: false }">
             <div x-show="open" x-cloak
                  x-transition:enter="transition ease-out duration-200"
                  x-transition:enter-start="opacity-0 scale-95"
