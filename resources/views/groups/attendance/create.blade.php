@@ -72,15 +72,10 @@
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ __('app.group_present_guests') }}</label>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     @foreach($group->guests->sortBy('first_name') as $guest)
-                    <label class="flex items-center p-3 bg-orange-50 dark:bg-orange-900/10 rounded-xl cursor-pointer hover:bg-orange-100 dark:hover:bg-orange-900/20 transition-colors">
+                    <label class="flex items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-xl cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
                         <input type="checkbox" name="guests_present[]" value="{{ $guest->id }}"
-                               class="w-5 h-5 rounded border-gray-300 text-orange-600 focus:ring-orange-500">
-                        <div class="ml-3 flex items-center gap-2">
-                            @if($guest->photo)
-                            <img src="{{ Storage::url($guest->photo) }}" alt="" class="w-6 h-6 rounded-full object-cover">
-                            @endif
-                            <span class="text-gray-900 dark:text-white">{{ $guest->full_name }}</span>
-                        </div>
+                               class="w-5 h-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500">
+                        <span class="ml-3 text-gray-900 dark:text-white">{{ $guest->full_name }}</span>
                     </label>
                     @endforeach
                 </div>

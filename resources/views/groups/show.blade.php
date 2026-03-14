@@ -821,9 +821,9 @@
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.group_present_guests') }}</label>
                     <div class="max-h-40 overflow-y-auto space-y-1.5 pr-1">
                         @foreach($group->guests->sortBy('first_name') as $guest)
-                        <label class="flex items-center p-2.5 bg-orange-50 dark:bg-orange-900/10 rounded-xl cursor-pointer hover:bg-orange-100 dark:hover:bg-orange-900/20 transition-colors">
+                        <label class="flex items-center p-2.5 bg-gray-50 dark:bg-gray-700 rounded-xl cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
                             <input type="checkbox" name="guests_present[]" value="{{ $guest->id }}"
-                                   class="w-5 h-5 rounded border-gray-300 text-orange-600 focus:ring-orange-500">
+                                   class="w-5 h-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500">
                             <span class="ml-3 text-sm text-gray-900 dark:text-white">{{ $guest->full_name }}</span>
                         </label>
                         @endforeach
