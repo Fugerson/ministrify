@@ -68,7 +68,7 @@
                 </div>
 
                 {{-- Calendar: Week/Month toggle --}}
-                <div x-show="activeTab === 'calendar'" x-transition class="flex items-center gap-3">
+                <div class="flex items-center gap-3">
                     <div class="w-px h-6 bg-gray-300 dark:bg-gray-600 hidden sm:block"></div>
                     <div class="flex items-center bg-gray-100 dark:bg-gray-700 rounded-xl p-1">
                         <button @click="switchView('week')" type="button"
@@ -86,8 +86,8 @@
 
             </div>
 
-            {{-- Date Navigation (calendar only) --}}
-            <div x-show="activeTab === 'calendar'" x-transition class="flex items-center justify-between sm:justify-center gap-2 sm:gap-4">
+            {{-- Date Navigation --}}
+            <div class="flex items-center justify-between sm:justify-center gap-2 sm:gap-4">
                     <div class="flex items-center gap-2 sm:gap-4">
                         <button @click="prevPeriod()" type="button"
                            class="w-11 h-11 sm:w-10 sm:h-10 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 rounded-xl transition-colors">
@@ -161,8 +161,8 @@
                     </div>
             </div>
 
-            {{-- Actions (calendar only) --}}
-            <div x-show="activeTab === 'calendar'" x-transition class="flex items-center gap-2">
+            {{-- Actions --}}
+            <div class="flex items-center gap-2">
                 @if(auth()->user()->canEdit('events'))
                 @if($isGoogleConnected)
                     <div x-data="{
