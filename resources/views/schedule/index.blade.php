@@ -24,9 +24,9 @@
                    class="px-3 sm:px-4 py-2 text-sm font-medium rounded-xl whitespace-nowrap text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
                     {{ __('app.calendar') }}
                 </a>
-                <a href="{{ route('service-planning') }}"
+                <a href="{{ route('schedule', ['tab' => 'planning']) }}"
                    class="px-3 sm:px-4 py-2 text-sm font-medium rounded-xl whitespace-nowrap text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
-                    {{ __('app.assignments') }}
+                    {{ __('app.service_planning') }}
                 </a>
             </div>
 

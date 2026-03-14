@@ -57,6 +57,13 @@ class EventController extends Controller
 
         $church = $this->getCurrentChurch();
 
+        $tab = $request->get('tab', 'calendar');
+
+        // If tab=planning, return early with minimal data
+        if ($tab === 'planning') {
+            return view('schedule.calendar', compact('tab'));
+        }
+
         $view = $request->get('view', 'month');
         $year = (int) $request->get('year', now()->year);
         $month = (int) $request->get('month', now()->month);
@@ -210,7 +217,7 @@ class EventController extends Controller
         $serviceTypes = Event::serviceTypeLabels();
 
         return view('schedule.calendar', compact(
-            'events', 'year', 'month', 'startDate', 'endDate',
+            'tab', 'events', 'year', 'month', 'startDate', 'endDate',
             'ministries', 'view', 'currentWeek', 'church', 'meetings', 'upcomingNextMonth', 'nextMonth', 'nextYear',
             'isGoogleConnected', 'lastSyncedAt', 'serviceTypes'
         ));
@@ -1123,15 +1130,11 @@ class EventController extends Controller
     }
 
     /**
-     * Service Planning page
+     * Service Planning page — redirects to schedule with planning tab
      */
     public function servicePlanning()
     {
-        if (!auth()->user()->canView('events')) {
-            abort(403);
-        }
-
-        return view('service-planning.index');
+        return redirect()->route('schedule', ['tab' => 'planning']);
     }
 
 }

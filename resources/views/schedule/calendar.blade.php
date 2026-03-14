@@ -15,6 +15,26 @@
 @endsection
 
 @section('content')
+@if(($tab ?? 'calendar') === 'planning')
+    {{-- Tab Header for Planning --}}
+    <div class="space-y-4">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+            <div class="flex items-center gap-2">
+                <div class="flex items-center bg-gray-100 dark:bg-gray-700 rounded-xl p-1">
+                    <a href="{{ route('schedule') }}"
+                       class="px-4 py-2 text-sm font-medium rounded-lg transition-colors text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+                        {{ __('app.calendar') }}
+                    </a>
+                    <span class="px-4 py-2 text-sm font-medium rounded-lg bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow">
+                        {{ __('app.service_planning') }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        @include('service-planning._matrix')
+    </div>
+@else
 @php
     $months = explode(',', __('app.cal_months'));
     $daysShort = explode(',', __('app.cal_days_short'));
@@ -42,6 +62,17 @@
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             {{-- Tab Toggle + View Controls --}}
             <div class="flex items-center gap-3">
+                {{-- Calendar/Planning tab toggle --}}
+                <div class="flex items-center bg-gray-100 dark:bg-gray-700 rounded-xl p-1">
+                    <span class="px-4 py-2 text-sm font-medium rounded-lg bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow">
+                        {{ __('app.calendar') }}
+                    </span>
+                    <a href="{{ route('schedule', ['tab' => 'planning']) }}"
+                       class="px-4 py-2 text-sm font-medium rounded-lg transition-colors text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+                        {{ __('app.service_planning') }}
+                    </a>
+                </div>
+
                 {{-- Calendar: Week/Month toggle --}}
                 <div class="flex items-center gap-3">
                     <div class="w-px h-6 bg-gray-300 dark:bg-gray-600 hidden sm:block"></div>
@@ -1358,4 +1389,5 @@ Date.prototype.getWeek = function() {
 };
 
 </script>
+@endif
 @endsection
