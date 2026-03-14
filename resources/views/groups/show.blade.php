@@ -168,7 +168,7 @@
             </div>
 
             @php
-                $sortedMembers = $group->members->sortBy(fn($m) => $m->pivot->role === 'leader' ? 0 : ($m->pivot->role === 'assistant' ? 1 : 2));
+                $sortedMembers = $group->members->sortBy(fn($m) => match($m->pivot->role) { 'leader' => 0, 'assistant' => 1, 'member' => 2, 'guest' => 3, default => 4 });
             @endphp
 
             @if($sortedMembers->count() > 0)
@@ -237,8 +237,9 @@
                                                         'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 hover:bg-amber-200 dark:hover:bg-amber-900/50': role === 'leader',
                                                         'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40': role === 'assistant',
                                                         'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600': role === 'member'
+                                                        'bg-orange-50 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/40': role === 'guest'
                                                     }">
-                                                <span x-text="role === 'leader' ? @js(__('app.leader')) : (role === 'assistant' ? @js(__('app.assistant_role')) : @js(__('app.member_role')))"></span>
+                                                <span x-text="role === 'leader' ? @js(__('app.leader')) : (role === 'assistant' ? @js(__('app.assistant_role')) : (role === 'guest' ? @js(__('app.group_role_guest')) : @js(__('app.member_role'))))"></span>
                                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                                             </button>
                                             <div x-show="open" @click.away="open = false" x-transition x-cloak
@@ -258,6 +259,11 @@
                                                         :class="role === 'member' ? 'text-gray-900 dark:text-white font-semibold' : 'text-gray-700 dark:text-gray-300'">
                                                     <span class="w-2 h-2 rounded-full bg-gray-400"></span> {{ __('app.member_role') }}
                                                 </button>
+                                                <button type="button" @click="setRole('guest')" :disabled="saving"
+                                                        class="w-full text-left px-3 py-1.5 text-xs hover:bg-gray-50 dark:hover:bg-gray-600 flex items-center gap-2"
+                                                        :class="role === 'guest' ? 'text-orange-600 dark:text-orange-400 font-semibold' : 'text-gray-700 dark:text-gray-300'">
+                                                    <span class="w-2 h-2 rounded-full bg-orange-400"></span> {{ __('app.group_role_guest') }}
+                                                </button>
                                             </div>
                                         </div>
                                         @else
@@ -266,6 +272,9 @@
                                         </template>
                                         <template x-if="role === 'assistant'">
                                             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300">{{ __('app.assistant_role') }}</span>
+                                        </template>
+                                        <template x-if="role === 'guest'">
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-50 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400">{{ __('app.group_role_guest') }}</span>
                                         </template>
                                         @endcan
                                     </div>
@@ -374,9 +383,10 @@
                                                 :class="{
                                                     'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400': role === 'leader',
                                                     'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300': role === 'assistant',
-                                                    'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400': role === 'member'
+                                                    'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400': role === 'member',
+                                                    'bg-orange-50 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400': role === 'guest'
                                                 }">
-                                            <span x-text="role === 'leader' ? @js(__('app.leader')) : (role === 'assistant' ? @js(__('app.assistant_role')) : @js(__('app.member_role')))"></span>
+                                            <span x-text="role === 'leader' ? @js(__('app.leader')) : (role === 'assistant' ? @js(__('app.assistant_role')) : (role === 'guest' ? @js(__('app.group_role_guest')) : @js(__('app.member_role'))))"></span>
                                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                                         </button>
                                         <div x-show="open" @click.away="open = false" x-transition x-cloak
@@ -390,6 +400,9 @@
                                             <button type="button" @click="setRole('member')" :disabled="saving" class="w-full text-left px-3 py-1.5 text-xs hover:bg-gray-50 dark:hover:bg-gray-600 flex items-center gap-2" :class="role === 'member' ? 'text-gray-900 dark:text-white font-semibold' : 'text-gray-700 dark:text-gray-300'">
                                                 <span class="w-2 h-2 rounded-full bg-gray-400"></span> {{ __('app.member_role') }}
                                             </button>
+                                            <button type="button" @click="setRole('guest')" :disabled="saving" class="w-full text-left px-3 py-1.5 text-xs hover:bg-gray-50 dark:hover:bg-gray-600 flex items-center gap-2" :class="role === 'guest' ? 'text-orange-600 dark:text-orange-400 font-semibold' : 'text-gray-700 dark:text-gray-300'">
+                                                <span class="w-2 h-2 rounded-full bg-orange-400"></span> {{ __('app.group_role_guest') }}
+                                            </button>
                                         </div>
                                     </div>
                                     @else
@@ -398,6 +411,9 @@
                                     </template>
                                     <template x-if="role === 'assistant'">
                                         <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300">{{ __('app.assistant_role') }}</span>
+                                    </template>
+                                    <template x-if="role === 'guest'">
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-50 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400">{{ __('app.group_role_guest') }}</span>
                                     </template>
                                     @endcan
                                 </div>

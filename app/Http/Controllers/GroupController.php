@@ -240,7 +240,7 @@ class GroupController extends Controller
         abort_unless($person->church_id === $this->getCurrentChurch()->id, 404);
 
         $validated = $request->validate([
-            'role' => 'required|in:leader,assistant,member',
+            'role' => 'required|in:leader,assistant,member,guest',
         ]);
 
         // If promoting to leader, demote current leader
