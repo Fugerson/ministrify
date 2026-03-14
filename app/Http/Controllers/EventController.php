@@ -59,11 +59,6 @@ class EventController extends Controller
 
         $tab = $request->get('tab', 'calendar');
 
-        // If tab=planning, return early with minimal data
-        if ($tab === 'planning') {
-            return view('schedule.calendar', compact('tab'));
-        }
-
         $view = $request->get('view', 'month');
         $year = (int) $request->get('year', now()->year);
         $month = (int) $request->get('month', now()->month);

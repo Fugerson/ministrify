@@ -15,26 +15,6 @@
 @endsection
 
 @section('content')
-@if(($tab ?? 'calendar') === 'planning')
-    {{-- Tab Header for Planning --}}
-    <div class="space-y-4">
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-            <div class="flex items-center gap-2">
-                <div class="flex items-center bg-gray-100 dark:bg-gray-700 rounded-xl p-1">
-                    <a href="{{ route('schedule') }}"
-                       class="px-4 py-2 text-sm font-medium rounded-lg transition-colors text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
-                        {{ __('app.calendar') }}
-                    </a>
-                    <span class="px-4 py-2 text-sm font-medium rounded-lg bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow">
-                        {{ __('app.service_planning') }}
-                    </span>
-                </div>
-            </div>
-        </div>
-
-        @include('service-planning._matrix')
-    </div>
-@else
 @php
     $months = explode(',', __('app.cal_months'));
     $daysShort = explode(',', __('app.cal_days_short'));
@@ -54,6 +34,17 @@
 
 <div class="space-y-4"
      x-data="{
+        activeTab: '{{ $tab ?? 'calendar' }}',
+        switchTab(tab) {
+            this.activeTab = tab;
+            const url = new URL(window.location);
+            if (tab === 'planning') {
+                url.searchParams.set('tab', 'planning');
+            } else {
+                url.searchParams.delete('tab');
+            }
+            history.replaceState({}, '', url);
+        },
         ...calendarNavigator({{ json_encode(['view' => $view, 'year' => $year, 'month' => $month, 'week' => $currentWeek ?? null]) }})
      }">
 
@@ -64,17 +55,20 @@
             <div class="flex items-center gap-3">
                 {{-- Calendar/Planning tab toggle --}}
                 <div class="flex items-center bg-gray-100 dark:bg-gray-700 rounded-xl p-1">
-                    <span class="px-4 py-2 text-sm font-medium rounded-lg bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow">
+                    <button @click="switchTab('calendar')" type="button"
+                       :class="activeTab === 'calendar' ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'"
+                       class="px-4 py-2 text-sm font-medium rounded-lg transition-colors">
                         {{ __('app.calendar') }}
-                    </span>
-                    <a href="{{ route('schedule', ['tab' => 'planning']) }}"
-                       class="px-4 py-2 text-sm font-medium rounded-lg transition-colors text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+                    </button>
+                    <button @click="switchTab('planning')" type="button"
+                       :class="activeTab === 'planning' ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'"
+                       class="px-4 py-2 text-sm font-medium rounded-lg transition-colors">
                         {{ __('app.service_planning') }}
-                    </a>
+                    </button>
                 </div>
 
                 {{-- Calendar: Week/Month toggle --}}
-                <div class="flex items-center gap-3">
+                <div x-show="activeTab === 'calendar'" x-transition class="flex items-center gap-3">
                     <div class="w-px h-6 bg-gray-300 dark:bg-gray-600 hidden sm:block"></div>
                     <div class="flex items-center bg-gray-100 dark:bg-gray-700 rounded-xl p-1">
                         <button @click="switchView('week')" type="button"
@@ -92,8 +86,8 @@
 
             </div>
 
-            {{-- Date Navigation --}}
-            <div class="flex items-center justify-between sm:justify-center gap-2 sm:gap-4">
+            {{-- Date Navigation (calendar only) --}}
+            <div x-show="activeTab === 'calendar'" x-transition class="flex items-center justify-between sm:justify-center gap-2 sm:gap-4">
                     <div class="flex items-center gap-2 sm:gap-4">
                         <button @click="prevPeriod()" type="button"
                            class="w-11 h-11 sm:w-10 sm:h-10 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 rounded-xl transition-colors">
@@ -167,8 +161,8 @@
                     </div>
             </div>
 
-            {{-- Actions --}}
-            <div class="flex items-center gap-2">
+            {{-- Actions (calendar only) --}}
+            <div x-show="activeTab === 'calendar'" x-transition class="flex items-center gap-2">
                 @if(auth()->user()->canEdit('events'))
                 @if($isGoogleConnected)
                     <div x-data="{
@@ -281,8 +275,8 @@
         </div>
     </div>
 
-    {{-- Calendar --}}
-    <div>
+    {{-- Calendar Content --}}
+    <div x-show="activeTab === 'calendar'">
         @if($view === 'week')
             {{-- Week View --}}
             <div class="hidden sm:block bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
@@ -662,6 +656,10 @@
         @endif
     </div>
 
+    {{-- Service Planning Content --}}
+    <div x-show="activeTab === 'planning'" x-cloak>
+        @include('service-planning._matrix')
+    </div>
 
 </div>
 
@@ -1389,5 +1387,4 @@ Date.prototype.getWeek = function() {
 };
 
 </script>
-@endif
 @endsection
