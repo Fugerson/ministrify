@@ -142,7 +142,7 @@ return [
     'budget_allocation' => 'Виділення бюджету',
 
     // Settings
-    'settings' => 'Параметри',
+    'settings' => 'Налаштування',
     'church_settings' => 'Параметри церкви',
     'user_settings' => 'Параметри користувача',
     'app_settings' => 'Параметри програми',

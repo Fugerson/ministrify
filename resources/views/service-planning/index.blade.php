@@ -9,22 +9,8 @@
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 px-3 sm:px-4 py-3">
         {{-- Row 1: Title + View toggle --}}
         <div class="flex items-center justify-between gap-2 mb-2 sm:mb-0">
-            <h1 class="text-sm sm:text-lg font-semibold text-gray-900 dark:text-white truncate">{{ __('app.service_planning') }}</h1>
-
-            <div class="flex items-center gap-2 flex-shrink-0">
-                {{-- View mode toggle --}}
-                <div class="flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg p-0.5">
-                    <button @click="switchToWeek()" type="button"
-                        :class="viewMode === 'week' ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'"
-                        class="px-2.5 py-1 text-xs font-medium rounded-md transition-all">
-                        {{ __('app.week') }}
-                    </button>
-                    <button @click="switchToMonth()" type="button"
-                        :class="viewMode === 'month' ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'"
-                        class="px-2.5 py-1 text-xs font-medium rounded-md transition-all">
-                        {{ __('app.month') }}
-                    </button>
-                </div>
+            <div class="flex items-center gap-2">
+                <h1 class="text-sm sm:text-lg font-semibold text-gray-900 dark:text-white truncate">{{ __('app.service_planning') }}</h1>
 
                 {{-- Event type filter --}}
                 <div class="relative" x-data="{ filterOpen: false }">
@@ -60,6 +46,22 @@
                             </div>
                         </template>
                     </div>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2 flex-shrink-0">
+                {{-- View mode toggle --}}
+                <div class="flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg p-0.5">
+                    <button @click="switchToWeek()" type="button"
+                        :class="viewMode === 'week' ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'"
+                        class="px-2.5 py-1 text-xs font-medium rounded-md transition-all">
+                        {{ __('app.week') }}
+                    </button>
+                    <button @click="switchToMonth()" type="button"
+                        :class="viewMode === 'month' ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'"
+                        class="px-2.5 py-1 text-xs font-medium rounded-md transition-all">
+                        {{ __('app.month') }}
+                    </button>
                 </div>
             </div>
         </div>
