@@ -154,6 +154,41 @@ class GroupController extends Controller
     {
         $this->authorize('update', $group);
 
+        $role = $request->input('role', 'member');
+
+        // Guest flow: create new Person and attach as guest
+        if ($role === 'guest') {
+            $validated = $request->validate([
+                'first_name' => 'required|string|max:255',
+                'last_name' => 'nullable|string|max:255',
+                'birth_date' => 'nullable|date|before_or_equal:today',
+                'photo' => 'nullable|image|max:5120',
+                'notes' => 'nullable|string|max:1000',
+            ]);
+
+            if ($request->hasFile('photo')) {
+                $validated['photo'] = app(\App\Services\ImageService::class)->storeProfilePhoto(
+                    $request->file('photo'),
+                    'people'
+                );
+            }
+
+            $validated['church_id'] = $this->getCurrentChurch()->id;
+            $validated['membership_status'] = 'guest';
+
+            $person = Person::create($validated);
+            $group->members()->attach($person->id, ['role' => Group::ROLE_GUEST, 'joined_at' => now()]);
+
+            $this->logAuditAction('member_added', 'Group', $group->id, $group->name, [
+                'person_id' => $person->id,
+                'person_name' => $person->full_name,
+                'role' => 'guest',
+            ]);
+
+            return $this->successResponse($request, __('messages.guest_added'));
+        }
+
+        // Regular member/assistant flow
         $validated = $request->validate([
             'person_id' => ['required', new BelongsToChurch(Person::class)],
             'role' => 'nullable|in:leader,assistant,member',
@@ -168,7 +203,6 @@ class GroupController extends Controller
             'joined_at' => now(),
         ]);
 
-        // Log member added
         $person = Person::find($validated['person_id']);
         $this->logAuditAction('member_added', 'Group', $group->id, $group->name, [
             'person_id' => $validated['person_id'],
