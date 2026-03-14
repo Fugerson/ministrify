@@ -88,7 +88,9 @@ class GroupController extends Controller
             'last_meeting' => $group->last_attendance,
         ];
 
-        return view('groups.show', compact('group', 'availablePeople', 'attendanceStats'));
+        $existingToday = $group->attendances()->whereDate('date', today())->first();
+
+        return view('groups.show', compact('group', 'availablePeople', 'attendanceStats', 'existingToday'));
     }
 
     public function edit(Group $group)

@@ -1422,7 +1422,7 @@
         </aside>
 
         <!-- Main Content -->
-        <div id="main-content" class="main-content-area flex-1 min-w-0 {{ $menuPosition === 'top' ? 'lg:pt-16' : '' }} {{ $menuPosition === 'top' ? 'pb-0' : 'pb-16' }} {{ $menuPosition === 'bottom' ? 'lg:pb-20' : 'lg:pb-0' }}"
+        <div id="main-content" class="main-content-area flex-1 min-w-0 {{ $menuPosition === 'top' ? 'lg:pt-16' : '' }} pb-16 {{ $menuPosition === 'bottom' ? 'lg:pb-20' : 'lg:pb-0' }}"
              x-data="{ sidebarCollapsed: localStorage.getItem('sidebar_collapsed') === 'true' }"
              x-on:sidebar-toggle.window="sidebarCollapsed = $event.detail"
              :class="sidebarCollapsed ? '{{ $menuPosition === 'right' ? 'lg:pr-16' : 'lg:pl-16' }}' : '{{ $menuPosition === 'right' ? 'lg:pr-64' : 'lg:pl-64' }}'">
@@ -1462,34 +1462,6 @@
                     </div>
                 </div>
             </header>
-
-            @if($menuPosition === 'top')
-            <!-- Mobile Top Navigation (when position=top) -->
-            <nav class="lg:hidden sticky top-14 z-20 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 overflow-x-auto safe-top-nav">
-                <div class="flex items-center gap-1 px-2 py-1.5 min-w-max">
-                    <a wire:navigate href="{{ route('dashboard') }}" class="px-3 py-1.5 text-xs font-medium rounded-lg whitespace-nowrap {{ request()->routeIs('dashboard') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 active:bg-gray-100 dark:active:bg-gray-700' }}">{{ __('app.home') }}</a>
-                    @if(auth()->user()->canView('people'))
-                    <a wire:navigate href="{{ route('people.index') }}" class="px-3 py-1.5 text-xs font-medium rounded-lg whitespace-nowrap {{ request()->routeIs('people.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 active:bg-gray-100 dark:active:bg-gray-700' }}">{{ __('app.people') }}</a>
-                    @endif
-                    @if(auth()->user()->canView('events'))
-                    <a wire:navigate href="{{ route('schedule') }}" class="px-3 py-1.5 text-xs font-medium rounded-lg whitespace-nowrap {{ request()->routeIs('schedule') || request()->routeIs('events.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 active:bg-gray-100 dark:active:bg-gray-700' }}">{{ __('app.schedule') }}</a>
-                    @endif
-                    @if(auth()->user()->canView('groups'))
-                    <a wire:navigate href="{{ route('groups.index') }}" class="px-3 py-1.5 text-xs font-medium rounded-lg whitespace-nowrap {{ request()->routeIs('groups.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 active:bg-gray-100 dark:active:bg-gray-700' }}">{{ __('app.groups') }}</a>
-                    @endif
-                    @if(auth()->user()->canView('ministries'))
-                    <a wire:navigate href="{{ route('ministries.index') }}" class="px-3 py-1.5 text-xs font-medium rounded-lg whitespace-nowrap {{ request()->routeIs('ministries.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 active:bg-gray-100 dark:active:bg-gray-700' }}">{{ __('ui.teams') }}</a>
-                    @endif
-                    @if(auth()->user()->canView('announcements'))
-                    <a wire:navigate href="{{ route('announcements.index') }}" class="px-3 py-1.5 text-xs font-medium rounded-lg whitespace-nowrap {{ request()->routeIs('announcements.*') || request()->routeIs('pm.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 active:bg-gray-100 dark:active:bg-gray-700' }}">{{ __('app.chat') }}</a>
-                    @endif
-                    @if(auth()->user()->canView('finances'))
-                    <a wire:navigate href="{{ route('finances.index') }}" class="px-3 py-1.5 text-xs font-medium rounded-lg whitespace-nowrap {{ request()->routeIs('finances.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 active:bg-gray-100 dark:active:bg-gray-700' }}">{{ __('app.finances') }}</a>
-                    @endif
-                    <button @click="sidebarOpen = true" class="px-3 py-1.5 text-xs font-medium rounded-lg whitespace-nowrap text-gray-600 dark:text-gray-400 active:bg-gray-100 dark:active:bg-gray-700">{{ __('app.more_nav') }}</button>
-                </div>
-            </nav>
-            @endif
 
             <!-- Desktop Header -->
             <header class="hidden lg:flex sticky top-0 z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 items-center justify-between h-16 px-6">
@@ -1548,7 +1520,7 @@
         </div>
 
         <!-- Mobile Bottom Navigation -->
-        <nav class="{{ $menuPosition === 'top' ? 'hidden' : 'lg:hidden' }} fixed bottom-0 left-0 right-0 z-30 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 safe-bottom">
+        <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 safe-bottom">
             <div class="flex items-center justify-around h-14 px-1">
                 <a wire:navigate href="{{ route('dashboard') }}" class="flex flex-col items-center justify-center w-full py-1 {{ request()->routeIs('dashboard') ? 'text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400' }}">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
