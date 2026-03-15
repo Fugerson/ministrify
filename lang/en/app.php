@@ -6302,4 +6302,8 @@ return [
 
     // Profile
     'profile_not_found' => 'Your profile was not found. Please contact the administrator.',
+
+    // Public site sections
+    'public_service_times' => 'Service times',
+    'public_address' => 'Address',
 ];

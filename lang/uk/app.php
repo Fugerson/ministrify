@@ -6135,4 +6135,8 @@ return [
 
     // Profile
     'profile_not_found' => 'Ваш профіль не знайдено. Зверніться до адміністратора.',
+
+    // Public site sections
+    'public_service_times' => 'Розклад богослужінь',
+    'public_address' => 'Адреса',
 ];

@@ -15,7 +15,7 @@
                     <div class="w-4 h-4 rounded-full" style="background-color: {{ $ministry->color }}"></div>
                 @endif
                 <div>
-                    <div class="flex items-center gap-2">
+                    <div class="flex flex-wrap items-center gap-2">
                         <h1 id="ministry-name" class="text-2xl font-bold text-gray-900 dark:text-white">{{ $ministry->name }}</h1>
                         @php $visibility = $ministry->visibility ?? 'public'; @endphp
                         @if($visibility !== 'public')

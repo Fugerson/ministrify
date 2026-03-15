@@ -10,7 +10,7 @@
                     </svg>
                 </div>
                 <div class="text-left">
-                    <p class="text-sm text-gray-500">Розклад богослужінь</p>
+                    <p class="text-sm text-gray-500">{{ __('app.public_service_times') }}</p>
                     <p class="font-semibold text-gray-900 whitespace-pre-line">{{ $church->service_times }}</p>
                 </div>
             </div>
@@ -23,7 +23,7 @@
                     </svg>
                 </div>
                 <div class="text-left">
-                    <p class="text-sm text-gray-500">Адреса</p>
+                    <p class="text-sm text-gray-500">{{ __('app.public_address') }}</p>
                     <p class="font-semibold text-gray-900">{{ $church->address }}</p>
                 </div>
             </div>
