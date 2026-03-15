@@ -843,6 +843,7 @@ return [
     'you_signed_up' => 'Ви записалися!',
     'you_unsubscribed' => 'Ви відписалися',
     'not_team_member' => 'Ви не є учасником цієї команди',
+    'signup_for_role' => 'Записатися на роль',
     'you' => 'ви',
 
     // Church Budget

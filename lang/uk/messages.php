@@ -202,6 +202,10 @@ return [
     'confirm_remove_member' => 'Видалити учасника з групи?',
     'confirm_delete_guest' => 'Видалити гостя з групи?',
     'guest_added' => 'Гостя додано.',
+    'already_signed_up' => 'Ви вже записані на цю роль.',
+    'signed_up_success' => 'Ви записалися на служіння!',
+    'can_only_delete_own' => 'Ви можете видалити тільки свій запис.',
+    'unsubscribed_success' => 'Ви відписалися від служіння.',
     'guest_updated' => 'Дані гостя оновлено.',
     'guest_deleted' => 'Гостя видалено.',
     'confirm_remove_team_member' => 'Видалити учасника з команди?',
@@ -224,6 +228,7 @@ return [
     'confirm_reset_role_permissions' => 'Скинути права для ":role" до стандартних?',
     'confirm_reset_all_roles' => 'Скинути всі ролі до стандартних? Всі ваші зміни будуть втрачені.',
     'confirm_auto_assign' => 'Запустити авто-розподіл для всіх подій на 4 тижні?',
+    'confirm_unsubscribe' => 'Відписатися від цієї ролі?',
     'confirm_delete_project' => 'Видалити проєкт ":name"? Всі завдання будуть видалені.',
     'saving' => 'Збереження...',
 

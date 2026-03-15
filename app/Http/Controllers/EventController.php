@@ -419,7 +419,25 @@ class EventController extends Controller
 
         $canEdit = auth()->user()->can('update', $event);
 
-        return view('schedule.show', compact('event', 'availablePeople', 'volunteerBlockouts', 'checklistTemplates', 'boards', 'allPeople', 'ministries', 'songsForAutocomplete', 'canEdit'));
+        // Self-signup data: current user's ministries with roles
+        $currentPerson = auth()->user()->person;
+        $myMinistriesForSignup = collect();
+        if ($currentPerson) {
+            $myMinistriesForSignup = $currentPerson->ministries()
+                ->with('ministryRoles')
+                ->get()
+                ->map(fn($m) => [
+                    'id' => $m->id,
+                    'name' => $m->name,
+                    'color' => $m->color,
+                    'roles' => $m->ministryRoles->map(fn($r) => [
+                        'id' => $r->id,
+                        'name' => $r->name,
+                    ])->values(),
+                ]);
+        }
+
+        return view('schedule.show', compact('event', 'availablePeople', 'volunteerBlockouts', 'checklistTemplates', 'boards', 'allPeople', 'ministries', 'songsForAutocomplete', 'canEdit', 'currentPerson', 'myMinistriesForSignup'));
     }
 
     public function edit(Event $event)

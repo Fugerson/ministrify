@@ -203,6 +203,10 @@ return [
     'confirm_remove_member' => 'Remove member from group?',
     'confirm_delete_guest' => 'Delete guest from group?',
     'guest_added' => 'Guest added.',
+    'already_signed_up' => 'You are already signed up for this role.',
+    'signed_up_success' => 'You signed up for service!',
+    'can_only_delete_own' => 'You can only delete your own record.',
+    'unsubscribed_success' => 'You unsubscribed from service.',
     'guest_updated' => 'Guest updated.',
     'guest_deleted' => 'Guest deleted.',
     'confirm_remove_team_member' => 'Remove member from team?',
@@ -225,6 +229,7 @@ return [
     'confirm_reset_role_permissions' => 'Reset permissions for ":role" to defaults?',
     'confirm_reset_all_roles' => 'Reset all roles to defaults? All your changes will be lost.',
     'confirm_auto_assign' => 'Run auto-assignment for all events for 4 weeks?',
+    'confirm_unsubscribe' => 'Unsubscribe from this role?',
     'confirm_delete_project' => 'Delete project ":name"? All tasks will be deleted.',
     'saving' => 'Saving...',
 

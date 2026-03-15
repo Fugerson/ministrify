@@ -188,7 +188,7 @@ class ServiceTeamController extends Controller
 
         $person = auth()->user()->person;
         if (!$person) {
-            return response()->json(['error' => __('app.not_team_member')], 403);
+            return $this->errorResponse($request, __('app.not_team_member'));
         }
 
         $churchId = $this->getCurrentChurch()->id;
@@ -200,7 +200,7 @@ class ServiceTeamController extends Controller
 
         // Check user is a member of this ministry
         if (!$ministry->members()->where('people.id', $person->id)->exists()) {
-            return response()->json(['error' => __('app.not_team_member')], 403);
+            return $this->errorResponse($request, __('app.not_team_member'));
         }
 
         // Verify role belongs to the ministry
@@ -217,7 +217,7 @@ class ServiceTeamController extends Controller
             ->exists();
 
         if ($exists) {
-            return response()->json(['error' => 'Ви вже записані на цю роль'], 422);
+            return $this->errorResponse($request, __('messages.already_signed_up'));
         }
 
         $member = EventMinistryTeam::create([
@@ -228,11 +228,7 @@ class ServiceTeamController extends Controller
             'status' => 'confirmed',
         ]);
 
-        return response()->json([
-            'success' => true,
-            'id' => $member->id,
-            'person_name' => $person->first_name . ' ' . mb_substr($person->last_name ?? '', 0, 1) . '.',
-        ]);
+        return $this->successResponse($request, __('messages.signed_up_success'));
     }
 
     /**
@@ -248,12 +244,12 @@ class ServiceTeamController extends Controller
 
         $person = auth()->user()->person;
         if (!$person || $member->person_id !== $person->id) {
-            return response()->json(['error' => 'Ви можете видалити тільки свій запис'], 403);
+            return $this->errorResponse($request, __('messages.can_only_delete_own'));
         }
 
         $member->delete();
 
-        return response()->json(['success' => true]);
+        return $this->successResponse($request, __('messages.unsubscribed_success'));
     }
 
     /**

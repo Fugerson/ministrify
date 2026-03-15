@@ -631,43 +631,65 @@
             @php
                 // Combine assignments and ministry teams, grouped by ministry → role
                 $eventTeam = collect();
+                $myPersonId = $currentPerson?->id;
 
                 // Position-based assignments
                 foreach ($event->assignments as $assignment) {
                     if (!$assignment->person || !$assignment->position) continue;
-                    $ministryName = $assignment->position->ministry?->name ?? __('app.schedule_other');
-                    $ministryColor = $assignment->position->ministry?->color ?? '#6B7280';
                     $eventTeam->push((object)[
-                        'ministry_name' => $ministryName,
-                        'ministry_color' => $ministryColor,
+                        'ministry_name' => $assignment->position->ministry?->name ?? __('app.schedule_other'),
+                        'ministry_color' => $assignment->position->ministry?->color ?? '#6B7280',
+                        'ministry_id' => $assignment->position->ministry?->id,
                         'role_name' => $assignment->position->name,
+                        'role_id' => null,
                         'person_name' => $assignment->person->full_name,
+                        'person_id' => $assignment->person->id,
+                        'member_id' => null,
                         'status' => $assignment->status,
                         'notes' => $assignment->notes,
+                        'source' => 'assignment',
                     ]);
                 }
 
                 // Role-based ministry teams
                 foreach ($event->ministryTeams as $member) {
                     if (!$member->person) continue;
-                    $ministryName = $member->ministry?->name ?? __('app.schedule_other');
-                    $ministryColor = $member->ministry?->color ?? '#6B7280';
                     $eventTeam->push((object)[
-                        'ministry_name' => $ministryName,
-                        'ministry_color' => $ministryColor,
+                        'ministry_name' => $member->ministry?->name ?? __('app.schedule_other'),
+                        'ministry_color' => $member->ministry?->color ?? '#6B7280',
+                        'ministry_id' => $member->ministry_id,
                         'role_name' => $member->ministryRole?->name ?? __('app.schedule_member'),
+                        'role_id' => $member->ministry_role_id,
                         'person_name' => $member->person->full_name,
+                        'person_id' => $member->person->id,
+                        'member_id' => $member->id,
                         'status' => $member->status,
                         'notes' => $member->notes,
+                        'source' => 'ministry_team',
                     ]);
                 }
 
                 $eventTeamGrouped = $eventTeam->groupBy('ministry_name');
                 $eventTeamCount = $eventTeam->count();
+
+                // Check which roles the current user is already signed up for
+                $mySignups = $eventTeam->where('person_id', $myPersonId)->where('source', 'ministry_team');
+                $mySignupKeys = $mySignups->map(fn($s) => $s->ministry_id . '_' . $s->role_id)->toArray();
+
+                // Filter available ministries/roles (exclude already signed up)
+                $availableSignups = $myMinistriesForSignup->map(function($ministry) use ($mySignupKeys) {
+                    $roles = collect($ministry['roles'])->filter(function($role) use ($ministry, $mySignupKeys) {
+                        return !in_array($ministry['id'] . '_' . $role['id'], $mySignupKeys);
+                    })->values();
+                    return array_merge($ministry, ['roles' => $roles]);
+                })->filter(fn($m) => count($m['roles']) > 0)->values();
+
+                $hasSignupOptions = $availableSignups->count() > 0;
+                $showTeamSection = $eventTeamCount > 0 || $hasSignupOptions || $mySignups->count() > 0;
             @endphp
 
-            @if($eventTeamCount > 0)
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700" x-data="{ teamOpen: false }">
+            @if($showTeamSection)
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700" x-data="{ teamOpen: {{ ($eventTeamCount > 0 || $hasSignupOptions) ? 'true' : 'false' }} }">
                 <button type="button" @click="teamOpen = !teamOpen" class="w-full px-5 py-4 flex items-center justify-between cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors rounded-t-2xl" :class="teamOpen ? 'border-b border-gray-200 dark:border-gray-700' : ''">
                     <div class="flex items-center gap-2">
                         <svg class="w-4 h-4 text-gray-400 transition-transform" :class="teamOpen ? 'rotate-90' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -682,6 +704,7 @@
                 </button>
 
                 <div class="p-4 space-y-4" x-show="teamOpen" x-collapse>
+                    {{-- Existing team members --}}
                     @foreach($eventTeamGrouped as $ministryName => $members)
                     <div>
                         <div class="flex items-center gap-2 mb-2">
@@ -704,10 +727,23 @@
                                                     'declined' => 'bg-red-500',
                                                     default => 'bg-gray-400',
                                                 };
+                                                $isMe = $member->person_id === $myPersonId;
                                             @endphp
                                             <span class="inline-flex items-center gap-1">
                                                 <span class="w-1.5 h-1.5 rounded-full flex-shrink-0 {{ $dotClass }}"></span>
-                                                <span class="text-sm text-gray-900 dark:text-white">{{ $member->person_name }}</span>
+                                                <span class="text-sm {{ $isMe ? 'font-semibold text-primary-600 dark:text-primary-400' : 'text-gray-900 dark:text-white' }}">{{ $member->person_name }}</span>
+                                                {{-- Unsubscribe button for own signups --}}
+                                                @if($isMe && $member->source === 'ministry_team' && $member->member_id)
+                                                    <form method="POST" action="{{ route('events.self-unsubscribe', [$event, $member->member_id]) }}" class="inline" onsubmit="return confirm('{{ __('messages.confirm_unsubscribe') }}')">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="text-red-400 hover:text-red-600 dark:text-red-500 dark:hover:text-red-400 transition-colors" title="{{ __('app.unsubscribe') }}">
+                                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                                            </svg>
+                                                        </button>
+                                                    </form>
+                                                @endif
                                             </span>
                                             @if(!$loop->last)<span class="text-gray-300 dark:text-gray-600">·</span>@endif
                                         @endforeach
@@ -720,6 +756,32 @@
                         </div>
                     </div>
                     @endforeach
+
+                    {{-- Self-signup: available roles --}}
+                    @if($hasSignupOptions)
+                    <div class="{{ $eventTeamCount > 0 ? 'border-t border-gray-200 dark:border-gray-700 pt-4' : '' }}">
+                        <h3 class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-3">{{ __('app.signup_for_role') }}</h3>
+                        <div class="space-y-2">
+                            @foreach($availableSignups as $ministry)
+                                @foreach($ministry['roles'] as $role)
+                                    <form method="POST" action="{{ route('events.self-signup', $event) }}" class="inline-block">
+                                        @csrf
+                                        <input type="hidden" name="ministry_id" value="{{ $ministry['id'] }}">
+                                        <input type="hidden" name="ministry_role_id" value="{{ $role['id'] }}">
+                                        <button type="submit" class="inline-flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg border border-primary-200 dark:border-primary-800 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 hover:bg-primary-100 dark:hover:bg-primary-900/40 transition-colors">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                            </svg>
+                                            <span class="font-medium" style="color: {{ $ministry['color'] }}">{{ $ministry['name'] }}</span>
+                                            <span class="text-gray-400">·</span>
+                                            <span>{{ $role['name'] }}</span>
+                                        </button>
+                                    </form>
+                                @endforeach
+                            @endforeach
+                        </div>
+                    </div>
+                    @endif
                 </div>
             </div>
             @endif

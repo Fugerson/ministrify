@@ -835,6 +835,7 @@ return [
     'you_signed_up' => 'You signed up!',
     'you_unsubscribed' => 'You unsubscribed',
     'not_team_member' => 'You are not a member of this team',
+    'signup_for_role' => 'Sign up for a role',
     'you' => 'you',
 
     // Church Budget
