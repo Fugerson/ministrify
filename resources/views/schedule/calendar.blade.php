@@ -217,12 +217,12 @@
                     </div>
                 @else
                     <a href="{{ route('settings.index') }}#google-calendar"
-                       class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600 rounded-lg transition-colors"
+                       class="inline-flex items-center px-2 sm:px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600 rounded-lg transition-colors"
                        title="{{ __('app.cal_connect_google') }}">
-                        <svg class="w-4 h-4 mr-1.5 text-blue-500" viewBox="0 0 24 24" fill="currentColor">
+                        <svg class="w-4 h-4 sm:mr-1.5 text-blue-500" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M12 0C5.383 0 0 5.383 0 12s5.383 12 12 12 12-5.383 12-12S18.617 0 12 0zM9.857 17.143H6.857v-3h3v3zm0-4.286H6.857V9.857h3v3zm4.286 4.286h-3v-3h3v3zm0-4.286h-3V9.857h3v3zm4.286 4.286h-3v-3h3v3zm0-4.286h-3V9.857h3v3z"/>
                         </svg>
-                        Google Calendar
+                        <span class="hidden sm:inline">Google Calendar</span>
                     </a>
                 @endif
                 @endif
@@ -863,7 +863,7 @@
 
                     {{-- Date & Time --}}
                     <div x-data="{ allDay: false, multiDay: false }">
-                        <div class="grid grid-cols-2 gap-3">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div>
                                 <label for="modal_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.cal_date_label') }} *</label>
                                 <input type="date" name="date" id="modal_date" value="{{ now()->format('Y-m-d') }}" required

@@ -87,12 +87,12 @@
             <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">{{ __('app.folder_empty') }}</h3>
             <p class="text-gray-500 dark:text-gray-400 mb-4">{{ __('app.create_folder_or_upload') }}</p>
             @if(auth()->user()->canCreate('resources'))
-            <div class="flex items-center justify-center gap-3">
+            <div class="flex flex-wrap items-center justify-center gap-3">
                 <button @click="showCreateFolder = true"
-                        class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                        class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors whitespace-nowrap">
                     {{ __('app.create_folder') }}
                 </button>
-                <label class="px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors cursor-pointer">
+                <label class="px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors cursor-pointer whitespace-nowrap">
                     {{ __('app.upload_file') }}
                     <input type="file" class="hidden" @change="uploadFile($event)" multiple>
                 </label>

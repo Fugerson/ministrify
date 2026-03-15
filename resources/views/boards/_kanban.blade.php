@@ -35,9 +35,9 @@
         @endif
 
         <!-- Toolbar -->
-        <div class="flex items-center gap-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-2 shadow-sm">
+        <div class="flex flex-wrap items-center gap-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-2 shadow-sm">
             <!-- Search -->
-            <div class="relative flex-1 min-w-0 sm:min-w-[180px] sm:max-w-xs" x-data="{ showDropdown: false }" @click.away="showDropdown = false">
+            <div class="relative flex-1 min-w-[120px] sm:min-w-[180px] sm:max-w-xs" x-data="{ showDropdown: false }" @click.away="showDropdown = false">
                 <input type="text" x-model="searchQuery" placeholder="{{ __('app.board_search_placeholder') }}"
                        x-ref="searchInput"
                        @focus="showDropdown = true"

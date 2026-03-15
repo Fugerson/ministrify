@@ -114,12 +114,12 @@
                 <!-- Info -->
                 <div class="flex-1">
                     @if($canEdit)
-                        <div class="flex items-center gap-2">
+                        <div class="flex flex-wrap items-center gap-1 sm:gap-2">
                             <input type="text" name="first_name" value="{{ old('first_name', $person->first_name) }}" required
-                                   class="text-2xl font-bold text-gray-900 dark:text-white bg-transparent border-0 border-b-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600 focus:border-primary-500 focus:ring-0 px-0 py-0 w-auto"
+                                   class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white bg-transparent border-0 border-b-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600 focus:border-primary-500 focus:ring-0 px-0 py-0 min-w-0 w-auto max-w-[45%] sm:max-w-none"
                                    placeholder="{{ __('app.first_name') }}">
                             <input type="text" name="last_name" value="{{ old('last_name', $person->last_name) }}" required
-                                   class="text-2xl font-bold text-gray-900 dark:text-white bg-transparent border-0 border-b-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600 focus:border-primary-500 focus:ring-0 px-0 py-0 w-auto"
+                                   class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white bg-transparent border-0 border-b-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600 focus:border-primary-500 focus:ring-0 px-0 py-0 min-w-0 w-auto max-w-[45%] sm:max-w-none"
                                    placeholder="{{ __('app.last_name') }}">
                         </div>
                     @else
@@ -284,7 +284,7 @@
 
             @if($canEdit)
             <!-- Additional Admin Fields -->
-            <div class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
+            <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
                 <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
                     <p class="text-xs text-gray-500 dark:text-gray-400 mb-1 flex items-center gap-1">
                         Telegram
@@ -370,7 +370,7 @@
             </div>
 
             <!-- Personal Details -->
-            <div class="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4" x-data="{ maritalStatus: '{{ $person->marital_status ?? '' }}' }">
+            <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-4" x-data="{ maritalStatus: '{{ $person->marital_status ?? '' }}' }">
                 <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
                     <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">{{ __('app.gender') }}</p>
                     <select name="gender"

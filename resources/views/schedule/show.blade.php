@@ -168,8 +168,8 @@
         <div class="space-y-6">
             <!-- План події -->
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700" x-data="planEditor()">
-                <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700" :class="{ 'border-b-0': planCollapsed }">
-                    <div class="flex items-center justify-between">
+                <div class="px-3 sm:px-5 py-4 border-b border-gray-200 dark:border-gray-700" :class="{ 'border-b-0': planCollapsed }">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
                         <button type="button" @click="planCollapsed = !planCollapsed" class="flex items-center gap-2 hover:opacity-70 transition-opacity">
                             <svg class="w-5 h-5 text-gray-400 transition-transform duration-200" :class="{ '-rotate-90': planCollapsed }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
@@ -274,10 +274,10 @@
                         <thead class="bg-gray-50 dark:bg-gray-700/50 text-xs uppercase text-gray-500 dark:text-gray-400 sticky top-0 z-10">
                             <tr>
                                 <th class="px-1 py-4" style="width: 30px;"></th>
-                                <th class="px-3 py-4 text-left" style="width: 70px;">{{ __('app.schedule_time_col') }}</th>
-                                <th class="px-3 py-4 text-left" style="width: 40%;">{{ __('app.schedule_what_happens') }}</th>
-                                <th class="px-3 py-4 text-left" style="width: 1px;">{{ __('app.schedule_responsible') }}</th>
-                                <th class="px-3 py-4 text-left" style="width: 25%;">{{ __('app.schedule_comments') }}</th>
+                                <th class="px-2 sm:px-3 py-4 text-left" style="width: 70px;">{{ __('app.schedule_time_col') }}</th>
+                                <th class="px-2 sm:px-3 py-4 text-left" style="width: 40%;">{{ __('app.schedule_what_happens') }}</th>
+                                <th class="px-2 sm:px-3 py-4 text-left" style="width: 1px;">{{ __('app.schedule_responsible') }}</th>
+                                <th class="px-2 sm:px-3 py-4 text-left hidden sm:table-cell" style="width: 25%;">{{ __('app.schedule_comments') }}</th>
                                 <th class="px-2 py-4" style="width: 40px;"></th>
                             </tr>
                         </thead>
@@ -294,11 +294,11 @@
                                         </svg>
                                     </td>
                                     {{-- Час --}}
-                                    <td class="px-3 py-3 border-r border-gray-200 dark:border-gray-700">
+                                    <td class="px-2 sm:px-3 py-3 border-r border-gray-200 dark:border-gray-700">
                                         <input type="time"
                                                value="{{ $item->start_time ? \Carbon\Carbon::parse($item->start_time)->format('H:i') : '' }}"
                                                @change="updateField({{ $item->id }}, 'start_time', $event.target.value)"
-                                               class="min-w-[5.5rem] px-2 py-1.5 text-sm font-semibold text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 cursor-pointer">
+                                               class="min-w-[4.5rem] sm:min-w-[5.5rem] px-1.5 sm:px-2 py-1.5 text-sm font-semibold text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 cursor-pointer">
                                     </td>
                                     {{-- Що відбувається - єдиний підхід з інлайн посиланнями на пісні --}}
                                     @php
@@ -312,7 +312,7 @@
                                         }
                                         $displayTitle = trim($displayTitle);
                                     @endphp
-                                    <td class="px-3 py-3 border-r border-gray-200 dark:border-gray-700 align-top">
+                                    <td class="px-2 sm:px-3 py-3 border-r border-gray-200 dark:border-gray-700 align-top">
                                         <div class="relative" x-data="titleEditor({{ $item->id }}, {{ Js::from($displayTitle) }}, {{ $item->song_id ?? 'null' }})">
                                             {{-- Display mode --}}
                                             <div x-show="!editing" @click="startEditing()" class="cursor-text min-h-[1.5rem] px-1 py-1 text-sm text-gray-900 dark:text-white break-words" x-html="renderWithSongLinks(title)"></div>
@@ -390,7 +390,7 @@
                                         $declinedCount = count(array_filter($existingPeople, fn($p) => ($p['status'] ?? null) === 'declined'));
                                         $notAskedCount = count(array_filter($existingPeople, fn($p) => ($p['status'] ?? null) === null && $p['hasTelegram']));
                                     @endphp
-                                    <td class="px-3 py-3 border-r border-gray-200 dark:border-gray-700 align-top whitespace-nowrap"
+                                    <td class="px-2 sm:px-3 py-3 border-r border-gray-200 dark:border-gray-700 align-top"
                                         x-data="responsibleEditor({{ $item->id }}, {{ json_encode($existingPeople) }})">
                                         <div class="flex flex-col gap-1">
                                             {{-- Selected people as tags --}}
@@ -499,7 +499,7 @@
                                         </div>
                                     </td>
                                     {{-- Коментарі --}}
-                                    <td class="px-3 py-3 border-r border-gray-200 dark:border-gray-700 align-top">
+                                    <td class="px-2 sm:px-3 py-3 border-r border-gray-200 dark:border-gray-700 align-top hidden sm:table-cell">
                                         <textarea placeholder="{{ __('app.schedule_notes_placeholder') }}"
                                                   @change="updateField({{ $item->id }}, 'notes', $event.target.value)"
                                                   rows="1"
@@ -536,7 +536,7 @@
                 <div class="p-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-700/30">
                     <form @submit.prevent="addItem()" class="flex flex-wrap items-start gap-2">
                         <input type="time" x-model="newItem.start_time"
-                               class="min-w-[6rem] px-2 py-2 text-sm font-semibold text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-700 rounded-lg focus:ring-2 focus:ring-primary-500 cursor-pointer">
+                               class="min-w-[5rem] sm:min-w-[6rem] px-1.5 sm:px-2 py-2 text-sm font-semibold text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-700 rounded-lg focus:ring-2 focus:ring-primary-500 cursor-pointer">
                         {{-- Title with song autocomplete --}}
                         <div class="flex-1 min-w-[150px] relative">
                             <textarea x-model="newItem.title"
@@ -2726,13 +2726,13 @@ window.insertPlanRow = function(item) {
                 <circle cx="9" cy="20" r="1.5"/><circle cx="15" cy="20" r="1.5"/>
             </svg>
         </td>
-        <td class="px-3 py-3 border-r border-gray-200 dark:border-gray-700">
+        <td class="px-2 sm:px-3 py-3 border-r border-gray-200 dark:border-gray-700">
             <input type="time"
                    value="${startTime}"
                    onchange="updateField(${item.id}, 'start_time', this.value)"
-                   class="min-w-[5.5rem] px-2 py-1.5 text-sm font-semibold text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 cursor-pointer">
+                   class="min-w-[4.5rem] sm:min-w-[5.5rem] px-1.5 sm:px-2 py-1.5 text-sm font-semibold text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 cursor-pointer">
         </td>
-        <td class="px-3 py-3 border-r border-gray-200 dark:border-gray-700 align-top">
+        <td class="px-2 sm:px-3 py-3 border-r border-gray-200 dark:border-gray-700 align-top">
             <div class="relative" x-data="${xDataAttr}">
                 <div x-show="!editing" @click="startEditing()" class="cursor-text min-h-[1.5rem] px-1 py-1 text-sm text-gray-900 dark:text-white break-words" x-html="renderWithSongLinks(title)"></div>
                 <div x-show="editing" class="relative">
@@ -2766,7 +2766,7 @@ window.insertPlanRow = function(item) {
                 </div>
             </div>
         </td>
-        <td class="px-3 py-3 border-r border-gray-200 dark:border-gray-700 align-top whitespace-nowrap"
+        <td class="px-2 sm:px-3 py-3 border-r border-gray-200 dark:border-gray-700 align-top"
             x-data="${respXData}">
             <div class="flex flex-col gap-1">
                 <template x-for="(person, index) in people" :key="index">
@@ -2806,7 +2806,7 @@ window.insertPlanRow = function(item) {
                 </div>
             </div>
         </td>
-        <td class="px-3 py-3 border-r border-gray-200 dark:border-gray-700 align-top">
+        <td class="px-2 sm:px-3 py-3 border-r border-gray-200 dark:border-gray-700 align-top hidden sm:table-cell">
             <textarea placeholder=@js( __("app.schedule_notes_placeholder") )
                       onchange="updateField(${item.id}, 'notes', this.value)"
                       rows="1"

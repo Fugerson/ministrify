@@ -11,7 +11,7 @@
                 </div>
                 <div class="text-left">
                     <p class="text-sm text-gray-500">Розклад богослужінь</p>
-                    <p class="font-semibold text-gray-900">{{ $church->service_times }}</p>
+                    <p class="font-semibold text-gray-900 whitespace-pre-line">{{ $church->service_times }}</p>
                 </div>
             </div>
             @if($church->address)

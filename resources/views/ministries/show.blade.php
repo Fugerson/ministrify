@@ -2076,10 +2076,10 @@
                             <template x-for="inc in filteredIncome" :key="inc.id">
                                 <div class="px-4 py-2.5 flex items-center justify-between gap-3 hover:bg-gray-50 dark:hover:bg-gray-700/30 group">
                                     <div class="flex-1 min-w-0">
-                                        <div class="flex items-center gap-2">
+                                        <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5">
                                             <span class="font-semibold text-green-600 dark:text-green-400 whitespace-nowrap" x-text="'+' + new Intl.NumberFormat('uk-UA').format(inc.amount) + ' ' + inc.currency"></span>
-                                            <span x-show="inc.source_type === 'allocation'" class="inline-flex items-center px-1.5 py-0.5 text-[10px] font-medium rounded bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">{{ __('app.allocation_badge') }}</span>
-                                            <span class="text-sm text-gray-900 dark:text-white truncate" x-text="inc.description"></span>
+                                            <span x-show="inc.source_type === 'allocation'" class="inline-flex items-center px-1.5 py-0.5 text-[10px] font-medium rounded bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 whitespace-nowrap shrink-0">{{ __('app.allocation_badge') }}</span>
+                                            <span class="text-sm text-gray-900 dark:text-white truncate min-w-0" x-text="inc.description"></span>
                                         </div>
                                         <div class="flex items-center gap-2 mt-0.5">
                                             <span class="text-xs text-gray-400" x-text="inc.date_formatted"></span>
@@ -2120,10 +2120,10 @@
                             <template x-for="t in filteredTransactions" :key="t.id">
                                 <div class="px-4 py-2.5 flex items-center justify-between gap-3 hover:bg-gray-50 dark:hover:bg-gray-700/30 group">
                                     <div class="flex-1 min-w-0">
-                                        <div class="flex items-center gap-2">
+                                        <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5">
                                             <span class="font-semibold text-red-500 dark:text-red-400 whitespace-nowrap" x-text="'-' + new Intl.NumberFormat('uk-UA').format(t.amount) + ' ' + t.currency"></span>
-                                            <span x-show="t.category" class="inline-flex items-center px-1.5 py-0.5 text-[10px] font-medium rounded bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400" x-text="t.category"></span>
-                                            <span class="text-sm text-gray-900 dark:text-white truncate" x-text="t.description"></span>
+                                            <span x-show="t.category" class="inline-flex items-center px-1.5 py-0.5 text-[10px] font-medium rounded bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 whitespace-nowrap shrink-0" x-text="t.category"></span>
+                                            <span class="text-sm text-gray-900 dark:text-white truncate min-w-0" x-text="t.description"></span>
                                         </div>
                                         <div class="flex items-center gap-2 mt-0.5">
                                             <span class="text-xs text-gray-400" x-text="t.date_formatted"></span>
@@ -2811,7 +2811,7 @@
                             </div>
                         </div>
                         @can('contribute-ministry', $ministry)
-                        <button @click="editingVision = !editingVision" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 text-sm font-medium">
+                        <button @click="editingVision = !editingVision" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 text-sm font-medium whitespace-nowrap flex-shrink-0">
                             <span x-text="editingVision ? @js(__('app.cancel')) : @js(__('app.edit'))"></span>
                         </button>
                         @endcan

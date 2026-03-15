@@ -251,8 +251,11 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.site_url') }}</label>
                     <div class="flex items-center">
-                        <span class="px-3 py-2.5 bg-gray-100 dark:bg-gray-700 border border-r-0 border-gray-300 dark:border-gray-600 rounded-l-lg text-gray-500 dark:text-gray-400 text-sm">
+                        <span class="px-3 py-2.5 bg-gray-100 dark:bg-gray-700 border border-r-0 border-gray-300 dark:border-gray-600 rounded-l-lg text-gray-500 dark:text-gray-400 text-sm whitespace-nowrap hidden sm:inline-flex">
                             {{ url('/c/') }}/
+                        </span>
+                        <span class="px-2 py-2.5 bg-gray-100 dark:bg-gray-700 border border-r-0 border-gray-300 dark:border-gray-600 rounded-l-lg text-gray-500 dark:text-gray-400 text-xs whitespace-nowrap sm:hidden">
+                            /c/
                         </span>
                         <input type="text" name="slug" value="{{ old('slug', $church->slug ?? Str::slug($church->name)) }}" required
                                autocomplete="off"
@@ -1324,7 +1327,7 @@
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.settings_finance_categories') }}</h2>
                 <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.settings_finance_categories_desc') }}</p>
             </div>
-            <button @click="showForm = !showForm; editId = null" class="inline-flex items-center text-primary-600 dark:text-primary-400 hover:text-primary-500 text-sm">
+            <button @click="showForm = !showForm; editId = null" class="inline-flex items-center text-primary-600 dark:text-primary-400 hover:text-primary-500 text-sm whitespace-nowrap flex-shrink-0">
                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
@@ -1597,7 +1600,7 @@
                        class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                 <input type="color" name="color" value="#3b82f6"
                        class="w-12 h-10 border border-gray-300 dark:border-gray-600 rounded-lg">
-                <button type="submit" :disabled="saving" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg disabled:opacity-50">
+                <button type="submit" :disabled="saving" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg disabled:opacity-50 whitespace-nowrap flex-shrink-0">
                     <span x-show="!saving">{{ __('app.settings_add') }}</span>
                     <span x-show="saving" x-cloak>...</span>
                 </button>

@@ -15,17 +15,17 @@
 
 <div class="max-w-4xl mx-auto">
     <!-- Header -->
-    <div class="flex items-center justify-between mb-6">
-        <div>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('app.ann_church_announcements') }}</h1>
+    <div class="flex items-center justify-between gap-3 mb-6">
+        <div class="min-w-0">
+            <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{{ __('app.ann_church_announcements') }}</h1>
             @if($unreadCount > 0)
             <p class="text-sm text-primary-600 dark:text-primary-400">{{ __('app.ann_new_count', ['count' => $unreadCount]) }}</p>
             @endif
         </div>
         @if($unreadCount > 0)
         <button @click="ajaxAction('{{ route('announcements.mark-all-read') }}', 'POST').then(() => window.location.reload())"
-                class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors">
-            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                class="inline-flex items-center whitespace-nowrap flex-shrink-0 px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors">
+            <svg class="w-4 h-4 mr-1.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
             {{ __('app.ann_mark_all_read') }}
