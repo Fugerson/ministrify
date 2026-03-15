@@ -583,7 +583,7 @@
                                 </template>
                             </div>
                         </div>
-                        <div class="relative w-44">
+                        <div class="relative w-full sm:w-44">
                             <div class="flex flex-wrap items-center gap-1 min-h-[2.375rem] px-2 py-1 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg cursor-pointer"
                                  @click="newResponsible.open = !newResponsible.open">
                                 <template x-for="(person, index) in newResponsible.people" :key="index">
@@ -615,7 +615,7 @@
                             </div>
                         </div>
                         <input type="text" x-model="newItem.notes" placeholder="{{ __('app.schedule_comment_placeholder') }}"
-                               class="w-32 min-w-[80px] px-2 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">
+                               class="hidden sm:block w-32 min-w-[80px] px-2 py-2 text-sm bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">
                         <button type="submit" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm rounded-lg font-medium whitespace-nowrap">
                             {{ __('app.schedule_add_btn') }}
                         </button>
