@@ -64,9 +64,9 @@
     </div>
 
     <!-- Monthly Chart -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-3 sm:p-6">
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.reports_monthly_dynamics') }}</h3>
-        <div class="h-72">
+        <div class="h-72 -mx-1 sm:mx-0">
             <canvas id="financeChart"></canvas>
         </div>
     </div>
@@ -164,19 +164,38 @@ onPageReady(function() {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: { legend: { position: 'top' } },
+            plugins: { legend: { position: 'top', labels: { font: { size: window.innerWidth < 640 ? 10 : 12 }, boxWidth: window.innerWidth < 640 ? 8 : 40 } } },
             scales: {
                 y: {
                     type: 'linear',
                     position: 'left',
                     beginAtZero: true,
-                    ticks: { callback: v => v.toLocaleString('uk-UA') + ' ₴' }
+                    ticks: {
+                        font: { size: window.innerWidth < 640 ? 9 : 12 },
+                        callback: v => {
+                            if (window.innerWidth < 640) {
+                                if (Math.abs(v) >= 1000) return (v / 1000).toFixed(0) + 'k';
+                                return v;
+                            }
+                            return v.toLocaleString('uk-UA') + ' ₴';
+                        }
+                    }
                 },
                 y1: {
                     type: 'linear',
                     position: 'right',
                     grid: { drawOnChartArea: false },
-                    ticks: { color: '#3b82f6', callback: v => (v >= 0 ? '+' : '') + v.toLocaleString('uk-UA') + ' ₴' }
+                    ticks: {
+                        font: { size: window.innerWidth < 640 ? 9 : 12 },
+                        callback: v => {
+                            if (window.innerWidth < 640) {
+                                const prefix = v >= 0 ? '+' : '';
+                                if (Math.abs(v) >= 1000) return prefix + (v / 1000).toFixed(0) + 'k';
+                                return prefix + v;
+                            }
+                            return (v >= 0 ? '+' : '') + v.toLocaleString('uk-UA') + ' ₴';
+                        }
+                    }
                 }
             }
         }

@@ -175,8 +175,8 @@ function exportButton() {
         </div>
     </div>
 
-    <!-- Transactions Table -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
+    <!-- Transactions Table (Desktop) -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden hidden md:block">
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead class="bg-gray-50 dark:bg-gray-900">
@@ -297,7 +297,82 @@ function exportButton() {
             </table>
         </div>
 
-        <!-- Results count -->
+        <!-- Results count (desktop) -->
+        <div class="px-4 py-3 border-t border-gray-200 dark:border-gray-700 text-sm text-gray-500 dark:text-gray-400" x-show="hasActiveFilters">
+            {{ __('app.finance_found_count') }} <span x-text="displayedTransactions.length"></span> з <span x-text="periodTransactions.length"></span>
+        </div>
+    </div>
+
+    <!-- Mobile Transactions List -->
+    <div class="md:hidden bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
+        <!-- Mobile sort header -->
+        <div class="flex items-center justify-between px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+            <span class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('app.finance_date_header') }} / {{ __('app.finance_description_header') }}</span>
+            <span class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('app.finance_amount_header') }}</span>
+        </div>
+        <div class="divide-y divide-gray-200 dark:divide-gray-700">
+            <template x-for="item in displayedTransactions" :key="'m-'+item.transaction.id">
+                <div class="px-4 py-3 active:bg-gray-50 dark:active:bg-gray-700/50 cursor-pointer transition-colors"
+                     @click="openDetails(item.transaction.id)">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0 flex-1">
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm font-medium text-gray-900 dark:text-white truncate" x-text="item.transaction.description"></span>
+                                <template x-if="item.transaction.source_type === 'allocation'">
+                                    <span class="flex-shrink-0 inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300">
+                                        <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+                                    </span>
+                                </template>
+                                <template x-if="item.transaction.source_type === 'exchange'">
+                                    <span class="flex-shrink-0 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">{{ __('app.exchange') }}</span>
+                                </template>
+                            </div>
+                            <div class="flex items-center gap-2 mt-0.5">
+                                <span class="text-xs text-gray-500 dark:text-gray-400" x-text="formatDate(item.transaction.date)"></span>
+                                <span class="text-xs text-gray-400 dark:text-gray-500" x-text="formatWeekday(item.transaction.date)"></span>
+                                <template x-if="item.transaction.category">
+                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium"
+                                          :style="'background-color: ' + item.transaction.category.color + '20; color: ' + item.transaction.category.color"
+                                          x-text="item.transaction.category.name"></span>
+                                </template>
+                            </div>
+                            <div class="text-xs text-gray-400 dark:text-gray-500 mt-0.5" x-show="item.transaction.payment_method" x-text="paymentMethods[item.transaction.payment_method] || item.transaction.payment_method"></div>
+                        </div>
+                        <div class="flex-shrink-0 text-right">
+                            <template x-if="item.transaction.source_type === 'allocation'">
+                                <span class="text-sm font-semibold text-violet-600 dark:text-violet-400 whitespace-nowrap">
+                                    <span x-text="formatNumber(item.transaction.amount)"></span>
+                                    <span class="text-xs" x-text="currencySymbol(item.transaction.currency)"></span>
+                                </span>
+                            </template>
+                            <template x-if="item.transaction.source_type === 'exchange'">
+                                <span class="text-sm font-semibold text-amber-600 dark:text-amber-400 whitespace-nowrap">
+                                    <span x-text="formatNumber(item.transaction.amount)"></span>
+                                    <span class="text-xs" x-text="currencySymbol(item.transaction.currency)"></span>
+                                </span>
+                            </template>
+                            <template x-if="item.transaction.source_type !== 'allocation' && item.transaction.source_type !== 'exchange'">
+                                <span class="text-sm font-semibold whitespace-nowrap" :class="item.transaction.direction === 'in' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
+                                    <span x-text="(item.transaction.direction === 'in' ? '+' : '-') + formatNumber(item.transaction.amount)"></span>
+                                    <span class="text-xs" x-text="currencySymbol(item.transaction.currency)"></span>
+                                </span>
+                            </template>
+                            <div x-show="subFilter === '' && sortColumn === 'date'" class="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">
+                                <span :class="item.balance >= 0 ? '' : 'text-red-500'" x-text="formatNumber(item.balance) + ' ₴'"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </template>
+            <div x-show="displayedTransactions.length === 0" class="px-4 py-12 text-center text-gray-500 dark:text-gray-400">
+                <svg class="w-12 h-12 mx-auto mb-4 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                </svg>
+                <p class="text-lg font-medium">{{ __('app.finance_no_transactions') }}</p>
+                <p class="text-sm">{{ __('app.finance_for_selected_period') }}</p>
+            </div>
+        </div>
+        <!-- Results count (mobile) -->
         <div class="px-4 py-3 border-t border-gray-200 dark:border-gray-700 text-sm text-gray-500 dark:text-gray-400" x-show="hasActiveFilters">
             {{ __('app.finance_found_count') }} <span x-text="displayedTransactions.length"></span> з <span x-text="periodTransactions.length"></span>
         </div>

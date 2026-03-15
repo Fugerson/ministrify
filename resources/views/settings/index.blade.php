@@ -15,7 +15,8 @@
     }
 }">
     <!-- Tabs -->
-    <div id="settings-tabs" class="overflow-x-auto bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-1.5 sm:p-2">
+    <div id="settings-tabs" class="relative bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-1.5 sm:p-2">
+        <div class="overflow-x-auto scrollbar-hide">
         <div class="flex gap-1 sm:gap-2 min-w-max">
             <button @click="setTab('general')"
                     :class="{ 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400': activeTab === 'general' }"
@@ -58,6 +59,9 @@
                 {{ __('app.tab_audit') }}
             </button>
         </div>
+        </div>
+        <!-- Scroll fade indicator (right) -->
+        <div class="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white dark:from-gray-800 to-transparent pointer-events-none rounded-r-xl sm:hidden"></div>
     </div>
 
     <!-- General Tab -->
