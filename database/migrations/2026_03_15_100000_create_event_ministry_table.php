@@ -22,7 +22,6 @@ return new class extends Migration
             INSERT IGNORE INTO event_ministry (event_id, ministry_id, created_at, updated_at)
             SELECT DISTINCT event_id, ministry_id, MIN(created_at), NOW()
             FROM event_ministry_team
-            WHERE deleted_at IS NULL
             GROUP BY event_id, ministry_id
         ");
 
