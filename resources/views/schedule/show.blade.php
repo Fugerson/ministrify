@@ -627,24 +627,23 @@
                 </div>
             </div>
 
-            <!-- Event Team Section -->
+            <!-- Event Team Section (Alpine.js AJAX) -->
             @php
-                // Combine assignments and ministry teams, grouped by ministry → role
+                // Build initial data for Alpine component
                 $eventTeam = collect();
                 $myPersonId = $currentPerson?->id;
 
                 // Position-based assignments
                 foreach ($event->assignments as $assignment) {
                     if (!$assignment->person || !$assignment->position) continue;
-                    $eventTeam->push((object)[
-                        'ministry_name' => $assignment->position->ministry?->name ?? __('app.schedule_other'),
-                        'ministry_color' => $assignment->position->ministry?->color ?? '#6B7280',
+                    $eventTeam->push([
                         'ministry_id' => $assignment->position->ministry?->id,
                         'role_name' => $assignment->position->name,
                         'role_id' => null,
+                        'role_type' => 'position',
                         'person_name' => $assignment->person->full_name,
                         'person_id' => $assignment->person->id,
-                        'member_id' => null,
+                        'id' => $assignment->id,
                         'status' => $assignment->status,
                         'notes' => $assignment->notes,
                         'has_telegram' => (bool) $assignment->person->telegram_chat_id,
@@ -655,15 +654,14 @@
                 // Role-based ministry teams
                 foreach ($event->ministryTeams as $member) {
                     if (!$member->person) continue;
-                    $eventTeam->push((object)[
-                        'ministry_name' => $member->ministry?->name ?? __('app.schedule_other'),
-                        'ministry_color' => $member->ministry?->color ?? '#6B7280',
+                    $eventTeam->push([
                         'ministry_id' => $member->ministry_id,
                         'role_name' => $member->ministryRole?->name ?? __('app.schedule_member'),
                         'role_id' => $member->ministry_role_id,
+                        'role_type' => 'ministry_role',
                         'person_name' => $member->person->full_name,
                         'person_id' => $member->person->id,
-                        'member_id' => $member->id,
+                        'id' => $member->id,
                         'status' => $member->status,
                         'notes' => $member->notes,
                         'has_telegram' => (bool) $member->person->telegram_chat_id,
@@ -671,28 +669,44 @@
                     ]);
                 }
 
-                // Group by ministry for display
-                $eventTeamByMinistry = $eventTeam->groupBy('ministry_id');
-                $eventTeamCount = $eventTeam->count();
+                // Linked ministries with roles and members
+                $linkedMinistriesData = $linkedMinistries->map(function($lm) {
+                    return [
+                        'id' => $lm->id,
+                        'name' => $lm->name,
+                        'color' => $lm->color ?? '#6B7280',
+                        'roles' => $lm->ministryRoles->map(fn($r) => ['id' => $r->id, 'name' => $r->name])->values(),
+                    ];
+                })->values();
 
-                // Check which roles the current user is already signed up for
-                $mySignups = $eventTeam->where('person_id', $myPersonId)->where('source', 'ministry_team');
-                $mySignupKeys = $mySignups->map(fn($s) => $s->ministry_id . '_' . $s->role_id)->toArray();
+                // Members by ministry (for assign dropdown)
+                $membersByMinistry = [];
+                foreach ($linkedMinistries as $lm) {
+                    $membersByMinistry[$lm->id] = $lm->members->map(fn($p) => [
+                        'id' => $p->id,
+                        'name' => $p->full_name,
+                        'has_telegram' => (bool) $p->telegram_chat_id,
+                    ])->sortBy('name')->values()->toArray();
+                }
 
-                // Filter available ministries/roles for self-signup (exclude already signed up)
-                $availableSignups = $myMinistriesForSignup->map(function($ministry) use ($mySignupKeys) {
-                    $roles = collect($ministry['roles'])->filter(function($role) use ($ministry, $mySignupKeys) {
-                        return !in_array($ministry['id'] . '_' . $role['id'], $mySignupKeys);
-                    })->values();
-                    return array_merge($ministry, ['roles' => $roles]);
-                })->filter(fn($m) => count($m['roles']) > 0)->values();
+                // Available ministries to link
+                $availableMinistriesData = $availableMinistriesToLink->map(fn($m) => [
+                    'id' => $m->id,
+                    'name' => $m->name,
+                    'color' => $m->color ?? '#6B7280',
+                ])->values();
 
-                $hasSignupOptions = $availableSignups->count() > 0;
-                $showTeamSection = $linkedMinistries->count() > 0 || $eventTeamCount > 0 || $hasSignupOptions || $canEdit;
+                // My ministry IDs for self-signup
+                $myMinistryIds = $currentPerson ? $currentPerson->ministries()->whereIn('ministries.id', $linkedMinistries->pluck('id'))->pluck('ministries.id')->toArray() : [];
+
+                $initialTeamCount = $eventTeam->count();
+                $showTeamSection = $linkedMinistries->count() > 0 || $initialTeamCount > 0 || count($myMinistryIds) > 0 || $canEdit;
             @endphp
 
             @if($showTeamSection)
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700" x-data="{ teamOpen: {{ ($linkedMinistries->count() > 0 || $eventTeamCount > 0 || $hasSignupOptions) ? 'true' : 'false' }}, showAddMinistry: false }">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700"
+                 x-data="eventTeamManager()">
+
                 <button type="button" @click="teamOpen = !teamOpen" class="w-full px-5 py-4 flex items-center justify-between cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors rounded-t-2xl" :class="teamOpen ? 'border-b border-gray-200 dark:border-gray-700' : ''">
                     <div class="flex items-center gap-2">
                         <svg class="w-4 h-4 text-gray-400 transition-transform" :class="teamOpen ? 'rotate-90' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -703,238 +717,152 @@
                         </svg>
                         <h2 class="font-semibold text-gray-900 dark:text-white">{{ __('app.schedule_event_team') }}</h2>
                     </div>
-                    <span class="text-sm text-gray-500 dark:text-gray-400">{{ $linkedMinistries->count() }} {{ mb_strtolower(__('messages.teams')) }} · {{ $eventTeamCount }}</span>
+                    <span class="text-sm text-gray-500 dark:text-gray-400"
+                          x-text="linkedMinistries.length + ' {{ mb_strtolower(__('messages.teams')) }} · ' + totalAssigned"></span>
                 </button>
 
                 <div class="p-4 space-y-4" x-show="teamOpen" x-collapse>
 
-                    {{-- Linked ministries with their team members --}}
-                    @foreach($linkedMinistries as $lm)
-                    @php
-                        $ministryMembers = $eventTeamByMinistry->get($lm->id, collect());
-                        $roleGroups = $ministryMembers->groupBy('role_name');
-                        // Self-signup roles for this ministry
-                        $mySignupRoles = $availableSignups->firstWhere('id', $lm->id);
-                    @endphp
-                    <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <div class="flex items-center gap-2">
-                                <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background: {{ $lm->color ?? '#6B7280' }}"></span>
-                                <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ $lm->name }}</h3>
-                                <span class="text-xs text-gray-400 dark:text-gray-500">{{ $ministryMembers->count() }}</span>
-                            </div>
-                            @if($canEdit)
-                            <form method="POST" action="{{ route('events.unlink-ministry', [$event, $lm]) }}" class="inline" onsubmit="return confirm('{{ __('messages.confirm_remove_team_member') }}')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="text-gray-300 hover:text-red-500 dark:text-gray-600 dark:hover:text-red-400 transition-colors" title="{{ __('messages.delete') }}">
+                    {{-- Toast --}}
+                    <div x-show="toast.show" x-transition
+                         class="fixed top-4 right-4 z-50 px-4 py-2 rounded-lg shadow-lg text-sm font-medium"
+                         :class="toast.type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'"
+                         x-text="toast.message"></div>
+
+                    {{-- Linked ministries --}}
+                    <template x-for="ministry in linkedMinistries" :key="ministry.id">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" :style="'background:' + ministry.color"></span>
+                                    <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300" x-text="ministry.name"></h3>
+                                    <span class="text-xs text-gray-400 dark:text-gray-500" x-text="getMinistryMemberCount(ministry.id)"></span>
+                                </div>
+                                @if($canEdit)
+                                <button type="button" @click="unlinkMinistry(ministry)"
+                                        class="text-gray-300 hover:text-red-500 dark:text-gray-600 dark:hover:text-red-400 transition-colors" :title="@js(__('messages.delete'))">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                     </svg>
                                 </button>
-                            </form>
-                            @endif
-                        </div>
+                                @endif
+                            </div>
 
-                        {{-- Roles and members --}}
-                        <div class="ml-5 space-y-2">
-                            @foreach($lm->ministryRoles as $role)
-                                @php
-                                    $roleMembers = $roleGroups->get($role->name, collect());
-                                    $canSelfSignup = $mySignupRoles && collect($mySignupRoles['roles'])->contains('id', $role->id);
-                                    $assignedPersonIds = $roleMembers->pluck('person_id')->toArray();
-                                    $availableForRole = $canEdit ? $lm->members->filter(fn($p) => !in_array($p->id, $assignedPersonIds))->sortBy('last_name') : collect();
-                                    $roleUid = $lm->id . '_' . $role->id;
-                                @endphp
-                                <div class="py-1" x-data="{ showAssign: false, notifyLoading: {}, noteEditing: {} }">
-                                    {{-- Role header --}}
-                                    <div class="flex items-center justify-between mb-1">
-                                        <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ $role->name }}</span>
-                                        <div class="flex items-center gap-1">
-                                            @if($canEdit && $availableForRole->count() > 0)
-                                                <button type="button" @click="showAssign = !showAssign" class="text-gray-400 hover:text-primary-500 dark:text-gray-500 dark:hover:text-primary-400 transition-colors" title="{{ __('messages.add') }}">
+                            {{-- Roles --}}
+                            <div class="ml-5 space-y-2">
+                                <template x-for="role in ministry.roles" :key="role.id">
+                                    <div class="py-1">
+                                        {{-- Role header --}}
+                                        <div class="flex items-center justify-between mb-1">
+                                            <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide" x-text="role.name"></span>
+                                            <div class="flex items-center gap-1">
+                                                @if($canEdit)
+                                                <button type="button" @click="openDropdown(ministry, role, $event)"
+                                                        class="text-gray-400 hover:text-primary-500 dark:text-gray-500 dark:hover:text-primary-400 transition-colors" :title="@js(__('messages.add'))">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                                     </svg>
                                                 </button>
-                                            @endif
-                                            @if(!$canEdit && $canSelfSignup)
-                                                <form method="POST" action="{{ route('events.self-signup', $event) }}" class="inline">
-                                                    @csrf
-                                                    <input type="hidden" name="ministry_id" value="{{ $lm->id }}">
-                                                    <input type="hidden" name="ministry_role_id" value="{{ $role->id }}">
-                                                    <button type="submit" class="text-xs text-primary-500 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 transition-colors">
+                                                @else
+                                                <template x-if="canSelfSignup(ministry) && !isMeAssignedToRole(ministry.id, role.id)">
+                                                    <button type="button" @click="selfSignup(ministry, role)"
+                                                            class="text-xs text-primary-500 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 transition-colors"
+                                                            :disabled="busy">
                                                         + {{ __('app.sign_up') }}
                                                     </button>
-                                                </form>
-                                            @endif
+                                                </template>
+                                                @endif
+                                            </div>
                                         </div>
-                                    </div>
 
-                                    {{-- Assigned persons --}}
-                                    @forelse($roleMembers as $member)
-                                        @php
-                                            $statusBadge = match($member->status) {
-                                                'confirmed' => ['bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400', __('app.yes_status')],
-                                                'pending' => ['bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400', __('app.status_pending_legend')],
-                                                'declined' => ['bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400', __('app.no_status')],
-                                                default => ['bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400', ''],
-                                            };
-                                            $dotClass = match($member->status) {
-                                                'confirmed' => 'bg-green-500',
-                                                'pending' => 'bg-amber-500',
-                                                'declined' => 'bg-red-500',
-                                                default => 'bg-gray-400',
-                                            };
-                                            $isMe = $member->person_id === $myPersonId;
-                                        @endphp
-                                        <div class="flex items-center justify-between py-1 group">
-                                            <div class="flex items-center gap-2 min-w-0 flex-1">
-                                                <span class="w-1.5 h-1.5 rounded-full flex-shrink-0 {{ $dotClass }}"></span>
-                                                <span class="text-sm truncate {{ $isMe ? 'font-semibold text-primary-600 dark:text-primary-400' : 'text-gray-900 dark:text-white' }}">{{ $member->person_name }}@if($isMe) <span class="text-xs">({{ __('app.you') }})</span>@endif</span>
-                                                @if($statusBadge[1])
-                                                <span class="text-[10px] px-1.5 py-0.5 rounded-full font-medium flex-shrink-0 {{ $statusBadge[0] }}">{{ $statusBadge[1] }}</span>
-                                                @endif
-                                            </div>
-                                            <div class="flex items-center gap-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                {{-- Notes toggle --}}
-                                                @if($canEdit && $member->source === 'ministry_team' && $member->member_id)
-                                                    <button type="button" @click="noteEditing[{{ $member->member_id }}] = !noteEditing[{{ $member->member_id }}]" class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors" title="{{ __('messages.notes') }}">
-                                                        <svg class="w-3.5 h-3.5" fill="{{ $member->notes ? 'currentColor' : 'none' }}" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
-                                                        </svg>
-                                                    </button>
-                                                @endif
-                                                {{-- Telegram notify --}}
-                                                @if($canEdit && $member->source === 'ministry_team' && $member->member_id && $member->has_telegram)
-                                                    <button type="button"
-                                                        x-bind:disabled="notifyLoading[{{ $member->member_id }}]"
-                                                        @click="notifyLoading[{{ $member->member_id }}] = true; fetch('{{ route('events.ministry-team.notify', [$event, $member->member_id]) }}', {method:'POST', headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}','Content-Type':'application/json','Accept':'application/json'}}).then(r=>r.json()).then(d=>{notifyLoading[{{ $member->member_id }}]=false; alert(d.message)}).catch(()=>{notifyLoading[{{ $member->member_id }}]=false; alert('Error')})"
-                                                        class="p-1 text-blue-400 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 transition-colors" title="Telegram">
-                                                        <svg class="w-3.5 h-3.5" x-show="!notifyLoading[{{ $member->member_id }}]" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
-                                                        <svg class="w-3.5 h-3.5 animate-spin" x-show="notifyLoading[{{ $member->member_id }}]" x-cloak fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
-                                                    </button>
-                                                @endif
-                                                {{-- Delete/Unsubscribe --}}
-                                                @if($member->source === 'ministry_team' && $member->member_id)
-                                                    @if($canEdit)
-                                                        <form method="POST" action="{{ route('events.ministry-team.remove', [$event, $member->member_id]) }}" class="inline" onsubmit="return confirm('{{ __('messages.confirm_delete_item') }}')">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit" class="p-1 text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors">
-                                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        {{-- Assigned persons --}}
+                                        <template x-for="person in getRolePersons(ministry.id, role.id)" :key="person.id">
+                                            <div>
+                                                <div class="flex items-center justify-between py-1 group">
+                                                    <div class="flex items-center gap-2 min-w-0 flex-1">
+                                                        <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" :class="statusDotClass(person.status)"></span>
+                                                        <span class="text-sm truncate" :class="isMe(person) ? 'font-semibold text-primary-600 dark:text-primary-400' : 'text-gray-900 dark:text-white'">
+                                                            <span x-text="person.person_name"></span>
+                                                            <template x-if="isMe(person)"><span class="text-xs"> ({{ __('app.you') }})</span></template>
+                                                        </span>
+                                                        <span class="text-[10px] px-1.5 py-0.5 rounded-full font-medium flex-shrink-0"
+                                                              :class="statusBadgeClass(person.status)"
+                                                              x-text="statusLabel(person.status)"
+                                                              x-show="statusLabel(person.status)"></span>
+                                                    </div>
+                                                    <div class="flex items-center gap-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        {{-- Notes toggle --}}
+                                                        <template x-if="{{ $canEdit ? 'true' : 'false' }} && person.source === 'ministry_team'">
+                                                            <button type="button" @click="toggleNoteEditing(person.id)"
+                                                                    class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors" :title="@js(__('messages.notes'))">
+                                                                <svg class="w-3.5 h-3.5" :fill="person.notes ? 'currentColor' : 'none'" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
                                                                 </svg>
                                                             </button>
-                                                        </form>
-                                                    @elseif($isMe)
-                                                        <form method="POST" action="{{ route('events.self-unsubscribe', [$event, $member->member_id]) }}" class="inline" onsubmit="return confirm('{{ __('messages.confirm_unsubscribe') }}')">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit" class="p-1 text-red-400 hover:text-red-600 dark:text-red-500 dark:hover:text-red-400 transition-colors" title="{{ __('app.unsubscribe') }}">
-                                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                                                </svg>
+                                                        </template>
+                                                        {{-- Telegram notify --}}
+                                                        <template x-if="{{ $canEdit ? 'true' : 'false' }} && person.source === 'ministry_team' && person.has_telegram">
+                                                            <button type="button" @click="notifyPerson(person)"
+                                                                    :disabled="person._notifying"
+                                                                    class="p-1 text-blue-400 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 transition-colors" title="Telegram">
+                                                                <svg class="w-3.5 h-3.5" x-show="!person._notifying" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>
+                                                                <svg class="w-3.5 h-3.5 animate-spin" x-show="person._notifying" x-cloak fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
                                                             </button>
-                                                        </form>
-                                                    @endif
-                                                @endif
+                                                        </template>
+                                                        {{-- Delete/Unsubscribe --}}
+                                                        <template x-if="person.source === 'ministry_team'">
+                                                            <span>
+                                                                @if($canEdit)
+                                                                <button type="button" @click="removePerson(person, ministry.id, role.id)"
+                                                                        class="p-1 text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors">
+                                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                                    </svg>
+                                                                </button>
+                                                                @else
+                                                                <template x-if="isMe(person)">
+                                                                    <button type="button" @click="selfUnsubscribe(person, ministry.id, role.id)"
+                                                                            class="p-1 text-red-400 hover:text-red-600 dark:text-red-500 dark:hover:text-red-400 transition-colors" :title="@js(__('app.unsubscribe'))">
+                                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                                                        </svg>
+                                                                    </button>
+                                                                </template>
+                                                                @endif
+                                                            </span>
+                                                        </template>
+                                                    </div>
+                                                </div>
+                                                {{-- Notes display/edit --}}
+                                                <template x-if="person.notes && !noteEditing[person.id]">
+                                                    <div class="ml-4 text-xs text-gray-400 dark:text-gray-500 italic" x-text="person.notes"></div>
+                                                </template>
+                                                <template x-if="{{ $canEdit ? 'true' : 'false' }} && person.source === 'ministry_team' && noteEditing[person.id]">
+                                                    <div class="ml-4 mt-1 flex items-center gap-2">
+                                                        <input type="text" :value="person.notes || ''" x-ref="'notes_' + person.id"
+                                                               @keydown.enter="saveNotes(person, $event.target.value)"
+                                                               placeholder="{{ __('messages.notes') }}..."
+                                                               class="text-xs rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary-500 focus:border-primary-500 flex-1 py-1">
+                                                        <button type="button" @click="saveNotes(person, $el.previousElementSibling.value)"
+                                                                class="text-xs text-primary-600 hover:text-primary-800 dark:text-primary-400 font-medium">{{ __('messages.save') }}</button>
+                                                    </div>
+                                                </template>
                                             </div>
-                                        </div>
-                                        {{-- Notes display/edit --}}
-                                        @if($member->notes && !$canEdit)
-                                            <div class="ml-4 text-xs text-gray-400 dark:text-gray-500 italic">{{ $member->notes }}</div>
-                                        @endif
-                                        @if($canEdit && $member->source === 'ministry_team' && $member->member_id)
-                                            @if($member->notes)
-                                                <div class="ml-4 text-xs text-gray-400 dark:text-gray-500 italic" x-show="!noteEditing[{{ $member->member_id }}]">{{ $member->notes }}</div>
-                                            @endif
-                                            <form x-show="noteEditing[{{ $member->member_id }}]" x-cloak class="ml-4 mt-1 flex items-center gap-2"
-                                                @submit.prevent="fetch('{{ route('events.ministry-team.update-notes', [$event, $member->member_id]) }}', {method:'PATCH', headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}','Content-Type':'application/json','Accept':'application/json'}, body:JSON.stringify({notes:$refs.notes_{{ $member->member_id }}.value})}).then(()=>location.reload())">
-                                                <input type="text" x-ref="notes_{{ $member->member_id }}" value="{{ $member->notes }}" placeholder="{{ __('messages.notes') }}..." class="text-xs rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary-500 focus:border-primary-500 flex-1 py-1">
-                                                <button type="submit" class="text-xs text-primary-600 hover:text-primary-800 dark:text-primary-400 font-medium">{{ __('messages.save') }}</button>
-                                            </form>
-                                        @endif
-                                    @empty
-                                        @if(!$canEdit && !$canSelfSignup)
+                                        </template>
+
+                                        {{-- Empty role (no persons assigned) --}}
+                                        <template x-if="getRolePersons(ministry.id, role.id).length === 0 && !{{ $canEdit ? 'true' : 'false' }} && !canSelfSignup(ministry)">
                                             <div class="text-xs text-gray-400 dark:text-gray-500 italic py-1">—</div>
-                                        @elseif(!$canEdit && $canSelfSignup)
-                                            {{-- empty, signup button already in header --}}
-                                        @endif
-                                    @endforelse
-
-                                    {{-- Assign person dropdown (for editors) --}}
-                                    @if($canEdit && $availableForRole->count() > 0)
-                                    <form x-show="showAssign" x-cloak method="POST" action="{{ route('events.ministry-team.add', $event) }}" class="flex items-center gap-2 mt-1.5">
-                                        @csrf
-                                        <input type="hidden" name="ministry_id" value="{{ $lm->id }}">
-                                        <input type="hidden" name="ministry_role_id" value="{{ $role->id }}">
-                                        <select name="person_id" class="text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary-500 focus:border-primary-500 flex-1 py-1.5">
-                                            @foreach($availableForRole as $p)
-                                                <option value="{{ $p->id }}">{{ $p->full_name }}</option>
-                                            @endforeach
-                                        </select>
-                                        <button type="submit" class="px-2.5 py-1.5 text-xs font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors">
-                                            {{ __('messages.add') }}
-                                        </button>
-                                        <button type="button" @click="showAssign = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                            </svg>
-                                        </button>
-                                    </form>
-                                    @endif
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
-                    @endforeach
-
-                    {{-- Members from non-linked ministries (legacy/orphaned) --}}
-                    @php
-                        $linkedIds = $linkedMinistries->pluck('id')->toArray();
-                        $orphanedMembers = $eventTeam->filter(fn($m) => !in_array($m->ministry_id, $linkedIds));
-                        $orphanedGrouped = $orphanedMembers->groupBy('ministry_name');
-                    @endphp
-                    @foreach($orphanedGrouped as $ministryName => $members)
-                    <div>
-                        <div class="flex items-center gap-2 mb-2">
-                            <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background: {{ $members->first()->ministry_color }}"></span>
-                            <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400">{{ $ministryName }}</h3>
-                            <span class="text-xs text-gray-400 dark:text-gray-500">{{ $members->count() }}</span>
-                        </div>
-                        <div class="ml-5 space-y-1">
-                            @php $roleGroups = $members->groupBy('role_name'); @endphp
-                            @foreach($roleGroups as $roleName => $roleMembers)
-                                <div class="py-1">
-                                    <div class="flex items-center gap-2 flex-wrap">
-                                        <span class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ $roleName }}:</span>
-                                        @foreach($roleMembers as $member)
-                                            @php
-                                                $dotClass = match($member->status) {
-                                                    'confirmed' => 'bg-green-500',
-                                                    'pending' => 'bg-amber-500',
-                                                    'declined' => 'bg-red-500',
-                                                    default => 'bg-gray-400',
-                                                };
-                                                $isMe = $member->person_id === $myPersonId;
-                                            @endphp
-                                            <span class="inline-flex items-center gap-1">
-                                                <span class="w-1.5 h-1.5 rounded-full flex-shrink-0 {{ $dotClass }}"></span>
-                                                <span class="text-sm {{ $isMe ? 'font-semibold text-primary-600 dark:text-primary-400' : 'text-gray-900 dark:text-white' }}">{{ $member->person_name }}</span>
-                                            </span>
-                                            @if(!$loop->last)<span class="text-gray-300 dark:text-gray-600">·</span>@endif
-                                        @endforeach
+                                        </template>
                                     </div>
-                                </div>
-                            @endforeach
+                                </template>
+                            </div>
                         </div>
-                    </div>
-                    @endforeach
+                    </template>
 
                     {{-- Add ministry to event --}}
-                    @if($canEdit && $availableMinistriesToLink->count() > 0)
-                    <div class="{{ ($linkedMinistries->count() > 0 || $eventTeamCount > 0) ? 'border-t border-gray-200 dark:border-gray-700 pt-4' : '' }}">
+                    @if($canEdit)
+                    <div x-show="availableMinistries.length > 0" class="border-t border-gray-200 dark:border-gray-700 pt-4" x-cloak>
                         <template x-if="!showAddMinistry">
                             <button type="button" @click="showAddMinistry = true" class="inline-flex items-center gap-1.5 text-sm text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300 transition-colors">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -943,30 +871,139 @@
                                 {{ __('app.add_team') }}
                             </button>
                         </template>
-                        <form x-show="showAddMinistry" method="POST" action="{{ route('events.link-ministry', $event) }}" class="flex items-center gap-2">
-                            @csrf
-                            <select name="ministry_id" class="text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary-500 focus:border-primary-500 flex-1">
-                                @foreach($availableMinistriesToLink as $m)
-                                    <option value="{{ $m->id }}">{{ $m->name }}</option>
-                                @endforeach
+                        <div x-show="showAddMinistry" x-cloak class="flex items-center gap-2">
+                            <select x-model="selectedMinistryToLink" class="text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary-500 focus:border-primary-500 flex-1">
+                                <template x-for="m in availableMinistries" :key="m.id">
+                                    <option :value="m.id" x-text="m.name"></option>
+                                </template>
                             </select>
-                            <button type="submit" class="px-3 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors">
+                            <button type="button" @click="linkMinistry()" :disabled="busy"
+                                    class="px-3 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors">
                                 {{ __('messages.add') }}
                             </button>
-                            <button type="button" @click="showAddMinistry = false" class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors">
+                            <button type="button" @click="showAddMinistry = false"
+                                    class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors">
                                 {{ __('messages.cancel') }}
                             </button>
-                        </form>
+                        </div>
                     </div>
                     @endif
 
                     {{-- Empty state --}}
-                    @if($linkedMinistries->count() === 0 && $eventTeamCount === 0 && !$hasSignupOptions)
-                    <p class="text-sm text-gray-400 dark:text-gray-500 text-center py-2">
-                        {{ __('app.no_teams_added') }}
-                    </p>
-                    @endif
+                    <template x-if="linkedMinistries.length === 0 && totalAssigned === 0">
+                        <p class="text-sm text-gray-400 dark:text-gray-500 text-center py-2">
+                            {{ __('app.no_teams_added') }}
+                        </p>
+                    </template>
                 </div>
+
+                {{-- Assign/Action Dropdown (like matrix) --}}
+                @if($canEdit)
+                <div x-show="dropdown.open" @click="dropdown.open = false"
+                     class="fixed inset-0 bg-black/40 z-40 sm:hidden"
+                     x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                     x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+                </div>
+                <div x-show="dropdown.open" x-transition:enter="transition ease-out duration-150"
+                     x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
+                     x-transition:leave="transition ease-in duration-100"
+                     x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
+                     @click.outside="dropdown.open = false"
+                     @keydown.escape.window="dropdown.open = false"
+                     class="fixed z-50 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden w-[calc(100vw-16px)] sm:w-72 max-h-[80vh] overflow-y-auto"
+                     :style="window.innerWidth < 640 ? 'top:50%;left:50%;transform:translate(-50%,-50%)' : 'top:' + dropdown.y + 'px;left:' + dropdown.x + 'px'">
+
+                    <div class="px-3 py-2 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
+                        <div class="flex items-center justify-between">
+                            <div class="min-w-0">
+                                <div class="text-xs font-semibold text-gray-900 dark:text-white truncate" x-text="dropdown.role?.name"></div>
+                                <div class="text-[10px] text-gray-500 dark:text-gray-400" x-text="dropdown.ministry?.name"></div>
+                            </div>
+                            <button @click="dropdown.open = false"
+                                class="p-1 -mr-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    {{-- Already assigned persons --}}
+                    <template x-if="dropdown.persons.length > 0">
+                        <div class="border-b border-gray-200 dark:border-gray-700">
+                            <template x-for="person in dropdown.persons" :key="person.id">
+                                <div class="flex items-center justify-between px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                    <div class="flex items-center gap-2 min-w-0">
+                                        <span class="w-2 h-2 rounded-full flex-shrink-0" :class="statusDotClass(person.status)"></span>
+                                        <span class="text-sm text-gray-900 dark:text-white truncate" x-text="isMe(person) ? person.person_name + ' ({{ __('app.you') }})' : person.person_name"></span>
+                                        <span class="text-[10px] px-1.5 py-0.5 rounded-full flex-shrink-0"
+                                              :class="statusBadgeClass(person.status)"
+                                              x-text="statusLabel(person.status)"></span>
+                                    </div>
+                                    <div class="flex items-center gap-0.5 flex-shrink-0 ml-2">
+                                        <template x-if="person.has_telegram && person.source !== 'assignment'">
+                                            <button @click.stop="notifyPerson(person)"
+                                                class="p-1.5 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                                                :title="@js(__('app.send_to_telegram'))">
+                                                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
+                                                </svg>
+                                            </button>
+                                        </template>
+                                        <button @click.stop="removePerson(person, dropdown.ministry.id, dropdown.role.id)"
+                                            class="p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20"
+                                            :title="@js(__('app.delete'))">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+
+                    {{-- Notes --}}
+                    <div class="px-3 py-2 border-b border-gray-200 dark:border-gray-700">
+                        <div class="flex items-center gap-1.5 mb-1">
+                            <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
+                            </svg>
+                            <span class="text-[11px] text-gray-500 dark:text-gray-400 font-medium">{{ __('app.position_note') }}</span>
+                        </div>
+                        <input type="text" :value="dropdown.cellNotes || ''"
+                               @input.debounce.600ms="saveCellNotes($event.target.value)"
+                               placeholder="{{ __('app.note_placeholder') }}"
+                               class="w-full px-2 py-1.5 text-xs rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 dark:text-gray-200 focus:ring-primary-500 focus:border-primary-500 placeholder-gray-400 dark:placeholder-gray-500">
+                    </div>
+
+                    {{-- Search & assign --}}
+                    <div>
+                        <div class="p-2">
+                            <input type="text" x-model="dropdown.search" x-ref="dropdownSearch"
+                                   placeholder="{{ __('app.search_member') }}"
+                                   class="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 dark:text-gray-200 focus:ring-primary-500 focus:border-primary-500 placeholder-gray-400 dark:placeholder-gray-500"
+                                   @keydown.escape="dropdown.open = false">
+                        </div>
+                        <div class="overflow-y-auto max-h-44 pb-1">
+                            <template x-for="member in filteredMembers()" :key="member.id">
+                                <button @click="assignPerson(member)"
+                                    class="w-full text-left px-3 py-2 text-sm hover:bg-primary-50 dark:hover:bg-primary-900/30 text-gray-700 dark:text-gray-300 transition-colors flex items-center gap-2">
+                                    <svg class="w-3.5 h-3.5 text-primary-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                    </svg>
+                                    <span class="truncate" x-text="member.name"></span>
+                                </button>
+                            </template>
+                            <template x-if="filteredMembers().length === 0 && dropdown.search">
+                                <div class="px-3 py-3 text-sm text-gray-400 dark:text-gray-500 text-center">
+                                    {{ __('app.nobody_found') }}
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+                @endif
             </div>
             @endif
 
@@ -1374,6 +1411,337 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text || '';
     return div.innerHTML;
+}
+
+// Event Team Manager (AJAX, no page reloads)
+function eventTeamManager() {
+    return {
+        eventId: {{ $event->id }},
+        currentPersonId: {{ $myPersonId ?? 'null' }},
+        isLeader: {{ $canEdit ? 'true' : 'false' }},
+        myMinistryIds: @json($myMinistryIds),
+        linkedMinistries: @json($linkedMinistriesData),
+        availableMinistries: @json($availableMinistriesData),
+        members: @json($membersByMinistry),
+        assignments: @json($eventTeam->values()),
+        teamOpen: {{ ($linkedMinistries->count() > 0 || $initialTeamCount > 0 || count($myMinistryIds) > 0) ? 'true' : 'false' }},
+        showAddMinistry: false,
+        selectedMinistryToLink: null,
+        busy: false,
+        noteEditing: {},
+        toast: { show: false, message: '', type: 'success', timer: null },
+        dropdown: { open: false, ministry: null, role: null, persons: [], search: '', cellNotes: '', x: 0, y: 0 },
+
+        init() {
+            if (this.availableMinistries.length > 0) {
+                this.selectedMinistryToLink = this.availableMinistries[0].id;
+            }
+        },
+
+        get totalAssigned() {
+            return this.assignments.length;
+        },
+
+        getMinistryMemberCount(ministryId) {
+            return this.assignments.filter(a => a.ministry_id === ministryId).length;
+        },
+
+        getRolePersons(ministryId, roleId) {
+            return this.assignments.filter(a => a.ministry_id === ministryId && a.role_id === roleId && a.source === 'ministry_team');
+        },
+
+        isMe(person) {
+            return person && person.person_id === this.currentPersonId;
+        },
+
+        isMeAssignedToRole(ministryId, roleId) {
+            return this.assignments.some(a => a.ministry_id === ministryId && a.role_id === roleId && a.person_id === this.currentPersonId);
+        },
+
+        canSelfSignup(ministry) {
+            return ministry && this.myMinistryIds.includes(ministry.id);
+        },
+
+        statusDotClass(s) { return { confirmed: 'bg-green-500', pending: 'bg-amber-500', declined: 'bg-red-500', attended: 'bg-blue-500' }[s] || 'bg-gray-400'; },
+        statusBadgeClass(s) { return { confirmed: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400', pending: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400', declined: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400', attended: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400' }[s] || 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'; },
+        statusLabel(s) { return { confirmed: @js(__('app.yes_status')), pending: @js(__('app.status_pending_legend')), declined: @js(__('app.no_status')), attended: @js(__('app.was_present_status')) }[s] || ''; },
+
+        showToast(message, type = 'success') {
+            if (this.toast.timer) clearTimeout(this.toast.timer);
+            this.toast.message = message;
+            this.toast.type = type;
+            this.toast.show = true;
+            this.toast.timer = setTimeout(() => { this.toast.show = false; }, 2500);
+        },
+
+        toggleNoteEditing(personId) {
+            this.noteEditing[personId] = !this.noteEditing[personId];
+        },
+
+        _headers() {
+            return {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'X-Requested-With': 'XMLHttpRequest',
+            };
+        },
+
+        // --- Link / Unlink ministry ---
+        async linkMinistry() {
+            if (!this.selectedMinistryToLink || this.busy) return;
+            this.busy = true;
+            try {
+                const resp = await fetch(`/events/${this.eventId}/link-ministry`, {
+                    method: 'POST',
+                    headers: this._headers(),
+                    body: JSON.stringify({ ministry_id: this.selectedMinistryToLink }),
+                });
+                if (resp.ok) {
+                    const data = await resp.json();
+                    const linkId = Number(this.selectedMinistryToLink);
+                    // Move from available to linked
+                    const idx = this.availableMinistries.findIndex(m => m.id === linkId);
+                    if (idx !== -1) {
+                        const ministry = this.availableMinistries.splice(idx, 1)[0];
+                        this.linkedMinistries = [...this.linkedMinistries, {
+                            id: ministry.id,
+                            name: ministry.name,
+                            color: ministry.color,
+                            roles: data.roles || [],
+                        }];
+                        if (data.members) {
+                            this.members[String(ministry.id)] = data.members;
+                        }
+                    }
+                    this.selectedMinistryToLink = this.availableMinistries.length > 0 ? this.availableMinistries[0].id : null;
+                    this.showAddMinistry = false;
+                    this.showToast(data.message || @js(__('messages.saved')));
+                } else {
+                    const err = await resp.json().catch(() => ({}));
+                    this.showToast(err.error || @js(__('app.error')), 'error');
+                }
+            } catch (e) {
+                console.error('Link ministry error:', e);
+                this.showToast(@js(__('app.error')), 'error');
+            } finally { this.busy = false; }
+        },
+
+        async unlinkMinistry(ministry) {
+            if (!confirm(@js(__('messages.confirm_remove_team_member')))) return;
+            if (this.busy) return;
+            this.busy = true;
+            try {
+                const resp = await fetch(`/events/${this.eventId}/unlink-ministry/${ministry.id}`, {
+                    method: 'DELETE',
+                    headers: this._headers(),
+                });
+                if (resp.ok) {
+                    this.linkedMinistries = this.linkedMinistries.filter(m => m.id !== ministry.id);
+                    this.assignments = this.assignments.filter(a => a.ministry_id !== ministry.id);
+                    this.availableMinistries.push({ id: ministry.id, name: ministry.name, color: ministry.color });
+                    delete this.members[ministry.id];
+                    this.showToast(@js(__('messages.deleted')));
+                }
+            } catch (e) {
+                console.error('Unlink ministry error:', e);
+                this.showToast(@js(__('app.error')), 'error');
+            } finally { this.busy = false; }
+        },
+
+        // --- Dropdown (assign person) ---
+        openDropdown(ministry, role, $event) {
+            const persons = this.getRolePersons(ministry.id, role.id);
+            // Get first person's notes as cell notes
+            let cellNotes = '';
+            for (const p of persons) { if (p.notes) { cellNotes = p.notes; break; } }
+
+            if (window.innerWidth >= 640) {
+                const rect = $event.currentTarget.getBoundingClientRect();
+                const dw = 288, dh = 360;
+                let x = rect.left + (rect.width / 2) - (dw / 2);
+                let y = rect.bottom + 6;
+                if (x + dw > window.innerWidth - 8) x = window.innerWidth - dw - 8;
+                if (y + dh > window.innerHeight) y = rect.top - dh - 6;
+                if (x < 8) x = 8;
+                if (y < 8) y = 8;
+                this.dropdown.x = x;
+                this.dropdown.y = y;
+            }
+            this.dropdown.ministry = ministry;
+            this.dropdown.role = role;
+            this.dropdown.persons = persons;
+            this.dropdown.search = '';
+            this.dropdown.cellNotes = cellNotes;
+            this.dropdown.open = true;
+            this.$nextTick(() => { this.$refs.dropdownSearch?.focus(); });
+        },
+
+        filteredMembers() {
+            if (!this.dropdown.ministry) return [];
+            const mKey = String(this.dropdown.ministry.id);
+            const allMembers = this.members[mKey] || [];
+            const assignedIds = this.dropdown.persons.map(p => p.person_id);
+            const search = this.dropdown.search.toLowerCase();
+            return allMembers.filter(m => !assignedIds.includes(m.id) && (!search || m.name.toLowerCase().includes(search)));
+        },
+
+        async assignPerson(member) {
+            if (this.busy) return;
+            this.busy = true;
+            const { ministry, role } = this.dropdown;
+            try {
+                const resp = await fetch(`/events/${this.eventId}/ministry-team`, {
+                    method: 'POST',
+                    headers: this._headers(),
+                    body: JSON.stringify({ ministry_id: ministry.id, person_id: member.id, ministry_role_id: role.id }),
+                });
+                if (resp.ok) {
+                    const data = await resp.json();
+                    const newPerson = {
+                        id: data.id, person_id: member.id, person_name: data.person_name || member.name,
+                        status: data.status || 'pending', has_telegram: member.has_telegram || false,
+                        source: 'ministry_team', notes: null,
+                        ministry_id: ministry.id, role_id: role.id, role_name: role.name, role_type: 'ministry_role',
+                    };
+                    this.assignments.push(newPerson);
+                    this.dropdown.persons = this.getRolePersons(ministry.id, role.id);
+                    this.showToast((member.name) + ' — ' + @js(__('app.assigned_toast')));
+                    if (this.filteredMembers().length === 0) setTimeout(() => { this.dropdown.open = false; }, 600);
+                } else {
+                    const err = await resp.json().catch(() => ({}));
+                    this.showToast(err.error || err.message || @js(__('app.assignment_error')), 'error');
+                }
+            } catch (e) {
+                console.error('Assign error:', e);
+                this.showToast(@js(__('app.assignment_error')), 'error');
+            } finally { this.busy = false; }
+        },
+
+        async removePerson(person, ministryId, roleId) {
+            if (this.busy) return;
+            this.busy = true;
+            try {
+                const url = person.source === 'assignment'
+                    ? `/rotation/assignment/${person.id}`
+                    : `/events/${this.eventId}/ministry-team/${person.id}`;
+                const resp = await fetch(url, {
+                    method: 'DELETE',
+                    headers: this._headers(),
+                });
+                if (resp.ok) {
+                    this.assignments = this.assignments.filter(a => a.id !== person.id);
+                    this.dropdown.persons = this.getRolePersons(ministryId, roleId);
+                    this.showToast(person.person_name + ' — ' + @js(__('app.removed_toast')));
+                    if (this.dropdown.persons.length === 0) setTimeout(() => { this.dropdown.open = false; }, 400);
+                }
+            } catch (e) {
+                console.error('Remove error:', e);
+                this.showToast(@js(__('app.error')), 'error');
+            } finally { this.busy = false; }
+        },
+
+        async selfSignup(ministry, role) {
+            if (this.busy) return;
+            this.busy = true;
+            try {
+                const resp = await fetch(`/events/${this.eventId}/self-signup`, {
+                    method: 'POST',
+                    headers: this._headers(),
+                    body: JSON.stringify({ ministry_id: ministry.id, ministry_role_id: role.id }),
+                });
+                const data = await resp.json();
+                if (resp.ok) {
+                    this.assignments.push({
+                        id: data.id, person_id: this.currentPersonId, person_name: data.person_name,
+                        status: 'confirmed', has_telegram: false, source: 'ministry_team', notes: null,
+                        ministry_id: ministry.id, role_id: role.id, role_name: role.name, role_type: 'ministry_role',
+                    });
+                    this.showToast(@js(__('app.you_signed_up')));
+                } else {
+                    this.showToast(data.error || data.message || @js(__('app.error')), 'error');
+                }
+            } catch (e) {
+                console.error('Self-signup error:', e);
+                this.showToast(@js(__('app.error')), 'error');
+            } finally { this.busy = false; }
+        },
+
+        async selfUnsubscribe(person, ministryId, roleId) {
+            if (!confirm(@js(__('messages.confirm_unsubscribe')))) return;
+            if (this.busy) return;
+            this.busy = true;
+            try {
+                const resp = await fetch(`/events/${this.eventId}/self-unsubscribe/${person.id}`, {
+                    method: 'DELETE',
+                    headers: this._headers(),
+                });
+                if (resp.ok) {
+                    this.assignments = this.assignments.filter(a => a.id !== person.id);
+                    this.showToast(@js(__('app.you_unsubscribed')));
+                }
+            } catch (e) {
+                console.error('Unsubscribe error:', e);
+                this.showToast(@js(__('app.error')), 'error');
+            } finally { this.busy = false; }
+        },
+
+        async notifyPerson(person) {
+            if (person._notifying) return;
+            person._notifying = true;
+            try {
+                const resp = await fetch(`/events/${this.eventId}/ministry-team/${person.id}/notify`, {
+                    method: 'POST',
+                    headers: this._headers(),
+                });
+                const data = await resp.json();
+                if (data.success) {
+                    person.status = 'pending';
+                    this.showToast(@js(__('app.message_sent_toast')));
+                } else {
+                    this.showToast(data.message || @js(__('app.send_failed_toast')), 'error');
+                }
+            } catch (e) {
+                console.error('Notify error:', e);
+                this.showToast(@js(__('app.error')), 'error');
+            } finally { person._notifying = false; }
+        },
+
+        async saveNotes(person, value) {
+            const notes = value.trim() || null;
+            try {
+                await fetch(`/events/${this.eventId}/ministry-team/${person.id}/notes`, {
+                    method: 'PATCH',
+                    headers: this._headers(),
+                    body: JSON.stringify({ notes }),
+                });
+                person.notes = notes;
+                this.noteEditing[person.id] = false;
+                this.showToast(@js(__('app.note_saved_toast')));
+            } catch (e) {
+                console.error('Save notes error:', e);
+                this.showToast(@js(__('app.error')), 'error');
+            }
+        },
+
+        async saveCellNotes(value) {
+            const { ministry, role } = this.dropdown;
+            if (!ministry || !role) return;
+            const notes = value.trim() || null;
+            this.dropdown.cellNotes = notes || '';
+            try {
+                await fetch(`/events/${this.eventId}/cell-note`, {
+                    method: 'PATCH',
+                    headers: this._headers(),
+                    body: JSON.stringify({ role_type: 'ministry_role', role_id: role.id, notes }),
+                });
+                this.showToast(@js(__('app.note_saved_toast')));
+            } catch (e) {
+                console.error('Save cell notes error:', e);
+                this.showToast(@js(__('app.error')), 'error');
+            }
+        },
+    };
 }
 
 // Alpine store for shared event state

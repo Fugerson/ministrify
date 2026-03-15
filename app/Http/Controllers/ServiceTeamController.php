@@ -32,7 +32,19 @@ class ServiceTeamController extends Controller
         $event->linkedMinistries()->syncWithoutDetaching([$ministry->id]);
 
         if ($request->wantsJson()) {
-            return response()->json(['success' => true]);
+            $roles = $ministry->ministryRoles()->orderBy('name')->get(['id', 'name'])->map(fn($r) => ['id' => $r->id, 'name' => $r->name])->values();
+            $members = $ministry->members()->orderBy('last_name')->get(['people.id', 'first_name', 'last_name', 'telegram_chat_id'])->map(fn($p) => [
+                'id' => $p->id,
+                'name' => $p->full_name,
+                'has_telegram' => (bool) $p->telegram_chat_id,
+            ])->values();
+
+            return response()->json([
+                'success' => true,
+                'message' => __('messages.item_added'),
+                'roles' => $roles,
+                'members' => $members,
+            ]);
         }
 
         return back()->with('success', __('messages.item_added'));
@@ -120,7 +132,12 @@ class ServiceTeamController extends Controller
         ]);
 
         if ($request->wantsJson()) {
-            return response()->json(['success' => true, 'id' => $member->id]);
+            return response()->json([
+                'success' => true,
+                'id' => $member->id,
+                'person_name' => $person->full_name,
+                'status' => $member->status ?? 'pending',
+            ]);
         }
 
         return back()->with('success', 'Учасника додано');
