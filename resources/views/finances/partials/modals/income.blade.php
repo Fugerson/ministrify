@@ -163,7 +163,7 @@ window.incomeModal = function() {
                                    :class="errors.amount ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'">
                             @if(count($enabledCurrencies ?? ['UAH']) > 1)
                             <select x-model="formData.currency"
-                                    class="w-[5.5rem] flex-shrink-0 px-2 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                                    class="w-[6.5rem] flex-shrink-0 px-2 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500">
                                 @foreach($enabledCurrencies as $curr)
                                     <option value="{{ $curr }}">{{ \App\Helpers\CurrencyHelper::symbol($curr) }} {{ $curr }}</option>
                                 @endforeach
