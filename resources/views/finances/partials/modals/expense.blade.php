@@ -209,7 +209,7 @@ window.expenseModal = function() {
                  x-transition:enter-start="opacity-0 scale-95"
                  x-transition:enter-end="opacity-100 scale-100"
                  @click.stop>
-                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                <div class="px-4 sm:px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white"
                         x-text="isEdit ? @js( __('app.edit_expense') ) : @js( __('app.add_expense_title') )"></h3>
                     <button @click="modalOpen = false" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg">
@@ -219,7 +219,7 @@ window.expenseModal = function() {
                     </button>
                 </div>
 
-                <form @submit.prevent="submit()" class="max-h-[70vh] overflow-y-auto p-6 space-y-4">
+                <form @submit.prevent="submit()" class="max-h-[70vh] overflow-y-auto p-4 sm:p-6 space-y-4">
                     <!-- Ministry -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.team_label') }} <span class="text-red-500">*</span></label>

@@ -144,7 +144,7 @@ window.incomeModal = function() {
                  x-transition:enter-start="opacity-0 scale-95"
                  x-transition:enter-end="opacity-100 scale-100"
                  @click.stop>
-                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                <div class="px-4 sm:px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white"
                         x-text="isEdit ? @js( __('app.edit_income') ) : @js( __('app.add_income_title') )"></h3>
                     <button @click="modalOpen = false" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg">
@@ -153,7 +153,7 @@ window.incomeModal = function() {
                         </svg>
                     </button>
                 </div>
-                <form @submit.prevent="submit()" class="max-h-[70vh] overflow-y-auto p-6 space-y-4">
+                <form @submit.prevent="submit()" class="max-h-[70vh] overflow-y-auto p-4 sm:p-6 space-y-4">
                     <!-- Amount + Currency -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.amount') }} <span class="text-red-500">*</span></label>
@@ -163,7 +163,7 @@ window.incomeModal = function() {
                                    :class="errors.amount ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'">
                             @if(count($enabledCurrencies ?? ['UAH']) > 1)
                             <select x-model="formData.currency"
-                                    class="w-24 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                                    class="w-[5.5rem] flex-shrink-0 px-2 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
                                 @foreach($enabledCurrencies as $curr)
                                     <option value="{{ $curr }}">{{ \App\Helpers\CurrencyHelper::symbol($curr) }} {{ $curr }}</option>
                                 @endforeach
