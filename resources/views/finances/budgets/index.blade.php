@@ -976,7 +976,7 @@ function budgetsPage() {
         },
 
         async deleteItem(itemId, itemName) {
-            if (!confirm(@js( __('app.finance_delete_item_confirm') ).replace(':name', itemName))) return;
+            if (!await confirmDialog(@js( __('app.finance_delete_item_confirm') ).replace(':name', itemName))) return;
 
             try {
                 const res = await fetch(`/finances/budgets/items/${itemId}`, {
@@ -1151,7 +1151,7 @@ function budgetsPage() {
         },
 
         async deleteChurchItem(itemId, itemName) {
-            if (!confirm(@js( __('app.finance_delete_item_confirm') ).replace(':name', itemName))) return;
+            if (!await confirmDialog(@js( __('app.finance_delete_item_confirm') ).replace(':name', itemName))) return;
 
             try {
                 const res = await fetch(`/finances/church-budget-items/${itemId}`, {

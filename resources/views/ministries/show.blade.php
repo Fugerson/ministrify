@@ -4755,7 +4755,7 @@ function songsLibrary() {
         },
 
         async deleteSong(song) {
-            if (!confirm(@js( __('messages.confirm_delete_song') ))) return;
+            if (!await confirmDialog(@js( __('messages.confirm_delete_song') ))) return;
 
             try {
                 const response = await fetch(`/songs/${song.id}`, {
@@ -4942,7 +4942,7 @@ function ministryRolesManager() {
         },
 
         async deleteRole(id) {
-            if (!confirm(@js( __('messages.confirm_delete_role') ))) return;
+            if (!await confirmDialog(@js( __('messages.confirm_delete_role') ))) return;
             this.loading = true;
 
             try {
@@ -5300,7 +5300,7 @@ function budgetPage() {
 
         // Delete item — inline refresh, no reload
         async deleteItem(itemId, itemName) {
-            if (!confirm(@js(__('app.delete_item_confirm')).replace(':name', itemName))) return;
+            if (!await confirmDialog(@js(__('app.delete_item_confirm')).replace(':name', itemName))) return;
             try {
                 const res = await fetch(`/ministries/budget-items/${itemId}`, {
                     method: 'DELETE',
@@ -5325,7 +5325,7 @@ function budgetPage() {
             let toYear = this.currentYear;
             if (toMonth > 12) { toMonth = 1; toYear++; }
 
-            if (!confirm(`Копіювати бюджет на ${this.monthNames[toMonth]} ${toYear}?`)) return;
+            if (!await confirmDialog(`Копіювати бюджет на ${this.monthNames[toMonth]} ${toYear}?`)) return;
 
             try {
                 const res = await fetch(`/ministries/${this.ministryId}/budget-copy`, {
@@ -5371,7 +5371,7 @@ function budgetPage() {
                 }
                 const overallBalance = this.budget.overall_balance || 0;
                 if (overallBalance <= 0) {
-                    if (!confirm('Загальний баланс: ' + this.fmt(overallBalance) + ' ₴. Кошти вичерпано. Все одно додати витрату?')) {
+                    if (!await confirmDialog('Загальний баланс: ' + this.fmt(overallBalance) + ' ₴. Кошти вичерпано. Все одно додати витрату?')) {
                         return;
                     }
                 }
@@ -5522,7 +5522,7 @@ function budgetPage() {
         },
 
         async deleteExpense(transactionId) {
-            if (!confirm(@js(__('app.delete_this_expense')))) return;
+            if (!await confirmDialog(@js(__('app.delete_this_expense')))) return;
             try {
                 const res = await fetch(`/ministries/expenses/${transactionId}`, {
                     method: 'DELETE',
@@ -5589,7 +5589,7 @@ function budgetPage() {
         },
 
         async deleteIncome(transactionId) {
-            if (!confirm(@js(__('app.delete_this_income')))) return;
+            if (!await confirmDialog(@js(__('app.delete_this_income')))) return;
             try {
                 const res = await fetch(`/ministries/income/${transactionId}`, {
                     method: 'DELETE',

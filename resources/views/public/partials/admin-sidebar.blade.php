@@ -946,7 +946,7 @@ document.addEventListener('alpine:init', () => {
         },
 
         async contentDeleteItem(section, id) {
-            if (!confirm(@js(__('app.sb_delete_confirm')))) return;
+            if (!await confirmDialog(@js(__('app.sb_delete_confirm')))) return;
             try {
                 await this.cntFetch(this.contentRoutes[section] + '/' + id, 'DELETE');
                 this.showToast(@js(__('app.sb_deleted')), 'success');

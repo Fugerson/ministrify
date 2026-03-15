@@ -57,7 +57,7 @@ window.incomeModal = function() {
             this.modalOpen = true;
         },
         async deleteIncome() {
-            if (!confirm(@js( __('messages.confirm_delete_income') ))) return;
+            if (!await confirmDialog(@js( __('messages.confirm_delete_income') ))) return;
             this.loading = true;
             try {
                 const response = await fetch(`/finances/incomes/${this.editId}`, {

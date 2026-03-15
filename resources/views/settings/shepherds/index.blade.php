@@ -265,7 +265,7 @@ function shepherdsManager() {
                 message += '\n\n' + translations.confirmRemoveWarning.replace(':count', shepherd.sheep_count);
             }
 
-            if (!confirm(message)) return;
+            if (!await confirmDialog(message)) return;
 
             try {
                 const response = await fetch(`/settings/shepherds/${shepherd.id}`, {

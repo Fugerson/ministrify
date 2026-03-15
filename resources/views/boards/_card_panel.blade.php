@@ -111,7 +111,7 @@
                                     </button>
                                     @endif
                                     @if(auth()->user()->canDelete('boards'))
-                                    <button @click="if(confirm(@js(__('app.board_delete_card_confirm')))) { deleteCard(cardPanel.data.card.id); closePanel(); }"
+                                    <button @click="if(!await confirmDialog(@js(__('app.board_delete_card_confirm')))) return; deleteCard(cardPanel.data.card.id); closePanel();"
                                             class="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                                             title="{{ __('app.board_delete_card') }}">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

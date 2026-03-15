@@ -1523,7 +1523,7 @@ function eventTeamManager() {
         },
 
         async unlinkMinistry(ministry) {
-            if (!confirm(@js(__('messages.confirm_remove_team_member')))) return;
+            if (!await confirmDialog(@js(__('messages.confirm_remove_team_member')))) return;
             if (this.busy) return;
             this.busy = true;
             try {
@@ -1663,7 +1663,7 @@ function eventTeamManager() {
         },
 
         async selfUnsubscribe(person, ministryId, roleId) {
-            if (!confirm(@js(__('messages.confirm_unsubscribe')))) return;
+            if (!await confirmDialog(@js(__('messages.confirm_unsubscribe')))) return;
             if (this.busy) return;
             this.busy = true;
             try {
@@ -2057,7 +2057,7 @@ function updateSongCellDOM(itemId, songId, title, songKey) {
                             <svg class="w-4 h-4 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>
                             <a href="/songs/${songId}" class="text-sm text-primary-600 dark:text-primary-400 hover:underline font-medium" @click.stop>${escapeHtml(title)}</a>
                             ${keyBadge}
-                            <button type="button" @click.stop="if(confirm(@js(__('messages.confirm_remove_song')))) { updateFieldWithSong(${itemId}, null, ''); editing = false; }" class="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-500" title=@js( __("app.schedule_remove_song") )>
+                            <button type="button" @click.stop="confirmDialog(@js(__('messages.confirm_remove_song'))).then(ok => { if(ok) { updateFieldWithSong(${itemId}, null, ''); editing = false; } })" class="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-500" title=@js( __("app.schedule_remove_song") )>
                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                             </button>
                         </div>
@@ -2287,7 +2287,7 @@ function planTemplatesManager() {
         },
 
         async applyCustomTemplate(templateId) {
-            if (!confirm(@js(__('messages.confirm_apply_template')))) return;
+            if (!await confirmDialog(@js(__('messages.confirm_apply_template')))) return;
 
             try {
                 const response = await fetch(`/service-plan-templates/apply/{{ $event->id }}/${templateId}`, {
@@ -2312,7 +2312,7 @@ function planTemplatesManager() {
         },
 
         async deleteTemplate(templateId) {
-            if (!confirm(@js(__('messages.confirm_delete_template')))) return;
+            if (!await confirmDialog(@js(__('messages.confirm_delete_template')))) return;
 
             try {
                 const response = await fetch(`/service-plan-templates/${templateId}`, {
@@ -2616,7 +2616,7 @@ function planEditor() {
         },
 
         async deleteItem(id) {
-            if (!confirm(@js(__('messages.confirm_delete_plan_item')))) return;
+            if (!await confirmDialog(@js(__('messages.confirm_delete_plan_item')))) return;
 
             try {
                 const response = await fetch(`{{ url('events/' . $event->id . '/plan') }}/${id}`, {
@@ -2829,7 +2829,7 @@ window.insertPlanRow = function(item) {
 
 // Global delete function for dynamically added rows
 window.planEditorDeleteItem = async function(id) {
-    if (!confirm(@js(__('messages.confirm_delete_plan_item')))) return;
+    if (!await confirmDialog(@js(__('messages.confirm_delete_plan_item')))) return;
 
     try {
         const response = await fetch(`{{ url('events/' . $event->id . '/plan') }}/${id}`, {

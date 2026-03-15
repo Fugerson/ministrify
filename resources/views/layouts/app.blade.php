@@ -1783,6 +1783,9 @@
     <!-- Toast Notifications -->
     @include('components.toast')
 
+    <!-- Confirm Modal -->
+    @include('components.confirm-modal')
+
     <!-- AJAX Form Helpers -->
     @include('components.ajax-helpers')
 

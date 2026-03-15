@@ -206,7 +206,7 @@ function checklistManager(eventId, hasChecklistInitial) {
         },
 
         async deleteChecklist() {
-            if (!confirm(@js( __('app.checklist_delete_confirm') ))) return;
+            if (!await confirmDialog(@js( __('app.checklist_delete_confirm') ))) return;
 
             try {
                 const response = await fetch(`/checklists/${this.checklistId}`, {

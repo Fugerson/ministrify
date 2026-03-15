@@ -1160,7 +1160,7 @@ function churchBoard() {
         },
 
         async deleteColumn(columnId) {
-            if (!confirm(@js(__('app.board_delete_column_confirm')))) return;
+            if (!await confirmDialog(@js(__('app.board_delete_column_confirm')))) return;
             try {
                 const response = await fetch(`/boards/columns/${columnId}`, {
                     method: 'DELETE',
@@ -1220,7 +1220,7 @@ function churchBoard() {
         },
 
         async deleteComment(comment) {
-            if (!confirm(@js( __('messages.confirm_delete_comment') ))) return;
+            if (!await confirmDialog(@js( __('messages.confirm_delete_comment') ))) return;
 
             const cardId = this.cardPanel.data.card.id;
             try {
@@ -1477,7 +1477,7 @@ function churchBoard() {
         },
 
         async deleteAttachment(file) {
-            if (!confirm(@js( __('messages.confirm_delete_file') ))) return;
+            if (!await confirmDialog(@js( __('messages.confirm_delete_file') ))) return;
 
             try {
                 await fetch(`/boards/attachments/${file.id}`, {
@@ -1637,7 +1637,7 @@ function churchBoard() {
         },
 
         async deleteCard(cardId) {
-            if (!confirm(@js( __('messages.confirm_delete_task') ))) return;
+            if (!await confirmDialog(@js( __('messages.confirm_delete_task') ))) return;
 
             try {
                 const response = await fetch(`/boards/cards/${cardId}`, {
@@ -1808,7 +1808,7 @@ function churchBoard() {
         },
 
         async deleteEpic(epic) {
-            if (!confirm(@js( __('messages.confirm_delete_project') ).replace(':name', epic.name))) return;
+            if (!await confirmDialog(@js( __('messages.confirm_delete_project') ).replace(':name', epic.name))) return;
 
             try {
                 const response = await fetch(`/boards/epics/${epic.id}`, {

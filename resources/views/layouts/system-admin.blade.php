@@ -297,5 +297,7 @@
     </div>
 
     @stack('scripts')
+
+    @include('components.confirm-modal')
 </body>
 </html>

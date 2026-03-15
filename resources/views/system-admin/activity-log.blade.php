@@ -553,17 +553,17 @@ function activityLog() {
             this.selectAll = false;
         },
 
-        deleteSelected() {
-            if (!confirm(@js(__('app.sa_confirm_delete_records')) + ` (${this.selectedIds.length})?`)) return;
+        async deleteSelected() {
+            if (!await confirmDialog(@js(__('app.sa_confirm_delete_records')) + ` (${this.selectedIds.length})?`)) return;
             this.$refs.deleteAction.value = 'selected';
             this.$refs.deleteIds.value = JSON.stringify(this.selectedIds);
             this.$refs.deleteForm.submit();
         },
 
-        deleteAll() {
+        async deleteAll() {
             const tab = '{{ $tab }}';
             const label = tab === 'visits' ? @js(__('app.sa_navigation_label')) : @js(__('app.sa_actions_log_label'));
-            if (!confirm(@js(__('app.sa_confirm_delete_all_prefix')) + ` ${label}? ` + @js(__('app.sa_irreversible_action')))) return;
+            if (!await confirmDialog(@js(__('app.sa_confirm_delete_all_prefix')) + ` ${label}? ` + @js(__('app.sa_irreversible_action')))) return;
             this.$refs.deleteAction.value = 'all';
             this.$refs.deleteForm.submit();
         }

@@ -321,7 +321,7 @@ async function autoAssignEvent(eventId) {
 }
 
 async function autoAssignAll() {
-    if (!confirm(@js( __('messages.confirm_auto_assign') ))) return;
+    if (!await confirmDialog(@js( __('messages.confirm_auto_assign') ))) return;
 
     try {
         const response = await fetch(`/rotation/ministry/{{ $ministry->id }}/auto-assign`, {

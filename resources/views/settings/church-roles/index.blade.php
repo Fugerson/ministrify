@@ -404,7 +404,7 @@ function churchRolesManager() {
         },
 
         async deleteRole(id, name) {
-            if (!confirm(@js( __('messages.confirm_delete_role') ))) return;
+            if (!await confirmDialog(@js( __('messages.confirm_delete_role') ))) return;
 
             try {
                 const response = await fetch(`/settings/church-roles/${id}`, {
@@ -466,7 +466,7 @@ function churchRolesManager() {
         },
 
         async resetToDefaults() {
-            if (!confirm(@js( __('messages.confirm_reset_all_roles') ))) return;
+            if (!await confirmDialog(@js( __('messages.confirm_reset_all_roles') ))) return;
 
             try {
                 const response = await fetch('{{ route("settings.church-roles.reset") }}', {

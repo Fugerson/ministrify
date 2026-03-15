@@ -62,7 +62,7 @@
                     </form>
 
                     <form action="{{ route('two-factor.disable') }}" method="POST"
-                          onsubmit="return confirm(@js( __('app.confirm_disable_2fa') ))">
+                          onsubmit="event.preventDefault(); confirmDialog(@js( __('app.confirm_disable_2fa') )).then(ok => { if(ok) this.submit(); }); return false;">
                         @csrf
                         @method('DELETE')
                         <div class="mb-4">

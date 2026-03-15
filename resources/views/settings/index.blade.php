@@ -847,7 +847,7 @@
                         <span class="text-sm text-gray-600 dark:text-gray-400">
                             {{ __('app.settings_connected') }} {{ \Carbon\Carbon::parse($googleCalendarSettings['connected_at'] ?? now())->diffForHumans() }}
                         </span>
-                        <button @click="if (confirm({{ Js::from(__('messages.confirm_disconnect_google')) }})) { ajaxAction('{{ route('settings.google-calendar.disconnect') }}', 'POST').then(() => location.reload()) }"
+                        <button @click="confirmDialog({{ Js::from(__('messages.confirm_disconnect_google')) }}).then(ok => { if(ok) { ajaxAction('{{ route('settings.google-calendar.disconnect') }}', 'POST').then(() => location.reload()) } })"
                                 class="text-sm text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors">
                             {{ __('app.settings_disconnect') }}
                         </button>
@@ -1038,7 +1038,7 @@
                                 </p>
                                 <div class="space-y-2">
                                     <!-- Unlink from Google -->
-                                    <button @click="if (confirm({{ Js::from(__('messages.confirm_unlink_google_events')) }})) { unlinkEvents() }"
+                                    <button @click="if (!await confirmDialog({{ Js::from(__('messages.confirm_unlink_google_events')) }})) return; unlinkEvents()"
                                             :disabled="rollbackLoading"
                                             class="w-full flex items-center gap-3 px-3 py-2.5 text-left text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50">
                                         <svg class="w-5 h-5 text-amber-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1050,7 +1050,7 @@
                                         </div>
                                     </button>
                                     <!-- Delete imported -->
-                                    <button @click="if (confirm({{ Js::from(__('messages.confirm_delete_google_events')) }})) { deleteImported() }"
+                                    <button @click="if (!await confirmDialog({{ Js::from(__('messages.confirm_delete_google_events')) }})) return; deleteImported()"
                                             :disabled="rollbackLoading"
                                             class="w-full flex items-center gap-3 px-3 py-2.5 text-left text-sm bg-white dark:bg-gray-800 border border-red-200 dark:border-red-800 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-50">
                                         <svg class="w-5 h-5 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2704,7 +2704,7 @@ function permissionsManager() {
 
         async resetToDefaults() {
             const roleName = this.roles[this.currentRoleId]?.name || @js( __('app.settings_this_role') );
-            if (!confirm({{ Js::from(__('messages.confirm_reset_role_permissions')) }}.replace(':role', roleName))) {
+            if (!await confirmDialog({{ Js::from(__('messages.confirm_reset_role_permissions')) }}.replace(':role', roleName))) {
                 return;
             }
 

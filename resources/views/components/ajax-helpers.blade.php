@@ -84,7 +84,7 @@ function ajaxForm(config = {}) {
  *   <button @click="ajaxDelete(url, 'Ви впевнені?', null, redirectUrl)">
  */
 async function ajaxDelete(url, confirmMsg, onSuccess, redirectUrl) {
-    if (!confirm(confirmMsg || @json(__('app.are_you_sure')))) return;
+    if (!await confirmDialog(confirmMsg || @json(__('app.are_you_sure')))) return;
 
     try {
         const response = await fetch(url, {

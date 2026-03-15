@@ -288,7 +288,7 @@ function messageForm() {
                 showToast('error', _msgI18n.no_recipients);
                 return;
             }
-            if (!confirm(_msgI18n.confirm_send.replace(':count', count))) {
+            if (!await confirmDialog(_msgI18n.confirm_send.replace(':count', count))) {
                 return;
             }
             this.submit(formEl);

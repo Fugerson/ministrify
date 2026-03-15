@@ -1235,7 +1235,7 @@ function userRoleManager() {
         },
 
         async resetPassword() {
-            if (!confirm(@js(__('messages.confirm_generate_password')))) return;
+            if (!await confirmDialog(@js(__('messages.confirm_generate_password')))) return;
 
             this.resettingPassword = true;
 
@@ -1300,7 +1300,7 @@ function userRoleManager() {
             if (hadNoRole && newRoleId) {
                 const roleSelect = document.querySelector('select[x-model="churchRoleId"]');
                 const roleName = roleSelect.options[roleSelect.selectedIndex].text;
-                if (!confirm(@js(__('messages.confirm_grant_access')).replace(':role', roleName))) {
+                if (!await confirmDialog(@js(__('messages.confirm_grant_access')).replace(':role', roleName))) {
                     this.churchRoleId = '';
                     return;
                 }
@@ -1610,7 +1610,7 @@ function familyManager() {
         },
 
         async deleteRelationship(relationshipId) {
-            if (!confirm(@js(__('messages.confirm_delete_family_link')))) return;
+            if (!await confirmDialog(@js(__('messages.confirm_delete_family_link')))) return;
 
             try {
                 const response = await fetch(`/family/${relationshipId}`, {

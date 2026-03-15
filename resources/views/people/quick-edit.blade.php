@@ -920,7 +920,7 @@ function quickEdit() {
         async deletePhoto(row) {
             if (!row.id || !row.photo_url) return;
 
-            if (!confirm(@js(__('messages.confirm_delete_photo')))) return;
+            if (!await confirmDialog(@js(__('messages.confirm_delete_photo')))) return;
 
             const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 

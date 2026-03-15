@@ -103,7 +103,7 @@ window.expenseModal = function() {
             this.files.splice(index, 1);
         },
         async deleteExpense() {
-            if (!confirm(@js( __('messages.confirm_delete_expense') ))) return;
+            if (!await confirmDialog(@js( __('messages.confirm_delete_expense') ))) return;
             this.loading = true;
             try {
                 const response = await fetch(`/finances/expenses/${this.editId}`, {
