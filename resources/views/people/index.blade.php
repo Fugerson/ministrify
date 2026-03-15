@@ -3,7 +3,7 @@
 @section('title', __('app.people'))
 
 @section('actions')
-<div class="flex items-center gap-2">
+<div class="flex flex-wrap items-center gap-2">
     @if(auth()->user()->isAdmin())
     <div x-data="{ count: null, loading: true }" x-init="
         fetch('{{ route('people.duplicates') }}', { headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content } })

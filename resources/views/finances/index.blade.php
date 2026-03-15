@@ -37,7 +37,7 @@
             <!-- Link to transactions -->
             @if(auth()->user()->canCreate('finances'))
             <a href="{{ route('finances.transactions') }}"
-               class="inline-flex items-center px-4 py-2 text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 transition-colors">
+               class="inline-flex items-center px-3 sm:px-4 py-2 text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 transition-colors whitespace-nowrap">
                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
@@ -238,15 +238,15 @@
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white" x-text="chartTitle">{{ __('app.chart_dynamics', ['year' => $year]) }}</h3>
-            <div class="flex rounded-lg bg-gray-100 dark:bg-gray-700 p-0.5">
+            <div class="flex rounded-lg bg-gray-100 dark:bg-gray-700 p-0.5 overflow-x-auto">
                 <button @click="switchChartPeriod('month')" :class="chartPeriod === 'month' ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'"
-                    class="px-3 py-1 text-sm font-medium rounded-md transition-all">{{ __('app.period_month') }}</button>
+                    class="px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium rounded-md transition-all whitespace-nowrap flex-shrink-0">{{ __('app.period_month') }}</button>
                 <button @click="switchChartPeriod('quarter')" :class="chartPeriod === 'quarter' ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'"
-                    class="px-3 py-1 text-sm font-medium rounded-md transition-all">{{ __('app.period_quarter') }}</button>
+                    class="px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium rounded-md transition-all whitespace-nowrap flex-shrink-0">{{ __('app.period_quarter') }}</button>
                 <button @click="switchChartPeriod('year')" :class="chartPeriod === 'year' ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'"
-                    class="px-3 py-1 text-sm font-medium rounded-md transition-all">{{ __('app.period_year') }}</button>
+                    class="px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium rounded-md transition-all whitespace-nowrap flex-shrink-0">{{ __('app.period_year') }}</button>
                 <button @click="switchChartPeriod('all')" :class="chartPeriod === 'all' ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'"
-                    class="px-3 py-1 text-sm font-medium rounded-md transition-all">{{ __('app.period_all_time') }}</button>
+                    class="px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium rounded-md transition-all whitespace-nowrap flex-shrink-0">{{ __('app.period_all_time') }}</button>
             </div>
         </div>
         <div class="h-64 relative">
