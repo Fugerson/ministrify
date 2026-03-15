@@ -107,7 +107,7 @@ window.exchangeModal = function() {
                  x-transition:enter-start="opacity-0 scale-95"
                  x-transition:enter-end="opacity-100 scale-100"
                  @click.stop>
-                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                <div class="px-4 sm:px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.exchange_title') }}</h3>
                     <button @click="modalOpen = false" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -115,8 +115,8 @@ window.exchangeModal = function() {
                         </svg>
                     </button>
                 </div>
-                <form @submit.prevent="submit()" class="p-6 space-y-4">
-                    <div class="bg-red-50 dark:bg-red-900/20 rounded-lg p-4">
+                <form @submit.prevent="submit()" class="p-4 sm:p-6 space-y-4">
+                    <div class="bg-red-50 dark:bg-red-900/20 rounded-lg p-3 sm:p-4">
                         <label class="block text-sm font-medium text-red-700 dark:text-red-300 mb-2">{{ __('app.exchange_you_give') }}</label>
                         <div class="flex gap-2">
                             <input type="number" x-model="formData.from_amount" @input="calculate()" step="0.01" min="0.01" required
@@ -137,7 +137,7 @@ window.exchangeModal = function() {
                                class="w-24 px-2 py-1 text-center border border-amber-200 dark:border-amber-800 rounded-lg bg-white dark:bg-gray-700">
                         <span class="font-medium">₴</span>
                     </div>
-                    <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
+                    <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 sm:p-4">
                         <label class="block text-sm font-medium text-green-700 dark:text-green-300 mb-2">{{ __('app.exchange_you_receive') }}</label>
                         <div class="flex gap-2">
                             <input type="number" x-model="formData.to_amount" step="0.01" min="0.01" required readonly
