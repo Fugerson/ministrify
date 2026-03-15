@@ -753,26 +753,24 @@
                                 <template x-for="role in ministry.roles" :key="role.id">
                                     <div class="py-1">
                                         {{-- Role header --}}
-                                        <div class="flex items-center justify-between mb-1">
+                                        <div class="flex items-center gap-1.5 mb-1">
                                             <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide" x-text="role.name"></span>
-                                            <div class="flex items-center gap-1">
-                                                @if($canEdit)
-                                                <button type="button" @click="openDropdown(ministry, role, $event)"
-                                                        class="text-gray-400 hover:text-primary-500 dark:text-gray-500 dark:hover:text-primary-400 transition-colors" :title="@js(__('messages.add'))">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                                                    </svg>
+                                            @if($canEdit)
+                                            <button type="button" @click="openDropdown(ministry, role, $event)"
+                                                    class="text-gray-400 hover:text-primary-500 dark:text-gray-500 dark:hover:text-primary-400 transition-colors" :title="@js(__('messages.add'))">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                                </svg>
+                                            </button>
+                                            @else
+                                            <template x-if="canSelfSignup(ministry) && !isMeAssignedToRole(ministry.id, role.id)">
+                                                <button type="button" @click="selfSignup(ministry, role)"
+                                                        class="text-xs text-primary-500 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 transition-colors"
+                                                        :disabled="busy">
+                                                    + {{ __('app.sign_up') }}
                                                 </button>
-                                                @else
-                                                <template x-if="canSelfSignup(ministry) && !isMeAssignedToRole(ministry.id, role.id)">
-                                                    <button type="button" @click="selfSignup(ministry, role)"
-                                                            class="text-xs text-primary-500 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 transition-colors"
-                                                            :disabled="busy">
-                                                        + {{ __('app.sign_up') }}
-                                                    </button>
-                                                </template>
-                                                @endif
-                                            </div>
+                                            </template>
+                                            @endif
                                         </div>
 
                                         {{-- Assigned persons --}}
