@@ -489,8 +489,165 @@
                 </div>
             </div>
 
-            {{-- Events List (below calendar) --}}
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+            {{-- Mobile Month Calendar Grid --}}
+            @php
+                $mobileCalStart = $startDate->copy()->startOfMonth();
+                $mobileStartDow = $mobileCalStart->dayOfWeekIso - 1;
+                $mobileGridStart = $mobileCalStart->copy()->subDays($mobileStartDow);
+                $mobileGridDate = $mobileGridStart->copy();
+                $mobileEventsMap = [];
+                $mobileGridDate2 = $mobileGridStart->copy();
+                for ($w = 0; $w < 6; $w++) {
+                    for ($d = 0; $d < 7; $d++) {
+                        $dk = $mobileGridDate2->format('Y-m-d');
+                        $de = $events->get($dk, collect());
+                        if ($de->count() > 0) {
+                            $mobileEventsMap[$dk] = $de->map(function($item) {
+                                if ($item->type === 'meeting') {
+                                    return [
+                                        'type' => 'meeting',
+                                        'title' => $item->title,
+                                        'time' => $item->time ? \Carbon\Carbon::parse($item->time)->format('H:i') : null,
+                                        'url' => route('meetings.show', [$item->ministry_id, $item->id]),
+                                        'ministry' => $item->ministry?->name ?? '',
+                                        'color' => $item->ministry?->color ?? '#8b5cf6',
+                                    ];
+                                }
+                                return [
+                                    'type' => 'event',
+                                    'title' => $item->title,
+                                    'time' => $item->time ? $item->time->format('H:i') : null,
+                                    'url' => route('events.show', $item->original),
+                                    'ministry' => $item->ministry_display_name ?? __('app.no_ministry'),
+                                    'color' => $item->ministry_display_color ?? '#3b82f6',
+                                    'staffed' => $item->original->isFullyStaffed(),
+                                    'filled' => $item->original->filled_positions_count,
+                                    'total' => $item->original->total_positions_count,
+                                    'confirmed' => $item->original->confirmed_assignments_count,
+                                ];
+                            })->values()->toArray();
+                        }
+                        $mobileGridDate2->addDay();
+                    }
+                    if ($mobileGridDate2->month > $month && $mobileGridDate2->year >= $year) break;
+                }
+            @endphp
+            <div class="sm:hidden" x-data="{ selectedDate: '{{ now()->format('Y-m-d') }}', eventsMap: {{ json_encode($mobileEventsMap) }} }">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                    {{-- Day headers --}}
+                    <div class="grid grid-cols-7 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
+                        @foreach($daysShort as $day)
+                            <div class="py-2 text-center">
+                                <span class="text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase">{{ $day }}</span>
+                            </div>
+                        @endforeach
+                    </div>
+                    {{-- Calendar cells --}}
+                    <div class="grid grid-cols-7">
+                        @php $mobileGridDate = $mobileGridStart->copy(); @endphp
+                        @for($w = 0; $w < 6; $w++)
+                            @for($d = 0; $d < 7; $d++)
+                                @php
+                                    $dk = $mobileGridDate->format('Y-m-d');
+                                    $de = $events->get($dk, collect());
+                                    $isTd = $mobileGridDate->isToday();
+                                    $isCm = $mobileGridDate->month == $month;
+                                    $eventColors = $de->take(3)->map(fn($item) => $item->type === 'meeting' ? ($item->ministry?->color ?? '#8b5cf6') : ($item->ministry_display_color ?? '#3b82f6'))->values();
+                                @endphp
+                                <button type="button" @click="selectedDate = selectedDate === '{{ $dk }}' ? '' : '{{ $dk }}'"
+                                        class="relative flex flex-col items-center justify-center py-2.5 border-b border-r border-gray-100 dark:border-gray-700/50 transition-colors"
+                                        :class="selectedDate === '{{ $dk }}' ? 'bg-primary-50 dark:bg-primary-900/20' : ''">
+                                    <span class="text-sm font-medium {{ $isTd ? 'w-7 h-7 flex items-center justify-center rounded-full bg-primary-600 text-white' : ($isCm ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-600') }}">
+                                        {{ $mobileGridDate->format('j') }}
+                                    </span>
+                                    @if($de->count() > 0)
+                                        <div class="flex items-center gap-0.5 mt-1">
+                                            @foreach($eventColors as $ec)
+                                                <span class="w-1.5 h-1.5 rounded-full" style="background-color: {{ $ec }};"></span>
+                                            @endforeach
+                                            @if($de->count() > 3)
+                                                <span class="text-[9px] text-gray-400">+{{ $de->count() - 3 }}</span>
+                                            @endif
+                                        </div>
+                                    @else
+                                        <div class="h-2.5 mt-1"></div>
+                                    @endif
+                                </button>
+                                @php $mobileGridDate->addDay(); @endphp
+                            @endfor
+                            @if($mobileGridDate->month > $month && $mobileGridDate->year >= $year)
+                                @break
+                            @endif
+                        @endfor
+                    </div>
+                </div>
+
+                {{-- Selected date events --}}
+                <template x-if="selectedDate && eventsMap[selectedDate]">
+                    <div class="mt-3 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                        <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+                            <h3 class="font-semibold text-gray-900 dark:text-white text-sm" x-text="new Date(selectedDate + 'T00:00:00').toLocaleDateString('{{ app()->getLocale() === 'uk' ? 'uk-UA' : 'en-US' }}', { weekday: 'long', day: 'numeric', month: 'long' })"></h3>
+                        </div>
+                        <div class="divide-y divide-gray-200 dark:divide-gray-700">
+                            <template x-for="(item, idx) in eventsMap[selectedDate]" :key="idx">
+                                <a :href="item.url" class="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                    <div class="flex items-center gap-3 min-w-0 flex-1">
+                                        <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" :style="'background-color: ' + item.color + '30'">
+                                            <template x-if="item.type === 'meeting'">
+                                                <svg class="w-5 h-5" :style="'color: ' + item.color" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                </svg>
+                                            </template>
+                                            <template x-if="item.type !== 'meeting'">
+                                                <svg class="w-5 h-5" :style="'color: ' + item.color" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                                </svg>
+                                            </template>
+                                        </div>
+                                        <div class="min-w-0">
+                                            <p class="font-medium text-gray-900 dark:text-white truncate" x-text="item.title"></p>
+                                            <p class="text-sm text-gray-500 dark:text-gray-400 truncate">
+                                                <span x-text="item.ministry"></span>
+                                                <template x-if="item.time"><span x-text="' • ' + item.time"></span></template>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-2 flex-shrink-0 ml-2">
+                                        <template x-if="item.type === 'event' && item.total > 0">
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium"
+                                                  :class="item.staffed ? 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300' : 'bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300'"
+                                                  x-text="(item.staffed ? item.confirmed : item.filled) + '/' + item.total"></span>
+                                        </template>
+                                        <template x-if="item.type === 'meeting'">
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300">{{ __('app.meeting') }}</span>
+                                        </template>
+                                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                        </svg>
+                                    </div>
+                                </a>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+
+                {{-- No events for selected date --}}
+                <template x-if="selectedDate && !eventsMap[selectedDate]">
+                    <div class="mt-3 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 text-center">
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.no_events_for_date') }}</p>
+                    </div>
+                </template>
+
+                {{-- No date selected --}}
+                <template x-if="!selectedDate">
+                    <div class="mt-3 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 text-center">
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.tap_date_to_see_events') }}</p>
+                    </div>
+                </template>
+            </div>
+
+            {{-- Desktop Events List (below calendar) --}}
+            <div class="hidden sm:block bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
                 <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
                     <h3 class="font-semibold text-gray-900 dark:text-white">{{ __('app.month_events') }}</h3>
                 </div>

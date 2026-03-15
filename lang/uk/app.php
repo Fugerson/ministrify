@@ -652,6 +652,8 @@ return [
     'meeting' => 'Зустріч',
     'month_events' => 'Події місяця',
     'no_events_this_month' => 'Немає подій у цьому місяці',
+    'no_events_for_date' => 'Немає подій на цю дату',
+    'tap_date_to_see_events' => 'Натисніть на дату, щоб побачити події',
     'next_month' => 'наступний місяць',
     'calendar_subscription' => 'Підписка на календар',
     'add_to_calendars' => 'Додайте календар до Google, Apple або Outlook',

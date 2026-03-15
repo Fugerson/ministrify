@@ -645,6 +645,8 @@ return [
     'meeting' => 'Meeting',
     'month_events' => 'Month events',
     'no_events_this_month' => 'No events this month',
+    'no_events_for_date' => 'No events for this date',
+    'tap_date_to_see_events' => 'Tap a date to see events',
     'next_month' => 'next month',
     'calendar_subscription' => 'Calendar subscription',
     'add_to_calendars' => 'Add calendar to Google, Apple, or Outlook',
