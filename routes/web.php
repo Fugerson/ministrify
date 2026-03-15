@@ -359,6 +359,10 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
     Route::post('events/{event}/ministry-team/{member}/notify', [ServiceTeamController::class, 'sendNotification'])->name('events.ministry-team.notify')->middleware('permission:events,edit');
     Route::patch('events/{event}/ministry-team/{member}/notes', [ServiceTeamController::class, 'updateNotes'])->name('events.ministry-team.update-notes')->middleware('permission:events,edit');
 
+    // Event-Ministry linking
+    Route::post('events/{event}/link-ministry', [ServiceTeamController::class, 'linkMinistry'])->name('events.link-ministry')->middleware('permission:events,edit');
+    Route::delete('events/{event}/unlink-ministry/{ministry}', [ServiceTeamController::class, 'unlinkMinistry'])->name('events.unlink-ministry')->middleware('permission:events,edit');
+
     // Self-signup (no permission:events,edit — any team member can sign up)
     Route::post('events/{event}/self-signup', [ServiceTeamController::class, 'selfSignup'])->name('events.self-signup');
     Route::delete('events/{event}/self-unsubscribe/{member}', [ServiceTeamController::class, 'selfUnsubscribe'])->name('events.self-unsubscribe');

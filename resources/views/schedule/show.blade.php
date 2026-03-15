@@ -669,14 +669,15 @@
                     ]);
                 }
 
-                $eventTeamGrouped = $eventTeam->groupBy('ministry_name');
+                // Group by ministry for display
+                $eventTeamByMinistry = $eventTeam->groupBy('ministry_id');
                 $eventTeamCount = $eventTeam->count();
 
                 // Check which roles the current user is already signed up for
                 $mySignups = $eventTeam->where('person_id', $myPersonId)->where('source', 'ministry_team');
                 $mySignupKeys = $mySignups->map(fn($s) => $s->ministry_id . '_' . $s->role_id)->toArray();
 
-                // Filter available ministries/roles (exclude already signed up)
+                // Filter available ministries/roles for self-signup (exclude already signed up)
                 $availableSignups = $myMinistriesForSignup->map(function($ministry) use ($mySignupKeys) {
                     $roles = collect($ministry['roles'])->filter(function($role) use ($ministry, $mySignupKeys) {
                         return !in_array($ministry['id'] . '_' . $role['id'], $mySignupKeys);
@@ -685,11 +686,11 @@
                 })->filter(fn($m) => count($m['roles']) > 0)->values();
 
                 $hasSignupOptions = $availableSignups->count() > 0;
-                $showTeamSection = $eventTeamCount > 0 || $hasSignupOptions || $mySignups->count() > 0;
+                $showTeamSection = $linkedMinistries->count() > 0 || $eventTeamCount > 0 || $hasSignupOptions || $canEdit;
             @endphp
 
             @if($showTeamSection)
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700" x-data="{ teamOpen: {{ ($eventTeamCount > 0 || $hasSignupOptions) ? 'true' : 'false' }} }">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700" x-data="{ teamOpen: {{ ($linkedMinistries->count() > 0 || $eventTeamCount > 0 || $hasSignupOptions) ? 'true' : 'false' }}, showAddMinistry: false }">
                 <button type="button" @click="teamOpen = !teamOpen" class="w-full px-5 py-4 flex items-center justify-between cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors rounded-t-2xl" :class="teamOpen ? 'border-b border-gray-200 dark:border-gray-700' : ''">
                     <div class="flex items-center gap-2">
                         <svg class="w-4 h-4 text-gray-400 transition-transform" :class="teamOpen ? 'rotate-90' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -700,22 +701,123 @@
                         </svg>
                         <h2 class="font-semibold text-gray-900 dark:text-white">{{ __('app.schedule_event_team') }}</h2>
                     </div>
-                    <span class="text-sm text-gray-500 dark:text-gray-400">{{ $eventTeamCount }}</span>
+                    <span class="text-sm text-gray-500 dark:text-gray-400">{{ $linkedMinistries->count() }} {{ mb_strtolower(__('messages.teams')) }} · {{ $eventTeamCount }}</span>
                 </button>
 
                 <div class="p-4 space-y-4" x-show="teamOpen" x-collapse>
-                    {{-- Existing team members --}}
-                    @foreach($eventTeamGrouped as $ministryName => $members)
+
+                    {{-- Linked ministries with their team members --}}
+                    @foreach($linkedMinistries as $lm)
+                    @php
+                        $ministryMembers = $eventTeamByMinistry->get($lm->id, collect());
+                        $roleGroups = $ministryMembers->groupBy('role_name');
+                        // Self-signup roles for this ministry
+                        $mySignupRoles = $availableSignups->firstWhere('id', $lm->id);
+                    @endphp
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background: {{ $lm->color ?? '#6B7280' }}"></span>
+                                <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ $lm->name }}</h3>
+                                <span class="text-xs text-gray-400 dark:text-gray-500">{{ $ministryMembers->count() }}</span>
+                            </div>
+                            @if($canEdit)
+                            <form method="POST" action="{{ route('events.unlink-ministry', [$event, $lm]) }}" class="inline" onsubmit="return confirm('{{ __('messages.confirm_remove_team_member') }}')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="text-gray-300 hover:text-red-500 dark:text-gray-600 dark:hover:text-red-400 transition-colors" title="{{ __('messages.delete') }}">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                </button>
+                            </form>
+                            @endif
+                        </div>
+
+                        {{-- Roles and members --}}
+                        <div class="ml-5 space-y-1">
+                            @foreach($lm->ministryRoles as $role)
+                                @php
+                                    $roleMembers = $roleGroups->get($role->name, collect());
+                                    $canSelfSignup = $mySignupRoles && collect($mySignupRoles['roles'])->contains('id', $role->id);
+                                @endphp
+                                <div class="py-1">
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <span class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ $role->name }}:</span>
+                                        @forelse($roleMembers as $member)
+                                            @php
+                                                $dotClass = match($member->status) {
+                                                    'confirmed' => 'bg-green-500',
+                                                    'pending' => 'bg-amber-500',
+                                                    'declined' => 'bg-red-500',
+                                                    default => 'bg-gray-400',
+                                                };
+                                                $isMe = $member->person_id === $myPersonId;
+                                            @endphp
+                                            <span class="inline-flex items-center gap-1">
+                                                <span class="w-1.5 h-1.5 rounded-full flex-shrink-0 {{ $dotClass }}"></span>
+                                                <span class="text-sm {{ $isMe ? 'font-semibold text-primary-600 dark:text-primary-400' : 'text-gray-900 dark:text-white' }}">{{ $member->person_name }}</span>
+                                                @if($isMe && $member->source === 'ministry_team' && $member->member_id)
+                                                    <form method="POST" action="{{ route('events.self-unsubscribe', [$event, $member->member_id]) }}" class="inline" onsubmit="return confirm('{{ __('messages.confirm_unsubscribe') }}')">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="text-red-400 hover:text-red-600 dark:text-red-500 dark:hover:text-red-400 transition-colors" title="{{ __('app.unsubscribe') }}">
+                                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                                            </svg>
+                                                        </button>
+                                                    </form>
+                                                @endif
+                                            </span>
+                                            @if(!$loop->last)<span class="text-gray-300 dark:text-gray-600">·</span>@endif
+                                        @empty
+                                            @if($canSelfSignup)
+                                                <form method="POST" action="{{ route('events.self-signup', $event) }}" class="inline">
+                                                    @csrf
+                                                    <input type="hidden" name="ministry_id" value="{{ $lm->id }}">
+                                                    <input type="hidden" name="ministry_role_id" value="{{ $role->id }}">
+                                                    <button type="submit" class="text-xs text-primary-500 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 transition-colors">
+                                                        + {{ __('app.sign_up') }}
+                                                    </button>
+                                                </form>
+                                            @else
+                                                <span class="text-xs text-gray-400 dark:text-gray-500 italic">—</span>
+                                            @endif
+                                        @endforelse
+                                        {{-- Show signup button after existing members too --}}
+                                        @if($canSelfSignup && $roleMembers->count() > 0)
+                                            <form method="POST" action="{{ route('events.self-signup', $event) }}" class="inline">
+                                                @csrf
+                                                <input type="hidden" name="ministry_id" value="{{ $lm->id }}">
+                                                <input type="hidden" name="ministry_role_id" value="{{ $role->id }}">
+                                                <button type="submit" class="text-xs text-primary-500 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 transition-colors">
+                                                    + {{ __('app.sign_up') }}
+                                                </button>
+                                            </form>
+                                        @endif
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                    @endforeach
+
+                    {{-- Members from non-linked ministries (legacy/orphaned) --}}
+                    @php
+                        $linkedIds = $linkedMinistries->pluck('id')->toArray();
+                        $orphanedMembers = $eventTeam->filter(fn($m) => !in_array($m->ministry_id, $linkedIds));
+                        $orphanedGrouped = $orphanedMembers->groupBy('ministry_name');
+                    @endphp
+                    @foreach($orphanedGrouped as $ministryName => $members)
                     <div>
                         <div class="flex items-center gap-2 mb-2">
-                            <span class="w-2 h-2 rounded-full flex-shrink-0" style="background: {{ $members->first()->ministry_color }}"></span>
-                            <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ $ministryName }}</h3>
+                            <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background: {{ $members->first()->ministry_color }}"></span>
+                            <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400">{{ $ministryName }}</h3>
                             <span class="text-xs text-gray-400 dark:text-gray-500">{{ $members->count() }}</span>
                         </div>
-                        <div class="ml-4 space-y-1">
+                        <div class="ml-5 space-y-1">
                             @php $roleGroups = $members->groupBy('role_name'); @endphp
                             @foreach($roleGroups as $roleName => $roleMembers)
-                                @php $roleNote = $roleMembers->pluck('notes')->filter()->first(); @endphp
                                 <div class="py-1">
                                     <div class="flex items-center gap-2 flex-wrap">
                                         <span class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ $roleName }}:</span>
@@ -732,55 +834,49 @@
                                             <span class="inline-flex items-center gap-1">
                                                 <span class="w-1.5 h-1.5 rounded-full flex-shrink-0 {{ $dotClass }}"></span>
                                                 <span class="text-sm {{ $isMe ? 'font-semibold text-primary-600 dark:text-primary-400' : 'text-gray-900 dark:text-white' }}">{{ $member->person_name }}</span>
-                                                {{-- Unsubscribe button for own signups --}}
-                                                @if($isMe && $member->source === 'ministry_team' && $member->member_id)
-                                                    <form method="POST" action="{{ route('events.self-unsubscribe', [$event, $member->member_id]) }}" class="inline" onsubmit="return confirm('{{ __('messages.confirm_unsubscribe') }}')">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="text-red-400 hover:text-red-600 dark:text-red-500 dark:hover:text-red-400 transition-colors" title="{{ __('app.unsubscribe') }}">
-                                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                                            </svg>
-                                                        </button>
-                                                    </form>
-                                                @endif
                                             </span>
                                             @if(!$loop->last)<span class="text-gray-300 dark:text-gray-600">·</span>@endif
                                         @endforeach
                                     </div>
-                                    @if($roleNote)
-                                        <div class="text-xs text-gray-400 dark:text-gray-500 mt-0.5 ml-0.5">{{ $roleNote }}</div>
-                                    @endif
                                 </div>
                             @endforeach
                         </div>
                     </div>
                     @endforeach
 
-                    {{-- Self-signup: available roles --}}
-                    @if($hasSignupOptions)
-                    <div class="{{ $eventTeamCount > 0 ? 'border-t border-gray-200 dark:border-gray-700 pt-4' : '' }}">
-                        <h3 class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-3">{{ __('app.signup_for_role') }}</h3>
-                        <div class="space-y-2">
-                            @foreach($availableSignups as $ministry)
-                                @foreach($ministry['roles'] as $role)
-                                    <form method="POST" action="{{ route('events.self-signup', $event) }}" class="inline-block">
-                                        @csrf
-                                        <input type="hidden" name="ministry_id" value="{{ $ministry['id'] }}">
-                                        <input type="hidden" name="ministry_role_id" value="{{ $role['id'] }}">
-                                        <button type="submit" class="inline-flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg border border-primary-200 dark:border-primary-800 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 hover:bg-primary-100 dark:hover:bg-primary-900/40 transition-colors">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                                            </svg>
-                                            <span class="font-medium" style="color: {{ $ministry['color'] }}">{{ $ministry['name'] }}</span>
-                                            <span class="text-gray-400">·</span>
-                                            <span>{{ $role['name'] }}</span>
-                                        </button>
-                                    </form>
+                    {{-- Add ministry to event --}}
+                    @if($canEdit && $availableMinistriesToLink->count() > 0)
+                    <div class="{{ ($linkedMinistries->count() > 0 || $eventTeamCount > 0) ? 'border-t border-gray-200 dark:border-gray-700 pt-4' : '' }}">
+                        <template x-if="!showAddMinistry">
+                            <button type="button" @click="showAddMinistry = true" class="inline-flex items-center gap-1.5 text-sm text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                </svg>
+                                {{ __('app.add_team') }}
+                            </button>
+                        </template>
+                        <form x-show="showAddMinistry" method="POST" action="{{ route('events.link-ministry', $event) }}" class="flex items-center gap-2">
+                            @csrf
+                            <select name="ministry_id" class="text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary-500 focus:border-primary-500 flex-1">
+                                @foreach($availableMinistriesToLink as $m)
+                                    <option value="{{ $m->id }}">{{ $m->name }}</option>
                                 @endforeach
-                            @endforeach
-                        </div>
+                            </select>
+                            <button type="submit" class="px-3 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors">
+                                {{ __('messages.add') }}
+                            </button>
+                            <button type="button" @click="showAddMinistry = false" class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors">
+                                {{ __('messages.cancel') }}
+                            </button>
+                        </form>
                     </div>
+                    @endif
+
+                    {{-- Empty state --}}
+                    @if($linkedMinistries->count() === 0 && $eventTeamCount === 0 && !$hasSignupOptions)
+                    <p class="text-sm text-gray-400 dark:text-gray-500 text-center py-2">
+                        {{ __('app.no_teams_added') }}
+                    </p>
                     @endif
                 </div>
             </div>

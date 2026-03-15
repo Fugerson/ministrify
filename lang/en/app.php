@@ -836,6 +836,9 @@ return [
     'you_unsubscribed' => 'You unsubscribed',
     'not_team_member' => 'You are not a member of this team',
     'signup_for_role' => 'Sign up for a role',
+    'add_team' => 'Add team',
+    'no_teams_added' => 'No teams added yet. Click "+" to add.',
+    'ministry_not_linked' => 'This team is not added to the event',
     'you' => 'you',
 
     // Church Budget

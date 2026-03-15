@@ -419,11 +419,22 @@ class EventController extends Controller
 
         $canEdit = auth()->user()->can('update', $event);
 
-        // Self-signup data: current user's ministries with roles
+        // Linked ministries for this event
+        $linkedMinistries = $event->linkedMinistries()->with('ministryRoles')->orderBy('name')->get();
+        $linkedMinistryIds = $linkedMinistries->pluck('id')->toArray();
+
+        // Available ministries to link (not yet linked)
+        $availableMinistriesToLink = Ministry::where('church_id', $church->id)
+            ->whereNotIn('id', $linkedMinistryIds)
+            ->orderBy('name')
+            ->get();
+
+        // Self-signup data: current user's ministries with roles (filtered by linked ministries)
         $currentPerson = auth()->user()->person;
         $myMinistriesForSignup = collect();
-        if ($currentPerson) {
+        if ($currentPerson && count($linkedMinistryIds) > 0) {
             $myMinistriesForSignup = $currentPerson->ministries()
+                ->whereIn('ministries.id', $linkedMinistryIds)
                 ->with('ministryRoles')
                 ->get()
                 ->map(fn($m) => [
@@ -437,7 +448,7 @@ class EventController extends Controller
                 ]);
         }
 
-        return view('schedule.show', compact('event', 'availablePeople', 'volunteerBlockouts', 'checklistTemplates', 'boards', 'allPeople', 'ministries', 'songsForAutocomplete', 'canEdit', 'currentPerson', 'myMinistriesForSignup'));
+        return view('schedule.show', compact('event', 'availablePeople', 'volunteerBlockouts', 'checklistTemplates', 'boards', 'allPeople', 'ministries', 'songsForAutocomplete', 'canEdit', 'currentPerson', 'myMinistriesForSignup', 'linkedMinistries', 'availableMinistriesToLink'));
     }
 
     public function edit(Event $event)

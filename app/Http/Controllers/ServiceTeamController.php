@@ -13,6 +13,53 @@ use Illuminate\Http\Request;
 class ServiceTeamController extends Controller
 {
     /**
+     * Link a ministry to an event
+     */
+    public function linkMinistry(Request $request, Event $event)
+    {
+        $this->authorizeChurch($event);
+
+        $validated = $request->validate([
+            'ministry_id' => 'required|exists:ministries,id',
+        ]);
+
+        $churchId = $this->getCurrentChurch()->id;
+        $ministry = Ministry::find($validated['ministry_id']);
+        if (!$ministry || $ministry->church_id !== $churchId) {
+            abort(404);
+        }
+
+        $event->linkedMinistries()->syncWithoutDetaching([$ministry->id]);
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
+
+        return back()->with('success', __('messages.item_added'));
+    }
+
+    /**
+     * Unlink a ministry from an event (also removes all team assignments for it)
+     */
+    public function unlinkMinistry(Request $request, Event $event, Ministry $ministry)
+    {
+        $this->authorizeChurch($event);
+
+        $event->linkedMinistries()->detach($ministry->id);
+
+        // Remove all team assignments for this ministry on this event
+        EventMinistryTeam::where('event_id', $event->id)
+            ->where('ministry_id', $ministry->id)
+            ->delete();
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
+
+        return back()->with('success', __('messages.item_deleted'));
+    }
+
+    /**
      * Add a team member to a service event
      */
     public function addTeamMember(Request $request, Event $event)
@@ -34,6 +81,9 @@ class ServiceTeamController extends Controller
         if (!$ministry || $ministry->church_id !== $churchId) {
             abort(404);
         }
+
+        // Auto-link ministry to event if not yet linked
+        $event->linkedMinistries()->syncWithoutDetaching([$ministry->id]);
 
         // Verify person belongs to same church
         $person = \App\Models\Person::find($validated['person_id']);
@@ -196,6 +246,11 @@ class ServiceTeamController extends Controller
         $ministry = Ministry::find($validated['ministry_id']);
         if (!$ministry || $ministry->church_id !== $churchId) {
             abort(404);
+        }
+
+        // Verify ministry is linked to this event
+        if (!$event->linkedMinistries()->where('ministries.id', $ministry->id)->exists()) {
+            return $this->errorResponse($request, __('app.ministry_not_linked'));
         }
 
         // Check user is a member of this ministry

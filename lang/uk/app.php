@@ -844,6 +844,9 @@ return [
     'you_unsubscribed' => 'Ви відписалися',
     'not_team_member' => 'Ви не є учасником цієї команди',
     'signup_for_role' => 'Записатися на роль',
+    'add_team' => 'Додати команду',
+    'no_teams_added' => 'Команди ще не додані. Натисніть «+» щоб додати.',
+    'ministry_not_linked' => 'Ця команда не додана до події',
     'you' => 'ви',
 
     // Church Budget

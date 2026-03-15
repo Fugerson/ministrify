@@ -170,6 +170,15 @@ class Event extends Model
         return $this->hasMany(EventMinistryTeam::class);
     }
 
+    /**
+     * Ministries explicitly linked to this event (for team assignments)
+     */
+    public function linkedMinistries(): BelongsToMany
+    {
+        return $this->belongsToMany(Ministry::class, 'event_ministry')
+            ->withTimestamps();
+    }
+
     public function hasServicePlan(): bool
     {
         return $this->is_service && $this->planItems()->exists();
