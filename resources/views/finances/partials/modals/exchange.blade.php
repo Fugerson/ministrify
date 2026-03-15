@@ -122,7 +122,7 @@ window.exchangeModal = function() {
                             <input type="number" x-model="formData.from_amount" @input="calculate()" step="0.01" min="0.01" required
                                    class="flex-1 px-4 py-2 border border-red-200 dark:border-red-800 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                             <select x-model="formData.from_currency" @change="updateRate()"
-                                    class="w-24 px-2 py-2 border border-red-200 dark:border-red-800 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                    class="w-[5.5rem] flex-shrink-0 px-2 py-2 border border-red-200 dark:border-red-800 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                                 @foreach($enabledCurrencies ?? ['UAH'] as $curr)
                                     <option value="{{ $curr }}">{{ $curr }}</option>
                                 @endforeach
@@ -143,7 +143,7 @@ window.exchangeModal = function() {
                             <input type="number" x-model="formData.to_amount" step="0.01" min="0.01" required readonly
                                    class="flex-1 px-4 py-2 border border-green-200 dark:border-green-800 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white">
                             <select x-model="formData.to_currency" @change="updateRate()"
-                                    class="w-24 px-2 py-2 border border-green-200 dark:border-green-800 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                    class="w-[5.5rem] flex-shrink-0 px-2 py-2 border border-green-200 dark:border-green-800 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                                 @foreach($enabledCurrencies ?? ['UAH'] as $curr)
                                     <option value="{{ $curr }}">{{ $curr }}</option>
                                 @endforeach

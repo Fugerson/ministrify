@@ -327,11 +327,11 @@ function exportButton() {
                                     <span class="flex-shrink-0 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">{{ __('app.exchange') }}</span>
                                 </template>
                             </div>
-                            <div class="flex items-center gap-2 mt-0.5">
-                                <span class="text-xs text-gray-500 dark:text-gray-400" x-text="formatDate(item.transaction.date)"></span>
-                                <span class="text-xs text-gray-400 dark:text-gray-500" x-text="formatWeekday(item.transaction.date)"></span>
+                            <div class="flex items-center gap-2 mt-0.5 flex-wrap">
+                                <span class="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap" x-text="formatDate(item.transaction.date)"></span>
+                                <span class="text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap" x-text="formatWeekday(item.transaction.date)"></span>
                                 <template x-if="item.transaction.category">
-                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium"
+                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium whitespace-nowrap"
                                           :style="'background-color: ' + item.transaction.category.color + '20; color: ' + item.transaction.category.color"
                                           x-text="item.transaction.category.name"></span>
                                 </template>
