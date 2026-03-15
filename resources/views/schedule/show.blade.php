@@ -776,20 +776,40 @@
                                         {{-- Assigned persons --}}
                                         <template x-for="person in getRolePersons(ministry.id, role.id)" :key="person.id">
                                             <div>
-                                                <div class="flex items-center justify-between py-1 group">
-                                                    <div class="flex items-center gap-2 min-w-0 flex-1">
-                                                        <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" :class="statusDotClass(person.status)"></span>
-                                                        <span class="text-sm truncate" :class="isMe(person) ? 'font-semibold text-primary-600 dark:text-primary-400' : 'text-gray-900 dark:text-white'">
-                                                            <span x-text="person.person_name"></span>
-                                                            <template x-if="isMe(person)"><span class="text-xs"> ({{ __('app.you') }})</span></template>
+                                                <div class="flex items-center gap-1.5 py-1 group">
+                                                    {{-- Delete/Unsubscribe — left side --}}
+                                                    <template x-if="person.source === 'ministry_team'">
+                                                        <span class="flex-shrink-0">
+                                                            @if($canEdit)
+                                                            <button type="button" @click="removePerson(person, ministry.id, role.id)"
+                                                                    class="p-0.5 text-gray-300 hover:text-red-500 dark:text-gray-600 dark:hover:text-red-400 transition-colors">
+                                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                                                </svg>
+                                                            </button>
+                                                            @else
+                                                            <template x-if="isMe(person)">
+                                                                <button type="button" @click="selfUnsubscribe(person, ministry.id, role.id)"
+                                                                        class="p-0.5 text-gray-300 hover:text-red-500 dark:text-gray-600 dark:hover:text-red-400 transition-colors" :title="@js(__('app.unsubscribe'))">
+                                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                                                    </svg>
+                                                                </button>
+                                                            </template>
+                                                            @endif
                                                         </span>
-                                                        <span class="text-[10px] px-1.5 py-0.5 rounded-full font-medium flex-shrink-0"
-                                                              :class="statusBadgeClass(person.status)"
-                                                              x-text="statusLabel(person.status)"
-                                                              x-show="statusLabel(person.status)"></span>
-                                                    </div>
-                                                    <div class="flex items-center gap-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                        {{-- Notes toggle --}}
+                                                    </template>
+                                                    <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" :class="statusDotClass(person.status)"></span>
+                                                    <span class="text-sm truncate" :class="isMe(person) ? 'font-semibold text-primary-600 dark:text-primary-400' : 'text-gray-900 dark:text-white'">
+                                                        <span x-text="person.person_name"></span>
+                                                        <template x-if="isMe(person)"><span class="text-xs"> ({{ __('app.you') }})</span></template>
+                                                    </span>
+                                                    <span class="text-[10px] px-1.5 py-0.5 rounded-full font-medium flex-shrink-0"
+                                                          :class="statusBadgeClass(person.status)"
+                                                          x-text="statusLabel(person.status)"
+                                                          x-show="statusLabel(person.status)"></span>
+                                                    {{-- Notes & Telegram — right side --}}
+                                                    <div class="flex items-center gap-1 flex-shrink-0 ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
                                                         <template x-if="{{ $canEdit ? 'true' : 'false' }} && person.source === 'ministry_team'">
                                                             <button type="button" @click="toggleNoteEditing(person.id)"
                                                                     class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors" :title="@js(__('messages.notes'))">
@@ -798,7 +818,6 @@
                                                                 </svg>
                                                             </button>
                                                         </template>
-                                                        {{-- Telegram notify --}}
                                                         <template x-if="{{ $canEdit ? 'true' : 'false' }} && person.source === 'ministry_team' && person.has_telegram">
                                                             <button type="button" @click="notifyPerson(person)"
                                                                     :disabled="person._notifying"
@@ -806,28 +825,6 @@
                                                                 <svg class="w-3.5 h-3.5" x-show="!person._notifying" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>
                                                                 <svg class="w-3.5 h-3.5 animate-spin" x-show="person._notifying" x-cloak fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
                                                             </button>
-                                                        </template>
-                                                        {{-- Delete/Unsubscribe --}}
-                                                        <template x-if="person.source === 'ministry_team'">
-                                                            <span>
-                                                                @if($canEdit)
-                                                                <button type="button" @click="removePerson(person, ministry.id, role.id)"
-                                                                        class="p-1 text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors">
-                                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                                                    </svg>
-                                                                </button>
-                                                                @else
-                                                                <template x-if="isMe(person)">
-                                                                    <button type="button" @click="selfUnsubscribe(person, ministry.id, role.id)"
-                                                                            class="p-1 text-red-400 hover:text-red-600 dark:text-red-500 dark:hover:text-red-400 transition-colors" :title="@js(__('app.unsubscribe'))">
-                                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                                                        </svg>
-                                                                    </button>
-                                                                </template>
-                                                                @endif
-                                                            </span>
                                                         </template>
                                                     </div>
                                                 </div>
