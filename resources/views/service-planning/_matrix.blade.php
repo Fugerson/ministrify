@@ -3,7 +3,7 @@
     {{-- Controls: teleported to header when embedded, or shown inline --}}
     @if($embedded ?? false)
     <template x-teleport="#sp-controls-slot">
-        <div class="flex items-center gap-3">
+        <div class="flex flex-wrap items-center gap-2 sm:gap-3">
             <div class="w-px h-6 bg-gray-300 dark:bg-gray-600 hidden sm:block"></div>
             {{-- Filter --}}
             <div class="relative" x-data="{ filterOpen: false }">
@@ -47,12 +47,12 @@
             <div class="flex items-center bg-gray-100 dark:bg-gray-700 rounded-xl p-1">
                 <button @click="switchToWeek()" type="button"
                     :class="viewMode === 'week' ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'"
-                    class="px-4 py-2 text-sm font-medium rounded-lg transition-colors">
+                    class="px-2.5 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium rounded-lg transition-colors whitespace-nowrap">
                     {{ __('app.week') }}
                 </button>
                 <button @click="switchToMonth()" type="button"
                     :class="viewMode === 'month' ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'"
-                    class="px-4 py-2 text-sm font-medium rounded-lg transition-colors">
+                    class="px-2.5 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium rounded-lg transition-colors whitespace-nowrap">
                     {{ __('app.month') }}
                 </button>
             </div>
