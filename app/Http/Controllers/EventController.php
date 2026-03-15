@@ -420,7 +420,7 @@ class EventController extends Controller
         $canEdit = auth()->user()->can('update', $event);
 
         // Linked ministries for this event
-        $linkedMinistries = $event->linkedMinistries()->with('ministryRoles')->orderBy('name')->get();
+        $linkedMinistries = $event->linkedMinistries()->with(['ministryRoles', 'members'])->orderBy('name')->get();
         $linkedMinistryIds = $linkedMinistries->pluck('id')->toArray();
 
         // Available ministries to link (not yet linked)

@@ -735,16 +735,18 @@
                         </div>
 
                         {{-- Roles and members --}}
-                        <div class="ml-5 space-y-1">
+                        <div class="ml-5 space-y-1.5">
                             @foreach($lm->ministryRoles as $role)
                                 @php
                                     $roleMembers = $roleGroups->get($role->name, collect());
                                     $canSelfSignup = $mySignupRoles && collect($mySignupRoles['roles'])->contains('id', $role->id);
+                                    $assignedPersonIds = $roleMembers->pluck('person_id')->toArray();
+                                    $availableForRole = $canEdit ? $lm->members->filter(fn($p) => !in_array($p->id, $assignedPersonIds))->sortBy('last_name') : collect();
                                 @endphp
-                                <div class="py-1">
+                                <div class="py-1" x-data="{ showAssign_{{ $lm->id }}_{{ $role->id }}: false }">
                                     <div class="flex items-center gap-2 flex-wrap">
-                                        <span class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ $role->name }}:</span>
-                                        @forelse($roleMembers as $member)
+                                        <span class="text-xs font-medium text-gray-500 dark:text-gray-400 min-w-0">{{ $role->name }}:</span>
+                                        @foreach($roleMembers as $member)
                                             @php
                                                 $dotClass = match($member->status) {
                                                     'confirmed' => 'bg-green-500',
@@ -757,20 +759,43 @@
                                             <span class="inline-flex items-center gap-1">
                                                 <span class="w-1.5 h-1.5 rounded-full flex-shrink-0 {{ $dotClass }}"></span>
                                                 <span class="text-sm {{ $isMe ? 'font-semibold text-primary-600 dark:text-primary-400' : 'text-gray-900 dark:text-white' }}">{{ $member->person_name }}</span>
-                                                @if($isMe && $member->source === 'ministry_team' && $member->member_id)
-                                                    <form method="POST" action="{{ route('events.self-unsubscribe', [$event, $member->member_id]) }}" class="inline" onsubmit="return confirm('{{ __('messages.confirm_unsubscribe') }}')">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="text-red-400 hover:text-red-600 dark:text-red-500 dark:hover:text-red-400 transition-colors" title="{{ __('app.unsubscribe') }}">
-                                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                                            </svg>
-                                                        </button>
-                                                    </form>
+                                                {{-- Remove button: admin can remove anyone, user can remove self --}}
+                                                @if($member->source === 'ministry_team' && $member->member_id)
+                                                    @if($canEdit)
+                                                        <form method="POST" action="{{ route('events.ministry-team.remove', [$event, $member->member_id]) }}" class="inline" onsubmit="return confirm('{{ __('messages.confirm_delete_item') }}')">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="text-gray-300 hover:text-red-500 dark:text-gray-600 dark:hover:text-red-400 transition-colors">
+                                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                                                </svg>
+                                                            </button>
+                                                        </form>
+                                                    @elseif($isMe)
+                                                        <form method="POST" action="{{ route('events.self-unsubscribe', [$event, $member->member_id]) }}" class="inline" onsubmit="return confirm('{{ __('messages.confirm_unsubscribe') }}')">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="text-red-400 hover:text-red-600 dark:text-red-500 dark:hover:text-red-400 transition-colors" title="{{ __('app.unsubscribe') }}">
+                                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                                                </svg>
+                                                            </button>
+                                                        </form>
+                                                    @endif
                                                 @endif
                                             </span>
                                             @if(!$loop->last)<span class="text-gray-300 dark:text-gray-600">·</span>@endif
-                                        @empty
+                                        @endforeach
+
+                                        {{-- Add person button (for editors) --}}
+                                        @if($canEdit && $availableForRole->count() > 0)
+                                            <button type="button" @click="showAssign_{{ $lm->id }}_{{ $role->id }} = !showAssign_{{ $lm->id }}_{{ $role->id }}" class="text-gray-400 hover:text-primary-500 dark:text-gray-500 dark:hover:text-primary-400 transition-colors" title="{{ __('messages.add') }}">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                                </svg>
+                                            </button>
+                                        @elseif($roleMembers->count() === 0)
+                                            {{-- Self-signup for empty role --}}
                                             @if($canSelfSignup)
                                                 <form method="POST" action="{{ route('events.self-signup', $event) }}" class="inline">
                                                     @csrf
@@ -780,12 +805,13 @@
                                                         + {{ __('app.sign_up') }}
                                                     </button>
                                                 </form>
-                                            @else
+                                            @elseif(!$canEdit)
                                                 <span class="text-xs text-gray-400 dark:text-gray-500 italic">—</span>
                                             @endif
-                                        @endforelse
-                                        {{-- Show signup button after existing members too --}}
-                                        @if($canSelfSignup && $roleMembers->count() > 0)
+                                        @endif
+
+                                        {{-- Self-signup after existing members --}}
+                                        @if(!$canEdit && $canSelfSignup && $roleMembers->count() > 0)
                                             <form method="POST" action="{{ route('events.self-signup', $event) }}" class="inline">
                                                 @csrf
                                                 <input type="hidden" name="ministry_id" value="{{ $lm->id }}">
@@ -796,6 +822,28 @@
                                             </form>
                                         @endif
                                     </div>
+
+                                    {{-- Assign person dropdown (for editors) --}}
+                                    @if($canEdit && $availableForRole->count() > 0)
+                                    <form x-show="showAssign_{{ $lm->id }}_{{ $role->id }}" x-cloak method="POST" action="{{ route('events.ministry-team.add', $event) }}" class="flex items-center gap-2 mt-1.5 ml-0">
+                                        @csrf
+                                        <input type="hidden" name="ministry_id" value="{{ $lm->id }}">
+                                        <input type="hidden" name="ministry_role_id" value="{{ $role->id }}">
+                                        <select name="person_id" class="text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary-500 focus:border-primary-500 flex-1 py-1.5">
+                                            @foreach($availableForRole as $p)
+                                                <option value="{{ $p->id }}">{{ $p->full_name }}</option>
+                                            @endforeach
+                                        </select>
+                                        <button type="submit" class="px-2.5 py-1.5 text-xs font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors">
+                                            {{ __('messages.add') }}
+                                        </button>
+                                        <button type="button" @click="showAssign_{{ $lm->id }}_{{ $role->id }} = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                            </svg>
+                                        </button>
+                                    </form>
+                                    @endif
                                 </div>
                             @endforeach
                         </div>
