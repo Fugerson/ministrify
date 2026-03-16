@@ -270,16 +270,47 @@
                             </tr>
                             @endif
 
-                            {{-- Totals --}}
+                            {{-- Totals: Church --}}
                             @if(count($churchBudgetItems) > 0)
                             <tr class="bg-gray-100 dark:bg-gray-700/50 font-semibold">
-                                <td class="px-6 py-3 text-gray-900 dark:text-white">{{ __('app.finance_total') }}</td>
+                                <td class="px-6 py-3 text-gray-900 dark:text-white">{{ __('app.church_expenses') }}</td>
                                 <td class="px-6 py-3 text-right text-gray-900 dark:text-white">{{ number_format($churchBudgetTotals['planned'], 0, ',', ' ') }} ₴</td>
                                 <td class="px-6 py-3 text-right text-red-600 dark:text-red-400">{{ number_format($churchBudgetTotals['actual'], 0, ',', ' ') }} ₴</td>
                                 <td class="px-6 py-3 text-right {{ $churchBudgetTotals['difference'] >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
                                     {{ $churchBudgetTotals['difference'] >= 0 ? '+' : '' }}{{ number_format($churchBudgetTotals['difference'], 0, ',', ' ') }} ₴
                                 </td>
                                 <td class="px-6 py-3 text-right text-gray-500 dark:text-gray-400">{{ number_format($churchBudgetTotals['annual_planned'], 0, ',', ' ') }} ₴</td>
+                                @if(auth()->user()->canEdit('finances'))
+                                <td class="px-6 py-3"></td>
+                                @endif
+                            </tr>
+                            {{-- Totals: Teams --}}
+                            @php
+                                $teamBudget = $ministries->sum('monthly_budget');
+                                $teamSpent = $ministries->sum('spent');
+                                $teamDiff = $teamBudget - $teamSpent;
+                            @endphp
+                            <tr class="bg-gray-100 dark:bg-gray-700/50 font-semibold">
+                                <td class="px-6 py-3 text-gray-900 dark:text-white">{{ __('app.ministry_budgets_section') }}</td>
+                                <td class="px-6 py-3 text-right text-gray-900 dark:text-white">{{ number_format($teamBudget, 0, ',', ' ') }} ₴</td>
+                                <td class="px-6 py-3 text-right text-red-600 dark:text-red-400">{{ number_format($teamSpent, 0, ',', ' ') }} ₴</td>
+                                <td class="px-6 py-3 text-right {{ $teamDiff >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
+                                    {{ $teamDiff >= 0 ? '+' : '' }}{{ number_format($teamDiff, 0, ',', ' ') }} ₴
+                                </td>
+                                <td class="px-6 py-3 text-right text-gray-500 dark:text-gray-400">—</td>
+                                @if(auth()->user()->canEdit('finances'))
+                                <td class="px-6 py-3"></td>
+                                @endif
+                            </tr>
+                            {{-- Grand Total --}}
+                            <tr class="bg-gray-200 dark:bg-gray-600/50 font-bold border-t-2 border-gray-300 dark:border-gray-500">
+                                <td class="px-6 py-3 text-gray-900 dark:text-white">{{ __('app.finance_total') }}</td>
+                                <td class="px-6 py-3 text-right text-gray-900 dark:text-white">{{ number_format($grandTotals['planned'], 0, ',', ' ') }} ₴</td>
+                                <td class="px-6 py-3 text-right text-red-600 dark:text-red-400">{{ number_format($grandTotals['actual'], 0, ',', ' ') }} ₴</td>
+                                <td class="px-6 py-3 text-right {{ $grandTotals['difference'] >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
+                                    {{ $grandTotals['difference'] >= 0 ? '+' : '' }}{{ number_format($grandTotals['difference'], 0, ',', ' ') }} ₴
+                                </td>
+                                <td class="px-6 py-3 text-right text-gray-500 dark:text-gray-400">—</td>
                                 @if(auth()->user()->canEdit('finances'))
                                 <td class="px-6 py-3"></td>
                                 @endif
