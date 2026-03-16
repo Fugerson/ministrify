@@ -392,7 +392,7 @@ class MinistryController extends Controller
             ->completed()
             ->sum(\DB::raw('COALESCE(amount_uah, amount)'));
 
-        $monthNames = ['', 'Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень', 'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'];
+        $monthNames = ['', __('app.month_january'), __('app.month_february'), __('app.month_march'), __('app.month_april'), __('app.month_may'), __('app.month_june'), __('app.month_july'), __('app.month_august'), __('app.month_september'), __('app.month_october'), __('app.month_november'), __('app.month_december')];
         $budgetData = [
             'budget' => $ministryBudget,
             'items' => $budgetItems,
@@ -622,7 +622,7 @@ class MinistryController extends Controller
             }
         }
 
-        $monthNames = ['', 'Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень', 'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'];
+        $monthNames = ['', __('app.month_january'), __('app.month_february'), __('app.month_march'), __('app.month_april'), __('app.month_may'), __('app.month_june'), __('app.month_july'), __('app.month_august'), __('app.month_september'), __('app.month_october'), __('app.month_november'), __('app.month_december')];
 
         return response()->json([
             'success' => true,
@@ -1153,7 +1153,7 @@ class MinistryController extends Controller
         $year = $request->integer('year', now()->year);
         $month = $request->integer('month', now()->month);
 
-        $monthNames = ['', 'січ', 'лют', 'бер', 'кві', 'тра', 'чер', 'лип', 'сер', 'вер', 'жов', 'лис', 'гру'];
+        $monthNames = ['', __('app.month_short_jan'), __('app.month_short_feb'), __('app.month_short_mar'), __('app.month_short_apr'), __('app.month_short_may'), __('app.month_short_jun'), __('app.month_short_jul'), __('app.month_short_aug'), __('app.month_short_sep'), __('app.month_short_oct'), __('app.month_short_nov'), __('app.month_short_dec')];
 
         $rawEvents = Event::where('church_id', $church->id)
             ->where('service_type', 'sunday_service')

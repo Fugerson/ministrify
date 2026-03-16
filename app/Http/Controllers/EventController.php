@@ -915,7 +915,7 @@ class EventController extends Controller
             $endDate = $startDate->copy()->addWeeks($weeks)->subDay()->endOfDay();
         }
 
-        $monthNames = ['', 'січ', 'лют', 'бер', 'кві', 'тра', 'чер', 'лип', 'сер', 'вер', 'жов', 'лис', 'гру'];
+        $monthNames = ['', __('app.month_short_jan'), __('app.month_short_feb'), __('app.month_short_mar'), __('app.month_short_apr'), __('app.month_short_may'), __('app.month_short_jun'), __('app.month_short_jul'), __('app.month_short_aug'), __('app.month_short_sep'), __('app.month_short_oct'), __('app.month_short_nov'), __('app.month_short_dec')];
 
         // 1. Load all service events for the period
         $rawEvents = Event::where('church_id', $church->id)
