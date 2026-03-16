@@ -132,44 +132,37 @@
     </div>
     @endif
     <!-- Search & Filter Bar -->
-    <div id="people-search-bar" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-        <div class="flex flex-col sm:flex-row gap-3">
+    <div id="people-search-bar">
+        <div class="flex gap-2 items-center">
             <!-- Mobile filter toggle -->
             <button @click="showFilterSidebar = !showFilterSidebar"
-                    class="lg:hidden inline-flex items-center justify-center gap-2 px-3 py-2.5 border rounded-xl font-medium transition-colors shrink-0"
-                    :class="showFilterSidebar ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 border-primary-200 dark:border-primary-800' : 'bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600'">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    class="lg:hidden inline-flex items-center justify-center gap-1.5 px-3 py-2 border rounded-lg text-sm font-medium transition-colors shrink-0"
+                    :class="showFilterSidebar ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 border-primary-200 dark:border-primary-800' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600'">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
                 </svg>
-                <span x-text="showFilterSidebar ? @js(__('app.show_list')) : @js(__('app.filters'))"></span>
                 <span x-show="activeFilterCount > 0" x-text="activeFilterCount"
                       class="px-1.5 py-0.5 text-xs font-semibold bg-primary-600 text-white rounded-full"></span>
             </button>
 
             <!-- Search -->
             <div class="flex-1 relative">
-                <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                 </svg>
                 <input type="text" x-model="filters.search" placeholder="{{ __('app.search') }}..."
-                    class="w-full pl-10 pr-10 py-2.5 bg-gray-50 dark:bg-gray-700 border-0 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500/20">
+                    class="w-full pl-9 pr-8 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-300">
                 <button x-show="filters.search" @click="filters.search = ''" x-cloak
-                    class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    class="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
                 </button>
             </div>
-
-            <!-- Stats -->
-            <div class="flex items-center gap-2 text-sm shrink-0">
-                <span class="font-semibold text-gray-900 dark:text-white" x-text="filteredCount"></span>
-                <span class="text-gray-500 dark:text-gray-400">{{ __('app.of_total') }} {{ $stats['total'] }}</span>
-            </div>
         </div>
 
         <!-- Active Filters Chips -->
-        <div x-show="hasFilters" x-cloak class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+        <div x-show="hasFilters" x-cloak class="flex flex-wrap gap-1.5 mt-2">
             <template x-if="filters.genders.length > 0">
                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg text-sm">
                     <span x-text="filters.genders.map(g => g === 'male' ? @js(__('app.male')) : @js(__('app.female'))).join(', ')"></span>
@@ -277,11 +270,12 @@
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 lg:sticky lg:top-20">
 
                 <!-- Header -->
-                <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800 z-10">
-                    <h3 class="text-sm font-semibold text-gray-900 dark:text-white">{{ __('app.filters') }}</h3>
+                <div class="flex items-center justify-between px-4 py-2.5 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800 z-10">
                     <div class="flex items-center gap-2">
-                        <button x-show="activeFilterCount > 0" @click="clearFilters()" class="text-xs text-red-500 hover:text-red-700">{{ __('app.clear_all') }}</button>
+                        <h3 class="text-sm font-semibold text-gray-900 dark:text-white">{{ __('app.filters') }}</h3>
+                        <span class="text-xs text-gray-400 dark:text-gray-500"><span x-text="filteredCount"></span> {{ __('app.of_total') }} {{ $stats['total'] }}</span>
                     </div>
+                    <button x-show="activeFilterCount > 0" @click="clearFilters()" class="text-xs text-red-500 hover:text-red-700">{{ __('app.clear_all') }}</button>
                 </div>
 
                 <!-- Gender Accordion -->
