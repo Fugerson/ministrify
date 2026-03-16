@@ -846,7 +846,7 @@ return [
     // Church Budget
     'church_budget' => 'Church Budget',
     'church_expenses' => 'Church-wide Expenses',
-    'ministry_budgets_section' => 'Ministries (Teams)',
+    'ministry_budgets_section' => 'Team Budgets',
     'annual_budget' => 'Annual Budget',
     'recurring_expense' => 'Recurring',
     'one_time_expense' => 'One-time',

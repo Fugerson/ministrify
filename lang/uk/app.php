@@ -854,7 +854,7 @@ return [
     // Church Budget
     'church_budget' => 'Бюджет церкви',
     'church_expenses' => 'Загальноцерковні витрати',
-    'ministry_budgets_section' => 'Служіння (команди)',
+    'ministry_budgets_section' => 'Бюджети команд',
     'annual_budget' => 'Річний бюджет',
     'recurring_expense' => 'Щомісячна',
     'one_time_expense' => 'Одноразова',
