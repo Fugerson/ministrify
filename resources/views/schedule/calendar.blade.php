@@ -331,7 +331,6 @@
                                             $roundedClass = $isMultiDay ? ($isFirstDay ? 'rounded-l-lg rounded-r-none' : ($isLastDay ? 'rounded-r-lg rounded-l-none' : 'rounded-none')) : 'rounded-lg';
                                         @endphp
                                         <a href="{{ route('events.show', $item->original) }}"
-                                           @click.prevent="$dispatch('open-event', { id: {{ $item->original->id }} })"
                                            class="block p-2 {{ $roundedClass }} text-xs transition-all hover:shadow-md {{ $isMultiDay && !$isFirstDay ? '-ml-2 pl-4' : '' }}"
                                            style="background-color: {{ $item->ministry_display_color ?? '#3b82f6' }}30; border-left: {{ $isFirstDay ? '3px' : '0' }} solid {{ $item->ministry_display_color ?? '#3b82f6' }};">
                                             @if($isFirstDay)
@@ -399,7 +398,6 @@
                                         </a>
                                     @else
                                         <a href="{{ route('events.show', $item->original) }}"
-                                           @click.prevent="$dispatch('open-event', { id: {{ $item->original->id }} })"
                                            class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
                                             <div class="flex items-center gap-3">
                                                 <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background-color: {{ $item->ministry_display_color ?? '#3b82f6' }}30;">
@@ -473,7 +471,6 @@
                                             </a>
                                         @else
                                             <a href="{{ route('events.show', $item->original) }}"
-                                               @click.prevent="$dispatch('open-event', { id: {{ $item->original->id }} })"
                                                class="block px-1.5 py-0.5 rounded text-xs truncate transition-colors hover:opacity-80 {{ $isPast && !$isToday ? 'opacity-60' : '' }}"
                                                style="background-color: {{ $item->ministry_display_color ?? '#3b82f6' }}30; color: {{ $item->ministry_display_color ?? '#3b82f6' }};">
                                                 <span class="hidden lg:inline">{{ $item->time ? $item->time->format('H:i') : '' }}</span>
@@ -518,7 +515,6 @@
                                 }
                                 return [
                                     'type' => 'event',
-                                    'id' => $item->original->id,
                                     'title' => $item->title,
                                     'time' => $item->time ? $item->time->format('H:i') : null,
                                     'url' => route('events.show', $item->original),
@@ -594,7 +590,7 @@
                         </div>
                         <div class="divide-y divide-gray-200 dark:divide-gray-700">
                             <template x-for="(item, idx) in eventsMap[selectedDate]" :key="idx">
-                                <a :href="item.url" @click.prevent="if (item.type === 'event' && item.id) { $dispatch('open-event', { id: item.id }) } else { window.location.href = item.url }" class="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                <a :href="item.url" class="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                                     <div class="flex items-center gap-3 min-w-0 flex-1">
                                         <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" :style="'background-color: ' + item.color + '30'">
                                             <template x-if="item.type === 'meeting'">
@@ -711,7 +707,6 @@
                                             </a>
                                         @else
                                             <a href="{{ route('events.show', $item->original) }}"
-                                               @click.prevent="$dispatch('open-event', { id: {{ $item->original->id }} })"
                                                class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
                                                 <div class="flex items-center gap-3">
                                                     <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background-color: {{ $item->ministry_display_color ?? '#3b82f6' }}30;">
@@ -783,7 +778,6 @@
                 <div class="divide-y divide-gray-200 dark:divide-gray-700">
                     @foreach($upcomingNextMonth as $item)
                         <a href="{{ route('events.show', $item->original) }}"
-                           @click.prevent="$dispatch('open-event', { id: {{ $item->original->id }} })"
                            class="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                             <div class="flex items-center gap-3">
                                 <div class="w-12 h-12 rounded-xl flex flex-col items-center justify-center" style="background-color: {{ $item->ministry_display_color ?? '#3b82f6' }}30;">

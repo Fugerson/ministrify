@@ -448,10 +448,7 @@ class EventController extends Controller
                 ]);
         }
 
-        $isPartial = request()->has('partial') || request()->has('panel');
-        $layout = $isPartial ? 'layouts.partial' : 'layouts.app';
-
-        return view('schedule.show', compact('event', 'availablePeople', 'volunteerBlockouts', 'checklistTemplates', 'boards', 'allPeople', 'ministries', 'songsForAutocomplete', 'canEdit', 'currentPerson', 'myMinistriesForSignup', 'linkedMinistries', 'availableMinistriesToLink', 'layout', 'isPartial'));
+        return view('schedule.show', compact('event', 'availablePeople', 'volunteerBlockouts', 'checklistTemplates', 'boards', 'allPeople', 'ministries', 'songsForAutocomplete', 'canEdit', 'currentPerson', 'myMinistriesForSignup', 'linkedMinistries', 'availableMinistriesToLink'));
     }
 
     public function edit(Event $event)

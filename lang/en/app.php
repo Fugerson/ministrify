@@ -6306,7 +6306,4 @@ return [
     // Public site sections
     'public_service_times' => 'Service times',
     'public_address' => 'Address',
-
-    // Slide-over panel
-    'open_full_page' => 'Open',
 ];

@@ -136,7 +136,6 @@
                                 </svg>
                             </button>
                             <a href="{{ route('events.show', $event) }}"
-                               @click.prevent="$dispatch('open-event', { id: {{ $event->id }} })"
                                class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                                title="{{ __('app.rotation_view') }}">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

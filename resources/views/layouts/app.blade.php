@@ -2211,6 +2211,5 @@
     </script>
 
 <x-image-lightbox />
-<x-event-slide-over />
 </body>
 </html>

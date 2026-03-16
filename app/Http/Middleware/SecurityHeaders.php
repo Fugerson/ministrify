@@ -19,12 +19,7 @@ class SecurityHeaders
         $config = config('security.headers');
 
         // Prevent clickjacking - don't allow embedding in iframes
-        // Allow same-origin iframe embedding for slide-over panels (?panel=1)
-        if ($request->has('panel') || $request->has('partial')) {
-            $response->headers->remove('X-Frame-Options');
-        } else {
-            $response->headers->set('X-Frame-Options', $config['x_frame_options'] ?? 'SAMEORIGIN');
-        }
+        $response->headers->set('X-Frame-Options', $config['x_frame_options'] ?? 'SAMEORIGIN');
 
         // Prevent MIME type sniffing
         $response->headers->set('X-Content-Type-Options', $config['x_content_type_options'] ?? 'nosniff');

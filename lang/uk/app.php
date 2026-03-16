@@ -6139,7 +6139,4 @@ return [
     // Public site sections
     'public_service_times' => 'Розклад богослужінь',
     'public_address' => 'Адреса',
-
-    // Slide-over panel
-    'open_full_page' => 'Відкрити',
 ];

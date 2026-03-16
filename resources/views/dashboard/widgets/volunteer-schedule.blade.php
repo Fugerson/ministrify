@@ -30,7 +30,7 @@
             {{-- Assignments for this date --}}
             <div class="space-y-2 ml-10">
                 @foreach($assignments as $assignment)
-                <a href="{{ route('events.show', $assignment->event) }}" @click.prevent="$dispatch('open-event', { id: {{ $assignment->event_id }} })" class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                <a href="{{ route('events.show', $assignment->event) }}" class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                     {{-- Status indicator --}}
                     <div class="w-2 h-2 rounded-full flex-shrink-0 {{ $assignment->status === 'confirmed' ? 'bg-green-500' : 'bg-amber-500' }}"></div>
 
