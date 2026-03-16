@@ -1853,14 +1853,14 @@ function peopleTable() {
     return {
         showFilterSidebar: saved.showFilterSidebar,
         filterAccordion: {
-            gender: true,
-            marital_status: false,
-            ministry: true,
-            role: false,
-            shepherd: false,
-            tag: false,
-            account: false,
-            telegram: false,
+            gender: saved.genders.length > 0,
+            marital_status: saved.marital_statuses.length > 0,
+            ministry: saved.ministries.length > 0,
+            role: saved.roles.length > 0,
+            shepherd: saved.shepherds.length > 0,
+            tag: saved.tags.length > 0,
+            account: !!saved.has_user,
+            telegram: !!saved.has_telegram,
             birth_date: false,
         },
         filters: {
