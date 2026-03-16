@@ -1497,7 +1497,7 @@
 
                             <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                                 <h3 class="text-sm font-semibold text-gray-900 dark:text-white">{{ __('app.pending_approvals') }}</h3>
-                                <a href="{{ route('settings.index') }}#approvals" class="text-xs text-primary-600 hover:text-primary-700">{{ __('app.view_all') }}</a>
+                                <a href="{{ route('settings.servant-approvals.index') }}" class="text-xs text-primary-600 hover:text-primary-700">{{ __('app.view_all') }}</a>
                             </div>
 
                             <div x-show="loading" class="p-6 text-center text-gray-400">
@@ -1936,7 +1936,7 @@
                         this.roles = data.roles || [];
                         this.users = (data.users || []).map(u => ({
                             ...u,
-                            selectedRole: u.requested_role_id || (this.roles[0]?.id ?? ''),
+                            selectedRole: u.requested_role_id || (this.roles[this.roles.length - 1]?.id ?? ''),
                             processing: false
                         }));
                     } catch (e) { console.error(e); }

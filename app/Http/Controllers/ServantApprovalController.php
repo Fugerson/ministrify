@@ -96,6 +96,7 @@ class ServantApprovalController extends Controller
                 'name' => $u->name,
                 'email' => $u->email,
                 'requested_role' => $u->requestedChurchRole?->name ?? '',
+                'requested_role_id' => $u->requested_church_role_id,
                 'created_at' => $u->created_at->diffForHumans(),
             ]);
 
