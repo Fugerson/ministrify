@@ -6149,4 +6149,6 @@ return [
     'current_password_incorrect' => 'Поточний пароль невірний',
 
     'show_list' => 'Показати список',
+    'show_more' => 'Показати більше',
+    'show_less' => 'Показати менше',
 ];

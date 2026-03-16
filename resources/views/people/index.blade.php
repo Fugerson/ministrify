@@ -270,7 +270,7 @@
 
         <!-- Filter Sidebar -->
         <aside x-show="showFilterSidebar" x-cloak class="w-full lg:w-72 shrink-0">
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] overflow-y-auto">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 lg:sticky lg:top-20">
 
                 <!-- Header -->
                 <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800 z-10">
@@ -335,13 +335,14 @@
                             <svg :class="filterAccordion.ministry && 'rotate-180'" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                         </div>
                     </button>
-                    <div x-show="filterAccordion.ministry" x-collapse class="px-4 pb-3 space-y-1 max-h-48 overflow-y-auto">
-                        <template x-for="name in availableMinistries" :key="name">
-                            <label class="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer text-sm text-gray-600 dark:text-gray-300">
+                    <div x-show="filterAccordion.ministry" x-collapse class="px-4 pb-3 space-y-1" x-data="{ expanded: false }">
+                        <template x-for="(name, i) in availableMinistries" :key="name">
+                            <label x-show="expanded || i < 5" class="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer text-sm text-gray-600 dark:text-gray-300">
                                 <input type="checkbox" :checked="filters.ministries.includes(name)" @change="toggleArrayFilter(filters.ministries, name)" class="w-4 h-4 text-primary-600 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-primary-500">
                                 <span x-text="name"></span>
                             </label>
                         </template>
+                        <button x-show="availableMinistries.length > 5" @click="expanded = !expanded" class="text-xs text-primary-600 hover:text-primary-700 dark:text-primary-400 font-medium px-2 py-1" x-text="expanded ? @js(__('app.show_less')) : @js(__('app.show_more')) + ' (' + (availableMinistries.length - 5) + ')'"></button>
                     </div>
                 </div>
 
@@ -355,13 +356,14 @@
                             <svg :class="filterAccordion.role && 'rotate-180'" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                         </div>
                     </button>
-                    <div x-show="filterAccordion.role" x-collapse class="px-4 pb-3 space-y-1 max-h-48 overflow-y-auto">
-                        <template x-for="name in availableRoles" :key="name">
-                            <label class="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer text-sm text-gray-600 dark:text-gray-300">
+                    <div x-show="filterAccordion.role" x-collapse class="px-4 pb-3 space-y-1" x-data="{ expanded: false }">
+                        <template x-for="(name, i) in availableRoles" :key="name">
+                            <label x-show="expanded || i < 5" class="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer text-sm text-gray-600 dark:text-gray-300">
                                 <input type="checkbox" :checked="filters.roles.includes(name)" @change="toggleArrayFilter(filters.roles, name)" class="w-4 h-4 text-primary-600 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-primary-500">
                                 <span x-text="name"></span>
                             </label>
                         </template>
+                        <button x-show="availableRoles.length > 5" @click="expanded = !expanded" class="text-xs text-primary-600 hover:text-primary-700 dark:text-primary-400 font-medium px-2 py-1" x-text="expanded ? @js(__('app.show_less')) : @js(__('app.show_more')) + ' (' + (availableRoles.length - 5) + ')'"></button>
                     </div>
                 </div>
 
@@ -376,17 +378,18 @@
                             <svg :class="filterAccordion.shepherd && 'rotate-180'" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                         </div>
                     </button>
-                    <div x-show="filterAccordion.shepherd" x-collapse class="px-4 pb-3 space-y-1 max-h-48 overflow-y-auto">
+                    <div x-show="filterAccordion.shepherd" x-collapse class="px-4 pb-3 space-y-1" x-data="{ expanded: false }">
                         <label class="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer text-sm text-gray-600 dark:text-gray-300">
                             <input type="checkbox" :checked="filters.shepherds.includes('none')" @change="toggleArrayFilter(filters.shepherds, 'none')" class="w-4 h-4 text-primary-600 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-primary-500">
                             <span class="italic">{{ __('app.no_shepherd') }}</span>
                         </label>
-                        <template x-for="name in availableShepherds" :key="name">
-                            <label class="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer text-sm text-gray-600 dark:text-gray-300">
+                        <template x-for="(name, i) in availableShepherds" :key="name">
+                            <label x-show="expanded || i < 4" class="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer text-sm text-gray-600 dark:text-gray-300">
                                 <input type="checkbox" :checked="filters.shepherds.includes(name)" @change="toggleArrayFilter(filters.shepherds, name)" class="w-4 h-4 text-primary-600 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-primary-500">
                                 <span x-text="name"></span>
                             </label>
                         </template>
+                        <button x-show="availableShepherds.length > 4" @click="expanded = !expanded" class="text-xs text-primary-600 hover:text-primary-700 dark:text-primary-400 font-medium px-2 py-1" x-text="expanded ? @js(__('app.show_less')) : @js(__('app.show_more')) + ' (' + (availableShepherds.length - 4) + ')'"></button>
                     </div>
                 </div>
                 @endif
@@ -401,13 +404,14 @@
                             <svg :class="filterAccordion.tag && 'rotate-180'" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                         </div>
                     </button>
-                    <div x-show="filterAccordion.tag" x-collapse class="px-4 pb-3 space-y-1 max-h-48 overflow-y-auto">
-                        <template x-for="name in availableTags" :key="name">
-                            <label class="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer text-sm text-gray-600 dark:text-gray-300">
+                    <div x-show="filterAccordion.tag" x-collapse class="px-4 pb-3 space-y-1" x-data="{ expanded: false }">
+                        <template x-for="(name, i) in availableTags" :key="name">
+                            <label x-show="expanded || i < 5" class="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer text-sm text-gray-600 dark:text-gray-300">
                                 <input type="checkbox" :checked="filters.tags.includes(name)" @change="toggleArrayFilter(filters.tags, name)" class="w-4 h-4 text-primary-600 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-primary-500">
                                 <span x-text="name"></span>
                             </label>
                         </template>
+                        <button x-show="availableTags.length > 5" @click="expanded = !expanded" class="text-xs text-primary-600 hover:text-primary-700 dark:text-primary-400 font-medium px-2 py-1" x-text="expanded ? @js(__('app.show_less')) : @js(__('app.show_more')) + ' (' + (availableTags.length - 5) + ')'"></button>
                     </div>
                 </div>
 

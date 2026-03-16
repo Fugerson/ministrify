@@ -6316,4 +6316,6 @@ return [
     'current_password_incorrect' => 'Current password is incorrect',
 
     'show_list' => 'Show list',
+    'show_more' => 'Show more',
+    'show_less' => 'Show less',
 ];
