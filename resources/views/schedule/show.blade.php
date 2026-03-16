@@ -863,30 +863,44 @@
                     {{-- Add ministry to event --}}
                     @if($canEdit)
                     <div x-show="availableMinistries.length > 0" class="border-t border-gray-200 dark:border-gray-700 pt-4" x-cloak>
-                        <template x-if="!showAddMinistry">
-                            <button type="button" @click="showAddMinistry = true" class="inline-flex items-center gap-1.5 text-sm text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300 transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                                </svg>
-                                {{ __('app.add_team') }}
-                            </button>
-                        </template>
-                        <div x-show="showAddMinistry" x-cloak class="flex items-center gap-2">
-                            <select x-model="selectedMinistryToLink" class="text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary-500 focus:border-primary-500 flex-1">
-                                <template x-for="m in availableMinistries" :key="m.id">
-                                    <option :value="m.id" x-text="m.name"></option>
-                                </template>
-                            </select>
-                            <button type="button" @click="linkMinistry()" :disabled="busy"
-                                    class="px-3 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors">
-                                {{ __('messages.add') }}
-                            </button>
-                            <button type="button" @click="showAddMinistry = false"
-                                    class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors">
-                                {{ __('messages.cancel') }}
-                            </button>
-                        </div>
+                        <button type="button" @click="showAddMinistry = true" class="inline-flex items-center gap-1.5 text-sm text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                            {{ __('app.add_team') }}
+                        </button>
                     </div>
+
+                    {{-- Add team modal --}}
+                    <template x-teleport="body">
+                        <div x-show="showAddMinistry" x-cloak
+                             class="fixed inset-0 z-[60] flex items-center justify-center p-4"
+                             @keydown.escape.window="showAddMinistry = false">
+                            <div class="absolute inset-0 bg-black/50" @click="showAddMinistry = false"></div>
+                            <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-sm overflow-hidden"
+                                 @click.stop>
+                                <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700">
+                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.add_team') }}</h3>
+                                </div>
+                                <div class="p-2 max-h-64 overflow-y-auto">
+                                    <template x-for="m in availableMinistries" :key="m.id">
+                                        <button type="button"
+                                                @click="selectedMinistryToLink = m.id; linkMinistry(); showAddMinistry = false"
+                                                class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-left">
+                                            <span class="w-3 h-3 rounded-full flex-shrink-0" :style="'background:' + m.color"></span>
+                                            <span class="text-sm font-medium text-gray-900 dark:text-white" x-text="m.name"></span>
+                                        </button>
+                                    </template>
+                                </div>
+                                <div class="px-5 py-3 border-t border-gray-200 dark:border-gray-700">
+                                    <button type="button" @click="showAddMinistry = false"
+                                            class="w-full px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-xl transition-colors">
+                                        {{ __('messages.cancel') }}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
                     @endif
 
                     {{-- Empty state --}}
