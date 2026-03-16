@@ -1431,10 +1431,17 @@
                             </svg>
                         </button>
                         @if(auth()->user()->isAdmin() && ($pendingApprovalsCount ?? 0) > 0)
-                        <a wire:navigate href="{{ route('settings.servant-approvals.index') }}" class="relative w-11 h-11 flex items-center justify-center text-gray-400 hover:text-primary-600 active:bg-gray-100 dark:active:bg-gray-700 rounded-xl">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
-                            <span class="absolute top-0.5 right-0.5 px-1 py-0.5 text-[9px] font-bold bg-red-500 text-white rounded-full min-w-[16px] text-center leading-none">{{ $pendingApprovalsCount }}</span>
-                        </a>
+                        <div x-data="{ showTip: true }" x-init="setTimeout(() => showTip = false, 5000)" class="relative">
+                            <a wire:navigate href="{{ route('settings.servant-approvals.index') }}" @click="showTip = false" class="relative w-11 h-11 flex items-center justify-center text-gray-400 hover:text-primary-600 active:bg-gray-100 dark:active:bg-gray-700 rounded-xl">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
+                                <span class="absolute top-0.5 right-0.5 px-1 py-0.5 text-[9px] font-bold bg-red-500 text-white rounded-full min-w-[16px] text-center leading-none animate-pulse">{{ $pendingApprovalsCount }}</span>
+                            </a>
+                            <div x-show="showTip" x-cloak x-transition.opacity
+                                 class="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-3 py-1.5 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded-lg shadow-lg whitespace-nowrap z-50">
+                                <div class="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-gray-900 dark:bg-gray-700 rotate-45"></div>
+                                {{ $pendingApprovalsCount }} {{ trans_choice('app.people_awaiting', $pendingApprovalsCount) }}
+                            </div>
+                        </div>
                         @endif
                         <a wire:navigate href="{{ route('my-schedule') }}" class="w-11 h-11 flex items-center justify-center text-gray-400 hover:text-primary-600 active:bg-gray-100 dark:active:bg-gray-700 rounded-xl" title="{{ __('app.my_schedule') }}">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
@@ -1477,13 +1484,19 @@
                     </button>
                     @if(auth()->user()->isAdmin() && ($pendingApprovalsCount ?? 0) > 0)
                     <!-- Pending Approvals -->
-                    <div x-data="pendingApprovals()" class="relative">
-                        <button @click="toggle()" class="relative p-2 text-gray-400 hover:text-primary-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                    <div x-data="{ ...pendingApprovals(), showTip: true }" x-init="$nextTick(() => { setTimeout(() => showTip = false, 5000) })" class="relative">
+                        <button @click="toggle(); showTip = false" class="relative p-2 text-gray-400 hover:text-primary-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
                             </svg>
-                            <span class="absolute -top-1 -right-1 px-1.5 py-0.5 text-[10px] font-bold bg-red-500 text-white rounded-full min-w-[18px] text-center">{{ $pendingApprovalsCount }}</span>
+                            <span class="absolute -top-1 -right-1 px-1.5 py-0.5 text-[10px] font-bold bg-red-500 text-white rounded-full min-w-[18px] text-center animate-pulse">{{ $pendingApprovalsCount }}</span>
                         </button>
+                        <!-- Tooltip -->
+                        <div x-show="showTip && !open" x-cloak x-transition.opacity
+                             class="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-3 py-1.5 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded-lg shadow-lg whitespace-nowrap z-50 pointer-events-none">
+                            <div class="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-gray-900 dark:bg-gray-700 rotate-45"></div>
+                            {{ $pendingApprovalsCount }} {{ trans_choice('app.people_awaiting', $pendingApprovalsCount) }}
+                        </div>
 
                         <!-- Dropdown -->
                         <div x-show="open" x-cloak @click.away="open = false"

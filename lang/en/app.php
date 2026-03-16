@@ -6320,4 +6320,5 @@ return [
     'show_less' => 'Show less',
     'pending_approvals' => 'Pending Approvals',
     'no_pending_approvals' => 'No pending requests',
+    'people_awaiting' => '{1} person awaiting approval|[2,*] people awaiting approval',
 ];
