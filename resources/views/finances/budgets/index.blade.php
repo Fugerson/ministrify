@@ -303,12 +303,17 @@
                                 @endif
                             </tr>
                             {{-- Grand Total --}}
+                            @php
+                                $gtPlanned = $churchBudgetTotals['planned'] + $teamBudget;
+                                $gtActual = $churchBudgetTotals['actual'] + $teamSpent;
+                                $gtDiff = $gtPlanned - $gtActual;
+                            @endphp
                             <tr class="bg-gray-200 dark:bg-gray-600/50 font-bold border-t-2 border-gray-300 dark:border-gray-500">
                                 <td class="px-6 py-3 text-gray-900 dark:text-white">{{ __('app.finance_total') }}</td>
-                                <td class="px-6 py-3 text-right text-gray-900 dark:text-white">{{ number_format($grandTotals['planned'], 0, ',', ' ') }} ₴</td>
-                                <td class="px-6 py-3 text-right text-red-600 dark:text-red-400">{{ number_format($grandTotals['actual'], 0, ',', ' ') }} ₴</td>
-                                <td class="px-6 py-3 text-right {{ $grandTotals['difference'] >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
-                                    {{ $grandTotals['difference'] >= 0 ? '+' : '' }}{{ number_format($grandTotals['difference'], 0, ',', ' ') }} ₴
+                                <td class="px-6 py-3 text-right text-gray-900 dark:text-white">{{ number_format($gtPlanned, 0, ',', ' ') }} ₴</td>
+                                <td class="px-6 py-3 text-right text-red-600 dark:text-red-400">{{ number_format($gtActual, 0, ',', ' ') }} ₴</td>
+                                <td class="px-6 py-3 text-right {{ $gtDiff >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
+                                    {{ $gtDiff >= 0 ? '+' : '' }}{{ number_format($gtDiff, 0, ',', ' ') }} ₴
                                 </td>
                                 <td class="px-6 py-3 text-right text-gray-500 dark:text-gray-400">—</td>
                                 @if(auth()->user()->canEdit('finances'))
