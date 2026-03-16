@@ -862,7 +862,7 @@ function quickEdit() {
                     // Remove deleted rows
                     this.rows = this.rows.filter(r => !r.isDeleted);
 
-                    this.toast(@json(__('app.saved_stats', ['created' => ':created', 'updated' => ':updated', 'deleted' => ':deleted'])).replace(':created', data.stats.created).replace(':updated', data.stats.updated).replace(':deleted', data.stats.deleted));
+                    this.toast({!! json_encode(__('app.saved_stats', ['created' => ':created', 'updated' => ':updated', 'deleted' => ':deleted'])) !!}.replace(':created', data.stats.created).replace(':updated', data.stats.updated).replace(':deleted', data.stats.deleted));
                 } else {
                     alert(data.message || @json(__('app.save_error')));
                 }
