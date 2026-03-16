@@ -270,20 +270,8 @@
                             </tr>
                             @endif
 
-                            {{-- Totals: Church --}}
+                            {{-- Totals --}}
                             @if(count($churchBudgetItems) > 0)
-                            <tr class="bg-gray-100 dark:bg-gray-700/50 font-semibold">
-                                <td class="px-6 py-3 text-gray-900 dark:text-white">{{ __('app.church_expenses') }}</td>
-                                <td class="px-6 py-3 text-right text-gray-900 dark:text-white">{{ number_format($churchBudgetTotals['planned'], 0, ',', ' ') }} ₴</td>
-                                <td class="px-6 py-3 text-right text-red-600 dark:text-red-400">{{ number_format($churchBudgetTotals['actual'], 0, ',', ' ') }} ₴</td>
-                                <td class="px-6 py-3 text-right {{ $churchBudgetTotals['difference'] >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
-                                    {{ $churchBudgetTotals['difference'] >= 0 ? '+' : '' }}{{ number_format($churchBudgetTotals['difference'], 0, ',', ' ') }} ₴
-                                </td>
-                                <td class="px-6 py-3 text-right text-gray-500 dark:text-gray-400">{{ number_format($churchBudgetTotals['annual_planned'], 0, ',', ' ') }} ₴</td>
-                                @if(auth()->user()->canEdit('finances'))
-                                <td class="px-6 py-3"></td>
-                                @endif
-                            </tr>
                             {{-- Totals: Teams --}}
                             @php
                                 $teamBudget = $ministries->sum('monthly_budget');
