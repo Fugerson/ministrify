@@ -170,18 +170,14 @@
                                 </span>
                             </td>
                             <td class="px-6 py-4">
-                                <form action="{{ route('system.tasks.update-status', $task) }}" method="POST" class="inline">
-                                    @csrf
-                                    @method('PATCH')
-                                    <select name="status" onchange="this.form.submit()"
-                                            class="px-2 py-1 text-xs font-medium rounded-full border-0 bg-{{ $task->status_color }}-500/20 text-{{ $task->status_color }}-400 focus:ring-2 focus:ring-indigo-500 cursor-pointer">
-                                        <option value="backlog" {{ $task->status === 'backlog' ? 'selected' : '' }}>{{ __('app.sa_status_backlog') }}</option>
-                                        <option value="todo" {{ $task->status === 'todo' ? 'selected' : '' }}>{{ __('app.sa_status_todo') }}</option>
-                                        <option value="in_progress" {{ $task->status === 'in_progress' ? 'selected' : '' }}>{{ __('app.sa_status_in_progress') }}</option>
-                                        <option value="testing" {{ $task->status === 'testing' ? 'selected' : '' }}>{{ __('app.sa_status_testing') }}</option>
-                                        <option value="done" {{ $task->status === 'done' ? 'selected' : '' }}>{{ __('app.sa_status_done') }}</option>
-                                    </select>
-                                </form>
+                                <select onchange="updateTaskStatus(this, '{{ route('system.tasks.update-status', $task) }}')"
+                                        class="px-2 py-1 text-xs font-medium rounded-full border-0 bg-{{ $task->status_color }}-500/20 text-{{ $task->status_color }}-400 focus:ring-2 focus:ring-indigo-500 cursor-pointer">
+                                    <option value="backlog" {{ $task->status === 'backlog' ? 'selected' : '' }}>{{ __('app.sa_status_backlog') }}</option>
+                                    <option value="todo" {{ $task->status === 'todo' ? 'selected' : '' }}>{{ __('app.sa_status_todo') }}</option>
+                                    <option value="in_progress" {{ $task->status === 'in_progress' ? 'selected' : '' }}>{{ __('app.sa_status_in_progress') }}</option>
+                                    <option value="testing" {{ $task->status === 'testing' ? 'selected' : '' }}>{{ __('app.sa_status_testing') }}</option>
+                                    <option value="done" {{ $task->status === 'done' ? 'selected' : '' }}>{{ __('app.sa_status_done') }}</option>
+                                </select>
                             </td>
                             <td class="px-6 py-4 text-gray-500 dark:text-gray-400 text-sm">
                                 {{ $task->assignee?->name ?? '-' }}
@@ -213,4 +209,27 @@
         {{ $tasks->links() }}
     </div>
 </div>
+
+@push('scripts')
+<script>
+async function updateTaskStatus(select, url) {
+    try {
+        const response = await fetch(url, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({ status: select.value }),
+        });
+        if (response.ok) {
+            window.location.href = window.location.href;
+        }
+    } catch (e) {
+        window.location.href = window.location.href;
+    }
+}
+</script>
+@endpush
 @endsection

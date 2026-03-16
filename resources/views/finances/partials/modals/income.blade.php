@@ -74,7 +74,7 @@ window.incomeModal = function() {
                     if (window.journalRemoveTransaction) {
                         window.journalRemoveTransaction(this.editId);
                     } else {
-                        setTimeout(() => Livewire.navigate(window.location.href), 600);
+                        setTimeout(() => Livewire.navigate(window.location.href), 200);
                     }
                 } else {
                     showToast('error', data.message || @js( __('app.delete_error') ));
@@ -110,7 +110,7 @@ window.incomeModal = function() {
                     if (data.transaction && window.journalUpdateTransaction) {
                         window.journalUpdateTransaction(data.transaction, !this.isEdit);
                     } else {
-                        setTimeout(() => Livewire.navigate(window.location.href), 600);
+                        setTimeout(() => Livewire.navigate(window.location.href), 200);
                     }
                 } else if (response.status === 422) {
                     this.errors = data.errors || {};

@@ -45,7 +45,7 @@ function ajaxForm(config = {}) {
                         showToast('error', data.message || @json(__('app.check_form_errors')));
                     } else if (response.status === 419) {
                         showToast('error', @json(__('app.session_expired')));
-                        setTimeout(() => window.location.reload(), 1500);
+                        setTimeout(() => window.location.href = '/login', 1500);
                     } else {
                         showToast('error', data.message || @json(__('app.save_error')));
                     }
@@ -159,7 +159,7 @@ async function ajaxAction(url, method = 'POST', body = {}) {
     if (!response.ok) {
         if (response.status === 419) {
             showToast('error', @json(__('app.session_expired')));
-            setTimeout(() => window.location.reload(), 1500);
+            setTimeout(() => window.location.href = '/login', 1500);
         } else {
             showToast('error', data.message || @json(__('app.error_generic')));
         }

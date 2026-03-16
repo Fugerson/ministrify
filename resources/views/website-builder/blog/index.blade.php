@@ -36,13 +36,13 @@
     <!-- Filters -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
         <form method="GET" class="flex flex-wrap gap-4">
-            <select name="status" onchange="this.form.submit()" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+            <select name="status" onchange="const params = new URLSearchParams(new FormData(this.form)); Livewire.navigate(window.location.pathname + '?' + params.toString())" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                 <option value="">Всі статуси</option>
                 @foreach($statuses as $key => $label)
                     <option value="{{ $key }}" {{ request('status') === $key ? 'selected' : '' }}>{{ $label }}</option>
                 @endforeach
             </select>
-            <select name="category" onchange="this.form.submit()" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+            <select name="category" onchange="const params = new URLSearchParams(new FormData(this.form)); Livewire.navigate(window.location.pathname + '?' + params.toString())" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                 <option value="">Всі категорії</option>
                 @foreach($categories as $category)
                     <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
@@ -109,7 +109,7 @@
                     @if(auth()->user()->canEdit('website'))
                     <div class="flex gap-1">
                         @if($post->status === 'draft')
-                            <button type="button" @click="ajaxAction('{{ route('website-builder.blog.publish', $post) }}', 'POST').then(() => setTimeout(() => location.reload(), 600))" class="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors" title="Опублікувати">
+                            <button type="button" @click="ajaxAction('{{ route('website-builder.blog.publish', $post) }}', 'POST').then(() => setTimeout(() => Livewire.navigate(window.location.href), 600))" class="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors" title="Опублікувати">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                 </svg>

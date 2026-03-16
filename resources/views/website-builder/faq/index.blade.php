@@ -97,7 +97,7 @@
                              const data = await resp.json().catch(() => ({}));
                              if (!resp.ok) { if (resp.status === 422 && data.errors) this.errors = data.errors; showToast('error', data.message || @js(__('app.wb_error'))); this.saving = false; return; }
                              showToast('success', data.message || @js(__('app.wb_saved')));
-                             setTimeout(() => location.reload(), 600);
+                             setTimeout(() => Livewire.navigate(window.location.href), 600);
                          } catch(e) { showToast('error', @js(__('app.wb_connection_error'))); this.saving = false; }
                      }
                  }">

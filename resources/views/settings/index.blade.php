@@ -179,7 +179,7 @@
                                }).then(() => {
                                    uploading = false;
                                    saved = true;
-                                   setTimeout(() => location.reload(), 500);
+                                   setTimeout(() => Livewire.navigate(window.location.href), 200);
                                }).catch(() => uploading = false);
                            }
                        ">
@@ -854,7 +854,7 @@
                         <span class="text-sm text-gray-600 dark:text-gray-400">
                             {{ __('app.settings_connected') }} {{ \Carbon\Carbon::parse($googleCalendarSettings['connected_at'] ?? now())->diffForHumans() }}
                         </span>
-                        <button @click="confirmDialog({{ Js::from(__('messages.confirm_disconnect_google')) }}).then(ok => { if(ok) { ajaxAction('{{ route('settings.google-calendar.disconnect') }}', 'POST').then(() => location.reload()) } })"
+                        <button @click="confirmDialog({{ Js::from(__('messages.confirm_disconnect_google')) }}).then(ok => { if(ok) { ajaxAction('{{ route('settings.google-calendar.disconnect') }}', 'POST').then(() => Livewire.navigate(window.location.href)) } })"
                                 class="text-sm text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors">
                             {{ __('app.settings_disconnect') }}
                         </button>
@@ -1338,7 +1338,7 @@
         <!-- Add/Edit Form -->
         <div x-show="showForm" x-cloak class="p-4 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
             <form @submit.prevent="submit($refs.catCreateForm)" x-ref="catCreateForm"
-                  x-data="{ ...ajaxForm({ url: '{{ route('settings.transaction-categories.store') }}', method: 'POST', onSuccess: () => location.reload() }) }">
+                  x-data="{ ...ajaxForm({ url: '{{ route('settings.transaction-categories.store') }}', method: 'POST', onSuccess: () => Livewire.navigate(window.location.href) }) }">
                 <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
                     <div>
                         <input type="text" name="name" placeholder="{{ __('app.settings_name_placeholder') }}" required
@@ -1404,7 +1404,7 @@
                             </div>
                             <!-- Edit form -->
                             <form x-show="editing" @submit.prevent="submit($refs.editCatForm{{ $category->id }})" x-ref="editCatForm{{ $category->id }}" class="flex-1 flex items-center gap-2"
-                                  x-data="{ ...ajaxForm({ url: '{{ route('settings.transaction-categories.update', $category) }}', method: 'PUT', stayOnPage: true, onSuccess: () => location.reload() }) }">
+                                  x-data="{ ...ajaxForm({ url: '{{ route('settings.transaction-categories.update', $category) }}', method: 'PUT', stayOnPage: true, onSuccess: () => Livewire.navigate(window.location.href) }) }">
                                 <input type="text" name="name" value="{{ $category->name }}" required
                                        class="flex-1 px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
                                 <input type="color" name="color" value="{{ $category->color }}"
@@ -1453,7 +1453,7 @@
                             </div>
                             <!-- Edit form -->
                             <form x-show="editing" @submit.prevent="submit($refs.editCatForm{{ $category->id }})" x-ref="editCatForm{{ $category->id }}" class="flex-1 flex items-center gap-2"
-                                  x-data="{ ...ajaxForm({ url: '{{ route('settings.transaction-categories.update', $category) }}', method: 'PUT', stayOnPage: true, onSuccess: () => location.reload() }) }">
+                                  x-data="{ ...ajaxForm({ url: '{{ route('settings.transaction-categories.update', $category) }}', method: 'PUT', stayOnPage: true, onSuccess: () => Livewire.navigate(window.location.href) }) }">
                                 <input type="text" name="name" value="{{ $category->name }}" required
                                        class="flex-1 px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
                                 <input type="color" name="color" value="{{ $category->color }}"
@@ -1595,7 +1595,7 @@
             </div>
 
             <form @submit.prevent="submit($refs.tagCreateForm)" x-ref="tagCreateForm" class="flex gap-2"
-                  x-data="{ ...ajaxForm({ url: '{{ route('tags.store') }}', method: 'POST', onSuccess: () => location.reload() }) }">
+                  x-data="{ ...ajaxForm({ url: '{{ route('tags.store') }}', method: 'POST', onSuccess: () => Livewire.navigate(window.location.href) }) }">
                 <input type="text" name="name" placeholder="{{ __('app.settings_new_tag') }}" required
                        class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                 <input type="color" name="color" value="#3b82f6"
@@ -2729,7 +2729,7 @@ function permissionsManager() {
                 });
 
                 if (response.ok) {
-                    window.location.reload();
+                    Livewire.navigate(window.location.href);
                 }
             } catch (error) {
                 if (window.showGlobalToast) {
@@ -2813,7 +2813,7 @@ function userOverridesManager() {
                 if (res.ok) {
                     this.showModal = false;
                     if (window.showGlobalToast) showGlobalToast(@js( __('app.settings_overrides_saved') ), 'success');
-                    window.location.reload();
+                    Livewire.navigate(window.location.href);
                 } else {
                     if (window.showGlobalToast) showGlobalToast(data.message || @js( __('app.settings_save_error') ), 'error');
                 }

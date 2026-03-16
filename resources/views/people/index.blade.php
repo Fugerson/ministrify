@@ -1690,7 +1690,7 @@ function personCreateForm() {
                 }
                 showToast('success', data.message || @js( __("app.saved") ));
                 closeCreatePersonModal();
-                setTimeout(() => Livewire.navigate(window.location.href), 600);
+                setTimeout(() => Livewire.navigate(window.location.href), 200);
             } catch (e) {
                 showToast('error', @js( __('app.connection_error') ));
                 this.saving = false;

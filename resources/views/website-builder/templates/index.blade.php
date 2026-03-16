@@ -67,7 +67,7 @@
                     <div class="flex gap-2 mt-4">
                         @if($currentTemplate !== $key)
                             <div class="flex-1">
-                                <button type="button" @click="ajaxAction('{{ route('website-builder.templates.apply', $key) }}', 'POST').then(() => setTimeout(() => location.reload(), 600))" class="w-full px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">
+                                <button type="button" @click="ajaxAction('{{ route('website-builder.templates.apply', $key) }}', 'POST').then(() => setTimeout(() => Livewire.navigate(window.location.href), 600))" class="w-full px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">
                                     Застосувати
                                 </button>
                             </div>

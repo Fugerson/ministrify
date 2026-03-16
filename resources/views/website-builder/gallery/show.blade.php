@@ -41,7 +41,7 @@
 
     <!-- Upload photos -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6"
-         x-data="{ ...ajaxForm({ url: '{{ route('website-builder.gallery.photos.upload', $gallery) }}', method: 'POST', onSuccess() { setTimeout(() => location.reload(), 600); } }) }">
+         x-data="{ ...ajaxForm({ url: '{{ route('website-builder.gallery.photos.upload', $gallery) }}', method: 'POST', onSuccess() { setTimeout(() => Livewire.navigate(window.location.href), 600); } }) }">
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.upload_photos') }}</h3>
         <form @submit.prevent="submit($refs.uploadForm)" x-ref="uploadForm">
             <div class="flex items-center gap-4">

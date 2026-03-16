@@ -293,7 +293,7 @@ function prayerRequestCreateForm() {
                 }
                 showToast('success', data.message || this.i18n.added);
                 closeCreatePrayerRequestModal();
-                setTimeout(() => Livewire.navigate(window.location.href), 600);
+                setTimeout(() => Livewire.navigate(window.location.href), 200);
             } catch (e) { showToast('error', this.i18n.connectionError); this.saving = false; }
         }
     }

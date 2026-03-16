@@ -35,7 +35,7 @@
             </label>
 
             <select name="per_page" id="perPageSelect"
-                    onchange="document.cookie='system_users_per_page='+this.value+';path=/;max-age=31536000'; this.form.submit()"
+                    onchange="document.cookie='system_users_per_page='+this.value+';path=/;max-age=31536000'; window.location.href=window.location.pathname+'?'+new URLSearchParams(new FormData(this.form)).toString()"
                     class="w-full lg:w-auto px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
                 <option value="20" {{ $perPage == 20 ? 'selected' : '' }}>20</option>
                 <option value="50" {{ $perPage == 50 ? 'selected' : '' }}>50</option>

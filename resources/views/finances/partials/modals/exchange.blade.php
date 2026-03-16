@@ -77,7 +77,7 @@ window.exchangeModal = function() {
                 if (response.ok && data.success) {
                     this.modalOpen = false;
                     showToast('success', data.message);
-                    setTimeout(() => Livewire.navigate(window.location.href), 500);
+                    setTimeout(() => Livewire.navigate(window.location.href), 200);
                 } else {
                     showToast('error', data.message || @js( __('app.save_error') ));
                 }
