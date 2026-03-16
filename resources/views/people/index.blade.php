@@ -290,11 +290,11 @@
                     </button>
                     <div x-show="filterAccordion.gender" x-collapse class="px-4 pb-3 space-y-1">
                         <label class="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer text-sm text-gray-600 dark:text-gray-300">
-                            <input type="checkbox" :checked="filters.genders.includes('male')" @change="toggleArrayFilter(filters.genders, 'male')" class="w-4 h-4 text-primary-600 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-primary-500">
+                            <input type="checkbox" :checked="filters.genders.includes('male')" @change="toggleArrayFilter('genders', 'male')" class="w-4 h-4 text-primary-600 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-primary-500">
                             <span>{{ __('app.male') }}</span>
                         </label>
                         <label class="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer text-sm text-gray-600 dark:text-gray-300">
-                            <input type="checkbox" :checked="filters.genders.includes('female')" @change="toggleArrayFilter(filters.genders, 'female')" class="w-4 h-4 text-primary-600 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-primary-500">
+                            <input type="checkbox" :checked="filters.genders.includes('female')" @change="toggleArrayFilter('genders', 'female')" class="w-4 h-4 text-primary-600 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-primary-500">
                             <span>{{ __('app.female') }}</span>
                         </label>
                     </div>
@@ -313,7 +313,7 @@
                     <div x-show="filterAccordion.marital_status" x-collapse class="px-4 pb-3 space-y-1">
                         <template x-for="[key, label] in Object.entries(availableMaritalStatuses)" :key="key">
                             <label class="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer text-sm text-gray-600 dark:text-gray-300">
-                                <input type="checkbox" :checked="filters.marital_statuses.includes(key)" @change="toggleArrayFilter(filters.marital_statuses, key)" class="w-4 h-4 text-primary-600 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-primary-500">
+                                <input type="checkbox" :checked="filters.marital_statuses.includes(key)" @change="toggleArrayFilter('marital_statuses', key)" class="w-4 h-4 text-primary-600 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-primary-500">
                                 <span x-text="label"></span>
                             </label>
                         </template>
@@ -333,7 +333,7 @@
                     <div x-show="filterAccordion.ministry" x-collapse class="px-4 pb-3 space-y-1" x-data="{ expanded: false }">
                         <template x-for="(name, i) in availableMinistries" :key="name">
                             <label x-show="expanded || i < 5" class="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer text-sm text-gray-600 dark:text-gray-300">
-                                <input type="checkbox" :checked="filters.ministries.includes(name)" @change="toggleArrayFilter(filters.ministries, name)" class="w-4 h-4 text-primary-600 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-primary-500">
+                                <input type="checkbox" :checked="filters.ministries.includes(name)" @change="toggleArrayFilter('ministries', name)" class="w-4 h-4 text-primary-600 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-primary-500">
                                 <span x-text="name"></span>
                             </label>
                         </template>
@@ -354,7 +354,7 @@
                     <div x-show="filterAccordion.role" x-collapse class="px-4 pb-3 space-y-1" x-data="{ expanded: false }">
                         <template x-for="(name, i) in availableRoles" :key="name">
                             <label x-show="expanded || i < 5" class="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer text-sm text-gray-600 dark:text-gray-300">
-                                <input type="checkbox" :checked="filters.roles.includes(name)" @change="toggleArrayFilter(filters.roles, name)" class="w-4 h-4 text-primary-600 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-primary-500">
+                                <input type="checkbox" :checked="filters.roles.includes(name)" @change="toggleArrayFilter('roles', name)" class="w-4 h-4 text-primary-600 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-primary-500">
                                 <span x-text="name"></span>
                             </label>
                         </template>
@@ -375,12 +375,12 @@
                     </button>
                     <div x-show="filterAccordion.shepherd" x-collapse class="px-4 pb-3 space-y-1" x-data="{ expanded: false }">
                         <label class="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer text-sm text-gray-600 dark:text-gray-300">
-                            <input type="checkbox" :checked="filters.shepherds.includes('none')" @change="toggleArrayFilter(filters.shepherds, 'none')" class="w-4 h-4 text-primary-600 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-primary-500">
+                            <input type="checkbox" :checked="filters.shepherds.includes('none')" @change="toggleArrayFilter('shepherds', 'none')" class="w-4 h-4 text-primary-600 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-primary-500">
                             <span class="italic">{{ __('app.no_shepherd') }}</span>
                         </label>
                         <template x-for="(name, i) in availableShepherds" :key="name">
                             <label x-show="expanded || i < 4" class="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer text-sm text-gray-600 dark:text-gray-300">
-                                <input type="checkbox" :checked="filters.shepherds.includes(name)" @change="toggleArrayFilter(filters.shepherds, name)" class="w-4 h-4 text-primary-600 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-primary-500">
+                                <input type="checkbox" :checked="filters.shepherds.includes(name)" @change="toggleArrayFilter('shepherds', name)" class="w-4 h-4 text-primary-600 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-primary-500">
                                 <span x-text="name"></span>
                             </label>
                         </template>
@@ -402,7 +402,7 @@
                     <div x-show="filterAccordion.tag" x-collapse class="px-4 pb-3 space-y-1" x-data="{ expanded: false }">
                         <template x-for="(name, i) in availableTags" :key="name">
                             <label x-show="expanded || i < 5" class="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer text-sm text-gray-600 dark:text-gray-300">
-                                <input type="checkbox" :checked="filters.tags.includes(name)" @change="toggleArrayFilter(filters.tags, name)" class="w-4 h-4 text-primary-600 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-primary-500">
+                                <input type="checkbox" :checked="filters.tags.includes(name)" @change="toggleArrayFilter('tags', name)" class="w-4 h-4 text-primary-600 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-primary-500">
                                 <span x-text="name"></span>
                             </label>
                         </template>
@@ -1954,9 +1954,14 @@ function peopleTable() {
             });
         },
 
-        toggleArrayFilter(arr, value) {
+        toggleArrayFilter(filterKey, value) {
+            const arr = this.filters[filterKey];
             const idx = arr.indexOf(value);
-            if (idx === -1) { arr.push(value); } else { arr.splice(idx, 1); }
+            if (idx === -1) {
+                this.filters[filterKey] = [...arr, value];
+            } else {
+                this.filters[filterKey] = arr.filter((_, i) => i !== idx);
+            }
         },
 
         openDatePicker() {
