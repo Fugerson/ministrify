@@ -1431,7 +1431,7 @@
                             </svg>
                         </button>
                         @if(auth()->user()->isAdmin() && ($pendingApprovalsCount ?? 0) > 0)
-                        <a wire:navigate href="{{ route('servant-approvals.index') }}" class="relative w-11 h-11 flex items-center justify-center text-gray-400 hover:text-primary-600 active:bg-gray-100 dark:active:bg-gray-700 rounded-xl">
+                        <a wire:navigate href="{{ route('settings.servant-approvals.index') }}" class="relative w-11 h-11 flex items-center justify-center text-gray-400 hover:text-primary-600 active:bg-gray-100 dark:active:bg-gray-700 rounded-xl">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
                             <span class="absolute top-0.5 right-0.5 px-1 py-0.5 text-[9px] font-bold bg-red-500 text-white rounded-full min-w-[16px] text-center leading-none">{{ $pendingApprovalsCount }}</span>
                         </a>
@@ -1929,7 +1929,7 @@
                 async load() {
                     this.loading = true;
                     try {
-                        const res = await fetch('{{ route("servant-approvals.pending") }}', {
+                        const res = await fetch('{{ route("settings.servant-approvals.pending") }}', {
                             headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content }
                         });
                         const data = await res.json();
