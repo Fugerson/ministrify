@@ -1515,11 +1515,12 @@
                                             </div>
                                             <div class="flex items-center gap-1.5 shrink-0">
                                                 <select x-model="user.selectedRole" class="text-xs border border-gray-200 dark:border-gray-600 dark:bg-gray-700 rounded-lg px-2 py-1 focus:ring-1 focus:ring-primary-500">
+                                                    <option value="">{{ __('app.pending') }}...</option>
                                                     <template x-for="role in roles" :key="role.id">
                                                         <option :value="role.id" x-text="role.name"></option>
                                                     </template>
                                                 </select>
-                                                <button @click="approve(user)" :disabled="user.processing"
+                                                <button @click="approve(user)" :disabled="user.processing || !user.selectedRole"
                                                         class="p-1.5 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/30 rounded-lg transition-colors disabled:opacity-50" title="{{ __('app.approve') }}">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                                                 </button>
@@ -1936,7 +1937,7 @@
                         this.roles = data.roles || [];
                         this.users = (data.users || []).map(u => ({
                             ...u,
-                            selectedRole: u.requested_role_id || (this.roles[this.roles.length - 1]?.id ?? ''),
+                            selectedRole: '',
                             processing: false
                         }));
                     } catch (e) { console.error(e); }
