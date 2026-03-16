@@ -222,8 +222,8 @@ window.expenseModal = function() {
                 <form @submit.prevent="submit()" class="max-h-[70vh] overflow-y-auto p-4 sm:p-6 space-y-4">
                     <!-- Ministry -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.team_label') }} <span class="text-red-500">*</span></label>
-                        <select x-model="formData.ministry_id" required
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.team_label') }}</label>
+                        <select x-model="formData.ministry_id"
                                 class="w-full px-4 py-2 border rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
                                 :class="errors.ministry_id ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'">
                             <option value="">{{ __('app.select_team') }}</option>
