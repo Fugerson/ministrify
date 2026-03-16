@@ -6151,4 +6151,6 @@ return [
     'show_list' => 'Показати список',
     'show_more' => 'Показати більше',
     'show_less' => 'Показати менше',
+    'pending_approvals' => 'Очікують одобрення',
+    'no_pending_approvals' => 'Немає заявок',
 ];

@@ -656,6 +656,7 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
 
         // Servant/role approval management
         Route::get('servant-approvals', [ServantApprovalController::class, 'index'])->name('servant-approvals.index');
+        Route::get('servant-approvals/pending', [ServantApprovalController::class, 'pending'])->name('servant-approvals.pending');
         Route::post('servant-approvals/{user}/approve', [ServantApprovalController::class, 'approve'])->name('servant-approvals.approve')->middleware('permission:settings,edit');
         Route::post('servant-approvals/{user}/reject', [ServantApprovalController::class, 'reject'])->name('servant-approvals.reject')->middleware('permission:settings,edit');
 

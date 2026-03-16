@@ -1430,6 +1430,12 @@
                                 <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
                             </svg>
                         </button>
+                        @if(auth()->user()->isAdmin() && ($pendingApprovalsCount ?? 0) > 0)
+                        <a wire:navigate href="{{ route('servant-approvals.index') }}" class="relative w-11 h-11 flex items-center justify-center text-gray-400 hover:text-primary-600 active:bg-gray-100 dark:active:bg-gray-700 rounded-xl">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
+                            <span class="absolute top-0.5 right-0.5 px-1 py-0.5 text-[9px] font-bold bg-red-500 text-white rounded-full min-w-[16px] text-center leading-none">{{ $pendingApprovalsCount }}</span>
+                        </a>
+                        @endif
                         <a wire:navigate href="{{ route('my-schedule') }}" class="w-11 h-11 flex items-center justify-center text-gray-400 hover:text-primary-600 active:bg-gray-100 dark:active:bg-gray-700 rounded-xl" title="{{ __('app.my_schedule') }}">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                         </a>
@@ -1469,6 +1475,71 @@
                         <span class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.search') }}...</span>
                         <kbd class="hidden sm:inline-flex items-center px-2 py-0.5 text-xs text-gray-400 bg-gray-200 dark:bg-gray-600 rounded">/</kbd>
                     </button>
+                    @if(auth()->user()->isAdmin() && ($pendingApprovalsCount ?? 0) > 0)
+                    <!-- Pending Approvals -->
+                    <div x-data="pendingApprovals()" class="relative">
+                        <button @click="toggle()" class="relative p-2 text-gray-400 hover:text-primary-600 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                            </svg>
+                            <span class="absolute -top-1 -right-1 px-1.5 py-0.5 text-[10px] font-bold bg-red-500 text-white rounded-full min-w-[18px] text-center">{{ $pendingApprovalsCount }}</span>
+                        </button>
+
+                        <!-- Dropdown -->
+                        <div x-show="open" x-cloak @click.away="open = false"
+                             x-transition:enter="transition ease-out duration-200"
+                             x-transition:enter-start="opacity-0 scale-95"
+                             x-transition:enter-end="opacity-100 scale-100"
+                             x-transition:leave="transition ease-in duration-150"
+                             x-transition:leave-start="opacity-100 scale-100"
+                             x-transition:leave-end="opacity-0 scale-95"
+                             class="absolute right-0 mt-2 w-96 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 z-50 overflow-hidden">
+
+                            <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                                <h3 class="text-sm font-semibold text-gray-900 dark:text-white">{{ __('app.pending_approvals') }}</h3>
+                                <a href="{{ route('settings.index') }}#approvals" class="text-xs text-primary-600 hover:text-primary-700">{{ __('app.view_all') }}</a>
+                            </div>
+
+                            <div x-show="loading" class="p-6 text-center text-gray-400">
+                                <svg class="animate-spin h-5 w-5 mx-auto" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                            </div>
+
+                            <div x-show="!loading" class="max-h-80 overflow-y-auto divide-y divide-gray-100 dark:divide-gray-700/50">
+                                <template x-for="user in users" :key="user.id">
+                                    <div class="px-4 py-3">
+                                        <div class="flex items-start justify-between gap-3">
+                                            <div class="min-w-0">
+                                                <p class="text-sm font-medium text-gray-900 dark:text-white truncate" x-text="user.name"></p>
+                                                <p class="text-xs text-gray-500 dark:text-gray-400 truncate" x-text="user.email"></p>
+                                                <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5" x-text="user.created_at"></p>
+                                            </div>
+                                            <div class="flex items-center gap-1.5 shrink-0">
+                                                <select x-model="user.selectedRole" class="text-xs border border-gray-200 dark:border-gray-600 dark:bg-gray-700 rounded-lg px-2 py-1 focus:ring-1 focus:ring-primary-500">
+                                                    <template x-for="role in roles" :key="role.id">
+                                                        <option :value="role.id" x-text="role.name"></option>
+                                                    </template>
+                                                </select>
+                                                <button @click="approve(user)" :disabled="user.processing"
+                                                        class="p-1.5 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/30 rounded-lg transition-colors disabled:opacity-50" title="{{ __('app.approve') }}">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                                </button>
+                                                <button @click="reject(user)" :disabled="user.processing"
+                                                        class="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors disabled:opacity-50" title="{{ __('app.reject') }}">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <div x-show="!loading && users.length === 0" class="p-6 text-center text-sm text-gray-400">
+                                {{ __('app.no_pending_approvals') }}
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+
                     <!-- Profile Link -->
                     <x-user-profile-link />
                 </div>
@@ -1840,6 +1911,79 @@
             };
         })();
     </script>
+
+    @if(auth()->user()->isAdmin())
+    <script>
+        function pendingApprovals() {
+            return {
+                open: false,
+                loading: false,
+                users: [],
+                roles: [],
+
+                toggle() {
+                    this.open = !this.open;
+                    if (this.open && this.users.length === 0) this.load();
+                },
+
+                async load() {
+                    this.loading = true;
+                    try {
+                        const res = await fetch('{{ route("servant-approvals.pending") }}', {
+                            headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content }
+                        });
+                        const data = await res.json();
+                        this.roles = data.roles || [];
+                        this.users = (data.users || []).map(u => ({
+                            ...u,
+                            selectedRole: u.requested_role_id || (this.roles[0]?.id ?? ''),
+                            processing: false
+                        }));
+                    } catch (e) { console.error(e); }
+                    this.loading = false;
+                },
+
+                async approve(user) {
+                    user.processing = true;
+                    try {
+                        const res = await fetch(`/settings/servant-approvals/${user.id}/approve`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content },
+                            body: JSON.stringify({ church_role_id: user.selectedRole })
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                            this.users = this.users.filter(u => u.id !== user.id);
+                            if (typeof showToast === 'function') showToast('success', data.message);
+                        } else {
+                            if (typeof showToast === 'function') showToast('error', data.message || 'Error');
+                        }
+                    } catch (e) { console.error(e); }
+                    user.processing = false;
+                },
+
+                async reject(user) {
+                    user.processing = true;
+                    try {
+                        const res = await fetch(`/settings/servant-approvals/${user.id}/reject`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content },
+                            body: JSON.stringify({})
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                            this.users = this.users.filter(u => u.id !== user.id);
+                            if (typeof showToast === 'function') showToast('success', data.message);
+                        } else {
+                            if (typeof showToast === 'function') showToast('error', data.message || 'Error');
+                        }
+                    } catch (e) { console.error(e); }
+                    user.processing = false;
+                }
+            };
+        }
+    </script>
+    @endif
 
     <!-- PWA Service Worker Registration & Install Prompt -->
     <script>

@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Person;
 use App\Models\ChurchRole;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -69,6 +70,43 @@ class ServantApprovalController extends Controller
             'availablePeople',
             'potentialMatches'
         ));
+    }
+
+    /**
+     * JSON list of pending approvals for header popup
+     */
+    public function pending(Request $request)
+    {
+        if (!auth()->user()->isAdmin()) {
+            return response()->json([], 403);
+        }
+
+        $church = $this->getCurrentChurch();
+
+        $pendingUsers = User::where('church_id', $church->id)
+            ->where(function ($q) {
+                $q->where('servant_approval_status', 'pending')
+                  ->orWhereHas('churches', fn ($q2) => $q2->where('role_approval_status', 'pending'));
+            })
+            ->with(['requestedChurchRole'])
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(fn ($u) => [
+                'id' => $u->id,
+                'name' => $u->name,
+                'email' => $u->email,
+                'requested_role' => $u->requestedChurchRole?->name ?? '',
+                'created_at' => $u->created_at->diffForHumans(),
+            ]);
+
+        $churchRoles = ChurchRole::where('church_id', $church->id)
+            ->orderBy('sort_order')
+            ->get(['id', 'name']);
+
+        return response()->json([
+            'users' => $pendingUsers,
+            'roles' => $churchRoles,
+        ]);
     }
 
     /**
@@ -186,6 +224,8 @@ class ServantApprovalController extends Controller
             ]);
         }
 
+        Cache::forget("church:{$church->id}:pending_approvals");
+
         return response()->json([
             'success' => true,
             'message' => "Користувач {$user->name} одобрений як {$role->name}",
@@ -253,6 +293,8 @@ class ServantApprovalController extends Controller
                 'error' => $e->getMessage(),
             ]);
         }
+
+        Cache::forget("church:{$church->id}:pending_approvals");
 
         return response()->json([
             'success' => true,

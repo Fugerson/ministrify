@@ -6318,4 +6318,6 @@ return [
     'show_list' => 'Show list',
     'show_more' => 'Show more',
     'show_less' => 'Show less',
+    'pending_approvals' => 'Pending Approvals',
+    'no_pending_approvals' => 'No pending requests',
 ];

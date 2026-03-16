@@ -118,6 +118,19 @@ class EnsureChurchContext
                     ->count()
             );
             view()->share('unreadTelegramCount', $unreadTelegramCount);
+
+            // Share pending approvals count
+            $pendingApprovalsCount = Cache::remember(
+                "church:{$church->id}:pending_approvals",
+                120,
+                fn () => \App\Models\User::where('church_id', $church->id)
+                    ->where(function ($q) {
+                        $q->where('servant_approval_status', 'pending')
+                          ->orWhereHas('churches', fn ($q2) => $q2->where('role_approval_status', 'pending'));
+                    })
+                    ->count()
+            );
+            view()->share('pendingApprovalsCount', $pendingApprovalsCount);
         }
 
         return $next($request);
