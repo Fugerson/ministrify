@@ -81,7 +81,7 @@
                             <button @click="pickerYear++" type="button" class="w-8 h-8 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"><svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></button>
                         </div>
                         <div class="grid grid-cols-3 gap-1.5 mb-3">
-                            <template x-for="(month, index) in @js(explode(',', __('app.cal_months_short')))" :key="index">
+                            <template x-for="(month, index) in {!! json_encode(explode(',', __('app.cal_months_short'))) !!}" :key="index">
                                 <button @click="pickMonth(pickerYear, index); pickerOpen = false" type="button"
                                     :class="startDate.getFullYear() === pickerYear && startDate.getMonth() === index ? 'bg-primary-500 text-white font-bold' : (pickerYear === new Date().getFullYear() && index === new Date().getMonth() ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 font-medium' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700')"
                                     class="px-2 py-2 rounded-lg text-sm transition-colors">
@@ -186,7 +186,7 @@
                             <button @click="pickerYear++" type="button" class="w-8 h-8 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"><svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></button>
                         </div>
                         <div class="grid grid-cols-3 gap-1.5 mb-3">
-                            <template x-for="(month, index) in @js(explode(',', __('app.cal_months_short')))" :key="index">
+                            <template x-for="(month, index) in {!! json_encode(explode(',', __('app.cal_months_short'))) !!}" :key="index">
                                 <button @click="pickMonth(pickerYear, index); pickerOpen = false" type="button"
                                     :class="startDate.getFullYear() === pickerYear && startDate.getMonth() === index ? 'bg-primary-500 text-white font-bold' : (pickerYear === new Date().getFullYear() && index === new Date().getMonth() ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 font-medium' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700')"
                                     class="px-2 py-2 rounded-lg text-sm transition-colors">
@@ -632,7 +632,7 @@ function servicePlanningMatrix() {
         },
 
         updatePeriodLabel() {
-            const months = @json(explode(',', __('app.cal_months')));
+            const months = {!! json_encode(explode(',', __('app.cal_months'))) !!};
             if (this.viewMode === 'week') {
                 const sd = this.startDate;
                 const ed = this.endDate;
