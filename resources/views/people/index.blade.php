@@ -134,8 +134,8 @@
             </div>
 
             <!-- Filter Button -->
-            <button id="people-filter-btn" @click="showFilters = !showFilters"
-                :class="{'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 border-primary-200 dark:border-primary-800': hasFilters || showFilters, 'bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600': !hasFilters && !showFilters}"
+            <button id="people-filter-btn" @click="showFilterSidebar = !showFilterSidebar"
+                :class="{'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 border-primary-200 dark:border-primary-800': hasFilters || showFilterSidebar, 'bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600': !hasFilters && !showFilterSidebar}"
                 class="inline-flex items-center px-4 py-2.5 border rounded-xl font-medium transition-colors">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
@@ -156,50 +156,50 @@
 
         <!-- Active Filters Chips -->
         <div x-show="hasFilters" x-cloak class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-            <template x-if="filters.gender">
+            <template x-if="filters.genders.length > 0">
                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg text-sm">
-                    <span x-text="filters.gender === 'male' ? @js(__('app.male')) : @js(__('app.female'))"></span>
-                    <button @click="filters.gender = ''" class="hover:text-blue-900 dark:hover:text-blue-100">
+                    <span x-text="filters.genders.map(g => g === 'male' ? @js(__('app.male')) : @js(__('app.female'))).join(', ')"></span>
+                    <button @click="filters.genders = []" class="hover:text-blue-900 dark:hover:text-blue-100">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                         </svg>
                     </button>
                 </span>
             </template>
-            <template x-if="filters.marital_status">
+            <template x-if="filters.marital_statuses.length > 0">
                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 rounded-lg text-sm">
-                    <span x-text="maritalStatusLabels[filters.marital_status]"></span>
-                    <button @click="filters.marital_status = ''" class="hover:text-pink-900 dark:hover:text-pink-100">
+                    <span x-text="filters.marital_statuses.map(s => maritalStatusLabels[s] || s).join(', ')"></span>
+                    <button @click="filters.marital_statuses = []" class="hover:text-pink-900 dark:hover:text-pink-100">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                         </svg>
                     </button>
                 </span>
             </template>
-            <template x-if="filters.ministry">
+            <template x-if="filters.ministries.length > 0">
                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-lg text-sm">
-                    <span x-text="filters.ministry"></span>
-                    <button @click="filters.ministry = ''" class="hover:text-green-900 dark:hover:text-green-100">
+                    <span x-text="@js(__('app.ministry')) + ': ' + filters.ministries.length"></span>
+                    <button @click="filters.ministries = []" class="hover:text-green-900 dark:hover:text-green-100">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                         </svg>
                     </button>
                 </span>
             </template>
-            <template x-if="filters.role">
+            <template x-if="filters.roles.length > 0">
                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-lg text-sm">
-                    <span x-text="filters.role"></span>
-                    <button @click="filters.role = ''" class="hover:text-purple-900 dark:hover:text-purple-100">
+                    <span x-text="@js(__('app.church_role')) + ': ' + filters.roles.length"></span>
+                    <button @click="filters.roles = []" class="hover:text-purple-900 dark:hover:text-purple-100">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                         </svg>
                     </button>
                 </span>
             </template>
-            <template x-if="filters.tag">
+            <template x-if="filters.tags.length > 0">
                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 rounded-lg text-sm">
-                    <span x-text="filters.tag"></span>
-                    <button @click="filters.tag = ''" class="hover:text-teal-900 dark:hover:text-teal-100">
+                    <span x-text="@js(__('app.tag')) + ': ' + filters.tags.length"></span>
+                    <button @click="filters.tags = []" class="hover:text-teal-900 dark:hover:text-teal-100">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                         </svg>
@@ -207,10 +207,10 @@
                 </span>
             </template>
             @if($church->shepherds_enabled)
-            <template x-if="filters.shepherd">
+            <template x-if="filters.shepherds.length > 0">
                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 rounded-lg text-sm">
-                    <span x-text="filters.shepherd === 'none' ? @js(__('app.no_shepherd')) : filters.shepherd"></span>
-                    <button @click="filters.shepherd = ''" class="hover:text-amber-900 dark:hover:text-amber-100">
+                    <span x-text="@js(__('app.shepherd')) + ': ' + filters.shepherds.length"></span>
+                    <button @click="filters.shepherds = []" class="hover:text-amber-900 dark:hover:text-amber-100">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                         </svg>
@@ -255,143 +255,233 @@
         </div>
     </div>
 
-    <!-- Filter Panel -->
-    <div x-show="showFilters" x-cloak x-transition:enter="transition ease-out duration-200"
-        x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0"
-        class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+    <!-- Filter Sidebar + Table Layout -->
+    <div class="flex gap-6 items-start">
 
-            <!-- Gender -->
-            <div>
-                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">{{ __('app.gender') }}</label>
-                <div class="flex flex-wrap gap-2">
-                    <button @click="filters.gender = filters.gender === 'male' ? '' : 'male'"
-                        :class="filters.gender === 'male' ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 border-blue-300 dark:border-blue-700' : 'bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'"
-                        class="px-3 py-1.5 text-sm font-medium border rounded-lg transition-colors">
-                        {{ __('app.male') }}
-                    </button>
-                    <button @click="filters.gender = filters.gender === 'female' ? '' : 'female'"
-                        :class="filters.gender === 'female' ? 'bg-pink-100 dark:bg-pink-900/40 text-pink-700 dark:text-pink-300 border-pink-300 dark:border-pink-700' : 'bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'"
-                        class="px-3 py-1.5 text-sm font-medium border rounded-lg transition-colors">
-                        {{ __('app.female') }}
-                    </button>
+        <!-- Mobile backdrop -->
+        <div x-show="showFilterSidebar" @click="showFilterSidebar = false" x-cloak
+             x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+             class="fixed inset-0 bg-black/50 z-40 lg:hidden"></div>
+
+        <!-- Filter Sidebar -->
+        <aside x-show="showFilterSidebar" x-cloak class="w-72 shrink-0">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] overflow-y-auto
+                        fixed inset-y-0 left-0 w-72 z-50 rounded-none border-r lg:relative lg:inset-auto lg:z-auto lg:rounded-xl lg:border lg:w-auto">
+
+                <!-- Header -->
+                <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800 z-10">
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-white">{{ __('app.filters') }}</h3>
+                    <div class="flex items-center gap-2">
+                        <button x-show="activeFilterCount > 0" @click="clearFilters()" class="text-xs text-red-500 hover:text-red-700">{{ __('app.clear_all') }}</button>
+                        <button @click="showFilterSidebar = false" class="lg:hidden p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Marital Status -->
-            <div>
-                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">{{ __('app.family_status') }}</label>
-                <select x-model="filters.marital_status"
-                    class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500">
-                    <option value="">{{ __('app.all') }}</option>
-                    @foreach(\App\Models\Person::getMaritalStatuses() as $value => $label)
-                    <option value="{{ $value }}">{{ $label }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <!-- Ministry -->
-            <div>
-                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">{{ __('app.ministry') }}</label>
-                <select x-model="filters.ministry"
-                    class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500">
-                    <option value="">{{ __('app.all') }}</option>
-                    @foreach($ministries as $ministry)
-                    <option value="{{ $ministry->name }}">{{ $ministry->name }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <!-- Role -->
-            <div>
-                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">{{ __('app.church_role') }}</label>
-                <select x-model="filters.role"
-                    class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500">
-                    <option value="">{{ __('app.all') }}</option>
-                    @foreach($churchRoles as $role)
-                    <option value="{{ $role->name }}">{{ $role->name }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            @if($church->shepherds_enabled)
-            <!-- Shepherd -->
-            <div>
-                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">{{ __('app.shepherd') }}</label>
-                <select x-model="filters.shepherd"
-                    class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500">
-                    <option value="">{{ __('app.all') }}</option>
-                    @foreach($shepherds as $shepherd)
-                    <option value="{{ $shepherd->full_name }}">{{ $shepherd->full_name }}</option>
-                    @endforeach
-                    <option value="none">{{ __('app.no_shepherd') }}</option>
-                </select>
-            </div>
-            @endif
-
-            <!-- Tag -->
-            <div>
-                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">{{ __('app.tag') }}</label>
-                <select x-model="filters.tag"
-                    class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500">
-                    <option value="">{{ __('app.all') }}</option>
-                    @foreach($tags as $tag)
-                    <option value="{{ $tag->name }}">{{ $tag->name }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <!-- Has User Account -->
-            <div>
-                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">{{ __('app.user_account') }}</label>
-                <div class="flex flex-wrap gap-2">
-                    <button @click="filters.has_user = filters.has_user === 'yes' ? '' : 'yes'"
-                        :class="filters.has_user === 'yes' ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700' : 'bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'"
-                        class="px-3 py-1.5 text-sm font-medium border rounded-lg transition-colors">
-                        {{ __('app.has_account') }}
+                <!-- Gender Accordion -->
+                <div class="border-b border-gray-100 dark:border-gray-700/50">
+                    <button @click="filterAccordion.gender = !filterAccordion.gender"
+                            class="w-full flex items-center justify-between px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                        <span>{{ __('app.gender') }}</span>
+                        <div class="flex items-center gap-1.5">
+                            <span x-show="filters.genders.length" x-text="filters.genders.length" class="px-1.5 py-0.5 text-xs bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 rounded-full"></span>
+                            <svg :class="filterAccordion.gender && 'rotate-180'" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </div>
                     </button>
-                    <button @click="filters.has_user = filters.has_user === 'no' ? '' : 'no'"
-                        :class="filters.has_user === 'no' ? 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 border-gray-400 dark:border-gray-500' : 'bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'"
-                        class="px-3 py-1.5 text-sm font-medium border rounded-lg transition-colors">
-                        {{ __('app.no_account') }}
-                    </button>
+                    <div x-show="filterAccordion.gender" x-collapse class="px-4 pb-3 space-y-1">
+                        <label class="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer text-sm text-gray-600 dark:text-gray-300">
+                            <input type="checkbox" :checked="filters.genders.includes('male')" @change="toggleArrayFilter(filters.genders, 'male')" class="w-4 h-4 text-primary-600 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-primary-500">
+                            <span>{{ __('app.male') }}</span>
+                        </label>
+                        <label class="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer text-sm text-gray-600 dark:text-gray-300">
+                            <input type="checkbox" :checked="filters.genders.includes('female')" @change="toggleArrayFilter(filters.genders, 'female')" class="w-4 h-4 text-primary-600 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-primary-500">
+                            <span>{{ __('app.female') }}</span>
+                        </label>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Has Telegram Bot -->
-            <div>
-                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">{{ __('app.telegram_bot') }}</label>
-                <div class="flex flex-wrap gap-2">
-                    <button @click="filters.has_telegram = filters.has_telegram === 'yes' ? '' : 'yes'"
-                        :class="filters.has_telegram === 'yes' ? 'bg-sky-100 dark:bg-sky-900/40 text-sky-700 dark:text-sky-300 border-sky-300 dark:border-sky-700' : 'bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'"
-                        class="px-3 py-1.5 text-sm font-medium border rounded-lg transition-colors">
-                        {{ __('app.tg_connected') }}
+                <!-- Marital Status Accordion -->
+                <div class="border-b border-gray-100 dark:border-gray-700/50">
+                    <button @click="filterAccordion.marital_status = !filterAccordion.marital_status"
+                            class="w-full flex items-center justify-between px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                        <span>{{ __('app.family_status') }}</span>
+                        <div class="flex items-center gap-1.5">
+                            <span x-show="filters.marital_statuses.length" x-text="filters.marital_statuses.length" class="px-1.5 py-0.5 text-xs bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 rounded-full"></span>
+                            <svg :class="filterAccordion.marital_status && 'rotate-180'" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </div>
                     </button>
-                    <button @click="filters.has_telegram = filters.has_telegram === 'no' ? '' : 'no'"
-                        :class="filters.has_telegram === 'no' ? 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 border-gray-400 dark:border-gray-500' : 'bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'"
-                        class="px-3 py-1.5 text-sm font-medium border rounded-lg transition-colors">
-                        {{ __('app.tg_not_connected') }}
-                    </button>
+                    <div x-show="filterAccordion.marital_status" x-collapse class="px-4 pb-3 space-y-1">
+                        <template x-for="[key, label] in Object.entries(availableMaritalStatuses)" :key="key">
+                            <label class="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer text-sm text-gray-600 dark:text-gray-300">
+                                <input type="checkbox" :checked="filters.marital_statuses.includes(key)" @change="toggleArrayFilter(filters.marital_statuses, key)" class="w-4 h-4 text-primary-600 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-primary-500">
+                                <span x-text="label"></span>
+                            </label>
+                        </template>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Birth Date Range -->
-            <div>
-                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">{{ __('app.date_of_birth') }}</label>
-                <div class="relative">
-                    <input type="text" x-ref="dateRange" x-model="filters.dateRangeDisplay" placeholder="{{ __('app.select_range') }}" readonly
-                        @click="openDatePicker()"
-                        class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500/20 cursor-pointer">
-                    <button type="button" x-show="filters.birth_from || filters.birth_to" @click="clearDateFilter()"
-                        class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                        </svg>
+                <!-- Ministry Accordion -->
+                <div class="border-b border-gray-100 dark:border-gray-700/50">
+                    <button @click="filterAccordion.ministry = !filterAccordion.ministry"
+                            class="w-full flex items-center justify-between px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                        <span>{{ __('app.ministry') }}</span>
+                        <div class="flex items-center gap-1.5">
+                            <span x-show="filters.ministries.length" x-text="filters.ministries.length" class="px-1.5 py-0.5 text-xs bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 rounded-full"></span>
+                            <svg :class="filterAccordion.ministry && 'rotate-180'" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </div>
                     </button>
+                    <div x-show="filterAccordion.ministry" x-collapse class="px-4 pb-3 space-y-1 max-h-48 overflow-y-auto">
+                        <template x-for="name in availableMinistries" :key="name">
+                            <label class="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer text-sm text-gray-600 dark:text-gray-300">
+                                <input type="checkbox" :checked="filters.ministries.includes(name)" @change="toggleArrayFilter(filters.ministries, name)" class="w-4 h-4 text-primary-600 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-primary-500">
+                                <span x-text="name"></span>
+                            </label>
+                        </template>
+                    </div>
                 </div>
+
+                <!-- Church Role Accordion -->
+                <div class="border-b border-gray-100 dark:border-gray-700/50">
+                    <button @click="filterAccordion.role = !filterAccordion.role"
+                            class="w-full flex items-center justify-between px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                        <span>{{ __('app.church_role') }}</span>
+                        <div class="flex items-center gap-1.5">
+                            <span x-show="filters.roles.length" x-text="filters.roles.length" class="px-1.5 py-0.5 text-xs bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 rounded-full"></span>
+                            <svg :class="filterAccordion.role && 'rotate-180'" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </div>
+                    </button>
+                    <div x-show="filterAccordion.role" x-collapse class="px-4 pb-3 space-y-1 max-h-48 overflow-y-auto">
+                        <template x-for="name in availableRoles" :key="name">
+                            <label class="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer text-sm text-gray-600 dark:text-gray-300">
+                                <input type="checkbox" :checked="filters.roles.includes(name)" @change="toggleArrayFilter(filters.roles, name)" class="w-4 h-4 text-primary-600 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-primary-500">
+                                <span x-text="name"></span>
+                            </label>
+                        </template>
+                    </div>
+                </div>
+
+                @if($church->shepherds_enabled)
+                <!-- Shepherd Accordion -->
+                <div class="border-b border-gray-100 dark:border-gray-700/50">
+                    <button @click="filterAccordion.shepherd = !filterAccordion.shepherd"
+                            class="w-full flex items-center justify-between px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                        <span>{{ __('app.shepherd') }}</span>
+                        <div class="flex items-center gap-1.5">
+                            <span x-show="filters.shepherds.length" x-text="filters.shepherds.length" class="px-1.5 py-0.5 text-xs bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 rounded-full"></span>
+                            <svg :class="filterAccordion.shepherd && 'rotate-180'" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </div>
+                    </button>
+                    <div x-show="filterAccordion.shepherd" x-collapse class="px-4 pb-3 space-y-1 max-h-48 overflow-y-auto">
+                        <label class="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer text-sm text-gray-600 dark:text-gray-300">
+                            <input type="checkbox" :checked="filters.shepherds.includes('none')" @change="toggleArrayFilter(filters.shepherds, 'none')" class="w-4 h-4 text-primary-600 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-primary-500">
+                            <span class="italic">{{ __('app.no_shepherd') }}</span>
+                        </label>
+                        <template x-for="name in availableShepherds" :key="name">
+                            <label class="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer text-sm text-gray-600 dark:text-gray-300">
+                                <input type="checkbox" :checked="filters.shepherds.includes(name)" @change="toggleArrayFilter(filters.shepherds, name)" class="w-4 h-4 text-primary-600 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-primary-500">
+                                <span x-text="name"></span>
+                            </label>
+                        </template>
+                    </div>
+                </div>
+                @endif
+
+                <!-- Tag Accordion -->
+                <div class="border-b border-gray-100 dark:border-gray-700/50">
+                    <button @click="filterAccordion.tag = !filterAccordion.tag"
+                            class="w-full flex items-center justify-between px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                        <span>{{ __('app.tag') }}</span>
+                        <div class="flex items-center gap-1.5">
+                            <span x-show="filters.tags.length" x-text="filters.tags.length" class="px-1.5 py-0.5 text-xs bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 rounded-full"></span>
+                            <svg :class="filterAccordion.tag && 'rotate-180'" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </div>
+                    </button>
+                    <div x-show="filterAccordion.tag" x-collapse class="px-4 pb-3 space-y-1 max-h-48 overflow-y-auto">
+                        <template x-for="name in availableTags" :key="name">
+                            <label class="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer text-sm text-gray-600 dark:text-gray-300">
+                                <input type="checkbox" :checked="filters.tags.includes(name)" @change="toggleArrayFilter(filters.tags, name)" class="w-4 h-4 text-primary-600 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-primary-500">
+                                <span x-text="name"></span>
+                            </label>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Account Accordion -->
+                <div class="border-b border-gray-100 dark:border-gray-700/50">
+                    <button @click="filterAccordion.account = !filterAccordion.account"
+                            class="w-full flex items-center justify-between px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                        <span>{{ __('app.user_account') }}</span>
+                        <div class="flex items-center gap-1.5">
+                            <span x-show="filters.has_user" class="px-1.5 py-0.5 text-xs bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 rounded-full">1</span>
+                            <svg :class="filterAccordion.account && 'rotate-180'" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </div>
+                    </button>
+                    <div x-show="filterAccordion.account" x-collapse class="px-4 pb-3 space-y-1">
+                        <label class="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer text-sm text-gray-600 dark:text-gray-300">
+                            <input type="checkbox" :checked="filters.has_user === 'yes'" @change="filters.has_user = filters.has_user === 'yes' ? '' : 'yes'" class="w-4 h-4 text-primary-600 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-primary-500">
+                            <span>{{ __('app.has_account') }}</span>
+                        </label>
+                        <label class="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer text-sm text-gray-600 dark:text-gray-300">
+                            <input type="checkbox" :checked="filters.has_user === 'no'" @change="filters.has_user = filters.has_user === 'no' ? '' : 'no'" class="w-4 h-4 text-primary-600 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-primary-500">
+                            <span>{{ __('app.no_account') }}</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Telegram Accordion -->
+                <div class="border-b border-gray-100 dark:border-gray-700/50">
+                    <button @click="filterAccordion.telegram = !filterAccordion.telegram"
+                            class="w-full flex items-center justify-between px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                        <span>{{ __('app.telegram_bot') }}</span>
+                        <div class="flex items-center gap-1.5">
+                            <span x-show="filters.has_telegram" class="px-1.5 py-0.5 text-xs bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 rounded-full">1</span>
+                            <svg :class="filterAccordion.telegram && 'rotate-180'" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </div>
+                    </button>
+                    <div x-show="filterAccordion.telegram" x-collapse class="px-4 pb-3 space-y-1">
+                        <label class="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer text-sm text-gray-600 dark:text-gray-300">
+                            <input type="checkbox" :checked="filters.has_telegram === 'yes'" @change="filters.has_telegram = filters.has_telegram === 'yes' ? '' : 'yes'" class="w-4 h-4 text-primary-600 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-primary-500">
+                            <span>{{ __('app.tg_connected') }}</span>
+                        </label>
+                        <label class="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer text-sm text-gray-600 dark:text-gray-300">
+                            <input type="checkbox" :checked="filters.has_telegram === 'no'" @change="filters.has_telegram = filters.has_telegram === 'no' ? '' : 'no'" class="w-4 h-4 text-primary-600 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-primary-500">
+                            <span>{{ __('app.tg_not_connected') }}</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Birth Date Accordion -->
+                <div class="border-b border-gray-100 dark:border-gray-700/50">
+                    <button @click="filterAccordion.birth_date = !filterAccordion.birth_date"
+                            class="w-full flex items-center justify-between px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                        <span>{{ __('app.date_of_birth') }}</span>
+                        <div class="flex items-center gap-1.5">
+                            <span x-show="filters.birth_from || filters.birth_to" class="px-1.5 py-0.5 text-xs bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 rounded-full">1</span>
+                            <svg :class="filterAccordion.birth_date && 'rotate-180'" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </div>
+                    </button>
+                    <div x-show="filterAccordion.birth_date" x-collapse class="px-4 pb-3">
+                        <div class="relative">
+                            <input type="text" x-ref="dateRange" x-model="filters.dateRangeDisplay" placeholder="{{ __('app.select_range') }}" readonly
+                                @click="openDatePicker()"
+                                class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500/20 cursor-pointer">
+                            <button type="button" x-show="filters.birth_from || filters.birth_to" @click="clearDateFilter()"
+                                class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
             </div>
-        </div>
-    </div>
+        </aside>
+
+        <!-- Main content (table) -->
+        <div class="flex-1 min-w-0 space-y-4">
 
     @if($peopleLimited)
     <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-3 text-amber-800 dark:text-amber-200 text-sm">
@@ -725,6 +815,9 @@
         </div>
     </div>
     @endif
+
+        </div><!-- /flex-1 min-w-0 (main content) -->
+    </div><!-- /flex gap-6 (sidebar + table layout) -->
 
     <!-- Bulk Action Modal -->
     @if(auth()->user()->canEdit('people'))
@@ -1766,33 +1859,49 @@ function personCreateForm() {
 function peopleTable() {
     const saved = filterStorage.load('people', {
         search: '',
-        ministry: '',
-        gender: '',
-        marital_status: '',
-        role: '',
-        tag: '',
-        shepherd: '',
+        genders: [],
+        marital_statuses: [],
+        ministries: [],
+        roles: [],
+        tags: [],
+        shepherds: [],
         has_user: '',
         has_telegram: '',
-        showFilters: false,
+        showFilterSidebar: false,
         perPage: 25,
     });
     return {
-        showFilters: saved.showFilters,
+        showFilterSidebar: saved.showFilterSidebar,
+        filterAccordion: {
+            gender: true,
+            marital_status: false,
+            ministry: true,
+            role: false,
+            shepherd: false,
+            tag: false,
+            account: false,
+            telegram: false,
+            birth_date: false,
+        },
         filters: {
             search: saved.search,
             birth_from: '',
             birth_to: '',
             dateRangeDisplay: '',
-            ministry: saved.ministry,
-            gender: saved.gender,
-            marital_status: saved.marital_status,
-            role: saved.role,
-            tag: saved.tag,
-            shepherd: saved.shepherd,
+            genders: saved.genders,
+            marital_statuses: saved.marital_statuses,
+            ministries: saved.ministries,
+            roles: saved.roles,
+            tags: saved.tags,
+            shepherds: saved.shepherds,
             has_user: saved.has_user,
             has_telegram: saved.has_telegram
         },
+        availableMinistries: @js($ministries->pluck('name')->values()),
+        availableRoles: @js($churchRoles->pluck('name')->values()),
+        availableTags: @js(($tags ?? collect())->pluck('name')->values()),
+        availableShepherds: @js(($shepherds ?? collect())->pluck('full_name')->values()),
+        availableMaritalStatuses: @js(\App\Models\Person::getMaritalStatuses()),
         maritalStatusLabels: @js(\App\Models\Person::getMaritalStatuses()),
         flatpickrInstance: null,
         filteredCount: {{ $people->count() }},
@@ -1845,24 +1954,29 @@ function peopleTable() {
                 this._saveFilters();
             }, { deep: true });
 
-            this.$watch('showFilters', () => this._saveFilters());
+            this.$watch('showFilterSidebar', () => this._saveFilters());
             this.$watch('perPage', () => this._saveFilters());
         },
 
         _saveFilters() {
             filterStorage.save('people', {
                 search: this.filters.search,
-                ministry: this.filters.ministry,
-                gender: this.filters.gender,
-                marital_status: this.filters.marital_status,
-                role: this.filters.role,
-                tag: this.filters.tag,
-                shepherd: this.filters.shepherd,
+                genders: this.filters.genders,
+                marital_statuses: this.filters.marital_statuses,
+                ministries: this.filters.ministries,
+                roles: this.filters.roles,
+                tags: this.filters.tags,
+                shepherds: this.filters.shepherds,
                 has_user: this.filters.has_user,
                 has_telegram: this.filters.has_telegram,
-                showFilters: this.showFilters,
+                showFilterSidebar: this.showFilterSidebar,
                 perPage: this.perPage,
             });
+        },
+
+        toggleArrayFilter(arr, value) {
+            const idx = arr.indexOf(value);
+            if (idx === -1) { arr.push(value); } else { arr.splice(idx, 1); }
         },
 
         openDatePicker() {
@@ -1916,12 +2030,12 @@ function peopleTable() {
 
         get activeFilterCount() {
             let count = 0;
-            if (this.filters.gender) count++;
-            if (this.filters.marital_status) count++;
-            if (this.filters.ministry) count++;
-            if (this.filters.role) count++;
-            if (this.filters.tag) count++;
-            if (this.filters.shepherd) count++;
+            if (this.filters.genders.length) count++;
+            if (this.filters.marital_statuses.length) count++;
+            if (this.filters.ministries.length) count++;
+            if (this.filters.roles.length) count++;
+            if (this.filters.tags.length) count++;
+            if (this.filters.shepherds.length) count++;
             if (this.filters.has_user) count++;
             if (this.filters.has_telegram) count++;
             if (this.filters.birth_from || this.filters.birth_to) count++;
@@ -1957,8 +2071,9 @@ function peopleTable() {
 
         get hasFilters() {
             return this.filters.search || this.filters.birth_from || this.filters.birth_to ||
-                   this.filters.ministry || this.filters.gender || this.filters.marital_status ||
-                   this.filters.role || this.filters.tag || this.filters.shepherd ||
+                   this.filters.genders.length || this.filters.marital_statuses.length ||
+                   this.filters.ministries.length || this.filters.roles.length ||
+                   this.filters.tags.length || this.filters.shepherds.length ||
                    this.filters.has_user || this.filters.has_telegram;
         },
 
@@ -1968,33 +2083,28 @@ function peopleTable() {
                 const allText = [person.name, person.phone, person.email, person.ministry, person.role, person.shepherd].join(' ').toLowerCase();
                 if (!allText.includes(searchLower)) return false;
             }
-
-            if (this.filters.shepherd) {
-                if (this.filters.shepherd === 'none') {
-                    if (person.shepherd) return false;
-                } else {
-                    if (!person.shepherd || !person.shepherd.toLowerCase().includes(this.filters.shepherd.toLowerCase())) return false;
-                }
+            if (this.filters.genders.length > 0 && !this.filters.genders.includes(person.gender)) return false;
+            if (this.filters.marital_statuses.length > 0 && !this.filters.marital_statuses.includes(person.marital_status)) return false;
+            if (this.filters.ministries.length > 0) {
+                const pm = person.ministry.split(', ').filter(Boolean);
+                if (!this.filters.ministries.some(m => pm.includes(m))) return false;
             }
-
-            if (this.filters.has_user) {
-                if (this.filters.has_user === 'yes' && !person.has_user) return false;
-                if (this.filters.has_user === 'no' && person.has_user) return false;
+            if (this.filters.roles.length > 0 && !this.filters.roles.includes(person.role)) return false;
+            if (this.filters.tags.length > 0) {
+                const pt = person.tags.split(', ').filter(Boolean);
+                if (!this.filters.tags.some(t => pt.includes(t))) return false;
             }
-
-            if (this.filters.has_telegram) {
-                if (this.filters.has_telegram === 'yes' && !person.has_telegram) return false;
-                if (this.filters.has_telegram === 'no' && person.has_telegram) return false;
+            if (this.filters.shepherds.length > 0) {
+                const hasNone = this.filters.shepherds.includes('none');
+                const named = this.filters.shepherds.filter(s => s !== 'none');
+                const match = (hasNone && !person.shepherd) || named.includes(person.shepherd);
+                if (!match) return false;
             }
-
-            return (
-                this.matchDateRange(person.birth_date, this.filters.birth_from, this.filters.birth_to) &&
-                this.matchText(person.ministry, this.filters.ministry) &&
-                this.matchExact(person.gender, this.filters.gender) &&
-                this.matchExact(person.marital_status, this.filters.marital_status) &&
-                this.matchText(person.role, this.filters.role) &&
-                this.matchText(person.tags, this.filters.tag)
-            );
+            if (this.filters.has_user === 'yes' && !person.has_user) return false;
+            if (this.filters.has_user === 'no' && person.has_user) return false;
+            if (this.filters.has_telegram === 'yes' && !person.has_telegram) return false;
+            if (this.filters.has_telegram === 'no' && person.has_telegram) return false;
+            return this.matchDateRange(person.birth_date, this.filters.birth_from, this.filters.birth_to);
         },
 
         matchExact(value, filter) {
@@ -2023,12 +2133,12 @@ function peopleTable() {
                 birth_from: '',
                 birth_to: '',
                 dateRangeDisplay: '',
-                ministry: '',
-                gender: '',
-                marital_status: '',
-                role: '',
-                tag: '',
-                shepherd: '',
+                genders: [],
+                marital_statuses: [],
+                ministries: [],
+                roles: [],
+                tags: [],
+                shepherds: [],
                 has_user: '',
                 has_telegram: ''
             };
