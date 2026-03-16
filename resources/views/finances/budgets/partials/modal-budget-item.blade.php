@@ -27,9 +27,31 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.planned_amount_label') }}</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.frequency_label') }}</label>
+                    <div class="flex gap-1">
+                        <label class="flex-1 cursor-pointer">
+                            <input type="radio" x-model="itemForm.frequency" value="one_time" class="sr-only peer">
+                            <div class="text-center py-1.5 text-xs font-medium rounded-lg border border-gray-300 dark:border-gray-600 peer-checked:border-primary-500 peer-checked:bg-primary-50 dark:peer-checked:bg-primary-900/30 peer-checked:text-primary-700 dark:peer-checked:text-primary-300 text-gray-600 dark:text-gray-400 transition-colors">{{ __('app.frequency_one_time') }}</div>
+                        </label>
+                        <label class="flex-1 cursor-pointer">
+                            <input type="radio" x-model="itemForm.frequency" value="weekly" class="sr-only peer">
+                            <div class="text-center py-1.5 text-xs font-medium rounded-lg border border-gray-300 dark:border-gray-600 peer-checked:border-primary-500 peer-checked:bg-primary-50 dark:peer-checked:bg-primary-900/30 peer-checked:text-primary-700 dark:peer-checked:text-primary-300 text-gray-600 dark:text-gray-400 transition-colors">{{ __('app.frequency_weekly') }}</div>
+                        </label>
+                        <label class="flex-1 cursor-pointer">
+                            <input type="radio" x-model="itemForm.frequency" value="monthly" class="sr-only peer">
+                            <div class="text-center py-1.5 text-xs font-medium rounded-lg border border-gray-300 dark:border-gray-600 peer-checked:border-primary-500 peer-checked:bg-primary-50 dark:peer-checked:bg-primary-900/30 peer-checked:text-primary-700 dark:peer-checked:text-primary-300 text-gray-600 dark:text-gray-400 transition-colors">{{ __('app.frequency_monthly') }}</div>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                           x-text="itemForm.frequency === 'weekly' ? '{{ __('app.amount_per_week') }}' : itemForm.frequency === 'monthly' ? '{{ __('app.amount_per_month_label') }}' : '{{ __('app.planned_amount_label') }}'"></label>
                     <input type="number" x-model="itemForm.planned_amount" required min="0" step="0.01"
                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                    <p x-show="itemForm.frequency === 'weekly' && itemForm.planned_amount > 0"
+                       class="text-xs text-primary-600 dark:text-primary-400 mt-1"
+                       x-text="'≈ ' + new Intl.NumberFormat('uk-UA').format(Math.ceil(itemForm.planned_amount * {{ (int) ceil(\Carbon\Carbon::now()->daysInMonth / 7) }})) + ' ₴ {{ __('app.per_month') }}'"></p>
                 </div>
 
                 <div>

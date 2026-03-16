@@ -6267,6 +6267,7 @@ return [
     'income_description_placeholder' => 'Enter income description',
     'overall_balance' => 'Overall Balance',
     'per_month' => 'per month',
+    'frequency_weekly_short' => 'weekly',
     'received_all_time' => 'Received All Time',
     'spent_all_time' => 'Spent All Time',
 

@@ -6100,6 +6100,7 @@ return [
     'income_description_placeholder' => 'Введіть опис доходу',
     'overall_balance' => 'Загальний баланс',
     'per_month' => 'на місяць',
+    'frequency_weekly_short' => 'щотижн.',
     'received_all_time' => 'Отримано за весь час',
     'spent_all_time' => 'Витрачено за весь час',
 

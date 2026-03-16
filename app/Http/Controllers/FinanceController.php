@@ -1252,14 +1252,17 @@ class FinanceController extends Controller
                     }
                     $itemSpent = $directSpent + $autoMatched;
                     $itemsSpentTotal += $itemSpent;
+                    $monthlyPlanned = $item->getMonthlyPlanned();
                     $items[] = [
                         'id' => $item->id,
                         'name' => $item->name,
                         'category' => $item->category,
                         'category_id' => $item->category_id,
-                        'planned_amount' => (float) $item->planned_amount,
+                        'planned_amount' => $monthlyPlanned,
+                        'base_planned_amount' => (float) $item->planned_amount,
+                        'frequency' => $item->frequency ?? 'one_time',
                         'actual' => $itemSpent,
-                        'difference' => (float) $item->planned_amount - $itemSpent,
+                        'difference' => $monthlyPlanned - $itemSpent,
                         'responsible' => $item->responsiblePeople,
                         'notes' => $item->notes,
                         'sort_order' => $item->sort_order,
@@ -1538,6 +1541,7 @@ class FinanceController extends Controller
                     'category_id' => $item->category_id,
                     'name' => $item->name,
                     'planned_amount' => $item->planned_amount,
+                    'frequency' => $item->frequency,
                     'notes' => $item->notes,
                     'sort_order' => $item->sort_order,
                 ]);
@@ -1709,6 +1713,7 @@ class FinanceController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'planned_amount' => 'required|numeric|min:0',
+            'frequency' => 'nullable|string|in:one_time,weekly,monthly',
             'category_id' => 'nullable|integer|exists:transaction_categories,id',
             'category_name' => 'nullable|string|max:100',
             'notes' => 'nullable|string|max:500',
@@ -1750,6 +1755,7 @@ class FinanceController extends Controller
             'category_id' => $categoryId,
             'name' => $validated['name'],
             'planned_amount' => $validated['planned_amount'],
+            'frequency' => $validated['frequency'] ?? 'one_time',
             'notes' => $validated['notes'] ?? null,
             'sort_order' => $maxSort + 1,
         ]);
@@ -1779,6 +1785,7 @@ class FinanceController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'planned_amount' => 'required|numeric|min:0',
+            'frequency' => 'nullable|string|in:one_time,weekly,monthly',
             'category_id' => 'nullable|integer|exists:transaction_categories,id',
             'category_name' => 'nullable|string|max:100',
             'notes' => 'nullable|string|max:500',
@@ -1816,6 +1823,7 @@ class FinanceController extends Controller
         $budgetItem->update([
             'name' => $validated['name'],
             'planned_amount' => $validated['planned_amount'],
+            'frequency' => $validated['frequency'] ?? 'one_time',
             'category_id' => $categoryId,
             'notes' => $validated['notes'] ?? null,
         ]);

@@ -467,7 +467,7 @@
                                             </thead>
                                             <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                                                 @foreach($item['items'] as $bi)
-                                                <tr class="hover:bg-gray-100 dark:hover:bg-gray-700/30">
+                                                <tr>
                                                     <td class="px-3 py-2.5">
                                                         <div class="font-medium text-gray-900 dark:text-white">{{ $bi['name'] }}</div>
                                                         @if($bi['category'])
@@ -476,6 +476,9 @@
                                                     </td>
                                                     <td class="px-3 py-2.5 text-right whitespace-nowrap text-gray-700 dark:text-gray-300">
                                                         {{ number_format($bi['planned_amount'], 0, ',', ' ') }} ₴
+                                                        @if(($bi['frequency'] ?? 'one_time') === 'weekly')
+                                                            <div class="text-xs text-gray-400">({{ $bi['base_planned_amount'] }} × {{ __('app.frequency_weekly_short') }})</div>
+                                                        @endif
                                                     </td>
                                                     <td class="px-3 py-2.5 text-right whitespace-nowrap text-red-600 dark:text-red-400">
                                                         {{ number_format($bi['actual'], 0, ',', ' ') }} ₴
@@ -507,7 +510,8 @@
                                                             <button @click.stop="openItemModal('edit', {{ json_encode([
                                                                 'id' => $bi['id'],
                                                                 'name' => $bi['name'],
-                                                                'planned_amount' => $bi['planned_amount'],
+                                                                'planned_amount' => $bi['base_planned_amount'],
+                                                                'frequency' => $bi['frequency'],
                                                                 'category_id' => $bi['category_id'],
                                                                 'notes' => $bi['notes'] ?? '',
                                                                 'person_ids' => $bi['responsible']->pluck('id')->toArray(),
@@ -711,6 +715,7 @@ function budgetsPage() {
         itemForm: {
             name: '',
             planned_amount: '',
+            frequency: 'one_time',
             category_id: '',
             category_name: '',
             notes: '',
@@ -879,6 +884,7 @@ function budgetsPage() {
                 this.itemForm = {
                     name: itemData.name,
                     planned_amount: itemData.planned_amount,
+                    frequency: itemData.frequency || 'one_time',
                     category_id: itemData.category_id || '',
                     category_name: '',
                     notes: itemData.notes || '',
@@ -888,6 +894,7 @@ function budgetsPage() {
                 this.itemForm = {
                     name: '',
                     planned_amount: '',
+                    frequency: 'one_time',
                     category_id: '',
                     category_name: '',
                     notes: '',
@@ -951,6 +958,7 @@ function budgetsPage() {
                     body: JSON.stringify({
                         name: this.itemForm.name,
                         planned_amount: this.itemForm.planned_amount,
+                        frequency: this.itemForm.frequency,
                         category_id: (this.itemForm.category_id && this.itemForm.category_id !== '__custom__') ? this.itemForm.category_id : null,
                         category_name: (this.itemForm.category_id === '__custom__' && this.itemForm.category_name) ? this.itemForm.category_name : null,
                         notes: this.itemForm.notes || null,
