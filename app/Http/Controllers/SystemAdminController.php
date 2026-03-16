@@ -1040,6 +1040,10 @@ class SystemAdminController extends Controller
         $ticket->messages()->delete();
         $ticket->delete();
 
+        if (request()->expectsJson()) {
+            return response()->json(['success' => true, 'message' => "Тікет \"{$subject}\" видалено."]);
+        }
+
         return redirect()->route('system.support.index')
             ->with('success', "Тікет \"{$subject}\" видалено.");
     }
@@ -1071,6 +1075,10 @@ class SystemAdminController extends Controller
         }
 
         $ticket->save();
+
+        if (request()->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Тікет оновлено.']);
+        }
 
         return redirect()->route('system.support.show', $ticket)
             ->with('success', 'Тікет оновлено.');

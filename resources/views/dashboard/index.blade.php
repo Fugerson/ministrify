@@ -340,7 +340,7 @@ function dashboardBuilder() {
                         if (el) el.style.display = w.enabled ? '' : 'none';
                         else if (w.enabled) _nr = true;
                     });
-                    if (_nr) { window.location.reload(); return; }
+                    if (_nr) { Livewire.navigate(window.location.href); return; }
                     this.originalWidgets = JSON.parse(JSON.stringify(this.widgets));
                     this.editMode = false;
                     this.destroySortable();
