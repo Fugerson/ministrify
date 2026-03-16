@@ -632,7 +632,7 @@ function servicePlanningMatrix() {
         },
 
         updatePeriodLabel() {
-            const months = ['Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень', 'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'];
+            const months = @json(explode(',', __('app.cal_months')));
             if (this.viewMode === 'week') {
                 const sd = this.startDate;
                 const ed = this.endDate;
