@@ -585,6 +585,41 @@
                         @endforelse
 
                     </tbody>
+                    @if($ministries->isNotEmpty())
+                    @php
+                        $teamTotalBudget = $ministries->sum('monthly_budget');
+                        $teamTotalSpent = $ministries->sum('spent');
+                        $teamTotalRemaining = $teamTotalBudget - $teamTotalSpent;
+                        $teamTotalPct = $teamTotalBudget > 0 ? round($teamTotalSpent / $teamTotalBudget * 100) : 0;
+                    @endphp
+                    <tfoot class="bg-gray-50 dark:bg-gray-700/50 border-t-2 border-gray-300 dark:border-gray-600">
+                        <tr>
+                            <td class="px-6 py-3 font-semibold text-gray-900 dark:text-white">{{ __('app.total_label') }}</td>
+                            <td class="px-6 py-3 text-right whitespace-nowrap font-semibold text-gray-900 dark:text-white">
+                                {{ number_format($teamTotalBudget, 0, ',', ' ') }} ₴
+                            </td>
+                            <td class="px-6 py-3 text-right whitespace-nowrap font-semibold text-red-600 dark:text-red-400">
+                                {{ number_format($teamTotalSpent, 0, ',', ' ') }} ₴
+                            </td>
+                            <td class="px-6 py-3 text-right whitespace-nowrap font-semibold {{ $teamTotalRemaining >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
+                                {{ number_format($teamTotalRemaining, 0, ',', ' ') }} ₴
+                            </td>
+                            <td class="px-6 py-3">
+                                @if($teamTotalBudget > 0)
+                                <div class="flex items-center gap-2">
+                                    <div class="flex-1 bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+                                        <div class="{{ $teamTotalPct > 100 ? 'bg-red-600' : ($teamTotalPct > 80 ? 'bg-orange-500' : 'bg-green-500') }} h-2 rounded-full" style="width: {{ min(100, $teamTotalPct) }}%"></div>
+                                    </div>
+                                    <span class="text-xs {{ $teamTotalPct > 100 ? 'text-red-600' : 'text-gray-500' }} w-12 text-right">{{ $teamTotalPct }}%</span>
+                                </div>
+                                @endif
+                            </td>
+                            @if(auth()->user()->canEdit('finances'))
+                            <td class="px-3 py-3"></td>
+                            @endif
+                        </tr>
+                    </tfoot>
+                    @endif
                 </table>
             </div>
 
