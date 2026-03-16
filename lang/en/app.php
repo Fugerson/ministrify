@@ -6314,4 +6314,6 @@ return [
     'confirm_new_password' => 'Confirm new password',
     'password_changed' => 'Password changed successfully',
     'current_password_incorrect' => 'Current password is incorrect',
+
+    'show_list' => 'Show list',
 ];

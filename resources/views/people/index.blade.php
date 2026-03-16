@@ -118,6 +118,18 @@
     <!-- Search & Filter Bar -->
     <div id="people-search-bar" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
         <div class="flex flex-col sm:flex-row gap-3">
+            <!-- Mobile filter toggle -->
+            <button @click="showFilterSidebar = !showFilterSidebar"
+                    class="lg:hidden inline-flex items-center justify-center gap-2 px-3 py-2.5 border rounded-xl font-medium transition-colors shrink-0"
+                    :class="showFilterSidebar ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 border-primary-200 dark:border-primary-800' : 'bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600'">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+                </svg>
+                <span x-text="showFilterSidebar ? @js(__('app.show_list')) : @js(__('app.filters'))"></span>
+                <span x-show="activeFilterCount > 0" x-text="activeFilterCount"
+                      class="px-1.5 py-0.5 text-xs font-semibold bg-primary-600 text-white rounded-full"></span>
+            </button>
+
             <!-- Search -->
             <div class="flex-1 relative">
                 <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -244,15 +256,9 @@
     <!-- Filter Sidebar + Table Layout -->
     <div class="flex gap-6 items-start">
 
-        <!-- Mobile backdrop -->
-        <div x-show="showFilterSidebar" @click="showFilterSidebar = false" x-cloak
-             x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
-             x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
-             class="fixed inset-0 bg-black/50 z-40 lg:hidden"></div>
-
         <!-- Expand filters button (when sidebar is hidden) -->
         <button x-show="!showFilterSidebar" @click="showFilterSidebar = true"
-                class="shrink-0 flex items-center gap-1.5 px-2 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:border-primary-300 dark:hover:border-primary-700 transition-colors"
+                class="shrink-0 hidden lg:flex items-center gap-1.5 px-2 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:border-primary-300 dark:hover:border-primary-700 transition-colors"
                 title="{{ __('app.filters') }}">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
@@ -263,16 +269,15 @@
         </button>
 
         <!-- Filter Sidebar -->
-        <aside x-show="showFilterSidebar" x-cloak class="w-72 shrink-0">
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] overflow-y-auto
-                        fixed inset-y-0 left-0 w-72 z-50 rounded-none border-r lg:relative lg:inset-auto lg:z-auto lg:rounded-xl lg:border lg:w-auto">
+        <aside x-show="showFilterSidebar" x-cloak class="w-full lg:w-72 shrink-0">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] overflow-y-auto">
 
                 <!-- Header -->
                 <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800 z-10">
                     <h3 class="text-sm font-semibold text-gray-900 dark:text-white">{{ __('app.filters') }}</h3>
                     <div class="flex items-center gap-2">
                         <button x-show="activeFilterCount > 0" @click="clearFilters()" class="text-xs text-red-500 hover:text-red-700">{{ __('app.clear_all') }}</button>
-                        <button @click="showFilterSidebar = false" class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" title="{{ __('app.collapse') }}">
+                        <button @click="showFilterSidebar = false" class="hidden lg:block p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" title="{{ __('app.collapse') }}">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
                         </button>
                     </div>
@@ -479,7 +484,7 @@
         </aside>
 
         <!-- Main content (table) -->
-        <div class="flex-1 min-w-0 space-y-4">
+        <div class="flex-1 min-w-0 space-y-4" :class="showFilterSidebar && 'hidden lg:block'"
 
     @if($peopleLimited)
     <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-3 text-amber-800 dark:text-amber-200 text-sm">

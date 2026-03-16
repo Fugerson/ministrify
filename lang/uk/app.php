@@ -6147,4 +6147,6 @@ return [
     'confirm_new_password' => 'Підтвердіть новий пароль',
     'password_changed' => 'Пароль успішно змінено',
     'current_password_incorrect' => 'Поточний пароль невірний',
+
+    'show_list' => 'Показати список',
 ];
