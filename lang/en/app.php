@@ -573,6 +573,7 @@ return [
     'make_member' => 'Make member',
     'remove_from_group' => 'Remove from group',
     'no_members' => 'No members',
+    'no_guests_yet' => 'No guests yet',
     'add_first_member' => 'Add first member',
     'all_records' => 'All records',
     'guests' => 'guests',

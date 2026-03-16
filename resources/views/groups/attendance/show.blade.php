@@ -113,11 +113,10 @@
                     <div>
                         <p class="font-medium text-gray-900 dark:text-white">{{ $record->person->full_name }}</p>
                         <div class="flex items-center gap-2">
-                            @if($pivotRole && $pivotRole !== 'member')
+                            @if($pivotRole && $pivotRole !== 'member' && $pivotRole !== 'guest')
                             <span class="text-xs text-gray-500 dark:text-gray-400">
                                 @if($pivotRole === 'leader') {{ __('app.leader') }}
                                 @elseif($pivotRole === 'assistant') {{ __('app.assistant_role') }}
-                                @elseif($pivotRole === 'guest') {{ __('app.group_role_guest') }}
                                 @endif
                             </span>
                             @endif
@@ -147,6 +146,39 @@
             </div>
             @endif
             @endforeach
+
+            @if($group->guests->count() > 0)
+            <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
+                <p class="text-xs font-medium text-orange-600 dark:text-orange-400 mb-3">{{ __('app.group_guests_list') }}</p>
+                @foreach($group->guests as $guest)
+                @php $isPresent = isset($guestAttendance[$guest->id]) && $guestAttendance[$guest->id]->present; @endphp
+                <div class="flex items-center justify-between py-2">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center mr-3">
+                            <span class="text-sm font-medium text-orange-600 dark:text-orange-400">{{ mb_substr($guest->first_name, 0, 1) }}{{ mb_substr($guest->last_name ?? '', 0, 1) }}</span>
+                        </div>
+                        <div>
+                            <p class="font-medium text-gray-900 dark:text-white">{{ $guest->full_name }}</p>
+                            <span class="text-xs text-orange-500 dark:text-orange-400">{{ __('app.group_role_guest') }}</span>
+                        </div>
+                    </div>
+                    <div>
+                        @if($isPresent)
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-sm font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            {{ __('app.group_present') }}
+                        </span>
+                        @else
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-sm font-medium bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                            {{ __('app.group_absent') }}
+                        </span>
+                        @endif
+                    </div>
+                </div>
+                @endforeach
+            </div>
+            @endif
         </div>
     </div>
 </div>

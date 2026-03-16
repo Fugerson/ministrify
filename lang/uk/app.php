@@ -579,6 +579,7 @@ return [
     'make_member' => 'Зробити учасником',
     'remove_from_group' => 'Видалити з групи',
     'no_members' => 'Немає учасників',
+    'no_guests_yet' => 'Немає гостей',
     'add_first_member' => 'Додати першого учасника',
     'all_records' => 'Усі записи',
     'guests' => 'гостей',

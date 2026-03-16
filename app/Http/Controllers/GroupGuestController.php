@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Group;
-use App\Models\Person;
+use App\Models\GroupGuest;
 use App\Services\ImageService;
 use Illuminate\Http\Request;
 
@@ -36,19 +36,17 @@ class GroupGuestController extends Controller
         }
 
         $validated['church_id'] = $this->getCurrentChurch()->id;
-        $validated['membership_status'] = 'guest';
+        $validated['group_id'] = $group->id;
 
-        $person = Person::create($validated);
-
-        $group->members()->attach($person->id, ['role' => Group::ROLE_GUEST]);
+        GroupGuest::create($validated);
 
         return $this->successResponse($request, __('messages.guest_added'), 'groups.show', ['group' => $group->id]);
     }
 
-    public function update(Request $request, Group $group, Person $guest)
+    public function update(Request $request, Group $group, GroupGuest $guest)
     {
         $this->authorize('update', $group);
-        abort_unless($group->guests()->where('people.id', $guest->id)->exists(), 404);
+        abort_unless($guest->group_id === $group->id, 404);
 
         $validated = $request->validate([
             'first_name' => 'required|string|max:255',
@@ -71,13 +69,12 @@ class GroupGuestController extends Controller
         return $this->successResponse($request, __('messages.guest_updated'), 'groups.show', ['group' => $group->id]);
     }
 
-    public function destroy(Request $request, Group $group, Person $guest)
+    public function destroy(Request $request, Group $group, GroupGuest $guest)
     {
         $this->authorize('update', $group);
-        abort_unless($group->guests()->where('people.id', $guest->id)->exists(), 404);
+        abort_unless($guest->group_id === $group->id, 404);
 
-        // Remove from group (detach pivot)
-        $group->members()->detach($guest->id);
+        $guest->delete();
 
         return $this->successResponse($request, __('messages.guest_deleted'), 'groups.show', ['group' => $group->id]);
     }

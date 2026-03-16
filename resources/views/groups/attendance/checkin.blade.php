@@ -25,7 +25,7 @@
             <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.group_tap_to_mark') }}</p>
         </div>
         <div class="divide-y divide-gray-200 dark:divide-gray-700">
-            @foreach($group->members->sortBy('first_name') as $member)
+            @foreach($group->members->filter(fn($m) => $m->pivot->role !== 'guest')->sortBy('first_name') as $member)
             @php
                 $record = $attendance->records->firstWhere('person_id', $member->id);
                 $isPresent = $record ? $record->present : false;
@@ -54,8 +54,6 @@
                             {{ __('app.leader') }}
                             @elseif($member->pivot->role === 'assistant')
                             {{ __('app.assistant_role') }}
-                            @elseif($member->pivot->role === 'guest')
-                            {{ __('app.group_role_guest') }}
                             @else
                             {{ __('app.member_role') }}
                             @endif
@@ -71,6 +69,48 @@
                 </div>
             </button>
             @endforeach
+
+            @if($group->guests->count() > 0)
+            <div class="border-t-2 border-orange-200 dark:border-orange-800">
+                <div class="px-4 py-2 bg-orange-50 dark:bg-orange-900/20">
+                    <p class="text-xs font-medium text-orange-600 dark:text-orange-400">{{ __('app.group_guests_list') }}</p>
+                </div>
+                @foreach($group->guests->sortBy('first_name') as $guest)
+                @php
+                    $guestRecord = \DB::table('group_guest_attendance')
+                        ->where('group_guest_id', $guest->id)
+                        ->where('attendance_id', $attendance->id)
+                        ->first();
+                    $isGuestPresent = $guestRecord ? $guestRecord->present : false;
+                @endphp
+                <button type="button"
+                        onclick="toggleGuestPresence({{ $guest->id }}, this)"
+                        data-guest-id="{{ $guest->id }}"
+                        class="w-full p-4 flex items-center justify-between hover:bg-orange-50 dark:hover:bg-orange-900/10 transition-all {{ $isGuestPresent ? 'bg-green-50 dark:bg-green-900/20' : '' }}">
+                    <div class="flex items-center">
+                        @if($guest->photo)
+                        <img src="{{ Storage::url($guest->photo) }}" alt="" class="w-12 h-12 rounded-full object-cover mr-4" loading="lazy">
+                        @else
+                        <div class="w-12 h-12 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center mr-4">
+                            <span class="text-lg font-medium text-orange-600 dark:text-orange-400">{{ mb_substr($guest->first_name, 0, 1) }}{{ mb_substr($guest->last_name ?? '', 0, 1) }}</span>
+                        </div>
+                        @endif
+                        <div class="text-left">
+                            <p class="font-medium text-gray-900 dark:text-white">{{ $guest->full_name }}</p>
+                            <p class="text-sm text-orange-500 dark:text-orange-400">{{ __('app.group_role_guest') }}</p>
+                        </div>
+                    </div>
+                    <div class="check-indicator {{ $isGuestPresent ? '' : 'opacity-0' }} transition-opacity">
+                        <div class="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                        </div>
+                    </div>
+                </button>
+                @endforeach
+            </div>
+            @endif
         </div>
     </div>
 
@@ -99,6 +139,36 @@ async function togglePresence(personId, button) {
                 'Accept': 'application/json'
             },
             body: JSON.stringify({ person_id: personId })
+        });
+
+        const data = await response.json().catch(() => ({}));
+
+        if (data.success) {
+            const indicator = button.querySelector('.check-indicator');
+            if (data.present) {
+                button.classList.add('bg-green-50', 'dark:bg-green-900/20');
+                indicator.classList.remove('opacity-0');
+            } else {
+                button.classList.remove('bg-green-50', 'dark:bg-green-900/20');
+                indicator.classList.add('opacity-0');
+            }
+            document.getElementById('presentCount').textContent = data.members_present;
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+async function toggleGuestPresence(guestId, button) {
+    try {
+        const response = await fetch(toggleUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ guest_id: guestId })
         });
 
         const data = await response.json().catch(() => ({}));

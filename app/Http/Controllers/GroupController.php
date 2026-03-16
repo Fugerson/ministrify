@@ -156,7 +156,7 @@ class GroupController extends Controller
 
         $role = $request->input('role', 'member');
 
-        // Guest flow: create new Person and attach as guest
+        // Guest flow: create GroupGuest record (separate from people table)
         if ($role === 'guest') {
             $validated = $request->validate([
                 'first_name' => 'required|string|max:255',
@@ -174,14 +174,13 @@ class GroupController extends Controller
             }
 
             $validated['church_id'] = $this->getCurrentChurch()->id;
-            $validated['membership_status'] = 'guest';
+            $validated['group_id'] = $group->id;
 
-            $person = Person::create($validated);
-            $group->members()->attach($person->id, ['role' => Group::ROLE_GUEST, 'joined_at' => now()]);
+            $guest = \App\Models\GroupGuest::create($validated);
 
             $this->logAuditAction('member_added', 'Group', $group->id, $group->name, [
-                'person_id' => $person->id,
-                'person_name' => $person->full_name,
+                'guest_id' => $guest->id,
+                'guest_name' => $guest->full_name,
                 'role' => 'guest',
             ]);
 
@@ -240,7 +239,7 @@ class GroupController extends Controller
         abort_unless($person->church_id === $this->getCurrentChurch()->id, 404);
 
         $validated = $request->validate([
-            'role' => 'required|in:leader,assistant,member,guest',
+            'role' => 'required|in:leader,assistant,member',
         ]);
 
         // If promoting to leader, demote current leader

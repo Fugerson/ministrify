@@ -166,12 +166,9 @@ class Group extends Model
             ->withTimestamps();
     }
 
-    public function guests(): BelongsToMany
+    public function guests(): HasMany
     {
-        return $this->belongsToMany(Person::class)
-            ->withPivot(['role', 'joined_at'])
-            ->wherePivot('role', self::ROLE_GUEST)
-            ->withTimestamps();
+        return $this->hasMany(GroupGuest::class);
     }
 
     /**

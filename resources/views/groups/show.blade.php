@@ -90,7 +90,7 @@
     <!-- Stats Row -->
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-            <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $group->members->count() }}</div>
+            <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $group->members->filter(fn($m) => $m->pivot->role !== 'guest')->count() }}</div>
             <div class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.members') }}</div>
         </div>
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
@@ -168,7 +168,7 @@
             </div>
 
             @php
-                $sortedMembers = $group->members->sortBy(fn($m) => match($m->pivot->role) { 'leader' => 0, 'assistant' => 1, 'member' => 2, 'guest' => 3, default => 4 });
+                $sortedMembers = $group->members->filter(fn($m) => $m->pivot->role !== 'guest')->sortBy(fn($m) => match($m->pivot->role) { 'leader' => 0, 'assistant' => 1, 'member' => 2, default => 3 });
             @endphp
 
             @if($sortedMembers->count() > 0)
@@ -237,9 +237,8 @@
                                                         'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 hover:bg-amber-200 dark:hover:bg-amber-900/50': role === 'leader',
                                                         'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40': role === 'assistant',
                                                         'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600': role === 'member'
-                                                        'bg-orange-50 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/40': role === 'guest'
                                                     }">
-                                                <span x-text="role === 'leader' ? @js(__('app.leader')) : (role === 'assistant' ? @js(__('app.assistant_role')) : (role === 'guest' ? @js(__('app.group_role_guest')) : @js(__('app.member_role'))))"></span>
+                                                <span x-text="role === 'leader' ? @js(__('app.leader')) : (role === 'assistant' ? @js(__('app.assistant_role')) : @js(__('app.member_role')))"></span>
                                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                                             </button>
                                             <div x-show="open" @click.away="open = false" x-transition x-cloak
@@ -259,11 +258,6 @@
                                                         :class="role === 'member' ? 'text-gray-900 dark:text-white font-semibold' : 'text-gray-700 dark:text-gray-300'">
                                                     <span class="w-2 h-2 rounded-full bg-gray-400"></span> {{ __('app.member_role') }}
                                                 </button>
-                                                <button type="button" @click="setRole('guest')" :disabled="saving"
-                                                        class="w-full text-left px-3 py-1.5 text-xs hover:bg-gray-50 dark:hover:bg-gray-600 flex items-center gap-2"
-                                                        :class="role === 'guest' ? 'text-orange-600 dark:text-orange-400 font-semibold' : 'text-gray-700 dark:text-gray-300'">
-                                                    <span class="w-2 h-2 rounded-full bg-orange-400"></span> {{ __('app.group_role_guest') }}
-                                                </button>
                                             </div>
                                         </div>
                                         @else
@@ -272,9 +266,6 @@
                                         </template>
                                         <template x-if="role === 'assistant'">
                                             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300">{{ __('app.assistant_role') }}</span>
-                                        </template>
-                                        <template x-if="role === 'guest'">
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-50 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400">{{ __('app.group_role_guest') }}</span>
                                         </template>
                                         @endcan
                                     </div>
@@ -383,10 +374,9 @@
                                                 :class="{
                                                     'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400': role === 'leader',
                                                     'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300': role === 'assistant',
-                                                    'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400': role === 'member',
-                                                    'bg-orange-50 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400': role === 'guest'
+                                                    'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400': role === 'member'
                                                 }">
-                                            <span x-text="role === 'leader' ? @js(__('app.leader')) : (role === 'assistant' ? @js(__('app.assistant_role')) : (role === 'guest' ? @js(__('app.group_role_guest')) : @js(__('app.member_role'))))"></span>
+                                            <span x-text="role === 'leader' ? @js(__('app.leader')) : (role === 'assistant' ? @js(__('app.assistant_role')) : @js(__('app.member_role')))"></span>
                                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                                         </button>
                                         <div x-show="open" @click.away="open = false" x-transition x-cloak
@@ -400,9 +390,6 @@
                                             <button type="button" @click="setRole('member')" :disabled="saving" class="w-full text-left px-3 py-1.5 text-xs hover:bg-gray-50 dark:hover:bg-gray-600 flex items-center gap-2" :class="role === 'member' ? 'text-gray-900 dark:text-white font-semibold' : 'text-gray-700 dark:text-gray-300'">
                                                 <span class="w-2 h-2 rounded-full bg-gray-400"></span> {{ __('app.member_role') }}
                                             </button>
-                                            <button type="button" @click="setRole('guest')" :disabled="saving" class="w-full text-left px-3 py-1.5 text-xs hover:bg-gray-50 dark:hover:bg-gray-600 flex items-center gap-2" :class="role === 'guest' ? 'text-orange-600 dark:text-orange-400 font-semibold' : 'text-gray-700 dark:text-gray-300'">
-                                                <span class="w-2 h-2 rounded-full bg-orange-400"></span> {{ __('app.group_role_guest') }}
-                                            </button>
                                         </div>
                                     </div>
                                     @else
@@ -411,9 +398,6 @@
                                     </template>
                                     <template x-if="role === 'assistant'">
                                         <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300">{{ __('app.assistant_role') }}</span>
-                                    </template>
-                                    <template x-if="role === 'guest'">
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-50 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400">{{ __('app.group_role_guest') }}</span>
                                     </template>
                                     @endcan
                                 </div>
@@ -534,6 +518,68 @@
             </div>
             @endif
         </div>
+
+        <!-- Group Guests (separate from members) -->
+        @if($group->guests->count() > 0 || auth()->user()->can('update', $group))
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <h3 class="font-semibold text-gray-900 dark:text-white">{{ __('app.group_guests_list') }}</h3>
+                    <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 text-xs font-semibold">{{ $group->guests->count() }}</span>
+                </div>
+            </div>
+
+            @if($group->guests->count() > 0)
+            <div class="divide-y divide-gray-200 dark:divide-gray-700">
+                @foreach($group->guests->sortBy('first_name') as $guest)
+                <div class="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group/guest-row">
+                    {{-- Avatar --}}
+                    <div class="shrink-0" x-data="{ imgErr: false }">
+                        @if($guest->photo)
+                        <img x-show="!imgErr" x-on:error="imgErr = true" src="{{ Storage::url($guest->photo) }}" alt="" class="w-10 h-10 rounded-full object-cover" loading="lazy">
+                        <div x-show="imgErr" x-cloak class="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center">
+                            <span class="text-white text-sm font-semibold">{{ mb_substr($guest->first_name, 0, 1) }}{{ mb_substr($guest->last_name ?? '', 0, 1) }}</span>
+                        </div>
+                        @else
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center">
+                            <span class="text-white text-sm font-semibold">{{ mb_substr($guest->first_name, 0, 1) }}{{ mb_substr($guest->last_name ?? '', 0, 1) }}</span>
+                        </div>
+                        @endif
+                    </div>
+
+                    {{-- Name --}}
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2">
+                            <span class="font-medium text-sm text-gray-900 dark:text-white truncate">{{ $guest->full_name }}</span>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-50 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400">{{ __('app.group_role_guest') }}</span>
+                        </div>
+                        @if($guest->notes)
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">{{ $guest->notes }}</p>
+                        @endif
+                    </div>
+
+                    {{-- Birth date --}}
+                    @if($guest->birth_date)
+                    <span class="hidden sm:inline text-xs text-gray-400">{{ $guest->birth_date->format('d.m.Y') }}</span>
+                    @endif
+
+                    {{-- Delete button --}}
+                    @can('update', $group)
+                    <button @click="ajaxDelete('{{ route('groups.guests.destroy', [$group, $guest]) }}', @js(__('messages.confirm_remove_member')), () => $el.closest('.group\\/guest-row').remove())"
+                            class="shrink-0 p-1.5 text-gray-300 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 opacity-0 group-hover/guest-row:opacity-100 transition-opacity rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    </button>
+                    @endcan
+                </div>
+                @endforeach
+            </div>
+            @else
+            <div class="p-6 text-center text-sm text-gray-500 dark:text-gray-400">
+                {{ __('app.no_guests_yet') }}
+            </div>
+            @endif
+        </div>
+        @endif
 
         <!-- Recent Attendance -->
         @if($currentChurch->attendance_enabled)
@@ -728,7 +774,7 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.group_present_members') }}</label>
                     <div class="max-h-60 overflow-y-auto space-y-1.5 pr-1">
-                        @foreach($group->members->sortBy('first_name') as $member)
+                        @foreach($group->members->filter(fn($m) => $m->pivot->role !== 'guest')->sortBy('first_name') as $member)
                         <label class="flex items-center p-2.5 bg-gray-50 dark:bg-gray-700 rounded-xl cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
                             <input type="checkbox" name="present[]" value="{{ $member->id }}"
                                    class="w-5 h-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500">
@@ -737,12 +783,24 @@
                             <span class="ml-auto text-xs text-gray-500 dark:text-gray-400">
                                 @if($member->pivot->role === 'leader') {{ __('app.leader') }}
                                 @elseif($member->pivot->role === 'assistant') {{ __('app.assistant_role') }}
-                                @elseif($member->pivot->role === 'guest') {{ __('app.group_role_guest') }}
                                 @endif
                             </span>
                             @endif
                         </label>
                         @endforeach
+                        @if($group->guests->count() > 0)
+                        <div class="pt-2 mt-1 border-t border-gray-200 dark:border-gray-600">
+                            <p class="text-xs font-medium text-orange-600 dark:text-orange-400 mb-1.5 px-1">{{ __('app.group_guests_list') }}</p>
+                            @foreach($group->guests->sortBy('first_name') as $guest)
+                            <label class="flex items-center p-2.5 bg-orange-50/50 dark:bg-orange-900/10 rounded-xl cursor-pointer hover:bg-orange-100/50 dark:hover:bg-orange-900/20 transition-colors">
+                                <input type="checkbox" name="guests_present[]" value="{{ $guest->id }}"
+                                       class="w-5 h-5 rounded border-gray-300 text-orange-500 focus:ring-orange-500">
+                                <span class="ml-3 text-sm text-gray-900 dark:text-white">{{ $guest->full_name }}</span>
+                                <span class="ml-auto text-xs text-orange-500 dark:text-orange-400">{{ __('app.group_role_guest') }}</span>
+                            </label>
+                            @endforeach
+                        </div>
+                        @endif
                     </div>
                 </div>
 

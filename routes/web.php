@@ -876,8 +876,8 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
 
     // Group Guests
     Route::post('groups/{group}/guests', [\App\Http\Controllers\GroupGuestController::class, 'store'])->name('groups.guests.store');
-    Route::put('groups/{group}/guests/{guest:id}', [\App\Http\Controllers\GroupGuestController::class, 'update'])->name('groups.guests.update');
-    Route::delete('groups/{group}/guests/{guest:id}', [\App\Http\Controllers\GroupGuestController::class, 'destroy'])->name('groups.guests.destroy');
+    Route::put('groups/{group}/guests/{guest}', [\App\Http\Controllers\GroupGuestController::class, 'update'])->name('groups.guests.update');
+    Route::delete('groups/{group}/guests/{guest}', [\App\Http\Controllers\GroupGuestController::class, 'destroy'])->name('groups.guests.destroy');
 
     // Group Attendance
     Route::prefix('groups/{group}/attendance')->name('groups.attendance.')->group(function () {
