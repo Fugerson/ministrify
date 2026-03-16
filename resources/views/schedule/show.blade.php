@@ -2306,7 +2306,7 @@ function planTemplatesManager() {
                 const data = await response.json().catch(() => ({}));
                 if (data.success) {
                     showGlobalToast(@js( __("app.schedule_template_applied") ), 'success');
-                    setTimeout(() => window.location.reload(), 500);
+                    setTimeout(() => Livewire.navigate(window.location.href), 200);
                 } else {
                     showGlobalToast(data.message || @js( __("app.schedule_error") ), 'error');
                 }
@@ -2951,7 +2951,7 @@ function servicePlanManager() {
                 });
 
                 if (response.ok) {
-                    window.location.reload();
+                    Livewire.navigate(window.location.href);
                 }
             } catch (err) {
                 console.error(err);
@@ -2982,7 +2982,7 @@ function servicePlanManager() {
                 const data = await response.json().catch(() => ({}));
                 if (data.success) {
                     this.showTextModal = false;
-                    window.location.reload();
+                    Livewire.navigate(window.location.href);
                 }
             } catch (err) {
                 console.error(err);

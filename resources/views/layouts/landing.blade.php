@@ -324,7 +324,7 @@
         .catch(err => console.error('Locale switch error:', err));
 
         // Reload after brief delay
-        setTimeout(() => location.reload(), 2000);
+        setTimeout(() => { window.location.href = window.location.href; }, 200);
     };
     </script>
 

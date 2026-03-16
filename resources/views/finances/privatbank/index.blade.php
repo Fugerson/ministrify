@@ -209,7 +209,7 @@
                     </svg>
                     <p class="mt-2 text-gray-600 dark:text-gray-400">{{ __('app.no_transactions_found') }}</p>
                     @if($tab === 'new')
-                        <button type="button" @click="ajaxAction('{{ route('finances.privatbank.sync') }}', 'POST').then(() => location.reload())" class="mt-4 text-green-600 dark:text-green-400 hover:underline">
+                        <button type="button" @click="ajaxAction('{{ route('finances.privatbank.sync') }}', 'POST').then(() => Livewire.navigate(window.location.href))" class="mt-4 text-green-600 dark:text-green-400 hover:underline">
                             {{ __('app.sync_now') }}
                         </button>
                     @endif
@@ -375,7 +375,7 @@ function importModal() {
                 }
                 showToast('success', data.message || @js(__('app.status_imported') ) + '!');
                 closeImportModal();
-                setTimeout(() => location.reload(), 600);
+                setTimeout(() => Livewire.navigate(window.location.href), 200);
             } catch (e) {
                 showToast('error', @js( __('app.connection_error_generic') ));
                 this.saving = false;

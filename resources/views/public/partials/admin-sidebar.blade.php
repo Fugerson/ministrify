@@ -673,7 +673,7 @@ document.addEventListener('alpine:init', () => {
                 this.destroyPageSortable();
 
                 sessionStorage.setItem('adminEditMode', '1');
-                window.location.reload();
+                Livewire.navigate(window.location.href);
             } catch (e) {
                 this.showPageToast(@js(__('app.sb_error_prefix')) + e.message);
             } finally {
@@ -1257,7 +1257,7 @@ document.addEventListener('alpine:init', () => {
                 sessionStorage.setItem('adminSidebarOpen', '1');
                 sessionStorage.setItem('adminSidebarTab', this.activeTab);
                 if (this.contentPanel) sessionStorage.setItem('adminContentPanel', this.contentPanel);
-                window.location.reload();
+                Livewire.navigate(window.location.href);
             }
         },
     }));

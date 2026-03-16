@@ -479,7 +479,7 @@ function churchRolesManager() {
 
                 if (response.ok) {
                     // Reload page as this is a complete reset
-                    window.location.reload();
+                    Livewire.navigate(window.location.href);
                 } else {
                     const data = await response.json().catch(() => ({}));
                     alert(data.message || @js(__('app.error_resetting')));

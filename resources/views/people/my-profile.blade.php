@@ -631,7 +631,7 @@
                              });
                              if (response.ok) {
                                  this.currentPosition = position;
-                                 setTimeout(() => window.location.reload(), 500);
+                                 setTimeout(() => Livewire.navigate(window.location.href), 200);
                              }
                          } catch (e) {
                              console.error('Menu position update error:', e);
@@ -688,7 +688,7 @@
                              });
                              if (response.ok) {
                                  this.currentTheme = theme;
-                                 setTimeout(() => window.location.reload(), 500);
+                                 setTimeout(() => Livewire.navigate(window.location.href), 200);
                              }
                          } catch (e) {
                              console.error('Theme update error:', e);

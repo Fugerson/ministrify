@@ -2265,7 +2265,7 @@ function peopleTable() {
                     if (this.duplicatePairs.length === 0) {
                         setTimeout(() => {
                             this.showDuplicatesModal = false;
-                            window.location.reload();
+                            Livewire.navigate(window.location.href);
                         }, 1000);
                     }
                 } else {
@@ -2310,7 +2310,7 @@ function peopleTable() {
 
                     // Show success message and optionally reload
                     if (data.reload) {
-                        window.location.reload();
+                        Livewire.navigate(window.location.href);
                     } else {
                         alert(data.message || @js(__('app.operation_success')));
                     }

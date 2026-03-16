@@ -338,7 +338,7 @@ function _addResourceFolder(ctx, data) {
     var tbody = document.querySelector('table tbody');
     if (!tbody) {
         // Empty state — need to reload to get the table
-        window.location.reload();
+        Livewire.navigate(window.location.href);
         return;
     }
     var name = ctx.$refs.createFolderForm.querySelector('[name="name"]').value;
@@ -357,7 +357,7 @@ function _addResourceFolder(ctx, data) {
 function _addResourceFile(fileName) {
     var tbody = document.querySelector('table tbody');
     if (!tbody) {
-        window.location.reload();
+        Livewire.navigate(window.location.href);
         return;
     }
     var safeName = fileName.replace(/&/g, '\x26amp;').replace(/\x3C/g, '\x26lt;').replace(/>/g, '\x26gt;');

@@ -372,7 +372,7 @@
 function _addResourceFolder(ctx, data) {
     ctx.showCreateFolder = false;
     var tbody = document.querySelector('table tbody');
-    if (!tbody) { window.location.reload(); return; }
+    if (!tbody) { Livewire.navigate(window.location.href); return; }
     var name = ctx.$refs.createFolderForm.querySelector('[name="name"]').value;
     var safeName = name.replace(/&/g, '\x26amp;').replace(/\x3C/g, '\x26lt;').replace(/>/g, '\x26gt;');
     var tr = document.createElement('tr');
@@ -388,7 +388,7 @@ function _addResourceFolder(ctx, data) {
 
 function _addResourceFile(fileName) {
     var tbody = document.querySelector('table tbody');
-    if (!tbody) { window.location.reload(); return; }
+    if (!tbody) { Livewire.navigate(window.location.href); return; }
     var safeName = fileName.replace(/&/g, '\x26amp;').replace(/\x3C/g, '\x26lt;').replace(/>/g, '\x26gt;');
     var tr = document.createElement('tr');
     tr.className = 'hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer group';

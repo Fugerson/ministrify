@@ -597,7 +597,7 @@ function messengerApp() {
                     if (!data.broadcast && recipient) {
                         this.selectUser(recipient.id, recipient.name, recipient.role);
                     } else {
-                        window.location.reload();
+                        Livewire.navigate(window.location.href);
                     }
                 }
             } catch (error) {

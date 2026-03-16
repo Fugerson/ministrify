@@ -269,7 +269,7 @@ function personLinker(userId, suggestedMatches) {
             .then(data => {
                 if (data.success) {
                     alert(data.message);
-                    location.reload();
+                    Livewire.navigate(window.location.href);
                 } else {
                     alert(@js(__('app.error') ) + ': ' + data.message);
                 }
@@ -310,7 +310,7 @@ onPageReady(function() {
             .then(data => {
                 if (data.success) {
                     alert(data.message);
-                    location.reload();
+                    Livewire.navigate(window.location.href);
                 } else {
                     alert(@js(__('app.error') ) + ': ' + data.message);
                 }

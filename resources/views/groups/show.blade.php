@@ -602,7 +602,7 @@
     <div class="min-h-screen px-4 flex items-center justify-center">
         <div class="fixed inset-0 bg-black/50" onclick="document.getElementById('addMemberModal').classList.add('hidden')"></div>
         <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full p-4 sm:p-6"
-             x-data="{ role: 'member', ...ajaxForm({url: '{{ route('groups.members.add', $group) }}', method: 'POST', stayOnPage: true, onSuccess() { window.location.reload(); }}) }">
+             x-data="{ role: 'member', ...ajaxForm({url: '{{ route('groups.members.add', $group) }}', method: 'POST', stayOnPage: true, onSuccess() { Livewire.navigate(window.location.href); }}) }">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.add_member_title') }}</h3>
             <form @submit.prevent="submit($refs.addMemberForm)" x-ref="addMemberForm" enctype="multipart/form-data">
                 <div class="space-y-4">
@@ -696,7 +696,7 @@
             @endif
 
             <form @submit.prevent="submit($refs.grpAttModalForm)" x-ref="grpAttModalForm"
-                  x-data="{ ...ajaxForm({ url: '{{ route('groups.attendance.store', $group) }}', method: 'POST', onSuccess() { window.location.reload(); } }) }" class="space-y-4">
+                  x-data="{ ...ajaxForm({ url: '{{ route('groups.attendance.store', $group) }}', method: 'POST', onSuccess() { Livewire.navigate(window.location.href); } }) }" class="space-y-4">
 
                 <div class="grid grid-cols-2 gap-3">
                     <div>

@@ -127,7 +127,7 @@ window.expenseEditModal = function() {
                 if (response.ok && data.success) {
                     this.modalOpen = false;
                     showToast('success', data.message);
-                    setTimeout(() => location.reload(), 500);
+                    setTimeout(() => Livewire.navigate(window.location.href), 200);
                 } else if (response.status === 422) {
                     const errorMsgs = Object.values(data.errors || {}).flat();
                     showToast('error', errorMsgs.length ? errorMsgs[0] : (data.message || '{{ __('app.validation_error') }}'));

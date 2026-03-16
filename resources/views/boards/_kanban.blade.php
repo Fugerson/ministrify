@@ -1137,7 +1137,7 @@ function churchBoard() {
                     headers: { 'X-CSRF-TOKEN': this.csrfToken, 'Accept': 'application/json', 'Content-Type': 'application/json' },
                     body: JSON.stringify({ name: name.trim() })
                 });
-                if (response.ok) { window.location.reload(); }
+                if (response.ok) { Livewire.navigate(window.location.href); }
                 else { const data = await response.json().catch(() => ({})); if (window.showGlobalToast) showGlobalToast(data.message || @js(__('app.board_error')), 'error'); }
             } catch (e) { console.error(e); }
         },

@@ -819,7 +819,7 @@ function budgetsPage() {
                 if (res.ok && data.success) {
                     this.showAllocateModal = false;
                     showToast('success', data.message || @js( __('app.finance_budget_allocated_toast') ));
-                    setTimeout(() => location.reload(), 600);
+                    setTimeout(() => Livewire.navigate(window.location.href), 200);
                 } else if (res.status === 422 && data.errors) {
                     const msgs = Object.values(data.errors).flat();
                     showToast('error', msgs[0] || @js( __('app.finance_validation_error') ));
@@ -855,7 +855,7 @@ function budgetsPage() {
                 if (res.ok && data.success) {
                     this.showBudgetModal = false;
                     showToast('success', data.message || @js( __('app.finance_saved_toast') ));
-                    setTimeout(() => location.reload(), 600);
+                    setTimeout(() => Livewire.navigate(window.location.href), 200);
                 } else if (res.status === 422 && data.errors) {
                     const msgs = Object.values(data.errors).flat();
                     showToast('error', msgs[0] || @js( __('app.finance_validation_error') ));
@@ -961,7 +961,7 @@ function budgetsPage() {
                 if (res.ok && data.success) {
                     this.showItemModal = false;
                     showToast('success', data.message);
-                    setTimeout(() => location.reload(), 600);
+                    setTimeout(() => Livewire.navigate(window.location.href), 200);
                 } else if (res.status === 422) {
                     const msgs = data.errors ? Object.values(data.errors).flat() : [data.message];
                     showToast('error', msgs[0] || @js( __('app.finance_validation_error') ));
@@ -989,7 +989,7 @@ function budgetsPage() {
                 const data = await res.json().catch(() => ({}));
                 if (res.ok && data.success) {
                     showToast('success', data.message);
-                    setTimeout(() => location.reload(), 600);
+                    setTimeout(() => Livewire.navigate(window.location.href), 200);
                 } else {
                     showToast('error', data.message || @js( __('app.finance_delete_error') ));
                 }
@@ -1037,7 +1037,7 @@ function budgetsPage() {
                 const data = await res.json().catch(() => ({}));
                 if (res.ok && data.success) {
                     showToast('success', data.message);
-                    setTimeout(() => location.reload(), 600);
+                    setTimeout(() => Livewire.navigate(window.location.href), 200);
                 } else {
                     showToast('error', data.message || @js( __('app.finance_error_toast') ));
                 }
@@ -1136,7 +1136,7 @@ function budgetsPage() {
                 if (res.ok && data.success) {
                     this.showChurchItemModal = false;
                     showToast('success', data.message);
-                    setTimeout(() => location.reload(), 600);
+                    setTimeout(() => Livewire.navigate(window.location.href), 200);
                 } else if (res.status === 422) {
                     const msgs = data.errors ? Object.values(data.errors).flat() : [data.message];
                     showToast('error', msgs[0] || @js( __('app.finance_validation_error') ));
@@ -1164,7 +1164,7 @@ function budgetsPage() {
                 const data = await res.json().catch(() => ({}));
                 if (res.ok && data.success) {
                     showToast('success', data.message);
-                    setTimeout(() => location.reload(), 600);
+                    setTimeout(() => Livewire.navigate(window.location.href), 200);
                 } else {
                     showToast('error', data.message || @js( __('app.finance_delete_error') ));
                 }

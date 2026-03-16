@@ -294,7 +294,7 @@ window.switchLocale = function(locale) {
     const formData = new FormData();
     formData.append('_token', csrfToken);
     fetch('/locale/' + locale, { method: 'POST', credentials: 'include', body: formData })
-        .then(() => location.reload())
+        .then(() => { window.location.href = window.location.href; })
         .catch(err => console.error('Locale switch error:', err));
 };
 </script>
