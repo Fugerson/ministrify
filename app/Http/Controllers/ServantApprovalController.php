@@ -24,12 +24,10 @@ class ServantApprovalController extends Controller
         $church = $this->getCurrentChurch();
 
         $query = User::where('church_id', $church->id)
+            ->whereNull('church_role_id')
             ->where(function ($q) {
                 $q->where('servant_approval_status', 'pending')
-                  ->orWhere(function ($q2) {
-                      $q2->whereNull('church_role_id')
-                          ->whereHas('churches', fn ($q3) => $q3->where('role_approval_status', 'pending'));
-                  });
+                  ->orWhereHas('churches', fn ($q3) => $q3->where('role_approval_status', 'pending'));
             })
             ->with(['person', 'requestedChurchRole', 'churchRole'])
             ->orderBy('created_at', 'desc');
@@ -85,12 +83,10 @@ class ServantApprovalController extends Controller
         $church = $this->getCurrentChurch();
 
         $pendingUsers = User::where('church_id', $church->id)
+            ->whereNull('church_role_id')
             ->where(function ($q) {
                 $q->where('servant_approval_status', 'pending')
-                  ->orWhere(function ($q2) {
-                      $q2->whereNull('church_role_id')
-                          ->whereHas('churches', fn ($q3) => $q3->where('role_approval_status', 'pending'));
-                  });
+                  ->orWhereHas('churches', fn ($q3) => $q3->where('role_approval_status', 'pending'));
             })
             ->with(['requestedChurchRole'])
             ->orderBy('created_at', 'desc')
