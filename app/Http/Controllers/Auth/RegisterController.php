@@ -237,6 +237,43 @@ class RegisterController extends Controller
             'user_agent' => $request->userAgent(),
         ]);
 
+        // Notify admins about new pending user (email + Telegram)
+        try {
+            $admins = User::where('church_id', $church->id)
+                ->whereNotNull('church_role_id')
+                ->whereHas('churchRole', fn ($q) => $q->where('is_admin_role', true))
+                ->with('person')
+                ->get();
+
+            foreach ($admins as $admin) {
+                // Email
+                $admin->notify(new \App\Notifications\NewPendingApproval(
+                    $user->name, $user->email, $church->name
+                ));
+
+                // Telegram
+                if ($admin->person?->telegram_chat_id) {
+                    try {
+                        $tg = new \App\Services\TelegramService();
+                        $tg->sendMessage(
+                            $admin->person->telegram_chat_id,
+                            "🔔 <b>Новий користувач очікує одобрення</b>\n\n"
+                            . "👤 {$user->name}\n"
+                            . "📧 {$user->email}\n"
+                            . "⛪ {$church->name}\n\n"
+                            . "Перейдіть в налаштування щоб одобрити або відхилити заявку."
+                        );
+                    } catch (\Exception $e) {
+                        Log::warning('Failed to send Telegram approval notification', ['admin_id' => $admin->id, 'error' => $e->getMessage()]);
+                    }
+                }
+            }
+
+            \Illuminate\Support\Facades\Cache::forget("church:{$church->id}:pending_approvals");
+        } catch (\Exception $e) {
+            Log::warning('Failed to notify admins about pending approval', ['error' => $e->getMessage()]);
+        }
+
         return redirect()->route('dashboard')
             ->with('success', 'Ласкаво просимо! Ваш акаунт створено. Адміністратор церкви повинен одобрити вашу реєстрацію.');
     }
