@@ -822,6 +822,7 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
     Route::delete('my-profile/unavailable/{unavailableDate}', [PersonController::class, 'removeUnavailableDate'])->name('my-profile.unavailable.remove');
     Route::post('my-profile/telegram/generate-code', [PersonController::class, 'generateTelegramCode'])->name('my-profile.telegram.generate');
     Route::delete('my-profile/telegram/unlink', [PersonController::class, 'unlinkTelegram'])->name('my-profile.telegram.unlink');
+    Route::put('my-profile/password', [PersonController::class, 'updatePassword'])->name('my-profile.password');
     Route::post('my-profile/theme', [PersonController::class, 'updateTheme'])->name('my-profile.theme');
     Route::post('my-profile/menu-position', [PersonController::class, 'updateMenuPosition'])->name('my-profile.menu-position');
 

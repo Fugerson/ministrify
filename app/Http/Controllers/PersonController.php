@@ -841,6 +841,26 @@ class PersonController extends Controller
         return $this->successResponse($request, 'Профіль оновлено.');
     }
 
+    public function updatePassword(Request $request)
+    {
+        $user = auth()->user();
+
+        $request->validate([
+            'current_password' => 'required|string',
+            'new_password' => 'required|string|min:8|confirmed',
+        ]);
+
+        if (!Hash::check($request->current_password, $user->password)) {
+            return response()->json([
+                'errors' => ['current_password' => [__('app.current_password_incorrect')]]
+            ], 422);
+        }
+
+        $user->update(['password' => Hash::make($request->new_password)]);
+
+        return response()->json(['message' => __('app.password_changed')]);
+    }
+
     public function addUnavailableDate(Request $request)
     {
         $user = auth()->user();

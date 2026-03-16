@@ -6306,4 +6306,12 @@ return [
     // Public site sections
     'public_service_times' => 'Service times',
     'public_address' => 'Address',
+
+    // Password change
+    'change_password' => 'Change password',
+    'current_password' => 'Current password',
+    'new_password' => 'New password',
+    'confirm_new_password' => 'Confirm new password',
+    'password_changed' => 'Password changed successfully',
+    'current_password_incorrect' => 'Current password is incorrect',
 ];

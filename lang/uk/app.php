@@ -6139,4 +6139,12 @@ return [
     // Public site sections
     'public_service_times' => 'Розклад богослужінь',
     'public_address' => 'Адреса',
+
+    // Password change
+    'change_password' => 'Змінити пароль',
+    'current_password' => 'Поточний пароль',
+    'new_password' => 'Новий пароль',
+    'confirm_new_password' => 'Підтвердіть новий пароль',
+    'password_changed' => 'Пароль успішно змінено',
+    'current_password_incorrect' => 'Поточний пароль невірний',
 ];
