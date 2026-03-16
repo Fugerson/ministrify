@@ -192,7 +192,7 @@
     {{-- TAB: Budgets (Загальний бюджет + Команди)           --}}
     {{-- ═══════════════════════════════════════════════════ --}}
     <div x-show="budgetTab === 'budgets'" x-cloak>
-    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+    <div class="space-y-6">
 
     {{-- LEFT: Church Budget --}}
         <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
