@@ -883,7 +883,7 @@
         <div class="divide-y divide-gray-200 dark:divide-gray-700">
             @foreach($person->assignments->take(10) as $assignment)
                 @if($assignment->event)
-                <a href="{{ route('events.show', $assignment->event) }}" class="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                <a href="{{ route('events.show', $assignment->event) }}" @click.prevent="$dispatch('open-event', { id: {{ $assignment->event_id }} })" class="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background-color: {{ $assignment->event->ministry?->color ?? '#3b82f6' }}30;">
                             <svg class="w-5 h-5" style="color: {{ $assignment->event->ministry?->color ?? '#3b82f6' }};" fill="none" stroke="currentColor" viewBox="0 0 24 24">

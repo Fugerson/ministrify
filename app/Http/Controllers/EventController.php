@@ -448,7 +448,10 @@ class EventController extends Controller
                 ]);
         }
 
-        return view('schedule.show', compact('event', 'availablePeople', 'volunteerBlockouts', 'checklistTemplates', 'boards', 'allPeople', 'ministries', 'songsForAutocomplete', 'canEdit', 'currentPerson', 'myMinistriesForSignup', 'linkedMinistries', 'availableMinistriesToLink'));
+        $isPartial = request()->has('partial') || request()->has('panel');
+        $layout = $isPartial ? 'layouts.partial' : 'layouts.app';
+
+        return view('schedule.show', compact('event', 'availablePeople', 'volunteerBlockouts', 'checklistTemplates', 'boards', 'allPeople', 'ministries', 'songsForAutocomplete', 'canEdit', 'currentPerson', 'myMinistriesForSignup', 'linkedMinistries', 'availableMinistriesToLink', 'layout', 'isPartial'));
     }
 
     public function edit(Event $event)

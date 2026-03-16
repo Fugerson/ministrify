@@ -6,7 +6,7 @@
     </div>
     <div class="divide-y divide-gray-50 dark:divide-gray-700">
         @forelse($upcomingEvents as $event)
-        <a href="{{ route('events.show', $event) }}" class="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+        <a href="{{ route('events.show', $event) }}" @click.prevent="$dispatch('open-event', { id: {{ $event->id }} })" class="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
             <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style="background-color: {{ $event->ministry?->color ?? '#3b82f6' }}30;">
                 <svg class="w-6 h-6" style="color: {{ $event->ministry?->color ?? '#3b82f6' }};" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>

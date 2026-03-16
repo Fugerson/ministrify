@@ -60,6 +60,7 @@
             <div class="divide-y divide-gray-200 dark:divide-gray-700">
                 @foreach($events as $event)
                 <a href="{{ route('events.show', $event) }}"
+                   @click.prevent="$dispatch('open-event', { id: {{ $event->id }} })"
                    class="block px-4 py-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                     <div class="flex items-start justify-between">
                         <div class="flex-1 min-w-0">

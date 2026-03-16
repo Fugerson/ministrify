@@ -176,6 +176,7 @@
                     <div class="space-y-2">
                         @foreach($song->events as $event)
                             <a href="{{ route('events.show', $event) }}"
+                               @click.prevent="$dispatch('open-event', { id: {{ $event->id }} })"
                                class="block p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors">
                                 <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $event->title }}</p>
                                 <p class="text-xs text-gray-500 dark:text-gray-400">{{ $event->date->format('d.m.Y') }}</p>

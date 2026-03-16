@@ -11,7 +11,7 @@
     </div>
     <div class="divide-y divide-gray-50 dark:divide-gray-700">
         @forelse($eventRegistrations as $event)
-        <a href="{{ route('events.show', $event) }}" class="block p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+        <a href="{{ route('events.show', $event) }}" @click.prevent="$dispatch('open-event', { id: {{ $event->id }} })" class="block p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
             <div class="flex items-start gap-3">
                 <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style="background-color: {{ $event->ministry?->color ?? '#3b82f6' }}20;">
                     <svg class="w-6 h-6" style="color: {{ $event->ministry?->color ?? '#3b82f6' }};" fill="none" stroke="currentColor" viewBox="0 0 24 24">

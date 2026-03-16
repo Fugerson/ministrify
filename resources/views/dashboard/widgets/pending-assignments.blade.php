@@ -41,7 +41,7 @@
             <div class="mt-3 space-y-2">
                 @foreach($pendingAssignments->take(3) as $assignment)
                 <div class="bg-white dark:bg-gray-800 rounded-xl p-3 flex items-center justify-between gap-3" x-data="{ responding: false }">
-                    <a href="{{ route('events.show', $assignment->event) }}" class="min-w-0 hover:opacity-80 transition-opacity">
+                    <a href="{{ route('events.show', $assignment->event) }}" @click.prevent="$dispatch('open-event', { id: {{ $assignment->event_id }} })" class="min-w-0 hover:opacity-80 transition-opacity">
                         <p class="font-medium text-gray-900 dark:text-white text-sm truncate">{{ $assignment->event?->title }}</p>
                         <p class="text-xs text-gray-500 dark:text-gray-400">{{ $assignment->event?->date?->format('d.m') }} &bull; {{ $assignment->position?->name }}</p>
                     </a>
