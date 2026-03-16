@@ -126,7 +126,10 @@ class EnsureChurchContext
                 fn () => \App\Models\User::where('church_id', $church->id)
                     ->where(function ($q) {
                         $q->where('servant_approval_status', 'pending')
-                          ->orWhereHas('churches', fn ($q2) => $q2->where('role_approval_status', 'pending'));
+                          ->orWhere(function ($q2) {
+                              $q2->whereNull('church_role_id')
+                                  ->whereHas('churches', fn ($q3) => $q3->where('role_approval_status', 'pending'));
+                          });
                     })
                     ->count()
             );
