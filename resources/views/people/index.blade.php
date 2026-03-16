@@ -31,6 +31,22 @@
         <span class="hidden sm:inline">{{ __('app.quick_edit') }}</span>
     </a>
     @endif
+    @if(auth()->user()->canView('people'))
+    <a href="{{ route('people.export') }}" class="inline-flex items-center px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors" title="{{ __('app.export_excel') }}">
+        <svg class="w-4 h-4 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+        </svg>
+        <span class="hidden sm:inline">{{ __('app.export_excel') }}</span>
+    </a>
+    @endif
+    @if(auth()->user()->canCreate('people'))
+    <a href="{{ route('migration.planning-center') }}" class="inline-flex items-center px-4 py-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 text-sm font-medium rounded-xl hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors" title="{{ __('app.import_csv') }}">
+        <svg class="w-4 h-4 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+        </svg>
+        <span class="hidden sm:inline">{{ __('app.import_csv') }}</span>
+    </a>
+    @endif
     @if(auth()->user()->canCreate('people'))
     <button onclick="document.getElementById('createPersonModal').classList.remove('hidden')" id="people-add-btn" class="inline-flex items-center px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-xl hover:bg-primary-700 transition-colors">
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -785,28 +801,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Export/Import -->
-    @if(auth()->user()->canView('people'))
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-        <div class="flex flex-col sm:flex-row gap-3">
-            <a href="{{ route('people.export') }}" class="inline-flex items-center justify-center px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-sm">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                </svg>
-                {{ __('app.export_excel') }}
-            </a>
-            @if(auth()->user()->canCreate('people'))
-            <a href="{{ route('migration.planning-center') }}" class="inline-flex items-center justify-center px-4 py-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-lg font-medium hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors text-sm">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
-                </svg>
-                {{ __('app.import_csv') }}
-            </a>
-            @endif
-        </div>
-    </div>
-    @endif
 
         </div><!-- /flex-1 min-w-0 (main content) -->
     </div><!-- /flex gap-6 (sidebar + table layout) -->
