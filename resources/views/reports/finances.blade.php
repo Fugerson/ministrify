@@ -22,14 +22,16 @@
             {{ __('app.reports_back_to_reports') }}
         </a>
 
-        <form>
-            <select name="year" onchange="this.form.submit()"
-                    class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-sm text-gray-900 dark:text-white">
-                @for($y = now()->year; $y >= now()->year - 5; $y--)
-                    <option value="{{ $y }}" {{ $year == $y ? 'selected' : '' }}>{{ $y }}</option>
-                @endfor
-            </select>
-        </form>
+        <select x-data @change="
+                const url = new URL(window.location);
+                url.searchParams.set('year', $el.value);
+                Livewire.navigate(url.toString());
+            "
+                class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-sm text-gray-900 dark:text-white">
+            @for($y = now()->year; $y >= now()->year - 5; $y--)
+                <option value="{{ $y }}" {{ $year == $y ? 'selected' : '' }}>{{ $y }}</option>
+            @endfor
+        </select>
     </div>
 
     <!-- Year Comparison -->

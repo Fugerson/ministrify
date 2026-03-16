@@ -137,13 +137,11 @@
                     </a>
                 </div>
 
-                <form action="{{ route('system.tasks.destroy', $task) }}" method="POST" class="inline" onsubmit="event.preventDefault(); confirmDialog(@js( __('messages.confirm_delete_task') )).then(ok => { if(ok) this.submit(); }); return false;">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="px-4 py-2 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors">
-                        {{ __('app.delete') }}
-                    </button>
-                </form>
+                <button type="button"
+                        @click="ajaxDelete('{{ route('system.tasks.destroy', $task) }}', @js(__('messages.confirm_delete_task')), null, '{{ route('system.tasks.index') }}')"
+                        class="px-4 py-2 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors">
+                    {{ __('app.delete') }}
+                </button>
             </div>
         </form>
     </div>

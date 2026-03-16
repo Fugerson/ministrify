@@ -254,13 +254,22 @@ class SystemAdminController extends Controller
     public function destroyUser(User $user)
     {
         if ($user->id === auth()->id()) {
+            if (request()->expectsJson()) {
+                return response()->json(['success' => false, 'message' => 'Неможливо видалити себе.'], 403);
+            }
             return back()->with('error', 'Неможливо видалити себе.');
         }
 
+        $name = $user->name;
+        $email = $user->email;
         $user->delete();
 
+        if (request()->expectsJson()) {
+            return response()->json(['success' => true, 'message' => "Користувача {$name} ({$email}) видалено. Можна відновити."]);
+        }
+
         return redirect()->route('system.users.index')
-            ->with('success', "Користувача {$user->name} ({$user->email}) видалено. Можна відновити.");
+            ->with('success', "Користувача {$name} ({$email}) видалено. Можна відновити.");
     }
 
     /**
@@ -271,8 +280,14 @@ class SystemAdminController extends Controller
         $user = User::onlyTrashed()->findOrFail($id);
         $user->restore();
 
+        $message = "Користувача {$user->name} ({$user->email}) відновлено!";
+
+        if (request()->expectsJson()) {
+            return response()->json(['success' => true, 'message' => $message]);
+        }
+
         return redirect()->route('system.users.index')
-            ->with('success', "Користувача {$user->name} ({$user->email}) відновлено!");
+            ->with('success', $message);
     }
 
     /**
@@ -283,12 +298,19 @@ class SystemAdminController extends Controller
         $user = User::onlyTrashed()->findOrFail($id);
 
         if ($user->id === auth()->id()) {
+            if (request()->expectsJson()) {
+                return response()->json(['success' => false, 'message' => 'Неможливо видалити себе.'], 403);
+            }
             return back()->with('error', 'Неможливо видалити себе.');
         }
 
         $userName = $user->name;
         $userEmail = $user->email;
         $user->forceDelete();
+
+        if (request()->expectsJson()) {
+            return response()->json(['success' => true, 'message' => "Користувача {$userName} ({$userEmail}) видалено назавжди."]);
+        }
 
         return redirect()->route('system.users.index')
             ->with('success', "Користувача {$userName} ({$userEmail}) видалено назавжди.");
@@ -760,14 +782,26 @@ class SystemAdminController extends Controller
 
             DB::commit();
 
+            $message = "Церкву \"{$churchName}\" та всі пов'язані дані видалено назавжди.";
+
+            if (request()->expectsJson()) {
+                return response()->json(['success' => true, 'message' => $message]);
+            }
+
             return redirect()->route('system.churches.index')
-                ->with('success', "Церкву \"{$churchName}\" та всі пов'язані дані видалено назавжди.");
+                ->with('success', $message);
 
         } catch (\Exception $e) {
             DB::rollBack();
 
+            $errorMessage = "Помилка при видаленні церкви: {$e->getMessage()}";
+
+            if (request()->expectsJson()) {
+                return response()->json(['success' => false, 'message' => $errorMessage], 500);
+            }
+
             return redirect()->route('system.churches.index')
-                ->with('error', "Помилка при видаленні церкви: {$e->getMessage()}");
+                ->with('error', $errorMessage);
         }
     }
 
@@ -1201,6 +1235,10 @@ class SystemAdminController extends Controller
     public function destroyTask(AdminTask $task)
     {
         $task->delete();
+
+        if (request()->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Задачу видалено.']);
+        }
 
         return redirect()->route('system.tasks.index')
             ->with('success', 'Задачу видалено.');

@@ -36,18 +36,19 @@
                     {{ ($showPast ?? false) ? __('app.future_events') : __('app.past_events_btn') }}
                 </a>
                 @if($ministries->count() > 0)
-                <form method="GET" class="flex items-center gap-2">
-                    @if($showPast ?? false)<input type="hidden" name="past" value="1">@endif
-                    <select name="ministry" onchange="this.form.submit()"
-                            class="rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-sm">
-                        <option value="">{{ __('app.all_teams') }}</option>
-                        @foreach($ministries as $ministry)
-                            <option value="{{ $ministry->id }}" {{ request('ministry') == $ministry->id ? 'selected' : '' }}>
-                                {{ $ministry->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </form>
+                <select x-data @change="
+                        const url = new URL(window.location);
+                        if ($el.value) { url.searchParams.set('ministry', $el.value); } else { url.searchParams.delete('ministry'); }
+                        Livewire.navigate(url.toString());
+                    "
+                        class="rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-sm">
+                    <option value="">{{ __('app.all_teams') }}</option>
+                    @foreach($ministries as $ministry)
+                        <option value="{{ $ministry->id }}" {{ request('ministry') == $ministry->id ? 'selected' : '' }}>
+                            {{ $ministry->name }}
+                        </option>
+                    @endforeach
+                </select>
                 @endif
             </div>
         </div>

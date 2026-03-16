@@ -46,14 +46,17 @@
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.giving_history') }}</h2>
             @if($years->count() > 0)
-            <form method="GET" class="flex items-center gap-2">
-                <select name="year" onchange="this.form.submit()" class="text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-1.5">
-                    <option value="all" {{ $year === 'all' ? 'selected' : '' }}>{{ __('app.all_years') }}</option>
-                    @foreach($years as $y)
-                    <option value="{{ $y }}" {{ $year == $y ? 'selected' : '' }}>{{ $y }}</option>
-                    @endforeach
-                </select>
-            </form>
+            <select x-data @change="
+                    const url = new URL(window.location);
+                    url.searchParams.set('year', $el.value);
+                    Livewire.navigate(url.toString());
+                "
+                    class="text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-1.5">
+                <option value="all" {{ $year === 'all' ? 'selected' : '' }}>{{ __('app.all_years') }}</option>
+                @foreach($years as $y)
+                <option value="{{ $y }}" {{ $year == $y ? 'selected' : '' }}>{{ $y }}</option>
+                @endforeach
+            </select>
             @endif
         </div>
 

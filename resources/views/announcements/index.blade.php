@@ -23,7 +23,20 @@
             @endif
         </div>
         @if($unreadCount > 0)
-        <button @click="ajaxAction('{{ route('announcements.mark-all-read') }}', 'POST').then(() => window.location.reload())"
+        <button @click="ajaxAction('{{ route('announcements.mark-all-read') }}', 'POST').then(() => {
+                    /* Remove unread ring from announcement cards */
+                    document.querySelectorAll('.ring-primary-500').forEach(el => el.classList.remove('ring-2', 'ring-primary-500'));
+                    /* Remove blue unread dots */
+                    document.querySelectorAll('.space-y-4 .w-2.h-2.bg-primary-600.rounded-full').forEach(dot => dot.remove());
+                    /* Remove unread highlight from titles */
+                    document.querySelectorAll('.space-y-4 h3.text-primary-600').forEach(el => { el.classList.remove('text-primary-600', 'dark:text-primary-400'); });
+                    /* Remove unread count text */
+                    const unreadP = $el.closest('.flex')?.querySelector('p.text-primary-600');
+                    if (unreadP) unreadP.remove();
+                    /* Remove the button itself */
+                    $el.remove();
+                    if (window.showToast) showToast('success', {!! json_encode(__('app.ann_mark_all_read')) !!});
+                })"
                 class="inline-flex items-center whitespace-nowrap flex-shrink-0 px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors">
             <svg class="w-4 h-4 mr-1.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -240,7 +253,35 @@ function announcementCreateForm() {
                 }
                 showToast('success', data.message || _annI18n.published);
                 closeCreateAnnouncementModal();
-                setTimeout(() => Livewire.navigate(window.location.href), 600);
+                // Prepend new announcement to the list without page reload
+                const title = formData.get('title');
+                const content = formData.get('content');
+                const isPinned = formData.get('is_pinned') === '1';
+                const authorName = {!! json_encode(auth()->user()->name) !!};
+                const listContainer = document.querySelector('.space-y-4');
+                if (listContainer) {
+                    // Remove "no announcements" placeholder if present
+                    const emptyState = listContainer.querySelector('.text-center');
+                    if (emptyState && emptyState.closest('.rounded-2xl')) {
+                        emptyState.closest('.rounded-2xl').remove();
+                    }
+                    const card = document.createElement('div');
+                    card.className = 'bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden';
+                    const pinnedLabel = {!! json_encode(__('app.ann_pinned')) !!};
+                    const pinnedBanner = isPinned ? `<div class="bg-amber-50 dark:bg-amber-900/30 px-4 py-2 border-b border-amber-100 dark:border-amber-800 flex items-center text-amber-700 dark:text-amber-400 text-sm"><svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1.323l3.954.99a1 1 0 01.756.97v.01a1 1 0 01-.756.97L11 8.253V17a1 1 0 11-2 0V8.253L5.046 7.263a1 1 0 010-1.94L9 4.323V3a1 1 0 011-1z"/></svg>${pinnedLabel}</div>` : '';
+                    const snippet = content.replace(/<[^>]*>/g, '').substring(0, 150);
+                    const justNow = {!! json_encode(__('app.just_now', [], app()->getLocale())) !!} || 'just now';
+                    card.innerHTML = pinnedBanner + `<div class="block p-4 sm:p-6"><div class="flex items-start justify-between"><div class="flex-1 min-w-0"><div class="flex items-center gap-2 mb-2"><h3 class="text-lg font-semibold text-gray-900 dark:text-white">${title.replace(/</g, '&lt;')}</h3></div><p class="text-gray-600 dark:text-gray-400 line-clamp-2">${snippet.replace(/</g, '&lt;')}</p><div class="flex items-center gap-2 sm:gap-4 mt-3 text-sm text-gray-500 dark:text-gray-400"><span class="flex items-center"><svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>${authorName.replace(/</g, '&lt;')}</span><span>${justNow}</span></div></div></div></div>`;
+                    // Insert at top (after pinned items if any)
+                    const firstChild = listContainer.firstElementChild;
+                    if (isPinned || !firstChild) {
+                        listContainer.prepend(card);
+                    } else {
+                        listContainer.prepend(card);
+                    }
+                }
+                this.$refs.form.reset();
+                this.saving = false;
             } catch (e) { showToast('error', _annI18n.connection_error); this.saving = false; }
         }
     }

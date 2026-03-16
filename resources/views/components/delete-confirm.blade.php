@@ -31,9 +31,21 @@
                     showToast('success', data.message || @js( __('app.deleted') ));
                 }
                 @if($redirect)
-                    setTimeout(() => Livewire.navigate('{{ $redirect }}'), 500);
+                    setTimeout(() => {
+                        if (typeof Livewire !== 'undefined' && Livewire.navigate) {
+                            Livewire.navigate('{{ $redirect }}');
+                        } else {
+                            window.location.href = '{{ $redirect }}';
+                        }
+                    }, 500);
                 @else
-                    setTimeout(() => Livewire.navigate('{{ url()->previous() }}'), 500);
+                    setTimeout(() => {
+                        if (typeof Livewire !== 'undefined' && Livewire.navigate) {
+                            Livewire.navigate('{{ url()->previous() }}');
+                        } else {
+                            window.location.href = '{{ url()->previous() }}';
+                        }
+                    }, 500);
                 @endif
             } else {
                 if (typeof showToast === 'function') {

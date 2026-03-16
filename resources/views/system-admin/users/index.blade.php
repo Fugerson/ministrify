@@ -134,24 +134,18 @@
                         <td class="px-6 py-4 text-right">
                             <div class="flex items-center justify-end gap-2">
                                 @if($user->trashed())
-                                    <form method="POST" action="{{ route('system.users.restore', $user->id) }}" class="inline">
-                                        @csrf
-                                        <button type="submit" class="p-2 text-green-500 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg" title="{{ __('app.restore') }}">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                                            </svg>
-                                        </button>
-                                    </form>
-                                    <form method="POST" action="{{ route('system.users.forceDelete', $user->id) }}"
-                                          onsubmit="event.preventDefault(); confirmDialog(@js( __('messages.confirm_delete_user_warning', ['name' => $user->name]) )).then(ok => { if(ok) this.submit(); }); return false;" class="inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="p-2 text-red-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg" title="{{ __('app.delete_forever') }}">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                                            </svg>
-                                        </button>
-                                    </form>
+                                    <button @click="ajaxAction('{{ route('system.users.restore', $user->id) }}', 'POST').then(() => $el.closest('tr').remove())"
+                                            class="p-2 text-green-500 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg" title="{{ __('app.restore') }}">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                        </svg>
+                                    </button>
+                                    <button @click="ajaxDelete('{{ route('system.users.forceDelete', $user->id) }}', @js(__('messages.confirm_delete_user_warning', ['name' => $user->name])), () => $el.closest('tr').remove())"
+                                            class="p-2 text-red-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg" title="{{ __('app.delete_forever') }}">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                        </svg>
+                                    </button>
                                 @else
                                     @if($user->id !== auth()->id())
                                     <form method="POST" action="{{ route('system.users.impersonate', $user) }}" class="inline">
@@ -170,16 +164,12 @@
                                         </svg>
                                     </a>
                                     @if($user->id !== auth()->id())
-                                    <form method="POST" action="{{ route('system.users.destroy', $user) }}"
-                                          onsubmit="event.preventDefault(); confirmDialog(@js( __('messages.confirm_delete_user', ['name' => $user->name]) )).then(ok => { if(ok) this.submit(); }); return false;" class="inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="{{ __('app.delete') }}">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                            </svg>
-                                        </button>
-                                    </form>
+                                    <button @click="ajaxDelete('{{ route('system.users.destroy', $user) }}', @js(__('messages.confirm_delete_user', ['name' => $user->name])), () => $el.closest('tr').remove())"
+                                            class="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="{{ __('app.delete') }}">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        </svg>
+                                    </button>
                                     @endif
                                 @endif
                             </div>
@@ -204,7 +194,7 @@
     <!-- Users Cards (mobile) -->
     <div class="md:hidden space-y-3">
         @forelse($users as $user)
-        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 {{ $user->trashed() ? 'border-red-300 dark:border-red-800 bg-red-50 dark:bg-red-900/10' : '' }}">
+        <div data-user-card class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 {{ $user->trashed() ? 'border-red-300 dark:border-red-800 bg-red-50 dark:bg-red-900/10' : '' }}">
             <div class="flex items-start justify-between gap-3">
                 <div class="flex items-center min-w-0">
                     @if($user->person?->photo)
@@ -221,24 +211,18 @@
                 </div>
                 <div class="flex items-center gap-1 shrink-0">
                     @if($user->trashed())
-                        <form method="POST" action="{{ route('system.users.restore', $user->id) }}" class="inline">
-                            @csrf
-                            <button type="submit" class="p-2 text-green-500 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg" title="{{ __('app.restore') }}">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                                </svg>
-                            </button>
-                        </form>
-                        <form method="POST" action="{{ route('system.users.forceDelete', $user->id) }}"
-                              onsubmit="event.preventDefault(); confirmDialog(@js( __('messages.confirm_delete_user_warning', ['name' => $user->name]) )).then(ok => { if(ok) this.submit(); }); return false;" class="inline">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="p-2 text-red-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg" title="{{ __('app.delete_forever') }}">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                                </svg>
-                            </button>
-                        </form>
+                        <button @click="ajaxAction('{{ route('system.users.restore', $user->id) }}', 'POST').then(() => $el.closest('[data-user-card]').remove())"
+                                class="p-2 text-green-500 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg" title="{{ __('app.restore') }}">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                            </svg>
+                        </button>
+                        <button @click="ajaxDelete('{{ route('system.users.forceDelete', $user->id) }}', @js(__('messages.confirm_delete_user_warning', ['name' => $user->name])), () => $el.closest('[data-user-card]').remove())"
+                                class="p-2 text-red-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg" title="{{ __('app.delete_forever') }}">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                            </svg>
+                        </button>
                     @else
                         @if($user->id !== auth()->id())
                         <form method="POST" action="{{ route('system.users.impersonate', $user) }}" class="inline">
@@ -257,16 +241,12 @@
                             </svg>
                         </a>
                         @if($user->id !== auth()->id())
-                        <form method="POST" action="{{ route('system.users.destroy', $user) }}"
-                              onsubmit="event.preventDefault(); confirmDialog(@js( __('messages.confirm_delete_user', ['name' => $user->name]) )).then(ok => { if(ok) this.submit(); }); return false;" class="inline">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded-lg" title="{{ __('app.delete') }}">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                </svg>
-                            </button>
-                        </form>
+                        <button @click="ajaxDelete('{{ route('system.users.destroy', $user) }}', @js(__('messages.confirm_delete_user', ['name' => $user->name])), () => $el.closest('[data-user-card]').remove())"
+                                class="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded-lg" title="{{ __('app.delete') }}">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </svg>
+                        </button>
                         @endif
                     @endif
                 </div>

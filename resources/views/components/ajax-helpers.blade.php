@@ -58,7 +58,13 @@ function ajaxForm(config = {}) {
                 if (config.onSuccess) {
                     config.onSuccess.call(this, data);
                 } else if (!config.stayOnPage && data.redirect_url) {
-                    setTimeout(() => Livewire.navigate(data.redirect_url), 600);
+                    setTimeout(() => {
+                        if (typeof Livewire !== 'undefined' && Livewire.navigate) {
+                            Livewire.navigate(data.redirect_url);
+                        } else {
+                            window.location.href = data.redirect_url;
+                        }
+                    }, 600);
                     return; // keep saving=true during redirect
                 }
 
@@ -109,7 +115,14 @@ async function ajaxDelete(url, confirmMsg, onSuccess, redirectUrl) {
         if (onSuccess) {
             onSuccess(data);
         } else if (redirectUrl || data.redirect_url) {
-            setTimeout(() => Livewire.navigate(redirectUrl || data.redirect_url), 600);
+            const target = redirectUrl || data.redirect_url;
+            setTimeout(() => {
+                if (typeof Livewire !== 'undefined' && Livewire.navigate) {
+                    Livewire.navigate(target);
+                } else {
+                    window.location.href = target;
+                }
+            }, 600);
         }
     } catch (e) {
         showToast('error', @json(__('app.server_connection_error')));

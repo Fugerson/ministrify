@@ -299,5 +299,7 @@
     @stack('scripts')
 
     @include('components.confirm-modal')
+    @include('components.toast')
+    @include('components.ajax-helpers')
 </body>
 </html>

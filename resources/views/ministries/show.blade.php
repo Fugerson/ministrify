@@ -1343,7 +1343,7 @@
                     @can('contribute-ministry', $ministry)
                     @if($availablePeople->count() > 0)
                     <form @submit.prevent="submit($refs.addMemberForm)" x-ref="addMemberForm"
-                          x-data="{ ...ajaxForm({ url: '{{ route('ministries.members.add', $ministry) }}', method: 'POST', onSuccess: () => window.location.reload(), stayOnPage: true }) }"
+                          x-data="{ ...ajaxForm({ url: '{{ route('ministries.members.add', $ministry) }}', method: 'POST', onSuccess() { /* Оновлюємо сторінку через Livewire без повного reload */ setTimeout(() => Livewire.navigate(window.location.href), 400); }, stayOnPage: true }) }"
                           class="flex-1 min-w-0">
                         <div class="flex gap-2">
                             <div class="flex-1">
@@ -1408,7 +1408,7 @@
                                          });
                                          if (res.ok) {
                                              this.role = newRole;
-                                             if (newRole === 'leader') setTimeout(() => location.reload(), 300);
+                                             if (newRole === 'leader') { /* Оновлюємо сторінку через Livewire без повного reload */ setTimeout(() => Livewire.navigate(window.location.href), 300); }
                                          }
                                      } catch (e) { console.error(e); }
                                      this.saving = false;
@@ -1568,7 +1568,7 @@
                                              });
                                              if (res.ok) {
                                                  this.role = newRole;
-                                                 if (newRole === 'leader') setTimeout(() => location.reload(), 300);
+                                                 if (newRole === 'leader') { /* Оновлюємо сторінку через Livewire без повного reload */ setTimeout(() => Livewire.navigate(window.location.href), 300); }
                                              }
                                          } catch (e) { console.error(e); }
                                          this.saving = false;
@@ -2980,7 +2980,7 @@
                                       method: method,
                                       headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'Accept': 'application/json' },
                                       body: fd
-                                  }).then(r => { if (r.ok) window.location.reload(); else r.json().then(d => alert(d.message || 'Помилка')).catch(() => alert('Помилка')); }).catch(() => alert('Помилка'));
+                                  }).then(r => { if (r.ok) { if (typeof showToast === 'function') showToast('success', @js(__('app.saved_toast'))); /* Оновлюємо сторінку через Livewire */ setTimeout(() => Livewire.navigate(window.location.href), 400); } else r.json().then(d => alert(d.message || 'Помилка')).catch(() => alert('Помилка')); }).catch(() => alert('Помилка'));
                               " x-ref="goalForm" class="p-4 space-y-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Назва *</label>
@@ -3050,7 +3050,7 @@
                                       method: method,
                                       headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'Accept': 'application/json' },
                                       body: fd
-                                  }).then(r => { if (r.ok) window.location.reload(); else r.json().then(d => alert(d.message || 'Помилка')).catch(() => alert('Помилка')); }).catch(() => alert('Помилка'));
+                                  }).then(r => { if (r.ok) { if (typeof showToast === 'function') showToast('success', @js(__('app.saved_toast'))); /* Оновлюємо сторінку через Livewire */ setTimeout(() => Livewire.navigate(window.location.href), 400); } else r.json().then(d => alert(d.message || 'Помилка')).catch(() => alert('Помилка')); }).catch(() => alert('Помилка'));
                               " x-ref="taskForm" class="p-4 space-y-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Назва *</label>
@@ -4053,7 +4053,15 @@ function _getOrCreateResourceList() {
             empty.parentNode.insertBefore(list, empty);
             empty.remove();
         } else {
-            return null;
+            // Якщо немає ні списку, ні empty-стейту — створюємо список в контейнері ресурсів
+            var resourcesTab = document.querySelector('[x-data="resourcesManager()"]');
+            if (resourcesTab) {
+                resourcesTab.appendChild(list);
+            } else {
+                // Крайній fallback — вставляємо в body (ніколи не reload)
+                console.warn('Resources container not found, appending to body');
+                document.body.appendChild(list);
+            }
         }
     }
     return list;
@@ -4062,7 +4070,6 @@ function _getOrCreateResourceList() {
 function _addMinistryResourceFolder(ctx, data) {
     ctx.showCreateFolder = false;
     var list = _getOrCreateResourceList();
-    if (!list) { window.location.reload(); return; }
     var name = ctx.$refs.createFolderForm.querySelector('[name="name"]').value;
     var safeName = name.replace(/&/g, '\x26amp;').replace(/\x3C/g, '\x26lt;').replace(/>/g, '\x26gt;');
     var today = new Date();
@@ -4225,7 +4232,6 @@ function resourcesManager() {
             this.uploading = false;
             if (!this.uploadError) {
                 var list = _getOrCreateResourceList();
-                if (!list) { window.location.reload(); return; }
                 for (var i = 0; i < files.length; i++) {
                     _addMinistryResourceFile(list, files[i].name);
                 }

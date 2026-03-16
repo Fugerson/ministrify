@@ -73,19 +73,19 @@
     <!-- Expenses list -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-            <form method="GET" class="flex items-center space-x-4">
-                <input type="hidden" name="year" value="{{ $year }}">
-                <input type="hidden" name="month" value="{{ $month }}">
-                <select name="ministry" onchange="this.form.submit()"
-                        class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
-                    <option value="">{{ __('app.expense_all_teams') }}</option>
-                    @foreach($ministries as $ministry)
-                        <option value="{{ $ministry->id }}" {{ request('ministry') == $ministry->id ? 'selected' : '' }}>
-                            {{ $ministry->name }}
-                        </option>
-                    @endforeach
-                </select>
-            </form>
+            <select x-data @change="
+                    const url = new URL(window.location);
+                    if ($el.value) { url.searchParams.set('ministry', $el.value); } else { url.searchParams.delete('ministry'); }
+                    Livewire.navigate(url.toString());
+                "
+                    class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                <option value="">{{ __('app.expense_all_teams') }}</option>
+                @foreach($ministries as $ministry)
+                    <option value="{{ $ministry->id }}" {{ request('ministry') == $ministry->id ? 'selected' : '' }}>
+                        {{ $ministry->name }}
+                    </option>
+                @endforeach
+            </select>
         </div>
 
         <div class="overflow-x-auto">

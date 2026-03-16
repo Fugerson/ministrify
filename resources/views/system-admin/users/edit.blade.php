@@ -117,7 +117,7 @@
         <div class="flex justify-between">
             @if($user->id !== auth()->id())
             <button type="button"
-                    onclick="confirmDialog(@js( __('messages.confirm_delete_person') )).then(ok => { if(ok) document.getElementById('delete-user-form').submit(); })"
+                    @click="ajaxDelete('{{ route('system.users.destroy', $user) }}', @js(__('messages.confirm_delete_person')), null, '{{ route('system.users.index') }}')"
                     class="px-6 py-3 bg-red-100 dark:bg-red-900 hover:bg-red-200 dark:hover:bg-red-800 text-red-700 dark:text-red-300 font-medium rounded-xl">
                 {{ __('app.sa_delete_user') }}
             </button>
@@ -138,11 +138,5 @@
         </div>
     </form>
 
-    @if($user->id !== auth()->id())
-    <form id="delete-user-form" method="POST" action="{{ route('system.users.destroy', $user) }}" class="hidden">
-        @csrf
-        @method('DELETE')
-    </form>
-    @endif
 </div>
 @endsection

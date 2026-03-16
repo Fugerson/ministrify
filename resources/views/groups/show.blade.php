@@ -192,7 +192,7 @@
                                      });
                                      if (res.ok) {
                                          this.role = newRole;
-                                         if (newRole === 'leader') setTimeout(() => location.reload(), 300);
+                                         if (window.showToast) showToast('success', @js(__('app.audit_action_role_changed')));
                                      }
                                  } catch (e) { console.error(e); }
                                  this.saving = false;
@@ -349,7 +349,7 @@
                                          });
                                          if (res.ok) {
                                              this.role = newRole;
-                                             if (newRole === 'leader') setTimeout(() => location.reload(), 300);
+                                             if (window.showToast) showToast('success', @js(__('app.audit_action_role_changed')));
                                          }
                                      } catch (e) { console.error(e); }
                                      this.saving = false;

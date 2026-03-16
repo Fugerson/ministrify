@@ -22,21 +22,29 @@
             {{ __('app.reports_back_to_reports') }}
         </a>
 
-        <form class="flex items-center space-x-2">
-            <select name="year" onchange="this.form.submit()"
+        <div class="flex items-center space-x-2">
+            <select x-data @change="
+                    const url = new URL(window.location);
+                    url.searchParams.set('year', $el.value);
+                    Livewire.navigate(url.toString());
+                "
                     class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-sm text-gray-900 dark:text-white">
                 @for($y = now()->year; $y >= now()->year - 5; $y--)
                     <option value="{{ $y }}" {{ $year == $y ? 'selected' : '' }}>{{ $y }}</option>
                 @endfor
             </select>
-            <select name="ministry_id" onchange="this.form.submit()"
+            <select x-data @change="
+                    const url = new URL(window.location);
+                    if ($el.value) { url.searchParams.set('ministry_id', $el.value); } else { url.searchParams.delete('ministry_id'); }
+                    Livewire.navigate(url.toString());
+                "
                     class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-sm text-gray-900 dark:text-white">
                 <option value="">{{ __('app.reports_all_teams') }}</option>
                 @foreach($ministries as $ministry)
                     <option value="{{ $ministry->id }}" {{ $ministryId == $ministry->id ? 'selected' : '' }}>{{ $ministry->name }}</option>
                 @endforeach
             </select>
-        </form>
+        </div>
     </div>
 
     <!-- Monthly Chart -->

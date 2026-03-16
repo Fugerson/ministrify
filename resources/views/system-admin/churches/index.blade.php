@@ -22,7 +22,7 @@
     <!-- Mobile Cards (visible on small screens) -->
     <div class="lg:hidden space-y-4">
         @forelse($churches as $church)
-        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+        <div data-church-card class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
             <!-- Header with logo and name -->
             <div class="flex items-start justify-between mb-4">
                 <div class="flex items-center">
@@ -75,16 +75,12 @@
                         {{ __('app.sa_enter') }}
                     </button>
                 </form>
-                <form method="POST" action="{{ route('system.churches.destroy', $church) }}"
-                      onsubmit="event.preventDefault(); confirmDialog(@js( __('messages.confirm_delete_church_warning', ['name' => $church->name]) )).then(ok => { if(ok) this.submit(); }); return false;">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="py-2 px-3 bg-red-100 dark:bg-red-600/20 hover:bg-red-200 dark:hover:bg-red-600/30 text-red-600 dark:text-red-400 text-sm rounded-lg">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                        </svg>
-                    </button>
-                </form>
+                <button @click="ajaxDelete('{{ route('system.churches.destroy', $church) }}', @js(__('messages.confirm_delete_church_warning', ['name' => $church->name])), () => $el.closest('[data-church-card]').remove())"
+                        class="py-2 px-3 bg-red-100 dark:bg-red-600/20 hover:bg-red-200 dark:hover:bg-red-600/30 text-red-600 dark:text-red-400 text-sm rounded-lg">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                </button>
             </div>
         </div>
         @empty
@@ -157,16 +153,12 @@
                                         </svg>
                                     </button>
                                 </form>
-                                <form method="POST" action="{{ route('system.churches.destroy', $church) }}" class="inline"
-                                      onsubmit="event.preventDefault(); confirmDialog(@js( __('messages.confirm_delete_church_warning', ['name' => $church->name]) )).then(ok => { if(ok) this.submit(); }); return false;">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="{{ __('app.sa_delete_permanently') }}">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                        </svg>
-                                    </button>
-                                </form>
+                                <button @click="ajaxDelete('{{ route('system.churches.destroy', $church) }}', @js(__('messages.confirm_delete_church_warning', ['name' => $church->name])), () => $el.closest('tr').remove())"
+                                        class="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="{{ __('app.sa_delete_permanently') }}">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                    </svg>
+                                </button>
                             </div>
                         </td>
                     </tr>
