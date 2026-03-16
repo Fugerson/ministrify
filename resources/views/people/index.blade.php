@@ -117,7 +117,18 @@
     @endif
     <!-- Search & Filter Bar -->
     <div id="people-search-bar" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-        <div class="flex flex-col sm:flex-row gap-4">
+        <div class="flex flex-col sm:flex-row gap-3">
+            <!-- Filter Button -->
+            <button id="people-filter-btn" @click="showFilterSidebar = !showFilterSidebar"
+                :class="{'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 border-primary-200 dark:border-primary-800': hasFilters || showFilterSidebar, 'bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600': !hasFilters && !showFilterSidebar}"
+                class="inline-flex items-center px-3 py-2.5 border rounded-xl font-medium transition-colors shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+                </svg>
+                <span x-show="activeFilterCount > 0" x-text="activeFilterCount"
+                    class="ml-1.5 px-2 py-0.5 text-xs font-semibold bg-primary-600 text-white rounded-full"></span>
+            </button>
+
             <!-- Search -->
             <div class="flex-1 relative">
                 <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -133,24 +144,10 @@
                 </button>
             </div>
 
-            <!-- Filter Button -->
-            <button id="people-filter-btn" @click="showFilterSidebar = !showFilterSidebar"
-                :class="{'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 border-primary-200 dark:border-primary-800': hasFilters || showFilterSidebar, 'bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600': !hasFilters && !showFilterSidebar}"
-                class="inline-flex items-center px-4 py-2.5 border rounded-xl font-medium transition-colors">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
-                </svg>
-                {{ __('app.filters') }}
-                <span x-show="activeFilterCount > 0" x-text="activeFilterCount"
-                    class="ml-2 px-2 py-0.5 text-xs font-semibold bg-primary-600 text-white rounded-full"></span>
-            </button>
-
             <!-- Stats -->
-            <div class="flex flex-wrap items-center gap-4 text-sm">
-                <div class="flex items-center gap-2">
-                    <span class="font-semibold text-gray-900 dark:text-white" x-text="filteredCount"></span>
-                    <span class="text-gray-500 dark:text-gray-400">{{ __('app.of_total') }} {{ $stats['total'] }}</span>
-                </div>
+            <div class="flex items-center gap-2 text-sm shrink-0">
+                <span class="font-semibold text-gray-900 dark:text-white" x-text="filteredCount"></span>
+                <span class="text-gray-500 dark:text-gray-400">{{ __('app.of_total') }} {{ $stats['total'] }}</span>
             </div>
         </div>
 
