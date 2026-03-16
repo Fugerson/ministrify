@@ -34,7 +34,7 @@
                     </div>
                 @else
                     <div>
-                        <label for="ministry_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.finance_team') }} <span class="text-red-500">*</span></label>
+                        <label for="ministry_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.finance_team') }}</label>
                         @php
                             $ministriesWithBudget = $ministries->map(function($m) {
                                 $m->display_name = $m->name . ($m->monthly_budget ? ' (' . __('app.finance_remaining') . ': ' . number_format($m->remaining_budget, 0, ',', ' ') . ' ₴)' : '');
@@ -51,8 +51,7 @@
                             :searchKeys="['name', 'display_name']"
                             placeholder="{{ __('app.finance_search_team') }}"
                             nullText="{{ __('app.finance_select_team') }}"
-                            :nullable="false"
-                            required
+                            :nullable="true"
                         />
                         <template x-if="errors.ministry_id">
                             <p class="mt-1 text-sm text-red-500" x-text="errors.ministry_id[0]"></p>

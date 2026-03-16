@@ -57,11 +57,17 @@
                 class="px-4 py-2 text-sm font-medium rounded-lg transition-colors whitespace-nowrap">
             {{ __('app.budget_tab_overview') }}
         </button>
-        <button @click="budgetTab = 'budgets'"
-                :class="budgetTab === 'budgets' ? 'bg-primary-600 text-white shadow-sm' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700'"
+        <button @click="budgetTab = 'church'"
+                :class="budgetTab === 'church' ? 'bg-primary-600 text-white shadow-sm' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700'"
                 class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors whitespace-nowrap">
-            {{ __('app.budget_tab_church') }} + {{ __('app.budget_tab_teams') }}
-            <span class="w-2 h-2 rounded-full {{ $dotColor(max($churchPct, $ministryPct)) }}"></span>
+            {{ __('app.budget_tab_church') }}
+            <span class="w-2 h-2 rounded-full {{ $dotColor($churchPct) }}"></span>
+        </button>
+        <button @click="budgetTab = 'teams'"
+                :class="budgetTab === 'teams' ? 'bg-primary-600 text-white shadow-sm' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700'"
+                class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors whitespace-nowrap">
+            {{ __('app.budget_tab_teams') }}
+            <span class="w-2 h-2 rounded-full {{ $dotColor($ministryPct) }}"></span>
         </button>
     </div>
 
@@ -99,7 +105,7 @@
                     </div>
                 </div>
                 @else
-                <button @click="budgetTab = 'budgets'"
+                <button @click="budgetTab = 'church'"
                         class="w-full bg-white dark:bg-gray-800 rounded-xl p-4 border border-dashed border-gray-300 dark:border-gray-600 text-sm text-gray-500 dark:text-gray-400 hover:border-primary-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors text-left">
                     {{ __('app.budget_setup_church') }} &rarr;
                 </button>
@@ -125,7 +131,7 @@
                     </div>
                 </div>
                 @else
-                <button @click="budgetTab = 'budgets'"
+                <button @click="budgetTab = 'teams'"
                         class="w-full bg-white dark:bg-gray-800 rounded-xl p-4 border border-dashed border-gray-300 dark:border-gray-600 text-sm text-gray-500 dark:text-gray-400 hover:border-primary-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors text-left">
                     {{ __('app.budget_setup_teams') }} &rarr;
                 </button>
@@ -189,12 +195,9 @@
     </div>
 
     {{-- ═══════════════════════════════════════════════════ --}}
-    {{-- TAB: Budgets (Загальний бюджет + Команди)           --}}
+    {{-- TAB: Church Budget (Загальний бюджет)               --}}
     {{-- ═══════════════════════════════════════════════════ --}}
-    <div x-show="budgetTab === 'budgets'" x-cloak>
-    <div class="space-y-6">
-
-    {{-- LEFT: Church Budget --}}
+    <div x-show="budgetTab === 'church'" x-cloak>
         <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.church_expenses') }}</h2>
@@ -323,8 +326,12 @@
                 </div>
             @endif
         </div>
+    </div>
 
-    {{-- RIGHT: Teams --}}
+    {{-- ═══════════════════════════════════════════════════ --}}
+    {{-- TAB: Teams (Команди)                                --}}
+    {{-- ═══════════════════════════════════════════════════ --}}
+    <div x-show="budgetTab === 'teams'" x-cloak>
         <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.ministry_budgets_section') }}</h2>
@@ -632,9 +639,7 @@
             @endif
             @endif
         </div>
-
-    </div>{{-- /grid --}}
-    </div>{{-- /budgets tab --}}
+    </div>
 
     {{-- ═══ Expenses Missing Receipts (always visible) ═══ --}}
     @if($expensesMissingReceipts->count() > 0)
@@ -698,7 +703,7 @@ function budgetsPage() {
         month: {{ $month }},
 
         // Sub-tab
-        budgetTab: (['overview', 'budgets'].includes(localStorage.getItem('budgetTab')) ? localStorage.getItem('budgetTab') : 'overview'),
+        budgetTab: (['overview', 'church', 'teams'].includes(localStorage.getItem('budgetTab')) ? localStorage.getItem('budgetTab') : 'overview'),
 
         // Expanded ministries
         expandedMinistries: [],

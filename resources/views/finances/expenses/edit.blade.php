@@ -32,7 +32,7 @@
 
             <div class="space-y-4">
                 <div>
-                    <label for="ministry_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.team_label') }} <span class="text-red-500">*</span></label>
+                    <label for="ministry_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.team_label') }}</label>
                     <x-searchable-select
                         name="ministry_id"
                         :items="$ministries"
@@ -42,8 +42,7 @@
                         colorKey="color"
                         placeholder="{{ __('app.search_team') }}"
                         nullText="{{ __('app.select_team') }}"
-                        :nullable="false"
-                        required
+                        :nullable="true"
                     />
                     <template x-if="errors.ministry_id">
                         <p class="mt-1 text-sm text-red-500" x-text="errors.ministry_id[0]"></p>
