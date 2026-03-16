@@ -256,20 +256,8 @@
     <!-- Filter Sidebar + Table Layout -->
     <div class="flex gap-6 items-start">
 
-        <!-- Expand filters button (when sidebar is hidden) -->
-        <button x-show="!showFilterSidebar" @click="showFilterSidebar = true"
-                class="shrink-0 hidden lg:flex items-center gap-1.5 px-2 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:border-primary-300 dark:hover:border-primary-700 transition-colors"
-                title="{{ __('app.filters') }}">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
-            </svg>
-            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-            <span x-show="activeFilterCount > 0" x-text="activeFilterCount"
-                  class="px-1.5 py-0.5 text-xs font-semibold bg-primary-600 text-white rounded-full"></span>
-        </button>
-
-        <!-- Filter Sidebar -->
-        <aside x-show="showFilterSidebar" x-cloak class="w-full lg:w-72 shrink-0">
+        <!-- Filter Sidebar (always visible on desktop, togglable on mobile) -->
+        <aside :class="showFilterSidebar ? 'block' : 'hidden lg:block'" class="w-full lg:w-72 shrink-0">
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 lg:sticky lg:top-20">
 
                 <!-- Header -->
@@ -277,9 +265,6 @@
                     <h3 class="text-sm font-semibold text-gray-900 dark:text-white">{{ __('app.filters') }}</h3>
                     <div class="flex items-center gap-2">
                         <button x-show="activeFilterCount > 0" @click="clearFilters()" class="text-xs text-red-500 hover:text-red-700">{{ __('app.clear_all') }}</button>
-                        <button @click="showFilterSidebar = false" class="hidden lg:block p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" title="{{ __('app.collapse') }}">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-                        </button>
                     </div>
                 </div>
 
