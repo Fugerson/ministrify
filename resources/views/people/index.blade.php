@@ -497,6 +497,52 @@
     </div>
     @endif
 
+    <!-- Pagination -->
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-2 text-sm">
+        <div class="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+            <span class="hidden sm:inline">{{ __('app.show_per_page') }}</span>
+            <select x-model.number="perPage" @change="currentPage = 1"
+                class="px-2 py-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-primary-500/20">
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="0">{{ __('app.all') }}</option>
+            </select>
+            <span class="hidden sm:inline">{{ __('app.records') }}</span>
+            <span class="text-gray-400 dark:text-gray-500 ml-1">(<span x-text="filteredCount"></span>)</span>
+        </div>
+
+        <div class="flex items-center gap-0.5">
+            <button @click="currentPage = 1" :disabled="currentPage === 1"
+                class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
+                </svg>
+            </button>
+            <button @click="currentPage--" :disabled="currentPage === 1"
+                class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+            </button>
+            <span class="px-2 py-1 text-sm text-gray-700 dark:text-gray-300 min-w-[3.5rem] text-center">
+                <span x-text="currentPage"></span> / <span x-text="totalPages"></span>
+            </span>
+            <button @click="currentPage++" :disabled="currentPage >= totalPages"
+                class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+            </button>
+            <button @click="currentPage = totalPages" :disabled="currentPage >= totalPages"
+                class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
     <!-- Table Container -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
         <!-- Table -->
@@ -754,52 +800,6 @@
             </button>
         </div>
 
-        <!-- Pagination -->
-        <div class="px-4 py-3 border-t border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                <span class="hidden sm:inline">{{ __('app.show_per_page') }}</span>
-                <select x-model.number="perPage" @change="currentPage = 1"
-                    class="px-2 py-1.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-primary-500/20">
-                    <option value="25">25</option>
-                    <option value="50">50</option>
-                    <option value="100">100</option>
-                    <option value="0">{{ __('app.all') }}</option>
-                </select>
-                <span class="hidden sm:inline">{{ __('app.records') }}</span>
-            </div>
-
-            <div class="flex items-center gap-0.5">
-                <button @click="currentPage = 1" :disabled="currentPage === 1"
-                    class="w-10 h-10 sm:w-9 sm:h-9 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
-                    </svg>
-                </button>
-                <button @click="currentPage--" :disabled="currentPage === 1"
-                    class="w-10 h-10 sm:w-9 sm:h-9 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                    </svg>
-                </button>
-
-                <span class="px-3 py-1 text-sm text-gray-700 dark:text-gray-300 min-w-[4rem] text-center">
-                    <span x-text="currentPage"></span> / <span x-text="totalPages"></span>
-                </span>
-
-                <button @click="currentPage++" :disabled="currentPage >= totalPages"
-                    class="w-10 h-10 sm:w-9 sm:h-9 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                    </svg>
-                </button>
-                <button @click="currentPage = totalPages" :disabled="currentPage >= totalPages"
-                    class="w-10 h-10 sm:w-9 sm:h-9 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"/>
-                    </svg>
-                </button>
-            </div>
-        </div>
     </div>
 
         </div><!-- /flex-1 min-w-0 (main content) -->
