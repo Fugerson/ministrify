@@ -6323,4 +6323,10 @@ return [
     'pending_approvals' => 'Pending Approvals',
     'no_pending_approvals' => 'No pending requests',
     'people_awaiting' => '{1} person awaiting approval|[2,*] people awaiting approval',
+
+    // Devices
+    'device_mobile' => 'Mobile',
+    'device_tablet' => 'Tablet',
+    'device_desktop' => 'Desktop',
+    'device_unknown' => 'Unknown',
 ];

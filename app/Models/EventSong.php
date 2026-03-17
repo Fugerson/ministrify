@@ -4,9 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Traits\Auditable;
 
 class EventSong extends Model
 {
+    use Auditable;
     protected $table = 'event_songs';
 
     protected $fillable = [

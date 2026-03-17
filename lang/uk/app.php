@@ -6156,4 +6156,10 @@ return [
     'pending_approvals' => 'Очікують одобрення',
     'no_pending_approvals' => 'Немає заявок',
     'people_awaiting' => '{1} людина очікує одобрення|[2,4] людини очікують одобрення|[5,*] людей очікують одобрення',
+
+    // Devices
+    'device_mobile' => 'Телефон',
+    'device_tablet' => 'Планшет',
+    'device_desktop' => 'Комп\'ютер',
+    'device_unknown' => 'Невідомо',
 ];

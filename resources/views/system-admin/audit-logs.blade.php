@@ -149,12 +149,20 @@
                         </a>
                         @endif
 
-                        <!-- IP Address -->
-                        @if($log->ip_address)
-                        <span class="text-[10px] text-gray-400 dark:text-gray-500 font-mono ml-auto">
-                            IP: {{ $log->ip_address }}
+                        <!-- Device & IP -->
+                        <span class="flex items-center gap-2 ml-auto">
+                            <span class="inline-flex items-center gap-1 text-[10px] text-gray-400 dark:text-gray-500" title="{{ $log->user_agent }}">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $log->device_icon }}"/></svg>
+                                {{ $log->device_label }}
+                                <span class="text-gray-300 dark:text-gray-600">·</span>
+                                {{ $log->browser_name }}
+                            </span>
+                            @if($log->ip_address)
+                            <span class="text-[10px] text-gray-400 dark:text-gray-500 font-mono">
+                                {{ $log->ip_address }}
+                            </span>
+                            @endif
                         </span>
-                        @endif
                     </div>
 
                     <!-- Changes Details -->
@@ -229,11 +237,12 @@
                             </div>
                         </div>
                     @elseif($log->action === 'login')
-                        <div class="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                            Вхід в систему
-                            @if($log->user_agent)
-                                <span class="text-xs text-gray-400 dark:text-gray-500 ml-2">{{ Str::limit($log->user_agent, 60) }}</span>
-                            @endif
+                        <div class="mt-2 flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                            <span>Вхід в систему</span>
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs {{ $log->device_type === 'mobile' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400' }}">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $log->device_icon }}"/></svg>
+                                {{ $log->device_label }} · {{ $log->browser_name }}
+                            </span>
                         </div>
                     @elseif($log->action === 'logout')
                         <div class="mt-2 text-sm text-gray-500 dark:text-gray-400">

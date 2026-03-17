@@ -4,9 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Traits\Auditable;
 
 class EventChecklistItem extends Model
 {
+    use Auditable;
     protected $fillable = [
         'event_checklist_id',
         'title',

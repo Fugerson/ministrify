@@ -861,4 +861,67 @@ class AuditLog extends Model
     {
         return $query->where('created_at', '>=', now()->subDays($days));
     }
+
+    /**
+     * Detect device type from user_agent
+     */
+    public function getDeviceTypeAttribute(): string
+    {
+        $ua = strtolower($this->user_agent ?? '');
+
+        if (!$ua) {
+            return 'unknown';
+        }
+
+        if (preg_match('/mobile|android|iphone|ipod|blackberry|opera mini|iemobile|wpdesktop/i', $ua)) {
+            return 'mobile';
+        }
+
+        if (preg_match('/tablet|ipad|playbook|silk/i', $ua)) {
+            return 'tablet';
+        }
+
+        return 'desktop';
+    }
+
+    /**
+     * Get device icon SVG path
+     */
+    public function getDeviceIconAttribute(): string
+    {
+        return match($this->device_type) {
+            'mobile' => 'M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z',
+            'tablet' => 'M12 18h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z',
+            default => 'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z',
+        };
+    }
+
+    /**
+     * Get device label
+     */
+    public function getDeviceLabelAttribute(): string
+    {
+        return match($this->device_type) {
+            'mobile' => __('app.device_mobile'),
+            'tablet' => __('app.device_tablet'),
+            'desktop' => __('app.device_desktop'),
+            default => __('app.device_unknown'),
+        };
+    }
+
+    /**
+     * Get browser name from user_agent
+     */
+    public function getBrowserNameAttribute(): string
+    {
+        $ua = $this->user_agent ?? '';
+
+        if (preg_match('/Edg\//i', $ua)) return 'Edge';
+        if (preg_match('/OPR\//i', $ua)) return 'Opera';
+        if (preg_match('/Chrome\//i', $ua)) return 'Chrome';
+        if (preg_match('/Safari\//i', $ua) && !preg_match('/Chrome/i', $ua)) return 'Safari';
+        if (preg_match('/Firefox\//i', $ua)) return 'Firefox';
+
+        return 'Other';
+    }
 }
