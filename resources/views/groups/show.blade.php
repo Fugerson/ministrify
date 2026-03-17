@@ -135,7 +135,7 @@
              x-data="{ membersView: localStorage.getItem('group_members_view') || 'grid' }"
              x-init="$watch('membersView', v => localStorage.setItem('group_members_view', v))">
             <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between gap-3">
-                <h3 class="font-semibold text-gray-900 dark:text-white">{{ __('app.members') }} ({{ $group->members->count() }})</h3>
+                <h3 class="font-semibold text-gray-900 dark:text-white">{{ __('app.members') }} ({{ $group->members->filter(fn($m) => $m->pivot->role !== 'guest')->count() + $group->guests->count() }})</h3>
                 <div class="flex items-center gap-2">
                     {{-- View switcher --}}
                     <div class="inline-flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg p-0.5">
@@ -171,7 +171,7 @@
                 $sortedMembers = $group->members->filter(fn($m) => $m->pivot->role !== 'guest')->sortBy(fn($m) => match($m->pivot->role) { 'leader' => 0, 'assistant' => 1, 'member' => 2, default => 3 });
             @endphp
 
-            @if($sortedMembers->count() > 0)
+            @if($sortedMembers->count() > 0 || $group->guests->count() > 0)
 
             {{-- ===== GRID VIEW ===== --}}
             <div x-show="membersView === 'grid'" class="p-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -318,6 +318,47 @@
                         </div>
                     </div>
                 @endforeach
+
+                {{-- Guests in grid --}}
+                @foreach($group->guests->sortBy('first_name') as $guest)
+                    <div class="relative bg-white dark:bg-gray-800 border border-orange-200 dark:border-orange-800/50 rounded-xl hover:shadow-md transition-shadow group/card">
+                        <div class="h-1 rounded-t-xl bg-gradient-to-r from-orange-400 to-orange-500"></div>
+                        <div class="p-4">
+                            <div class="flex items-start gap-3">
+                                <div class="shrink-0" x-data="{ imgErr: false }">
+                                    @if($guest->photo)
+                                    <img x-show="!imgErr" x-on:error="imgErr = true" src="{{ Storage::url($guest->photo) }}" alt="" class="w-12 h-12 rounded-full object-cover ring-2 ring-orange-100 dark:ring-orange-900/30" loading="lazy">
+                                    <div x-show="imgErr" x-cloak class="w-12 h-12 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center ring-2 ring-orange-100 dark:ring-orange-900/30">
+                                        <span class="text-white text-sm font-semibold">{{ mb_substr($guest->first_name, 0, 1) }}{{ mb_substr($guest->last_name ?? '', 0, 1) }}</span>
+                                    </div>
+                                    @else
+                                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center ring-2 ring-orange-100 dark:ring-orange-900/30">
+                                        <span class="text-white text-sm font-semibold">{{ mb_substr($guest->first_name, 0, 1) }}{{ mb_substr($guest->last_name ?? '', 0, 1) }}</span>
+                                    </div>
+                                    @endif
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <span class="font-semibold text-gray-900 dark:text-white text-sm truncate">{{ $guest->full_name }}</span>
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-50 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400">{{ __('app.group_role_guest') }}</span>
+                                    </div>
+                                    @if($guest->notes)
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate">{{ $guest->notes }}</p>
+                                    @endif
+                                    @if($guest->birth_date)
+                                    <p class="text-xs text-gray-400 mt-1">{{ $guest->birth_date->format('d.m.Y') }}</p>
+                                    @endif
+                                </div>
+                                @can('update', $group)
+                                <button @click="ajaxDelete('{{ route('groups.guests.destroy', [$group, $guest]) }}', @js(__('messages.confirm_remove_member')), () => $el.closest('.group\\/card').remove())"
+                                        class="shrink-0 p-1.5 text-gray-300 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 opacity-0 group-hover/card:opacity-100 transition-opacity rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                </button>
+                                @endcan
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
             </div>
 
             {{-- ===== LIST VIEW ===== --}}
@@ -452,6 +493,42 @@
                             @endcan
                         </div>
                     @endforeach
+
+                    {{-- Guests in list --}}
+                    @foreach($group->guests->sortBy('first_name') as $guest)
+                        <div class="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group/row">
+                            <div class="shrink-0" x-data="{ imgErr: false }">
+                                @if($guest->photo)
+                                <img x-show="!imgErr" x-on:error="imgErr = true" src="{{ Storage::url($guest->photo) }}" alt="" class="w-10 h-10 rounded-full object-cover" loading="lazy">
+                                <div x-show="imgErr" x-cloak class="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center">
+                                    <span class="text-white text-sm font-semibold">{{ mb_substr($guest->first_name, 0, 1) }}{{ mb_substr($guest->last_name ?? '', 0, 1) }}</span>
+                                </div>
+                                @else
+                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center">
+                                    <span class="text-white text-sm font-semibold">{{ mb_substr($guest->first_name, 0, 1) }}{{ mb_substr($guest->last_name ?? '', 0, 1) }}</span>
+                                </div>
+                                @endif
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-medium text-sm text-gray-900 dark:text-white truncate">{{ $guest->full_name }}</span>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-50 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400">{{ __('app.group_role_guest') }}</span>
+                                </div>
+                                @if($guest->notes)
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">{{ $guest->notes }}</p>
+                                @endif
+                            </div>
+                            @if($guest->birth_date)
+                            <span class="hidden sm:inline text-xs text-gray-400">{{ $guest->birth_date->format('d.m.Y') }}</span>
+                            @endif
+                            @can('update', $group)
+                            <button @click="ajaxDelete('{{ route('groups.guests.destroy', [$group, $guest]) }}', @js(__('messages.confirm_remove_member')), () => $el.closest('.group\\/row').remove())"
+                                    class="shrink-0 p-1.5 text-gray-300 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 opacity-0 group-hover/row:opacity-100 transition-opacity rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            </button>
+                            @endcan
+                        </div>
+                    @endforeach
                 </div>
             </div>
 
@@ -500,6 +577,25 @@
                             @endcan
                         </div>
                     @endforeach
+
+                    {{-- Guests in compact --}}
+                    @foreach($group->guests->sortBy('first_name') as $guest)
+                        <div class="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group/compact">
+                            <span class="w-2 h-2 rounded-full shrink-0 bg-orange-400"></span>
+                            <span class="text-sm text-gray-900 dark:text-white truncate">{{ $guest->full_name }}</span>
+                            <span class="text-xs text-orange-500 dark:text-orange-400 shrink-0">{{ __('app.group_role_guest') }}</span>
+                            <span class="flex-1"></span>
+                            @if($guest->birth_date)
+                            <span class="hidden sm:inline text-xs text-gray-400">{{ $guest->birth_date->format('d.m.Y') }}</span>
+                            @endif
+                            @can('update', $group)
+                            <button @click="ajaxDelete('{{ route('groups.guests.destroy', [$group, $guest]) }}', @js(__('messages.confirm_remove_member')), () => $el.closest('.group\\/compact').remove())"
+                                    class="shrink-0 p-1 text-gray-300 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 opacity-0 group-hover/compact:opacity-100 transition-opacity">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                            </button>
+                            @endcan
+                        </div>
+                    @endforeach
                 </div>
             </div>
 
@@ -518,68 +614,6 @@
             </div>
             @endif
         </div>
-
-        <!-- Group Guests (separate from members) -->
-        @if($group->guests->count() > 0 || auth()->user()->can('update', $group))
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
-            <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <h3 class="font-semibold text-gray-900 dark:text-white">{{ __('app.group_guests_list') }}</h3>
-                    <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 text-xs font-semibold">{{ $group->guests->count() }}</span>
-                </div>
-            </div>
-
-            @if($group->guests->count() > 0)
-            <div class="divide-y divide-gray-200 dark:divide-gray-700">
-                @foreach($group->guests->sortBy('first_name') as $guest)
-                <div class="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group/guest-row">
-                    {{-- Avatar --}}
-                    <div class="shrink-0" x-data="{ imgErr: false }">
-                        @if($guest->photo)
-                        <img x-show="!imgErr" x-on:error="imgErr = true" src="{{ Storage::url($guest->photo) }}" alt="" class="w-10 h-10 rounded-full object-cover" loading="lazy">
-                        <div x-show="imgErr" x-cloak class="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center">
-                            <span class="text-white text-sm font-semibold">{{ mb_substr($guest->first_name, 0, 1) }}{{ mb_substr($guest->last_name ?? '', 0, 1) }}</span>
-                        </div>
-                        @else
-                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center">
-                            <span class="text-white text-sm font-semibold">{{ mb_substr($guest->first_name, 0, 1) }}{{ mb_substr($guest->last_name ?? '', 0, 1) }}</span>
-                        </div>
-                        @endif
-                    </div>
-
-                    {{-- Name --}}
-                    <div class="flex-1 min-w-0">
-                        <div class="flex items-center gap-2">
-                            <span class="font-medium text-sm text-gray-900 dark:text-white truncate">{{ $guest->full_name }}</span>
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-50 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400">{{ __('app.group_role_guest') }}</span>
-                        </div>
-                        @if($guest->notes)
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">{{ $guest->notes }}</p>
-                        @endif
-                    </div>
-
-                    {{-- Birth date --}}
-                    @if($guest->birth_date)
-                    <span class="hidden sm:inline text-xs text-gray-400">{{ $guest->birth_date->format('d.m.Y') }}</span>
-                    @endif
-
-                    {{-- Delete button --}}
-                    @can('update', $group)
-                    <button @click="ajaxDelete('{{ route('groups.guests.destroy', [$group, $guest]) }}', @js(__('messages.confirm_remove_member')), () => $el.closest('.group\\/guest-row').remove())"
-                            class="shrink-0 p-1.5 text-gray-300 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 opacity-0 group-hover/guest-row:opacity-100 transition-opacity rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                    </button>
-                    @endcan
-                </div>
-                @endforeach
-            </div>
-            @else
-            <div class="p-6 text-center text-sm text-gray-500 dark:text-gray-400">
-                {{ __('app.no_guests_yet') }}
-            </div>
-            @endif
-        </div>
-        @endif
 
         <!-- Recent Attendance -->
         @if($currentChurch->attendance_enabled)
