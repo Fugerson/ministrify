@@ -680,9 +680,25 @@
                         'id' => $lm->id,
                         'name' => $lm->name,
                         'color' => $lm->color ?? '#6B7280',
+                        'is_worship' => (bool) $lm->is_worship_ministry,
                         'roles' => $lm->ministryRoles->map(fn($r) => ['id' => $r->id, 'name' => $r->name])->values(),
                     ];
                 })->values();
+
+                // Songs for this event (for worship ministries)
+                $eventSongsData = $event->songs->map(fn($s) => [
+                    'id' => $s->pivot->id,
+                    'song_id' => $s->id,
+                    'title' => $s->title,
+                    'key' => $s->pivot->key ?? $s->key,
+                    'order' => $s->pivot->order,
+                ])->values();
+
+                // All available songs for the church
+                $hasWorshipLinked = $linkedMinistries->contains('is_worship_ministry', true);
+                $allChurchSongs = $hasWorshipLinked
+                    ? \App\Models\Song::where('church_id', $event->church_id)->orderBy('title')->get(['id', 'title', 'key'])->map(fn($s) => ['id' => $s->id, 'title' => $s->title, 'key' => $s->key])->values()
+                    : collect();
 
                 // Members by ministry (for assign dropdown)
                 $membersByMinistry = [];
@@ -854,6 +870,81 @@
                                         <template x-if="getRolePersons(ministry.id, role.id).length === 0 && !{{ $canEdit ? 'true' : 'false' }} && !canSelfSignup(ministry)">
                                             <div class="text-xs text-gray-400 dark:text-gray-500 italic py-1">—</div>
                                         </template>
+                                    </div>
+                                </template>
+
+                                {{-- Songs section for worship ministries --}}
+                                <template x-if="ministry.is_worship">
+                                    <div class="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700/50">
+                                        <div class="flex items-center gap-1.5 mb-2">
+                                            <svg class="w-3.5 h-3.5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
+                                            </svg>
+                                            <span class="text-xs font-semibold text-purple-600 dark:text-purple-400 uppercase tracking-wide">{{ __('app.songs') }}</span>
+                                            @if($canEdit)
+                                            <button type="button" @click="songDropdownOpen = !songDropdownOpen"
+                                                    class="text-gray-400 hover:text-purple-500 dark:text-gray-500 dark:hover:text-purple-400 transition-colors">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                                </svg>
+                                            </button>
+                                            @endif
+                                        </div>
+
+                                        {{-- Song list --}}
+                                        <template x-for="(song, idx) in eventSongs" :key="song.song_id">
+                                            <div class="flex items-center gap-2 py-1 group">
+                                                @if($canEdit)
+                                                <button type="button" @click="removeSongFromEvent(song)"
+                                                        class="p-0.5 text-gray-300 hover:text-red-500 dark:text-gray-600 dark:hover:text-red-400 transition-colors flex-shrink-0">
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                                    </svg>
+                                                </button>
+                                                @endif
+                                                <span class="text-[10px] text-gray-400 dark:text-gray-500 w-4 text-right flex-shrink-0" x-text="idx + 1"></span>
+                                                <a :href="'/songs/' + song.song_id" class="text-sm text-gray-900 dark:text-white hover:text-purple-600 dark:hover:text-purple-400 transition-colors truncate" x-text="song.title"></a>
+                                                <template x-if="song.key">
+                                                    <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400 flex-shrink-0" x-text="song.key"></span>
+                                                </template>
+                                            </div>
+                                        </template>
+
+                                        <template x-if="eventSongs.length === 0">
+                                            <div class="text-xs text-gray-400 dark:text-gray-500 italic py-1">{{ __('app.songs_not_added') }}</div>
+                                        </template>
+
+                                        {{-- Add song dropdown --}}
+                                        @if($canEdit)
+                                        <div x-show="songDropdownOpen" x-transition x-cloak class="mt-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden">
+                                            <div class="p-2">
+                                                <input type="text" x-model="songSearch"
+                                                       placeholder="{{ __('app.search_song') }}"
+                                                       class="w-full px-3 py-1.5 text-sm rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-gray-200 focus:ring-purple-500 focus:border-purple-500 placeholder-gray-400 dark:placeholder-gray-500"
+                                                       @keydown.escape="songDropdownOpen = false">
+                                            </div>
+                                            <div class="max-h-48 overflow-y-auto pb-1">
+                                                <template x-for="song in filteredAvailableSongsForEvent()" :key="song.id">
+                                                    <button type="button" @click="addSongToEvent(song)"
+                                                        class="w-full text-left px-3 py-1.5 text-sm hover:bg-purple-50 dark:hover:bg-purple-900/30 text-gray-700 dark:text-gray-300 transition-colors flex items-center gap-2">
+                                                        <svg class="w-3 h-3 text-purple-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                                        </svg>
+                                                        <span class="truncate" x-text="song.title"></span>
+                                                        <template x-if="song.key">
+                                                            <span class="text-[10px] text-gray-400 ml-auto flex-shrink-0" x-text="song.key"></span>
+                                                        </template>
+                                                    </button>
+                                                </template>
+                                                <template x-if="filteredAvailableSongsForEvent().length === 0 && songSearch">
+                                                    <div class="px-3 py-2 text-sm text-gray-400 text-center">{{ __('app.nobody_found') }}</div>
+                                                </template>
+                                                <template x-if="allChurchSongs.length === 0">
+                                                    <div class="px-3 py-2 text-sm text-gray-400 text-center">{{ __('app.no_songs_yet') }}</div>
+                                                </template>
+                                            </div>
+                                        </div>
+                                        @endif
                                     </div>
                                 </template>
                             </div>
@@ -1445,6 +1536,10 @@ function eventTeamManager() {
         noteEditing: {},
         toast: { show: false, message: '', type: 'success', timer: null },
         dropdown: { open: false, ministry: null, role: null, persons: [], search: '', cellNotes: '', x: 0, y: 0 },
+        eventSongs: @json($eventSongsData ?? []),
+        allChurchSongs: @json($allChurchSongs ?? []),
+        songDropdownOpen: false,
+        songSearch: '',
 
         init() {
             if (this.availableMinistries.length > 0) {
@@ -1754,6 +1849,58 @@ function eventTeamManager() {
                 console.error('Save cell notes error:', e);
                 this.showToast(@js(__('app.error')), 'error');
             }
+        },
+
+        // Song management
+        filteredAvailableSongsForEvent() {
+            const assigned = this.eventSongs.map(s => s.song_id);
+            const search = this.songSearch.toLowerCase();
+            return this.allChurchSongs.filter(s => !assigned.includes(s.id) && (!search || s.title.toLowerCase().includes(search)));
+        },
+
+        async addSongToEvent(song) {
+            if (this.busy) return;
+            this.busy = true;
+            try {
+                const resp = await fetch(`/events/${this.eventId}/songs`, {
+                    method: 'POST',
+                    headers: this._headers(),
+                    body: JSON.stringify({ song_id: song.id, key: song.key }),
+                });
+                if (resp.ok) {
+                    const data = await resp.json();
+                    this.eventSongs.push({
+                        id: data.event_song_id,
+                        song_id: song.id,
+                        title: song.title,
+                        key: song.key,
+                        order: this.eventSongs.length + 1,
+                    });
+                    this.showToast(song.title + ' — ' + @js(__('app.song_added_toast')));
+                } else {
+                    const err = await resp.json().catch(() => ({}));
+                    this.showToast(err.message || @js(__('app.error')), 'error');
+                }
+            } catch (e) {
+                this.showToast(@js(__('app.error')), 'error');
+            } finally { this.busy = false; }
+        },
+
+        async removeSongFromEvent(song) {
+            if (this.busy) return;
+            this.busy = true;
+            try {
+                const resp = await fetch(`/events/${this.eventId}/songs/${song.song_id}`, {
+                    method: 'DELETE',
+                    headers: this._headers(),
+                });
+                if (resp.ok) {
+                    this.eventSongs = this.eventSongs.filter(s => s.song_id !== song.song_id);
+                    this.showToast(song.title + ' — ' + @js(__('app.song_removed_toast')));
+                }
+            } catch (e) {
+                this.showToast(@js(__('app.error')), 'error');
+            } finally { this.busy = false; }
         },
     };
 }
