@@ -989,6 +989,7 @@ class EventController extends Controller
                 'color' => $ministry->color,
                 'icon' => $ministry->icon,
                 'roles' => $roles,
+                'is_worship' => (bool) $ministry->is_worship_ministry,
             ];
 
             // Initialize grid for this ministry
@@ -1103,6 +1104,41 @@ class EventController extends Controller
             ->map(fn($group) => $group->first()->notes)
             ->toArray();
 
+        // Load songs for worship ministries
+        $hasWorshipMinistry = collect($ministriesData)->contains('is_worship', true);
+        $eventSongs = [];
+        $availableSongs = [];
+
+        if ($hasWorshipMinistry && count($eventIds) > 0) {
+            // Songs assigned to events
+            $songRows = \DB::table('event_songs')
+                ->join('songs', 'songs.id', '=', 'event_songs.song_id')
+                ->whereIn('event_songs.event_id', $eventIds)
+                ->select('event_songs.id', 'event_songs.event_id', 'event_songs.song_id', 'event_songs.order', 'event_songs.key', 'songs.title', 'songs.key as default_key')
+                ->orderBy('event_songs.order')
+                ->get();
+
+            foreach ($songRows as $row) {
+                $eKey = (string) $row->event_id;
+                if (!isset($eventSongs[$eKey])) $eventSongs[$eKey] = [];
+                $eventSongs[$eKey][] = [
+                    'id' => $row->id,
+                    'song_id' => $row->song_id,
+                    'title' => $row->title,
+                    'key' => $row->key ?? $row->default_key,
+                    'order' => $row->order,
+                ];
+            }
+
+            // All available songs for the church
+            $availableSongs = \App\Models\Song::where('church_id', $church->id)
+                ->orderBy('title')
+                ->get(['id', 'title', 'key'])
+                ->map(fn($s) => ['id' => $s->id, 'title' => $s->title, 'key' => $s->key])
+                ->values()
+                ->toArray();
+        }
+
         // Current user context for self-signup
         $currentPerson = auth()->user()->person;
         $currentPersonId = $currentPerson?->id;
@@ -1111,7 +1147,7 @@ class EventController extends Controller
             : [];
         $isLeader = auth()->user()->canEdit('events');
 
-        return response()->json(compact('events', 'ministriesData', 'grid', 'members', 'cellNotes', 'currentPersonId', 'myMinistryIds', 'isLeader'));
+        return response()->json(compact('events', 'ministriesData', 'grid', 'members', 'cellNotes', 'currentPersonId', 'myMinistryIds', 'isLeader', 'eventSongs', 'availableSongs'));
     }
 
     /**

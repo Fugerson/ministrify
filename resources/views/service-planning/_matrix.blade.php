@@ -321,6 +321,16 @@
                                                 <span class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 truncate max-w-[70px] sm:max-w-none" x-text="row.role.name"></span>
                                             </div>
                                         </template>
+
+                                        {{-- Songs Row --}}
+                                        <template x-if="row.type === 'songs'">
+                                            <div class="flex items-center gap-2 pl-6">
+                                                <svg class="w-3.5 h-3.5 text-purple-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
+                                                </svg>
+                                                <span class="text-xs sm:text-sm font-medium text-purple-600 dark:text-purple-400">{{ __('app.songs') }}</span>
+                                            </div>
+                                        </template>
                                     </td>
 
                                     {{-- Event cells --}}
@@ -336,6 +346,31 @@
                                                         <span class="text-xs font-semibold px-2 py-1 rounded-lg"
                                                               :class="getSummaryClasses(ministry, event)"
                                                               x-text="getSummaryText(ministry, event)"></span>
+                                                    </template>
+                                                </div>
+                                            </template>
+
+                                            {{-- Songs cell (expanded) --}}
+                                            <template x-if="row.type === 'songs'">
+                                                <div class="min-h-[40px] flex flex-col items-center justify-center gap-0.5 rounded-lg px-1 py-1 transition-all duration-150 cursor-pointer border border-dashed border-purple-200 dark:border-purple-800 hover:border-purple-400 dark:hover:border-purple-600 hover:bg-purple-50/50 dark:hover:bg-purple-900/20"
+                                                     @click="openSongDropdown(ministry, event, $event)">
+                                                    <template x-for="song in getEventSongs(event.id)" :key="song.song_id">
+                                                        <div class="flex items-center gap-1 text-[11px] leading-tight w-full justify-center">
+                                                            <svg class="w-2.5 h-2.5 text-purple-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                                                <path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.37 4.37 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z"/>
+                                                            </svg>
+                                                            <span class="truncate max-w-[70px] sm:max-w-[110px] font-medium text-purple-700 dark:text-purple-300" x-text="song.title"></span>
+                                                            <template x-if="song.key">
+                                                                <span class="text-[9px] text-purple-400 dark:text-purple-500 flex-shrink-0" x-text="song.key"></span>
+                                                            </template>
+                                                        </div>
+                                                    </template>
+                                                    <template x-if="getEventSongs(event.id).length === 0">
+                                                        <div class="flex items-center justify-center w-full h-full">
+                                                            <svg class="w-4 h-4 text-purple-300 dark:text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                                            </svg>
+                                                        </div>
                                                     </template>
                                                 </div>
                                             </template>
@@ -535,6 +570,110 @@
             </div>
         </template>
     </div>
+
+    {{-- Song Dropdown backdrop (mobile) --}}
+    <div x-show="songDropdown.open" @click="songDropdown.open = false"
+         class="fixed inset-0 bg-black/40 z-40 sm:hidden"
+         x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+    </div>
+
+    {{-- Song Dropdown --}}
+    <div x-show="songDropdown.open" x-transition:enter="transition ease-out duration-150"
+         x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
+         x-transition:leave="transition ease-in duration-100"
+         x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
+         @click.outside="songDropdown.open = false"
+         @keydown.escape.window="songDropdown.open = false"
+         class="fixed z-50 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden w-[calc(100vw-16px)] sm:w-80 max-h-[80vh] overflow-y-auto"
+         :style="window.innerWidth < 640 ? 'top:50%;left:50%;transform:translate(-50%,-50%)' : 'top:' + songDropdown.y + 'px;left:' + songDropdown.x + 'px'">
+
+        {{-- Header --}}
+        <div class="px-3 py-2 bg-purple-50 dark:bg-purple-900/30 border-b border-purple-200 dark:border-purple-800">
+            <div class="flex items-center justify-between">
+                <div class="min-w-0">
+                    <div class="flex items-center gap-1.5">
+                        <svg class="w-3.5 h-3.5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
+                        </svg>
+                        <span class="text-xs font-semibold text-purple-700 dark:text-purple-300">{{ __('app.songs') }}</span>
+                    </div>
+                    <div class="text-[10px] text-purple-500 dark:text-purple-400"
+                         x-text="songDropdown.event?.dayOfWeek + ' ' + songDropdown.event?.dateLabel + ' — ' + (songDropdown.event?.title || '')"></div>
+                </div>
+                <button @click="songDropdown.open = false"
+                    class="p-1 -mr-1 text-purple-400 hover:text-purple-600 dark:hover:text-purple-300 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        {{-- Assigned songs --}}
+        <template x-if="songDropdown.event && getEventSongs(songDropdown.event.id).length > 0">
+            <div class="border-b border-gray-200 dark:border-gray-700">
+                <template x-for="(song, idx) in getEventSongs(songDropdown.event.id)" :key="song.song_id">
+                    <div class="flex items-center justify-between px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <span class="text-[10px] text-gray-400 dark:text-gray-500 w-4 text-right flex-shrink-0" x-text="idx + 1"></span>
+                            <svg class="w-3.5 h-3.5 text-purple-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.37 4.37 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z"/>
+                            </svg>
+                            <span class="text-sm text-gray-900 dark:text-white truncate" x-text="song.title"></span>
+                            <template x-if="song.key">
+                                <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400 flex-shrink-0" x-text="song.key"></span>
+                            </template>
+                        </div>
+                        <template x-if="isLeader">
+                            <button @click.stop="removeSongFromEvent(song)"
+                                class="p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 flex-shrink-0">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                </svg>
+                            </button>
+                        </template>
+                    </div>
+                </template>
+            </div>
+        </template>
+
+        {{-- Search & add songs (leader only) --}}
+        <template x-if="isLeader">
+            <div>
+                <div class="p-2">
+                    <input type="text" x-model="songDropdown.search"
+                           placeholder="{{ __('app.search_song') }}"
+                           class="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 dark:text-gray-200 focus:ring-purple-500 focus:border-purple-500 placeholder-gray-400 dark:placeholder-gray-500"
+                           @keydown.escape="songDropdown.open = false">
+                </div>
+                <div class="overflow-y-auto max-h-44 pb-1">
+                    <template x-for="song in filteredAvailableSongs()" :key="song.id">
+                        <button @click="addSongToEvent(song)"
+                            class="w-full text-left px-3 py-2 text-sm hover:bg-purple-50 dark:hover:bg-purple-900/30 text-gray-700 dark:text-gray-300 transition-colors flex items-center gap-2">
+                            <svg class="w-3.5 h-3.5 text-purple-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                            <span class="truncate" x-text="song.title"></span>
+                            <template x-if="song.key">
+                                <span class="text-[10px] text-gray-400 ml-auto flex-shrink-0" x-text="song.key"></span>
+                            </template>
+                        </button>
+                    </template>
+                    <template x-if="filteredAvailableSongs().length === 0 && songDropdown.search">
+                        <div class="px-3 py-3 text-sm text-gray-400 dark:text-gray-500 text-center">
+                            {{ __('app.nobody_found') }}
+                        </div>
+                    </template>
+                    <template x-if="availableSongs.length === 0">
+                        <div class="px-3 py-3 text-sm text-gray-400 dark:text-gray-500 text-center">
+                            {{ __('app.no_songs_yet') }}
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </template>
+    </div>
 </div>
 
 <script>
@@ -550,6 +689,8 @@ function servicePlanningMatrix() {
         grid: {},
         cellNotes: {},
         members: {},
+        eventSongs: {},
+        availableSongs: [],
         periodLabel: '',
         nearestEventId: null,
         collapsed: JSON.parse(localStorage.getItem('sp_collapsed') || '{}'),
@@ -572,6 +713,15 @@ function servicePlanningMatrix() {
             persons: [],
             search: '',
             cellNotes: '',
+        },
+
+        songDropdown: {
+            open: false,
+            x: 0,
+            y: 0,
+            event: null,
+            ministry: null,
+            search: '',
         },
 
         toast: { show: false, message: '', type: 'success', timer: null },
@@ -774,6 +924,8 @@ function servicePlanningMatrix() {
                 this.grid = data.grid;
                 this.cellNotes = data.cellNotes || {};
                 this.members = data.members;
+                this.eventSongs = data.eventSongs || {};
+                this.availableSongs = data.availableSongs || [];
                 this.currentPersonId = data.currentPersonId;
                 this.myMinistryIds = data.myMinistryIds || [];
                 this.isLeader = data.isLeader || false;
@@ -798,6 +950,9 @@ function servicePlanningMatrix() {
 
         getMinistryRows(ministry) {
             const rows = [{ key: 'header_' + ministry.id, type: 'header' }];
+            if (ministry.is_worship) {
+                rows.push({ key: 'songs_' + ministry.id, type: 'songs' });
+            }
             for (const role of ministry.roles) {
                 rows.push({ key: role.type + '_' + role.id, type: 'role', role });
             }
@@ -1107,6 +1262,95 @@ function servicePlanningMatrix() {
                 console.error('Save cell notes error:', e);
                 this.showToast(@js( __('app.error') ), 'error');
             }
+        },
+
+        // Song management for worship ministries
+        getEventSongs(eventId) {
+            return this.eventSongs[String(eventId)] || [];
+        },
+
+        openSongDropdown(ministry, event, $event) {
+            if (!this.isLeader) return;
+            if (window.innerWidth >= 640) {
+                const rect = $event.currentTarget.getBoundingClientRect();
+                const dw = 320, dh = 400;
+                let x = rect.left + (rect.width / 2) - (dw / 2);
+                let y = rect.bottom + 6;
+                if (x + dw > window.innerWidth - 8) x = window.innerWidth - dw - 8;
+                if (y + dh > window.innerHeight) y = rect.top - dh - 6;
+                if (x < 8) x = 8;
+                if (y < 8) y = 8;
+                this.songDropdown.x = x;
+                this.songDropdown.y = y;
+            }
+            this.songDropdown.event = event;
+            this.songDropdown.ministry = ministry;
+            this.songDropdown.search = '';
+            this.songDropdown.open = true;
+        },
+
+        filteredAvailableSongs() {
+            if (!this.songDropdown.event) return [];
+            const eKey = String(this.songDropdown.event.id);
+            const assigned = (this.eventSongs[eKey] || []).map(s => s.song_id);
+            const search = this.songDropdown.search.toLowerCase();
+            return this.availableSongs.filter(s => !assigned.includes(s.id) && (!search || s.title.toLowerCase().includes(search)));
+        },
+
+        async addSongToEvent(song) {
+            const event = this.songDropdown.event;
+            if (!event || this.busy) return;
+            this.busy = true;
+            const eKey = String(event.id);
+
+            try {
+                const resp = await fetch(`/events/${event.id}/songs`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content, 'X-Requested-With': 'XMLHttpRequest' },
+                    body: JSON.stringify({ song_id: song.id, key: song.key }),
+                });
+
+                if (resp.ok) {
+                    const data = await resp.json();
+                    if (!this.eventSongs[eKey]) this.eventSongs[eKey] = [];
+                    this.eventSongs[eKey].push({
+                        id: data.event_song_id,
+                        song_id: song.id,
+                        title: song.title,
+                        key: song.key,
+                        order: this.eventSongs[eKey].length + 1,
+                    });
+                    this.showToast(song.title + ' — ' + @js(__('app.song_added_toast')));
+                } else {
+                    const err = await resp.json().catch(() => ({}));
+                    this.showToast(err.message || @js(__('app.error')), 'error');
+                }
+            } catch (e) {
+                console.error('Add song error:', e);
+                this.showToast(@js(__('app.error')), 'error');
+            } finally { this.busy = false; }
+        },
+
+        async removeSongFromEvent(song) {
+            const event = this.songDropdown.event;
+            if (!event || this.busy) return;
+            this.busy = true;
+            const eKey = String(event.id);
+
+            try {
+                const resp = await fetch(`/events/${event.id}/songs/${song.song_id}`, {
+                    method: 'DELETE',
+                    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content, 'X-Requested-With': 'XMLHttpRequest' },
+                });
+
+                if (resp.ok) {
+                    this.eventSongs[eKey] = (this.eventSongs[eKey] || []).filter(s => s.song_id !== song.song_id);
+                    this.showToast(song.title + ' — ' + @js(__('app.song_removed_toast')));
+                }
+            } catch (e) {
+                console.error('Remove song error:', e);
+                this.showToast(@js(__('app.error')), 'error');
+            } finally { this.busy = false; }
         },
 
         async notifyPerson(person) {
