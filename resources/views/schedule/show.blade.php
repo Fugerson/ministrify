@@ -849,6 +849,9 @@
                                                                   x-text="isMe(person) ? person.person_name + ' ({{ __('app.you') }})' : person.person_name"></span>
                                                         </div>
                                                     </template>
+                                                    <template x-if="getCellNotes(ministry.id, row.role)">
+                                                        <div class="text-[10px] text-amber-500 dark:text-amber-400 truncate w-full mt-0.5" x-text="getCellNotes(ministry.id, row.role)"></div>
+                                                    </template>
                                                     <template x-if="getRolePersons(ministry.id, row.role.id).length === 0">
                                                         <div class="flex items-center justify-center w-full">
                                                             <svg class="w-5 h-5 text-gray-400 dark:text-gray-500 hover:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1576,6 +1579,13 @@ function eventTeamManager() {
 
         getRolePersons(ministryId, roleId) {
             return this.assignments.filter(a => a.ministry_id === ministryId && a.role_id === roleId && a.source === 'ministry_team');
+        },
+
+        getCellNotes(ministryId, role) {
+            // Check person-level notes first
+            const persons = this.getRolePersons(ministryId, role.id);
+            for (const p of persons) { if (p.notes) return p.notes; }
+            return null;
         },
 
         isMe(person) {
