@@ -107,6 +107,8 @@ class AttendanceTest extends TestCase
             'attendable_id' => $group->id,
             'type' => Attendance::TYPE_GROUP,
             'members_present' => 2,
+            'total_count' => 2,
+            'total_members' => 4,
         ]);
 
         // Mark 2 present

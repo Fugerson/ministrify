@@ -148,7 +148,7 @@ class EventTest extends TestCase
         ]);
         $person = Person::factory()->forChurch($this->church)->create();
 
-        Assignment::factory()->create([
+        Assignment::factory()->confirmed()->create([
             'event_id' => $event->id,
             'position_id' => $position->id,
             'person_id' => $person->id,
@@ -177,7 +177,7 @@ class EventTest extends TestCase
         ]);
         $person = Person::factory()->forChurch($this->church)->create();
 
-        Assignment::factory()->create([
+        Assignment::factory()->confirmed()->create([
             'event_id' => $event->id,
             'position_id' => $pos1->id,
             'person_id' => $person->id,

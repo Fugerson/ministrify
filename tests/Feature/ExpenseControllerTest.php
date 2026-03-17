@@ -38,9 +38,10 @@ class ExpenseControllerTest extends TestCase
 
     public function test_admin_can_view_expenses_index(): void
     {
+        // /finances/expenses now redirects to /finances/transactions?filter=expense
         $response = $this->actingAs($this->admin)->get('/finances/expenses');
 
-        $response->assertStatus(200);
+        $response->assertRedirect();
     }
 
     public function test_guest_cannot_view_expenses(): void
@@ -118,6 +119,18 @@ class ExpenseControllerTest extends TestCase
             'church_id' => $this->church->id,
             'email_verified_at' => now(),
         ]);
+        // Ensure church_user pivot and finances permission
+        if (!\Illuminate\Support\Facades\DB::table('church_user')->where('user_id', $leader->id)->where('church_id', $this->church->id)->exists()) {
+            $leader->churches()->attach($this->church->id, [
+                'church_role_id' => $leader->church_role_id,
+            ]);
+        }
+        // Grant finances permission to leader role
+        \App\Models\ChurchRolePermission::updateOrCreate(
+            ['church_role_id' => $leader->church_role_id, 'module' => 'finances'],
+            ['actions' => ['view', 'create', 'edit', 'delete']]
+        );
+        \Illuminate\Support\Facades\Cache::flush();
         $leader->refresh();
         $leaderPerson = Person::factory()->forChurch($this->church)->create([
             'user_id' => $leader->id,

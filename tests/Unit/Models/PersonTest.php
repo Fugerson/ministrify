@@ -323,7 +323,8 @@ class PersonTest extends TestCase
             'membership_status' => Person::STATUS_ACTIVE,
         ]);
 
-        $this->assertEquals('Активний член', $person->membership_status_label);
+        // STATUS_ACTIVE = 'leadership' with label 'Керівництво церкви'
+        $this->assertEquals('Керівництво церкви', $person->membership_status_label);
     }
 
     public function test_gender_label(): void

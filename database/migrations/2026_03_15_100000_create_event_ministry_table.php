@@ -18,20 +18,22 @@ return new class extends Migration
         });
 
         // Backfill from existing event_ministry_team assignments
-        DB::statement("
-            INSERT IGNORE INTO event_ministry (event_id, ministry_id, created_at, updated_at)
-            SELECT DISTINCT event_id, ministry_id, MIN(created_at), NOW()
-            FROM event_ministry_team
-            GROUP BY event_id, ministry_id
-        ");
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement("
+                INSERT IGNORE INTO event_ministry (event_id, ministry_id, created_at, updated_at)
+                SELECT DISTINCT event_id, ministry_id, MIN(created_at), NOW()
+                FROM event_ministry_team
+                GROUP BY event_id, ministry_id
+            ");
 
-        // Also backfill from events.ministry_id
-        DB::statement("
-            INSERT IGNORE INTO event_ministry (event_id, ministry_id, created_at, updated_at)
-            SELECT id, ministry_id, created_at, NOW()
-            FROM events
-            WHERE ministry_id IS NOT NULL AND deleted_at IS NULL
-        ");
+            // Also backfill from events.ministry_id
+            DB::statement("
+                INSERT IGNORE INTO event_ministry (event_id, ministry_id, created_at, updated_at)
+                SELECT id, ministry_id, created_at, NOW()
+                FROM events
+                WHERE ministry_id IS NOT NULL AND deleted_at IS NULL
+            ");
+        }
     }
 
     public function down(): void

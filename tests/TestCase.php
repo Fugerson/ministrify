@@ -17,6 +17,12 @@ abstract class TestCase extends BaseTestCase
         $admin = User::factory()->admin()->create([
             'church_id' => $church->id,
         ]);
+        // Ensure church_user pivot exists for multi-church belongsToChurch() check
+        if (!\Illuminate\Support\Facades\DB::table('church_user')->where('user_id', $admin->id)->where('church_id', $church->id)->exists()) {
+            $admin->churches()->attach($church->id, [
+                'church_role_id' => $admin->church_role_id,
+            ]);
+        }
         $admin->refresh();
 
         return [$church, $admin];
@@ -27,6 +33,12 @@ abstract class TestCase extends BaseTestCase
         $user = User::factory()->{$roleType}()->create([
             'church_id' => $church->id,
         ]);
+        // Ensure church_user pivot exists
+        if (!\Illuminate\Support\Facades\DB::table('church_user')->where('user_id', $user->id)->where('church_id', $church->id)->exists()) {
+            $user->churches()->attach($church->id, [
+                'church_role_id' => $user->church_role_id,
+            ]);
+        }
         $user->refresh();
 
         return $user;

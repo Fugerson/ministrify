@@ -4,9 +4,9 @@ namespace Tests\Unit\Models;
 
 use App\Models\Church;
 use App\Models\ChurchRole;
-use App\Models\Expense;
 use App\Models\Ministry;
 use App\Models\Person;
+use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -57,11 +57,14 @@ class MinistryTest extends TestCase
         ]);
 
         // Create existing expenses to bring to 75%
-        Expense::create([
+        Transaction::create([
             'church_id' => $this->church->id,
             'ministry_id' => $ministry->id,
             'user_id' => $this->admin->id,
             'amount' => 7500,
+            'direction' => Transaction::DIRECTION_OUT,
+            'source_type' => Transaction::SOURCE_EXPENSE,
+            'status' => Transaction::STATUS_COMPLETED,
             'description' => 'Test',
             'date' => now(),
         ]);
@@ -77,11 +80,14 @@ class MinistryTest extends TestCase
             'monthly_budget' => 10000,
         ]);
 
-        Expense::create([
+        Transaction::create([
             'church_id' => $this->church->id,
             'ministry_id' => $ministry->id,
             'user_id' => $this->admin->id,
             'amount' => 9500,
+            'direction' => Transaction::DIRECTION_OUT,
+            'source_type' => Transaction::SOURCE_EXPENSE,
+            'status' => Transaction::STATUS_COMPLETED,
             'description' => 'Test',
             'date' => now(),
         ]);
@@ -97,11 +103,14 @@ class MinistryTest extends TestCase
             'monthly_budget' => 10000,
         ]);
 
-        Expense::create([
+        Transaction::create([
             'church_id' => $this->church->id,
             'ministry_id' => $ministry->id,
             'user_id' => $this->admin->id,
             'amount' => 8500,
+            'direction' => Transaction::DIRECTION_OUT,
+            'source_type' => Transaction::SOURCE_EXPENSE,
+            'status' => Transaction::STATUS_COMPLETED,
             'description' => 'Test',
             'date' => now(),
         ]);
@@ -115,11 +124,14 @@ class MinistryTest extends TestCase
             'monthly_budget' => 5000,
         ]);
 
-        Expense::create([
+        Transaction::create([
             'church_id' => $this->church->id,
             'ministry_id' => $ministry->id,
             'user_id' => $this->admin->id,
             'amount' => 5500,
+            'direction' => Transaction::DIRECTION_OUT,
+            'source_type' => Transaction::SOURCE_EXPENSE,
+            'status' => Transaction::STATUS_COMPLETED,
             'description' => 'Test',
             'date' => now(),
         ]);
@@ -133,11 +145,14 @@ class MinistryTest extends TestCase
             'monthly_budget' => 10000,
         ]);
 
-        Expense::create([
+        Transaction::create([
             'church_id' => $this->church->id,
             'ministry_id' => $ministry->id,
             'user_id' => $this->admin->id,
             'amount' => 5000,
+            'direction' => Transaction::DIRECTION_OUT,
+            'source_type' => Transaction::SOURCE_EXPENSE,
+            'status' => Transaction::STATUS_COMPLETED,
             'description' => 'Test',
             'date' => now(),
         ]);
@@ -160,11 +175,14 @@ class MinistryTest extends TestCase
             'monthly_budget' => 10000,
         ]);
 
-        Expense::create([
+        Transaction::create([
             'church_id' => $this->church->id,
             'ministry_id' => $ministry->id,
             'user_id' => $this->admin->id,
             'amount' => 3000,
+            'direction' => Transaction::DIRECTION_OUT,
+            'source_type' => Transaction::SOURCE_EXPENSE,
+            'status' => Transaction::STATUS_COMPLETED,
             'description' => 'Test',
             'date' => now(),
         ]);

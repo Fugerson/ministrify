@@ -680,8 +680,12 @@ class RoutesSmokeTest extends TestCase
 
     public function test_system_admin_index(): void
     {
+        $this->skipIfSqlite(); // YEAR(), MONTH()
         $superAdmin = User::factory()->superAdmin()->create([
             'church_id' => $this->church->id,
+        ]);
+        $superAdmin->churches()->attach($this->church->id, [
+            'church_role_id' => $superAdmin->church_role_id,
         ]);
         $response = $this->actingAs($superAdmin)->get('/system-admin');
         $this->assertNotEquals(500, $response->getStatusCode(), 'Route [/system-admin] returned 500');
