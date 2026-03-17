@@ -764,20 +764,10 @@
 
                                             {{-- Ministry header --}}
                                             <template x-if="row.type === 'header'">
-                                                <div class="flex items-center justify-between">
-                                                    <div class="flex items-center gap-2">
-                                                        <span class="w-1 h-4 rounded-full flex-shrink-0" :style="'background:' + ministry.color"></span>
-                                                        <span class="text-[11px] font-bold uppercase tracking-wide" :style="'color:' + ministry.color" x-text="ministry.name"></span>
-                                                        <span class="text-[10px] text-gray-400 dark:text-gray-500" x-text="'(' + ministry.roles.length + ')'"></span>
-                                                    </div>
-                                                    @if($canEdit)
-                                                    <button type="button" @click="unlinkMinistry(ministry)"
-                                                            class="text-gray-300 hover:text-red-500 dark:text-gray-600 dark:hover:text-red-400 transition-colors">
-                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                                        </svg>
-                                                    </button>
-                                                    @endif
+                                                <div class="flex items-center gap-2">
+                                                    <span class="w-1 h-4 rounded-full flex-shrink-0" :style="'background:' + ministry.color"></span>
+                                                    <span class="text-[11px] font-bold uppercase tracking-wide" :style="'color:' + ministry.color" x-text="ministry.name"></span>
+                                                    <span class="text-[10px] text-gray-400 dark:text-gray-500" x-text="'(' + ministry.roles.length + ')'"></span>
                                                 </div>
                                             </template>
 
@@ -788,14 +778,6 @@
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
                                                     </svg>
                                                     <span class="text-xs font-semibold text-purple-600 dark:text-purple-400">{{ __('app.songs') }}</span>
-                                                    @if($canEdit)
-                                                    <button type="button" @click="songDropdownOpen = !songDropdownOpen"
-                                                            class="text-gray-400 hover:text-purple-500 dark:text-gray-500 dark:hover:text-purple-400 transition-colors">
-                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                                                        </svg>
-                                                    </button>
-                                                    @endif
                                                 </div>
                                             </template>
 
@@ -804,29 +786,24 @@
                                                 <div class="flex items-center gap-1.5">
                                                     <span class="w-1.5 h-1.5 rounded-full flex-shrink-0 bg-gray-300 dark:bg-gray-600"></span>
                                                     <span class="text-xs font-medium text-gray-600 dark:text-gray-400 truncate" x-text="row.role.name"></span>
-                                                    @if($canEdit)
-                                                    <button type="button" @click="openDropdown(ministry, row.role, $event)"
-                                                            class="text-gray-400 hover:text-primary-500 dark:text-gray-500 dark:hover:text-primary-400 transition-colors flex-shrink-0">
-                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                                                        </svg>
-                                                    </button>
-                                                    @else
-                                                    <template x-if="canSelfSignup(ministry) && !isMeAssignedToRole(ministry.id, row.role.id)">
-                                                        <button type="button" @click="selfSignup(ministry, row.role)"
-                                                                class="text-[10px] text-primary-500 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 transition-colors flex-shrink-0"
-                                                                :disabled="busy">+</button>
-                                                    </template>
-                                                    @endif
                                                 </div>
                                             </template>
                                         </td>
 
                                         {{-- Right column: data --}}
                                         <td class="px-3 py-2.5 align-top">
-                                            {{-- Header: empty --}}
+                                            {{-- Header: unlink button --}}
                                             <template x-if="row.type === 'header'">
-                                                <span></span>
+                                                <div class="flex justify-end">
+                                                    @if($canEdit)
+                                                    <button type="button" @click="unlinkMinistry(ministry)"
+                                                            class="text-gray-300 hover:text-red-500 dark:text-gray-600 dark:hover:text-red-400 transition-colors" :title="@js(__('messages.delete'))">
+                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                                        </svg>
+                                                    </button>
+                                                    @endif
+                                                </div>
                                             </template>
 
                                             {{-- Songs data --}}
@@ -855,6 +832,13 @@
                                                         <div class="text-xs text-gray-400 dark:text-gray-500 italic">{{ __('app.songs_not_added') }}</div>
                                                     </template>
                                                     @if($canEdit)
+                                                    <button type="button" @click="songDropdownOpen = !songDropdownOpen"
+                                                            class="mt-1 inline-flex items-center gap-1 text-xs text-purple-500 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 transition-colors">
+                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                                        </svg>
+                                                        {{ __('messages.add') }}
+                                                    </button>
                                                     <div x-show="songDropdownOpen" x-transition x-cloak class="mt-2 bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden max-w-sm">
                                                         <div class="p-2">
                                                             <input type="text" x-model="songSearch" placeholder="{{ __('app.search_song') }}"
@@ -955,6 +939,21 @@
                                                     <template x-if="getRolePersons(ministry.id, row.role.id).length === 0">
                                                         <div class="text-xs text-gray-400 dark:text-gray-500 italic">—</div>
                                                     </template>
+                                                    @if($canEdit)
+                                                    <button type="button" @click="openDropdown(ministry, row.role, $event)"
+                                                            class="mt-1 inline-flex items-center gap-1 text-xs text-primary-500 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 transition-colors">
+                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                                        </svg>
+                                                        {{ __('messages.add') }}
+                                                    </button>
+                                                    @else
+                                                    <template x-if="canSelfSignup(ministry) && !isMeAssignedToRole(ministry.id, row.role.id)">
+                                                        <button type="button" @click="selfSignup(ministry, row.role)"
+                                                                class="mt-1 text-xs text-primary-500 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 transition-colors"
+                                                                :disabled="busy">+ {{ __('app.sign_up') }}</button>
+                                                    </template>
+                                                    @endif
                                                 </div>
                                             </template>
                                         </td>
