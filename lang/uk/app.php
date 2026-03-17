@@ -4351,6 +4351,8 @@ return [
     'settings_gcal_actions_warning' => 'Небезпечні дії',
     'settings_delete_imported_events' => 'Видалити імпортовані події',
     'settings_delete_imported_events_desc' => 'Видалити всі події, які були імпортовані з Google Календаря',
+    'settings_delete_all_events' => 'Видалити ВСІ події',
+    'settings_delete_all_events_desc' => 'Видалити абсолютно всі події церкви (імпортовані та створені вручну)',
     'settings_google_calendar_label' => 'Google Календар',
     'settings_connected' => 'Підключено',
     'settings_disconnect' => 'Від\'єднати',

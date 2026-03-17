@@ -4874,6 +4874,8 @@ return [
     'settings_gcal_actions_warning' => 'Dangerous actions',
     'settings_delete_imported_events' => 'Delete imported events',
     'settings_delete_imported_events_desc' => 'Delete all events that were imported from Google Calendar',
+    'settings_delete_all_events' => 'Delete ALL events',
+    'settings_delete_all_events_desc' => 'Delete all church events (both imported and manually created)',
     'settings_google_calendar_label' => 'Google Calendar',
     'settings_connected' => 'Connected',
     'settings_disconnect' => 'Disconnect',

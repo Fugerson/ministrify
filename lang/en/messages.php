@@ -217,6 +217,7 @@ return [
     'confirm_disconnect_google' => 'Disconnect Google Calendar?',
     'confirm_unlink_google_events' => 'Unlink all events from Google Calendar? They will remain in the system as regular events.',
     'confirm_delete_google_events' => 'Delete all events imported from Google? This action is irreversible.',
+    'confirm_delete_all_events' => 'Delete ALL church events? This will remove all events — both imported and manually created. This action is irreversible!',
     'confirm_disconnect_privatbank' => 'Disconnect PrivatBank?',
     'confirm_disconnect_monobank' => 'Are you sure? The token will be deleted.',
     'confirm_disable_2fa' => 'Are you sure you want to disable 2FA?',

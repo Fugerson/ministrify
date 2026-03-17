@@ -216,6 +216,7 @@ return [
     'confirm_disconnect_google' => 'Відключити Google Calendar?',
     'confirm_unlink_google_events' => 'Відв\'язати всі події від Google Calendar? Вони залишаться в системі як звичайні події.',
     'confirm_delete_google_events' => 'Видалити всі імпортовані з Google події? Ця дія незворотна.',
+    'confirm_delete_all_events' => 'Видалити ВСІ події церкви? Це видалить усі події — і імпортовані, і створені вручну. Ця дія незворотна!',
     'confirm_disconnect_privatbank' => 'Відключити ПриватБанк?',
     'confirm_disconnect_monobank' => 'Ви впевнені? Токен буде видалено.',
     'confirm_disable_2fa' => 'Ви впевнені, що хочете вимкнути 2FA?',

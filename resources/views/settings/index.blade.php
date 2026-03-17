@@ -1105,6 +1105,60 @@
         </div>
     </div>
 
+    <!-- Delete All Events -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700"
+         x-data="{ deleteLoading: false, deleteMessage: '', deleteSuccess: false }">
+        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 flex items-center justify-center">
+                    <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.settings_delete_all_events') }}</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.settings_delete_all_events_desc') }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="p-6">
+            <button @click="async () => {
+                        if (!await confirmDialog({{ Js::from(__('messages.confirm_delete_all_events')) }})) return;
+                        deleteLoading = true;
+                        deleteMessage = '';
+                        try {
+                            const res = await fetch('{{ route('settings.google-calendar.delete-events') }}', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
+                                body: JSON.stringify({ scope: 'all' })
+                            });
+                            const data = await res.json();
+                            deleteMessage = data.message || {{ Js::from(__('app.settings_done')) }};
+                            deleteSuccess = data.success;
+                        } catch (e) {
+                            deleteMessage = {{ Js::from(__('app.settings_connection_error')) }};
+                            deleteSuccess = false;
+                        }
+                        deleteLoading = false;
+                    }()"
+                    :disabled="deleteLoading"
+                    class="inline-flex items-center gap-2 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
+                <svg x-show="!deleteLoading" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+                <svg x-show="deleteLoading" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                </svg>
+                {{ __('app.settings_delete_all_events') }}
+            </button>
+            <div x-show="deleteMessage" x-transition class="mt-3 text-sm"
+                 :class="deleteSuccess ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
+                <span x-text="deleteMessage"></span>
+            </div>
+        </div>
+    </div>
+
     <script>
     function googleCalendarSync(isConnected = false, savedMappings = []) {
         return {
@@ -1277,7 +1331,8 @@
                     this.rollbackSuccess = false;
                 }
                 this.rollbackLoading = false;
-            }
+            },
+
         }
     }
     </script>
