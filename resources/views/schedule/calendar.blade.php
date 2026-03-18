@@ -532,7 +532,7 @@
                     if ($mobileGridDate2->month > $month && $mobileGridDate2->year >= $year) break;
                 }
             @endphp
-            <div class="sm:hidden" x-data="{ selectedDate: '{{ now()->format('Y-m-d') }}', eventsMap: {{ json_encode($mobileEventsMap) }} }">
+            <div class="sm:hidden" x-data="mobileCalendarData()">
                 <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
                     {{-- Day headers --}}
                     <div class="grid grid-cols-7 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
@@ -1256,6 +1256,13 @@ document.addEventListener('keydown', function(e) {
 // Create Event Modal
 function closeCreateEventModal() {
     document.getElementById('createEventModal')?.classList.add('hidden');
+}
+
+function mobileCalendarData() {
+    return {
+        selectedDate: '{{ now()->format('Y-m-d') }}',
+        eventsMap: {!! json_encode($mobileEventsMap) !!},
+    }
 }
 
 function eventCreateForm() {
