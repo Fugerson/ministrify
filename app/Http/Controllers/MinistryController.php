@@ -417,7 +417,9 @@ class MinistryController extends Controller
 
         $enabledCurrencies = CurrencyHelper::getEnabledCurrencies($church->enabled_currencies);
 
-        return view('ministries.show', compact('ministry', 'tab', 'boards', 'availablePeople', 'resources', 'currentFolder', 'breadcrumbs', 'registeredUsers', 'goalsStats', 'songs', 'songBoardTags', 'scheduleEvents', 'ministryRoles', 'ministryBoard', 'boardPeople', 'boardMinistries', 'boardEpics', 'budgetData', 'expenseCategories', 'enabledCurrencies'));
+        $isMember = $ministry->isMember(auth()->user());
+
+        return view('ministries.show', compact('ministry', 'tab', 'boards', 'availablePeople', 'resources', 'currentFolder', 'breadcrumbs', 'registeredUsers', 'goalsStats', 'songs', 'songBoardTags', 'scheduleEvents', 'ministryRoles', 'ministryBoard', 'boardPeople', 'boardMinistries', 'boardEpics', 'budgetData', 'expenseCategories', 'enabledCurrencies', 'isMember'));
     }
 
     /**

@@ -118,7 +118,7 @@
                     {{ __('app.tab_songs_library') }}
                 </button>
                 @endif
-                @can('manage-ministry', $ministry)
+                @if($isMember || auth()->user()->can('manage-ministry', $ministry))
                 <button @click="setTab('settings')" type="button"
                    :class="activeTab === 'settings' ? 'border-primary-500 text-primary-600 dark:text-primary-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
                    class="px-3 sm:px-6 py-3 border-b-2 text-sm font-medium flex items-center gap-1">
@@ -128,7 +128,7 @@
                     </svg>
                     {{ __('app.tab_settings') }}
                 </button>
-                @endcan
+                @endif
             </nav>
         </div>
 
@@ -3641,11 +3641,12 @@
 
 
             <!-- Settings Tab -->
-            @can('manage-ministry', $ministry)
+            @if($isMember || auth()->user()->can('manage-ministry', $ministry))
             <div x-show="activeTab === 'settings'"{{ $tab !== 'settings' ? ' style="display:none"' : '' }}
                  x-data="settingsTab()"
                  x-init="init()">
                 <div class="max-w-2xl space-y-8">
+                    @can('manage-ministry', $ministry)
                     <!-- General Settings -->
                     <div>
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Загальні налаштування</h3>
@@ -3694,6 +3695,7 @@
                             </div>
                         </form>
                     </div>
+                    @endcan
 
                     @if($ministry->is_worship_ministry)
                     <hr class="border-gray-200 dark:border-gray-700">
@@ -3728,6 +3730,7 @@
                     </div>
                     @endif
 
+                    @can('manage-ministry', $ministry)
                     <hr class="border-gray-200 dark:border-gray-700">
 
                     <!-- Access Settings -->
@@ -3856,6 +3859,7 @@
                     </div>
 
                 </div>
+                    @endcan
 
                     <hr class="border-gray-200 dark:border-gray-700">
 
@@ -3974,6 +3978,7 @@
                         </div>
                     </div>
 
+                    @can('manage-ministry', $ministry)
                     <hr class="border-gray-200 dark:border-gray-700">
 
                     <!-- Danger Zone -->
@@ -3988,9 +3993,10 @@
                             {{ __('app.delete_team') }}
                         </button>
                     </div>
+                    @endcan
             </div>
             </div>
-            @endcan
+            @endif
 
             <!-- Delete ministry handled via ajaxDelete -->
         </div>
