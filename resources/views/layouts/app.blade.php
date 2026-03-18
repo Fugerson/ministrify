@@ -1075,11 +1075,17 @@
                 </a>
                 @endif
                 @if(auth()->user()->canView('events'))
-                <a wire:navigate href="{{ route('schedule') }}" id="nav-schedule" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('schedule') || request()->routeIs('events.*') || request()->routeIs('service-planning') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? @js( __("app.schedule") ) : ''">
+                <a wire:navigate href="{{ route('schedule') }}" id="nav-schedule" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ (request()->routeIs('schedule') && request()->get('tab') !== 'planning') || request()->routeIs('events.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? @js( __("app.schedule") ) : ''">
                     <svg class="w-5 h-5 sidebar-icon flex-shrink-0" :class="collapsed ? '' : 'mr-3'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                     </svg>
                     <span x-show="!collapsed" class="sidebar-text">{{ __('app.schedule') }}</span>
+                </a>
+                <a wire:navigate href="{{ route('schedule', ['tab' => 'planning']) }}" id="nav-planning" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ (request()->routeIs('schedule') && request()->get('tab') === 'planning') || request()->routeIs('service-planning') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? @js( __("app.service_planning") ) : ''">
+                    <svg class="w-5 h-5 sidebar-icon flex-shrink-0" :class="collapsed ? '' : 'mr-3'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                    </svg>
+                    <span x-show="!collapsed" class="sidebar-text">{{ __('app.service_planning') }}</span>
                 </a>
                 @endif
                 @endhasChurchRole
