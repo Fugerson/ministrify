@@ -19,7 +19,12 @@ trait Auditable
         // Log update
         static::updated(function ($model) {
             $dirty = $model->getDirty();
-            if (!empty($dirty)) {
+
+            // Fields that should NEVER trigger an audit entry (not just hidden, but completely ignored)
+            $ignoredFields = ['remember_token', 'visible_sections', 'updated_at'];
+            $meaningfulDirty = array_diff_key($dirty, array_flip($ignoredFields));
+
+            if (!empty($meaningfulDirty)) {
                 $old = array_intersect_key($model->getOriginal(), $dirty);
                 $model->logAudit('updated', $old, $dirty);
             }

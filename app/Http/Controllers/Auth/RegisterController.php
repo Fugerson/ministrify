@@ -81,6 +81,23 @@ class RegisterController extends Controller
                 Auth::login($existingUser);
                 $request->session()->regenerate();
                 $existingUser->switchToChurch($church->id);
+
+                // Audit login for existing member
+                if ($existingUser->church_id) {
+                    AuditLog::create([
+                        'church_id' => $existingUser->church_id,
+                        'user_id' => $existingUser->id,
+                        'user_name' => $existingUser->name,
+                        'action' => 'login',
+                        'model_type' => User::class,
+                        'model_id' => $existingUser->id,
+                        'model_name' => $existingUser->name,
+                        'notes' => 'Вхід через форму приєднання (вже член церкви)',
+                        'ip_address' => $request->ip(),
+                        'user_agent' => $request->userAgent(),
+                    ]);
+                }
+
                 return redirect()->route('dashboard')
                     ->with('info', 'Ви вже є членом цієї церкви.');
             }
@@ -97,6 +114,19 @@ class RegisterController extends Controller
                 'email' => $request->email,
                 'church_id' => $church->id,
                 'ip' => $request->ip(),
+            ]);
+
+            AuditLog::create([
+                'church_id' => $church->id,
+                'user_id' => $existingUser->id,
+                'user_name' => $existingUser->name,
+                'action' => 'login',
+                'model_type' => User::class,
+                'model_id' => $existingUser->id,
+                'model_name' => $existingUser->name,
+                'notes' => 'Вхід через форму приєднання до церкви',
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
             ]);
 
             AuditLog::create([

@@ -51,7 +51,12 @@ class AuditLogController extends Controller
 
         // Get filter options
         $users = $church->members()->select('users.id', 'users.name')->get();
-        $actions = ['created', 'updated', 'deleted', 'restored', 'login', 'logout'];
+        $actions = AuditLog::where('church_id', $church->id)
+            ->select('action')
+            ->distinct()
+            ->orderBy('action')
+            ->pluck('action')
+            ->toArray();
         $models = [
             'Person', 'User', 'Event', 'Ministry', 'Group',
             'Transaction', 'Expense', 'Income', 'DonationCampaign', 'OnlineDonation',

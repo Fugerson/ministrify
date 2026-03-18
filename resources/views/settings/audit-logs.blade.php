@@ -23,15 +23,7 @@
                     <option value="">Всі дії</option>
                     @foreach($actions as $action)
                         <option value="{{ $action }}" {{ request('action') == $action ? 'selected' : '' }}>
-                            {{ match($action) {
-                                'created' => 'Створено',
-                                'updated' => 'Оновлено',
-                                'deleted' => 'Видалено',
-                                'restored' => 'Відновлено',
-                                'login' => 'Вхід',
-                                'logout' => 'Вихід',
-                                default => $action
-                            } }}
+                            {{ (new \App\Models\AuditLog(['action' => $action]))->action_label }}
                         </option>
                     @endforeach
                 </select>
@@ -134,17 +126,25 @@
                 @php
                     $color = $log->action_color;
                     $colorClasses = match($color) {
-                        'green' => 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300',
-                        'blue' => 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300',
+                        'green', 'emerald' => 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300',
+                        'blue', 'sky' => 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300',
                         'red' => 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300',
-                        'purple' => 'bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300',
+                        'purple', 'violet' => 'bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300',
+                        'amber' => 'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300',
+                        'teal', 'cyan' => 'bg-teal-100 text-teal-700 dark:bg-teal-900/50 dark:text-teal-300',
+                        'indigo' => 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300',
+                        'lime' => 'bg-lime-100 text-lime-700 dark:bg-lime-900/50 dark:text-lime-300',
                         default => 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
                     };
                     $borderColor = match($color) {
-                        'green' => 'border-l-green-500',
-                        'blue' => 'border-l-blue-500',
+                        'green', 'emerald' => 'border-l-green-500',
+                        'blue', 'sky' => 'border-l-blue-500',
                         'red' => 'border-l-red-500',
-                        'purple' => 'border-l-purple-500',
+                        'purple', 'violet' => 'border-l-purple-500',
+                        'amber' => 'border-l-amber-500',
+                        'teal', 'cyan' => 'border-l-teal-500',
+                        'indigo' => 'border-l-indigo-500',
+                        'lime' => 'border-l-lime-500',
                         default => 'border-l-gray-400',
                     };
                     $changes = $log->changes_summary;
@@ -188,15 +188,24 @@
                             {{ $log->action_label }}
                         </span>
 
-                        <!-- Model type -->
-                        <span class="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded">
-                            {{ $log->model_label }}
-                        </span>
+                        @if(!in_array($log->action, ['login', 'logout']))
+                            <!-- Model type -->
+                            <span class="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded">
+                                {{ $log->model_label }}
+                            </span>
 
-                        <!-- Model name -->
-                        <span class="text-sm font-semibold text-gray-900 dark:text-white break-all">
-                            {{ Str::limit($log->model_name, 40) }}
-                        </span>
+                            <!-- Model name -->
+                            <span class="text-sm font-semibold text-gray-900 dark:text-white break-all">
+                                {{ Str::limit($log->model_name, 40) }}
+                            </span>
+                        @endif
+
+                        {{-- For "updated" show compact summary of changed fields --}}
+                        @if($log->action === 'updated' && count($changes) > 0)
+                            <span class="text-xs text-gray-500 dark:text-gray-400">
+                                ({{ implode(', ', array_map(fn($c) => $c['field'], array_slice($changes, 0, 3))) }}{{ count($changes) > 3 ? ' +' . (count($changes) - 3) : '' }})
+                            </span>
+                        @endif
                     </div>
 
                     <!-- Changes Details -->
@@ -223,20 +232,14 @@
                             <div class="text-xs font-semibold text-green-600 dark:text-green-400 uppercase mb-2">Створено з даними:</div>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                                 @php
-                                    $skip = ['id', 'church_id', 'created_at', 'updated_at', 'deleted_at', 'password', 'remember_token', 'email_verified_at'];
+                                    $skip = ['id', 'church_id', 'created_at', 'updated_at', 'deleted_at', 'password', 'remember_token', 'email_verified_at', 'checkin_token', 'google_event_id', 'google_calendar_id', 'google_id', 'calendar_token', 'telegram_bot_token', 'visible_sections'];
                                     $newVals = collect($log->new_values)->except($skip)->filter(fn($v) => $v !== null && $v !== '');
                                 @endphp
                                 @foreach($newVals->take(10) as $field => $value)
                                     <div class="text-sm min-w-0">
                                         <span class="font-medium text-gray-600 dark:text-gray-400">{{ \App\Models\AuditLog::getFieldLabel($field) }}:</span>
                                         <span class="text-gray-900 dark:text-white ml-1 break-all">
-                                            @if(is_array($value))
-                                                {{ Str::limit(json_encode($value, JSON_UNESCAPED_UNICODE), 50) }}
-                                            @elseif(is_bool($value))
-                                                {{ $value ? 'Так' : 'Ні' }}
-                                            @else
-                                                {{ Str::limit((string)$value, 50) }}
-                                            @endif
+                                            {{ Str::limit(\App\Models\AuditLog::formatValueForDisplay($value, $field) ?? '—', 50) }}
                                         </span>
                                     </div>
                                 @endforeach
@@ -250,20 +253,14 @@
                             <div class="text-xs font-semibold text-red-600 dark:text-red-400 uppercase mb-2">Видалено запис:</div>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                                 @php
-                                    $skip = ['id', 'church_id', 'created_at', 'updated_at', 'deleted_at', 'password', 'remember_token', 'email_verified_at'];
+                                    $skip = ['id', 'church_id', 'created_at', 'updated_at', 'deleted_at', 'password', 'remember_token', 'email_verified_at', 'checkin_token', 'google_event_id', 'google_calendar_id', 'google_id', 'calendar_token', 'telegram_bot_token', 'visible_sections'];
                                     $oldVals = collect($log->old_values)->except($skip)->filter(fn($v) => $v !== null && $v !== '');
                                 @endphp
                                 @foreach($oldVals->take(10) as $field => $value)
                                     <div class="text-sm min-w-0">
                                         <span class="font-medium text-gray-600 dark:text-gray-400">{{ \App\Models\AuditLog::getFieldLabel($field) }}:</span>
                                         <span class="text-red-700 dark:text-red-300 ml-1 line-through break-all">
-                                            @if(is_array($value))
-                                                {{ Str::limit(json_encode($value, JSON_UNESCAPED_UNICODE), 50) }}
-                                            @elseif(is_bool($value))
-                                                {{ $value ? 'Так' : 'Ні' }}
-                                            @else
-                                                {{ Str::limit((string)$value, 50) }}
-                                            @endif
+                                            {{ Str::limit(\App\Models\AuditLog::formatValueForDisplay($value, $field) ?? '—', 50) }}
                                         </span>
                                     </div>
                                 @endforeach

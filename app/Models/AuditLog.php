@@ -41,6 +41,7 @@ class AuditLog extends Model
      * Allowed model types for auditing (security: prevent arbitrary class instantiation)
      */
     private const ALLOWED_MODEL_TYPES = [
+        // Core models
         \App\Models\Person::class,
         \App\Models\User::class,
         \App\Models\Event::class,
@@ -50,13 +51,68 @@ class AuditLog extends Model
         \App\Models\Church::class,
         \App\Models\Attendance::class,
         \App\Models\Assignment::class,
+        \App\Models\ChurchRole::class,
+        \App\Models\ChurchRolePermission::class,
+        // Board
         \App\Models\Board::class,
         \App\Models\BoardCard::class,
+        \App\Models\BoardColumn::class,
+        \App\Models\BoardEpic::class,
+        // Songs & Worship
         \App\Models\Song::class,
         \App\Models\Sermon::class,
+        \App\Models\SermonSeries::class,
+        \App\Models\WorshipRole::class,
+        \App\Models\EventSong::class,
+        // Communication & Content
         \App\Models\PrayerRequest::class,
         \App\Models\Announcement::class,
-        \App\Models\ChurchRole::class,
+        \App\Models\BlogPost::class,
+        \App\Models\BlogCategory::class,
+        \App\Models\Testimonial::class,
+        \App\Models\Faq::class,
+        \App\Models\MessageTemplate::class,
+        \App\Models\PersonCommunication::class,
+        // Finance
+        \App\Models\TransactionCategory::class,
+        \App\Models\TransactionAttachment::class,
+        \App\Models\IncomeCategory::class,
+        \App\Models\ExpenseCategory::class,
+        \App\Models\DonationCampaign::class,
+        \App\Models\OnlineDonation::class,
+        \App\Models\ChurchBudget::class,
+        \App\Models\ChurchBudgetItem::class,
+        \App\Models\MinistryBudget::class,
+        // Ministry
+        \App\Models\MinistryTask::class,
+        \App\Models\MinistryGoal::class,
+        \App\Models\MinistryMeeting::class,
+        \App\Models\MinistryRole::class,
+        \App\Models\MinistryType::class,
+        \App\Models\Position::class,
+        // Events & Scheduling
+        \App\Models\EventRegistration::class,
+        \App\Models\EventChecklist::class,
+        \App\Models\EventChecklistItem::class,
+        \App\Models\EventTaskTemplate::class,
+        \App\Models\ServicePlanItem::class,
+        \App\Models\ServicePlanTemplate::class,
+        \App\Models\BlockoutDate::class,
+        \App\Models\ChecklistTemplate::class,
+        // Groups & Attendance
+        \App\Models\GroupGuest::class,
+        \App\Models\GroupAttendance::class,
+        \App\Models\AttendanceRecord::class,
+        // People & Relationships
+        \App\Models\FamilyRelationship::class,
+        \App\Models\StaffMember::class,
+        \App\Models\Tag::class,
+        // Media & Resources
+        \App\Models\Gallery::class,
+        \App\Models\GalleryPhoto::class,
+        \App\Models\Resource::class,
+        // Support
+        \App\Models\SupportTicket::class,
     ];
 
     /**
@@ -146,6 +202,9 @@ class AuditLog extends Model
             'budget_updated' => __('app.audit_action_budget_updated'),
             'receipt_uploaded' => __('app.audit_action_receipt_uploaded'),
             'receipt_deleted' => __('app.audit_action_receipt_deleted'),
+            'servant_approved' => __('app.audit_action_servant_approved'),
+            'servant_rejected' => __('app.audit_action_servant_rejected'),
+            'people_merged' => __('app.audit_action_people_merged'),
             default => $this->action,
         };
     }
@@ -241,6 +300,18 @@ class AuditLog extends Model
             'App\\Models\\Resource' => 'Ресурс',
             'App\\Models\\FamilyRelationship' => 'Сімейний звʼязок',
             'App\\Models\\MinistryBudget' => 'Бюджет служіння',
+            'App\\Models\\MinistryRole' => 'Роль служіння',
+            'App\\Models\\WorshipRole' => 'Роль поклоніння',
+            'App\\Models\\GroupGuest' => 'Гість групи',
+            'App\\Models\\EventSong' => 'Пісня події',
+            'App\\Models\\ServicePlanItem' => 'Елемент плану служби',
+            'App\\Models\\AttendanceRecord' => 'Запис відвідуваності',
+            'App\\Models\\TransactionAttachment' => 'Вкладення транзакції',
+            'App\\Models\\ChurchBudget' => 'Бюджет церкви',
+            'App\\Models\\ChurchBudgetItem' => 'Стаття бюджету церкви',
+            'App\\Models\\EventChecklist' => 'Чекліст події',
+            'App\\Models\\EventChecklistItem' => 'Пункт чеклісту події',
+            'App\\Models\\PersonCommunication' => 'Комунікація з особою',
             default => class_basename($this->model_type ?? ''),
         };
     }
@@ -267,12 +338,12 @@ class AuditLog extends Model
     public function getActionColorAttribute(): string
     {
         return match($this->action) {
-            'created', 'account_created', 'member_added', 'telegram_linked', 'registered', 'joined_church' => 'green',
+            'created', 'account_created', 'member_added', 'telegram_linked', 'registered', 'joined_church', 'servant_approved' => 'green',
             'updated', 'settings_updated', 'positions_updated', 'visibility_updated', 'quick_edit_saved' => 'blue',
-            'deleted', 'member_removed', 'telegram_unlinked', 'bulk_deleted', 'photo_deleted', 'receipt_deleted' => 'red',
+            'deleted', 'member_removed', 'telegram_unlinked', 'bulk_deleted', 'photo_deleted', 'receipt_deleted', 'servant_rejected' => 'red',
             'restored' => 'purple',
             'login', 'logout' => 'gray',
-            'exported', 'imported' => 'indigo',
+            'exported', 'imported', 'people_merged' => 'indigo',
             'sent', 'notification_sent', 'bulk_message_sent' => 'cyan',
             'assigned', 'bulk_ministry_assigned', 'bulk_tag_assigned', 'shepherd_assigned' => 'teal',
             'password_reset', 'email_changed', 'role_changed', 'member_role_changed' => 'amber',
@@ -524,6 +595,14 @@ class AuditLog extends Model
     }
 
     /**
+     * Format value for display (public static wrapper for use in Blade templates)
+     */
+    public static function formatValueForDisplay($value, string $field): ?string
+    {
+        return (new static)->formatValue($value, $field);
+    }
+
+    /**
      * Format value for display
      */
     protected function formatValue($value, string $field): ?string
@@ -631,7 +710,47 @@ class AuditLog extends Model
         // Church role ID - look up role name
         if ($field === 'church_role_id') {
             $role = ChurchRole::find($value);
-            return $role ? $role->name : $value;
+            return $role ? $role->name : "#{$value}";
+        }
+
+        // Foreign key fields - resolve to human-readable names
+        $fkMap = [
+            'ministry_id' => Ministry::class,
+            'person_id' => Person::class,
+            'leader_id' => Person::class,
+            'shepherd_id' => Person::class,
+            'author_id' => Person::class,
+            'assigned_to' => Person::class,
+            'created_by' => User::class,
+            'completed_by' => User::class,
+            'recorded_by' => User::class,
+            'user_id' => User::class,
+            'event_id' => Event::class,
+            'parent_event_id' => Event::class,
+            'group_id' => Group::class,
+            'board_id' => Board::class,
+            'column_id' => BoardColumn::class,
+            'position_id' => Position::class,
+            'category_id' => TransactionCategory::class,
+            'transaction_category_id' => TransactionCategory::class,
+            'campaign_id' => DonationCampaign::class,
+            'goal_id' => MinistryGoal::class,
+            'budget_id' => ChurchBudget::class,
+        ];
+        if (isset($fkMap[$field]) && is_numeric($value)) {
+            try {
+                $related = $fkMap[$field]::find($value);
+                if ($related) {
+                    // Use common name fields
+                    if (isset($related->name)) return $related->name;
+                    if (isset($related->title)) return $related->title;
+                    if (isset($related->first_name)) return trim(($related->first_name ?? '') . ' ' . ($related->last_name ?? ''));
+                    if (isset($related->email)) return $related->email;
+                }
+            } catch (\Exception $e) {
+                // Silently fall through to show ID
+            }
+            return "#{$value}";
         }
 
         // Priority
@@ -753,6 +872,7 @@ class AuditLog extends Model
             // Технічні поля
             'checkin_token', 'google_event_id', 'google_calendar_id',
             'google_id', 'calendar_token', 'telegram_bot_token',
+            'visible_sections',
         ];
 
         // Collect raw changes first

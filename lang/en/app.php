@@ -5392,6 +5392,9 @@ return [
     'audit_action_budget_updated' => 'Budget updated',
     'audit_action_receipt_uploaded' => 'Receipt uploaded',
     'audit_action_receipt_deleted' => 'Receipt deleted',
+    'audit_action_servant_approved' => 'Servant approved',
+    'audit_action_servant_rejected' => 'Servant rejected',
+    'audit_action_people_merged' => 'People merged',
 
     // Permission module labels (ChurchRolePermission)
     'perm_module_dashboard' => 'Dashboard',

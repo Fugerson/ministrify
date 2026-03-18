@@ -115,6 +115,19 @@ class SocialAuthController extends Controller
                         'church_id' => $church->id,
                         'user_id' => $user->id,
                         'user_name' => $user->name,
+                        'action' => 'login',
+                        'model_type' => User::class,
+                        'model_id' => $user->id,
+                        'model_name' => $user->name,
+                        'notes' => 'Вхід через Google',
+                        'ip_address' => $request->ip(),
+                        'user_agent' => $request->userAgent(),
+                    ]);
+
+                    AuditLog::create([
+                        'church_id' => $church->id,
+                        'user_id' => $user->id,
+                        'user_name' => $user->name,
                         'action' => 'joined_church',
                         'model_type' => User::class,
                         'model_id' => $user->id,
@@ -221,6 +234,19 @@ class SocialAuthController extends Controller
 
             Auth::login($existingUser, true);
             $request->session()->regenerate();
+
+            AuditLog::create([
+                'church_id' => $church->id,
+                'user_id' => $existingUser->id,
+                'user_name' => $existingUser->name,
+                'action' => 'login',
+                'model_type' => User::class,
+                'model_id' => $existingUser->id,
+                'model_name' => $existingUser->name,
+                'notes' => 'Вхід через Google',
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
 
             AuditLog::create([
                 'church_id' => $church->id,

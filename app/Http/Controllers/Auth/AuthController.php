@@ -81,6 +81,7 @@ class AuthController extends Controller
                     'model_type' => 'App\\Models\\User',
                     'model_id' => $user->id,
                     'model_name' => $user->name,
+                    'notes' => 'Вхід через email/пароль',
                     'ip_address' => $request->ip(),
                     'user_agent' => $request->userAgent(),
                 ]);
