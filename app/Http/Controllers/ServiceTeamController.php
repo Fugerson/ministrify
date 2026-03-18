@@ -219,6 +219,7 @@ class ServiceTeamController extends Controller
         $timeStr = $event->time ? $event->time->format('H:i') : 'час уточнюється';
 
         $message = "📋 <b>Запит на участь</b>\n\n"
+            . "🏛 {$event->title}\n"
             . "📅 {$event->date->format('d.m.Y')} ({$dayName})\n"
             . "⏰ {$timeStr}\n"
             . "🎯 {$roleName}\n\n"
@@ -234,11 +235,19 @@ class ServiceTeamController extends Controller
         $sent = $telegram->sendMessage($person->telegram_chat_id, $message, $keyboard);
 
         if ($sent) {
+            \App\Models\TelegramMessage::create([
+                'church_id' => $event->church_id,
+                'person_id' => $person->id,
+                'direction' => 'outgoing',
+                'message' => strip_tags($message),
+                'is_read' => true,
+            ]);
+
             $member->update(['status' => 'pending']);
-            return response()->json(['success' => true, 'message' => 'Запит надіслано в Telegram']);
+            return response()->json(['success' => true, 'message' => __('messages.telegram_request_sent')]);
         }
 
-        return response()->json(['success' => false, 'message' => 'Не вдалося надіслати повідомлення'], 500);
+        return response()->json(['success' => false, 'message' => __('messages.telegram_send_failed')], 500);
     }
 
     /**

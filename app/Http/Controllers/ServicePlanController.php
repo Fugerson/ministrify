@@ -598,8 +598,23 @@ class ServicePlanController extends Controller
             . "🏛 {$event->title}\n"
             . "📅 {$event->date->format('d.m.Y')} ({$this->getDayName($event->date)})\n"
             . "⏰ {$timeStr}\n"
-            . "📝 {$item->title}\n\n"
-            . "Чи можете ви взяти участь?";
+            . "📝 {$item->title}";
+
+        // Add notes/description if available
+        if ($item->notes) {
+            $message .= "\n💬 {$item->notes}";
+        }
+
+        // Add other responsible people
+        if ($item->responsible_names) {
+            $allNames = array_map('trim', explode(',', $item->responsible_names));
+            $otherNames = array_filter($allNames, fn($n) => $n !== $person->full_name);
+            if (count($otherNames) > 0) {
+                $message .= "\n👥 Разом з: " . implode(', ', $otherNames);
+            }
+        }
+
+        $message .= "\n\nЧи можете ви взяти участь?";
 
         // Include person_id in callback for tracking individual responses
         $keyboard = [
@@ -612,6 +627,15 @@ class ServicePlanController extends Controller
         $sent = $telegram->sendMessage($person->telegram_chat_id, $message, $keyboard);
 
         if ($sent) {
+            // Save to telegram_messages for tracking
+            \App\Models\TelegramMessage::create([
+                'church_id' => $event->church_id,
+                'person_id' => $personId,
+                'direction' => 'outgoing',
+                'message' => strip_tags($message),
+                'is_read' => true,
+            ]);
+
             // Set person status to pending
             $item->setPersonStatus($personId, 'pending');
 
