@@ -2747,7 +2747,11 @@ async function askInTelegram(itemId, personName, personId = null) {
         const data = await response.json().catch(() => ({}));
 
         if (data.success) {
-            showGlobalToast(@js(__("app.schedule_request_sent") ) + ': ' + personName, 'success');
+            if (data.already_sent) {
+                showGlobalToast(data.message, 'warning');
+            } else {
+                showGlobalToast(@js(__("app.schedule_request_sent") ) + ': ' + personName, 'success');
+            }
             return true;
         } else {
             showGlobalToast(data.message || @js( __("app.schedule_send_error") ), 'error');

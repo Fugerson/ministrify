@@ -557,4 +557,7 @@ return [
     'audit_bulk_delete' => 'Bulk delete',
     'bulk_people_deleted' => ':count people deleted',
     'unknown_action' => 'Unknown action',
+
+    // Telegram notifications
+    'notification_already_sent' => 'Request already sent, waiting for response',
 ];

@@ -559,6 +559,16 @@ class ServicePlanController extends Controller
             ], 422);
         }
 
+        // Prevent duplicate notifications — check if already pending
+        $currentStatus = $item->getPersonStatus($personId);
+        if ($currentStatus === 'pending') {
+            return response()->json([
+                'success' => true,
+                'message' => __('messages.notification_already_sent'),
+                'already_sent' => true,
+            ]);
+        }
+
         $church = $event->church;
         if (!$church?->isNotificationEnabled('notify_on_plan_request')) {
             return response()->json([
@@ -585,6 +595,7 @@ class ServicePlanController extends Controller
 
         $timeStr = $item->start_time ? \Carbon\Carbon::parse($item->start_time)->format('H:i') : __('messages.time_to_be_confirmed');
         $message = "📋 <b>Запит на участь</b>\n\n"
+            . "🏛 {$event->title}\n"
             . "📅 {$event->date->format('d.m.Y')} ({$this->getDayName($event->date)})\n"
             . "⏰ {$timeStr}\n"
             . "📝 {$item->title}\n\n"

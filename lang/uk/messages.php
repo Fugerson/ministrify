@@ -556,4 +556,7 @@ return [
     'audit_bulk_delete' => 'Масове видалення',
     'bulk_people_deleted' => 'Видалено :count людей',
     'unknown_action' => 'Невідома дія',
+
+    // Telegram notifications
+    'notification_already_sent' => 'Запит вже надіслано, очікуємо відповідь',
 ];
