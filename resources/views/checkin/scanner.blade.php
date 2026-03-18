@@ -1,22 +1,22 @@
 @extends('layouts.app')
 
-@section('title', 'QR Сканер')
+@section('title', __('app.qr_scanner'))
 
 @section('content')
 <div class="max-w-2xl mx-auto" x-data="qrScanner()" x-init="init()">
     {{-- Header --}}
     <div class="mb-6">
-        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">QR Check-in</h1>
-        <p class="text-gray-500 dark:text-gray-400">Скануйте QR-код для швидкої реєстрації</p>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('app.qr_checkin') }}</h1>
+        <p class="text-gray-500 dark:text-gray-400">{{ __('app.qr_scan_hint') }}</p>
     </div>
 
     {{-- Event selector --}}
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Подія</label>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.event') }}</label>
         <select x-model="selectedEventId"
                 @change="selectEvent()"
                 class="w-full rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary-500 focus:border-primary-500">
-            <option value="">Оберіть подію...</option>
+            <option value="">{{ __('app.select_event') }}</option>
             <template x-for="event in todayEvents" :key="event.id">
                 <option :value="event.id" x-text="event.time + ' - ' + event.title"></option>
             </template>
@@ -27,13 +27,13 @@
                 <div>
                     <p class="font-medium text-gray-900 dark:text-white" x-text="selectedEvent?.title"></p>
                     <p class="text-sm text-gray-500 dark:text-gray-400">
-                        Зареєстровано: <span x-text="attendanceCount" class="font-semibold"></span>
+                        {{ __('app.checkin_registered_count') }}: <span x-text="attendanceCount" class="font-semibold"></span>
                     </p>
                 </div>
                 <template x-if="selectedEvent?.qr_checkin_enabled">
                     <button @click="showQrCode = !showQrCode"
                             class="px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors">
-                        <span x-text="showQrCode ? 'Сховати QR' : 'Показати QR'"></span>
+                        <span x-text="showQrCode ? @js(__('app.qr_hide')) : @js(__('app.qr_show'))"></span>
                     </button>
                 </template>
             </div>
@@ -43,7 +43,7 @@
     {{-- QR Code display --}}
     <div x-show="showQrCode && selectedEvent?.checkin_url" x-cloak
          class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6 text-center">
-        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Покажіть цей QR-код учасникам для самостійної реєстрації</p>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">{{ __('app.qr_show_to_members') }}</p>
         <div class="inline-block p-4 bg-white rounded-xl">
             <div id="qr-code-display" class="w-48 h-48 sm:w-64 sm:h-64 mx-auto"></div>
         </div>
@@ -53,11 +53,11 @@
     {{-- Camera scanner --}}
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden mb-6">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-            <h2 class="font-semibold text-gray-900 dark:text-white">Камера</h2>
+            <h2 class="font-semibold text-gray-900 dark:text-white">{{ __('app.camera') }}</h2>
             <button @click="toggleCamera()"
                     class="px-4 py-2 rounded-xl transition-colors"
                     :class="cameraActive ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'">
-                <span x-text="cameraActive ? 'Вимкнути' : 'Увімкнути'"></span>
+                <span x-text="cameraActive ? @js(__('app.camera_off')) : @js(__('app.camera_on'))"></span>
             </button>
         </div>
 
@@ -69,7 +69,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
                     </svg>
-                    <p>Натисніть "Увімкнути" для сканування</p>
+                    <p>{{ __('app.camera_enable_hint') }}</p>
                 </div>
             </div>
 
@@ -85,7 +85,7 @@
     {{-- Recent check-ins --}}
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-            <h2 class="font-semibold text-gray-900 dark:text-white">Останні реєстрації</h2>
+            <h2 class="font-semibold text-gray-900 dark:text-white">{{ __('app.recent_checkins') }}</h2>
         </div>
         <div class="divide-y divide-gray-200 dark:divide-gray-700">
             <template x-for="checkin in recentCheckins" :key="checkin.id">
@@ -103,7 +103,7 @@
             </template>
             <template x-if="recentCheckins.length === 0">
                 <div class="p-8 text-center text-gray-400">
-                    Ще немає реєстрацій
+                    {{ __('app.no_checkins_yet') }}
                 </div>
             </template>
         </div>
@@ -212,7 +212,7 @@ function qrScanner() {
                 this.cameraActive = true;
             } catch (error) {
                 console.error('Camera error:', error);
-                alert('Не вдалося отримати доступ до камери. Перевірте дозволи.');
+                alert(@js(__('app.camera_access_error')));
             }
         },
 
@@ -247,25 +247,26 @@ function qrScanner() {
                 const data = await response.json().catch(() => ({}));
 
                 if (data.success) {
+                    const personName = data.person?.name || @js(__('app.checkin_user'));
                     this.showSuccessToast(data.already_checked_in
-                        ? `${data.person?.name || 'Користувач'} вже зареєстрований`
-                        : `${data.person?.name || 'Користувач'} зареєстровано!`
+                        ? personName + ' ' + @js(__('app.checkin_already_registered_short'))
+                        : personName + ' ' + @js(__('app.checkin_registered_short'))
                     );
 
                     if (!data.already_checked_in) {
                         this.recentCheckins.unshift({
                             id: Date.now(),
-                            name: data.person?.name || 'Невідомий',
+                            name: data.person?.name || @js(__('app.checkin_unknown')),
                             time: data.checked_in_at
                         });
                         this.attendanceCount++;
                     }
                 } else {
-                    alert(data.message || 'Помилка реєстрації');
+                    alert(data.message || @js(__('app.checkin_error_registration')));
                 }
             } catch (error) {
                 console.error('Check-in error:', error);
-                alert('Помилка з\'єднання');
+                alert(@js(__('app.checkin_connection_error_short')));
             }
 
             // Resume scanning after a short delay

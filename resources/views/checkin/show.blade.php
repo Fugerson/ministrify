@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Check-in - {{ $event->title }}</title>
+    <title>{{ __('app.checkin') }} - {{ $event->title }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
@@ -47,11 +47,11 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                             </svg>
                         </div>
-                        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Увійдіть для реєстрації</h2>
-                        <p class="text-gray-500 mb-6">Щоб зареєструватися на подію, увійдіть у свій акаунт</p>
+                        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">{{ __('app.checkin_login_required') }}</h2>
+                        <p class="text-gray-500 mb-6">{{ __('app.checkin_login_hint') }}</p>
                         <a href="{{ route('login') }}?redirect={{ urlencode(request()->fullUrl()) }}"
                            class="inline-flex items-center justify-center w-full px-6 py-3 bg-primary-600 text-white font-semibold rounded-xl hover:bg-primary-700 transition-colors">
-                            Увійти
+                            {{ __('app.login') }}
                         </a>
                     </div>
                 @else
@@ -66,10 +66,10 @@
                                 @endif
                             </div>
                             <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-1">{{ $person->full_name }}</h2>
-                            <p class="text-gray-500 mb-6">Натисніть кнопку для реєстрації</p>
+                            <p class="text-gray-500 mb-6">{{ __('app.checkin_press_button') }}</p>
                             <button @click="doCheckin()"
                                     class="w-full px-6 py-4 bg-green-600 text-white text-lg font-semibold rounded-xl hover:bg-green-700 transition-all transform hover:scale-105 active:scale-95">
-                                Зареєструватися
+                                {{ __('app.checkin_register') }}
                             </button>
                         </div>
 
@@ -79,7 +79,7 @@
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
-                            <p class="text-gray-500">Реєстрація...</p>
+                            <p class="text-gray-500">{{ __('app.checkin_registering') }}</p>
                         </div>
 
                         {{-- Success --}}
@@ -89,9 +89,9 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                 </svg>
                             </div>
-                            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Успішно!</h2>
+                            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">{{ __('app.checkin_success') }}</h2>
                             <p class="text-gray-500 mb-2" x-text="successMessage"></p>
-                            <p class="text-sm text-gray-400" x-text="'Час: ' + checkinTime"></p>
+                            <p class="text-sm text-gray-400" x-text="timeLabel + checkinTime"></p>
                         </div>
 
                         {{-- Error --}}
@@ -101,7 +101,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                 </svg>
                             </div>
-                            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Помилка</h2>
+                            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">{{ __('app.checkin_error') }}</h2>
                             <p class="text-gray-500" x-text="errorMessage"></p>
                         </div>
                     @else
@@ -112,8 +112,8 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                                 </svg>
                             </div>
-                            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Профіль не знайдено</h2>
-                            <p class="text-gray-500 mb-6">Зверніться до адміністратора церкви для створення профілю</p>
+                            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">{{ __('app.checkin_profile_not_found') }}</h2>
+                            <p class="text-gray-500 mb-6">{{ __('app.checkin_contact_admin') }}</p>
                         </div>
                     @endif
                 @endguest
@@ -137,6 +137,11 @@
             successMessage: '',
             errorMessage: '',
             checkinTime: '',
+            timeLabel: @js(__('app.checkin_time_label')),
+            msgAlreadyCheckedIn: @js(__('app.checkin_already_registered')),
+            msgCheckedIn: @js(__('app.checkin_registered')),
+            msgFailed: @js(__('app.checkin_failed')),
+            msgConnectionError: @js(__('app.checkin_connection_error')),
 
             init() {
                 // Check if already checked in from session
@@ -161,16 +166,16 @@
                     if (data.success) {
                         this.checkedIn = true;
                         this.successMessage = data.already_checked_in
-                            ? 'Ви вже зареєстровані на цю подію'
-                            : 'Вас зареєстровано на подію';
+                            ? this.msgAlreadyCheckedIn
+                            : this.msgCheckedIn;
                         this.checkinTime = data.checked_in_at || new Date().toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' });
                     } else {
                         this.error = true;
-                        this.errorMessage = data.message || 'Не вдалося зареєструватися';
+                        this.errorMessage = data.message || this.msgFailed;
                     }
                 } catch (err) {
                     this.error = true;
-                    this.errorMessage = 'Помилка з\'єднання. Спробуйте ще раз.';
+                    this.errorMessage = this.msgConnectionError;
                 }
 
                 this.loading = false;

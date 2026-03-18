@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Новий запит')
+@section('title', __('app.new_support_request'))
 
 @section('content')
 <div class="max-w-2xl mx-auto">
@@ -8,46 +8,46 @@
         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
         </svg>
-        Назад
+        {{ __('app.back') }}
     </a>
 
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-            <h1 class="text-xl font-bold text-gray-900 dark:text-white">Новий запит до підтримки</h1>
+            <h1 class="text-xl font-bold text-gray-900 dark:text-white">{{ __('app.new_support_request') }}</h1>
         </div>
 
         <form @submit.prevent="submit($refs.f)" x-ref="f" x-data="{ ...ajaxForm({ url: '{{ route('support.store') }}', method: 'POST' }), files: [] }" class="p-6 space-y-6">
 
             <div>
-                <label for="category" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Тип запиту</label>
+                <label for="category" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.support_request_type') }}</label>
                 <select name="category" id="category" required
                         class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-                    <option value="question">Питання</option>
-                    <option value="bug">Повідомити про помилку</option>
-                    <option value="feature">Пропозиція</option>
-                    <option value="other">Інше</option>
+                    <option value="question">{{ __('app.support_question') }}</option>
+                    <option value="bug">{{ __('app.support_bug_report') }}</option>
+                    <option value="feature">{{ __('app.support_feature_request') }}</option>
+                    <option value="other">{{ __('app.support_other') }}</option>
                 </select>
                 <template x-if="errors.category"><p class="mt-1 text-sm text-red-500" x-text="errors.category[0]"></p></template>
             </div>
 
             <div>
-                <label for="subject" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Тема</label>
+                <label for="subject" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.support_subject') }}</label>
                 <input type="text" name="subject" id="subject" required
-                       placeholder="Коротко опишіть проблему або питання"
+                       placeholder="{{ __('app.support_subject_placeholder') }}"
                        class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                 <template x-if="errors.subject"><p class="mt-1 text-sm text-red-500" x-text="errors.subject[0]"></p></template>
             </div>
 
             <div>
-                <label for="message" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Опис</label>
+                <label for="message" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.support_description') }}</label>
                 <textarea name="message" id="message" rows="6" required
-                          placeholder="Детально опишіть вашу проблему або питання. Чим більше деталей, тим швидше ми зможемо допомогти."
+                          placeholder="{{ __('app.support_description_placeholder') }}"
                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"></textarea>
                 <template x-if="errors.message"><p class="mt-1 text-sm text-red-500" x-text="errors.message[0]"></p></template>
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Скріншоти (необов'язково)</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.support_screenshots') }}</label>
                 <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center hover:border-primary-500 transition-colors">
                     <input type="file" name="attachments[]" multiple accept="image/*,.heic,.heif,.pdf"
                            @change="files = Array.from($event.target.files)"
@@ -56,8 +56,8 @@
                         <svg class="w-8 h-8 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                         </svg>
-                        <p class="text-sm text-gray-600 dark:text-gray-400">Натисніть для вибору файлів</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-500 mt-1">PNG, JPG, PDF до 5MB</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">{{ __('app.support_click_to_select') }}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-500 mt-1">{{ __('app.support_file_types') }}</p>
                     </label>
                 </div>
                 <template x-if="files.length > 0">
@@ -78,8 +78,8 @@
 
             <div class="flex justify-end">
                 <button type="submit" :disabled="saving" class="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
-                    <span x-show="!saving">Надіслати</span>
-                    <span x-show="saving" x-cloak>Надсилання...</span>
+                    <span x-show="!saving">{{ __('app.send') }}</span>
+                    <span x-show="saving" x-cloak>{{ __('app.sending') }}</span>
                 </button>
             </div>
         </form>

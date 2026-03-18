@@ -17,7 +17,7 @@
                     <svg class="w-5 h-5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
-                    Клавіатурні скорочення
+                    {{ __('app.keyboard_shortcuts') }}
                 </h3>
                 <button @click="showShortcuts = false" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -29,22 +29,22 @@
             <div class="space-y-4">
                 <!-- Global Shortcuts -->
                 <div>
-                    <h4 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Глобальні</h4>
+                    <h4 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">{{ __('app.shortcuts_global') }}</h4>
                     <div class="space-y-1.5">
                         <div class="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                            <span class="text-sm text-gray-700 dark:text-gray-300">Пошук</span>
+                            <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('app.search') }}</span>
                             <kbd class="px-2 py-1 bg-gray-200 dark:bg-gray-600 rounded text-xs font-mono">/</kbd>
                         </div>
                         <div class="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                            <span class="text-sm text-gray-700 dark:text-gray-300">Нове завдання</span>
+                            <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('app.new_task') }}</span>
                             <kbd class="px-2 py-1 bg-gray-200 dark:bg-gray-600 rounded text-xs font-mono">N</kbd>
                         </div>
                         <div class="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                            <span class="text-sm text-gray-700 dark:text-gray-300">Ця довідка</span>
+                            <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('app.shortcuts_this_help') }}</span>
                             <kbd class="px-2 py-1 bg-gray-200 dark:bg-gray-600 rounded text-xs font-mono">?</kbd>
                         </div>
                         <div class="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                            <span class="text-sm text-gray-700 dark:text-gray-300">Закрити модальне вікно</span>
+                            <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('app.shortcuts_close_modal') }}</span>
                             <kbd class="px-2 py-1 bg-gray-200 dark:bg-gray-600 rounded text-xs font-mono">Esc</kbd>
                         </div>
                     </div>
@@ -52,14 +52,14 @@
 
                 <!-- Card Panel Shortcuts -->
                 <div>
-                    <h4 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">При відкритій картці</h4>
+                    <h4 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">{{ __('app.shortcuts_open_card') }}</h4>
                     <div class="space-y-1.5">
                         <div class="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                            <span class="text-sm text-gray-700 dark:text-gray-300">Завершити / Відновити</span>
+                            <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('app.shortcuts_complete_restore') }}</span>
                             <kbd class="px-2 py-1 bg-gray-200 dark:bg-gray-600 rounded text-xs font-mono">C</kbd>
                         </div>
                         <div class="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                            <span class="text-sm text-gray-700 dark:text-gray-300">Перемістити в колонку</span>
+                            <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('app.shortcuts_move_to_column') }}</span>
                             <kbd class="px-2 py-1 bg-gray-200 dark:bg-gray-600 rounded text-xs font-mono">M</kbd>
                         </div>
                     </div>
@@ -68,7 +68,7 @@
                 <!-- Tips -->
                 <div class="pt-4 border-t border-gray-200 dark:border-gray-700">
                     <p class="text-xs text-gray-500 dark:text-gray-400">
-                        <span class="font-medium">Tip:</span> Використовуйте drag & drop для переміщення карток між колонками
+                        <span class="font-medium">Tip:</span> {{ __('app.shortcuts_drag_drop_tip') }}
                     </p>
                 </div>
             </div>

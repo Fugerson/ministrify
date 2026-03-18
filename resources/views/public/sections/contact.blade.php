@@ -3,8 +3,8 @@
 <section class="py-16 bg-gray-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
-            <h2 class="text-3xl font-bold text-gray-900">Контакти</h2>
-            <p class="text-gray-600 mt-2">Зв'яжіться з нами</p>
+            <h2 class="text-3xl font-bold text-gray-900">{{ __('app.public_contact_title') }}</h2>
+            <p class="text-gray-600 mt-2">{{ __('app.public_contact_subtitle') }}</p>
         </div>
 
         <div class="max-w-2xl mx-auto">
@@ -18,7 +18,7 @@
                         </svg>
                     </div>
                     <div>
-                        <h3 class="font-semibold text-gray-900">Адреса</h3>
+                        <h3 class="font-semibold text-gray-900">{{ __('app.public_contact_address') }}</h3>
                         <p class="text-gray-600 mt-1">{{ $church->address }}@if($church->city), {{ $church->city }}@endif</p>
                     </div>
                 </div>
@@ -46,7 +46,7 @@
                         </svg>
                     </div>
                     <div>
-                        <h3 class="font-semibold text-gray-900">Телефон</h3>
+                        <h3 class="font-semibold text-gray-900">{{ __('app.public_contact_phone') }}</h3>
                         <a href="tel:{{ $church->public_phone }}" class="text-primary-600 hover:text-primary-700 mt-1">{{ $church->public_phone }}</a>
                     </div>
                 </div>
@@ -79,8 +79,8 @@
 <section class="py-16 bg-gray-50 opacity-60">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-8">
-            <h2 class="text-3xl font-bold text-gray-900">Контакти</h2>
-            <p class="text-sm text-amber-600 mt-2">Заповніть контактні дані в налаштуваннях сайту</p>
+            <h2 class="text-3xl font-bold text-gray-900">{{ __('app.public_contact_title') }}</h2>
+            <p class="text-sm text-amber-600 mt-2">{{ __('app.public_contact_admin_hint') }}</p>
         </div>
     </div>
 </section>

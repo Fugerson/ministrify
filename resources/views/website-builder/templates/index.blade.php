@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Шаблони дизайну')
+@section('title', __('app.design_templates_title'))
 
 @section('content')
 <div class="max-w-6xl mx-auto space-y-6">

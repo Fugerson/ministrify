@@ -2637,7 +2637,7 @@
                                 <template x-if="previewFile && !previewFile?.mime?.startsWith('image/') && !previewFile?.mime?.startsWith('audio/') && !previewFile?.mime?.startsWith('video/') && previewFile?.mime !== 'application/pdf'">
                                     <div class="text-center py-8">
                                         <span class="text-6xl block mb-4" x-text="previewFile?.icon"></span>
-                                        <p class="text-gray-500 dark:text-gray-400">Попередній перегляд недоступний</p>
+                                        <p class="text-gray-500 dark:text-gray-400">{{ __('app.preview_unavailable') }}</p>
                                     </div>
                                 </template>
                             </div>
@@ -2692,7 +2692,7 @@
                                 </div>
                                 <input type="text" x-model="docName"
                                        class="flex-1 min-w-0 text-sm font-semibold text-gray-900 dark:text-white bg-transparent border-0 p-0 focus:ring-0 focus:outline-none placeholder-gray-400"
-                                       placeholder="Назва документа...">
+                                       placeholder="{{ __('app.doc_name_placeholder') }}">
                             </div>
                             <div class="flex items-center gap-1.5 shrink-0 ml-3">
                                 <span x-show="docSaving" x-transition class="text-xs text-blue-500">{{ __('app.saving') }}</span>
@@ -2710,16 +2710,16 @@
 
                         <!-- Toolbar -->
                         <div class="doc-toolbar" id="doc-toolbar">
-                            <select onchange="docExecBlock(this.value); this.value='';" title="Блок">
-                                <option value="">Формат</option>
-                                <option value="p">Текст</option>
-                                <option value="h1">Заголовок 1</option>
-                                <option value="h2">Заголовок 2</option>
-                                <option value="h3">Заголовок 3</option>
-                                <option value="blockquote">Цитата</option>
+                            <select onchange="docExecBlock(this.value); this.value='';" title="{{ __('app.toolbar_block') }}">
+                                <option value="">{{ __('app.toolbar_format') }}</option>
+                                <option value="p">{{ __('app.toolbar_text') }}</option>
+                                <option value="h1">{{ __('app.toolbar_heading1') }}</option>
+                                <option value="h2">{{ __('app.toolbar_heading2') }}</option>
+                                <option value="h3">{{ __('app.toolbar_heading3') }}</option>
+                                <option value="blockquote">{{ __('app.toolbar_blockquote') }}</option>
                             </select>
-                            <select onchange="docExecFontSize(this.value); this.value='';" title="Розмір">
-                                <option value="">Розмір</option>
+                            <select onchange="docExecFontSize(this.value); this.value='';" title="{{ __('app.toolbar_font_size') }}">
+                                <option value="">{{ __('app.toolbar_font_size') }}</option>
                                 <option value="1">10</option>
                                 <option value="2">13</option>
                                 <option value="3">16</option>
@@ -2729,50 +2729,50 @@
                                 <option value="7">48</option>
                             </select>
                             <div class="tb-sep"></div>
-                            <button class="tb-btn" onclick="docExec('bold')" title="Жирний"><b>B</b></button>
-                            <button class="tb-btn" onclick="docExec('italic')" title="Курсив"><i>I</i></button>
-                            <button class="tb-btn" onclick="docExec('underline')" title="Підкреслити"><u>U</u></button>
-                            <button class="tb-btn" onclick="docExec('strikeThrough')" title="Закреслити"><s>S</s></button>
+                            <button class="tb-btn" onclick="docExec('bold')" title="{{ __('app.toolbar_bold') }}"><b>B</b></button>
+                            <button class="tb-btn" onclick="docExec('italic')" title="{{ __('app.toolbar_italic') }}"><i>I</i></button>
+                            <button class="tb-btn" onclick="docExec('underline')" title="{{ __('app.toolbar_underline') }}"><u>U</u></button>
+                            <button class="tb-btn" onclick="docExec('strikeThrough')" title="{{ __('app.toolbar_strikethrough') }}"><s>S</s></button>
                             <div class="tb-sep"></div>
-                            <input type="color" value="#000000" onchange="docExecColor('foreColor', this.value)" title="Колір тексту">
-                            <input type="color" value="#ffffff" onchange="docExecColor('hiliteColor', this.value)" title="Колір фону">
+                            <input type="color" value="#000000" onchange="docExecColor('foreColor', this.value)" title="{{ __('app.toolbar_text_color') }}">
+                            <input type="color" value="#ffffff" onchange="docExecColor('hiliteColor', this.value)" title="{{ __('app.toolbar_bg_color') }}">
                             <div class="tb-sep"></div>
-                            <button class="tb-btn" onclick="docExec('justifyLeft')" title="Ліворуч">
+                            <button class="tb-btn" onclick="docExec('justifyLeft')" title="{{ __('app.toolbar_align_left') }}">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="18" y2="18"/></svg>
                             </button>
-                            <button class="tb-btn" onclick="docExec('justifyCenter')" title="По центру">
+                            <button class="tb-btn" onclick="docExec('justifyCenter')" title="{{ __('app.toolbar_align_center') }}">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="6" y1="12" x2="18" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
                             </button>
-                            <button class="tb-btn" onclick="docExec('justifyRight')" title="Праворуч">
+                            <button class="tb-btn" onclick="docExec('justifyRight')" title="{{ __('app.toolbar_align_right') }}">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="9" y1="12" x2="21" y2="12"/><line x1="6" y1="18" x2="21" y2="18"/></svg>
                             </button>
                             <div class="tb-sep"></div>
-                            <button class="tb-btn" onclick="docExec('insertUnorderedList')" title="Список">
+                            <button class="tb-btn" onclick="docExec('insertUnorderedList')" title="{{ __('app.toolbar_unordered_list') }}">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="9" y1="6" x2="20" y2="6"/><line x1="9" y1="12" x2="20" y2="12"/><line x1="9" y1="18" x2="20" y2="18"/><circle cx="4" cy="6" r="1.5" fill="currentColor"/><circle cx="4" cy="12" r="1.5" fill="currentColor"/><circle cx="4" cy="18" r="1.5" fill="currentColor"/></svg>
                             </button>
-                            <button class="tb-btn" onclick="docExec('insertOrderedList')" title="Нумерований список">
+                            <button class="tb-btn" onclick="docExec('insertOrderedList')" title="{{ __('app.toolbar_ordered_list') }}">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="10" y1="6" x2="20" y2="6"/><line x1="10" y1="12" x2="20" y2="12"/><line x1="10" y1="18" x2="20" y2="18"/><text x="3" y="8" font-size="8" fill="currentColor" stroke="none">1</text><text x="3" y="14" font-size="8" fill="currentColor" stroke="none">2</text><text x="3" y="20" font-size="8" fill="currentColor" stroke="none">3</text></svg>
                             </button>
-                            <button class="tb-btn" onclick="docExec('outdent')" title="Зменшити відступ">
+                            <button class="tb-btn" onclick="docExec('outdent')" title="{{ __('app.toolbar_outdent') }}">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="11" y1="12" x2="21" y2="12"/><line x1="11" y1="18" x2="21" y2="18"/><polyline points="7 9 3 12 7 15"/></svg>
                             </button>
-                            <button class="tb-btn" onclick="docExec('indent')" title="Збільшити відступ">
+                            <button class="tb-btn" onclick="docExec('indent')" title="{{ __('app.toolbar_indent') }}">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="11" y1="12" x2="21" y2="12"/><line x1="11" y1="18" x2="21" y2="18"/><polyline points="3 9 7 12 3 15"/></svg>
                             </button>
                             <div class="tb-sep"></div>
-                            <button class="tb-btn" onclick="docInsertLink()" title="Посилання">
+                            <button class="tb-btn" onclick="docInsertLink()" title="{{ __('app.toolbar_link') }}">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
                             </button>
-                            <button class="tb-btn" onclick="docInsertImage()" title="Зображення">
+                            <button class="tb-btn" onclick="docInsertImage()" title="{{ __('app.toolbar_image') }}">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
                             </button>
-                            <button class="tb-btn" onclick="docExec('removeFormat')" title="Очистити форматування">
+                            <button class="tb-btn" onclick="docExec('removeFormat')" title="{{ __('app.toolbar_clear_format') }}">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="4" x2="20" y2="20"/><path d="M6 4h8l-4 16"/></svg>
                             </button>
                         </div>
                         <!-- Editable area -->
                         <div class="flex-1 overflow-y-auto min-h-0">
-                            <div id="doc-editable" class="doc-editable" contenteditable="true" data-placeholder="Почніть вводити текст..."></div>
+                            <div id="doc-editable" class="doc-editable" contenteditable="true" data-placeholder="{{ __('app.start_typing_placeholder') }}"></div>
                         </div>
                     </div>
                 </div>
@@ -2806,8 +2806,8 @@
                                 </svg>
                             </div>
                             <div>
-                                <h3 class="font-semibold text-gray-900 dark:text-white">Бачення служіння</h3>
-                                <p class="text-xs text-indigo-600 dark:text-indigo-400">Куди ми рухаємось</p>
+                                <h3 class="font-semibold text-gray-900 dark:text-white">{{ __('app.ministry_vision') }}</h3>
+                                <p class="text-xs text-indigo-600 dark:text-indigo-400">{{ __('app.vision_subtitle') }}</p>
                             </div>
                         </div>
                         @can('contribute-ministry', $ministry)
@@ -2820,14 +2820,14 @@
                         @if($ministry->vision)
                             <p class="text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed">{{ $ministry->vision }}</p>
                         @else
-                            <p class="text-gray-500 dark:text-gray-400 italic">Бачення ще не визначено.</p>
+                            <p class="text-gray-500 dark:text-gray-400 italic">{{ __('app.vision_not_set') }}</p>
                         @endif
                     </div>
                     @can('contribute-ministry', $ministry)
                     <form x-show="editingVision" @submit.prevent="submit($refs.visionForm)" x-ref="visionForm"
-                          x-data="{ ...ajaxForm({ url: '{{ route('ministries.vision.update', $ministry) }}', method: 'POST', stayOnPage: true, onSuccess() { const ta = this.$refs.visionForm.querySelector('textarea'); const txt = ta.value; const display = this.$refs.visionForm.previousElementSibling; if (display) { const p = display.querySelector('p'); if (p) { p.textContent = txt || 'Бачення ще не визначено.'; p.className = txt ? 'text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed' : 'text-gray-500 dark:text-gray-400 italic'; } } this.editingVision = false; } }) }"
+                          x-data="{ ...ajaxForm({ url: '{{ route('ministries.vision.update', $ministry) }}', method: 'POST', stayOnPage: true, onSuccess() { const ta = this.$refs.visionForm.querySelector('textarea'); const txt = ta.value; const display = this.$refs.visionForm.previousElementSibling; if (display) { const p = display.querySelector('p'); if (p) { p.textContent = txt || @js(__('app.vision_not_set')); p.className = txt ? 'text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed' : 'text-gray-500 dark:text-gray-400 italic'; } } this.editingVision = false; } }) }"
                           class="space-y-3">
-                        <textarea name="vision" rows="4" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500" placeholder="Опишіть бачення вашого служіння...">{{ $ministry->vision }}</textarea>
+                        <textarea name="vision" rows="4" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500" placeholder="{{ __('app.vision_placeholder') }}">{{ $ministry->vision }}</textarea>
                         <div class="flex justify-end">
                             <button type="submit" :disabled="saving" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg">{{ __('app.save') }}</button>
                         </div>
@@ -2837,16 +2837,16 @@
 
                 <!-- Goals Header -->
                 <div class="flex items-center justify-between mb-4">
-                    <h3 class="font-semibold text-gray-900 dark:text-white">Цілі</h3>
+                    <h3 class="font-semibold text-gray-900 dark:text-white">{{ __('app.goals_title') }}</h3>
                     @can('contribute-ministry', $ministry)
                     <div class="flex gap-2">
                         <button @click="showTaskModal = true; taskForm.goal_id = ''" class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg">
                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                            Задача
+                            {{ __('app.task_btn') }}
                         </button>
                         <button @click="showGoalModal = true; resetGoalForm()" class="inline-flex items-center px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg">
                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                            Ціль
+                            {{ __('app.goal_btn') }}
                         </button>
                     </div>
                     @endcan
@@ -2953,7 +2953,7 @@
                         <div class="w-12 h-12 mx-auto mb-3 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
                             <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         </div>
-                        <p class="text-gray-500 dark:text-gray-400 text-sm mb-3">Цілей ще немає</p>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm mb-3">{{ __('app.no_goals_yet') }}</p>
                         @can('contribute-ministry', $ministry)
                         <button @click="showGoalModal = true; resetGoalForm()" class="inline-flex items-center px-3 py-1.5 bg-primary-600 text-white text-sm rounded-lg hover:bg-primary-700">
                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
@@ -2980,25 +2980,25 @@
                                       method: method,
                                       headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'Accept': 'application/json' },
                                       body: fd
-                                  }).then(r => { if (r.ok) { if (typeof showToast === 'function') showToast('success', @js(__('app.saved_toast'))); /* Оновлюємо сторінку через Livewire */ setTimeout(() => Livewire.navigate(window.location.href), 400); } else r.json().then(d => alert(d.message || 'Помилка')).catch(() => alert('Помилка')); }).catch(() => alert('Помилка'));
+                                  }).then(r => { if (r.ok) { if (typeof showToast === 'function') showToast('success', @js(__('app.saved_toast'))); /* Оновлюємо сторінку через Livewire */ setTimeout(() => Livewire.navigate(window.location.href), 400); } else r.json().then(d => alert(d.message || @js(__('app.error_generic')))).catch(() => alert(@js(__('app.error_generic')))); }).catch(() => alert(@js(__('app.error_generic'))));
                               " x-ref="goalForm" class="p-4 space-y-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Назва *</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.name_label') }} *</label>
                                 <input type="text" name="title" x-model="goalForm.title" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Опис</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.description_field') }}</label>
                                 <textarea name="description" x-model="goalForm.description" rows="2" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"></textarea>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Період</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.period_label') }}</label>
                                 <div class="grid grid-cols-2 gap-2">
                                     <div>
-                                        <span class="text-xs text-gray-500 dark:text-gray-400">Від</span>
+                                        <span class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.date_from') }}</span>
                                         <input type="date" x-model="goalForm.period_start" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
                                     </div>
                                     <div>
-                                        <span class="text-xs text-gray-500 dark:text-gray-400">До</span>
+                                        <span class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.to_label') }}</span>
                                         <input type="date" x-model="goalForm.period_end" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
                                     </div>
                                 </div>
@@ -3009,20 +3009,20 @@
                             <input type="hidden" name="due_date" :value="goalForm.period_end || ''">
                             <div class="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Пріоритет</label>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.priority_label') }}</label>
                                     <select name="priority" x-model="goalForm.priority" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
-                                        <option value="low">Низький</option>
-                                        <option value="medium">Середній</option>
-                                        <option value="high">Високий</option>
+                                        <option value="low">{{ __('app.priority_low') }}</option>
+                                        <option value="medium">{{ __('app.priority_medium') }}</option>
+                                        <option value="high">{{ __('app.priority_high') }}</option>
                                     </select>
                                 </div>
                                 <div x-show="editingGoalId">
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Статус</label>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.status_label') }}</label>
                                     <select name="status" x-model="goalForm.status" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
-                                        <option value="active">Активна</option>
-                                        <option value="completed">Виконана</option>
-                                        <option value="on_hold">На паузі</option>
-                                        <option value="cancelled">Скасована</option>
+                                        <option value="active">{{ __('app.status_active') }}</option>
+                                        <option value="completed">{{ __('app.status_completed') }}</option>
+                                        <option value="on_hold">{{ __('app.status_on_hold') }}</option>
+                                        <option value="cancelled">{{ __('app.status_cancelled') }}</option>
                                     </select>
                                 </div>
                             </div>
@@ -3050,16 +3050,16 @@
                                       method: method,
                                       headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'Accept': 'application/json' },
                                       body: fd
-                                  }).then(r => { if (r.ok) { if (typeof showToast === 'function') showToast('success', @js(__('app.saved_toast'))); /* Оновлюємо сторінку через Livewire */ setTimeout(() => Livewire.navigate(window.location.href), 400); } else r.json().then(d => alert(d.message || 'Помилка')).catch(() => alert('Помилка')); }).catch(() => alert('Помилка'));
+                                  }).then(r => { if (r.ok) { if (typeof showToast === 'function') showToast('success', @js(__('app.saved_toast'))); /* Оновлюємо сторінку через Livewire */ setTimeout(() => Livewire.navigate(window.location.href), 400); } else r.json().then(d => alert(d.message || @js(__('app.error_generic')))).catch(() => alert(@js(__('app.error_generic')))); }).catch(() => alert(@js(__('app.error_generic'))));
                               " x-ref="taskForm" class="p-4 space-y-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Назва *</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.name_label') }} *</label>
                                 <input type="text" name="title" x-model="taskForm.title" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Ціль</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.goal_label') }}</label>
                                 <select name="goal_id" x-model="taskForm.goal_id" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
-                                    <option value="">Без цілі</option>
+                                    <option value="">{{ __('app.no_goal') }}</option>
                                     @foreach($ministry->goals as $goal)
                                         <option value="{{ $goal->id }}">{{ $goal->title }}</option>
                                     @endforeach
@@ -3067,7 +3067,7 @@
                             </div>
                             <div class="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Виконавець</label>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.assignee_label') }}</label>
                                     <select name="assigned_to" x-model="taskForm.assigned_to" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
                                         <option value="">-</option>
                                         @foreach($ministry->members as $member)
@@ -3076,25 +3076,25 @@
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Дедлайн</label>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.deadline_label') }}</label>
                                     <input type="date" name="due_date" x-model="taskForm.due_date" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
                                 </div>
                             </div>
                             <div class="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Пріоритет</label>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.priority_label') }}</label>
                                     <select name="priority" x-model="taskForm.priority" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
-                                        <option value="low">Низький</option>
-                                        <option value="medium">Середній</option>
-                                        <option value="high">Високий</option>
+                                        <option value="low">{{ __('app.priority_low') }}</option>
+                                        <option value="medium">{{ __('app.priority_medium') }}</option>
+                                        <option value="high">{{ __('app.priority_high') }}</option>
                                     </select>
                                 </div>
                                 <div x-show="editingTaskId">
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Статус</label>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.status_label') }}</label>
                                     <select name="status" x-model="taskForm.status" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
-                                        <option value="todo">До виконання</option>
-                                        <option value="in_progress">В процесі</option>
-                                        <option value="done">Виконано</option>
+                                        <option value="todo">{{ __('app.status_todo') }}</option>
+                                        <option value="in_progress">{{ __('app.status_in_progress') }}</option>
+                                        <option value="done">{{ __('app.status_done') }}</option>
                                     </select>
                                 </div>
                             </div>
@@ -3116,7 +3116,7 @@
                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                     </svg>
-                    Назад до списку
+                    {{ __('app.back_to_list') }}
                 </a>
             </div>
 
@@ -3127,9 +3127,9 @@
                 <!-- Header -->
                 <div class="flex items-center justify-between mb-4">
                     <div>
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Бібліотека пісень</h3>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.songs_library') }}</h3>
                         <p class="text-sm text-gray-500 dark:text-gray-400">
-                            Всього: <span x-text="songs.length"></span> пісень
+                            {{ __('app.total_label') }}: <span x-text="songs.length"></span> {{ __('app.songs_count') }}
                         </p>
                     </div>
                     <div class="flex items-center gap-2">
@@ -3139,7 +3139,7 @@
                             <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
                             </svg>
-                            Імпорт
+                            {{ __('app.import_btn') }}
                         </a>
                         <button @click="openCreateModal()"
                            class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors">
@@ -3155,48 +3155,48 @@
                 <!-- Search & Filters -->
                 <div class="mb-4 space-y-3">
                     <div class="flex flex-wrap gap-3">
-                        <input type="text" x-model="search" placeholder="Пошук пісень..."
+                        <input type="text" x-model="search" placeholder="{{ __('app.search_songs_placeholder') }}"
                                class="flex-1 min-w-[200px] px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 text-sm">
                         <select x-model="filterArtist"
                                 class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
-                            <option value="">Усі виконавці</option>
+                            <option value="">{{ __('app.all_artists') }}</option>
                             <template x-for="a in artists" :key="a">
                                 <option :value="a" x-text="a"></option>
                             </template>
                         </select>
                         <select x-model="filterBpm"
                                 class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
-                            <option value="">Будь-який темп</option>
-                            <option value="slow">Повільні (< 80 BPM)</option>
-                            <option value="medium">Середні (80–120 BPM)</option>
-                            <option value="fast">Швидкі (> 120 BPM)</option>
+                            <option value="">{{ __('app.any_tempo') }}</option>
+                            <option value="slow">{{ __('app.slow_tempo') }}</option>
+                            <option value="medium">{{ __('app.medium_tempo') }}</option>
+                            <option value="fast">{{ __('app.fast_tempo') }}</option>
                             <option value="none">Без BPM</option>
                         </select>
                         <select x-model="filterUsage"
                                 class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
-                            <option value="">Будь-яке використання</option>
-                            <option value="frequent">Часто (5+ разів)</option>
-                            <option value="moderate">Помірно (1–4 рази)</option>
-                            <option value="never">Ніколи не використані</option>
+                            <option value="">{{ __('app.any_usage') }}</option>
+                            <option value="frequent">{{ __('app.usage_frequent') }}</option>
+                            <option value="moderate">{{ __('app.usage_moderate') }}</option>
+                            <option value="never">{{ __('app.usage_never') }}</option>
                         </select>
                         <select x-model="filterContent"
                                 class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
-                            <option value="">Будь-який контент</option>
-                            <option value="has_lyrics">Зі словами</option>
-                            <option value="has_chords">З акордами</option>
-                            <option value="has_youtube">З YouTube</option>
-                            <option value="has_spotify">Зі Spotify</option>
-                            <option value="no_lyrics">Без слів</option>
-                            <option value="no_chords">Без акордів</option>
+                            <option value="">{{ __('app.any_content') }}</option>
+                            <option value="has_lyrics">{{ __('app.with_lyrics') }}</option>
+                            <option value="has_chords">{{ __('app.with_chords') }}</option>
+                            <option value="has_youtube">{{ __('app.with_youtube') }}</option>
+                            <option value="has_spotify">{{ __('app.with_spotify') }}</option>
+                            <option value="no_lyrics">{{ __('app.without_lyrics') }}</option>
+                            <option value="no_chords">{{ __('app.without_chords') }}</option>
                         </select>
                     </div>
                     <div x-show="filterArtist || filterBpm || filterUsage || filterContent" class="flex items-center gap-2">
                         <span class="text-xs text-gray-500 dark:text-gray-400">
-                            Знайдено: <span x-text="filteredSongs.length"></span> пісень
+                            {{ __('app.found_label') }}: <span x-text="filteredSongs.length"></span> {{ __('app.songs_count') }}
                         </span>
                         <button x-on:click="filterArtist=''; filterBpm=''; filterUsage=''; filterContent=''; search=''; filterKey=''; filterTag=''"
                                 class="text-xs text-primary-600 dark:text-primary-400 hover:underline">
-                            Скинути фільтри
+                            {{ __('app.reset_filters') }}
                         </button>
                     </div>
                 </div>
@@ -3228,7 +3228,7 @@
                                                 </div>
                                                 @can('contribute-ministry', $ministry)
                                                 <div class="relative flex-shrink-0" x-data="{ open: false }">
-                                                    <button @click.stop="open = !open" class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded opacity-0 group-hover:opacity-100 transition-opacity" title="Перемістити">
+                                                    <button @click.stop="open = !open" class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded opacity-0 group-hover:opacity-100 transition-opacity" title="{{ __('app.move_btn') }}">
                                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"/></svg>
                                                     </button>
                                                     <div x-show="open" @click.away="open = false" x-transition
@@ -3241,7 +3241,7 @@
                                                         </template>
                                                         <button @click.stop="moveSong(song.id, col, null); open = false"
                                                                 class="w-full text-left px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700">
-                                                            <span class="mr-1">&times;</span> Прибрати тег
+                                                            <span class="mr-1">&times;</span> {{ __('app.remove_tag') }}
                                                         </button>
                                                     </div>
                                                 </div>
@@ -3249,7 +3249,7 @@
                                             </div>
                                         </template>
                                         <div x-show="getSongsForColumn(col).length === 0" class="px-3 py-6 text-center text-xs text-gray-400">
-                                            Немає пісень
+                                            {{ __('app.no_songs') }}
                                         </div>
                                     </div>
                                 </div>
@@ -3258,7 +3258,7 @@
                             <!-- Untagged Column -->
                             <div class="w-80 flex-shrink-0 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 border-dashed flex flex-col max-h-[calc(100vh-280px)]">
                                 <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between bg-gray-50 dark:bg-gray-700/50" style="border-top: 3px solid #9ca3af">
-                                    <h3 class="font-semibold text-gray-500 dark:text-gray-400 text-sm">Без тегу</h3>
+                                    <h3 class="font-semibold text-gray-500 dark:text-gray-400 text-sm">{{ __('app.untagged') }}</h3>
                                     <span class="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-xs font-medium rounded-full"
                                           x-text="getUntaggedSongs().length"></span>
                                 </div>
@@ -3290,7 +3290,7 @@
                                         </div>
                                     </template>
                                     <div x-show="getUntaggedSongs().length === 0" class="px-3 py-6 text-center text-xs text-gray-400">
-                                        Немає пісень
+                                        {{ __('app.no_songs') }}
                                     </div>
                                 </div>
                             </div>
@@ -3303,7 +3303,7 @@
                     <div>
                         <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4 mb-4">
                             <p class="text-sm text-amber-800 dark:text-amber-200">
-                                Колонки не налаштовані. Перейдіть в <a href="{{ route('settings.index') }}?tab=data" class="underline font-medium">Налаштування → Дані</a>, щоб додати теги-колонки для дошки пісень.
+                                {{ __('app.no_board_columns_hint') }} <a href="{{ route('settings.index') }}?tab=data" class="underline font-medium">{{ __('app.settings_data_link') }}</a>
                             </p>
                         </div>
                         <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl divide-y divide-gray-100 dark:divide-gray-700/50">
@@ -3325,8 +3325,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"/>
                         </svg>
                     </div>
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Немає пісень</h3>
-                    <p class="text-gray-500 dark:text-gray-400 mb-4">Додайте першу пісню до бібліотеки</p>
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">{{ __('app.no_songs') }}</h3>
+                    <p class="text-gray-500 dark:text-gray-400 mb-4">{{ __('app.add_first_song') }}</p>
                     @can('contribute-ministry', $ministry)
                     <button @click="openCreateModal()" class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors">
                         <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -3369,12 +3369,12 @@
                                 <div class="space-y-4">
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
-                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Назва <span class="text-red-500">*</span></label>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.name_label') }} <span class="text-red-500">*</span></label>
                                             <input type="text" x-model="form.title" required
                                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
                                         </div>
                                         <div>
-                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Автор</label>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.author_label') }}</label>
                                             <input type="text" x-model="form.artist" list="artists-list-modal"
                                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
                                             <datalist id="artists-list-modal">
@@ -3384,7 +3384,7 @@
                                             </datalist>
                                         </div>
                                         <div>
-                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Тональність</label>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.key_label') }}</label>
                                             <div class="relative">
                                                 <input type="text"
                                                        x-model="keyQuery"
@@ -3392,13 +3392,13 @@
                                                        @click.away="keyDropdownOpen = false"
                                                        @keydown.escape="keyDropdownOpen = false"
                                                        @keydown.enter.prevent="filteredKeys.length && selectKey(filteredKeys[0][0])"
-                                                       placeholder="Почніть вводити..."
+                                                       placeholder="{{ __('app.start_typing') }}"
                                                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
                                                 <div x-show="keyDropdownOpen && filteredKeys.length > 0" x-transition
                                                      class="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg max-h-48 overflow-auto">
                                                     <div @click="selectKey('')"
                                                          class="px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm text-gray-500">
-                                                        Не вказано
+                                                        {{ __('app.not_specified') }}
                                                     </div>
                                                     <template x-for="[key, label] in filteredKeys" :key="key">
                                                         <div @click="selectKey(key)"
@@ -3419,7 +3419,7 @@
                                     </div>
 
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Теги</label>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.tags_label') }}</label>
                                         <div class="flex flex-wrap gap-2 mb-2">
                                             <template x-for="tag in allTags" :key="tag">
                                                 <label class="inline-flex items-center cursor-pointer">
@@ -3428,23 +3428,23 @@
                                                 </label>
                                             </template>
                                         </div>
-                                        <input type="text" x-model="form.new_tag" placeholder="Нові теги через кому"
+                                        <input type="text" x-model="form.new_tag" placeholder="{{ __('app.new_tags_comma') }}"
                                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
                                     </div>
 
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Коментарі</label>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.comments_label') }}</label>
                                         <textarea x-model="form.notes" rows="2"
                                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
-                                                  placeholder="Нотатки для команди"></textarea>
+                                                  placeholder="{{ __('app.notes_for_team') }}"></textarea>
                                     </div>
 
                                     <!-- Resource Links -->
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Посилання на ресурси</label>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.resource_links_label') }}</label>
                                         <template x-for="(link, index) in form.resource_links" :key="index">
                                             <div class="flex gap-2 mb-2">
-                                                <input x-model="link.label" type="text" placeholder="Назва"
+                                                <input x-model="link.label" type="text" placeholder="{{ __('app.name_label') }}"
                                                        class="flex-1 px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500">
                                                 <input x-model="link.url" type="url" placeholder="https://..."
                                                        class="flex-[2] px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500">
@@ -3466,16 +3466,16 @@
                                     </div>
 
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Текст</label>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.lyrics_label') }}</label>
                                         <textarea x-model="form.lyrics" rows="4"
                                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 font-mono text-sm"></textarea>
                                     </div>
 
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Текст з акордами</label>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.chords_label') }}</label>
                                         <textarea x-model="form.chords" rows="6"
                                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 font-mono text-sm"
-                                                  placeholder="[C]Святий, Святий, [Am]Святий..."></textarea>
+                                                  placeholder="{{ __('app.chords_placeholder') }}"></textarea>
                                     </div>
 
                                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -3561,13 +3561,13 @@
                                     <!-- Notes -->
                                     <div x-show="viewingSong.notes" class="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
                                         <p class="text-sm text-yellow-800 dark:text-yellow-200">
-                                            <span class="font-medium">Коментарі:</span> <span x-text="viewingSong.notes"></span>
+                                            <span class="font-medium">{{ __('app.comments_label') }}:</span> <span x-text="viewingSong.notes"></span>
                                         </p>
                                     </div>
 
                                     <!-- Resource Links -->
                                     <div x-show="viewingSong.resource_links && viewingSong.resource_links.length > 0" class="mb-4">
-                                        <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Ресурси</h4>
+                                        <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.resources_label') }}</h4>
                                         <div class="flex flex-wrap gap-2">
                                             <template x-for="link in (viewingSong.resource_links || [])" :key="link.url">
                                                 <a :href="link.url" target="_blank" rel="noopener noreferrer"
@@ -3597,20 +3597,20 @@
 
                                     <!-- Chords -->
                                     <div x-show="viewingSong.chords" class="mb-4">
-                                        <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Текст з акордами</h4>
+                                        <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.chords_label') }}</h4>
                                         <div class="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg font-mono text-sm whitespace-pre-wrap max-h-96 overflow-y-auto" x-html="formatChords(viewingSong.chords)"></div>
                                     </div>
 
                                     <!-- Lyrics (if no chords) -->
                                     <div x-show="viewingSong.lyrics && !viewingSong.chords" class="mb-4">
-                                        <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Текст</h4>
+                                        <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('app.lyrics_label') }}</h4>
                                         <div class="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg text-sm whitespace-pre-wrap max-h-96 overflow-y-auto" x-text="viewingSong.lyrics"></div>
                                     </div>
 
                                     <!-- Actions -->
                                     <div class="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
                                         <div class="text-sm text-gray-500 dark:text-gray-400">
-                                            Використано <span x-text="viewingSong.times_used || 0"></span> раз
+                                            {{ __('app.used_times_prefix') }} <span x-text="viewingSong.times_used || 0"></span> {{ __('app.used_times_suffix') }}
                                         </div>
                                         @can('contribute-ministry', $ministry)
                                         <div class="flex items-center gap-2">
@@ -3649,30 +3649,30 @@
                     @can('manage-ministry', $ministry)
                     <!-- General Settings -->
                     <div>
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Загальні налаштування</h3>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.general_settings') }}</h3>
                         <form @submit.prevent="submit($refs.settingsForm)" x-ref="settingsForm"
                               x-data="{ ...ajaxForm({ url: '{{ route('ministries.update', $ministry) }}', method: 'PUT', stayOnPage: true, onSuccess() { _updateMinistryHeader(this); } }) }"
                               class="space-y-4">
 
                             <div>
-                                <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Назва</label>
+                                <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.name_label') }}</label>
                                 <input type="text" name="name" id="name" value="{{ old('name', $ministry->name) }}" required
                                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
                             </div>
 
                             <div>
-                                <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Опис</label>
+                                <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.description_field') }}</label>
                                 <textarea name="description" id="description" rows="2"
                                           class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500">{{ old('description', $ministry->description) }}</textarea>
                             </div>
 
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Лідер</label>
-                                <x-person-select name="leader_id" :people="$availablePeople->merge($ministry->members)->merge($ministry->leader ? collect([$ministry->leader]) : collect())->unique('id')->sortBy('last_name')" :selected="old('leader_id', $ministry->leader_id)" placeholder="Пошук лідера..." />
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.leader_label') }}</label>
+                                <x-person-select name="leader_id" :people="$availablePeople->merge($ministry->members)->merge($ministry->leader ? collect([$ministry->leader]) : collect())->unique('id')->sortBy('last_name')" :selected="old('leader_id', $ministry->leader_id)" :placeholder="__('app.search_leader_placeholder')" />
                             </div>
 
                             <div>
-                                <label for="color" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Колір</label>
+                                <label for="color" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.color_label') }}</label>
                                 <input type="color" name="color" id="color" value="{{ old('color', $ministry->color ?? '#3b82f6') }}"
                                        class="w-16 h-10 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer">
                             </div>
@@ -3683,8 +3683,8 @@
                                        {{ old('is_worship_ministry', $ministry->is_worship_ministry) ? 'checked' : '' }}
                                        class="w-5 h-5 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500">
                                 <label for="is_worship_ministry" class="text-sm text-gray-700 dark:text-gray-300">
-                                    <span class="font-medium">Музичне служіння</span>
-                                    <span class="block text-gray-500 dark:text-gray-400 text-xs">Показувати бібліотеку пісень та Music Stand</span>
+                                    <span class="font-medium">{{ __('app.worship_ministry') }}</span>
+                                    <span class="block text-gray-500 dark:text-gray-400 text-xs">{{ __('app.worship_ministry_hint') }}</span>
                                 </label>
                             </div>
 
@@ -3702,8 +3702,8 @@
 
                     <!-- Song Board Tags -->
                     <div x-data="songBoardTagsConfig()">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Колонки дошки пісень</h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Теги, які стануть колонками на вкладці "Пісні"</p>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">{{ __('app.song_board_columns') }}</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">{{ __('app.song_board_columns_hint') }}</p>
 
                         <div class="space-y-2 mb-4">
                             <template x-for="(tag, i) in tags" :key="i">
@@ -3715,12 +3715,12 @@
                                 </div>
                             </template>
                             <template x-if="tags.length === 0">
-                                <p class="text-gray-400 text-sm py-2">Немає колонок. Додайте теги нижче.</p>
+                                <p class="text-gray-400 text-sm py-2">{{ __('app.no_columns_add_tags') }}</p>
                             </template>
                         </div>
 
                         <form @submit.prevent="addTag()" class="flex gap-2">
-                            <input type="text" x-model="newTag" placeholder="Новий тег (напр. Регулярні)..." maxlength="50"
+                            <input type="text" x-model="newTag" placeholder="{{ __('app.new_tag_placeholder') }}" maxlength="50"
                                    class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500">
                             <button type="submit" :disabled="saving || !newTag.trim()"
                                     class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg text-sm transition-colors disabled:opacity-50">
@@ -3735,9 +3735,9 @@
 
                     <!-- Access Settings -->
                     <div>
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Налаштування доступу</h3>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.access_settings') }}</h3>
                         <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">
-                            Визначте, хто може бачити цю команду та її деталі
+                            {{ __('app.access_settings_hint') }}
                         </p>
 
                     <div class="space-y-3">
@@ -3750,9 +3750,9 @@
                                     <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                     </svg>
-                                    <span class="font-medium text-gray-900 dark:text-white">Всі користувачі</span>
+                                    <span class="font-medium text-gray-900 dark:text-white">{{ __('app.visibility_all_users') }}</span>
                                 </div>
-                                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Всі користувачі церкви можуть бачити цю команду</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ __('app.visibility_all_users_hint') }}</p>
                             </div>
                         </label>
 
@@ -3765,9 +3765,9 @@
                                     <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
                                     </svg>
-                                    <span class="font-medium text-gray-900 dark:text-white">Тільки учасники команди</span>
+                                    <span class="font-medium text-gray-900 dark:text-white">{{ __('app.visibility_members_only') }}</span>
                                 </div>
-                                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Тільки учасники цієї команди та адміністратори</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ __('app.visibility_members_only_hint') }}</p>
                             </div>
                         </label>
 
@@ -3780,9 +3780,9 @@
                                     <svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
                                     </svg>
-                                    <span class="font-medium text-gray-900 dark:text-white">Тільки лідери служінь</span>
+                                    <span class="font-medium text-gray-900 dark:text-white">{{ __('app.visibility_leaders_only') }}</span>
                                 </div>
-                                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Тільки адміністратори та лідери всіх служінь церкви</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ __('app.visibility_leaders_only_hint') }}</p>
                             </div>
                         </label>
 
@@ -3795,9 +3795,9 @@
                                     <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                                     </svg>
-                                    <span class="font-medium text-gray-900 dark:text-white">Тільки конкретні люди</span>
+                                    <span class="font-medium text-gray-900 dark:text-white">{{ __('app.visibility_specific_people') }}</span>
                                 </div>
-                                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Тільки адміністратори та люди, вибрані нижче</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ __('app.visibility_specific_hint') }}</p>
                             </div>
                         </label>
                     </div>
@@ -3809,9 +3809,9 @@
                             <svg class="w-5 h-5" :class="visibility === 'specific' ? 'text-red-500' : 'text-blue-500'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
                             </svg>
-                            <h4 class="font-medium text-gray-900 dark:text-white" x-text="visibility === 'specific' ? 'Люди з доступом' : 'Додаткові люди з доступом'"></h4>
+                            <h4 class="font-medium text-gray-900 dark:text-white" x-text="visibility === 'specific' ? @js(__('app.people_with_access')) : @js(__('app.additional_people_access'))"></h4>
                         </div>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-3" x-text="visibility === 'specific' ? 'Тільки ці люди (та адміністратори) матимуть доступ до команди' : 'Ці люди матимуть доступ незалежно від вибраної опції вище'"></p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-3" x-text="visibility === 'specific' ? @js(__('app.specific_access_hint')) : @js(__('app.additional_access_hint'))"></p>
 
                         <!-- Selected people tags -->
                         <div class="flex flex-wrap gap-2 mb-3" x-show="allowedPeople.length > 0">
@@ -3838,7 +3838,7 @@
                         <!-- Select people dropdown -->
                         <div class="flex gap-2">
                             <select x-model="selectedPersonId" class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
-                                <option value="">Оберіть людину...</option>
+                                <option value="">{{ __('app.select_person_placeholder') }}</option>
                                 <template x-for="person in availablePeopleFiltered" :key="person.id">
                                     <option :value="person.id" x-text="person.full_name"></option>
                                 </template>
@@ -3855,7 +3855,7 @@
                         <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                         </svg>
-                        <span class="text-sm text-green-600 dark:text-green-400">Збережено</span>
+                        <span class="text-sm text-green-600 dark:text-green-400">{{ __('app.saved') }}</span>
                     </div>
 
                 </div>
@@ -3865,12 +3865,12 @@
 
                     <!-- Ministry Roles Settings (AJAX) -->
                     <div x-data="ministryRolesManager()" x-init="init(@js($ministryRoles->map(fn($r) => ['id' => $r->id, 'name' => $r->name, 'color' => $r->color ?? '#3b82f6'])->values()), '{{ route('ministries.ministry-roles.store', $ministry) }}', '{{ url('ministries/' . $ministry->id . '/ministry-roles') }}')">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Ролі служіння</h3>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">{{ __('app.ministry_roles') }}</h3>
                         <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
                             @if($ministry->is_worship_ministry)
-                                Налаштуйте інструменти та ролі для команди прославлення
+                                {{ __('app.ministry_roles_worship_hint') }}
                             @else
-                                Налаштуйте ролі для команди (напр. Камера, Звук, Стрім)
+                                {{ __('app.ministry_roles_hint') }}
                             @endif
                         </p>
 
@@ -3911,14 +3911,14 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
                                         </svg>
                                     </div>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Немає ролей. Додайте свою першу роль.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.no_roles_yet') }}</p>
                                 </div>
                             </template>
 
                             <!-- Add Role Form -->
                             <div class="p-3 border-t border-gray-200 dark:border-gray-600">
                                 <div class="flex flex-wrap gap-2">
-                                    <input type="text" x-model="newName" placeholder="Назва ролі (напр. Камера, Звук)"
+                                    <input type="text" x-model="newName" placeholder="{{ __('app.role_name_placeholder') }}"
                                            @keydown.enter.prevent="addRole(newName, newColor)"
                                            class="flex-1 min-w-[150px] px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                                     <input type="color" x-model="newColor"
@@ -3936,7 +3936,7 @@
                         <!-- Suggested Defaults -->
                         <template x-if="availableDefaults.length > 0">
                             <div class="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
-                                <h4 class="text-sm font-medium text-blue-800 dark:text-blue-300 mb-2">Швидке додавання:</h4>
+                                <h4 class="text-sm font-medium text-blue-800 dark:text-blue-300 mb-2">{{ __('app.quick_add') }}:</h4>
                                 <div class="flex flex-wrap gap-2">
                                     <template x-for="def in availableDefaults" :key="def.name">
                                         <button type="button" @click="addRole(def.name, def.color)"
@@ -3955,12 +3955,12 @@
                                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.edit_role') }}</h3>
                                 <div class="space-y-4">
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Назва</label>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.name_label') }}</label>
                                         <input type="text" x-model="editName" @keydown.enter.prevent="saveEdit()"
                                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                                     </div>
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Колір</label>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.color_label') }}</label>
                                         <input type="color" x-model="editColor"
                                                class="w-full h-10 rounded-lg border border-gray-300 dark:border-gray-600 cursor-pointer">
                                     </div>
@@ -3983,9 +3983,9 @@
 
                     <!-- Danger Zone -->
                     <div class="p-6 border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/10 rounded-xl">
-                        <h3 class="text-lg font-semibold text-red-600 dark:text-red-400 mb-2">Небезпечна зона</h3>
+                        <h3 class="text-lg font-semibold text-red-600 dark:text-red-400 mb-2">{{ __('app.danger_zone') }}</h3>
                         <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                            Видалення команди є незворотнім. Всі дані команди (цілі, задачі, ресурси) будуть втрачені.
+                            {{ __('app.delete_team_warning') }}
                         </p>
                         <button type="button"
                                 @click="ajaxDelete('{{ route('ministries.destroy', $ministry) }}', @js( __('messages.confirm_delete_ministry_named', ['name' => $ministry->name]) ), null, '{{ route('ministries.index') }}')"
@@ -4084,9 +4084,9 @@ function _addMinistryResourceFolder(ctx, data) {
     el.className = 'group flex items-center gap-3 p-2.5 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors';
     el.setAttribute('data-resource-id', data.id);
     el.onclick = function() { Livewire.navigate('/ministries/{{ $ministry->id }}/resources/folder/' + data.id); };
-    el.innerHTML = '\x3Cdiv class="w-9 h-9 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center flex-shrink-0">\x3Csvg class="w-5 h-5 text-amber-600 dark:text-amber-400" fill="currentColor" viewBox="0 0 20 20">\x3Cpath d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"/>\x3C/svg>\x3C/div>\x3Cdiv class="flex-1 min-w-0">\x3Cp class="text-sm font-medium text-gray-900 dark:text-white truncate">' + safeName + '\x3C/p>\x3Cp class="text-xs text-gray-500 dark:text-gray-400">Папка \x3Cspan class="mx-1">\x26middot;\x3C/span> ' + dateStr + '\x3C/p>\x3C/div>';
+    el.innerHTML = '\x3Cdiv class="w-9 h-9 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center flex-shrink-0">\x3Csvg class="w-5 h-5 text-amber-600 dark:text-amber-400" fill="currentColor" viewBox="0 0 20 20">\x3Cpath d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"/>\x3C/svg>\x3C/div>\x3Cdiv class="flex-1 min-w-0">\x3Cp class="text-sm font-medium text-gray-900 dark:text-white truncate">' + safeName + '\x3C/p>\x3Cp class="text-xs text-gray-500 dark:text-gray-400">' + @js(__('app.folder_label')) + ' \x3Cspan class="mx-1">\x26middot;\x3C/span> ' + dateStr + '\x3C/p>\x3C/div>';
     list.prepend(el);
-    if (window.showGlobalToast) showGlobalToast('Папку створено', 'success');
+    if (window.showGlobalToast) showGlobalToast(@js(__('app.folder_created')), 'success');
 }
 
 function _addMinistryResourceFile(list, fileName) {
@@ -4121,7 +4121,7 @@ function docExecBlock(tag) { if (!tag) return; document.execCommand('formatBlock
 function docExecFontSize(size) { if (!size) return; document.execCommand('fontSize', false, size); document.getElementById('doc-editable')?.focus(); }
 function docExecColor(cmd, val) { document.execCommand(cmd, false, val); document.getElementById('doc-editable')?.focus(); }
 function docInsertLink() {
-    const url = prompt('URL посилання:', 'https://');
+    const url = prompt(@js(__('app.link_url_prompt')), 'https://');
     if (url) document.execCommand('createLink', false, url);
     document.getElementById('doc-editable')?.focus();
 }
@@ -4192,15 +4192,15 @@ function resourcesManager() {
                 });
                 if (response.ok) {
                     this.showRename = false;
-                    showToast('success', 'Перейменовано!');
+                    showToast('success', @js(__('app.renamed_success')));
                     const row = this.$el.querySelector(`[data-resource-id="${this.selectedId}"] .text-sm.font-medium`);
                     if (row) row.textContent = this.renameName;
                 } else {
                     const err = await response.json().catch(() => ({}));
-                    alert(err.message || 'Помилка перейменування');
+                    alert(err.message || @js(__('app.error_renaming')));
                 }
             } catch (error) {
-                alert('Помилка перейменування');
+                alert(@js(__('app.error_renaming')));
             }
         },
 
@@ -4227,10 +4227,10 @@ function resourcesManager() {
                     });
                     if (!response.ok) {
                         const data = await response.json().catch(() => ({}));
-                        this.uploadError = data.message || 'Помилка завантаження';
+                        this.uploadError = data.message || @js(__('app.error_uploading'));
                     }
                 } catch (error) {
-                    this.uploadError = 'Помилка завантаження';
+                    this.uploadError = @js(__('app.error_uploading'));
                 }
             }
 
@@ -4241,7 +4241,7 @@ function resourcesManager() {
                 for (var i = 0; i < files.length; i++) {
                     _addMinistryResourceFile(list, files[i].name);
                 }
-                if (window.showGlobalToast) showGlobalToast('Файл завантажено', 'success');
+                if (window.showGlobalToast) showGlobalToast(@js(__('app.file_uploaded')), 'success');
             }
         },
 
@@ -4264,7 +4264,7 @@ function resourcesManager() {
                         'Accept': 'application/json'
                     },
                     body: JSON.stringify({
-                        name: 'Новий документ',
+                        name: @js(__('app.new_document')),
                         parent_id: '{{ $currentFolder?->id ?? "" }}' || null
                     })
                 });
@@ -4272,13 +4272,13 @@ function resourcesManager() {
                 if (response.ok) {
                     const data = await response.json().catch(() => ({}));
                     this._docCreated = true;
-                    this.openDocument({ id: data.id, name: 'Новий документ', content: '' });
+                    this.openDocument({ id: data.id, name: @js(__('app.new_document')), content: '' });
                 } else {
                     const err = await response.json().catch(() => ({}));
-                    alert(err.message || 'Помилка');
+                    alert(err.message || @js(__('app.error_generic')));
                 }
             } catch (error) {
-                alert('Помилка створення документа');
+                alert(@js(__('app.error_creating_document')));
             }
         },
 
@@ -4328,10 +4328,10 @@ function resourcesManager() {
                     this.docSaved = true;
                     setTimeout(() => this.docSaved = false, 3000);
                 } else {
-                    alert('Помилка збереження');
+                    alert(@js(__('app.error_saving')));
                 }
             } catch (error) {
-                alert('Помилка збереження');
+                alert(@js(__('app.error_saving')));
             } finally {
                 this.docSaving = false;
             }
@@ -4368,7 +4368,7 @@ function resourcesManager() {
                 </div>
                 <div class="flex-1 min-w-0">
                     <p class="text-sm font-medium text-gray-900 dark:text-white truncate">${name}</p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Документ <span class="mx-1">&middot;</span> ${dd}.${mm}.${yyyy}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">${@js(__('app.document_label'))} <span class="mx-1">&middot;</span> ${dd}.${mm}.${yyyy}</p>
                 </div>`;
             list.prepend(el);
         }
@@ -4756,11 +4756,11 @@ function songsLibrary() {
                     }
                 } else {
                     const err = await response.json().catch(() => ({}));
-                    alert(err.message || 'Помилка збереження');
+                    alert(err.message || @js(__('app.error_saving')));
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('Помилка збереження');
+                alert(@js(__('app.error_saving')));
             } finally {
                 this.saving = false;
             }
@@ -4785,7 +4785,7 @@ function songsLibrary() {
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('Помилка видалення');
+                alert(@js(__('app.error_deleting')));
             }
         },
 
@@ -4838,29 +4838,26 @@ function songsLibrary() {
 function ministryRolesManager() {
     return {
         roles: [],
-        defaultRoles: {!! $ministry->is_worship_ministry ? "
-            [
-                {name: 'Ведучий вокал', color: '#dc2626'},
-                {name: 'Бек-вокал', color: '#f97316'},
-                {name: 'Акустична гітара', color: '#84cc16'},
-                {name: 'Електрогітара', color: '#22c55e'},
-                {name: 'Бас', color: '#14b8a6'},
-                {name: 'Барабани', color: '#06b6d4'},
-                {name: 'Клавіші', color: '#8b5cf6'},
-                {name: 'Звук', color: '#3b82f6'},
-                {name: 'Медіа', color: '#6366f1'},
-            ]" : "
-            [
-                {name: 'Камера 1', color: '#dc2626'},
-                {name: 'Камера 2', color: '#f97316'},
-                {name: 'Звук', color: '#3b82f6'},
-                {name: 'Стрім', color: '#8b5cf6'},
-                {name: 'Презентація', color: '#22c55e'},
-                {name: 'Бариста', color: '#92400e'},
-                {name: 'Привітання', color: '#ec4899'},
-                {name: 'Ведучий', color: '#14b8a6'},
-            ]"
-        !!},
+        defaultRoles: @json($ministry->is_worship_ministry ? [
+            ['name' => __('app.role_lead_vocal'), 'color' => '#dc2626'],
+            ['name' => __('app.role_backing_vocal'), 'color' => '#f97316'],
+            ['name' => __('app.role_acoustic_guitar'), 'color' => '#84cc16'],
+            ['name' => __('app.role_electric_guitar'), 'color' => '#22c55e'],
+            ['name' => __('app.role_bass'), 'color' => '#14b8a6'],
+            ['name' => __('app.role_drums'), 'color' => '#06b6d4'],
+            ['name' => __('app.role_keys'), 'color' => '#8b5cf6'],
+            ['name' => __('app.role_sound'), 'color' => '#3b82f6'],
+            ['name' => __('app.role_media'), 'color' => '#6366f1'],
+        ] : [
+            ['name' => __('app.role_camera1'), 'color' => '#dc2626'],
+            ['name' => __('app.role_camera2'), 'color' => '#f97316'],
+            ['name' => __('app.role_sound'), 'color' => '#3b82f6'],
+            ['name' => __('app.role_stream'), 'color' => '#8b5cf6'],
+            ['name' => __('app.role_presentation'), 'color' => '#22c55e'],
+            ['name' => __('app.role_barista'), 'color' => '#92400e'],
+            ['name' => __('app.role_greeting'), 'color' => '#ec4899'],
+            ['name' => __('app.role_host'), 'color' => '#14b8a6'],
+        ]),
         storeUrl: '',
         baseUrl: '',
         newName: '',
@@ -4906,7 +4903,7 @@ function ministryRolesManager() {
                     this.newColor = '#3b82f6';
                 }
             } catch (e) {
-                alert('Помилка додавання');
+                alert(@js(__('app.error_adding')));
             }
 
             this.loading = false;
@@ -4947,7 +4944,7 @@ function ministryRolesManager() {
                     this.showEditModal = false;
                 }
             } catch (e) {
-                alert('Помилка оновлення');
+                alert(@js(__('app.error_updating')));
             }
 
             this.loading = false;
@@ -4970,7 +4967,7 @@ function ministryRolesManager() {
                     this.roles = this.roles.filter(r => r.id !== id);
                 }
             } catch (e) {
-                alert('Помилка видалення');
+                alert(@js(__('app.error_deleting')));
             }
 
             this.loading = false;
@@ -5034,7 +5031,7 @@ function budgetPage() {
         currentMonth: {{ $budgetData['month'] }},
         currentYear: {{ $budgetData['year'] }},
         ministryId: {{ $ministry->id }},
-        monthNames: ['', 'Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень', 'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'],
+        monthNames: @json(['', __('app.month_january'), __('app.month_february'), __('app.month_march'), __('app.month_april'), __('app.month_may'), __('app.month_june'), __('app.month_july'), __('app.month_august'), __('app.month_september'), __('app.month_october'), __('app.month_november'), __('app.month_december')]),
 
         // Budget data (loaded via AJAX)
         budget: {
@@ -5301,10 +5298,10 @@ function budgetPage() {
                     const msgs = data.errors ? Object.values(data.errors).flat() : [data.message];
                     if (typeof showToast === 'function') showToast('error', msgs[0]);
                 } else {
-                    if (typeof showToast === 'function') showToast('error', data.message || 'Помилка');
+                    if (typeof showToast === 'function') showToast('error', data.message || @js(__('app.error_generic')));
                 }
             } catch (e) {
-                if (typeof showToast === 'function') showToast('error', 'Помилка збереження');
+                if (typeof showToast === 'function') showToast('error', @js(__('app.error_saving')));
             } finally {
                 this.itemSaving = false;
             }
@@ -5327,7 +5324,7 @@ function budgetPage() {
                     await this.loadBudget();
                 }
             } catch (e) {
-                if (typeof showToast === 'function') showToast('error', 'Помилка видалення');
+                if (typeof showToast === 'function') showToast('error', @js(__('app.error_deleting')));
             }
         },
 
@@ -5337,7 +5334,7 @@ function budgetPage() {
             let toYear = this.currentYear;
             if (toMonth > 12) { toMonth = 1; toYear++; }
 
-            if (!await confirmDialog(`Копіювати бюджет на ${this.monthNames[toMonth]} ${toYear}?`)) return;
+            if (!await confirmDialog(@js(__('app.copy_budget_confirm_prefix')) + this.monthNames[toMonth] + ' ' + toYear + '?')) return;
 
             try {
                 const res = await fetch(`/ministries/${this.ministryId}/budget-copy`, {
@@ -5362,10 +5359,10 @@ function budgetPage() {
                     this.currentYear = toYear;
                     await this.loadBudget();
                 } else {
-                    if (typeof showToast === 'function') showToast('error', data.message || 'Помилка копіювання');
+                    if (typeof showToast === 'function') showToast('error', data.message || @js(__('app.error_copying')));
                 }
             } catch (e) {
-                if (typeof showToast === 'function') showToast('error', 'Помилка копіювання');
+                if (typeof showToast === 'function') showToast('error', @js(__('app.error_copying')));
             }
         },
 
@@ -5378,12 +5375,12 @@ function budgetPage() {
             if (mode === 'create') {
                 const overallReceived = this.budget.overall_received || 0;
                 if (overallReceived <= 0) {
-                    if (typeof showToast === 'function') showToast('warning', 'Бюджет не виділено. Спочатку церква має виділити кошти для служіння.');
+                    if (typeof showToast === 'function') showToast('warning', @js(__('app.no_budget_allocated')));
                     return;
                 }
                 const overallBalance = this.budget.overall_balance || 0;
                 if (overallBalance <= 0) {
-                    if (!await confirmDialog('Загальний баланс: ' + this.fmt(overallBalance) + ' ₴. Кошти вичерпано. Все одно додати витрату?')) {
+                    if (!await confirmDialog(@js(__('app.balance_exhausted_prefix')) + this.fmt(overallBalance) + @js(__('app.balance_exhausted_suffix')))) {
                         return;
                     }
                 }
@@ -5420,7 +5417,7 @@ function budgetPage() {
                         this.existingAttachments = t.attachments || [];
                     }
                 } catch (e) {
-                    if (typeof showToast === 'function') showToast('error', 'Помилка завантаження даних');
+                    if (typeof showToast === 'function') showToast('error', @js(__('app.error_loading_data')));
                     return;
                 }
             } else {
@@ -5523,11 +5520,11 @@ function budgetPage() {
                     const msgs = data.errors ? Object.values(data.errors).flat() : [data.message];
                     if (typeof showToast === 'function') showToast('error', msgs[0]);
                 } else {
-                    if (typeof showToast === 'function') showToast('error', data.message || 'Помилка');
+                    if (typeof showToast === 'function') showToast('error', data.message || @js(__('app.error_generic')));
                 }
             } catch (e) {
                 console.error('Expense save error:', e);
-                if (typeof showToast === 'function') showToast('error', 'Помилка збереження');
+                if (typeof showToast === 'function') showToast('error', @js(__('app.error_saving')));
             } finally {
                 this.expenseSaving = false;
             }
@@ -5550,7 +5547,7 @@ function budgetPage() {
                     await this.loadBudget();
                 }
             } catch (e) {
-                if (typeof showToast === 'function') showToast('error', 'Помилка видалення');
+                if (typeof showToast === 'function') showToast('error', @js(__('app.error_deleting')));
             }
         },
 
@@ -5591,10 +5588,10 @@ function budgetPage() {
                     const msgs = data.errors ? Object.values(data.errors).flat() : [data.message];
                     if (typeof showToast === 'function') showToast('error', msgs[0]);
                 } else {
-                    if (typeof showToast === 'function') showToast('error', data.message || 'Помилка');
+                    if (typeof showToast === 'function') showToast('error', data.message || @js(__('app.error_generic')));
                 }
             } catch (e) {
-                if (typeof showToast === 'function') showToast('error', 'Помилка збереження');
+                if (typeof showToast === 'function') showToast('error', @js(__('app.error_saving')));
             } finally {
                 this.incomeSaving = false;
             }
@@ -5617,7 +5614,7 @@ function budgetPage() {
                     await this.loadBudget();
                 }
             } catch (e) {
-                if (typeof showToast === 'function') showToast('error', 'Помилка видалення');
+                if (typeof showToast === 'function') showToast('error', @js(__('app.error_deleting')));
             }
         },
     }

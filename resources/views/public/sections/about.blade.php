@@ -4,8 +4,8 @@
 <section class="py-16 bg-white">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
-            <h2 class="text-3xl font-bold text-gray-900">Про нас</h2>
-            <p class="text-gray-600 mt-2">Дізнайтесь більше про нашу церкву</p>
+            <h2 class="text-3xl font-bold text-gray-900">{{ __('app.public_about_title') }}</h2>
+            <p class="text-gray-600 mt-2">{{ __('app.public_about_subtitle') }}</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -16,7 +16,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                     </svg>
                 </div>
-                <h3 class="font-semibold text-gray-900 text-lg mb-2">Місія</h3>
+                <h3 class="font-semibold text-gray-900 text-lg mb-2">{{ __('app.public_about_mission') }}</h3>
                 <p class="text-gray-600 leading-relaxed">{{ $aboutContent['mission'] }}</p>
             </div>
             @endif
@@ -29,7 +29,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                     </svg>
                 </div>
-                <h3 class="font-semibold text-gray-900 text-lg mb-2">Візія</h3>
+                <h3 class="font-semibold text-gray-900 text-lg mb-2">{{ __('app.public_about_vision') }}</h3>
                 <p class="text-gray-600 leading-relaxed">{{ $aboutContent['vision'] }}</p>
             </div>
             @endif
@@ -41,7 +41,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
                     </svg>
                 </div>
-                <h3 class="font-semibold text-gray-900 text-lg mb-2">Цінності</h3>
+                <h3 class="font-semibold text-gray-900 text-lg mb-2">{{ __('app.public_about_values') }}</h3>
                 <ul class="text-gray-600 space-y-1">
                     @foreach((array)$aboutContent['values'] as $value)
                         <li>{{ $value }}</li>
@@ -53,7 +53,7 @@
 
         @if($aboutContent['history'] ?? null)
         <div class="mt-12 max-w-3xl mx-auto text-center">
-            <h3 class="font-semibold text-gray-900 text-lg mb-4">Наша історія</h3>
+            <h3 class="font-semibold text-gray-900 text-lg mb-4">{{ __('app.public_about_history') }}</h3>
             <p class="text-gray-600 leading-relaxed">{{ $aboutContent['history'] }}</p>
         </div>
         @endif
@@ -63,8 +63,8 @@
 <section class="py-16 bg-white opacity-60">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-8">
-            <h2 class="text-3xl font-bold text-gray-900">Про нас</h2>
-            <p class="text-sm text-amber-600 mt-2">Заповніть інформацію про церкву через Конструктор сайту</p>
+            <h2 class="text-3xl font-bold text-gray-900">{{ __('app.public_about_title') }}</h2>
+            <p class="text-sm text-amber-600 mt-2">{{ __('app.public_about_admin_hint') }}</p>
         </div>
     </div>
 </section>

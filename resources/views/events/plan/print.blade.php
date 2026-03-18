@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>План події - {{ $event->title }} - {{ $event->date->format('d.m.Y') }}</title>
+    <title>{{ __('app.print_event_plan') }} - {{ $event->title }} - {{ $event->date->format('d.m.Y') }}</title>
     <style>
         * {
             margin: 0;
@@ -221,14 +221,14 @@
 </head>
 <body>
     <div class="no-print">
-        <button class="print-btn" onclick="window.print()">Друкувати</button>
+        <button class="print-btn" onclick="window.print()">{{ __('app.print_btn') }}</button>
     </div>
 
     <div class="header">
         <div class="church-name">{{ $event->church->name }}</div>
         <div class="event-title">{{ $event->title }}</div>
         <div class="event-date">{{ $event->date->translatedFormat('l, d F Y') }}</div>
-        <div class="event-time">@if($event->time)Початок: {{ $event->time->format('H:i') }}@endif</div>
+        <div class="event-time">@if($event->time){{ __('app.print_start_time') }} {{ $event->time->format('H:i') }}@endif</div>
     </div>
 
     @php
@@ -275,7 +275,7 @@
 
                     @if($item->responsible_display)
                         <div class="item-responsible">
-                            <strong>Відповідальний:</strong> {{ $item->responsible_display }}
+                            <strong>{{ __('app.print_responsible') }}</strong> {{ $item->responsible_display }}
                         </div>
                     @endif
 
@@ -289,11 +289,11 @@
 
     @if($event->assignments->isNotEmpty())
         <div class="assignments-section">
-            <div class="section-title">Команда події</div>
+            <div class="section-title">{{ __('app.print_event_team') }}</div>
             <div class="assignments-grid">
                 @foreach($event->assignments as $assignment)
                     <div class="assignment-item">
-                        <span class="assignment-position">{{ $assignment->position?->name ?? 'Позиція' }}:</span>
+                        <span class="assignment-position">{{ $assignment->position?->name ?? __('app.print_position') }}:</span>
                         <span class="assignment-name">{{ $assignment->person?->full_name ?? '—' }}</span>
                     </div>
                 @endforeach
@@ -302,7 +302,7 @@
     @endif
 
     <div class="footer">
-        Сформовано: {{ now()->format('d.m.Y H:i') }}@if($event->ministry) | {{ $event->ministry->name }}@endif | {{ $event->church->name }}
+        {{ __('app.print_generated') }} {{ now()->format('d.m.Y H:i') }}@if($event->ministry) | {{ $event->ministry->name }}@endif | {{ $event->church->name }}
     </div>
 </body>
 </html>

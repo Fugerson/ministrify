@@ -146,7 +146,7 @@
                                 </button>
                                 @endif
                                 <button @click="changeWidth('{{ $widget['id'] }}', 12)" class="w-7 h-7 rounded-md text-xs font-bold transition-colors" :class="getWidgetCols('{{ $widget['id'] }}') === 12 ? 'bg-primary-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-500 border border-gray-200 dark:border-gray-700 hover:bg-gray-50'" title=@js( __('app.full_width') )>
-                                    <span class="text-[10px]">Full</span>
+                                    <span class="text-[10px]">{{ __('app.full_width_short') }}</span>
                                 </button>
 
                                 {{-- Remove Button --}}

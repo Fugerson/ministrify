@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Імпорт CSV')
+@section('title', __('app.csv_import_title'))
 
 @section('content')
 <div class="max-w-6xl mx-auto" x-data="migrationWizard()">
@@ -12,17 +12,17 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                 </svg>
             </a>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Імпорт CSV</h1>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('app.csv_import_title') }}</h1>
         </div>
         <p class="text-gray-600 dark:text-gray-400">
-            Імпортуйте дані про людей з CSV файлу у Ministrify
+            {{ __('app.csv_import_subtitle') }}
         </p>
     </div>
 
     <!-- Steps Indicator -->
     <div class="mb-8">
         <div class="flex items-center justify-between">
-            <template x-for="(stepName, index) in ['Завантаження', 'Мапінг полів', 'Імпорт']" :key="index">
+            <template x-for="(stepName, index) in [@js(__('app.csv_step_upload')), @js(__('app.csv_step_mapping')), @js(__('app.csv_step_import'))]" :key="index">
                 <div class="flex items-center">
                     <div class="flex items-center justify-center w-10 h-10 rounded-full transition-colors"
                          :class="step > index + 1 ? 'bg-green-500 text-white' :
@@ -49,7 +49,7 @@
 
     <!-- Step 1: File Upload -->
     <div x-show="step === 1" x-cloak class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Завантажте CSV файл</h2>
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.csv_upload_file') }}</h2>
 
         @if($existingCount > 0)
         <div class="mb-6 p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-700">
@@ -58,9 +58,9 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                 </svg>
                 <div>
-                    <p class="font-medium text-amber-800 dark:text-amber-200">У вас вже є {{ $existingCount }} людей</p>
+                    <p class="font-medium text-amber-800 dark:text-amber-200">{{ __('app.csv_existing_people', ['count' => $existingCount]) }}</p>
                     <p class="text-sm text-amber-700 dark:text-amber-300 mt-1">
-                        Ви можете очистити існуючі дані перед імпортом або імпортувати поверх них (дублікати буде оновлено).
+                        {{ __('app.csv_existing_people_hint') }}
                     </p>
                 </div>
             </div>
@@ -72,7 +72,7 @@
                 <input type="checkbox" x-model="clearExisting"
                        class="w-5 h-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
                 <span class="text-gray-700 dark:text-gray-300">
-                    Очистити всі існуючі дані перед імпортом
+                    {{ __('app.csv_clear_existing') }}
                 </span>
             </label>
 
@@ -83,14 +83,14 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                     </svg>
                     <div class="flex-1">
-                        <p class="font-bold text-red-800 dark:text-red-200">УВАГА! Це видалить ВСІ існуючі дані!</p>
+                        <p class="font-bold text-red-800 dark:text-red-200">{{ __('app.csv_delete_warning') }}</p>
                         <p class="text-sm text-red-700 dark:text-red-300 mt-1 mb-3">
-                            Ви втратите <strong>{{ $existingCount }}</strong> людей без можливості відновлення.
+                            {!! __('app.csv_delete_count', ['count' => '<strong>' . $existingCount . '</strong>']) !!}
                         </p>
                         <label class="block">
-                            <span class="text-sm text-red-700 dark:text-red-300">Для підтвердження введіть <strong>DELETE</strong>:</span>
+                            <span class="text-sm text-red-700 dark:text-red-300">{!! __('app.csv_confirm_delete_prompt') !!}</span>
                             <input type="text" x-model="confirmDelete"
-                                   placeholder="Введіть DELETE"
+                                   placeholder="{{ __('app.csv_type_delete') }}"
                                    @keydown.stop
                                    @keyup.stop
                                    class="mt-1 block w-48 rounded-lg border-red-300 dark:border-red-600 dark:bg-red-900/30 text-red-800 dark:text-red-200 text-sm focus:ring-red-500 focus:border-red-500">
@@ -113,17 +113,17 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
                     </svg>
                     <p class="text-gray-600 dark:text-gray-400 mb-2">
-                        Перетягніть CSV файл сюди або
+                        {{ __('app.csv_drag_or') }}
                     </p>
                     <label class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg cursor-pointer hover:bg-indigo-700 transition-colors">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
                         </svg>
-                        Виберіть файл
+                        {{ __('app.csv_choose_file') }}
                         <input type="file" accept=".csv,.txt" class="hidden" @change="handleFileSelect($event)">
                     </label>
                     <p class="text-sm text-gray-500 dark:text-gray-400 mt-4">
-                        Підтримуються CSV файли з будь-якої системи
+                        {{ __('app.csv_any_system') }}
                     </p>
                 </div>
             </template>
@@ -148,12 +148,12 @@
 
         <!-- CSV Format Info -->
         <div class="mt-6 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-            <h3 class="font-medium text-gray-900 dark:text-white mb-2">Формат CSV файлу:</h3>
+            <h3 class="font-medium text-gray-900 dark:text-white mb-2">{{ __('app.csv_format_title') }}</h3>
             <ul class="text-sm text-gray-600 dark:text-gray-400 space-y-1 list-disc list-inside">
-                <li>Перший рядок повинен містити назви колонок</li>
-                <li>Обов'язкова колонка: Ім'я (first_name, name, ім'я)</li>
-                <li>Опціональні: прізвище, email, телефон, дата народження, адреса</li>
-                <li>Підтримується експорт з Excel, Google Sheets, Planning Center тощо</li>
+                <li>{{ __('app.csv_format_header') }}</li>
+                <li>{{ __('app.csv_format_required') }}</li>
+                <li>{{ __('app.csv_format_optional') }}</li>
+                <li>{{ __('app.csv_format_sources') }}</li>
             </ul>
         </div>
 
@@ -167,7 +167,7 @@
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
                 </template>
-                <span x-text="loading ? 'Обробка...' : 'Далі'"></span>
+                <span x-text="loading ? @js(__('app.csv_processing')) : @js(__('app.csv_next'))"></span>
                 <svg x-show="!loading" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                 </svg>
@@ -177,22 +177,22 @@
 
     <!-- Step 2: Column Mapping -->
     <div x-show="step === 2" x-cloak class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Мапінг полів</h2>
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">{{ __('app.csv_step_mapping') }}</h2>
         <p class="text-gray-600 dark:text-gray-400 mb-6">
-            Вкажіть відповідність між колонками CSV та полями Ministrify. Знайдено <span class="font-medium text-indigo-600" x-text="totalRows"></span> записів.
+            {{ __('app.csv_mapping_hint') }} <span class="font-medium text-indigo-600" x-text="totalRows"></span> {{ __('app.csv_records_found') }}.
         </p>
 
         <div class="grid md:grid-cols-2 gap-6 mb-6">
             <!-- Ministrify Fields -->
             <div class="space-y-4">
-                <h3 class="font-medium text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">Поля Ministrify</h3>
+                <h3 class="font-medium text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">{{ __('app.csv_ministrify_fields') }}</h3>
 
                 <template x-for="(field, key) in churchHubFields" :key="key">
                     <div class="flex items-center gap-4">
                         <label class="w-32 text-sm text-gray-700 dark:text-gray-300" x-text="field.label"></label>
                         <select x-model="mappings[key]"
                                 class="flex-1 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-sm focus:ring-indigo-500 focus:border-indigo-500">
-                            <option value="">-- Не імпортувати --</option>
+                            <option value="">-- {{ __('app.csv_skip_field') }} --</option>
                             <template x-for="header in headers" :key="header">
                                 <option :value="header" x-text="header"></option>
                             </template>
@@ -204,7 +204,7 @@
 
             <!-- Preview Table -->
             <div class="overflow-hidden">
-                <h3 class="font-medium text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2 mb-4">Попередній перегляд</h3>
+                <h3 class="font-medium text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2 mb-4">{{ __('app.csv_preview') }}</h3>
                 <div class="overflow-x-auto max-h-96 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-lg">
                     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700 text-sm">
                         <thead class="bg-gray-50 dark:bg-gray-700 sticky top-0">
@@ -234,7 +234,7 @@
         <div class="flex justify-between">
             <button @click="step = 1"
                     class="px-6 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                Назад
+                {{ __('app.csv_back') }}
             </button>
             <button @click="startImport()"
                     :disabled="!mappings.first_name || loading"
@@ -245,7 +245,7 @@
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
                 </template>
-                <span x-text="loading ? 'Імпортування...' : 'Імпортувати ' + totalRows + ' записів'"></span>
+                <span x-text="loading ? @js(__('app.csv_importing')) : @js(__('app.csv_import_btn')) + ' ' + totalRows + ' ' + @js(__('app.csv_records'))"></span>
             </button>
         </div>
     </div>
@@ -259,17 +259,17 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                     </svg>
                 </div>
-                <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Імпорт завершено!</h2>
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">{{ __('app.csv_import_complete') }}</h2>
                 <p class="text-gray-600 dark:text-gray-400 mb-6">
-                    Успішно імпортовано <span class="font-bold text-indigo-600" x-text="importResult.imported"></span> людей.
+                    {{ __('app.csv_imported_count') }} <span class="font-bold text-indigo-600" x-text="importResult.imported"></span>.
                     <span x-show="importResult.skipped > 0" class="text-amber-600">
-                        Пропущено: <span x-text="importResult.skipped"></span>
+                        {{ __('app.csv_skipped') }}: <span x-text="importResult.skipped"></span>
                     </span>
                 </p>
 
                 <template x-if="importResult.errors && importResult.errors.length > 0">
                     <div class="mb-6 p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg text-left max-w-md mx-auto">
-                        <h4 class="font-medium text-amber-800 dark:text-amber-200 mb-2">Попередження:</h4>
+                        <h4 class="font-medium text-amber-800 dark:text-amber-200 mb-2">{{ __('app.csv_warnings') }}</h4>
                         <ul class="text-sm text-amber-700 dark:text-amber-300 space-y-1">
                             <template x-for="error in importResult.errors" :key="error">
                                 <li x-text="error"></li>
@@ -280,7 +280,7 @@
 
                 <a href="{{ route('people.index') }}"
                    class="inline-flex items-center px-6 py-2.5 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors">
-                    Перейти до списку людей
+                    {{ __('app.csv_go_to_people') }}
                     <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                     </svg>
@@ -295,11 +295,11 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
                 </div>
-                <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Помилка імпорту</h2>
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">{{ __('app.csv_import_error') }}</h2>
                 <p class="text-red-600 dark:text-red-400 mb-6" x-text="importResult.error"></p>
                 <button @click="step = 1; file = null; importResult = {}"
                         class="px-6 py-2.5 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors">
-                    Спробувати знову
+                    {{ __('app.csv_try_again') }}
                 </button>
             </div>
         </template>
@@ -351,17 +351,17 @@ function migrationWizard() {
         },
 
         churchHubFields: {
-            first_name: { label: "Ім'я", required: true },
-            last_name: { label: 'Прізвище', required: false },
+            first_name: { label: @js(__('app.first_name')), required: true },
+            last_name: { label: @js(__('app.last_name')), required: false },
             email: { label: 'Email', required: false },
-            phone: { label: 'Телефон', required: false },
-            birth_date: { label: 'Дата народження', required: false },
-            anniversary: { label: 'Річниця весілля', required: false },
-            address: { label: 'Адреса', required: false },
-            city: { label: 'Місто', required: false },
-            gender: { label: 'Стать', required: false },
-            marital_status: { label: 'Сімейний стан', required: false },
-            notes: { label: 'Примітки', required: false },
+            phone: { label: @js(__('app.phone')), required: false },
+            birth_date: { label: @js(__('app.date_of_birth')), required: false },
+            anniversary: { label: @js(__('app.csv_anniversary')), required: false },
+            address: { label: @js(__('app.address')), required: false },
+            city: { label: @js(__('app.csv_city')), required: false },
+            gender: { label: @js(__('app.gender')), required: false },
+            marital_status: { label: @js(__('app.marital_status')), required: false },
+            notes: { label: @js(__('app.notes')), required: false },
         },
 
         importResult: {},
@@ -419,10 +419,10 @@ function migrationWizard() {
 
                     this.step = 2;
                 } else {
-                    this.errorMessage = data.error || 'Помилка обробки файлу';
+                    this.errorMessage = data.error || @js(__('app.csv_file_error'));
                 }
             } catch (error) {
-                this.errorMessage = 'Помилка з\'єднання з сервером';
+                this.errorMessage = @js(__('app.csv_connection_error'));
                 console.error(error);
             } finally {
                 this.loading = false;
@@ -431,13 +431,13 @@ function migrationWizard() {
 
         async startImport() {
             if (!this.mappings.first_name) {
-                this.errorMessage = "Поле 'Ім'я' є обов'язковим для мапінгу";
+                this.errorMessage = @js(__('app.csv_name_required'));
                 return;
             }
 
             // Safety check: require DELETE confirmation for mass delete
             if (this.clearExisting && this.confirmDelete !== 'DELETE') {
-                this.errorMessage = "Для видалення існуючих даних введіть 'DELETE'";
+                this.errorMessage = @js(__('app.csv_type_delete_confirm'));
                 return;
             }
 
@@ -466,7 +466,7 @@ function migrationWizard() {
                 this.importResult = data;
                 this.step = 3;
             } catch (error) {
-                this.errorMessage = 'Помилка з\'єднання з сервером';
+                this.errorMessage = @js(__('app.csv_connection_error'));
                 console.error(error);
             } finally {
                 this.loading = false;

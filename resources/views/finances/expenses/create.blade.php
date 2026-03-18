@@ -265,11 +265,11 @@ function expenseCreateForm() {
                 if (this.previews.length >= 10) break;
                 const isHeic = file.name.match(/\.heic$/i) || file.name.match(/\.heif$/i);
                 if (!file.type.match('image.*') && file.type !== 'application/pdf' && !isHeic) {
-                    showToast('error', 'Непідтримуваний формат: ' + file.name + '. Дозволено: JPG, PNG, HEIC, PDF');
+                    showToast('error', @js(__('app.unsupported_format_detail', ['name' => '__NAME__'])).replace('__NAME__', file.name));
                     continue;
                 }
                 if (file.size > 10 * 1024 * 1024) {
-                    showToast('error', 'Файл занадто великий: ' + file.name + ' (' + (file.size / 1024 / 1024).toFixed(1) + ' МБ). Максимум 10 МБ.');
+                    showToast('error', @js(__('app.file_too_large_detail', ['name' => '__NAME__', 'size' => '__SIZE__'])).replace('__NAME__', file.name).replace('__SIZE__', (file.size / 1024 / 1024).toFixed(1)));
                     continue;
                 }
                 this.previews.push({
@@ -315,7 +315,7 @@ function expenseCreateForm() {
                 });
 
                 if (response.status === 413) {
-                    showToast('error', 'Файл занадто великий для завантаження. Максимум 10 МБ на файл.');
+                    showToast('error', @js(__('app.file_upload_too_large')));
                     this.saving = false;
                     return;
                 }

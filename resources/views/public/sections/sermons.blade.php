@@ -3,8 +3,8 @@
 <section class="py-16 bg-gray-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
-            <h2 class="text-3xl font-bold text-gray-900">Проповіді</h2>
-            <p class="text-gray-600 mt-2">Слово Боже для вашого життя</p>
+            <h2 class="text-3xl font-bold text-gray-900">{{ __('app.public_sermons_title') }}</h2>
+            <p class="text-gray-600 mt-2">{{ __('app.public_sermons_subtitle') }}</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -44,14 +44,14 @@
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
                                         </svg>
-                                        Дивитись
+                                        {{ __('app.public_sermons_watch') }}
                                     </a>
                                 @elseif($sermon->vimeo_url)
                                     <a href="{{ $sermon->vimeo_url }}" target="_blank" class="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-100 text-blue-700 rounded-lg text-sm hover:bg-blue-200 transition-colors">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
                                         </svg>
-                                        Дивитись
+                                        {{ __('app.public_sermons_watch') }}
                                     </a>
                                 @endif
                                 @if($sermon->podcast_url)
@@ -59,7 +59,7 @@
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/>
                                         </svg>
-                                        Слухати
+                                        {{ __('app.public_sermons_listen') }}
                                     </a>
                                 @endif
                             </div>
@@ -74,15 +74,15 @@
 <section class="py-16 bg-gray-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
-            <h2 class="text-3xl font-bold text-gray-900">Проповіді</h2>
-            <p class="text-gray-600 mt-2">Слово Боже для вашого життя</p>
+            <h2 class="text-3xl font-bold text-gray-900">{{ __('app.public_sermons_title') }}</h2>
+            <p class="text-gray-600 mt-2">{{ __('app.public_sermons_subtitle') }}</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             @foreach([
-                ['title' => 'Сила молитви', 'speaker' => 'Пастор', 'date' => now()->subDays(7)->translatedFormat('d F Y'), 'color' => 'from-primary-500 to-primary-700'],
-                ['title' => 'Віра, що рухає гори', 'speaker' => 'Пастор', 'date' => now()->subDays(14)->translatedFormat('d F Y'), 'color' => 'from-indigo-500 to-indigo-700'],
-                ['title' => 'Любов без умов', 'speaker' => 'Пастор', 'date' => now()->subDays(21)->translatedFormat('d F Y'), 'color' => 'from-purple-500 to-purple-700'],
+                ['title' => __('app.public_sermon_demo_1'), 'speaker' => __('app.public_sermon_demo_speaker'), 'date' => now()->subDays(7)->translatedFormat('d F Y'), 'color' => 'from-primary-500 to-primary-700'],
+                ['title' => __('app.public_sermon_demo_2'), 'speaker' => __('app.public_sermon_demo_speaker'), 'date' => now()->subDays(14)->translatedFormat('d F Y'), 'color' => 'from-indigo-500 to-indigo-700'],
+                ['title' => __('app.public_sermon_demo_3'), 'speaker' => __('app.public_sermon_demo_speaker'), 'date' => now()->subDays(21)->translatedFormat('d F Y'), 'color' => 'from-purple-500 to-purple-700'],
             ] as $sermon)
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow">
                     <div class="h-48 bg-gradient-to-br {{ $sermon['color'] }} flex items-center justify-center">

@@ -60,7 +60,7 @@
                                         @click="amount = {{ $preset }}; customAmount = false"
                                         :class="{ 'ring-2 ring-primary-500 border-primary-500 bg-primary-50': amount == {{ $preset }} && !customAmount }"
                                         class="py-3 px-4 border border-gray-300 rounded-xl text-center font-medium text-gray-700 hover:border-primary-400 transition-colors">
-                                    {{ $preset }} грн
+                                    {{ $preset }} {{ __('app.public_donate_currency') }}
                                 </button>
                             @endforeach
                         </div>
@@ -69,7 +69,7 @@
                                    :class="{ 'ring-2 ring-primary-500 border-primary-500': customAmount }"
                                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-lg"
                                    placeholder="{{ __('Інша сума') }}" min="1">
-                            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500">грн</span>
+                            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500">{{ __('app.public_donate_currency') }}</span>
                         </div>
                         @error('amount')
                             <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
@@ -124,14 +124,14 @@
                         <label class="flex items-center gap-3 cursor-pointer">
                             <input type="checkbox" name="is_anonymous" value="1"
                                    class="w-5 h-5 text-primary-600 border-gray-300 rounded focus:ring-primary-500">
-                            <span class="text-gray-700">Зробити пожертву анонімною</span>
+                            <span class="text-gray-700">{{ __('app.public_donate_anonymous') }}</span>
                         </label>
                     </div>
 
                     <!-- Payment method selection -->
                     @if(isset($paymentMethods) && ($paymentMethods['liqpay'] || $paymentMethods['monobank']))
                     <div class="mb-8">
-                        <label class="block text-sm font-medium text-gray-700 mb-3">Спосіб оплати</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-3">{{ __('app.public_donate_payment_method') }}</label>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             @if($paymentMethods['liqpay'])
                             <label class="relative flex items-center p-4 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-primary-400 transition-colors has-[:checked]:border-primary-500 has-[:checked]:bg-primary-50">
@@ -144,7 +144,7 @@
                                     </div>
                                     <div>
                                         <p class="font-medium text-gray-900">LiqPay</p>
-                                        <p class="text-xs text-gray-500">Картка Visa/Mastercard</p>
+                                        <p class="text-xs text-gray-500">{{ __('app.public_donate_liqpay_desc') }}</p>
                                     </div>
                                 </div>
                                 <div class="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 border-2 border-gray-300 rounded-full peer-checked:border-primary-500 peer-checked:bg-primary-500 peer-checked:after:content-[''] peer-checked:after:absolute peer-checked:after:inset-1 peer-checked:after:bg-white peer-checked:after:rounded-full"></div>
@@ -160,7 +160,7 @@
                                     </div>
                                     <div>
                                         <p class="font-medium text-gray-900">Monobank</p>
-                                        <p class="text-xs text-gray-500">Банка для збору</p>
+                                        <p class="text-xs text-gray-500">{{ __('app.public_donate_monobank_desc') }}</p>
                                     </div>
                                 </div>
                                 <div class="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 border-2 border-gray-300 rounded-full peer-checked:border-primary-500 peer-checked:bg-primary-500 peer-checked:after:content-[''] peer-checked:after:absolute peer-checked:after:inset-1 peer-checked:after:bg-white peer-checked:after:rounded-full"></div>
@@ -171,7 +171,7 @@
                     @else
                     <div class="mb-8 p-4 bg-amber-50 border border-amber-200 rounded-xl">
                         <p class="text-amber-800 text-sm">
-                            Онлайн-оплата наразі недоступна. Зверніться до адміністрації церкви.
+                            {{ __('app.public_donate_payment_unavailable') }}
                         </p>
                     </div>
                     @endif
@@ -180,16 +180,16 @@
                     @if(isset($paymentMethods) && ($paymentMethods['liqpay'] || $paymentMethods['monobank']))
                     <button type="submit" :disabled="submitting"
                             class="w-full py-4 bg-primary-600 hover:bg-primary-700 text-white text-lg font-semibold rounded-xl transition-colors shadow-lg hover:shadow-xl disabled:opacity-50">
-                        <span x-show="!submitting">Пожертвувати <span x-text="amount"></span> грн</span>
+                        <span x-show="!submitting">{{ __('app.public_donate_submit') }} <span x-text="amount"></span> {{ __('app.public_donate_currency') }}</span>
                         <span x-show="submitting" class="inline-flex items-center justify-center gap-2">
                             <svg class="animate-spin h-5 w-5" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
-                            Обробка...
+                            {{ __('app.public_donate_processing') }}
                         </span>
                     </button>
                     @endif
 
                     <p class="text-center text-sm text-gray-500 mt-4">
-                        Безпечна оплата. Ваші дані захищені.
+                        {{ __('app.public_donate_secure_notice') }}
                     </p>
                 </form>
             </div>
@@ -200,7 +200,7 @@
             <!-- Active campaigns -->
             @if($campaigns->count() > 0)
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                    <h3 class="font-semibold text-gray-900 mb-4">Активні збори</h3>
+                    <h3 class="font-semibold text-gray-900 mb-4">{{ __('app.public_donate_active_campaigns') }}</h3>
                     <div class="space-y-4">
                         @foreach($campaigns as $campaign)
                             <div class="p-4 bg-gray-50 rounded-xl">
@@ -208,7 +208,7 @@
                                 @if($campaign->goal_amount)
                                     <div class="mt-2">
                                         <div class="flex justify-between text-xs mb-1">
-                                            <span class="text-gray-500">{{ number_format($campaign->raised_amount, 0, ',', ' ') }} грн</span>
+                                            <span class="text-gray-500">{{ number_format($campaign->raised_amount, 0, ',', ' ') }} {{ __('app.public_donate_currency') }}</span>
                                             <span class="text-gray-900 font-medium">{{ $campaign->progress_percent }}%</span>
                                         </div>
                                         <div class="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
@@ -219,9 +219,9 @@
                                 @if($campaign->days_remaining !== null)
                                     <p class="text-xs text-gray-500 mt-2">
                                         @if($campaign->days_remaining > 0)
-                                            Залишилось {{ $campaign->days_remaining }} днів
+                                            {{ __('app.public_donate_days_remaining', ['days' => $campaign->days_remaining]) }}
                                         @else
-                                            Збір завершено
+                                            {{ __('app.public_donate_campaign_completed') }}
                                         @endif
                                     </p>
                                 @endif
@@ -233,44 +233,44 @@
 
             <!-- Info box -->
             <div class="bg-primary-50 rounded-2xl p-6">
-                <h3 class="font-semibold text-gray-900 mb-3">Як використовуються пожертви</h3>
+                <h3 class="font-semibold text-gray-900 mb-3">{{ __('app.public_donate_how_used') }}</h3>
                 <ul class="space-y-2 text-sm text-gray-600">
                     <li class="flex items-start gap-2">
                         <svg class="w-5 h-5 text-primary-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                         </svg>
-                        <span>Підтримка команд та програм</span>
+                        <span>{{ __('app.public_donate_use_teams') }}</span>
                     </li>
                     <li class="flex items-start gap-2">
                         <svg class="w-5 h-5 text-primary-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                         </svg>
-                        <span>Допомога нужденним</span>
+                        <span>{{ __('app.public_donate_use_needy') }}</span>
                     </li>
                     <li class="flex items-start gap-2">
                         <svg class="w-5 h-5 text-primary-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                         </svg>
-                        <span>Утримання приміщення</span>
+                        <span>{{ __('app.public_donate_use_building') }}</span>
                     </li>
                     <li class="flex items-start gap-2">
                         <svg class="w-5 h-5 text-primary-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                         </svg>
-                        <span>Місіонерська діяльність</span>
+                        <span>{{ __('app.public_donate_use_missions') }}</span>
                     </li>
                 </ul>
             </div>
 
             <!-- Contact -->
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                <h3 class="font-semibold text-gray-900 mb-3">Питання?</h3>
+                <h3 class="font-semibold text-gray-900 mb-3">{{ __('app.public_donate_questions') }}</h3>
                 <p class="text-sm text-gray-600 mb-4">
-                    Якщо у вас є питання щодо пожертвувань, зв'яжіться з нами.
+                    {{ __('app.public_donate_questions_text') }}
                 </p>
                 <a href="{{ route('public.contact', $church->slug) }}"
                    class="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 font-medium text-sm">
-                    Зв'язатися
+                    {{ __('app.public_donate_contact_us') }}
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                     </svg>

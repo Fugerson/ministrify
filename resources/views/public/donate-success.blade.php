@@ -1,6 +1,6 @@
 @extends('public.layout')
 
-@section('title', 'Дякуємо за пожертву - ' . $church->name)
+@section('title', __('app.donate_thanks') . ' - ' . $church->name)
 
 @section('content')
 <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-20">

@@ -23,7 +23,7 @@
             </div>
         </div>
         <div class="flex items-center gap-2">
-            <button @click="toggleFullscreen()" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors" title="Повноекранний режим">
+            <button @click="toggleFullscreen()" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors" title="{{ __('app.fullscreen_mode') }}">
                 <svg x-show="!isFullscreen" class="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
                 </svg>
@@ -41,15 +41,15 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19V6l12-3v13"/>
                 </svg>
             </div>
-            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Немає пісень</h3>
-            <p class="text-gray-500 dark:text-gray-400">Для цього служіння ще не додано пісні</p>
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">{{ __('app.no_songs') }}</h3>
+            <p class="text-gray-500 dark:text-gray-400">{{ __('app.no_songs_added_for_service') }}</p>
         </div>
     @else
         <!-- Song List -->
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
             <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                <h2 class="font-semibold text-gray-900 dark:text-white">Порядок пісень</h2>
-                <span class="text-sm text-gray-500 dark:text-gray-400">{{ $worshipItems->count() }} пісень</span>
+                <h2 class="font-semibold text-gray-900 dark:text-white">{{ __('app.song_order') }}</h2>
+                <span class="text-sm text-gray-500 dark:text-gray-400">{{ $worshipItems->count() }} {{ __('app.songs_count_label') }}</span>
             </div>
 
             <div class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -92,7 +92,7 @@
                         </svg>
                     </button>
                     <div class="text-center">
-                        <h2 class="font-semibold text-gray-900 dark:text-white" x-text="songs[currentSongIndex]?.title || 'Виберіть пісню'"></h2>
+                        <h2 class="font-semibold text-gray-900 dark:text-white" x-text="songs[currentSongIndex]?.title || selectSongLabel"></h2>
                         <p class="text-sm text-gray-500 dark:text-gray-400">
                             <span x-text="currentSongIndex + 1"></span> / <span x-text="songs.length"></span>
                         </p>
@@ -124,7 +124,7 @@
                     <!-- Key Transpose -->
                     <select x-model="transposeKey" @change="loadSongWithKey()"
                             class="px-3 py-1.5 bg-gray-100 dark:bg-gray-700 border-0 rounded-lg text-sm font-mono focus:ring-2 focus:ring-primary-500">
-                        <option value="">Оригінал</option>
+                        <option value="">{{ __('app.original_key') }}</option>
                         @foreach(\App\Models\Song::keyLabels() as $key => $label)
                             <option value="{{ $key }}">{{ $key }}</option>
                         @endforeach
@@ -164,11 +164,11 @@
                     </div>
 
                     <!-- Chords/Lyrics -->
-                    <div class="font-mono leading-loose whitespace-pre-wrap song-content" x-html="currentSong?.chordsHtml || currentSong?.lyrics || 'Текст не додано'"></div>
+                    <div class="font-mono leading-loose whitespace-pre-wrap song-content" x-html="currentSong?.chordsHtml || currentSong?.lyrics || noLyricsLabel"></div>
                 </div>
 
                 <div x-show="!loading && !currentSong" class="text-center py-12 text-gray-500 dark:text-gray-400">
-                    <p>Виберіть пісню зі списку вище</p>
+                    <p>{{ __('app.select_song_from_list') }}</p>
                 </div>
             </div>
         </div>
@@ -185,6 +185,8 @@
 function musicStand() {
     return {
         songs: @json($worshipItems->map(fn($item) => ['id' => $item->id, 'title' => $item->title, 'notes' => $item->notes])),
+        selectSongLabel: @js(__('app.select_song')),
+        noLyricsLabel: @js(__('app.no_lyrics')),
         currentSongIndex: 0,
         currentSong: null,
         transposeKey: '',

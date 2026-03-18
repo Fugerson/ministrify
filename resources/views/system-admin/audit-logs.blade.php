@@ -1,6 +1,6 @@
 @extends('layouts.system-admin')
 
-@section('title', 'Журнал дій')
+@section('title', __('app.audit_log_title'))
 
 @section('content')
 <div class="space-y-6">

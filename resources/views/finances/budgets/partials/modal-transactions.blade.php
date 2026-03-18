@@ -18,7 +18,7 @@
              @click.stop>
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                    Транзакції: <span x-text="transactionsItemName"></span>
+                    {{ __('app.budget_transactions_for', ['name' => '']) }}<span x-text="transactionsItemName"></span>
                 </h3>
                 <button @click="showTransactionsModal = false" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -36,7 +36,7 @@
                 </div>
 
                 <div x-show="!transactionsLoading && transactionsList.length === 0" class="text-center py-8 text-gray-500">
-                    Немає транзакцій
+                    {{ __('app.no_transactions_found') }}
                 </div>
 
                 <div x-show="!transactionsLoading && transactionsList.length > 0" class="space-y-3">
@@ -44,7 +44,7 @@
                         <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-3">
                             <div class="flex items-center justify-between">
                                 <div>
-                                    <div class="font-medium text-gray-900 dark:text-white" x-text="tx.description || 'Без опису'"></div>
+                                    <div class="font-medium text-gray-900 dark:text-white" x-text="tx.description || @js(__('app.no_description'))"></div>
                                     <div class="text-xs text-gray-500 dark:text-gray-400">
                                         <span x-text="tx.date"></span>
                                         <template x-if="tx.category">

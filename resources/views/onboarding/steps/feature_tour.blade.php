@@ -12,8 +12,8 @@
                 </svg>
             </div>
             <div>
-                <p class="text-[10px] font-bold uppercase tracking-wider text-primary-600 dark:text-primary-400 mb-0.5">КРОК 6 - ФІНАЛ</p>
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Огляд функцій</h2>
+                <p class="text-[10px] font-bold uppercase tracking-wider text-primary-600 dark:text-primary-400 mb-0.5">{{ __('app.onboarding_step_6_final') }}</p>
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('app.feature_tour') }}</h2>
             </div>
         </div>
     </div>
@@ -36,9 +36,9 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/>
                     </svg>
                 </div>
-                <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Dashboard</h3>
+                <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">{{ __('app.dashboard_title') }}</h3>
                 <p class="text-gray-600 dark:text-gray-400 max-w-md leading-relaxed">
-                    Головна панель з оглядом статистики, найближчих подій, та важливих сповіщень. Все в одному місці.
+                    {{ __('app.dashboard_description') }}
                 </p>
             </div>
 
@@ -56,9 +56,9 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                     </svg>
                 </div>
-                <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Календар та події</h3>
+                <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">{{ __('app.calendar_and_events') }}</h3>
                 <p class="text-gray-600 dark:text-gray-400 max-w-md leading-relaxed">
-                    Плануйте богослужіння, зустрічі та заходи. Автоматичні нагадування та синхронізація.
+                    {{ __('app.calendar_description') }}
                 </p>
             </div>
 
@@ -76,9 +76,9 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
                     </svg>
                 </div>
-                <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Управління людьми</h3>
+                <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">{{ __('app.people_management') }}</h3>
                 <p class="text-gray-600 dark:text-gray-400 max-w-md leading-relaxed">
-                    База даних членів церкви з тегами, групами та відстеженням відвідуваності. Легкий пошук та фільтрація.
+                    {{ __('app.people_description') }}
                 </p>
             </div>
 
@@ -96,9 +96,9 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                 </div>
-                <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Фінанси</h3>
+                <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">{{ __('app.finances_title') }}</h3>
                 <p class="text-gray-600 dark:text-gray-400 max-w-md leading-relaxed">
-                    Облік доходів та витрат з категоріями, графіками та звітами. Інтеграція з платіжними системами.
+                    {{ __('app.finances_description') }}
                 </p>
             </div>
 
@@ -116,9 +116,9 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
                     </svg>
                 </div>
-                <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Комунікація</h3>
+                <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">{{ __('app.communication_title') }}</h3>
                 <p class="text-gray-600 dark:text-gray-400 max-w-md leading-relaxed">
-                    Telegram-бот для сповіщень, масові розсилки, особисті повідомлення та оголошення для всієї церкви.
+                    {{ __('app.communication_description') }}
                 </p>
             </div>
         </div>
@@ -155,9 +155,9 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
             </svg>
         </div>
-        <h4 class="font-bold text-gray-900 dark:text-white text-xl mb-2">Вітаємо!</h4>
+        <h4 class="font-bold text-gray-900 dark:text-white text-xl mb-2">{{ __('app.congratulations') }}</h4>
         <p class="text-gray-600 dark:text-gray-400 max-w-md mx-auto">
-            Ви готові почати користуватися Ministrify. Натисніть "Завершити" щоб перейти до панелі управління.
+            {{ __('app.onboarding_complete_message') }}
         </p>
     </div>
 

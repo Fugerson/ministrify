@@ -3,8 +3,8 @@
 <section class="py-16">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
-            <h2 class="text-3xl font-bold text-gray-900">Малі групи</h2>
-            <p class="text-gray-600 mt-2">Спільнота, яка росте разом</p>
+            <h2 class="text-3xl font-bold text-gray-900">{{ __('app.public_groups_title') }}</h2>
+            <p class="text-gray-600 mt-2">{{ __('app.public_groups_subtitle') }}</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -34,9 +34,9 @@
                             </p>
                         @endif
                         <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
-                            <span class="text-xs text-gray-400">{{ $group->members_count }} учасників</span>
+                            <span class="text-xs text-gray-400">{{ $group->members_count }} {{ __('app.public_groups_members') }}</span>
                             @if($group->allow_join_requests)
-                                <span class="text-xs text-primary-600 font-medium">Приєднатися</span>
+                                <span class="text-xs text-primary-600 font-medium">{{ __('app.public_groups_join') }}</span>
                             @endif
                         </div>
                     </div>
@@ -49,15 +49,15 @@
 <section class="py-16">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
-            <h2 class="text-3xl font-bold text-gray-900">Малі групи</h2>
-            <p class="text-gray-600 mt-2">Спільнота, яка росте разом</p>
+            <h2 class="text-3xl font-bold text-gray-900">{{ __('app.public_groups_title') }}</h2>
+            <p class="text-gray-600 mt-2">{{ __('app.public_groups_subtitle') }}</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             @foreach([
-                ['name' => 'Сімейна група', 'schedule' => 'Субота, 17:00', 'color' => '#6366f1', 'count' => 10],
-                ['name' => 'Молодіжна група', 'schedule' => "П'ятниця, 19:00", 'color' => '#10b981', 'count' => 14],
-                ['name' => 'Жіноча група', 'schedule' => 'Четвер, 11:00', 'color' => '#ec4899', 'count' => 8],
+                ['name' => __('app.public_group_demo_family'), 'schedule' => __('app.public_group_demo_family_schedule'), 'color' => '#6366f1', 'count' => 10],
+                ['name' => __('app.public_group_demo_youth'), 'schedule' => __('app.public_group_demo_youth_schedule'), 'color' => '#10b981', 'count' => 14],
+                ['name' => __('app.public_group_demo_women'), 'schedule' => __('app.public_group_demo_women_schedule'), 'color' => '#ec4899', 'count' => 8],
             ] as $group)
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl hover:border-primary-200 transition-all duration-300">
                     <div class="h-40 flex items-center justify-center" style="background: linear-gradient(135deg, {{ $group['color'] }} 0%, {{ $group['color'] }}99 100%);">
@@ -69,8 +69,8 @@
                         <h3 class="font-semibold text-gray-900">{{ $group['name'] }}</h3>
                         <p class="text-sm text-gray-500 mt-1">{{ $group['schedule'] }}</p>
                         <div class="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
-                            <span class="text-xs text-gray-400">{{ $group['count'] }} учасників</span>
-                            <span class="text-xs text-primary-600 font-medium">Приєднатися</span>
+                            <span class="text-xs text-gray-400">{{ $group['count'] }} {{ __('app.public_groups_members') }}</span>
+                            <span class="text-xs text-primary-600 font-medium">{{ __('app.public_groups_join') }}</span>
                         </div>
                     </div>
                 </div>

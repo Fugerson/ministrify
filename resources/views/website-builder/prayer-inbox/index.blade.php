@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Запити на молитву')
+@section('title', __('app.prayer_requests_title'))
 
 @section('content')
 <div class="max-w-7xl mx-auto space-y-6">

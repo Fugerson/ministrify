@@ -8,7 +8,7 @@
         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
         </svg>
-        Назад до списку
+        {{ __('app.back_to_list') }}
     </a>
 
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden mb-6">
@@ -22,7 +22,7 @@
                 </span>
             </div>
             <h1 class="text-xl font-bold text-gray-900 dark:text-white">{{ $ticket->subject }}</h1>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Створено {{ $ticket->created_at->format('d.m.Y H:i') }}</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ __('app.support_created') }} {{ $ticket->created_at->format('d.m.Y H:i') }}</p>
         </div>
 
         <!-- Messages -->
@@ -43,7 +43,7 @@
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center gap-2 mb-2">
                                 <span class="font-medium text-gray-900 dark:text-white">
-                                    {{ $message->is_from_admin ? 'Підтримка' : ($message->user?->name ?? 'Видалений') }}
+                                    {{ $message->is_from_admin ? __('app.support_team') : ($message->user?->name ?? __('app.deleted')) }}
                                 </span>
                                 <span class="text-sm text-gray-500 dark:text-gray-400">
                                     {{ $message->created_at->format('d.m.Y H:i') }}
@@ -83,11 +83,11 @@
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden"
              x-data="{ ...ajaxForm({ url: '{{ route('support.reply', $ticket) }}', method: 'POST', stayOnPage: true, resetOnSuccess: true, onSuccess() { _supportAddReply(this); } }), files: [] }">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                <h2 class="font-semibold text-gray-900 dark:text-white">Відповісти</h2>
+                <h2 class="font-semibold text-gray-900 dark:text-white">{{ __('app.reply') }}</h2>
             </div>
             <form @submit.prevent="submit($refs.replyForm)" x-ref="replyForm" class="p-6">
                 <textarea name="message" rows="4" required
-                          placeholder="Напишіть вашу відповідь..."
+                          placeholder="{{ __('app.support_reply_placeholder') }}"
                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 mb-4"></textarea>
 
                 <div class="mb-4">
@@ -96,30 +96,30 @@
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
                             </svg>
-                            Прикріпити файл
+                            {{ __('app.attach_file') }}
                         </label>
                         <input type="file" name="attachments[]" id="reply-attachments" multiple accept="image/*,.heic,.heif,.pdf"
                                @change="files = Array.from($event.target.files)" class="hidden">
                         <template x-if="files.length > 0">
-                            <span class="text-sm text-gray-500 dark:text-gray-400" x-text="files.length + ' файл(ів)'"></span>
+                            <span class="text-sm text-gray-500 dark:text-gray-400" x-text="files.length + ' ' + @js(__('app.files_count'))"></span>
                         </template>
                     </div>
                 </div>
 
                 <div class="flex items-center justify-between">
                     <button type="button" @click="ajaxAction('{{ route('support.close', $ticket) }}', 'POST').then(() => setTimeout(() => Livewire.navigate('{{ route('support.index') }}'), 600))" class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
-                        Закрити запит
+                        {{ __('app.close_request') }}
                     </button>
                     <button type="submit" :disabled="saving" class="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
-                        <span x-show="!saving">Надіслати</span>
-                        <span x-show="saving" x-cloak>Надсилання...</span>
+                        <span x-show="!saving">{{ __('app.send') }}</span>
+                        <span x-show="saving" x-cloak>{{ __('app.sending') }}</span>
                     </button>
                 </div>
             </form>
         </div>
     @else
         <div class="bg-gray-100 dark:bg-gray-700 rounded-xl p-6 text-center">
-            <p class="text-gray-600 dark:text-gray-400">Цей запит закрито.</p>
+            <p class="text-gray-600 dark:text-gray-400">{{ __('app.support_request_closed') }}</p>
         </div>
     @endif
 </div>

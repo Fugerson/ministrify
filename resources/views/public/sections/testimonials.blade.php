@@ -3,8 +3,8 @@
 <section class="py-16 bg-gray-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
-            <h2 class="text-3xl font-bold text-gray-900">Свідчення</h2>
-            <p class="text-gray-600 mt-2">Історії змінених життів</p>
+            <h2 class="text-3xl font-bold text-gray-900">{{ __('app.public_testimonials_title') }}</h2>
+            <p class="text-gray-600 mt-2">{{ __('app.public_testimonials_subtitle') }}</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -38,15 +38,15 @@
 <section class="py-16 bg-gray-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-12">
-            <h2 class="text-3xl font-bold text-gray-900">Свідчення</h2>
-            <p class="text-gray-600 mt-2">Історії змінених життів</p>
+            <h2 class="text-3xl font-bold text-gray-900">{{ __('app.public_testimonials_title') }}</h2>
+            <p class="text-gray-600 mt-2">{{ __('app.public_testimonials_subtitle') }}</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             @foreach([
-                ['content' => 'Ця церква стала для мене справжнім домом. Тут я знайшов спільноту, яка підтримує і допомагає рости у вірі.', 'name' => 'Олександр', 'role' => 'Член церкви'],
-                ['content' => 'Завдяки малій групі я навчилася глибше розуміти Біблію та застосовувати її істини у повсякденному житті.', 'name' => 'Марія', 'role' => 'Лідер малої групи'],
-                ['content' => 'Молодіжне служіння змінило моє життя. Я знайшов справжніх друзів та своє покликання служити іншим.', 'name' => 'Дмитро', 'role' => 'Волонтер'],
+                ['content' => __('app.public_testimonial_1_content'), 'name' => __('app.public_testimonial_1_name'), 'role' => __('app.public_testimonial_1_role')],
+                ['content' => __('app.public_testimonial_2_content'), 'name' => __('app.public_testimonial_2_name'), 'role' => __('app.public_testimonial_2_role')],
+                ['content' => __('app.public_testimonial_3_content'), 'name' => __('app.public_testimonial_3_name'), 'role' => __('app.public_testimonial_3_role')],
             ] as $testimonial)
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                     <svg class="w-10 h-10 text-primary-200 mb-4" fill="currentColor" viewBox="0 0 24 24">

@@ -1,6 +1,6 @@
 @extends('layouts.system-admin')
 
-@section('title', 'Навігація користувачів')
+@section('title', __('app.user_navigation_title'))
 
 @section('content')
 <div class="space-y-6">

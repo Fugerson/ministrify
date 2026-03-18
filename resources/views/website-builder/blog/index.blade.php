@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Блог')
+@section('title', __('app.blog_title'))
 
 @section('content')
 <div class="max-w-6xl mx-auto space-y-6">

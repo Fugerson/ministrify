@@ -1,13 +1,13 @@
 @extends('layouts.app')
 
-@section('title', 'Журнал дій')
+@section('title', __('app.audit_log_title'))
 
 @section('content')
 <div class="space-y-6">
     <!-- Header -->
     <div>
-        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Журнал дій</h1>
-        <p class="text-gray-500 dark:text-gray-400">Детальна історія всіх змін у системі</p>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('app.audit_log_title') }}</h1>
+        <p class="text-gray-500 dark:text-gray-400">{{ __('app.audit_log_description') }}</p>
     </div>
 
     <!-- Filters -->
@@ -15,12 +15,12 @@
         <form method="GET" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 sm:gap-4">
             <div class="col-span-2 sm:col-span-3 md:col-span-1">
                 <input type="text" name="search" value="{{ request('search') }}"
-                       placeholder="Пошук..."
+                       placeholder="{{ __('app.search_placeholder') }}"
                        class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm">
             </div>
             <div>
                 <select name="action" class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm">
-                    <option value="">Всі дії</option>
+                    <option value="">{{ __('app.all_actions') }}</option>
                     @foreach($actions as $action)
                         <option value="{{ $action }}" {{ request('action') == $action ? 'selected' : '' }}>
                             {{ (new \App\Models\AuditLog(['action' => $action]))->action_label }}
@@ -30,61 +30,61 @@
             </div>
             <div>
                 <select name="model" class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm">
-                    <option value="">Всі типи</option>
+                    <option value="">{{ __('app.all_types') }}</option>
                     @foreach($models as $model)
                         <option value="{{ $model }}" {{ request('model') == $model ? 'selected' : '' }}>
                             {{ match($model) {
-                                'Person' => 'Члени',
-                                'User' => 'Користувачі',
-                                'Event' => 'Події',
-                                'Ministry' => 'Служіння',
-                                'Group' => 'Групи',
-                                'Transaction' => 'Транзакції',
-                                'Expense' => 'Витрати',
-                                'Income' => 'Доходи',
-                                'DonationCampaign' => 'Кампанії пожертв',
-                                'OnlineDonation' => 'Онлайн-пожертви',
-                                'Board' => 'Дошки',
-                                'BoardCard' => 'Картки',
-                                'BoardColumn' => 'Колонки дошки',
-                                'BoardEpic' => 'Епіки',
-                                'Assignment' => 'Призначення',
-                                'Attendance' => 'Відвідуваність',
-                                'GroupAttendance' => 'Відвідуваність груп',
-                                'BlogPost' => 'Блог-пости',
-                                'BlogCategory' => 'Категорії блогу',
-                                'Sermon' => 'Проповіді',
-                                'SermonSeries' => 'Серії проповідей',
-                                'Song' => 'Пісні',
-                                'Gallery' => 'Галереї',
-                                'GalleryPhoto' => 'Фото галереї',
-                                'Testimonial' => 'Свідчення',
-                                'Faq' => 'FAQ',
-                                'StaffMember' => 'Співробітники',
-                                'EventRegistration' => 'Реєстрації',
-                                'PrayerRequest' => 'Молитовні потреби',
-                                'Announcement' => 'Оголошення',
-                                'ChurchRole' => 'Церковні ролі',
-                                'ChurchRolePermission' => 'Дозволи ролей',
-                                'Position' => 'Позиції',
-                                'Tag' => 'Теги',
-                                'MinistryTask' => 'Завдання служіння',
-                                'MinistryGoal' => 'Цілі служіння',
-                                'MinistryMeeting' => 'Зустрічі служіння',
-                                'MinistryBudget' => 'Бюджети служіння',
-                                'MinistryType' => 'Типи служіння',
-                                'ChecklistTemplate' => 'Шаблони чеклістів',
-                                'EventTaskTemplate' => 'Шаблони завдань',
-                                'ServicePlanTemplate' => 'Шаблони плану служби',
-                                'MessageTemplate' => 'Шаблони повідомлень',
-                                'TransactionCategory' => 'Категорії фінансів',
-                                'ExpenseCategory' => 'Категорії витрат',
-                                'IncomeCategory' => 'Категорії доходів',
-                                'Resource' => 'Ресурси',
-                                'BlockoutDate' => 'Блокування дат',
-                                'FamilyRelationship' => 'Сімейні звʼязки',
-                                'Church' => 'Церква',
-                                'SupportTicket' => 'Тікети підтримки',
+                                'Person' => __('app.model_person'),
+                                'User' => __('app.model_user'),
+                                'Event' => __('app.model_event'),
+                                'Ministry' => __('app.model_ministry'),
+                                'Group' => __('app.model_group'),
+                                'Transaction' => __('app.model_transaction'),
+                                'Expense' => __('app.model_expense'),
+                                'Income' => __('app.model_income'),
+                                'DonationCampaign' => __('app.model_donation_campaign'),
+                                'OnlineDonation' => __('app.model_online_donation'),
+                                'Board' => __('app.model_board'),
+                                'BoardCard' => __('app.model_board_card'),
+                                'BoardColumn' => __('app.model_board_column'),
+                                'BoardEpic' => __('app.model_board_epic'),
+                                'Assignment' => __('app.model_assignment'),
+                                'Attendance' => __('app.model_attendance'),
+                                'GroupAttendance' => __('app.model_group_attendance'),
+                                'BlogPost' => __('app.model_blog_post'),
+                                'BlogCategory' => __('app.model_blog_category'),
+                                'Sermon' => __('app.model_sermon'),
+                                'SermonSeries' => __('app.model_sermon_series'),
+                                'Song' => __('app.model_song'),
+                                'Gallery' => __('app.model_gallery'),
+                                'GalleryPhoto' => __('app.model_gallery_photo'),
+                                'Testimonial' => __('app.model_testimonial'),
+                                'Faq' => __('app.model_faq'),
+                                'StaffMember' => __('app.model_staff_member'),
+                                'EventRegistration' => __('app.model_event_registration'),
+                                'PrayerRequest' => __('app.model_prayer_request'),
+                                'Announcement' => __('app.model_announcement'),
+                                'ChurchRole' => __('app.model_church_role'),
+                                'ChurchRolePermission' => __('app.model_church_role_permission'),
+                                'Position' => __('app.model_position'),
+                                'Tag' => __('app.model_tag'),
+                                'MinistryTask' => __('app.model_ministry_task'),
+                                'MinistryGoal' => __('app.model_ministry_goal'),
+                                'MinistryMeeting' => __('app.model_ministry_meeting'),
+                                'MinistryBudget' => __('app.model_ministry_budget'),
+                                'MinistryType' => __('app.model_ministry_type'),
+                                'ChecklistTemplate' => __('app.model_checklist_template'),
+                                'EventTaskTemplate' => __('app.model_event_task_template'),
+                                'ServicePlanTemplate' => __('app.model_service_plan_template'),
+                                'MessageTemplate' => __('app.model_message_template'),
+                                'TransactionCategory' => __('app.model_transaction_category'),
+                                'ExpenseCategory' => __('app.model_expense_category'),
+                                'IncomeCategory' => __('app.model_income_category'),
+                                'Resource' => __('app.model_resource'),
+                                'BlockoutDate' => __('app.model_blockout_date'),
+                                'FamilyRelationship' => __('app.model_family_relationship'),
+                                'Church' => __('app.model_church'),
+                                'SupportTicket' => __('app.model_support_ticket'),
                                 default => $model
                             } }}
                         </option>
@@ -93,7 +93,7 @@
             </div>
             <div>
                 <select name="user" class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm">
-                    <option value="">Всі користувачі</option>
+                    <option value="">{{ __('app.all_users') }}</option>
                     @foreach($users as $user)
                         <option value="{{ $user->id }}" {{ request('user') == $user->id ? 'selected' : '' }}>
                             {{ $user->name }}
@@ -104,12 +104,12 @@
             <div>
                 <input type="date" name="from" value="{{ request('from') }}"
                        class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm"
-                       placeholder="Від">
+                       placeholder="{{ __('app.date_from') }}">
             </div>
             <div class="flex gap-2">
                 <input type="date" name="to" value="{{ request('to') }}"
                        class="flex-1 min-w-0 px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm"
-                       placeholder="До">
+                       placeholder="{{ __('app.date_to') }}">
                 <button type="submit" class="px-4 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 shrink-0">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
@@ -211,7 +211,7 @@
                     <!-- Changes Details -->
                     @if($log->action === 'updated' && count($changes) > 0)
                         <div class="mt-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg p-3 overflow-hidden">
-                            <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-2">Зміни:</div>
+                            <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-2">{{ __('app.changes_label') }}:</div>
                             <div class="space-y-2">
                                 @foreach($changes as $change)
                                     <div class="text-sm">
@@ -229,7 +229,7 @@
                         </div>
                     @elseif($log->action === 'created' && $log->new_values)
                         <div class="mt-3 bg-green-50 dark:bg-green-900/20 rounded-lg p-3">
-                            <div class="text-xs font-semibold text-green-600 dark:text-green-400 uppercase mb-2">Створено з даними:</div>
+                            <div class="text-xs font-semibold text-green-600 dark:text-green-400 uppercase mb-2">{{ __('app.created_with_data') }}:</div>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                                 @php
                                     $skip = ['id', 'church_id', 'created_at', 'updated_at', 'deleted_at', 'password', 'remember_token', 'email_verified_at', 'checkin_token', 'google_event_id', 'google_calendar_id', 'google_id', 'calendar_token', 'telegram_bot_token', 'visible_sections'];
@@ -244,13 +244,13 @@
                                     </div>
                                 @endforeach
                                 @if($newVals->count() > 10)
-                                    <div class="text-xs text-gray-500 sm:col-span-2">+{{ $newVals->count() - 10 }} полів</div>
+                                    <div class="text-xs text-gray-500 sm:col-span-2">+{{ $newVals->count() - 10 }} {{ __('app.fields_more') }}</div>
                                 @endif
                             </div>
                         </div>
                     @elseif($log->action === 'deleted' && $log->old_values)
                         <div class="mt-3 bg-red-50 dark:bg-red-900/20 rounded-lg p-3">
-                            <div class="text-xs font-semibold text-red-600 dark:text-red-400 uppercase mb-2">Видалено запис:</div>
+                            <div class="text-xs font-semibold text-red-600 dark:text-red-400 uppercase mb-2">{{ __('app.deleted_record') }}:</div>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                                 @php
                                     $skip = ['id', 'church_id', 'created_at', 'updated_at', 'deleted_at', 'password', 'remember_token', 'email_verified_at', 'checkin_token', 'google_event_id', 'google_calendar_id', 'google_id', 'calendar_token', 'telegram_bot_token', 'visible_sections'];
@@ -265,13 +265,13 @@
                                     </div>
                                 @endforeach
                                 @if($oldVals->count() > 10)
-                                    <div class="text-xs text-gray-500 sm:col-span-2">+{{ $oldVals->count() - 10 }} полів</div>
+                                    <div class="text-xs text-gray-500 sm:col-span-2">+{{ $oldVals->count() - 10 }} {{ __('app.fields_more') }}</div>
                                 @endif
                             </div>
                         </div>
                     @elseif($log->action === 'login')
                         <div class="mt-2 flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                            <span>Вхід в систему</span>
+                            <span>{{ __('app.login_to_system') }}</span>
                             <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs {{ $log->device_type === 'mobile' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400' }}">
                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $log->device_icon }}"/></svg>
                                 {{ $log->device_label }} · {{ $log->browser_name }}
@@ -279,7 +279,7 @@
                         </div>
                     @elseif($log->action === 'logout')
                         <div class="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                            Вихід з системи
+                            {{ __('app.logout_from_system') }}
                         </div>
                     @endif
 
@@ -295,7 +295,7 @@
                     <svg class="w-12 h-12 mx-auto mb-3 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                     </svg>
-                    Записів не знайдено
+                    {{ __('app.no_records') }}
                 </div>
             @endforelse
         </div>
@@ -309,27 +309,27 @@
 
     <!-- Legend -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-        <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-2">Легенда:</div>
+        <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-2">{{ __('app.legend') }}:</div>
         <div class="flex flex-wrap gap-4 text-sm">
             <span class="flex items-center gap-1.5">
                 <span class="w-3 h-3 rounded bg-green-500"></span>
-                <span class="text-gray-600 dark:text-gray-300">Створено</span>
+                <span class="text-gray-600 dark:text-gray-300">{{ __('app.action_created') }}</span>
             </span>
             <span class="flex items-center gap-1.5">
                 <span class="w-3 h-3 rounded bg-blue-500"></span>
-                <span class="text-gray-600 dark:text-gray-300">Оновлено</span>
+                <span class="text-gray-600 dark:text-gray-300">{{ __('app.action_updated') }}</span>
             </span>
             <span class="flex items-center gap-1.5">
                 <span class="w-3 h-3 rounded bg-red-500"></span>
-                <span class="text-gray-600 dark:text-gray-300">Видалено</span>
+                <span class="text-gray-600 dark:text-gray-300">{{ __('app.action_deleted') }}</span>
             </span>
             <span class="flex items-center gap-1.5">
                 <span class="w-3 h-3 rounded bg-purple-500"></span>
-                <span class="text-gray-600 dark:text-gray-300">Відновлено</span>
+                <span class="text-gray-600 dark:text-gray-300">{{ __('app.action_restored') }}</span>
             </span>
             <span class="flex items-center gap-1.5">
                 <span class="w-3 h-3 rounded bg-gray-400"></span>
-                <span class="text-gray-600 dark:text-gray-300">Інше (вхід/вихід)</span>
+                <span class="text-gray-600 dark:text-gray-300">{{ __('app.action_other_login_logout') }}</span>
             </span>
         </div>
     </div>

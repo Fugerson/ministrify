@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Конструктор сайту')
+@section('title', __('app.website_builder'))
 
 @section('content')
 <div class="max-w-7xl mx-auto space-y-6">

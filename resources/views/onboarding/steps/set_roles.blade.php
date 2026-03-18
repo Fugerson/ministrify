@@ -1,17 +1,21 @@
 <div x-data="{
     users: [],
     errors: {},
+    _t: {
+        max_255_chars: @js(__('app.max_255_chars')),
+        invalid_email: @js(__('app.invalid_email')),
+    },
 
     validateUser(index) {
         const user = this.users[index];
         this.errors[index] = {};
 
         if (user.name && user.name.length > 255) {
-            this.errors[index].name = 'Максимум 255 символів';
+            this.errors[index].name = this._t.max_255_chars;
         }
 
         if (user.email && !this.isValidEmail(user.email)) {
-            this.errors[index].email = 'Невірний email';
+            this.errors[index].email = this._t.invalid_email;
         }
     },
 
@@ -61,8 +65,8 @@
                 </svg>
             </div>
             <div>
-                <p class="text-[10px] font-bold uppercase tracking-wider text-primary-600 dark:text-primary-400 mb-0.5">КРОК 5 - ОПЦІЙНО</p>
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Налаштуйте ролі</h2>
+                <p class="text-[10px] font-bold uppercase tracking-wider text-primary-600 dark:text-primary-400 mb-0.5">{{ __('app.onboarding_step_5_optional') }}</p>
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('app.set_roles') }}</h2>
             </div>
         </div>
     </div>
@@ -76,7 +80,7 @@
                     </svg>
                 </div>
                 <div>
-                    <p class="font-semibold text-blue-800 dark:text-blue-200 mb-2">Існуючі користувачі ({{ $users->count() }})</p>
+                    <p class="font-semibold text-blue-800 dark:text-blue-200 mb-2">{{ __('app.existing_users') }} ({{ $users->count() }})</p>
                     <div class="flex flex-wrap gap-2">
                         @foreach($users as $user)
                             <span class="inline-flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-slate-700 text-gray-700 dark:text-gray-300 rounded-xl text-sm border border-gray-200 dark:border-slate-600 shadow-sm">
@@ -97,8 +101,8 @@
                     </svg>
                 </div>
                 <div>
-                    <p class="font-semibold text-blue-800 dark:text-blue-200">Цей крок необов'язковий</p>
-                    <p class="text-sm text-blue-600 dark:text-blue-300">Можете пропустити і запросити користувачів пізніше</p>
+                    <p class="font-semibold text-blue-800 dark:text-blue-200">{{ __('app.this_step_optional') }}</p>
+                    <p class="text-sm text-blue-600 dark:text-blue-300">{{ __('app.skip_invite_later') }}</p>
                 </div>
             </div>
         </div>
@@ -123,7 +127,7 @@
                                 </template>
                             </svg>
                         </span>
-                        Користувач <span x-text="index + 1"></span>
+                        {{ __('app.user_label') }} <span x-text="index + 1"></span>
                     </span>
                     <button type="button"
                             @click="removeUser(index)"
@@ -146,7 +150,7 @@
                                    x-model="user.name"
                                    @blur="validateUser(index)"
                                    :class="errors[index]?.name ? 'ring-2 ring-red-500 border-red-500' : user.name ? 'ring-2 ring-green-500 border-green-500' : ''"
-                                   placeholder="Ім'я"
+                                   placeholder="{{ __('app.name_placeholder') }}"
                                    class="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all">
                         </div>
                         <p x-show="errors[index]?.name" x-text="errors[index]?.name" class="mt-1.5 text-xs text-red-500"></p>
@@ -172,9 +176,9 @@
                         <select :name="'users[' + index + '][role]'"
                                 x-model="user.role"
                                 class="w-full px-4 py-2.5 border border-gray-200 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all appearance-none cursor-pointer">
-                            <option value="admin">Адміністратор</option>
-                            <option value="leader">Лідер</option>
-                            <option value="volunteer">Служитель</option>
+                            <option value="admin">{{ __('app.role_admin') }}</option>
+                            <option value="leader">{{ __('app.role_leader') }}</option>
+                            <option value="volunteer">{{ __('app.role_volunteer') }}</option>
                         </select>
                     </div>
                 </div>
@@ -189,13 +193,13 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
                 </svg>
             </div>
-            <span class="font-medium">Запросити користувача</span>
+            <span class="font-medium">{{ __('app.invite_user') }}</span>
         </button>
 
         <!-- Users counter -->
         <div x-show="hasValidUsers" class="p-4 bg-gradient-to-r from-primary-50 to-emerald-50 dark:from-primary-900/20 dark:to-emerald-900/20 rounded-xl text-center">
             <p class="text-sm text-gray-600 dark:text-gray-400">
-                <span class="font-bold text-primary-600 dark:text-primary-400 text-lg" x-text="users.filter(u => u.name.trim() && u.email.trim()).length"></span> користувачів буде запрошено
+                <span class="font-bold text-primary-600 dark:text-primary-400 text-lg" x-text="users.filter(u => u.name.trim() && u.email.trim()).length"></span> {{ __('app.users_will_be_invited') }}
             </p>
         </div>
 
@@ -207,7 +211,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                 </div>
-                Опис ролей
+                {{ __('app.role_descriptions') }}
             </h4>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div class="p-4 bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20 rounded-2xl border border-red-200/50 dark:border-red-700/30">
@@ -217,9 +221,9 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
                             </svg>
                         </div>
-                        <span class="font-semibold text-red-700 dark:text-red-300">Адміністратор</span>
+                        <span class="font-semibold text-red-700 dark:text-red-300">{{ __('app.role_admin') }}</span>
                     </div>
-                    <p class="text-sm text-red-600 dark:text-red-400">Повний доступ до всіх функцій системи</p>
+                    <p class="text-sm text-red-600 dark:text-red-400">{{ __('app.admin_full_access') }}</p>
                 </div>
                 <div class="p-4 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-2xl border border-amber-200/50 dark:border-amber-700/30">
                     <div class="flex items-center gap-3 mb-2">
@@ -228,9 +232,9 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
                             </svg>
                         </div>
-                        <span class="font-semibold text-amber-700 dark:text-amber-300">Лідер</span>
+                        <span class="font-semibold text-amber-700 dark:text-amber-300">{{ __('app.role_leader') }}</span>
                     </div>
-                    <p class="text-sm text-amber-600 dark:text-amber-400">Управління своєю командою</p>
+                    <p class="text-sm text-amber-600 dark:text-amber-400">{{ __('app.leader_team_management') }}</p>
                 </div>
                 <div class="p-4 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-2xl border border-green-200/50 dark:border-green-700/30">
                     <div class="flex items-center gap-3 mb-2">
@@ -239,9 +243,9 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                             </svg>
                         </div>
-                        <span class="font-semibold text-green-700 dark:text-green-300">Служитель</span>
+                        <span class="font-semibold text-green-700 dark:text-green-300">{{ __('app.role_volunteer') }}</span>
                     </div>
-                    <p class="text-sm text-green-600 dark:text-green-400">Перегляд свого розкладу та завдань</p>
+                    <p class="text-sm text-green-600 dark:text-green-400">{{ __('app.volunteer_view_schedule') }}</p>
                 </div>
             </div>
         </div>
