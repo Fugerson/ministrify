@@ -20,6 +20,9 @@
     $daysShort = explode(',', __('app.cal_days_short'));
     $daysFull = explode(',', __('app.cal_days_full'));
 
+    // Default empty map — populated only in month view, but referenced by JS unconditionally
+    $mobileEventsMap = [];
+
     $prevMonth = $month == 1 ? 12 : $month - 1;
     $prevYear = $month == 1 ? $year - 1 : $year;
     $nextMonth = $month == 12 ? 1 : $month + 1;

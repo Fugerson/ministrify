@@ -1847,11 +1847,11 @@ function peopleTable() {
         shepherds: [],
         has_user: '',
         has_telegram: '',
-        showFilterSidebar: true,
+        showFilterSidebar: window.innerWidth >= 1024,
         perPage: 25,
     });
     return {
-        showFilterSidebar: saved.showFilterSidebar,
+        showFilterSidebar: saved.showFilterSidebar ?? (window.innerWidth >= 1024),
         filterAccordion: {
             gender: saved.genders.length > 0,
             marital_status: saved.marital_statuses.length > 0,

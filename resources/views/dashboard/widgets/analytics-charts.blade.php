@@ -119,13 +119,20 @@ onPageReady(function() {
 
         try {
             const response = await fetch(`{{ route('dashboard.charts') }}?type=${type}`);
-            const data = await response.json().catch(() => ({}));
+            if (!response.ok) {
+                chartLoader.classList.add('hidden');
+                return;
+            }
+            const data = await response.json().catch(() => []);
 
             if (analyticsChart) {
                 analyticsChart.destroy();
             }
 
             chartLoader.classList.add('hidden');
+
+            if (!Array.isArray(data) && typeof data !== 'object') return;
+            if (Array.isArray(data) && data.length === 0) return;
 
             const config = buildChartConfig(type, data);
             analyticsChart = new Chart(analyticsCtx, config);

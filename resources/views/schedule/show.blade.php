@@ -3313,7 +3313,7 @@ async function sendTelegramNotify(itemId, button) {
             if (!response.ok) return;
 
             const data = await response.json().catch(() => ({}));
-            lastCheck = data.server_time;
+            if (data.server_time) lastCheck = data.server_time;
 
             // Update each responsibility row
             data.responsibilities.forEach(resp => {
@@ -3368,6 +3368,10 @@ async function sendTelegramNotify(itemId, button) {
             startPolling();
         }
     });
+
+    // Stop polling on page unload / Livewire navigation
+    window.addEventListener('beforeunload', stopPolling);
+    document.addEventListener('livewire:navigating', stopPolling);
 
     // Start polling on page load
     startPolling();

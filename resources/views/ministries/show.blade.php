@@ -4370,7 +4370,7 @@ function resourcesManager() {
 }
 
 @php
-    $allowedPeopleData = collect($ministry->allowed_person_ids ?? [])->map(function($id) {
+    $allowedPeopleData = collect(is_array($ministry->allowed_person_ids) ? $ministry->allowed_person_ids : [])->map(function($id) {
         $p = \App\Models\Person::find($id);
         if (!$p) return ['id' => $id, 'name' => 'Unknown', 'photo' => null, 'initials' => '?'];
         return [

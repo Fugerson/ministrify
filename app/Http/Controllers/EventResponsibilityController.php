@@ -167,7 +167,11 @@ class EventResponsibilityController extends Controller
         $this->authorizeChurch($event);
 
         $lastCheck = $request->get('since');
-        $lastCheckTime = $lastCheck ? \Carbon\Carbon::parse($lastCheck) : now()->subMinutes(5);
+        try {
+            $lastCheckTime = $lastCheck && $lastCheck !== 'undefined' ? \Carbon\Carbon::parse($lastCheck) : now()->subMinutes(5);
+        } catch (\Exception $e) {
+            $lastCheckTime = now()->subMinutes(5);
+        }
 
         $responsibilities = $event->responsibilities()
             ->with('person:id,first_name,last_name')
