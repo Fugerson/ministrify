@@ -6334,4 +6334,10 @@ return [
     'device_tablet' => 'Tablet',
     'device_desktop' => 'Desktop',
     'device_unknown' => 'Unknown',
+
+    // Event sections
+    'schedule_add_section' => 'Add section',
+    'schedule_hide_section' => 'Hide section',
+    'schedule_linked_tasks' => 'Linked tasks',
+    'schedule_checklist' => 'Checklist',
 ];

@@ -6167,4 +6167,10 @@ return [
     'device_tablet' => 'Планшет',
     'device_desktop' => 'Комп\'ютер',
     'device_unknown' => 'Невідомо',
+
+    // Event sections
+    'schedule_add_section' => 'Додати блок',
+    'schedule_hide_section' => 'Сховати блок',
+    'schedule_linked_tasks' => 'Пов\'язані завдання',
+    'schedule_checklist' => 'Чекліст',
 ];

@@ -448,7 +448,16 @@ class EventController extends Controller
                 ]);
         }
 
-        return view('schedule.show', compact('event', 'availablePeople', 'volunteerBlockouts', 'checklistTemplates', 'boards', 'allPeople', 'ministries', 'songsForAutocomplete', 'canEdit', 'currentPerson', 'myMinistriesForSignup', 'linkedMinistries', 'availableMinistriesToLink'));
+        // Determine which sections have data (always visible regardless of settings)
+        $sectionsWithData = [];
+        if ($event->planItems->count() > 0) $sectionsWithData[] = 'plan';
+        if ($linkedMinistries->count() > 0 || $event->ministryTeams->count() > 0) $sectionsWithData[] = 'team';
+        if ($event->attendance && $event->attendance->records->count() > 0) $sectionsWithData[] = 'attendance';
+        if ($event->checklist && $event->checklist->items->count() > 0) $sectionsWithData[] = 'checklist';
+        if ($event->reminder_settings && count($event->reminder_settings) > 0) $sectionsWithData[] = 'reminders';
+        // tasks: checked client-side via linked-cards component
+
+        return view('schedule.show', compact('event', 'availablePeople', 'volunteerBlockouts', 'checklistTemplates', 'boards', 'allPeople', 'ministries', 'songsForAutocomplete', 'canEdit', 'currentPerson', 'myMinistriesForSignup', 'linkedMinistries', 'availableMinistriesToLink', 'sectionsWithData'));
     }
 
     public function edit(Event $event)
@@ -679,6 +688,21 @@ class EventController extends Controller
             'guests_count' => $validated['guests_count'] ?? 0,
             'date' => $event->date?->format('Y-m-d'),
         ]);
+
+        return response()->json(['success' => true]);
+    }
+
+    public function updateVisibleSections(Request $request, Event $event)
+    {
+        $this->authorizeChurch($event);
+        $this->authorize('update', $event);
+
+        $validated = $request->validate([
+            'visible_sections' => 'required|array',
+            'visible_sections.*' => 'string|in:plan,team,attendance,tasks,checklist,reminders',
+        ]);
+
+        $event->update(['visible_sections' => $validated['visible_sections']]);
 
         return response()->json(['success' => true]);
     }

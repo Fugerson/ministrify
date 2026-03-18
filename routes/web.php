@@ -440,6 +440,7 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
     Route::post('events/{event}/toggle-qr-checkin', [QrCheckinController::class, 'toggleQrCheckin'])->name('events.toggle-qr-checkin');
     Route::post('events/{event}/generate-qr', [QrCheckinController::class, 'generateQr'])->name('events.generate-qr');
     Route::post('events/{event}/attendance', [EventController::class, 'saveAttendance'])->name('events.attendance.save');
+    Route::patch('events/{event}/visible-sections', [EventController::class, 'updateVisibleSections'])->name('events.visible-sections');
 
     // Event Responsibilities
     Route::prefix('events/{event}/responsibilities')->name('events.responsibilities.')->group(function () {
