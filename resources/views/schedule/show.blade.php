@@ -1565,7 +1565,7 @@ function eventTeamManager() {
         availableMinistries: @json($availableMinistriesData),
         members: @json($membersByMinistry),
         assignments: @json($eventTeam->values()),
-        teamOpen: {{ ($linkedMinistries->count() > 0 || $initialTeamCount > 0 || count($myMinistryIds) > 0) ? 'true' : 'false' }},
+        teamOpen: false,
         showAddMinistry: false,
         selectedMinistryToLink: null,
         busy: false,
@@ -2722,7 +2722,7 @@ async function askInTelegram(itemId, personName, personId = null) {
 // Plan Editor - Spreadsheet-like inline editing
 function planEditor() {
     return {
-        planCollapsed: localStorage.getItem('plan_collapsed') === 'true',
+        planCollapsed: localStorage.getItem('plan_collapsed') !== 'false',
         init() {
             this.$watch('planCollapsed', val => localStorage.setItem('plan_collapsed', val));
         },
