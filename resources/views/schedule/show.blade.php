@@ -473,6 +473,7 @@
                                         $notAskedCount = count(array_filter($existingPeople, fn($p) => ($p['status'] ?? null) === null && $p['hasTelegram']));
                                     @endphp
                                     <td class="px-2 sm:px-3 py-3 border-r border-gray-200 dark:border-gray-700 align-top"
+                                        data-plan-item-id="{{ $item->id }}"
                                         x-data="responsibleEditor({{ $item->id }}, {{ json_encode($existingPeople) }})">
                                         <div class="flex flex-col gap-1">
                                             {{-- Selected people as tags --}}
@@ -3044,6 +3045,7 @@ window.insertPlanRow = function(item) {
             </div>
         </td>
         <td class="px-2 sm:px-3 py-3 border-r border-gray-200 dark:border-gray-700 align-top"
+            data-plan-item-id="${item.id}"
             x-data="${respXData}">
             <div class="flex flex-col gap-1">
                 <template x-for="(person, index) in people" :key="index">
@@ -3371,7 +3373,49 @@ async function sendTelegramNotify(itemId, button) {
                 }
             });
 
-            // Show toast for new responses
+            // Update plan item statuses (responsibleEditor Alpine components)
+            if (data.plan_items) {
+                data.plan_items.forEach(item => {
+                    // Find the Alpine responsibleEditor component for this plan item
+                    const el = document.querySelector(`[data-plan-item-id="${item.id}"]`);
+                    if (!el || !el._x_dataStack) return;
+                    const comp = el._x_dataStack[0];
+                    if (!comp || !comp.people) return;
+
+                    const statuses = item.statuses || {};
+                    let changed = false;
+                    comp.people.forEach((person, idx) => {
+                        const newStatus = statuses[person.id] || null;
+                        if (newStatus && person.status !== newStatus) {
+                            comp.people[idx].status = newStatus;
+                            changed = true;
+                            const action = newStatus === 'confirmed' ? @js( __("app.schedule_confirmed_action") ) : @js( __("app.schedule_declined_action") );
+                            showToast(`${person.name} ${action}: ${item.title}`, newStatus === 'confirmed' ? 'success' : 'error');
+                        }
+                    });
+                });
+            }
+
+            // Update ministry team member statuses
+            if (data.team_members) {
+                data.team_members.forEach(member => {
+                    if (!member.updated) return;
+                    const badge = document.querySelector(`[data-team-member-id="${member.id}"] .team-status-badge`);
+                    if (!badge) return;
+                    const currentStatus = badge.dataset.status;
+                    if (currentStatus && currentStatus !== member.status) {
+                        badge.dataset.status = member.status;
+                        // Update badge classes
+                        badge.className = badge.className.replace(/bg-\w+-\d+|text-\w+-\d+|dark:bg-\w+-\d+\/\d+|dark:text-\w+-\d+/g, '');
+                        const cls = statusClasses[member.status] || statusClasses['open'];
+                        cls.split(' ').forEach(c => badge.classList.add(c));
+                        const action = member.status === 'confirmed' ? @js( __("app.schedule_confirmed_action") ) : @js( __("app.schedule_declined_action") );
+                        showToast(`${member.person_name} ${action}`, member.status === 'confirmed' ? 'success' : 'error');
+                    }
+                });
+            }
+
+            // Show toast for new responsibility responses
             if (data.new_responses && data.new_responses.length > 0) {
                 data.new_responses.forEach(resp => {
                     const action = resp.status === 'confirmed' ? @js( __("app.schedule_confirmed_action") ) : @js( __("app.schedule_declined_action") );

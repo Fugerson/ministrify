@@ -190,9 +190,35 @@ class EventResponsibilityController extends Controller
         // Check for new responses to show notifications
         $newResponses = $responsibilities->filter(fn($r) => $r['is_new_response']);
 
+        // Plan item statuses (responsible_statuses JSON field)
+        $planItems = $event->planItems()
+            ->whereNotNull('responsible_statuses')
+            ->get(['id', 'title', 'responsible_statuses', 'responsible_names', 'updated_at'])
+            ->map(fn($item) => [
+                'id' => $item->id,
+                'title' => $item->title,
+                'statuses' => $item->responsible_statuses ?? [],
+                'names' => $item->responsible_names,
+                'updated' => $item->updated_at?->gt($lastCheckTime),
+            ]);
+
+        // Ministry team member statuses
+        $teamMembers = $event->ministryTeams()
+            ->with('person:id,first_name,last_name')
+            ->get(['id', 'person_id', 'status', 'updated_at'])
+            ->map(fn($m) => [
+                'id' => $m->id,
+                'person_id' => $m->person_id,
+                'person_name' => $m->person?->full_name,
+                'status' => $m->status,
+                'updated' => $m->updated_at?->gt($lastCheckTime),
+            ]);
+
         return response()->json([
             'responsibilities' => $responsibilities,
             'new_responses' => $newResponses->values(),
+            'plan_items' => $planItems,
+            'team_members' => $teamMembers,
             'server_time' => now()->toIso8601String(),
         ]);
     }
