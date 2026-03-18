@@ -254,6 +254,9 @@ Route::middleware(['auth', 'super_admin', 'throttle:30,1'])->prefix('system-admi
     Route::patch('tasks/{task}/status', [SystemAdminController::class, 'updateTaskStatus'])->name('tasks.update-status');
     Route::delete('tasks/{task}', [SystemAdminController::class, 'destroyTask'])->name('tasks.destroy');
 
+    // Telegram messages log
+    Route::get('telegram-log', [SystemAdminController::class, 'telegramLog'])->name('telegram-log');
+
     // Exit church context
     Route::post('exit-church', [SystemAdminController::class, 'exitChurchContext'])->name('exit-church');
 });

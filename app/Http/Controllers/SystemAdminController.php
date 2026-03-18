@@ -436,6 +436,51 @@ class SystemAdminController extends Controller
     }
 
     /**
+     * Telegram messages log
+     */
+    public function telegramLog(Request $request)
+    {
+        $churches = Church::orderBy('name')->get();
+
+        $query = \App\Models\TelegramMessage::with(['person', 'church']);
+
+        if ($request->church_id) {
+            $query->where('church_id', $request->church_id);
+        }
+
+        if ($request->direction) {
+            $query->where('direction', $request->direction);
+        }
+
+        if ($request->search) {
+            $s = addcslashes($request->search, '%_');
+            $query->where(function ($q) use ($s) {
+                $q->where('message', 'like', "%{$s}%")
+                  ->orWhereHas('person', fn($p) => $p->where('first_name', 'like', "%{$s}%")->orWhere('last_name', 'like', "%{$s}%"));
+            });
+        }
+
+        if ($request->from) {
+            $query->whereDate('created_at', '>=', $request->from);
+        }
+
+        if ($request->to) {
+            $query->whereDate('created_at', '<=', $request->to);
+        }
+
+        $messages = $query->latest()->paginate(50)->withQueryString();
+
+        $stats = [
+            'total' => \App\Models\TelegramMessage::count(),
+            'outgoing' => \App\Models\TelegramMessage::where('direction', 'outgoing')->count(),
+            'incoming' => \App\Models\TelegramMessage::where('direction', 'incoming')->count(),
+            'today' => \App\Models\TelegramMessage::whereDate('created_at', today())->count(),
+        ];
+
+        return view('system-admin.telegram-log', compact('messages', 'churches', 'stats'));
+    }
+
+    /**
      * Delete activity records (page visits or audit logs)
      */
     public function deleteActivityRecords(Request $request)
