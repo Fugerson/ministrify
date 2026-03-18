@@ -265,12 +265,6 @@
                                 </div>
                             </div>
                         </div>
-                        @if($canEdit)
-                        <button type="button" @click="$dispatch('hide-section', { section: 'plan' })" title="{{ __('app.schedule_hide_section') }}"
-                                class="p-1.5 text-gray-300 dark:text-gray-600 hover:text-gray-500 dark:hover:text-gray-400 transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                        </button>
-                        @endif
                     </div>
                 </div>
 
@@ -740,27 +734,19 @@
             <div x-show="isSectionVisible('team')" x-collapse.duration.300ms class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700"
                  x-data="eventTeamManager()">
 
-                <div class="flex items-center">
-                    <button type="button" @click="teamOpen = !teamOpen" class="flex-1 px-5 py-4 flex items-center justify-between cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors rounded-t-2xl" :class="teamOpen ? 'border-b border-gray-200 dark:border-gray-700' : ''">
-                        <div class="flex items-center gap-2">
-                            <svg class="w-4 h-4 text-gray-400 transition-transform" :class="teamOpen ? 'rotate-90' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                            </svg>
-                            <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
-                            </svg>
-                            <h2 class="font-semibold text-gray-900 dark:text-white">{{ __('app.schedule_event_team') }}</h2>
-                        </div>
-                        <span class="text-sm text-gray-500 dark:text-gray-400"
-                              x-text="linkedMinistries.length + ' {{ mb_strtolower(__('messages.teams')) }} · ' + totalAssigned"></span>
-                    </button>
-                    @if($canEdit)
-                    <button type="button" @click="$dispatch('hide-section', { section: 'team' })" title="{{ __('app.schedule_hide_section') }}"
-                            class="p-1.5 mr-3 text-gray-300 dark:text-gray-600 hover:text-gray-500 dark:hover:text-gray-400 transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
-                    @endif
-                </div>
+                <button type="button" @click="teamOpen = !teamOpen" class="w-full px-5 py-4 flex items-center justify-between cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors rounded-t-2xl" :class="teamOpen ? 'border-b border-gray-200 dark:border-gray-700' : ''">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-4 h-4 text-gray-400 transition-transform" :class="teamOpen ? 'rotate-90' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                        <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                        </svg>
+                        <h2 class="font-semibold text-gray-900 dark:text-white">{{ __('app.schedule_event_team') }}</h2>
+                    </div>
+                    <span class="text-sm text-gray-500 dark:text-gray-400"
+                          x-text="linkedMinistries.length + ' {{ mb_strtolower(__('messages.teams')) }} · ' + totalAssigned"></span>
+                </button>
 
                 <div class="p-4 space-y-4" x-show="teamOpen" x-collapse>
 
@@ -1165,8 +1151,7 @@
             <!-- Attendance Section -->
             @if($currentChurch->attendance_enabled)
             <div x-show="isSectionVisible('attendance')" x-collapse.duration.300ms class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700" x-data="{ ...attendanceManager(), attendanceOpen: false }">
-                <div class="flex items-center">
-                <button type="button" @click="attendanceOpen = !attendanceOpen" class="flex-1 px-5 py-4 flex items-center justify-between cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors rounded-t-2xl" :class="attendanceOpen ? 'border-b border-gray-200 dark:border-gray-700' : ''">
+                <button type="button" @click="attendanceOpen = !attendanceOpen" class="w-full px-5 py-4 flex items-center justify-between cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors rounded-t-2xl" :class="attendanceOpen ? 'border-b border-gray-200 dark:border-gray-700' : ''">
                     <div class="flex items-center gap-2">
                         <svg class="w-4 h-4 text-gray-400 transition-transform" :class="attendanceOpen ? 'rotate-90' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
@@ -1190,13 +1175,6 @@
                     @endphp
                     <span class="text-sm text-gray-500 dark:text-gray-400" x-text="attending.length + '/' + {{ $totalPeople }}">{{ $presentCount }}/{{ $totalPeople }}</span>
                 </button>
-                @if($canEdit)
-                <button type="button" @click="$dispatch('hide-section', { section: 'attendance' })" title="{{ __('app.schedule_hide_section') }}"
-                        class="p-1.5 mr-3 text-gray-300 dark:text-gray-600 hover:text-gray-500 dark:hover:text-gray-400 transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                </button>
-                @endif
-                </div>
 
                 <div class="p-4" x-show="attendanceOpen" x-collapse>
                     @php
@@ -1622,8 +1600,8 @@ function sectionManager() {
     const savedSections = @json($event->visible_sections);
 
     return {
-        // If visible_sections is null (legacy), show all; otherwise use saved + data
-        visibleSections: savedSections !== null ? [...new Set([...savedSections, ...sectionsWithData])] : allSections.map(s => s.id),
+        // Visible = sections with data + manually added via "+"
+        visibleSections: [...new Set([...sectionsWithData, ...(savedSections || [])])],
         saving: false,
 
         get hiddenSections() {
@@ -1639,11 +1617,6 @@ function sectionManager() {
                 this.visibleSections.push(id);
                 this.saveSections();
             }
-        },
-
-        hideSection(id) {
-            this.visibleSections = this.visibleSections.filter(s => s !== id);
-            this.saveSections();
         },
 
         async saveSections() {
@@ -1666,9 +1639,6 @@ function sectionManager() {
         },
 
         init() {
-            this.$el.addEventListener('hide-section', (e) => {
-                this.hideSection(e.detail.section);
-            });
         }
     };
 }
