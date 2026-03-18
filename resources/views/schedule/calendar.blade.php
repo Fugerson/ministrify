@@ -33,20 +33,7 @@
 @endphp
 
 <div class="space-y-4"
-     x-data="{
-        activeTab: '{{ $tab ?? 'calendar' }}',
-        switchTab(tab) {
-            this.activeTab = tab;
-            const url = new URL(window.location);
-            if (tab === 'planning') {
-                url.searchParams.set('tab', 'planning');
-            } else {
-                url.searchParams.delete('tab');
-            }
-            history.replaceState({}, '', url);
-        },
-        ...calendarNavigator({{ json_encode(['view' => $view, 'year' => $year, 'month' => $month, 'week' => $currentWeek ?? null]) }})
-     }">
+     x-data="calendarPageData()">
 
     {{-- Shared Header --}}
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-3 sm:p-4">
@@ -133,7 +120,7 @@
                                 {{-- Month Grid --}}
                                 <div class="grid grid-cols-3 gap-2 mb-4">
                                     @php $monthsShort = explode(',', __('app.cal_months_short')); @endphp
-                                    <template x-for="(month, index) in {{ json_encode($monthsShort) }}" :key="index">
+                                    <template x-for="(month, index) in monthsShort" :key="index">
                                         <button @click="pickMonth(index + 1); showPicker = false;" type="button"
                                            :class="{
                                                'bg-primary-600 text-white': currentMonth === index + 1 && currentYear === {{ now()->year }},
@@ -1425,6 +1412,25 @@ function modalGoogleCalendarPicker() {
                 }
             } catch (e) {}
         }
+    }
+}
+
+// Calendar Page Data
+function calendarPageData() {
+    return {
+        activeTab: '{{ $tab ?? 'calendar' }}',
+        monthsShort: {!! json_encode($monthsShort) !!},
+        switchTab(tab) {
+            this.activeTab = tab;
+            const url = new URL(window.location);
+            if (tab === 'planning') {
+                url.searchParams.set('tab', 'planning');
+            } else {
+                url.searchParams.delete('tab');
+            }
+            history.replaceState({}, '', url);
+        },
+        ...calendarNavigator({!! json_encode(['view' => $view, 'year' => $year, 'month' => $month, 'week' => $currentWeek ?? null]) !!})
     }
 }
 
