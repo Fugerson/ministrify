@@ -128,15 +128,29 @@ class TelegramController extends Controller
         $isConfirm = $action === 'confirm';
         $item->setPersonStatus($person->id, $isConfirm ? 'confirmed' : 'declined');
 
+        $event = $item->event;
+        $eventTitle = $event?->title ?? '';
+        $dateStr = $event?->date?->format('d.m.Y') ?? '';
+        $timeStr = $item->start_time ? \Carbon\Carbon::parse($item->start_time)->format('H:i') : '';
+
         $logMessage = $isConfirm
-            ? "✅ Підтверджено: {$item->title}"
-            : "❌ Відхилено: {$item->title}";
+            ? "✅ Підтверджено: {$item->title} ({$eventTitle}, {$dateStr})"
+            : "❌ Відхилено: {$item->title} ({$eventTitle}, {$dateStr})";
 
         $this->saveMessage($person, $logMessage);
 
-        $responseMessage = $isConfirm
-            ? "✅ Чудово! Ви підтвердили участь у: {$item->title}"
-            : "😔 Зрозуміло, пошукаємо когось іншого для: {$item->title}";
+        if ($isConfirm) {
+            $responseMessage = "✅ Чудово! Ви підтвердили участь.\n\n"
+                . "🏛 {$eventTitle}\n"
+                . "📅 {$dateStr}\n"
+                . ($timeStr ? "⏰ {$timeStr}\n" : "")
+                . "📝 {$item->title}";
+        } else {
+            $responseMessage = "😔 Зрозуміло, пошукаємо когось іншого.\n\n"
+                . "🏛 {$eventTitle}\n"
+                . "📅 {$dateStr}\n"
+                . "📝 {$item->title}";
+        }
 
         $this->telegram()->sendMessage($chatId, $responseMessage);
     }
@@ -157,17 +171,27 @@ class TelegramController extends Controller
         $member->update(['status' => $isConfirm ? 'confirmed' : 'declined']);
 
         $roleName = $member->ministryRole?->name ?? 'Служіння';
+        $eventTitle = $member->event->title;
         $dateStr = $member->event->date->format('d.m.Y');
+        $timeStr = $member->event->time ? $member->event->time->format('H:i') : '';
 
         $logMessage = $isConfirm
-            ? "✅ Підтверджено: {$roleName} ({$dateStr})"
-            : "❌ Відхилено: {$roleName} ({$dateStr})";
+            ? "✅ Підтверджено: {$roleName} — {$eventTitle} ({$dateStr})"
+            : "❌ Відхилено: {$roleName} — {$eventTitle} ({$dateStr})";
 
         $this->saveMessage($person, $logMessage);
 
-        $responseMessage = $isConfirm
-            ? "✅ Чудово! Ви підтвердили участь: {$roleName} ({$dateStr})"
-            : "😔 Зрозуміло, пошукаємо когось іншого.";
+        if ($isConfirm) {
+            $responseMessage = "✅ Чудово! Ви підтвердили участь.\n\n"
+                . "🏛 {$eventTitle}\n"
+                . "📅 {$dateStr}" . ($timeStr ? " о {$timeStr}" : "") . "\n"
+                . "👤 {$roleName}";
+        } else {
+            $responseMessage = "😔 Зрозуміло, пошукаємо когось іншого.\n\n"
+                . "🏛 {$eventTitle}\n"
+                . "📅 {$dateStr}\n"
+                . "👤 {$roleName}";
+        }
 
         $this->telegram()->sendMessage($chatId, $responseMessage);
     }
@@ -188,20 +212,30 @@ class TelegramController extends Controller
         $event = $assignment->event;
         $position = $assignment->position;
 
+        $ministryName = $event->ministry?->name ?? 'Служіння';
+        $positionName = $position?->name ?? '';
+        $eventTitle = $event->title;
+        $dateStr = $event->date->format('d.m.Y');
+        $timeStr = $event->time ? $event->time->format('H:i') : '';
+
         if ($action === 'confirm') {
             $assignment->confirm();
 
-            $ministryName = $event->ministry?->name ?? 'Служіння';
-            $positionName = $position?->name ?? '';
-            $this->saveMessage($person, "✅ Підтверджено: {$ministryName} - {$positionName} ({$event->date->format('d.m.Y')})");
-            $this->telegram()->sendMessage($chatId, "✅ Чудово! Ви підтвердили участь у служінні {$event->date->format('d.m.Y')}.");
+            $this->saveMessage($person, "✅ Підтверджено: {$ministryName} - {$positionName} ({$eventTitle}, {$dateStr})");
+            $responseMessage = "✅ Чудово! Ви підтвердили участь.\n\n"
+                . "🏛 {$eventTitle}\n"
+                . "📅 {$dateStr}" . ($timeStr ? " о {$timeStr}" : "") . "\n"
+                . "👥 {$ministryName}" . ($positionName ? " — {$positionName}" : "");
+            $this->telegram()->sendMessage($chatId, $responseMessage);
         } else {
             $assignment->decline();
 
-            $ministryName = $event->ministry?->name ?? 'Служіння';
-            $positionName = $position?->name ?? '';
-            $this->saveMessage($person, "❌ Відхилено: {$ministryName} - {$positionName} ({$event->date->format('d.m.Y')})");
-            $this->telegram()->sendMessage($chatId, "😔 Зрозуміло. Повідомлення надіслано лідеру.");
+            $this->saveMessage($person, "❌ Відхилено: {$ministryName} - {$positionName} ({$eventTitle}, {$dateStr})");
+            $responseMessage = "😔 Зрозуміло. Повідомлення надіслано лідеру.\n\n"
+                . "🏛 {$eventTitle}\n"
+                . "📅 {$dateStr}\n"
+                . "👥 {$ministryName}" . ($positionName ? " — {$positionName}" : "");
+            $this->telegram()->sendMessage($chatId, $responseMessage);
 
             // Notify ministry leader
             if ($person->church?->isNotificationEnabled('notify_leader_on_decline')) {
