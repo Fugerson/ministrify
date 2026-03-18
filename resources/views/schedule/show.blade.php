@@ -138,8 +138,90 @@
         </div>
 
 
+        <!-- Quick Actions (inline) -->
+        <div class="mt-4 flex items-center gap-2 flex-wrap">
+            <a href="{{ route('events.google', $event) }}" target="_blank" title="{{ __('app.schedule_add_to_google') }}"
+               class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19.5 3h-15A1.5 1.5 0 003 4.5v15A1.5 1.5 0 004.5 21h15a1.5 1.5 0 001.5-1.5v-15A1.5 1.5 0 0019.5 3zM8.25 18.75h-2.5v-2.5h2.5v2.5zm0-4h-2.5v-2.5h2.5v2.5zm0-4h-2.5v-2.5h2.5v2.5zm4 8h-2.5v-2.5h2.5v2.5zm0-4h-2.5v-2.5h2.5v2.5zm0-4h-2.5v-2.5h2.5v2.5zm4 8h-2.5v-2.5h2.5v2.5zm0-4h-2.5v-2.5h2.5v2.5zm0-4h-2.5v-2.5h2.5v2.5z"/>
+                </svg>
+                Google
+            </a>
+            <a href="{{ route('schedule') }}" title="{{ __('app.schedule_back_to_schedule') }}"
+               class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+                {{ __('app.schedule_back_to_schedule') }}
+            </a>
+            @can('delete', $event)
+            @php
+                $hasRelatedEvents = $event->parent_event_id || $event->childEvents()->count() > 0;
+                $relatedCount = $event->parent_event_id
+                    ? \App\Models\Event::where('parent_event_id', $event->parent_event_id)->count() + 1
+                    : $event->childEvents()->count() + 1;
+            @endphp
+            <div x-data="{ showDeleteModal: false }" class="inline-flex">
+                <button type="button" @click="showDeleteModal = true" title="{{ __('app.schedule_delete_event') }}"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 rounded-lg transition-colors">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                    {{ __('app.schedule_delete_event') }}
+                </button>
+                <!-- Delete Modal -->
+                <template x-teleport="body">
+                    <div x-show="showDeleteModal"
+                         x-transition:enter="ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                         x-transition:leave="ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+                         class="fixed inset-0 z-50 overflow-y-auto" @keydown.escape.window="showDeleteModal = false" style="display: none;">
+                        <div class="fixed inset-0 bg-black/50 dark:bg-black/70" @click="showDeleteModal = false"></div>
+                        <div class="flex min-h-full items-center justify-center p-4">
+                            <div x-show="showDeleteModal"
+                                 x-transition:enter="ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
+                                 x-transition:leave="ease-in duration-150" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
+                                 @click.stop class="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6">
+                                <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
+                                    <svg class="h-6 w-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                    </svg>
+                                </div>
+                                <h3 class="mt-4 text-lg font-semibold text-gray-900 dark:text-white text-center">{{ __('app.schedule_delete_event_title') }}</h3>
+                                @if($hasRelatedEvents)
+                                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400 text-center">{{ __('app.schedule_series_part', ['count' => $relatedCount]) }}</p>
+                                    <div class="mt-6 space-y-3">
+                                        <button type="button" @click="ajaxAction('{{ route('events.destroy', $event) }}', 'DELETE', { delete_series: 0 }).then(() => setTimeout(() => Livewire.navigate('{{ route('schedule') }}'), 600))"
+                                                class="w-full px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors text-left">
+                                            <div class="font-medium">{{ __('app.schedule_only_this') }}</div>
+                                            <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ __('app.schedule_others_remain') }}</div>
+                                        </button>
+                                        <button type="button" @click="ajaxAction('{{ route('events.destroy', $event) }}', 'DELETE', { delete_series: 1 }).then(() => setTimeout(() => Livewire.navigate('{{ route('schedule') }}'), 600))"
+                                                class="w-full px-4 py-3 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors text-left">
+                                            <div class="font-medium">{{ __('app.schedule_whole_series', ['count' => $relatedCount]) }}</div>
+                                            <div class="text-xs text-red-200 mt-0.5">{{ __('app.schedule_delete_all_related') }}</div>
+                                        </button>
+                                    </div>
+                                    <div class="mt-4">
+                                        <button type="button" @click="showDeleteModal = false" class="w-full px-4 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">{{ __('app.schedule_cancel') }}</button>
+                                    </div>
+                                @else
+                                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400 text-center">{{ __('app.schedule_confirm_delete') }}</p>
+                                    <div class="mt-6 flex justify-center space-x-3">
+                                        <button type="button" @click="showDeleteModal = false" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors">{{ __('app.schedule_cancel') }}</button>
+                                        <button type="button" @click="ajaxAction('{{ route('events.destroy', $event) }}', 'DELETE').then(() => setTimeout(() => Livewire.navigate('{{ route('schedule') }}'), 600))"
+                                                class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors">{{ __('app.schedule_delete_btn') }}</button>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+            @endcan
+        </div>
+
         <!-- Quick stats -->
-        <div class="mt-4 flex items-center gap-4 text-sm">
+        <div class="mt-3 flex items-center gap-4 text-sm">
             @php
                 $confirmedResp = $event->responsibilities->where('status', 'confirmed')->count();
                 $totalResp = $event->responsibilities->count();
@@ -1438,136 +1520,6 @@
             </div>
             @endif
 
-            <!-- Quick Actions -->
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-5">
-                <h3 class="font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.schedule_quick_actions') }}</h3>
-                <div class="space-y-2">
-                    <!-- Add to Google Calendar -->
-                    <a href="{{ route('events.google', $event) }}" target="_blank"
-                       class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300">
-                        <svg class="w-5 h-5 text-gray-400" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M19.5 3h-15A1.5 1.5 0 003 4.5v15A1.5 1.5 0 004.5 21h15a1.5 1.5 0 001.5-1.5v-15A1.5 1.5 0 0019.5 3zM8.25 18.75h-2.5v-2.5h2.5v2.5zm0-4h-2.5v-2.5h2.5v2.5zm0-4h-2.5v-2.5h2.5v2.5zm4 8h-2.5v-2.5h2.5v2.5zm0-4h-2.5v-2.5h2.5v2.5zm0-4h-2.5v-2.5h2.5v2.5zm4 8h-2.5v-2.5h2.5v2.5zm0-4h-2.5v-2.5h2.5v2.5zm0-4h-2.5v-2.5h2.5v2.5z"/>
-                        </svg>
-                        <span>{{ __('app.schedule_add_to_google') }}</span>
-                    </a>
-
-                    <a href="{{ route('schedule') }}"
-                       class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300">
-                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                        </svg>
-                        <span>{{ __('app.schedule_back_to_schedule') }}</span>
-                    </a>
-
-                    @can('delete', $event)
-                        @php
-                            $hasRelatedEvents = $event->parent_event_id || $event->childEvents()->count() > 0;
-                            $relatedCount = $event->parent_event_id
-                                ? \App\Models\Event::where('parent_event_id', $event->parent_event_id)->count() + 1
-                                : $event->childEvents()->count() + 1;
-                        @endphp
-
-                        <div x-data="{ showDeleteModal: false }" class="w-full">
-                            <button type="button"
-                                    @click="showDeleteModal = true"
-                                    class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-red-600 dark:text-red-400">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                </svg>
-                                <span>{{ __('app.schedule_delete_event') }}</span>
-                            </button>
-
-                            <!-- Delete Modal -->
-                            <template x-teleport="body">
-                                <div x-show="showDeleteModal"
-                                     x-transition:enter="ease-out duration-200"
-                                     x-transition:enter-start="opacity-0"
-                                     x-transition:enter-end="opacity-100"
-                                     x-transition:leave="ease-in duration-150"
-                                     x-transition:leave-start="opacity-100"
-                                     x-transition:leave-end="opacity-0"
-                                     class="fixed inset-0 z-50 overflow-y-auto"
-                                     @keydown.escape.window="showDeleteModal = false"
-                                     style="display: none;">
-
-                                    <div class="fixed inset-0 bg-black/50 dark:bg-black/70" @click="showDeleteModal = false"></div>
-
-                                    <div class="flex min-h-full items-center justify-center p-4">
-                                        <div x-show="showDeleteModal"
-                                             x-transition:enter="ease-out duration-200"
-                                             x-transition:enter-start="opacity-0 scale-95"
-                                             x-transition:enter-end="opacity-100 scale-100"
-                                             x-transition:leave="ease-in duration-150"
-                                             x-transition:leave-start="opacity-100 scale-100"
-                                             x-transition:leave-end="opacity-0 scale-95"
-                                             @click.stop
-                                             class="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6">
-
-                                            <!-- Warning Icon -->
-                                            <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
-                                                <svg class="h-6 w-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                                                </svg>
-                                            </div>
-
-                                            <h3 class="mt-4 text-lg font-semibold text-gray-900 dark:text-white text-center">
-                                                {{ __('app.schedule_delete_event_title') }}
-                                            </h3>
-
-                                            @if($hasRelatedEvents)
-                                                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400 text-center">
-                                                    {{ __('app.schedule_series_part', ['count' => $relatedCount]) }}
-                                                </p>
-
-                                                <div class="mt-6 space-y-3">
-                                                    <!-- Delete only this event -->
-                                                    <button type="button"
-                                                            @click="ajaxAction('{{ route('events.destroy', $event) }}', 'DELETE', { delete_series: 0 }).then(() => setTimeout(() => Livewire.navigate('{{ route('schedule') }}'), 600))"
-                                                            class="w-full px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors text-left">
-                                                        <div class="font-medium">{{ __('app.schedule_only_this') }}</div>
-                                                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ __('app.schedule_others_remain') }}</div>
-                                                    </button>
-
-                                                    <!-- Delete all in series -->
-                                                    <button type="button"
-                                                            @click="ajaxAction('{{ route('events.destroy', $event) }}', 'DELETE', { delete_series: 1 }).then(() => setTimeout(() => Livewire.navigate('{{ route('schedule') }}'), 600))"
-                                                            class="w-full px-4 py-3 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors text-left">
-                                                        <div class="font-medium">{{ __('app.schedule_whole_series', ['count' => $relatedCount]) }}</div>
-                                                        <div class="text-xs text-red-200 mt-0.5">{{ __('app.schedule_delete_all_related') }}</div>
-                                                    </button>
-                                                </div>
-
-                                                <div class="mt-4">
-                                                    <button type="button" @click="showDeleteModal = false"
-                                                            class="w-full px-4 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
-                                                        {{ __('app.schedule_cancel') }}
-                                                    </button>
-                                                </div>
-                                            @else
-                                                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400 text-center">
-                                                    {{ __('app.schedule_confirm_delete') }}
-                                                </p>
-
-                                                <div class="mt-6 flex justify-center space-x-3">
-                                                    <button type="button" @click="showDeleteModal = false"
-                                                            class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors">
-                                                        {{ __('app.schedule_cancel') }}
-                                                    </button>
-                                                    <button type="button"
-                                                            @click="ajaxAction('{{ route('events.destroy', $event) }}', 'DELETE').then(() => setTimeout(() => Livewire.navigate('{{ route('schedule') }}'), 600))"
-                                                            class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors">
-                                                        {{ __('app.schedule_delete_btn') }}
-                                                    </button>
-                                                </div>
-                                            @endif
-                                        </div>
-                                    </div>
-                                </div>
-                            </template>
-                        </div>
-                    @endcan
-                </div>
-            </div>
         </div>
     </div>
 </div>
