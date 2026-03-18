@@ -83,6 +83,20 @@ class LogPageVisit
             'pm/unread-count',
         ];
 
+        // Skip polling/AJAX endpoints
+        $skipPatterns = [
+            'responsibilities/poll',
+            'calendar-events',
+            'schedule-grid',
+            'matrix-data',
+        ];
+
+        foreach ($skipPatterns as $pattern) {
+            if (str_contains($path, $pattern)) {
+                return true;
+            }
+        }
+
         foreach ($skipPrefixes as $prefix) {
             if (str_starts_with($path, $prefix)) {
                 return true;
