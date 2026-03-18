@@ -700,6 +700,12 @@
                     ? \App\Models\Song::where('church_id', $event->church_id)->orderBy('title')->get(['id', 'title', 'key'])->map(fn($s) => ['id' => $s->id, 'title' => $s->title, 'key' => $s->key])->values()
                     : collect();
 
+                // Song notes
+                $songCellNote = \App\Models\EventCellNote::where('event_id', $event->id)
+                    ->where('role_type', 'songs')
+                    ->where('role_id', 0)
+                    ->value('notes') ?? '';
+
                 // Members by ministry (for assign dropdown)
                 $membersByMinistry = [];
                 foreach ($linkedMinistries as $lm) {
@@ -821,7 +827,10 @@
                                                             </template>
                                                         </div>
                                                     </template>
-                                                    <template x-if="eventSongs.length === 0">
+                                                    <template x-if="songNotes">
+                                                        <div class="text-[10px] text-amber-500 dark:text-amber-400 truncate w-full mt-0.5" x-text="songNotes"></div>
+                                                    </template>
+                                                    <template x-if="eventSongs.length === 0 && !songNotes">
                                                         <div class="flex items-center justify-center w-full">
                                                             <svg class="w-5 h-5 text-purple-300 dark:text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
@@ -1086,6 +1095,22 @@
                             </template>
                         </div>
                     </template>
+
+                    {{-- Notes for songs --}}
+                    @if($canEdit)
+                    <div class="px-3 py-2 border-b border-gray-200 dark:border-gray-700">
+                        <div class="flex items-center gap-1.5 mb-1">
+                            <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
+                            </svg>
+                            <span class="text-[11px] text-gray-500 dark:text-gray-400 font-medium">{{ __('app.position_note') }}</span>
+                        </div>
+                        <input type="text" x-model="songNotes"
+                               @input.debounce.600ms="saveSongNotes($event.target.value)"
+                               placeholder="{{ __('app.note_placeholder') }}"
+                               class="w-full px-2 py-1.5 text-xs rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 dark:text-gray-200 focus:ring-purple-500 focus:border-purple-500 placeholder-gray-400 dark:placeholder-gray-500">
+                    </div>
+                    @endif
 
                     {{-- Search & add --}}
                     @if($canEdit)
@@ -1551,6 +1576,7 @@ function eventTeamManager() {
         allChurchSongs: @json($allChurchSongs ?? []),
         songDropdownOpen: false,
         songSearch: '',
+        songNotes: @json($songCellNote ?? ''),
 
         init() {
             if (this.availableMinistries.length > 0) {
@@ -1931,6 +1957,21 @@ function eventTeamManager() {
             } catch (e) {
                 this.showToast(@js(__('app.error')), 'error');
             } finally { this.busy = false; }
+        },
+
+        async saveSongNotes(value) {
+            const notes = value.trim() || null;
+            try {
+                await fetch(`/events/${this.eventId}/cell-note`, {
+                    method: 'PATCH',
+                    headers: this._headers(),
+                    body: JSON.stringify({ role_type: 'songs', role_id: 0, notes }),
+                });
+                this.showToast(@js(__('app.note_saved_toast')));
+            } catch (e) {
+                console.error('Save song notes error:', e);
+                this.showToast(@js(__('app.error')), 'error');
+            }
         },
     };
 }

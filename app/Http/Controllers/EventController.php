@@ -1159,7 +1159,7 @@ class EventController extends Controller
         $this->authorizeChurch($event);
 
         $validated = $request->validate([
-            'role_type' => 'required|string|in:ministry_role,position',
+            'role_type' => 'required|string|in:ministry_role,position,songs',
             'role_id' => 'required|integer',
             'notes' => 'nullable|string|max:500',
         ]);
