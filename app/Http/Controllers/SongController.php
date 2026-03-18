@@ -482,7 +482,7 @@ class SongController extends Controller
 
                     // Validate key
                     $key = $this->getSongValue($row, $mappings, 'key');
-                    if ($key && !isset(Song::KEYS[$key])) {
+                    if ($key && !isset(Song::keyLabels()[$key])) {
                         // Try extracting from link fragment
                         $key = null;
                     }
@@ -603,7 +603,7 @@ class SongController extends Controller
     {
         if (!$url) return null;
         if (preg_match('/#([A-G][#b]?m?)/', $url, $m)) {
-            return isset(Song::KEYS[$m[1]]) ? $m[1] : null;
+            return isset(Song::keyLabels()[$m[1]]) ? $m[1] : null;
         }
         return null;
     }

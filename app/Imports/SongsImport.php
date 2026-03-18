@@ -62,7 +62,7 @@ class SongsImport implements ToModel, WithHeadingRow, WithValidation, WithEvents
         if (empty($key) && !empty($link)) {
             $key = $this->extractKeyFromUrl($link);
         }
-        if ($key && !array_key_exists($key, Song::KEYS)) {
+        if ($key && !array_key_exists($key, Song::keyLabels())) {
             $key = null;
         }
 
@@ -156,7 +156,7 @@ class SongsImport implements ToModel, WithHeadingRow, WithValidation, WithEvents
             $candidate = $matches[1];
             // Normalize first letter to uppercase
             $candidate = strtoupper($candidate[0]) . substr($candidate, 1);
-            if (array_key_exists($candidate, Song::KEYS)) {
+            if (array_key_exists($candidate, Song::keyLabels())) {
                 return $candidate;
             }
         }

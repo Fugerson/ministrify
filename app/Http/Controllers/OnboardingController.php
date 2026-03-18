@@ -95,7 +95,7 @@ class OnboardingController extends Controller
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Помилка валідації',
+                'message' => __('messages.validation_error'),
                 'errors' => $e->errors(),
             ], 422);
         } catch (\Exception $e) {
@@ -139,7 +139,7 @@ class OnboardingController extends Controller
         if ($stepConfig['required']) {
             return response()->json([
                 'success' => false,
-                'message' => 'Цей крок обов\'язковий.',
+                'message' => __('messages.step_required'),
             ], 400);
         }
 

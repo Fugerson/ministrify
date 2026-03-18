@@ -35,7 +35,7 @@ class PersonController extends Controller
     public function index(Request $request)
     {
         if (!auth()->user()->canView('people')) {
-            return $this->errorResponse($request, __('У вас немає доступу до цього розділу. Зверніться до адміністратора церкви для отримання потрібних прав.'));
+            return $this->errorResponse($request, __('messages.no_access_to_section'));
         }
 
         $church = $this->getCurrentChurch();
@@ -108,7 +108,7 @@ class PersonController extends Controller
             ];
         }
         $ageStats['unknown'] = [
-            'label' => 'Невідомо',
+            'label' => __('messages.unknown'),
             'count' => (clone $statsQuery)->whereNull('birth_date')->count(),
             'color' => '#9ca3af',
         ];
@@ -131,7 +131,7 @@ class PersonController extends Controller
         $noRoleCount = $roleCountsRaw[null] ?? $roleCountsRaw[''] ?? 0;
         if ($noRoleCount > 0) {
             $roleStats['none'] = [
-                'label' => 'Не вказано',
+                'label' => __('messages.not_specified'),
                 'count' => $noRoleCount,
                 'color' => '#9ca3af',
             ];
@@ -175,7 +175,7 @@ class PersonController extends Controller
     public function create(Request $request)
     {
         if (!auth()->user()->canCreate('people')) {
-            return $this->errorResponse($request, 'У вас немає прав для створення записів.');
+            return $this->errorResponse($request, __('messages.no_permission_to_create'));
         }
 
         $church = $this->getCurrentChurch();
@@ -189,7 +189,7 @@ class PersonController extends Controller
     public function store(Request $request)
     {
         if (!auth()->user()->canCreate('people')) {
-            return $this->errorResponse($request, 'У вас немає прав для створення записів.');
+            return $this->errorResponse($request, __('messages.no_permission_to_create'));
         }
 
         $validated = $request->validate([
@@ -251,7 +251,7 @@ class PersonController extends Controller
                 ->first();
 
             if ($existingPerson) {
-                return $this->successResponse($request, 'Людина з цим email вже існує. Перенаправляю на її профіль.', 'people.show', [$existingPerson]);
+                return $this->successResponse($request, __('messages.person_duplicate_email'), 'people.show', [$existingPerson]);
             }
         }
 
@@ -260,7 +260,7 @@ class PersonController extends Controller
             $existingByPhone = Person::findByPhoneInChurch($validated['phone'], $church->id, false);
 
             if ($existingByPhone) {
-                return $this->successResponse($request, 'Людина з цим номером телефону вже існує. Перенаправляю на її профіль.', 'people.show', [$existingByPhone]);
+                return $this->successResponse($request, __('messages.person_duplicate_phone'), 'people.show', [$existingByPhone]);
             }
         }
 
@@ -273,7 +273,7 @@ class PersonController extends Controller
 
             if ($existingByName) {
                 $info = $existingByName->first_name . ' ' . $existingByName->last_name;
-                if ($existingByName->phone) $info .= ', тел: ' . $existingByName->phone;
+                if ($existingByName->phone) $info .= ', ' . __('messages.phone_short') . ': ' . $existingByName->phone;
                 if ($existingByName->email) $info .= ', email: ' . $existingByName->email;
 
                 if ($request->wantsJson()) {
@@ -290,7 +290,7 @@ class PersonController extends Controller
                     ], 409);
                 }
                 return redirect()->route('people.show', $existingByName)
-                    ->with('warning', 'Людина з таким іменем вже існує.');
+                    ->with('warning', __('messages.person_duplicate_name'));
             }
         }
 
@@ -319,7 +319,7 @@ class PersonController extends Controller
             }
         }
 
-        return $this->successResponse($request, 'Людину успішно додано.', 'people.show', [$person]);
+        return $this->successResponse($request, __('messages.person_created'), 'people.show', [$person]);
     }
 
     public function show(Person $person)
@@ -373,7 +373,7 @@ class PersonController extends Controller
             ->map(fn($r) => [
                 'type' => 'attendance',
                 'date' => $r->attendance?->date,
-                'title' => $r->present ? 'Відвідав(ла) служіння' : 'Пропустив(ла) служіння',
+                'title' => $r->present ? __('messages.attended_service') : __('messages.missed_service'),
                 'icon' => $r->present ? '✅' : '❌',
                 'color' => $r->present ? 'green' : 'red',
             ]);
@@ -386,8 +386,8 @@ class PersonController extends Controller
             ->map(fn($a) => [
                 'type' => 'assignment',
                 'date' => $a->event?->date,
-                'title' => ($a->event?->title ?? 'Подія') . ' - ' . ($a->position?->name ?? 'Позиція'),
-                'subtitle' => $a->event?->ministry?->name ?? 'Служіння',
+                'title' => ($a->event?->title ?? __('messages.event')) . ' - ' . ($a->position?->name ?? __('messages.position')),
+                'subtitle' => $a->event?->ministry?->name ?? __('messages.ministry'),
                 'icon' => $a->status === 'confirmed' ? '🎯' : ($a->status === 'pending' ? '⏳' : '❌'),
                 'color' => $a->status === 'confirmed' ? 'green' : ($a->status === 'pending' ? 'yellow' : 'red'),
                 'status' => $a->status,
@@ -469,7 +469,7 @@ class PersonController extends Controller
         $isOwnProfile = $user->person && $user->person->id === $person->id;
 
         if (!$isOwnProfile && !$user->canEdit('people')) {
-            return $this->errorResponse($request, 'У вас немає прав для редагування записів.');
+            return $this->errorResponse($request, __('messages.no_permission_to_edit'));
         }
 
         $church = $this->getCurrentChurch();
@@ -492,7 +492,7 @@ class PersonController extends Controller
 
         // If not own profile and no edit permission, deny access
         if (!$isOwnProfile && !$canEditPeople) {
-            abort(403, 'У вас немає дозволу редагувати цей профіль.');
+            abort(403, __('messages.no_permission_to_edit_profile'));
         }
 
         // Different validation rules for users with edit permission vs own profile
@@ -607,7 +607,7 @@ class PersonController extends Controller
             }
         }
 
-        return $this->successResponse($request, 'Дані успішно оновлено.', 'people.show', [$person]);
+        return $this->successResponse($request, __('messages.person_updated'), 'people.show', [$person]);
     }
 
     public function destroy(Request $request, Person $person)
@@ -615,12 +615,12 @@ class PersonController extends Controller
         $this->authorizeChurch($person);
 
         if (!auth()->user()->canDelete('people')) {
-            return $this->errorResponse($request, 'У вас немає прав для видалення записів.');
+            return $this->errorResponse($request, __('messages.no_permission_to_delete'));
         }
 
         $person->delete();
 
-        return $this->successResponse($request, 'Людину видалено.', 'people.index');
+        return $this->successResponse($request, __('messages.person_deleted'), 'people.index');
     }
 
     public function restore(Request $request, Person $person)
@@ -628,18 +628,18 @@ class PersonController extends Controller
         $this->authorizeChurch($person);
 
         if (!auth()->user()->canDelete('people')) {
-            return $this->errorResponse($request, 'У вас немає прав для відновлення записів.');
+            return $this->errorResponse($request, __('messages.no_permission_to_restore'));
         }
 
         $person->restore();
 
-        return $this->successResponse($request, 'Людину відновлено.', 'people.show', [$person]);
+        return $this->successResponse($request, __('messages.person_restored'), 'people.show', [$person]);
     }
 
     public function export(Request $request)
     {
         if (!auth()->user()->canView('people')) {
-            abort(403, 'Недостатньо прав для експорту.');
+            abort(403, __('messages.insufficient_permissions_export'));
         }
 
         $church = $this->getCurrentChurch();
@@ -647,7 +647,7 @@ class PersonController extends Controller
         $filename = 'people_' . now()->format('Y-m-d') . '.xlsx';
 
         // Log export action
-        $this->logAuditAction('exported', 'Person', null, 'Експорт списку людей', [
+        $this->logAuditAction('exported', 'Person', null, __('messages.audit_people_export'), [
             'count' => $ids ? count($ids) : 'all',
             'filename' => $filename,
         ]);
@@ -658,7 +658,7 @@ class PersonController extends Controller
     public function import(Request $request)
     {
         if (!auth()->user()->canCreate('people')) {
-            abort(403, 'Недостатньо прав для імпорту.');
+            abort(403, __('messages.insufficient_permissions_import'));
         }
 
         $request->validate([
@@ -671,13 +671,13 @@ class PersonController extends Controller
             Excel::import(new PeopleImport($church->id), $request->file('file'));
 
             // Log import action
-            $this->logAuditAction('imported', 'Person', null, 'Імпорт списку людей', [
+            $this->logAuditAction('imported', 'Person', null, __('messages.audit_people_import'), [
                 'filename' => $request->file('file')->getClientOriginalName(),
             ]);
 
-            return $this->successResponse($request, 'Людей успішно імпортовано.');
+            return $this->successResponse($request, __('messages.people_imported'));
         } catch (\Exception $e) {
-            return $this->errorResponse($request, 'Помилка імпорту: ' . $e->getMessage());
+            return $this->errorResponse($request, __('messages.import_error') . ': ' . $e->getMessage());
         }
     }
 
@@ -838,7 +838,7 @@ class PersonController extends Controller
         $person = $user->person;
         $person->update($validated);
 
-        return $this->successResponse($request, 'Профіль оновлено.');
+        return $this->successResponse($request, __('messages.profile_updated'));
     }
 
     public function updatePassword(Request $request)
@@ -878,7 +878,7 @@ class PersonController extends Controller
         $validated['person_id'] = $user->person->id;
         UnavailableDate::create($validated);
 
-        return $this->successResponse($request, 'Дати недоступності додано.');
+        return $this->successResponse($request, __('messages.unavailable_dates_added'));
     }
 
     public function removeUnavailableDate(Request $request, UnavailableDate $unavailableDate)
@@ -891,7 +891,7 @@ class PersonController extends Controller
 
         $unavailableDate->delete();
 
-        return $this->successResponse($request, 'Дати видалено.');
+        return $this->successResponse($request, __('messages.unavailable_dates_removed'));
     }
 
     public function generateTelegramCode()
@@ -899,13 +899,13 @@ class PersonController extends Controller
         $user = auth()->user();
 
         if (!$user->person) {
-            return response()->json(['error' => 'Профіль не знайдено'], 404);
+            return response()->json(['error' => __('messages.profile_not_found')], 404);
         }
 
         $church = $this->getCurrentChurch();
 
         if (!config('services.telegram.bot_token')) {
-            return response()->json(['error' => 'Telegram бот не налаштовано'], 400);
+            return response()->json(['error' => __('messages.telegram_bot_not_configured')], 400);
         }
 
         $code = \App\Http\Controllers\Api\TelegramController::generateLinkingCode($user->person);
@@ -931,7 +931,7 @@ class PersonController extends Controller
         $user = auth()->user();
 
         if (!$user->person) {
-            return $this->errorResponse($request, 'Профіль не знайдено');
+            return $this->errorResponse($request, __('messages.profile_not_found'));
         }
 
         $user->person->update(['telegram_chat_id' => null]);
@@ -939,7 +939,7 @@ class PersonController extends Controller
         // Log telegram unlink
         $this->logAuditAction('telegram_unlinked', 'Person', $user->person->id, $user->person->full_name);
 
-        return $this->successResponse($request, 'Telegram від\'єднано');
+        return $this->successResponse($request, __('messages.telegram_unlinked'));
     }
 
     public function updateTheme(Request $request)
@@ -975,7 +975,7 @@ class PersonController extends Controller
         $this->authorizeChurch($person);
 
         if (!auth()->user()->isAdmin()) {
-            return response()->json(['message' => 'Недостатньо прав'], 403);
+            return response()->json(['message' => __('messages.insufficient_permissions')], 403);
         }
 
         $church = $this->getCurrentChurch();
@@ -985,12 +985,12 @@ class PersonController extends Controller
         ]);
 
         if (!$person->user) {
-            return response()->json(['message' => 'Користувач не має облікового запису'], 404);
+            return response()->json(['message' => __('messages.user_has_no_account')], 404);
         }
 
         // Prevent changing own role
         if ($person->user->id === auth()->id()) {
-            return response()->json(['message' => 'Не можна змінювати власну роль'], 400);
+            return response()->json(['message' => __('messages.cannot_change_own_role')], 400);
         }
 
         $hadNoRole = $person->user->church_role_id === null;
@@ -1009,8 +1009,8 @@ class PersonController extends Controller
             ]);
 
         // Log role change
-        $oldRoleName = $oldRoleId ? \App\Models\ChurchRole::find($oldRoleId)?->name : 'Без ролі';
-        $newRoleName = $newRoleId ? \App\Models\ChurchRole::find($newRoleId)?->name : 'Без ролі';
+        $oldRoleName = $oldRoleId ? \App\Models\ChurchRole::find($oldRoleId)?->name : __('messages.no_role');
+        $newRoleName = $newRoleId ? \App\Models\ChurchRole::find($newRoleId)?->name : __('messages.no_role');
         $this->logAuditAction('role_changed', 'User', $person->user->id, $person->full_name, [
             'new_role' => $newRoleName,
         ], [
@@ -1031,11 +1031,11 @@ class PersonController extends Controller
         $this->authorizeChurch($person);
 
         if (!auth()->user()->isAdmin()) {
-            return response()->json(['message' => 'Недостатньо прав'], 403);
+            return response()->json(['message' => __('messages.insufficient_permissions')], 403);
         }
 
         if (!$person->user) {
-            return response()->json(['message' => 'Користувач не має облікового запису'], 404);
+            return response()->json(['message' => __('messages.user_has_no_account')], 404);
         }
 
         $validated = $request->validate([
@@ -1060,7 +1060,7 @@ class PersonController extends Controller
         $this->authorizeChurch($person);
 
         if (!auth()->user()->isAdmin()) {
-            return response()->json(['message' => 'Недостатньо прав'], 403);
+            return response()->json(['message' => __('messages.insufficient_permissions')], 403);
         }
 
         $validated = $request->validate([
@@ -1073,7 +1073,7 @@ class PersonController extends Controller
         $churchRole = ChurchRole::where('church_id', $church->id)->findOrFail($validated['church_role_id']);
 
         if ($person->user) {
-            return response()->json(['message' => 'Користувач вже має обліковий запис'], 400);
+            return response()->json(['message' => __('messages.user_already_has_account')], 400);
         }
 
         // Generate random password
@@ -1135,7 +1135,7 @@ class PersonController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Обліковий запис створено. Лист для встановлення пароля надіслано на email.',
+            'message' => __('messages.account_created_email_sent'),
             'email_sent' => true,
         ]);
     }
@@ -1145,11 +1145,11 @@ class PersonController extends Controller
         $this->authorizeChurch($person);
 
         if (!auth()->user()->isAdmin()) {
-            return response()->json(['message' => 'Недостатньо прав'], 403);
+            return response()->json(['message' => __('messages.insufficient_permissions')], 403);
         }
 
         if (!$person->user) {
-            return response()->json(['message' => 'Користувач не має облікового запису'], 404);
+            return response()->json(['message' => __('messages.user_has_no_account')], 404);
         }
 
         // Generate new password
@@ -1165,7 +1165,7 @@ class PersonController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Пароль скинуто. Лист надіслано на email.',
+            'message' => __('messages.password_reset_email_sent'),
             'email_sent' => true,
         ]);
     }
@@ -1181,13 +1181,13 @@ class PersonController extends Controller
             && $request->input('shepherd_id') == $currentUser->person->id;
 
         if (!$currentUser->isAdmin() && !$currentUser->canEdit('people') && !$isShepherdSelfAssign) {
-            return response()->json(['message' => 'Недостатньо прав'], 403);
+            return response()->json(['message' => __('messages.insufficient_permissions')], 403);
         }
 
         $church = $this->getCurrentChurch();
 
         if (!$church->shepherds_enabled) {
-            return response()->json(['message' => 'Функція опікунів вимкнена'], 400);
+            return response()->json(['message' => __('messages.shepherds_feature_disabled')], 400);
         }
 
         $validated = $request->validate([
@@ -1206,15 +1206,15 @@ class PersonController extends Controller
             $shepherd = Person::where('church_id', $church->id)->find($shepherdId);
 
             if (!$shepherd) {
-                return response()->json(['message' => 'Опікуна не знайдено'], 404);
+                return response()->json(['message' => __('messages.shepherd_not_found')], 404);
             }
 
             if (!$shepherd->is_shepherd) {
-                return response()->json(['message' => 'Ця людина не є опікуном'], 400);
+                return response()->json(['message' => __('messages.person_is_not_shepherd')], 400);
             }
 
             if ($shepherd->id === $person->id) {
-                return response()->json(['message' => 'Людина не може бути своїм опікуном'], 400);
+                return response()->json(['message' => __('messages.cannot_be_own_shepherd')], 400);
             }
         }
 
@@ -1225,9 +1225,9 @@ class PersonController extends Controller
         $oldShepherdName = $oldShepherdId ? Person::find($oldShepherdId)?->full_name : null;
         $newShepherdName = $shepherdId ? Person::find($shepherdId)?->full_name : null;
         $this->logAuditAction('shepherd_assigned', 'Person', $person->id, $person->full_name, [
-            'shepherd' => $newShepherdName ?? 'Знято',
+            'shepherd' => $newShepherdName ?? __('messages.removed'),
         ], [
-            'shepherd' => $oldShepherdName ?? 'Не призначено',
+            'shepherd' => $oldShepherdName ?? __('messages.not_assigned'),
         ]);
 
         return response()->json(['success' => true]);
@@ -1239,7 +1239,7 @@ class PersonController extends Controller
     public function quickEdit(Request $request)
     {
         if (!auth()->user()->canView('people')) {
-            return $this->errorResponse($request, __('У вас немає доступу до цього розділу. Зверніться до адміністратора церкви для отримання потрібних прав.'));
+            return $this->errorResponse($request, __('messages.no_access_to_section'));
         }
 
         $church = $this->getCurrentChurch();
@@ -1444,7 +1444,7 @@ class PersonController extends Controller
 
         // Log quick edit action
         if ($stats['created'] > 0 || $stats['updated'] > 0 || $stats['deleted'] > 0) {
-            $this->logAuditAction('quick_edit_saved', 'Person', null, 'Швидке редагування', [
+            $this->logAuditAction('quick_edit_saved', 'Person', null, __('messages.audit_quick_edit'), [
                 'created' => $stats['created'],
                 'updated' => $stats['updated'],
                 'deleted' => $stats['deleted'],
@@ -1467,12 +1467,12 @@ class PersonController extends Controller
 
         // Ensure person belongs to current church
         if ($person->church_id !== $church->id) {
-            return response()->json(['success' => false, 'message' => 'Доступ заборонено'], 403);
+            return response()->json(['success' => false, 'message' => __('messages.access_denied')], 403);
         }
 
         // Check edit permission (own profile or canEdit('people'))
         if (!auth()->user()->can('update', $person)) {
-            return response()->json(['success' => false, 'message' => 'Недостатньо прав'], 403);
+            return response()->json(['success' => false, 'message' => __('messages.insufficient_permissions')], 403);
         }
 
         $request->validate([
@@ -1508,7 +1508,7 @@ class PersonController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Не вдалося обробити фото. Спробуйте інший файл (JPG/PNG).',
+                'message' => __('messages.photo_processing_failed'),
             ], 422);
         }
     }
@@ -1521,12 +1521,12 @@ class PersonController extends Controller
         $church = $this->getCurrentChurch();
 
         if ($person->church_id !== $church->id) {
-            return response()->json(['success' => false, 'message' => 'Доступ заборонено'], 403);
+            return response()->json(['success' => false, 'message' => __('messages.access_denied')], 403);
         }
 
         // Check edit permission (own profile or canEdit('people'))
         if (!auth()->user()->can('update', $person)) {
-            return response()->json(['success' => false, 'message' => 'Недостатньо прав'], 403);
+            return response()->json(['success' => false, 'message' => __('messages.insufficient_permissions')], 403);
         }
 
         if ($person->photo) {
@@ -1560,14 +1560,14 @@ class PersonController extends Controller
             ->get();
 
         if ($people->count() !== count($ids)) {
-            return response()->json(['success' => false, 'message' => 'Деякі записи не знайдено']);
+            return response()->json(['success' => false, 'message' => __('messages.some_records_not_found')]);
         }
 
         switch ($validated['action']) {
             case 'ministry':
                 $ministry = $church->ministries()->find($validated['value']);
                 if (!$ministry) {
-                    return response()->json(['success' => false, 'message' => 'Служіння не знайдено']);
+                    return response()->json(['success' => false, 'message' => __('messages.ministry_not_found')]);
                 }
 
                 foreach ($people as $person) {
@@ -1582,14 +1582,14 @@ class PersonController extends Controller
 
                 return response()->json([
                     'success' => true,
-                    'message' => "Додано {$people->count()} людей до служіння «{$ministry->name}»",
+                    'message' => __('messages.bulk_ministry_added', ['count' => $people->count(), 'name' => $ministry->name]),
                     'reload' => true
                 ]);
 
             case 'tag':
                 $tag = $church->tags()->find($validated['value']);
                 if (!$tag) {
-                    return response()->json(['success' => false, 'message' => 'Тег не знайдено']);
+                    return response()->json(['success' => false, 'message' => __('messages.tag_not_found')]);
                 }
 
                 foreach ($people as $person) {
@@ -1604,18 +1604,18 @@ class PersonController extends Controller
 
                 return response()->json([
                     'success' => true,
-                    'message' => "Додано тег «{$tag->name}» для {$people->count()} людей",
+                    'message' => __('messages.bulk_tag_added', ['name' => $tag->name, 'count' => $people->count()]),
                     'reload' => true
                 ]);
 
             case 'message':
                 if (!config('services.telegram.bot_token')) {
-                    return response()->json(['success' => false, 'message' => 'Telegram бот не налаштовано']);
+                    return response()->json(['success' => false, 'message' => __('messages.telegram_bot_not_configured')]);
                 }
 
                 $message = $validated['message'];
                 if (empty($message)) {
-                    return response()->json(['success' => false, 'message' => 'Повідомлення не може бути порожнім']);
+                    return response()->json(['success' => false, 'message' => __('messages.message_cannot_be_empty')]);
                 }
 
                 $telegram = \App\Services\TelegramService::make();
@@ -1633,29 +1633,29 @@ class PersonController extends Controller
                 }
 
                 // Log bulk message send
-                $this->logAuditAction('bulk_message_sent', 'Person', null, 'Масова розсилка', [
+                $this->logAuditAction('bulk_message_sent', 'Person', null, __('messages.audit_bulk_message'), [
                     'sent_count' => $sent,
                     'total_selected' => count($ids),
                 ]);
 
                 return response()->json([
                     'success' => true,
-                    'message' => "Надіслано {$sent} повідомлень",
+                    'message' => __('messages.bulk_messages_sent', ['count' => $sent]),
                 ]);
 
             case 'grant_access':
                 if (!auth()->user()->isAdmin()) {
-                    return response()->json(['success' => false, 'message' => 'Недостатньо прав']);
+                    return response()->json(['success' => false, 'message' => __('messages.insufficient_permissions')]);
                 }
 
                 $churchRoleId = $validated['church_role_id'] ?? null;
                 if (!$churchRoleId) {
-                    return response()->json(['success' => false, 'message' => 'Оберіть рівень доступу']);
+                    return response()->json(['success' => false, 'message' => __('messages.select_access_level')]);
                 }
 
                 $churchRole = $church->churchRoles()->find($churchRoleId);
                 if (!$churchRole) {
-                    return response()->json(['success' => false, 'message' => 'Роль не знайдено']);
+                    return response()->json(['success' => false, 'message' => __('messages.role_not_found')]);
                 }
 
                 $created = 0;
@@ -1716,17 +1716,17 @@ class PersonController extends Controller
                     $created++;
                 }
 
-                $message = "Створено {$created} акаунтів.";
+                $message = __('messages.bulk_accounts_created', ['count' => $created]);
                 if ($skipped > 0) {
-                    $message .= " Пропущено {$skipped} (вже мають доступ).";
+                    $message .= ' ' . __('messages.bulk_accounts_skipped', ['count' => $skipped]);
                 }
                 if ($noEmail > 0) {
-                    $message .= " Без email: {$noEmail}.";
+                    $message .= ' ' . __('messages.bulk_accounts_no_email', ['count' => $noEmail]);
                 }
 
                 // Log bulk access grant
                 if ($created > 0) {
-                    $this->logAuditAction('bulk_access_granted', 'User', null, 'Масове надання доступу', [
+                    $this->logAuditAction('bulk_access_granted', 'User', null, __('messages.audit_bulk_access_grant'), [
                         'created' => $created,
                         'skipped' => $skipped,
                         'no_email' => $noEmail,
@@ -1742,7 +1742,7 @@ class PersonController extends Controller
 
             case 'delete':
                 if (!auth()->user()->canDelete('people')) {
-                    return response()->json(['success' => false, 'message' => 'Недостатньо прав для видалення']);
+                    return response()->json(['success' => false, 'message' => __('messages.insufficient_permissions_delete')]);
                 }
 
                 $deletedNames = $people->pluck('full_name')->toArray();
@@ -1751,19 +1751,19 @@ class PersonController extends Controller
                 }
 
                 // Log bulk delete
-                $this->logAuditAction('bulk_deleted', 'Person', null, 'Масове видалення', [
+                $this->logAuditAction('bulk_deleted', 'Person', null, __('messages.audit_bulk_delete'), [
                     'count' => count($deletedNames),
                     'names' => array_slice($deletedNames, 0, 10), // Store first 10 names
                 ]);
 
                 return response()->json([
                     'success' => true,
-                    'message' => "Видалено {$people->count()} людей",
+                    'message' => __('messages.bulk_people_deleted', ['count' => $people->count()]),
                     'reload' => true
                 ]);
         }
 
-        return response()->json(['success' => false, 'message' => 'Невідома дія']);
+        return response()->json(['success' => false, 'message' => __('messages.unknown_action')]);
     }
 
     /**
@@ -1772,7 +1772,7 @@ class PersonController extends Controller
     public function findDuplicates()
     {
         if (!auth()->user()->isAdmin()) {
-            return response()->json(['message' => 'Недостатньо прав'], 403);
+            return response()->json(['message' => __('messages.insufficient_permissions')], 403);
         }
 
         $church = $this->getCurrentChurch();
@@ -1808,7 +1808,7 @@ class PersonController extends Controller
     public function mergePeople(Request $request)
     {
         if (!auth()->user()->isAdmin()) {
-            return response()->json(['message' => 'Недостатньо прав'], 403);
+            return response()->json(['message' => __('messages.insufficient_permissions')], 403);
         }
 
         $validated = $request->validate([

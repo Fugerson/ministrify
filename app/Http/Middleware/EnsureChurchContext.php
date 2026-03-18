@@ -27,7 +27,7 @@ class EnsureChurchContext
             if (!$church) {
                 session()->forget('impersonate_church_id');
                 return redirect()->route('system.index')
-                    ->with('error', 'Церква не знайдена.');
+                    ->with('error', __('messages.church_not_found'));
             }
         } else {
             $church = $user->church;
@@ -51,12 +51,12 @@ class EnsureChurchContext
             // Super admins without a church can still access if not impersonating
             if ($user->isSuperAdmin()) {
                 return redirect()->route('system.index')
-                    ->with('warning', 'Оберіть церкву для роботи.');
+                    ->with('warning', __('messages.select_church_to_work'));
             }
 
             auth()->logout();
             return redirect()->route('login')
-                ->withErrors(['email' => 'Ваш акаунт не прив\'язаний до церкви.']);
+                ->withErrors(['email' => __('messages.account_not_linked_to_church')]);
         }
 
         // Set correct Person for the active church

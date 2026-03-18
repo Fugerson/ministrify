@@ -98,7 +98,7 @@ class MinistryController extends Controller
 
         \App\Models\Church::clearMinistriesCache($church->id);
 
-        return $this->successResponse($request, 'Команду створено!', 'ministries.show', [$ministry]);
+        return $this->successResponse($request, __('messages.ministry_created'), 'ministries.show', [$ministry]);
     }
 
     public function show(Ministry $ministry)
@@ -108,7 +108,7 @@ class MinistryController extends Controller
 
         // Check private access
         if (!$ministry->canAccess()) {
-            abort(403, 'Ця команда приватна. Доступ тільки для учасників.');
+            abort(403, __('messages.ministry_private_access'));
         }
 
         $church = $this->getCurrentChurch();
@@ -575,7 +575,7 @@ class MinistryController extends Controller
             ->first();
 
         if (!$sourceBudget || $sourceBudget->items->isEmpty()) {
-            return response()->json(['success' => false, 'message' => 'Немає статей для копіювання.'], 422);
+            return response()->json(['success' => false, 'message' => __('messages.no_budget_items_to_copy')], 422);
         }
 
         $targetBudget = MinistryBudget::where('church_id', $church->id)
@@ -585,7 +585,7 @@ class MinistryController extends Controller
             ->first();
 
         if ($targetBudget && $targetBudget->items()->count() > 0) {
-            return response()->json(['success' => false, 'message' => 'Цільовий місяць вже має статті бюджету.'], 422);
+            return response()->json(['success' => false, 'message' => __('messages.target_month_has_items')], 422);
         }
 
         if (!$targetBudget) {
@@ -628,7 +628,7 @@ class MinistryController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Бюджет скопійовано на ' . $monthNames[$validated['to_month']] . ' ' . $validated['to_year'],
+            'message' => __('messages.budget_copied_to', ['month' => $monthNames[$validated['to_month']], 'year' => $validated['to_year']]),
             'budget_id' => $targetBudget->id,
         ]);
     }
@@ -701,7 +701,7 @@ class MinistryController extends Controller
                 ->where('category_id', $categoryId)
                 ->exists();
             if ($exists) {
-                return response()->json(['success' => false, 'message' => 'Ця категорія вже використовується в іншій статті бюджету.'], 422);
+                return response()->json(['success' => false, 'message' => __('messages.budget_category_already_used')], 422);
             }
         }
 
@@ -723,7 +723,7 @@ class MinistryController extends Controller
             $item->responsiblePeople()->attach($validated['person_ids']);
         }
 
-        return response()->json(['success' => true, 'message' => 'Статтю бюджету додано.', 'item' => $item->load('responsiblePeople', 'category')]);
+        return response()->json(['success' => true, 'message' => __('messages.budget_item_added'), 'item' => $item->load('responsiblePeople', 'category')]);
     }
 
     /**
@@ -769,7 +769,7 @@ class MinistryController extends Controller
                 ->where('id', '!=', $budgetItem->id)
                 ->exists();
             if ($exists) {
-                return response()->json(['success' => false, 'message' => 'Ця категорія вже використовується в іншій статті бюджету.'], 422);
+                return response()->json(['success' => false, 'message' => __('messages.budget_category_already_used')], 422);
             }
         }
 
@@ -784,7 +784,7 @@ class MinistryController extends Controller
 
         $budgetItem->responsiblePeople()->sync($validated['person_ids'] ?? []);
 
-        return response()->json(['success' => true, 'message' => 'Статтю бюджету оновлено.', 'item' => $budgetItem->load('responsiblePeople', 'category')]);
+        return response()->json(['success' => true, 'message' => __('messages.budget_item_updated'), 'item' => $budgetItem->load('responsiblePeople', 'category')]);
     }
 
     /**
@@ -801,7 +801,7 @@ class MinistryController extends Controller
         Transaction::where('budget_item_id', $budgetItem->id)->update(['budget_item_id' => null]);
         $budgetItem->delete();
 
-        return response()->json(['success' => true, 'message' => 'Статтю бюджету видалено.']);
+        return response()->json(['success' => true, 'message' => __('messages.budget_item_deleted')]);
     }
 
     // ==================
@@ -843,7 +843,7 @@ class MinistryController extends Controller
         if ($overallReceived <= 0) {
             return response()->json([
                 'success' => false,
-                'message' => 'Бюджет не виділено. Спочатку церква має виділити кошти для служіння.',
+                'message' => __('messages.no_budget_allocated'),
             ], 422);
         }
 
@@ -895,7 +895,7 @@ class MinistryController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Витрату додано.',
+            'message' => __('messages.expense_added'),
             'transaction' => [
                 'id' => $transaction->id,
                 'amount' => $transaction->amount,
@@ -1035,7 +1035,7 @@ class MinistryController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Витрату оновлено.',
+            'message' => __('messages.expense_updated'),
             'transaction' => [
                 'id' => $transaction->id,
                 'amount' => $transaction->amount,
@@ -1075,7 +1075,7 @@ class MinistryController extends Controller
 
         $transaction->delete();
 
-        return response()->json(['success' => true, 'message' => 'Витрату видалено.']);
+        return response()->json(['success' => true, 'message' => __('messages.expense_deleted')]);
     }
 
     /**
@@ -1112,7 +1112,7 @@ class MinistryController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Надходження додано.',
+            'message' => __('messages.income_added'),
             'transaction' => [
                 'id' => $transaction->id,
                 'amount' => $transaction->amount,
@@ -1142,7 +1142,7 @@ class MinistryController extends Controller
 
         $transaction->delete();
 
-        return response()->json(['success' => true, 'message' => 'Надходження видалено.']);
+        return response()->json(['success' => true, 'message' => __('messages.income_deleted')]);
     }
 
     public function scheduleGridData(Request $request, Ministry $ministry)
@@ -1333,7 +1333,7 @@ class MinistryController extends Controller
 
         \App\Models\Church::clearMinistriesCache($ministry->church_id);
 
-        return $this->successResponse($request, 'Команду оновлено!', 'ministries.show', [$ministry]);
+        return $this->successResponse($request, __('messages.ministry_updated'), 'ministries.show', [$ministry]);
     }
 
     public function destroy(Request $request, Ministry $ministry)
@@ -1346,7 +1346,7 @@ class MinistryController extends Controller
 
         \App\Models\Church::clearMinistriesCache($churchId);
 
-        return $this->successResponse($request, 'Служіння видалено.', 'ministries.index');
+        return $this->successResponse($request, __('messages.ministry_deleted'), 'ministries.index');
     }
 
     public function membersJson(Ministry $ministry)
@@ -1377,7 +1377,7 @@ class MinistryController extends Controller
 
         // Check if already a member
         if ($ministry->members()->where('person_id', $validated['person_id'])->exists()) {
-            return $this->errorResponse($request, 'Ця людина вже є учасником служіння.');
+            return $this->errorResponse($request, __('messages.person_already_member'));
         }
 
         $ministry->members()->attach($validated['person_id'], [
@@ -1392,7 +1392,7 @@ class MinistryController extends Controller
             'position_ids' => $validated['position_ids'] ?? [],
         ]);
 
-        return $this->successResponse($request, 'Учасника додано.');
+        return $this->successResponse($request, __('messages.member_added'));
     }
 
     public function removeMember(Request $request, Ministry $ministry, Person $person)
@@ -1403,7 +1403,7 @@ class MinistryController extends Controller
 
         // Prevent removing the leader from members
         if ($ministry->leader_id === $person->id) {
-            return $this->errorResponse($request, 'Неможливо видалити лідера з команди. Спочатку змініть лідера.');
+            return $this->errorResponse($request, __('messages.cannot_remove_leader_from_team'));
         }
 
         $ministry->members()->detach($person->id);
@@ -1414,7 +1414,7 @@ class MinistryController extends Controller
             'person_name' => $person->full_name,
         ]);
 
-        return $this->successResponse($request, 'Учасника видалено.');
+        return $this->successResponse($request, __('messages.member_removed'));
     }
 
     public function updateMemberPositions(Request $request, Ministry $ministry, Person $person)
@@ -1444,7 +1444,7 @@ class MinistryController extends Controller
             'old_position_ids' => $oldPositionIds,
         ]);
 
-        return $this->successResponse($request, 'Позиції оновлено.');
+        return $this->successResponse($request, __('messages.positions_updated'));
     }
 
     public function updateMemberRole(Request $request, Ministry $ministry, Person $person)
@@ -1578,7 +1578,7 @@ class MinistryController extends Controller
             'sort_order' => $maxOrder + 1,
         ]);
 
-        return $this->successResponse($request, 'Роль додано', null, [], ['id' => $role->id]);
+        return $this->successResponse($request, __('messages.role_added'), null, [], ['id' => $role->id]);
     }
 
     public function updateWorshipRole(Request $request, Ministry $ministry, WorshipRole $role)
@@ -1599,7 +1599,7 @@ class MinistryController extends Controller
 
         $role->update($validated);
 
-        return $this->successResponse($request, 'Роль оновлено');
+        return $this->successResponse($request, __('messages.role_updated'));
     }
 
     public function destroyWorshipRole(Request $request, Ministry $ministry, WorshipRole $role)
@@ -1614,7 +1614,7 @@ class MinistryController extends Controller
 
         $role->delete();
 
-        return $this->successResponse($request, 'Роль видалено');
+        return $this->successResponse($request, __('messages.role_deleted'));
     }
 
     public function storeMinistryRole(Request $request, Ministry $ministry)
@@ -1638,7 +1638,7 @@ class MinistryController extends Controller
             'sort_order' => $maxOrder + 1,
         ]);
 
-        return $this->successResponse($request, 'Роль додано', null, [], ['id' => $role->id]);
+        return $this->successResponse($request, __('messages.role_added'), null, [], ['id' => $role->id]);
     }
 
     public function updateMinistryRole(Request $request, Ministry $ministry, MinistryRole $role)
@@ -1660,7 +1660,7 @@ class MinistryController extends Controller
         $validated['color'] = !empty($validated['color']) ? $validated['color'] : null;
         $role->update($validated);
 
-        return $this->successResponse($request, 'Роль оновлено');
+        return $this->successResponse($request, __('messages.role_updated'));
     }
 
     public function destroyMinistryRole(Request $request, Ministry $ministry, MinistryRole $role)
@@ -1674,7 +1674,7 @@ class MinistryController extends Controller
 
         $role->delete();
 
-        return $this->successResponse($request, 'Роль видалено');
+        return $this->successResponse($request, __('messages.role_deleted'));
     }
 
     protected function authorizeChurch($model): void

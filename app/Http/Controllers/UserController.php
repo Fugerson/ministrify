@@ -91,12 +91,12 @@ class UserController extends Controller
             $email = $person->email;
 
             if (empty($email)) {
-                return back()->withInput()->withErrors(['person_id' => 'Ця людина не має email. Додайте email в профілі або створіть користувача без прив\'язки.']);
+                return back()->withInput()->withErrors(['person_id' => __('messages.person_no_email')]);
             }
         } else {
             // No person selected - require name and email
             if (empty($name) || empty($email)) {
-                return back()->withInput()->withErrors(['name' => 'Вкажіть ім\'я та email, або оберіть людину.']);
+                return back()->withInput()->withErrors(['name' => __('messages.provide_name_and_email')]);
             }
         }
 
@@ -105,7 +105,7 @@ class UserController extends Controller
 
         if ($existingUser) {
             if ($existingUser->belongsToChurch($church->id)) {
-                return back()->withInput()->withErrors(['email' => 'Цей користувач вже є членом вашої церкви.']);
+                return back()->withInput()->withErrors(['email' => __('messages.user_already_member')]);
             }
 
             // Add to this church via pivot
@@ -162,7 +162,7 @@ class UserController extends Controller
                 'updated_at' => now(),
             ]);
 
-            return $this->successResponse($request, 'Користувача додано до церкви.', 'settings.users.index');
+            return $this->successResponse($request, __('messages.user_added_to_church'), 'settings.users.index');
         }
 
         // Generate secure random password (user will reset via email)
@@ -252,14 +252,14 @@ class UserController extends Controller
         );
 
         // Try to send password reset link
-        $message = 'Користувача створено.';
+        $message = __('messages.user_created');
         try {
             $status = Password::sendResetLink(['email' => $user->email]);
             if ($status === Password::RESET_LINK_SENT) {
-                $message .= ' Посилання для входу надіслано на email.';
+                $message .= __('messages.login_link_sent');
             }
         } catch (\Exception $e) {
-            $message .= ' Налаштуйте пароль вручну або надішліть запрошення пізніше.';
+            $message .= __('messages.setup_password_manually');
         }
 
         return $this->successResponse($request, $message, 'settings.users.index');
@@ -320,7 +320,7 @@ class UserController extends Controller
         if ($churchRoleId) {
             $targetRole = \App\Models\ChurchRole::find($churchRoleId);
             if ($targetRole && $targetRole->is_admin_role && !auth()->user()->isAdmin()) {
-                return $this->errorResponse($request, 'Тільки адміністратори можуть призначати адміністративні ролі.');
+                return $this->errorResponse($request, __('messages.only_admins_can_assign_admin_roles'));
             }
         }
 
@@ -343,7 +343,7 @@ class UserController extends Controller
             $email = $person->email;
 
             if (empty($email)) {
-                $error = 'Ця людина не має email. Додайте email в профілі або відв\'яжіть користувача.';
+                $error = __('messages.person_no_email_edit');
                 if ($request->expectsJson()) {
                     return response()->json(['message' => $error], 422);
                 }
@@ -352,7 +352,7 @@ class UserController extends Controller
 
             // Check if email is already taken by another user
             if (User::where('email', $email)->where('id', '!=', $user->id)->exists()) {
-                $error = 'Користувач з таким email вже існує.';
+                $error = __('messages.user_email_already_exists');
                 if ($request->expectsJson()) {
                     return response()->json(['message' => $error], 422);
                 }
@@ -365,10 +365,10 @@ class UserController extends Controller
                 ->first();
 
             if (!$linkPerson) {
-                return response()->json(['message' => 'Обрана людина не знайдена'], 422);
+                return response()->json(['message' => __('messages.selected_person_not_found')], 422);
             }
             if ($linkPerson->user_id && $linkPerson->user_id !== $user->id) {
-                return response()->json(['message' => 'Ця людина вже привʼязана до іншого користувача'], 422);
+                return response()->json(['message' => __('messages.person_already_linked')], 422);
             }
 
             // Use existing User name/email — don't override
@@ -378,9 +378,9 @@ class UserController extends Controller
             // No person selected - require name and email
             if (empty($name) || empty($email)) {
                 if ($request->expectsJson()) {
-                    return response()->json(['message' => 'Вкажіть ім\'я та email, або оберіть людину.'], 422);
+                    return response()->json(['message' => __('messages.provide_name_and_email')], 422);
                 }
-                return back()->withInput()->withErrors(['name' => 'Вкажіть ім\'я та email, або оберіть людину.']);
+                return back()->withInput()->withErrors(['name' => __('messages.provide_name_and_email')]);
             }
         }
 
@@ -480,7 +480,7 @@ class UserController extends Controller
             }
         }
 
-        return $this->successResponse($request, 'Користувача оновлено.', 'settings.users.index');
+        return $this->successResponse($request, __('messages.user_updated'), 'settings.users.index');
     }
 
     public function destroy(Request $request, User $user)
@@ -489,7 +489,7 @@ class UserController extends Controller
 
         // Prevent deleting yourself
         if ($user->id === auth()->id()) {
-            return $this->errorResponse($request, 'Ви не можете видалити свій акаунт.');
+            return $this->errorResponse($request, __('messages.cannot_delete_self'));
         }
 
         $church = $this->getCurrentChurch();
@@ -508,7 +508,7 @@ class UserController extends Controller
                     ->where('church_roles.is_admin_role', true)
                     ->count();
                 if ($adminCount <= 1) {
-                    return $this->errorResponse($request, 'Неможливо видалити останнього адміністратора церкви.');
+                    return $this->errorResponse($request, __('messages.cannot_delete_last_admin'));
                 }
             }
         }
@@ -536,7 +536,7 @@ class UserController extends Controller
             $user->delete();
         }
 
-        return $this->successResponse($request, 'Користувача видалено.', 'settings.users.index');
+        return $this->successResponse($request, __('messages.user_deleted'), 'settings.users.index');
     }
 
     public function sendInvite(Request $request, User $user)
@@ -546,10 +546,10 @@ class UserController extends Controller
         try {
             $status = Password::sendResetLink(['email' => $user->email]);
             if ($status !== Password::RESET_LINK_SENT) {
-                return $this->errorResponse($request, 'Не вдалося надіслати запрошення.');
+                return $this->errorResponse($request, __('messages.invite_send_failed'));
             }
         } catch (\Exception $e) {
-            return $this->errorResponse($request, 'Помилка надсилання: ' . $e->getMessage());
+            return $this->errorResponse($request, __('messages.invite_error', ['error' => $e->getMessage()]));
         }
 
         // Log invite sent
@@ -558,7 +558,7 @@ class UserController extends Controller
             'email' => $user->email,
         ]);
 
-        return $this->successResponse($request, 'Запрошення надіслано на ' . $user->email);
+        return $this->successResponse($request, __('messages.invite_sent_to', ['email' => $user->email]));
     }
 
     public function getPermissions(User $user)
@@ -584,7 +584,7 @@ class UserController extends Controller
         return response()->json([
             'role_permissions' => $churchRole ? $churchRole->getAllPermissions() : [],
             'overrides' => $overrides,
-            'role_name' => $churchRole?->name ?? 'Без ролі',
+            'role_name' => $churchRole?->name ?? __('messages.no_role'),
             'is_admin_role' => $churchRole?->is_admin_role ?? false,
         ]);
     }
@@ -606,7 +606,7 @@ class UserController extends Controller
             : null;
 
         if ($churchRole?->is_admin_role) {
-            return response()->json(['message' => 'Адмін-роль вже має повний доступ.'], 400);
+            return response()->json(['message' => __('messages.admin_role_full_access')], 400);
         }
 
         $overridesInput = $request->input('overrides', []);
@@ -652,7 +652,7 @@ class UserController extends Controller
             ]);
 
         return response()->json([
-            'message' => 'Додаткові права збережено.',
+            'message' => __('messages.extra_permissions_saved'),
             'overrides' => $cleanOverrides,
         ]);
     }

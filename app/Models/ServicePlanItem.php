@@ -121,17 +121,17 @@ class ServicePlanItem extends Model
     public static function typeLabels(): array
     {
         return [
-            self::TYPE_WORSHIP => 'Прославлення',
-            self::TYPE_SERMON => 'Проповідь',
-            self::TYPE_ANNOUNCEMENT => 'Оголошення',
-            self::TYPE_PRAYER => 'Молитва',
-            self::TYPE_OFFERING => 'Пожертва',
-            self::TYPE_TESTIMONY => 'Свідчення',
-            self::TYPE_BAPTISM => 'Хрещення',
-            self::TYPE_COMMUNION => 'Причастя',
-            self::TYPE_CHILD_BLESSING => 'Дитяче благословення',
-            self::TYPE_SPECIAL => 'Особливий номер',
-            self::TYPE_OTHER => 'Інше',
+            self::TYPE_WORSHIP => __('app.plan_type_worship'),
+            self::TYPE_SERMON => __('app.plan_type_sermon'),
+            self::TYPE_ANNOUNCEMENT => __('app.plan_type_announcement'),
+            self::TYPE_PRAYER => __('app.plan_type_prayer'),
+            self::TYPE_OFFERING => __('app.plan_type_offering'),
+            self::TYPE_TESTIMONY => __('app.plan_type_testimony'),
+            self::TYPE_BAPTISM => __('app.plan_type_baptism'),
+            self::TYPE_COMMUNION => __('app.plan_type_communion'),
+            self::TYPE_CHILD_BLESSING => __('app.plan_type_child_blessing'),
+            self::TYPE_SPECIAL => __('app.plan_type_special'),
+            self::TYPE_OTHER => __('app.plan_type_other'),
         ];
     }
 
@@ -141,10 +141,10 @@ class ServicePlanItem extends Model
     public static function statusLabels(): array
     {
         return [
-            self::STATUS_PLANNED => 'Заплановано',
-            self::STATUS_CONFIRMED => 'Підтверджено',
-            self::STATUS_DECLINED => 'Відхилено',
-            self::STATUS_COMPLETED => 'Виконано',
+            self::STATUS_PLANNED => __('app.plan_status_planned'),
+            self::STATUS_CONFIRMED => __('app.plan_status_confirmed'),
+            self::STATUS_DECLINED => __('app.plan_status_declined'),
+            self::STATUS_COMPLETED => __('app.plan_status_completed'),
         ];
     }
 

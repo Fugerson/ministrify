@@ -38,49 +38,55 @@ class Song extends Model
         'last_used_at' => 'date',
     ];
 
-    const KEYS = [
-        // До
-        'C' => 'До мажор',
-        'Cm' => 'До мінор',
-        'C#' => 'До-дієз мажор',
-        'C#m' => 'До-дієз мінор',
-        // Ре
-        'Db' => 'Ре-бемоль мажор',
-        'Dbm' => 'Ре-бемоль мінор',
-        'D' => 'Ре мажор',
-        'Dm' => 'Ре мінор',
-        'D#' => 'Ре-дієз мажор',
-        'D#m' => 'Ре-дієз мінор',
-        // Мі
-        'Eb' => 'Мі-бемоль мажор',
-        'Ebm' => 'Мі-бемоль мінор',
-        'E' => 'Мі мажор',
-        'Em' => 'Мі мінор',
-        // Фа
-        'F' => 'Фа мажор',
-        'Fm' => 'Фа мінор',
-        'F#' => 'Фа-дієз мажор',
-        'F#m' => 'Фа-дієз мінор',
-        // Соль
-        'Gb' => 'Соль-бемоль мажор',
-        'Gbm' => 'Соль-бемоль мінор',
-        'G' => 'Соль мажор',
-        'Gm' => 'Соль мінор',
-        'G#' => 'Соль-дієз мажор',
-        'G#m' => 'Соль-дієз мінор',
-        // Ля
-        'Ab' => 'Ля-бемоль мажор',
-        'Abm' => 'Ля-бемоль мінор',
-        'A' => 'Ля мажор',
-        'Am' => 'Ля мінор',
-        'A#' => 'Ля-дієз мажор',
-        'A#m' => 'Ля-дієз мінор',
-        // Сі
-        'Bb' => 'Сі-бемоль мажор',
-        'Bbm' => 'Сі-бемоль мінор',
-        'B' => 'Сі мажор',
-        'Bm' => 'Сі мінор',
-    ];
+    /**
+     * Get key labels (localized)
+     */
+    public static function keyLabels(): array
+    {
+        return [
+            // C
+            'C' => __('app.key_c_major'),
+            'Cm' => __('app.key_c_minor'),
+            'C#' => __('app.key_c_sharp_major'),
+            'C#m' => __('app.key_c_sharp_minor'),
+            // D
+            'Db' => __('app.key_d_flat_major'),
+            'Dbm' => __('app.key_d_flat_minor'),
+            'D' => __('app.key_d_major'),
+            'Dm' => __('app.key_d_minor'),
+            'D#' => __('app.key_d_sharp_major'),
+            'D#m' => __('app.key_d_sharp_minor'),
+            // E
+            'Eb' => __('app.key_e_flat_major'),
+            'Ebm' => __('app.key_e_flat_minor'),
+            'E' => __('app.key_e_major'),
+            'Em' => __('app.key_e_minor'),
+            // F
+            'F' => __('app.key_f_major'),
+            'Fm' => __('app.key_f_minor'),
+            'F#' => __('app.key_f_sharp_major'),
+            'F#m' => __('app.key_f_sharp_minor'),
+            // G
+            'Gb' => __('app.key_g_flat_major'),
+            'Gbm' => __('app.key_g_flat_minor'),
+            'G' => __('app.key_g_major'),
+            'Gm' => __('app.key_g_minor'),
+            'G#' => __('app.key_g_sharp_major'),
+            'G#m' => __('app.key_g_sharp_minor'),
+            // A
+            'Ab' => __('app.key_a_flat_major'),
+            'Abm' => __('app.key_a_flat_minor'),
+            'A' => __('app.key_a_major'),
+            'Am' => __('app.key_a_minor'),
+            'A#' => __('app.key_a_sharp_major'),
+            'A#m' => __('app.key_a_sharp_minor'),
+            // B
+            'Bb' => __('app.key_b_flat_major'),
+            'Bbm' => __('app.key_b_flat_minor'),
+            'B' => __('app.key_b_major'),
+            'Bm' => __('app.key_b_minor'),
+        ];
+    }
 
     public function church(): BelongsTo
     {
@@ -101,7 +107,7 @@ class Song extends Model
 
     public function getKeyLabelAttribute(): ?string
     {
-        return $this->key ? (self::KEYS[$this->key] ?? $this->key) : null;
+        return $this->key ? (self::keyLabels()[$this->key] ?? $this->key) : null;
     }
 
     public function getYoutubeIdAttribute(): ?string

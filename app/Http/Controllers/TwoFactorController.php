@@ -38,7 +38,7 @@ class TwoFactorController extends Controller
 
         if ($user->two_factor_confirmed_at) {
             return redirect()->route('two-factor.show')
-                ->with('error', 'Двофакторна аутентифікація вже увімкнена.');
+                ->with('error', __('messages.2fa_already_enabled'));
         }
 
         $secret = $this->twoFactor->generateSecretKey();
@@ -65,11 +65,11 @@ class TwoFactorController extends Controller
         $secret = session('2fa_secret');
 
         if (!$secret) {
-            return back()->with('error', 'Сесія закінчилася. Спробуйте ще раз.');
+            return back()->with('error', __('messages.session_expired'));
         }
 
         if (!$this->twoFactor->verify($secret, $request->code)) {
-            return back()->with('error', 'Неправильний код. Спробуйте ще раз.');
+            return back()->with('error', __('messages.invalid_code_try_again'));
         }
 
         // Generate recovery codes
@@ -104,7 +104,7 @@ class TwoFactorController extends Controller
         ]);
 
         return redirect()->route('two-factor.show')
-            ->with('success', 'Двофакторну аутентифікацію вимкнено.');
+            ->with('success', __('messages.2fa_disabled'));
     }
 
     /**
@@ -119,7 +119,7 @@ class TwoFactorController extends Controller
         $user = auth()->user();
 
         if (!$user->two_factor_confirmed_at) {
-            return back()->with('error', '2FA не увімкнено.');
+            return back()->with('error', __('messages.2fa_not_enabled'));
         }
 
         $recoveryCodes = $this->twoFactor->generateRecoveryCodes();
@@ -166,7 +166,7 @@ class TwoFactorController extends Controller
 
         // Try TOTP code first
         if (!$user->two_factor_secret) {
-            return redirect()->route('login')->with('error', 'Двофакторну автентифікацію не налаштовано.');
+            return redirect()->route('login')->with('error', __('messages.2fa_not_configured'));
         }
         $secret = decrypt($user->two_factor_secret);
         if ($this->twoFactor->verify($secret, $code)) {
@@ -220,10 +220,9 @@ class TwoFactorController extends Controller
 
             $redirect = $user->isSuperAdmin() ? route('system.index') : route('dashboard');
             return redirect()->intended($redirect)
-                ->with('warning', 'Ви використали код відновлення. Залишилось: ' .
-                    count(json_decode(decrypt($user->two_factor_recovery_codes), true)));
+                ->with('warning', __('messages.recovery_code_used', ['count' => count(json_decode(decrypt($user->two_factor_recovery_codes), true))]));
         }
 
-        return back()->with('error', 'Неправильний код.');
+        return back()->with('error', __('messages.invalid_code'));
     }
 }

@@ -214,7 +214,7 @@ class BoardController extends Controller
             $board->columns()->create($column);
         }
 
-        return $this->successResponse($request, 'Дошку створено.', 'boards.index');
+        return $this->successResponse($request, __('messages.board_created'), 'boards.index');
     }
 
     public function edit(Board $board)
@@ -235,7 +235,7 @@ class BoardController extends Controller
 
         $board->update($validated);
 
-        return $this->successResponse($request, 'Дошку оновлено.', 'boards.show', [$board]);
+        return $this->successResponse($request, __('messages.board_updated'), 'boards.show', [$board]);
     }
 
     public function destroy(Request $request, Board $board)
@@ -244,7 +244,7 @@ class BoardController extends Controller
         abort_unless(auth()->user()->canDelete('boards'), 403);
         $board->delete();
 
-        return $this->successResponse($request, 'Дошку видалено.', 'boards.index');
+        return $this->successResponse($request, __('messages.board_deleted'), 'boards.index');
     }
 
     public function archive(Request $request, Board $board)
@@ -252,7 +252,7 @@ class BoardController extends Controller
         $this->authorizeBoard($board);
         $board->update(['is_archived' => true]);
 
-        return $this->successResponse($request, 'Дошку архівовано.', 'boards.index');
+        return $this->successResponse($request, __('messages.board_archived'), 'boards.index');
     }
 
     public function archived()
@@ -270,7 +270,7 @@ class BoardController extends Controller
         $this->authorizeBoard($board);
         $board->update(['is_archived' => false]);
 
-        return $this->successResponse($request, 'Дошку відновлено.', 'boards.index');
+        return $this->successResponse($request, __('messages.board_restored'), 'boards.index');
     }
 
     // Column Management
@@ -289,7 +289,7 @@ class BoardController extends Controller
 
         $board->columns()->create($validated);
 
-        return $this->successResponse($request, 'Колонку додано.', 'boards.show', [$board]);
+        return $this->successResponse($request, __('messages.column_added'), 'boards.show', [$board]);
     }
 
     public function updateColumn(Request $request, BoardColumn $column)
@@ -305,7 +305,7 @@ class BoardController extends Controller
 
         $column->update($validated);
 
-        return $this->successResponse($request, 'Колонку оновлено.', 'boards.show', [$column->board]);
+        return $this->successResponse($request, __('messages.column_updated'), 'boards.show', [$column->board]);
     }
 
     public function destroyColumn(Request $request, BoardColumn $column)
@@ -315,12 +315,12 @@ class BoardController extends Controller
         $board = $column->board;
 
         if ($column->cards()->count() > 0) {
-            return $this->errorResponse($request, 'Неможливо видалити колонку з картками.');
+            return $this->errorResponse($request, __('messages.cannot_delete_column_with_cards'));
         }
 
         $column->delete();
 
-        return $this->successResponse($request, 'Колонку видалено.', 'boards.show', [$board]);
+        return $this->successResponse($request, __('messages.column_deleted'), 'boards.show', [$board]);
     }
 
     public function reorderColumns(Request $request, Board $board)
@@ -336,7 +336,7 @@ class BoardController extends Controller
         $boardColumnIds = $board->columns()->pluck('id')->toArray();
         foreach ($positions['positions'] as $index => $columnId) {
             if (!in_array($columnId, $boardColumnIds)) {
-                abort(403, 'Колонка не належить цій дошці.');
+                abort(403, __('messages.column_not_belongs_to_board'));
             }
             BoardColumn::where('id', $columnId)->update(['position' => $index]);
         }
@@ -350,7 +350,7 @@ class BoardController extends Controller
         $this->authorizeBoard($column->board);
 
         if ($column->isAtLimit()) {
-            return response()->json(['error' => 'Ця колонка досягла ліміту карток.'], 422);
+            return response()->json(['error' => __('messages.column_limit_reached')], 422);
         }
 
         $validated = $request->validate([
@@ -382,7 +382,7 @@ class BoardController extends Controller
         // Log activity
         BoardCardActivity::log($card, 'created');
 
-        return $this->successResponse($request, 'Завдання додано.', 'boards.index', [], ['card' => $card]);
+        return $this->successResponse($request, __('messages.task_added'), 'boards.index', [], ['card' => $card]);
     }
 
     // Quick card creation from entities
@@ -399,20 +399,20 @@ class BoardController extends Controller
 
         $board = Board::find($validated['board_id']);
         if (!$board) {
-            return $this->errorResponse($request, 'Дошку не знайдено.');
+            return $this->errorResponse($request, __('messages.board_not_found'));
         }
         $this->authorizeBoard($board);
 
         // Get the first column (typically "To Do")
         $column = $board->columns()->orderBy('position')->first();
         if (!$column) {
-            return $this->errorResponse($request, 'Дошка не має колонок.');
+            return $this->errorResponse($request, __('messages.board_has_no_columns'));
         }
 
         // Get entity details
         $entityData = $this->getEntityData($validated['entity_type'], $validated['entity_id'], $church->id);
         if (!$entityData) {
-            return $this->errorResponse($request, 'Об\'єкт не знайдено.');
+            return $this->errorResponse($request, __('messages.entity_not_found'));
         }
 
         $maxPosition = $column->cards()->max('position') ?? -1;
@@ -431,7 +431,7 @@ class BoardController extends Controller
             'entity_type' => $validated['entity_type'],
         ]);
 
-        return $this->successResponse($request, 'Картку створено з ' . $this->getEntityTypeLabel($validated['entity_type']) . '.', 'boards.show', [$board], ['card' => $card]);
+        return $this->successResponse($request, __('messages.card_created_from_entity', ['entity' => $this->getEntityTypeLabel($validated['entity_type'])]), 'boards.show', [$board], ['card' => $card]);
     }
 
     private function getEntityData(string $type, int $id, int $churchId): ?array
@@ -455,8 +455,8 @@ class BoardController extends Controller
         $fullDateTime = trim("{$dateStr} {$timeStr}");
 
         return [
-            'title' => "Підготовка: {$event->title}",
-            'description' => "Подія: {$event->title}\nДата: {$fullDateTime}\n\n{$event->description}",
+            'title' => __('messages.preparation_prefix', ['title' => $event->title]),
+            'description' => __('messages.event_description', ['title' => $event->title]) . "\n" . __('messages.event_date_label', ['date' => $fullDateTime]) . "\n\n{$event->description}",
             'priority' => $event->date && $event->date->isBefore(now()->addDays(3)) ? 'high' : 'medium',
             'due_date' => $event->date ? $event->date->subDay() : now(),
         ];
@@ -468,8 +468,8 @@ class BoardController extends Controller
         if (!$ministry) return null;
 
         return [
-            'title' => "Завдання: {$ministry->name}",
-            'description' => "Служіння: {$ministry->name}\n\n{$ministry->description}",
+            'title' => __('messages.task_prefix', ['title' => $ministry->name]),
+            'description' => __('messages.ministry_description', ['title' => $ministry->name]) . "\n\n{$ministry->description}",
             'priority' => 'medium',
             'due_date' => null,
         ];
@@ -481,8 +481,8 @@ class BoardController extends Controller
         if (!$group) return null;
 
         return [
-            'title' => "Завдання: {$group->name}",
-            'description' => "Група: {$group->name}\n\n{$group->description}",
+            'title' => __('messages.task_prefix', ['title' => $group->name]),
+            'description' => __('messages.group_description', ['title' => $group->name]) . "\n\n{$group->description}",
             'priority' => 'medium',
             'due_date' => null,
         ];
@@ -494,8 +494,8 @@ class BoardController extends Controller
         if (!$person) return null;
 
         return [
-            'title' => "Завдання: {$person->full_name}",
-            'description' => "Особа: {$person->full_name}\nТелефон: {$person->phone}\nEmail: {$person->email}",
+            'title' => __('messages.task_prefix', ['title' => $person->full_name]),
+            'description' => __('messages.person_description', ['name' => $person->full_name]) . "\n" . __('messages.phone_label', ['phone' => $person->phone]) . "\n" . __('messages.email_label', ['email' => $person->email]),
             'priority' => 'medium',
             'due_date' => null,
         ];
@@ -504,11 +504,11 @@ class BoardController extends Controller
     private function getEntityTypeLabel(string $type): string
     {
         return match($type) {
-            'event' => 'події',
-            'ministry' => 'служіння',
-            'group' => 'групи',
-            'person' => 'особи',
-            default => 'об\'єкту',
+            'event' => __('messages.entity_type_event'),
+            'ministry' => __('messages.entity_type_ministry'),
+            'group' => __('messages.entity_type_group'),
+            'person' => __('messages.entity_type_person'),
+            default => __('messages.entity_type_default'),
         };
     }
 
@@ -634,8 +634,8 @@ class BoardController extends Controller
                     'old_value' => $a->old_value,
                     'new_value' => $a->new_value,
                     'description' => $a->description,
-                    'user_name' => $a->user?->name ?? 'Система',
-                    'user_initial' => mb_substr($a->user?->name ?? 'С', 0, 1),
+                    'user_name' => $a->user?->name ?? __('messages.system_user'),
+                    'user_initial' => mb_substr($a->user?->name ?? __('messages.system_user'), 0, 1),
                     'created_at' => $a->created_at->diffForHumans(),
                     'created_at_full' => $a->created_at->format('d.m.Y H:i'),
                     'metadata' => $a->metadata,
@@ -673,7 +673,7 @@ class BoardController extends Controller
             if ($targetColumn->board_id !== $card->column->board_id) {
                 $isGeneral = $card->show_in_general || ($card->epic && $card->epic->show_in_general);
                 if (!$isGeneral) {
-                    abort(403, 'Колонка не належить цій дошці.');
+                    abort(403, __('messages.column_not_belongs_to_board'));
                 }
                 $matchingColumn = BoardColumn::where('board_id', $card->column->board_id)
                     ->where('position', $targetColumn->position)
@@ -712,7 +712,7 @@ class BoardController extends Controller
 
         $card->update($validated);
 
-        return $this->successResponse($request, 'Картку оновлено.', 'boards.show', [$card->column->board]);
+        return $this->successResponse($request, __('messages.card_updated'), 'boards.show', [$card->column->board]);
     }
 
     public function destroyCard(Request $request, BoardCard $card)
@@ -722,7 +722,7 @@ class BoardController extends Controller
         $board = $card->column->board;
         $card->delete();
 
-        return $this->successResponse($request, 'Картку видалено.');
+        return $this->successResponse($request, __('messages.card_deleted'));
     }
 
     public function moveCard(Request $request, BoardCard $card)
@@ -742,14 +742,14 @@ class BoardController extends Controller
 
         // Check card limit on target column (skip if moving within same column)
         if ($targetColumn->id !== $card->column_id && $targetColumn->isAtLimit()) {
-            return response()->json(['error' => 'Цільова колонка досягла ліміту карток.'], 422);
+            return response()->json(['error' => __('messages.target_column_limit_reached')], 422);
         }
 
         // Cross-board move: card from ministry board shown on main board via show_in_general
         if ($targetColumn->board_id !== $card->column->board_id) {
             $isGeneral = $card->show_in_general || ($card->epic && $card->epic->show_in_general);
             if (!$isGeneral) {
-                abort(403, 'Колонка не належить цій дошці.');
+                abort(403, __('messages.column_not_belongs_to_board'));
             }
             // Find matching column on the card's own board by position
             $matchingColumn = BoardColumn::where('board_id', $card->column->board_id)
@@ -805,7 +805,7 @@ class BoardController extends Controller
             BoardCardActivity::log($card, 'completed');
         }
 
-        return $this->successResponse($request, 'Статус картки оновлено.', null, [], ['is_completed' => $card->is_completed]);
+        return $this->successResponse($request, __('messages.card_status_updated'), null, [], ['is_completed' => $card->is_completed]);
     }
 
     // Duplicate card
@@ -815,7 +815,7 @@ class BoardController extends Controller
 
         // Create duplicate
         $newCard = $card->replicate(['is_completed', 'completed_at']);
-        $newCard->title = $card->title . ' (копія)';
+        $newCard->title = $card->title . ' ' . __('messages.copy_suffix');
         $newCard->is_completed = false;
         $newCard->completed_at = null;
         $newCard->created_by = auth()->id();
@@ -836,7 +836,7 @@ class BoardController extends Controller
             'duplicated_from' => $card->id,
         ]);
 
-        return $this->successResponse($request, 'Картку здубльовано.', 'boards.index', [], ['card' => $newCard->load(['column', 'epic'])]);
+        return $this->successResponse($request, __('messages.card_duplicated'), 'boards.index', [], ['card' => $newCard->load(['column', 'epic'])]);
     }
 
     // Card Comments
@@ -852,7 +852,7 @@ class BoardController extends Controller
         // Must have either content or files
         $content = $validated['content'] ?? null;
         if (empty($content) && !$request->hasFile('files')) {
-            return response()->json(['error' => 'Потрібен текст або файл'], 422);
+            return response()->json(['error' => __('messages.text_or_file_required')], 422);
         }
 
         // Handle file uploads
@@ -881,7 +881,7 @@ class BoardController extends Controller
             'preview' => \Str::limit($validated['content'] ?? '', 50),
         ]);
 
-        return $this->successResponse($request, 'Коментар додано.', null, [], [
+        return $this->successResponse($request, __('messages.comment_added'), null, [], [
             'comment' => [
                 'id' => $comment->id,
                 'content' => $comment->content,
@@ -914,7 +914,7 @@ class BoardController extends Controller
         // Log activity
         BoardCardActivity::log($card, 'comment_deleted', null, \Str::limit($commentContent, 50));
 
-        return $this->successResponse($request, 'Коментар видалено.');
+        return $this->successResponse($request, __('messages.comment_deleted'));
     }
 
     // Card Checklist
@@ -934,7 +934,7 @@ class BoardController extends Controller
         // Log activity
         BoardCardActivity::log($card, 'checklist_added', null, null, $validated['title']);
 
-        return $this->successResponse($request, 'Пункт додано.', null, [], [
+        return $this->successResponse($request, __('messages.checklist_item_added'), null, [], [
             'item' => [
                 'id' => $item->id,
                 'title' => $item->title,
@@ -953,7 +953,7 @@ class BoardController extends Controller
         $action = $item->is_completed ? 'checklist_completed' : 'checklist_uncompleted';
         BoardCardActivity::log($item->card, $action, null, null, null, ['title' => $item->title]);
 
-        return $this->successResponse($request, 'Пункт оновлено.', null, [], ['is_completed' => $item->is_completed]);
+        return $this->successResponse($request, __('messages.checklist_item_updated'), null, [], ['is_completed' => $item->is_completed]);
     }
 
     public function destroyChecklistItem(Request $request, BoardCardChecklistItem $item)
@@ -966,7 +966,7 @@ class BoardController extends Controller
         // Log activity
         BoardCardActivity::log($card, 'checklist_deleted', null, $title);
 
-        return $this->successResponse($request, 'Пункт видалено.');
+        return $this->successResponse($request, __('messages.checklist_item_deleted'));
     }
 
     // Update comment
@@ -1010,7 +1010,7 @@ class BoardController extends Controller
             'comment_id' => $comment->id,
         ]);
 
-        return $this->successResponse($request, 'Коментар оновлено.', null, [], [
+        return $this->successResponse($request, __('messages.comment_updated'), null, [], [
             'comment' => [
                 'id' => $comment->id,
                 'content' => $comment->content,
@@ -1040,7 +1040,7 @@ class BoardController extends Controller
         $attachments = $comment->attachments ?? [];
 
         if (!isset($attachments[$index])) {
-            return response()->json(['error' => 'Вкладення не знайдено'], 404);
+            return response()->json(['error' => __('messages.attachment_not_found')], 404);
         }
 
         // Delete file from storage
@@ -1087,7 +1087,7 @@ class BoardController extends Controller
         // Log activity
         BoardCardActivity::log($card, 'attachment_added', null, null, $file->getClientOriginalName());
 
-        return $this->successResponse($request, 'Файл завантажено.', null, [], [
+        return $this->successResponse($request, __('messages.file_uploaded'), null, [], [
             'attachment' => [
                 'id' => $attachment->id,
                 'name' => $attachment->name,
@@ -1114,7 +1114,7 @@ class BoardController extends Controller
         // Log activity
         BoardCardActivity::log($card, 'attachment_deleted', null, $fileName);
 
-        return $this->successResponse($request, 'Файл видалено.');
+        return $this->successResponse($request, __('messages.file_deleted'));
     }
 
     // Related cards
@@ -1134,7 +1134,7 @@ class BoardController extends Controller
         // Verify related card belongs to same board (church isolation)
         $relatedCard = BoardCard::with('column')->findOrFail($validated['related_card_id']);
         if ($relatedCard->column->board_id !== $card->column->board_id) {
-            abort(403, 'Картка належить іншій дошці.');
+            abort(403, __('messages.card_belongs_to_other_board'));
         }
 
         // Check if already related
@@ -1148,7 +1148,7 @@ class BoardController extends Controller
             BoardCardActivity::log($card, 'related_added', null, null, $relatedCard->title);
         }
 
-        return $this->successResponse($request, 'Картку пов\'язано.', null, [], [
+        return $this->successResponse($request, __('messages.card_linked'), null, [], [
             'related_card' => [
                 'id' => $relatedCard->id,
                 'title' => $relatedCard->title,
@@ -1169,7 +1169,7 @@ class BoardController extends Controller
         // Log activity
         BoardCardActivity::log($card, 'related_removed', null, $relatedTitle);
 
-        return $this->successResponse($request, 'Зв\'язок видалено.');
+        return $this->successResponse($request, __('messages.link_removed'));
     }
 
     private function authorizeBoard(Board $board): void
@@ -1238,7 +1238,7 @@ class BoardController extends Controller
 
         $epic = $board->epics()->create($validated);
 
-        return $this->successResponse($request, 'Епік створено.', 'boards.index', [], ['epic' => $epic]);
+        return $this->successResponse($request, __('messages.epic_created'), 'boards.index', [], ['epic' => $epic]);
     }
 
     public function updateEpic(Request $request, BoardEpic $epic)
@@ -1254,7 +1254,7 @@ class BoardController extends Controller
 
         $epic->update($validated);
 
-        return $this->successResponse($request, 'Епік оновлено.', 'boards.index', [], ['epic' => $epic]);
+        return $this->successResponse($request, __('messages.epic_updated'), 'boards.index', [], ['epic' => $epic]);
     }
 
     public function destroyEpic(Request $request, BoardEpic $epic)
@@ -1266,6 +1266,6 @@ class BoardController extends Controller
 
         $epic->delete();
 
-        return $this->successResponse($request, 'Епік видалено.', 'boards.index');
+        return $this->successResponse($request, __('messages.epic_deleted'), 'boards.index');
     }
 }

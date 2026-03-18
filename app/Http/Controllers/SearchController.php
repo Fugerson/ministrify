@@ -61,7 +61,7 @@ class SearchController extends Controller
                     'type' => 'ministry',
                     'icon' => 'church',
                     'title' => $ministry->name,
-                    'subtitle' => $ministry->members_count . ' учасників',
+                    'subtitle' => __('messages.members_count', ['count' => $ministry->members_count]),
                     'url' => route('ministries.show', $ministry),
                     'color' => $ministry->color,
                 ];
@@ -80,7 +80,7 @@ class SearchController extends Controller
                     'type' => 'group',
                     'icon' => 'users',
                     'title' => $group->name,
-                    'subtitle' => $group->location ?? 'Домашня група',
+                    'subtitle' => $group->location ?? __('messages.home_group'),
                     'url' => route('groups.show', $group),
                 ];
             }
@@ -120,7 +120,7 @@ class SearchController extends Controller
                     'type' => 'board',
                     'icon' => 'kanban',
                     'title' => $board->name,
-                    'subtitle' => $board->cards_count . ' карток',
+                    'subtitle' => __('messages.cards_count', ['count' => $board->cards_count]),
                     'url' => route('boards.show', $board),
                 ];
             }
@@ -136,13 +136,13 @@ class SearchController extends Controller
         $actions = [
             [
                 'key' => 'n',
-                'label' => 'Нова людина',
+                'label' => __('messages.quick_action_new_person'),
                 'url' => route('people.create'),
                 'icon' => 'user-plus',
             ],
             [
                 'key' => 'e',
-                'label' => 'Нова подія',
+                'label' => __('messages.quick_action_new_event'),
                 'url' => route('events.create'),
                 'icon' => 'calendar-plus',
             ],
@@ -151,7 +151,7 @@ class SearchController extends Controller
         if ($user->hasRole(['admin', 'leader'])) {
             $actions[] = [
                 'key' => 'x',
-                'label' => 'Нова витрата',
+                'label' => __('messages.quick_action_new_expense'),
                 'url' => route('expenses.create'),
                 'icon' => 'receipt',
             ];
@@ -159,14 +159,14 @@ class SearchController extends Controller
 
         $actions[] = [
             'key' => 'g',
-            'label' => 'Нова група',
+            'label' => __('messages.quick_action_new_group'),
             'url' => route('groups.create'),
             'icon' => 'users',
         ];
 
         $actions[] = [
             'key' => 'b',
-            'label' => 'Нова дошка',
+            'label' => __('messages.quick_action_new_board'),
             'url' => route('boards.create'),
             'icon' => 'kanban',
         ];

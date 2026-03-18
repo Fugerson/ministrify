@@ -49,7 +49,7 @@
             <select x-model="filterKey"
                     class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-sm">
                 <option value="">{{ __('app.songs_all_keys') }}</option>
-                @foreach(\App\Models\Song::KEYS as $key => $label)
+                @foreach(\App\Models\Song::keyLabels() as $key => $label)
                     <option value="{{ $key }}">{{ $key }}</option>
                 @endforeach
             </select>

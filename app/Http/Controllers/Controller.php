@@ -40,14 +40,14 @@ abstract class Controller extends BaseController
         // Super admin without impersonation - redirect to system panel
         if ($user->is_super_admin && !$user->church_id) {
             abort(redirect()->route('system.index')
-                ->with('warning', 'Оберіть церкву для роботи.'));
+                ->with('warning', __('messages.select_church_to_work')));
         }
 
         $church = $user->church;
 
         if (!$church) {
             abort(redirect()->route('dashboard')
-                ->with('error', 'Ця функція доступна тільки для користувачів з церквою.'));
+                ->with('error', __('messages.feature_requires_church')));
         }
 
         return $this->cachedChurch = $church;
@@ -91,7 +91,7 @@ abstract class Controller extends BaseController
         $person = auth()->user()->person;
 
         if (!$person) {
-            abort(403, 'Для цієї дії потрібен профіль у системі.');
+            abort(403, __('messages.person_profile_required'));
         }
 
         return $person;

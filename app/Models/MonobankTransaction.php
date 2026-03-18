@@ -82,7 +82,7 @@ class MonobankTransaction extends Model
         if ($this->description) {
             return $this->description;
         }
-        return 'Невідомий відправник';
+        return __('app.unknown_sender');
     }
 
     public function getMaskedIbanAttribute(): ?string
@@ -193,7 +193,7 @@ class MonobankTransaction extends Model
         if (!$mcc) return null;
 
         $key = self::getMccCategoryKey($mcc);
-        return self::getMccCategories()[$key] ?? 'Інше';
+        return self::getMccCategories()[$key] ?? __('app.mcc_other');
     }
 
     /**
@@ -202,17 +202,17 @@ class MonobankTransaction extends Model
     public static function getMccCategories(): array
     {
         return [
-            'utilities' => 'Комунальні',
-            'groceries' => 'Продукти',
-            'restaurants' => 'Ресторани/Їжа',
-            'fuel' => 'Паливо',
-            'transport' => 'Транспорт',
-            'healthcare' => 'Медицина',
-            'education' => 'Освіта',
-            'entertainment' => 'Розваги',
-            'shopping' => 'Покупки',
-            'transfers' => 'Перекази',
-            'other' => 'Інше',
+            'utilities' => __('app.mcc_utilities'),
+            'groceries' => __('app.mcc_groceries'),
+            'restaurants' => __('app.mcc_restaurants'),
+            'fuel' => __('app.mcc_fuel'),
+            'transport' => __('app.mcc_transport'),
+            'healthcare' => __('app.mcc_healthcare'),
+            'education' => __('app.mcc_education'),
+            'entertainment' => __('app.mcc_entertainment'),
+            'shopping' => __('app.mcc_shopping'),
+            'transfers' => __('app.mcc_transfers'),
+            'other' => __('app.mcc_other'),
         ];
     }
 

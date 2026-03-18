@@ -23,7 +23,7 @@ class CheckRole
 
         // Check if user has one of the required roles
         if (!empty($roles) && !$user->hasRole($roles)) {
-            abort(403, 'У вас немає доступу до цієї сторінки.');
+            abort(403, __('messages.no_access_to_page'));
         }
 
         return $next($request);

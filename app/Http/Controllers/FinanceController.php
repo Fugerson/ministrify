@@ -27,7 +27,7 @@ class FinanceController extends Controller
     public function index(Request $request)
     {
         if (!auth()->user()->canView('finances')) {
-            return $this->errorResponse($request, __('У вас немає доступу до цього розділу. Зверніться до адміністратора церкви для отримання потрібних прав.'));
+            return $this->errorResponse($request, __('messages.no_access_to_section'));
         }
 
         $church = $this->getCurrentChurch();
@@ -51,7 +51,7 @@ class FinanceController extends Controller
         } else {
             $incomeQuery->forYear($year);
             $expenseQuery->forYear($year);
-            $periodLabel = $year . ' рік';
+            $periodLabel = __('messages.year_label', ['year' => $year]);
         }
 
         // Calculate totals in UAH (using amount_uah for converted amounts, fallback to amount)
@@ -284,7 +284,7 @@ class FinanceController extends Controller
             ->get()
             ->map(fn($pm) => [
                 'method' => $pm->payment_method,
-                'label' => Transaction::PAYMENT_METHODS[$pm->payment_method] ?? $pm->payment_method ?? 'Інше',
+                'label' => Transaction::PAYMENT_METHODS[$pm->payment_method] ?? $pm->payment_method ?? __('messages.other'),
                 'count' => $pm->count,
                 'total' => $pm->total,
             ]);
@@ -312,7 +312,7 @@ class FinanceController extends Controller
     public function journalExport(Request $request)
     {
         if (!auth()->user()->canView('finances')) {
-            abort(403, 'Немає доступу до фінансових даних');
+            abort(403, __('messages.no_access_to_finance_data'));
         }
 
         $church = $this->getCurrentChurch();
@@ -338,7 +338,7 @@ class FinanceController extends Controller
         $transactions = $query->orderBy('date', 'desc')->get();
 
         // Log export
-        $this->logAuditAction('exported', 'Transaction', null, 'Експорт фінансового журналу', [
+        $this->logAuditAction('exported', 'Transaction', null, __('messages.export_finance_journal'), [
             'period' => $period,
             'start_date' => $dates['start']->format('Y-m-d'),
             'end_date' => $dates['end']->format('Y-m-d'),
@@ -357,12 +357,12 @@ class FinanceController extends Controller
             // BOM for UTF-8
             fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
 
-            fputcsv($file, ['Дата', 'Тип', 'Категорія', 'Команда', 'Опис', 'Особа', 'Сума', 'Валюта', 'Спосіб оплати'], ';');
+            fputcsv($file, [__('messages.csv_date'), __('messages.csv_type'), __('messages.csv_category'), __('messages.csv_team'), __('messages.csv_description'), __('messages.csv_person'), __('messages.csv_amount'), __('messages.csv_currency'), __('messages.csv_payment_method')], ';');
 
             foreach ($transactions as $t) {
                 fputcsv($file, [
                     $t->date->format('d.m.Y'),
-                    $t->direction === 'in' ? 'Надходження' : 'Витрата',
+                    $t->direction === 'in' ? __('messages.direction_income') : __('messages.direction_expense'),
                     $t->category?->name ?? '-',
                     $t->ministry?->name ?? '-',
                     $t->description,
@@ -385,7 +385,7 @@ class FinanceController extends Controller
     public function transactions(Request $request)
     {
         if (!auth()->user()->canView('finances')) {
-            return $this->errorResponse($request, __('У вас немає доступу до цього розділу. Зверніться до адміністратора церкви для отримання потрібних прав.'));
+            return $this->errorResponse($request, __('messages.no_access_to_section'));
         }
 
         $church = $this->getCurrentChurch();
@@ -516,7 +516,7 @@ class FinanceController extends Controller
     public function createIncome(Request $request)
     {
         if (!auth()->user()->canCreate('finances')) {
-            return $this->errorResponse($request, 'У вас немає прав для створення записів.');
+            return $this->errorResponse($request, __('messages.no_permission_create'));
         }
 
         $church = $this->getCurrentChurch();
@@ -533,7 +533,7 @@ class FinanceController extends Controller
     public function storeIncome(Request $request)
     {
         if (!auth()->user()->canCreate('finances')) {
-            return $this->errorResponse($request, 'У вас немає прав для створення записів.', 403);
+            return $this->errorResponse($request, __('messages.no_permission_create'), 403);
         }
 
         $validated = $request->validate([
@@ -565,7 +565,7 @@ class FinanceController extends Controller
         }
 
         if (!$categoryId) {
-            return $this->errorResponse($request, 'Оберіть або введіть категорію.', 422);
+            return $this->errorResponse($request, __('messages.select_or_enter_category'), 422);
         }
 
         $validated['category_id'] = $categoryId;
@@ -598,7 +598,7 @@ class FinanceController extends Controller
             'recorded_by' => auth()->id(),
         ]);
 
-        return $this->successResponse($request, 'Надходження додано.', 'finances.transactions', ['filter' => 'income'], [
+        return $this->successResponse($request, __('messages.income_added'), 'finances.transactions', ['filter' => 'income'], [
             'transaction' => $transaction->load('category'),
         ]);
     }
@@ -608,7 +608,7 @@ class FinanceController extends Controller
         $this->authorizeChurch($transaction);
 
         if (!auth()->user()->canEdit('finances')) {
-            return $this->errorResponse($request, 'У вас немає прав для редагування записів.', 403);
+            return $this->errorResponse($request, __('messages.no_permission_edit'), 403);
         }
 
         $church = $this->getCurrentChurch();
@@ -637,7 +637,7 @@ class FinanceController extends Controller
         $this->authorizeChurch($transaction);
 
         if (!auth()->user()->canEdit('finances')) {
-            return $this->errorResponse($request, 'У вас немає прав для редагування записів.', 403);
+            return $this->errorResponse($request, __('messages.no_permission_edit'), 403);
         }
 
         $validated = $request->validate([
@@ -668,7 +668,7 @@ class FinanceController extends Controller
         }
 
         if (!$categoryId) {
-            return $this->errorResponse($request, 'Оберіть або введіть категорію.', 422);
+            return $this->errorResponse($request, __('messages.select_or_enter_category'), 422);
         }
 
         $validated['category_id'] = $categoryId;
@@ -693,7 +693,7 @@ class FinanceController extends Controller
 
         $transaction->update($validated);
 
-        return $this->successResponse($request, 'Надходження оновлено.', 'finances.transactions', ['filter' => 'income'], [
+        return $this->successResponse($request, __('messages.income_updated'), 'finances.transactions', ['filter' => 'income'], [
             'transaction' => $transaction->fresh()->load('category'),
         ]);
     }
@@ -703,18 +703,18 @@ class FinanceController extends Controller
         $this->authorizeChurch($transaction);
 
         if (!auth()->user()->canDelete('finances')) {
-            return $this->errorResponse($request, 'У вас немає прав для видалення записів.', 403);
+            return $this->errorResponse($request, __('messages.no_permission_delete'), 403);
         }
 
         $transaction->delete();
 
-        return $this->successResponse($request, 'Надходження видалено.', 'finances.transactions', ['filter' => 'income']);
+        return $this->successResponse($request, __('messages.income_deleted'), 'finances.transactions', ['filter' => 'income']);
     }
 
     public function createExpense(Request $request)
     {
         if (!auth()->user()->canCreate('finances')) {
-            return $this->errorResponse($request, 'У вас немає прав для створення записів.');
+            return $this->errorResponse($request, __('messages.no_permission_create'));
         }
 
         $church = $this->getCurrentChurch();
@@ -733,7 +733,7 @@ class FinanceController extends Controller
     public function storeExpense(Request $request)
     {
         if (!auth()->user()->canCreate('finances')) {
-            return $this->errorResponse($request, 'У вас немає прав для створення записів.', 403);
+            return $this->errorResponse($request, __('messages.no_permission_create'), 403);
         }
 
         $validated = $request->validate([
@@ -833,7 +833,7 @@ class FinanceController extends Controller
             }
         }
 
-        $message = 'Витрату додано.';
+        $message = __('messages.expense_added');
         if ($budgetWarning) {
             $message .= ' ' . $budgetWarning;
         }
@@ -854,7 +854,7 @@ class FinanceController extends Controller
         $this->authorizeChurch($transaction);
 
         if (!auth()->user()->canEdit('finances')) {
-            return $this->errorResponse($request, 'У вас немає прав для редагування записів.', 403);
+            return $this->errorResponse($request, __('messages.no_permission_edit'), 403);
         }
 
         $church = $this->getCurrentChurch();
@@ -887,7 +887,7 @@ class FinanceController extends Controller
         $this->authorizeChurch($transaction);
 
         if (!auth()->user()->canEdit('finances')) {
-            return $this->errorResponse($request, 'У вас немає прав для редагування записів.', 403);
+            return $this->errorResponse($request, __('messages.no_permission_edit'), 403);
         }
 
         $validated = $request->validate([
@@ -993,7 +993,7 @@ class FinanceController extends Controller
             }
         }
 
-        $message = 'Витрату оновлено.';
+        $message = __('messages.expense_updated');
         if ($budgetWarning) {
             $message .= ' ' . $budgetWarning;
         }
@@ -1014,24 +1014,24 @@ class FinanceController extends Controller
         $this->authorizeChurch($transaction);
 
         if (!auth()->user()->canDelete('finances')) {
-            return $this->errorResponse($request, 'У вас немає прав для видалення записів.', 403);
+            return $this->errorResponse($request, __('messages.no_permission_delete'), 403);
         }
         $ministryId = $transaction->ministry_id;
         $transaction->delete();
 
         // Determine redirect target
         if ($request->input('redirect_to') === 'ministry' && $ministryId) {
-            return $this->successResponse($request, 'Витрату видалено.', 'ministries.show', ['ministry' => $ministryId, 'tab' => 'expenses']);
+            return $this->successResponse($request, __('messages.expense_deleted'), 'ministries.show', ['ministry' => $ministryId, 'tab' => 'expenses']);
         }
 
-        return $this->successResponse($request, 'Витрату видалено.');
+        return $this->successResponse($request, __('messages.expense_deleted'));
     }
 
     // Currency Exchange
     public function createExchange(Request $request)
     {
         if (!auth()->user()->canCreate('finances')) {
-            return $this->errorResponse($request, 'У вас немає прав для створення записів.');
+            return $this->errorResponse($request, __('messages.no_permission_create'));
         }
 
         $church = $this->getCurrentChurch();
@@ -1044,7 +1044,7 @@ class FinanceController extends Controller
     public function storeExchange(Request $request)
     {
         if (!auth()->user()->canCreate('finances')) {
-            abort(403, 'У вас немає прав для створення записів.');
+            abort(403, __('messages.no_permission_create'));
         }
 
         $validated = $request->validate([
@@ -1070,7 +1070,7 @@ class FinanceController extends Controller
                 'date' => $validated['date'],
                 'status' => Transaction::STATUS_COMPLETED,
                 'payment_method' => Transaction::PAYMENT_CASH,
-                'description' => "Обмін {$validated['from_currency']} → {$validated['to_currency']}",
+                'description' => __('messages.exchange_description', ['from' => $validated['from_currency'], 'to' => $validated['to_currency']]),
                 'notes' => $validated['notes'],
             ]);
 
@@ -1084,7 +1084,7 @@ class FinanceController extends Controller
                 'date' => $validated['date'],
                 'status' => Transaction::STATUS_COMPLETED,
                 'payment_method' => Transaction::PAYMENT_CASH,
-                'description' => "Обмін {$validated['from_currency']} → {$validated['to_currency']}",
+                'description' => __('messages.exchange_description', ['from' => $validated['from_currency'], 'to' => $validated['to_currency']]),
                 'notes' => $validated['notes'],
                 'related_transaction_id' => $outTransaction->id,
             ]);
@@ -1093,7 +1093,7 @@ class FinanceController extends Controller
             $outTransaction->update(['related_transaction_id' => $inTransaction->id]);
         });
 
-        return $this->successResponse($request, 'Обмін валюти зареєстровано.', 'finances.index');
+        return $this->successResponse($request, __('messages.exchange_registered'), 'finances.index');
     }
 
     // Categories (unified)
@@ -1105,7 +1105,7 @@ class FinanceController extends Controller
     public function storeCategory(Request $request)
     {
         if (!auth()->user()->canCreate('finances')) {
-            abort(403, 'У вас немає прав для створення категорій.');
+            abort(403, __('messages.no_permission_create_categories'));
         }
 
         $validated = $request->validate([
@@ -1127,13 +1127,13 @@ class FinanceController extends Controller
 
         TransactionCategory::create($validated);
 
-        return $this->successResponse($request, 'Категорію додано.');
+        return $this->successResponse($request, __('messages.category_added'));
     }
 
     public function updateCategory(Request $request, TransactionCategory $category)
     {
         if (!auth()->user()->canEdit('finances')) {
-            abort(403, 'У вас немає прав для редагування категорій.');
+            abort(403, __('messages.no_permission_edit_categories'));
         }
 
         if ($category->church_id !== $this->getCurrentChurch()->id) {
@@ -1151,13 +1151,13 @@ class FinanceController extends Controller
 
         $category->update($validated);
 
-        return $this->successResponse($request, 'Категорію оновлено.');
+        return $this->successResponse($request, __('messages.category_updated'));
     }
 
     public function destroyCategory(Request $request, TransactionCategory $category)
     {
         if (!auth()->user()->canDelete('finances')) {
-            abort(403, 'У вас немає прав для видалення категорій.');
+            abort(403, __('messages.no_permission_delete_categories'));
         }
 
         if ($category->church_id !== $this->getCurrentChurch()->id) {
@@ -1165,19 +1165,19 @@ class FinanceController extends Controller
         }
 
         if ($category->transactions()->count() > 0) {
-            return $this->errorResponse($request, 'Неможливо видалити категорію з транзакціями.');
+            return $this->errorResponse($request, __('messages.cannot_delete_category_with_transactions'));
         }
 
         $category->delete();
 
-        return $this->successResponse($request, 'Категорію видалено.');
+        return $this->successResponse($request, __('messages.category_deleted'));
     }
 
     // Team Budgets
     public function budgets(Request $request)
     {
         if (!auth()->user()->canView('finances')) {
-            return $this->errorResponse($request, __('У вас немає доступу до цього розділу. Зверніться до адміністратора церкви для отримання потрібних прав.'));
+            return $this->errorResponse($request, __('messages.no_access_to_section'));
         }
 
         $church = $this->getCurrentChurch();
@@ -1463,8 +1463,10 @@ class FinanceController extends Controller
                 }
             }
 
-            $monthNames = [1 => 'Січ', 2 => 'Лют', 3 => 'Бер', 4 => 'Кві', 5 => 'Тра', 6 => 'Чер',
-                           7 => 'Лип', 8 => 'Сер', 9 => 'Вер', 10 => 'Жов', 11 => 'Лис', 12 => 'Гру'];
+            $monthNames = [];
+            for ($i = 1; $i <= 12; $i++) {
+                $monthNames[$i] = __('messages.month_short_' . $i);
+            }
 
             $months[] = [
                 'label' => $monthNames[$m],
@@ -1503,7 +1505,7 @@ class FinanceController extends Controller
             ->get();
 
         if ($sourceBudgets->isEmpty()) {
-            return response()->json(['success' => false, 'message' => 'Немає бюджетів для копіювання.'], 422);
+            return response()->json(['success' => false, 'message' => __('messages.no_budgets_to_copy')], 422);
         }
 
         $copied = 0;
@@ -1553,10 +1555,10 @@ class FinanceController extends Controller
             $copied++;
         }
 
-        $monthNames = ['', 'Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень', 'Липень', 'Серпень', 'Вересень', 'Жовтень', 'Листопад', 'Грудень'];
-        $msg = "Скопійовано {$copied} бюджетів на {$monthNames[$validated['to_month']]} {$validated['to_year']}";
+        $monthName = __('messages.month_short_' . $validated['to_month']);
+        $msg = __('messages.budgets_copied', ['copied' => $copied, 'month' => $monthName, 'year' => $validated['to_year']]);
         if ($skipped > 0) {
-            $msg .= " (пропущено {$skipped} — вже мають статті)";
+            $msg .= ' ' . __('messages.budgets_skipped', ['skipped' => $skipped]);
         }
 
         return response()->json(['success' => true, 'message' => $msg]);
@@ -1565,7 +1567,7 @@ class FinanceController extends Controller
     public function updateBudget(Request $request, Ministry $ministry)
     {
         if (!auth()->user()->canEdit('finances')) {
-            abort(403, 'У вас немає прав для редагування бюджетів.');
+            abort(403, __('messages.no_permission_edit_budgets'));
         }
 
         $church = $this->getCurrentChurch();
@@ -1611,13 +1613,13 @@ class FinanceController extends Controller
             'monthly_budget' => $oldBudget,
         ]);
 
-        return $this->successResponse($request, "Бюджет для \"{$ministry->name}\" оновлено.");
+        return $this->successResponse($request, __('messages.budget_updated_for', ['name' => $ministry->name]));
     }
 
     public function allocateBudget(Request $request, Ministry $ministry)
     {
         if (!auth()->user()->canEdit('finances')) {
-            abort(403, 'У вас немає прав для виділення бюджету.');
+            abort(403, __('messages.no_permission_allocate_budget'));
         }
 
         $church = $this->getCurrentChurch();
@@ -1636,7 +1638,7 @@ class FinanceController extends Controller
             'notes' => 'nullable|string|max:500',
         ]);
 
-        $description = "Виділення бюджету: {$ministry->name}";
+        $description = __('messages.budget_allocation_description', ['name' => $ministry->name]);
 
         DB::beginTransaction();
         try {
@@ -1691,10 +1693,10 @@ class FinanceController extends Controller
 
             DB::commit();
 
-            return $this->successResponse($request, "Виділено " . number_format($validated['amount'], 0, ',', ' ') . " {$validated['currency']} для \"{$ministry->name}\".");
+            return $this->successResponse($request, __('messages.budget_allocated', ['amount' => number_format($validated['amount'], 0, ',', ' '), 'currency' => $validated['currency'], 'name' => $ministry->name]));
         } catch (\Throwable $e) {
             DB::rollBack();
-            return response()->json(['success' => false, 'message' => 'Помилка виділення бюджету: ' . $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => __('messages.budget_allocation_error', ['error' => $e->getMessage()])], 500);
         }
     }
 
@@ -1742,7 +1744,7 @@ class FinanceController extends Controller
             if ($exists) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Ця категорія вже використовується в іншій статті бюджету.',
+                    'message' => __('messages.budget_category_already_used'),
                 ], 422);
             }
         }
@@ -1766,7 +1768,7 @@ class FinanceController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Статтю бюджету додано.',
+            'message' => __('messages.budget_item_added'),
             'item' => $item->load('responsiblePeople', 'category'),
         ]);
     }
@@ -1815,7 +1817,7 @@ class FinanceController extends Controller
             if ($exists) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Ця категорія вже використовується в іншій статті бюджету.',
+                    'message' => __('messages.budget_category_already_used'),
                 ], 422);
             }
         }
@@ -1832,7 +1834,7 @@ class FinanceController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Статтю бюджету оновлено.',
+            'message' => __('messages.budget_item_updated'),
             'item' => $budgetItem->load('responsiblePeople', 'category'),
         ]);
     }
@@ -1855,7 +1857,7 @@ class FinanceController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Статтю бюджету видалено.',
+            'message' => __('messages.budget_item_deleted'),
         ]);
     }
 
@@ -1897,7 +1899,7 @@ class FinanceController extends Controller
     public function chartData(Request $request)
     {
         if (!auth()->user()->canView('finances')) {
-            abort(403, 'Немає доступу до фінансових даних');
+            abort(403, __('messages.no_access_to_finance_data'));
         }
 
         $church = $this->getCurrentChurch();
@@ -2082,12 +2084,7 @@ class FinanceController extends Controller
 
     private function getMonthName(int $month): string
     {
-        $months = [
-            1 => 'Січ', 2 => 'Лют', 3 => 'Бер', 4 => 'Кві',
-            5 => 'Тра', 6 => 'Чер', 7 => 'Лип', 8 => 'Сер',
-            9 => 'Вер', 10 => 'Жов', 11 => 'Лис', 12 => 'Гру',
-        ];
-        return $months[$month] ?? '';
+        return __('messages.month_short_' . $month);
     }
 
     /**
@@ -2182,7 +2179,7 @@ class FinanceController extends Controller
     public function cards(Request $request)
     {
         if (!auth()->user()->canView('finances')) {
-            return $this->errorResponse($request, __('У вас немає доступу до цього розділу. Зверніться до адміністратора церкви для отримання потрібних прав.'));
+            return $this->errorResponse($request, __('messages.no_access_to_section'));
         }
 
         $church = $this->getCurrentChurch();

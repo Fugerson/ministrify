@@ -4516,7 +4516,7 @@ function songsLibrary() {
         sortDir: 'asc',
         keyQuery: '',
         keyDropdownOpen: false,
-        songKeysMap: @js(\App\Models\Song::KEYS),
+        songKeysMap: @js(\App\Models\Song::keyLabels()),
 
         init() {
             this.$nextTick(() => this.initSortable());

@@ -37,7 +37,7 @@ class SocialAuthController extends Controller
         } catch (\Exception $e) {
             Log::error('Google OAuth failed', ['error' => $e->getMessage()]);
             return redirect()->route('login')
-                ->with('error', 'Не вдалося увійти через Google. Спробуйте ще раз.');
+                ->with('error', __('messages.google_login_failed'));
         }
 
         // Find user by google_id first, then by email (prioritize google_id to avoid collision)
@@ -71,7 +71,7 @@ class SocialAuthController extends Controller
                     'email' => $googleUser->getEmail(),
                 ]);
                 return redirect()->route('login')
-                    ->with('error', 'Акаунт не знайдено.');
+                    ->with('error', __('messages.account_not_found'));
             }
         }
 
@@ -119,7 +119,7 @@ class SocialAuthController extends Controller
                         'model_type' => User::class,
                         'model_id' => $user->id,
                         'model_name' => $user->name,
-                        'notes' => 'Вхід через Google',
+                        'notes' => __('messages.audit_login_google'),
                         'ip_address' => $request->ip(),
                         'user_agent' => $request->userAgent(),
                     ]);
@@ -132,13 +132,13 @@ class SocialAuthController extends Controller
                         'model_type' => User::class,
                         'model_id' => $user->id,
                         'model_name' => $user->name,
-                        'notes' => 'Приєднався до церкви через Google',
+                        'notes' => __('messages.audit_joined_church_google'),
                         'ip_address' => $request->ip(),
                         'user_agent' => $request->userAgent(),
                     ]);
 
                     return redirect()->route('dashboard')
-                        ->with('success', 'Ви приєднались до ' . $church->name . '!');
+                        ->with('success', __('messages.joined_church', ['name' => $church->name]));
                 }
             }
 
@@ -163,7 +163,7 @@ class SocialAuthController extends Controller
                     'model_type' => User::class,
                     'model_id' => $user->id,
                     'model_name' => $user->name,
-                    'notes' => 'Вхід через Google',
+                    'notes' => __('messages.audit_login_google'),
                     'ip_address' => $request->ip(),
                     'user_agent' => $request->userAgent(),
                 ]);
@@ -203,12 +203,12 @@ class SocialAuthController extends Controller
         $church = \App\Models\Church::find($churchId);
 
         if (!$church) {
-            return redirect()->route('join')->with('error', 'Церкву не знайдено.');
+            return redirect()->route('join')->with('error', __('messages.church_not_found'));
         }
 
         // Check if self-registration is enabled
         if ($church->getSetting('self_registration_enabled') === false) {
-            return redirect()->route('join')->with('error', 'Ця церква не приймає нові реєстрації.');
+            return redirect()->route('join')->with('error', __('messages.church_registration_closed'));
         }
 
         // Check if user with this email already exists
@@ -243,7 +243,7 @@ class SocialAuthController extends Controller
                 'model_type' => User::class,
                 'model_id' => $existingUser->id,
                 'model_name' => $existingUser->name,
-                'notes' => 'Вхід через Google',
+                'notes' => __('messages.audit_login_google'),
                 'ip_address' => $request->ip(),
                 'user_agent' => $request->userAgent(),
             ]);
@@ -256,7 +256,7 @@ class SocialAuthController extends Controller
                 'model_type' => User::class,
                 'model_id' => $existingUser->id,
                 'model_name' => $existingUser->name,
-                'notes' => 'Приєднався до церкви через Google',
+                'notes' => __('messages.audit_joined_church_google'),
                 'ip_address' => $request->ip(),
                 'user_agent' => $request->userAgent(),
             ]);
@@ -292,13 +292,13 @@ class SocialAuthController extends Controller
             'model_type' => User::class,
             'model_id' => $user->id,
             'model_name' => $user->name,
-            'notes' => 'Зареєструвався через Google та приєднався до церкви',
+            'notes' => __('messages.audit_registered_google_joined'),
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
         ]);
 
         return redirect()->route('dashboard')
-            ->with('success', 'Ласкаво просимо! Ваш акаунт створено.');
+            ->with('success', __('messages.welcome_account_created'));
     }
 
     /**
@@ -455,13 +455,13 @@ class SocialAuthController extends Controller
             'model_type' => User::class,
             'model_id' => $user->id,
             'model_name' => $user->name,
-            'notes' => 'Зареєструвався через Google та створив нову церкву',
+            'notes' => __('messages.audit_registered_google_created_church'),
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
         ]);
 
         return redirect()->route('dashboard')
-            ->with('success', 'Ласкаво просимо до Ministrify!');
+            ->with('success', __('messages.welcome_to_ministrify'));
     }
 
     /**
@@ -473,7 +473,7 @@ class SocialAuthController extends Controller
 
         // Check if self-registration is enabled for this church
         if ($church->getSetting('self_registration_enabled') === false) {
-            return back()->with('error', 'Ця церква не приймає нові реєстрації.');
+            return back()->with('error', __('messages.church_registration_closed'));
         }
 
         // Wipe old soft-deleted user completely (allow re-registration from scratch)
@@ -506,13 +506,13 @@ class SocialAuthController extends Controller
             'model_type' => User::class,
             'model_id' => $user->id,
             'model_name' => $user->name,
-            'notes' => 'Зареєструвався через Google та приєднався до церкви',
+            'notes' => __('messages.audit_registered_google_joined'),
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
         ]);
 
         return redirect()->route('dashboard')
-            ->with('success', 'Ласкаво просимо до ' . $church->name . '!');
+            ->with('success', __('messages.welcome_to_church', ['name' => $church->name]));
     }
 
     /**

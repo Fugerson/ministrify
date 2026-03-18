@@ -59,7 +59,7 @@ class RegisterController extends Controller
 
         // Check if self-registration is enabled for this church
         if ($church->getSetting('self_registration_enabled') === false) {
-            return back()->with('error', 'Ця церква не приймає нові реєстрації.');
+            return back()->with('error', __('messages.church_registration_closed'));
         }
 
         // Find default volunteer role for this church (for approval pending status)
@@ -73,7 +73,7 @@ class RegisterController extends Controller
         if ($existingUser) {
             // Verify password
             if (!Hash::check($request->password, $existingUser->password)) {
-                return back()->withInput()->withErrors(['password' => 'Невірний пароль для існуючого акаунту.']);
+                return back()->withInput()->withErrors(['password' => __('messages.wrong_password_existing_account')]);
             }
 
             // Check if already a member
@@ -92,14 +92,14 @@ class RegisterController extends Controller
                         'model_type' => User::class,
                         'model_id' => $existingUser->id,
                         'model_name' => $existingUser->name,
-                        'notes' => 'Вхід через форму приєднання (вже член церкви)',
+                        'notes' => __('messages.audit_login_join_form_existing'),
                         'ip_address' => $request->ip(),
                         'user_agent' => $request->userAgent(),
                     ]);
                 }
 
                 return redirect()->route('dashboard')
-                    ->with('info', 'Ви вже є членом цієї церкви.');
+                    ->with('info', __('messages.already_church_member'));
             }
 
             // Join the new church (no role — pending approval)
@@ -124,7 +124,7 @@ class RegisterController extends Controller
                 'model_type' => User::class,
                 'model_id' => $existingUser->id,
                 'model_name' => $existingUser->name,
-                'notes' => 'Вхід через форму приєднання до церкви',
+                'notes' => __('messages.audit_login_join_form'),
                 'ip_address' => $request->ip(),
                 'user_agent' => $request->userAgent(),
             ]);
@@ -137,13 +137,13 @@ class RegisterController extends Controller
                 'model_type' => User::class,
                 'model_id' => $existingUser->id,
                 'model_name' => $existingUser->name,
-                'notes' => 'Приєднався до церкви (існуючий акаунт)',
+                'notes' => __('messages.audit_joined_church_existing'),
                 'ip_address' => $request->ip(),
                 'user_agent' => $request->userAgent(),
             ]);
 
             return redirect()->route('dashboard')
-                ->with('success', 'Ви приєднались до ' . $church->name . '!');
+                ->with('success', __('messages.joined_church', ['name' => $church->name]));
         }
 
         // Wipe old soft-deleted user completely (allow re-registration from scratch)
@@ -262,7 +262,7 @@ class RegisterController extends Controller
             'model_type' => User::class,
             'model_id' => $user->id,
             'model_name' => $user->name,
-            'notes' => 'Зареєструвався та приєднався до церкви (очікує одобрення)',
+            'notes' => __('messages.audit_registered_joined_pending'),
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
         ]);
@@ -305,7 +305,7 @@ class RegisterController extends Controller
         }
 
         return redirect()->route('dashboard')
-            ->with('success', 'Ласкаво просимо! Ваш акаунт створено. Адміністратор церкви повинен одобрити вашу реєстрацію.');
+            ->with('success', __('messages.welcome_pending_approval'));
     }
 
     public function register(Request $request)
@@ -440,7 +440,7 @@ class RegisterController extends Controller
             'model_type' => User::class,
             'model_id' => $user->id,
             'model_name' => $user->name,
-            'notes' => 'Зареєструвався та створив нову церкву',
+            'notes' => __('messages.audit_registered_created_church'),
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent(),
         ]);

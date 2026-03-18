@@ -41,11 +41,11 @@ class ServicePlanController extends Controller
             return response()->json([
                 'success' => true,
                 'item' => $item->load(['responsible', 'song']),
-                'message' => 'Пункт плану додано',
+                'message' => __('messages.plan_item_added'),
             ]);
         }
 
-        return back()->with('success', 'Пункт плану додано');
+        return back()->with('success', __('messages.plan_item_added'));
     }
 
     /**
@@ -88,11 +88,11 @@ class ServicePlanController extends Controller
             return response()->json([
                 'success' => true,
                 'item' => $item->fresh()->load('responsible'),
-                'message' => 'Пункт плану оновлено',
+                'message' => __('messages.plan_item_updated'),
             ]);
         }
 
-        return back()->with('success', 'Пункт плану оновлено');
+        return back()->with('success', __('messages.plan_item_updated'));
     }
 
     /**
@@ -112,11 +112,11 @@ class ServicePlanController extends Controller
         if ($request->ajax()) {
             return response()->json([
                 'success' => true,
-                'message' => 'Пункт плану видалено',
+                'message' => __('messages.plan_item_deleted'),
             ]);
         }
 
-        return back()->with('success', 'Пункт плану видалено');
+        return back()->with('success', __('messages.plan_item_deleted'));
     }
 
     /**
@@ -140,7 +140,7 @@ class ServicePlanController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Порядок оновлено',
+            'message' => __('messages.plan_order_updated'),
         ]);
     }
 
@@ -158,7 +158,7 @@ class ServicePlanController extends Controller
 
         // Verify source is a service with plan
         if (!$source->is_service || !$source->planItems()->exists()) {
-            return back()->with('error', 'Джерело не має плану служіння');
+            return back()->with('error', __('messages.source_has_no_plan'));
         }
 
         // Clear existing items if any
@@ -172,13 +172,13 @@ class ServicePlanController extends Controller
         if ($request->ajax()) {
             return response()->json([
                 'success' => true,
-                'message' => 'План скопійовано',
+                'message' => __('messages.plan_copied'),
                 'redirect' => route('events.plan.index', $event),
             ]);
         }
 
         return redirect()->route('events.plan.index', $event)
-            ->with('success', 'План скопійовано з ' . $source->title . ' (' . $source->date->format('d.m.Y') . ')');
+            ->with('success', __('messages.plan_copied_from', ['title' => $source->title, 'date' => $source->date->format('d.m.Y')]));
     }
 
     /**
@@ -222,11 +222,11 @@ class ServicePlanController extends Controller
             return response()->json([
                 'success' => true,
                 'item' => $item->load('responsible'),
-                'message' => 'Пункт додано',
+                'message' => __('messages.plan_quick_item_added'),
             ]);
         }
 
-        return back()->with('success', 'Пункт додано');
+        return back()->with('success', __('messages.plan_quick_item_added'));
     }
 
     /**
@@ -354,7 +354,7 @@ class ServicePlanController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Шаблон застосовано',
+            'message' => __('messages.plan_template_applied'),
             'count' => count($items),
         ]);
     }
@@ -401,7 +401,7 @@ class ServicePlanController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Пункти додано',
+            'message' => __('messages.plan_items_added'),
             'count' => count($validated['types']),
         ]);
     }
@@ -515,7 +515,7 @@ class ServicePlanController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => "Додано {$createdCount} пунктів",
+            'message' => __('messages.plan_items_parsed', ['count' => $createdCount]),
             'count' => $createdCount,
         ]);
     }
@@ -537,7 +537,7 @@ class ServicePlanController extends Controller
         if (!$personId) {
             return response()->json([
                 'success' => false,
-                'message' => 'Немає призначеної людини',
+                'message' => __('messages.no_responsible_person'),
             ], 422);
         }
 
@@ -548,14 +548,14 @@ class ServicePlanController extends Controller
         if (!$person) {
             return response()->json([
                 'success' => false,
-                'message' => 'Людину не знайдено',
+                'message' => __('messages.person_not_found'),
             ], 422);
         }
 
         if (!$person->telegram_chat_id) {
             return response()->json([
                 'success' => false,
-                'message' => 'У цієї людини не підключений Telegram',
+                'message' => __('messages.person_no_telegram'),
             ], 422);
         }
 
@@ -563,14 +563,14 @@ class ServicePlanController extends Controller
         if (!$church?->isNotificationEnabled('notify_on_plan_request')) {
             return response()->json([
                 'success' => false,
-                'message' => 'Сповіщення про план служіння вимкнено в налаштуваннях',
+                'message' => __('messages.plan_notifications_disabled'),
             ], 422);
         }
 
         if (!config('services.telegram.bot_token')) {
             return response()->json([
                 'success' => false,
-                'message' => 'Telegram бот не налаштований для цієї церкви',
+                'message' => __('messages.telegram_bot_not_configured'),
             ], 500);
         }
 
@@ -579,11 +579,11 @@ class ServicePlanController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Telegram бот не налаштований',
+                'message' => __('messages.telegram_bot_not_setup'),
             ], 500);
         }
 
-        $timeStr = $item->start_time ? \Carbon\Carbon::parse($item->start_time)->format('H:i') : 'час уточнюється';
+        $timeStr = $item->start_time ? \Carbon\Carbon::parse($item->start_time)->format('H:i') : __('messages.time_to_be_confirmed');
         $message = "📋 <b>Запит на участь</b>\n\n"
             . "📅 {$event->date->format('d.m.Y')} ({$this->getDayName($event->date)})\n"
             . "⏰ {$timeStr}\n"
@@ -614,13 +614,13 @@ class ServicePlanController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Запит надіслано в Telegram',
+                'message' => __('messages.telegram_request_sent'),
             ]);
         }
 
         return response()->json([
             'success' => false,
-            'message' => 'Не вдалося надіслати повідомлення',
+            'message' => __('messages.telegram_send_failed'),
         ], 500);
     }
 

@@ -25,10 +25,10 @@ class CheckPermission
 
         if (!$user->hasPermission($module, $action)) {
             if ($request->expectsJson()) {
-                return response()->json(['error' => 'Недостатньо прав доступу'], 403);
+                return response()->json(['error' => __('messages.insufficient_permissions')], 403);
             }
 
-            abort(403, 'Недостатньо прав для виконання цієї дії');
+            abort(403, __('messages.insufficient_permissions_action'));
         }
 
         return $next($request);

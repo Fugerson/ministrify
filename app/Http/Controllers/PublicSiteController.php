@@ -138,20 +138,20 @@ class PublicSiteController extends Controller
             ->first();
 
         if ($existing) {
-            return back()->with('error', 'Ви вже зареєстровані на цю подію.');
+            return back()->with('error', __('messages.already_registered_for_event'));
         }
 
         // Check remaining spaces
         if ($event->registration_limit) {
             $totalGuests = 1 + $validated['guests'];
             if ($totalGuests > $event->remaining_spaces) {
-                return back()->with('error', 'На жаль, недостатньо місць.');
+                return back()->with('error', __('messages.not_enough_spaces'));
             }
         }
 
         EventRegistration::create($validated);
 
-        return back()->with('success', 'Дякуємо за реєстрацію! Ви отримаєте підтвердження на email.');
+        return back()->with('success', __('messages.registration_success'));
     }
 
     // Ministry page
@@ -209,7 +209,7 @@ class PublicSiteController extends Controller
 
         MinistryJoinRequest::create($validated);
 
-        return back()->with('success', 'Дякуємо за заявку! Ми зв\'яжемося з вами найближчим часом.');
+        return back()->with('success', __('messages.ministry_join_success'));
     }
 
     // Group page
@@ -259,7 +259,7 @@ class PublicSiteController extends Controller
 
         GroupJoinRequest::create($validated);
 
-        return back()->with('success', 'Дякуємо за заявку! Ми зв\'яжемося з вами найближчим часом.');
+        return back()->with('success', __('messages.group_join_success'));
     }
 
     // Donate page
@@ -306,7 +306,7 @@ class PublicSiteController extends Controller
             'donor_phone' => 'nullable|string|max:20',
             'campaign_id' => ['nullable', 'exists:donation_campaigns,id', function ($attr, $value, $fail) use ($church) {
                 if ($value && \App\Models\DonationCampaign::where('id', $value)->where('church_id', $church->id)->doesntExist()) {
-                    $fail('Обрана кампанія не належить цій церкві.');
+                    $fail(__('messages.campaign_not_belongs_to_church'));
                 }
             }],
             'message' => 'nullable|string|max:500',
@@ -318,7 +318,7 @@ class PublicSiteController extends Controller
 
         if ($validated['payment_method'] === 'liqpay') {
             if (!$paymentService->isLiqPayAvailable()) {
-                return back()->with('error', 'LiqPay наразі недоступний.');
+                return back()->with('error', __('messages.liqpay_unavailable'));
             }
 
             try {
@@ -336,13 +336,13 @@ class PublicSiteController extends Controller
                     'error' => $e->getMessage(),
                     'trace' => $e->getTraceAsString(),
                 ]);
-                return back()->with('error', 'Помилка при створенні платежу. Спробуйте пізніше.');
+                return back()->with('error', __('messages.payment_creation_error'));
             }
         }
 
         if ($validated['payment_method'] === 'monobank') {
             if (!$paymentService->isMonobankAvailable()) {
-                return back()->with('error', 'Monobank наразі недоступний.');
+                return back()->with('error', __('messages.monobank_unavailable'));
             }
 
             // Create pending donation record
@@ -357,13 +357,13 @@ class PublicSiteController extends Controller
             $host = $parsedUrl['host'] ?? '';
 
             if (!in_array($host, $allowedDomains)) {
-                return back()->with('error', 'Невірне посилання Monobank.');
+                return back()->with('error', __('messages.invalid_monobank_link'));
             }
 
             return redirect()->away($jarLink);
         }
 
-        return back()->with('error', 'Невідомий метод оплати.');
+        return back()->with('error', __('messages.unknown_payment_method'));
     }
 
     // Donation success page

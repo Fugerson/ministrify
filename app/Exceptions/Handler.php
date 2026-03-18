@@ -24,10 +24,10 @@ class Handler extends ExceptionHandler
         // Handle CSRF token mismatch (419 Page Expired) - redirect to dashboard
         $this->renderable(function (TokenMismatchException $e, $request) {
             if ($request->expectsJson()) {
-                return response()->json(['message' => 'Сесія закінчилась. Оновіть сторінку.'], 419);
+                return response()->json(['message' => __('messages.session_expired_refresh')], 419);
             }
 
-            return redirect()->route('dashboard')->with('error', 'Сесія закінчилась. Спробуйте ще раз.');
+            return redirect()->route('dashboard')->with('error', __('messages.session_expired'));
         });
 
         // Handle expired/invalid verification links with a friendly page
@@ -39,7 +39,7 @@ class Handler extends ExceptionHandler
 
             // For other signed URLs, show generic error
             return response()->view('errors.403', [
-                'message' => 'Посилання недійсне або застаріло.',
+                'message' => __('messages.link_invalid_or_expired'),
             ], 403);
         });
     }
