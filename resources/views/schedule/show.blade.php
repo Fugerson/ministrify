@@ -248,8 +248,109 @@
     <div class="space-y-6" x-data="sectionManager()">
         <!-- Main content (full width) -->
         <div class="space-y-6">
-            <!-- План події -->
-            <div x-show="isSectionVisible('plan')" x-collapse.duration.300ms class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700" x-data="planEditor()">
+            <!-- Event Team Data Prep -->
+            @php
+                // Build initial data for Alpine component
+                $eventTeam = collect();
+                $myPersonId = $currentPerson?->id;
+
+                // Position-based assignments
+                foreach ($event->assignments as $assignment) {
+                    if (!$assignment->person || !$assignment->position) continue;
+                    $eventTeam->push([
+                        'ministry_id' => $assignment->position->ministry?->id,
+                        'role_name' => $assignment->position->name,
+                        'role_id' => null,
+                        'role_type' => 'position',
+                        'person_name' => $assignment->person->full_name,
+                        'person_id' => $assignment->person->id,
+                        'id' => $assignment->id,
+                        'status' => $assignment->status,
+                        'notes' => $assignment->notes,
+                        'has_telegram' => (bool) $assignment->person->telegram_chat_id,
+                        'source' => 'assignment',
+                    ]);
+                }
+
+                // Role-based ministry teams
+                foreach ($event->ministryTeams as $member) {
+                    if (!$member->person) continue;
+                    $eventTeam->push([
+                        'ministry_id' => $member->ministry_id,
+                        'role_name' => $member->ministryRole?->name ?? __('app.schedule_member'),
+                        'role_id' => $member->ministry_role_id,
+                        'role_type' => 'ministry_role',
+                        'person_name' => $member->person->full_name,
+                        'person_id' => $member->person->id,
+                        'id' => $member->id,
+                        'status' => $member->status,
+                        'notes' => $member->notes,
+                        'has_telegram' => (bool) $member->person->telegram_chat_id,
+                        'source' => 'ministry_team',
+                    ]);
+                }
+
+                // Linked ministries with roles and members
+                $linkedMinistriesData = $linkedMinistries->map(function($lm) {
+                    return [
+                        'id' => $lm->id,
+                        'name' => $lm->name,
+                        'color' => $lm->color ?? '#6B7280',
+                        'is_worship' => (bool) $lm->is_worship_ministry,
+                        'roles' => $lm->ministryRoles->map(fn($r) => ['id' => $r->id, 'name' => $r->name])->values(),
+                    ];
+                })->values();
+
+                // Songs for this event (for worship ministries)
+                $eventSongsData = $event->songs->map(fn($s) => [
+                    'id' => $s->pivot->id,
+                    'song_id' => $s->id,
+                    'title' => $s->title,
+                    'key' => $s->pivot->key ?? $s->key,
+                    'order' => $s->pivot->order,
+                ])->values();
+
+                // All available songs for the church
+                $hasWorshipLinked = $linkedMinistries->contains('is_worship_ministry', true);
+                $allChurchSongs = $hasWorshipLinked
+                    ? \App\Models\Song::where('church_id', $event->church_id)->orderBy('title')->get(['id', 'title', 'key'])->map(fn($s) => ['id' => $s->id, 'title' => $s->title, 'key' => $s->key])->values()
+                    : collect();
+
+                // Song notes
+                $songCellNote = \App\Models\EventCellNote::where('event_id', $event->id)
+                    ->where('role_type', 'songs')
+                    ->where('role_id', 0)
+                    ->value('notes') ?? '';
+
+                // Members by ministry (for assign dropdown)
+                $membersByMinistry = [];
+                foreach ($linkedMinistries as $lm) {
+                    $membersByMinistry[$lm->id] = $lm->members->map(fn($p) => [
+                        'id' => $p->id,
+                        'name' => $p->full_name,
+                        'has_telegram' => (bool) $p->telegram_chat_id,
+                    ])->sortBy('name')->values()->toArray();
+                }
+
+                // Available ministries to link
+                $availableMinistriesData = $availableMinistriesToLink->map(fn($m) => [
+                    'id' => $m->id,
+                    'name' => $m->name,
+                    'color' => $m->color ?? '#6B7280',
+                ])->values();
+
+                // My ministry IDs for self-signup
+                $myMinistryIds = $currentPerson ? $currentPerson->ministries()->whereIn('ministries.id', $linkedMinistries->pluck('id'))->pluck('ministries.id')->toArray() : [];
+
+                $initialTeamCount = $eventTeam->count();
+                $showTeamSection = $linkedMinistries->count() > 0 || $initialTeamCount > 0 || count($myMinistryIds) > 0 || $canEdit;
+            @endphp
+
+            <!-- Combined Plan + Team Card -->
+            <div x-show="isSectionVisible('plan') || isSectionVisible('team')" x-collapse.duration.300ms class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                <div class="flex flex-col xl:flex-row">
+                    <!-- Plan section -->
+                    <div class="flex-1 min-w-0" x-data="planEditor()">
                 <div class="px-3 sm:px-5 py-4 border-b border-gray-200 dark:border-gray-700" :class="{ 'border-b-0': planCollapsed }">
                     <div class="flex flex-wrap items-center justify-between gap-2">
                         <button type="button" @click="planCollapsed = !planCollapsed" class="flex items-center gap-2 hover:opacity-70 transition-opacity">
@@ -472,9 +573,13 @@
                                         $declinedCount = count(array_filter($existingPeople, fn($p) => ($p['status'] ?? null) === 'declined'));
                                         $notAskedCount = count(array_filter($existingPeople, fn($p) => ($p['status'] ?? null) === null && $p['hasTelegram']));
                                     @endphp
-                                    <td class="px-2 sm:px-3 py-3 border-r border-gray-200 dark:border-gray-700 align-top"
+                                    <td class="px-2 sm:px-3 py-3 border-r border-gray-200 dark:border-gray-700 align-top transition-colors"
                                         data-plan-item-id="{{ $item->id }}"
-                                        x-data="responsibleEditor({{ $item->id }}, {{ json_encode($existingPeople) }})">
+                                        x-data="responsibleEditor({{ $item->id }}, {{ json_encode($existingPeople) }})"
+                                        @dragover.prevent="$el.classList.add('!bg-primary-50','dark:!bg-primary-900/30','ring-2','ring-primary-400','ring-inset')"
+                                        @dragenter.prevent
+                                        @dragleave="$el.classList.remove('!bg-primary-50','dark:!bg-primary-900/30','ring-2','ring-primary-400','ring-inset')"
+                                        @drop.prevent="handlePersonDrop($event)">
                                         <div class="flex flex-col gap-1">
                                             {{-- Selected people as tags --}}
                                             <template x-for="(person, index) in people" :key="index">
@@ -713,523 +818,176 @@
                     <span x-text="message"></span>
                 </div>
                 </div>{{-- /planCollapsed wrapper --}}
-            </div>
+                    </div>{{-- end plan flex child --}}
 
-            <!-- Event Team Section (Alpine.js AJAX) -->
-            @php
-                // Build initial data for Alpine component
-                $eventTeam = collect();
-                $myPersonId = $currentPerson?->id;
+                    <!-- Team sidebar -->
+                    @if($showTeamSection)
+                    <div class="xl:w-80 flex-shrink-0 border-t xl:border-t-0 xl:border-l border-gray-200 dark:border-gray-700" x-data="eventTeamManager()">
+                        <!-- Sidebar header -->
+                        <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-700/30 flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                </svg>
+                                <h3 class="font-semibold text-sm text-gray-900 dark:text-white">{{ __('app.schedule_event_team') }}</h3>
+                            </div>
+                            <span class="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-full" x-text="totalAssigned"></span>
+                        </div>
 
-                // Position-based assignments
-                foreach ($event->assignments as $assignment) {
-                    if (!$assignment->person || !$assignment->position) continue;
-                    $eventTeam->push([
-                        'ministry_id' => $assignment->position->ministry?->id,
-                        'role_name' => $assignment->position->name,
-                        'role_id' => null,
-                        'role_type' => 'position',
-                        'person_name' => $assignment->person->full_name,
-                        'person_id' => $assignment->person->id,
-                        'id' => $assignment->id,
-                        'status' => $assignment->status,
-                        'notes' => $assignment->notes,
-                        'has_telegram' => (bool) $assignment->person->telegram_chat_id,
-                        'source' => 'assignment',
-                    ]);
-                }
+                        <!-- Toast -->
+                        <div x-show="toast.show" x-transition
+                             class="fixed top-4 right-4 z-50 px-4 py-2 rounded-lg shadow-lg text-sm font-medium"
+                             :class="toast.type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'"
+                             x-text="toast.message"></div>
 
-                // Role-based ministry teams
-                foreach ($event->ministryTeams as $member) {
-                    if (!$member->person) continue;
-                    $eventTeam->push([
-                        'ministry_id' => $member->ministry_id,
-                        'role_name' => $member->ministryRole?->name ?? __('app.schedule_member'),
-                        'role_id' => $member->ministry_role_id,
-                        'role_type' => 'ministry_role',
-                        'person_name' => $member->person->full_name,
-                        'person_id' => $member->person->id,
-                        'id' => $member->id,
-                        'status' => $member->status,
-                        'notes' => $member->notes,
-                        'has_telegram' => (bool) $member->person->telegram_chat_id,
-                        'source' => 'ministry_team',
-                    ]);
-                }
-
-                // Linked ministries with roles and members
-                $linkedMinistriesData = $linkedMinistries->map(function($lm) {
-                    return [
-                        'id' => $lm->id,
-                        'name' => $lm->name,
-                        'color' => $lm->color ?? '#6B7280',
-                        'is_worship' => (bool) $lm->is_worship_ministry,
-                        'roles' => $lm->ministryRoles->map(fn($r) => ['id' => $r->id, 'name' => $r->name])->values(),
-                    ];
-                })->values();
-
-                // Songs for this event (for worship ministries)
-                $eventSongsData = $event->songs->map(fn($s) => [
-                    'id' => $s->pivot->id,
-                    'song_id' => $s->id,
-                    'title' => $s->title,
-                    'key' => $s->pivot->key ?? $s->key,
-                    'order' => $s->pivot->order,
-                ])->values();
-
-                // All available songs for the church
-                $hasWorshipLinked = $linkedMinistries->contains('is_worship_ministry', true);
-                $allChurchSongs = $hasWorshipLinked
-                    ? \App\Models\Song::where('church_id', $event->church_id)->orderBy('title')->get(['id', 'title', 'key'])->map(fn($s) => ['id' => $s->id, 'title' => $s->title, 'key' => $s->key])->values()
-                    : collect();
-
-                // Song notes
-                $songCellNote = \App\Models\EventCellNote::where('event_id', $event->id)
-                    ->where('role_type', 'songs')
-                    ->where('role_id', 0)
-                    ->value('notes') ?? '';
-
-                // Members by ministry (for assign dropdown)
-                $membersByMinistry = [];
-                foreach ($linkedMinistries as $lm) {
-                    $membersByMinistry[$lm->id] = $lm->members->map(fn($p) => [
-                        'id' => $p->id,
-                        'name' => $p->full_name,
-                        'has_telegram' => (bool) $p->telegram_chat_id,
-                    ])->sortBy('name')->values()->toArray();
-                }
-
-                // Available ministries to link
-                $availableMinistriesData = $availableMinistriesToLink->map(fn($m) => [
-                    'id' => $m->id,
-                    'name' => $m->name,
-                    'color' => $m->color ?? '#6B7280',
-                ])->values();
-
-                // My ministry IDs for self-signup
-                $myMinistryIds = $currentPerson ? $currentPerson->ministries()->whereIn('ministries.id', $linkedMinistries->pluck('id'))->pluck('ministries.id')->toArray() : [];
-
-                $initialTeamCount = $eventTeam->count();
-                $showTeamSection = $linkedMinistries->count() > 0 || $initialTeamCount > 0 || count($myMinistryIds) > 0 || $canEdit;
-            @endphp
-
-            @if($showTeamSection)
-            <div x-show="isSectionVisible('team')" x-collapse.duration.300ms class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700"
-                 x-data="eventTeamManager()">
-
-                <button type="button" @click="teamOpen = !teamOpen" class="w-full px-5 py-4 flex items-center justify-between cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors rounded-t-2xl" :class="teamOpen ? 'border-b border-gray-200 dark:border-gray-700' : ''">
-                    <div class="flex items-center gap-2">
-                        <svg class="w-4 h-4 text-gray-400 transition-transform" :class="teamOpen ? 'rotate-90' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                        </svg>
-                        <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
-                        </svg>
-                        <h2 class="font-semibold text-gray-900 dark:text-white">{{ __('app.schedule_event_team') }}</h2>
-                    </div>
-                    <span class="text-sm text-gray-500 dark:text-gray-400"
-                          x-text="linkedMinistries.length + ' {{ mb_strtolower(__('messages.teams')) }} · ' + totalAssigned"></span>
-                </button>
-
-                <div class="p-4 space-y-4" x-show="teamOpen" x-collapse>
-
-                    {{-- Toast --}}
-                    <div x-show="toast.show" x-transition
-                         class="fixed top-4 right-4 z-50 px-4 py-2 rounded-lg shadow-lg text-sm font-medium"
-                         :class="toast.type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'"
-                         x-text="toast.message"></div>
-
-                    {{-- Linked ministries as grid table (like planning matrix) --}}
-                    <div class="rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-                        <table class="w-full border-collapse">
-                            <tbody>
+                        <!-- Scrollable team list -->
+                        <div class="overflow-y-auto p-3 space-y-2" style="max-height: 600px;">
                             <template x-for="(ministry, mIdx) in linkedMinistries" :key="ministry.id">
-                                <template x-for="(row, rowIdx) in getMinistryTableRows(ministry)" :key="row.key">
-                                    <tr class="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50/50 dark:hover:bg-gray-700/20 transition-colors"
-                                        :class="row.type === 'header' && mIdx > 0 ? 'border-t-2 border-gray-300 dark:border-gray-600' : ''">
-                                        {{-- Left column: role/header name --}}
-                                        <td class="px-3 py-2.5 border-r border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800 w-[160px] align-top"
-                                            :class="row.type === 'header' ? 'cursor-pointer' : ''">
+                                <div class="space-y-0.5">
+                                    <!-- Ministry header -->
+                                    <div class="flex items-center justify-between px-2 py-1.5 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                                        <div class="flex items-center gap-1.5">
+                                            <span class="w-1.5 h-4 rounded-full flex-shrink-0" :style="'background:'+ministry.color"></span>
+                                            <span class="text-[11px] font-bold uppercase tracking-wide" :style="'color:'+ministry.color" x-text="ministry.name"></span>
+                                            <span class="text-[10px] text-gray-400" x-text="'('+getMinistryMemberCount(ministry.id)+')'"></span>
+                                        </div>
+                                        @if($canEdit)
+                                        <button type="button" @click="unlinkMinistry(ministry)" class="text-gray-300 hover:text-red-500 dark:text-gray-600 dark:hover:text-red-400 transition-colors" :title="@js(__('messages.delete'))">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                        </button>
+                                        @endif
+                                    </div>
 
-                                            {{-- Ministry header --}}
-                                            <template x-if="row.type === 'header'">
-                                                <div class="flex items-center gap-2">
-                                                    <span class="w-1 h-4 rounded-full flex-shrink-0" :style="'background:' + ministry.color"></span>
-                                                    <span class="text-[11px] font-bold uppercase tracking-wide" :style="'color:' + ministry.color" x-text="ministry.name"></span>
-                                                    <span class="text-[10px] text-gray-400 dark:text-gray-500" x-text="'(' + ministry.roles.length + ')'"></span>
-                                                </div>
-                                            </template>
-
-                                            {{-- Songs label --}}
-                                            <template x-if="row.type === 'songs'">
-                                                <div class="flex items-center gap-1.5">
-                                                    <svg class="w-3.5 h-3.5 text-purple-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
+                                    <!-- Songs row (worship ministries only) -->
+                                    <template x-if="ministry.is_worship && eventSongs.length > 0">
+                                        <div class="ml-3 px-2 py-1">
+                                            <template x-for="song in eventSongs" :key="song.song_id">
+                                                <div class="flex items-center gap-1 text-xs text-purple-700 dark:text-purple-300">
+                                                    <svg class="w-3 h-3 text-purple-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.37 4.37 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z"/>
                                                     </svg>
-                                                    <span class="text-xs font-semibold text-purple-600 dark:text-purple-400">{{ __('app.songs') }}</span>
+                                                    <span class="truncate" x-text="song.title"></span>
+                                                    <span x-show="song.key" class="text-[9px] text-purple-400" x-text="song.key"></span>
                                                 </div>
                                             </template>
+                                        </div>
+                                    </template>
 
-                                            {{-- Role label --}}
-                                            <template x-if="row.type === 'role'">
-                                                <div class="flex items-center gap-1.5">
-                                                    <span class="w-1.5 h-1.5 rounded-full flex-shrink-0 bg-gray-300 dark:bg-gray-600"></span>
-                                                    <span class="text-xs font-medium text-gray-600 dark:text-gray-400 truncate" x-text="row.role.name"></span>
-                                                </div>
-                                            </template>
-                                        </td>
-
-                                        {{-- Right column: data --}}
-                                        <td class="px-3 py-2.5 align-top">
-                                            {{-- Header: unlink button --}}
-                                            <template x-if="row.type === 'header'">
-                                                <div class="flex justify-end">
+                                    <!-- Roles with assigned people -->
+                                    <template x-for="role in ministry.roles" :key="role.id">
+                                        <div class="ml-3 py-0.5">
+                                            <div class="text-[11px] text-gray-500 dark:text-gray-400 px-2 mb-0.5" x-text="role.name"></div>
+                                            <!-- Assigned people (DRAGGABLE) -->
+                                            <template x-for="person in getRolePersons(ministry.id, role.id)" :key="person.id">
+                                                <div class="group/person flex items-center gap-1.5 px-2 py-1 mx-1 mb-0.5 rounded-md text-xs transition-all cursor-grab active:cursor-grabbing"
+                                                     :class="statusBadgeClass(person.status)"
+                                                     draggable="true"
+                                                     @dragstart="$event.dataTransfer.setData('application/json', JSON.stringify({id: person.person_id, name: person.person_name, hasTelegram: person.has_telegram})); $event.dataTransfer.effectAllowed='copy'; $el.classList.add('opacity-50', 'scale-95')"
+                                                     @dragend="$el.classList.remove('opacity-50', 'scale-95')">
+                                                    <svg class="w-3 h-3 text-gray-400 flex-shrink-0 opacity-0 group-hover/person:opacity-100 transition-opacity" fill="currentColor" viewBox="0 0 24 24">
+                                                        <circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/>
+                                                        <circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/>
+                                                        <circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/>
+                                                    </svg>
+                                                    <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" :class="statusDotClass(person.status)"></span>
+                                                    <span class="truncate flex-1" x-text="person.person_name"></span>
                                                     @if($canEdit)
-                                                    <button type="button" @click="unlinkMinistry(ministry)"
-                                                            class="text-gray-300 hover:text-red-500 dark:text-gray-600 dark:hover:text-red-400 transition-colors" :title="@js(__('messages.delete'))">
-                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                                        </svg>
+                                                    <button type="button" @click.stop="removePerson(person, ministry.id, role.id)" class="text-gray-400 hover:text-red-500 opacity-0 group-hover/person:opacity-100 transition-opacity">
+                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                                                     </button>
                                                     @endif
                                                 </div>
                                             </template>
-
-                                            {{-- Songs cell (clickable, like matrix) --}}
-                                            <template x-if="row.type === 'songs'">
-                                                <div class="min-h-[40px] flex flex-col items-start justify-center gap-0.5 rounded-lg px-2 py-1.5 transition-all duration-150 cursor-pointer border border-dashed border-purple-200 dark:border-purple-800 hover:border-purple-400 dark:hover:border-purple-600 hover:bg-purple-50/50 dark:hover:bg-purple-900/20"
-                                                     @click="songDropdownOpen = !songDropdownOpen">
-                                                    <template x-for="song in eventSongs" :key="song.song_id">
-                                                        <div class="flex items-center gap-1.5 text-sm leading-tight w-full">
-                                                            <svg class="w-3 h-3 text-purple-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                                                <path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.37 4.37 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z"/>
-                                                            </svg>
-                                                            <span class="font-medium text-purple-700 dark:text-purple-300 truncate" x-text="song.title"></span>
-                                                            <template x-if="song.key">
-                                                                <span class="text-[9px] text-purple-400 dark:text-purple-500 flex-shrink-0" x-text="song.key"></span>
-                                                            </template>
-                                                        </div>
-                                                    </template>
-                                                    <template x-if="songNotes">
-                                                        <div class="text-[10px] text-amber-500 dark:text-amber-400 truncate w-full mt-0.5" x-text="songNotes"></div>
-                                                    </template>
-                                                    <template x-if="eventSongs.length === 0 && !songNotes">
-                                                        <div class="flex items-center justify-center w-full">
-                                                            <svg class="w-5 h-5 text-purple-300 dark:text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                                                            </svg>
-                                                        </div>
-                                                    </template>
+                                            <!-- Empty role: click to assign -->
+                                            @if($canEdit)
+                                            <template x-if="getRolePersons(ministry.id, role.id).length === 0">
+                                                <div class="flex items-center gap-1 px-2 py-1 mx-1 border border-dashed border-gray-300 dark:border-gray-600 rounded-md text-[11px] text-gray-400 cursor-pointer hover:border-primary-400 hover:text-primary-500 transition-colors"
+                                                     @click="openDropdown(ministry, role, $event)">
+                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                                                 </div>
                                             </template>
-
-                                            {{-- Role cell (clickable, like matrix) --}}
-                                            <template x-if="row.type === 'role'">
-                                                <div class="min-h-[40px] flex flex-col items-start justify-center gap-0.5 rounded-lg px-2 py-1.5 transition-all duration-150 cursor-pointer"
-                                                     :class="getRolePersons(ministry.id, row.role.id).length === 0
-                                                         ? 'border border-dashed border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-700 hover:bg-primary-50/50 dark:hover:bg-primary-900/20'
-                                                         : (getRolePersons(ministry.id, row.role.id).some(p => p.status === 'declined')
-                                                             ? 'bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30'
-                                                             : (getRolePersons(ministry.id, row.role.id).every(p => p.status === 'confirmed' || p.status === 'attended')
-                                                                 ? 'bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30'
-                                                                 : 'bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/30'))"
-                                                     @click="openDropdown(ministry, row.role, $event)">
-                                                    <template x-for="person in getRolePersons(ministry.id, row.role.id)" :key="person.id">
-                                                        <div class="flex items-center gap-1.5 text-sm leading-tight w-full">
-                                                            <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" :class="statusDotClass(person.status)"></span>
-                                                            <span class="truncate font-medium" :class="statusTextClass(person.status)"
-                                                                  x-text="isMe(person) ? person.person_name + ' ({{ __('app.you') }})' : person.person_name"></span>
-                                                        </div>
-                                                    </template>
-                                                    <template x-if="getCellNotes(ministry.id, row.role)">
-                                                        <div class="text-[10px] text-amber-500 dark:text-amber-400 truncate w-full mt-0.5" x-text="getCellNotes(ministry.id, row.role)"></div>
-                                                    </template>
-                                                    <template x-if="getRolePersons(ministry.id, row.role.id).length === 0">
-                                                        <div class="flex items-center justify-center w-full">
-                                                            <svg class="w-5 h-5 text-gray-400 dark:text-gray-500 hover:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                                                            </svg>
-                                                        </div>
-                                                    </template>
-                                                </div>
+                                            @endif
+                                            <!-- Self-signup (if current user is ministry member) -->
+                                            <template x-if="canSelfSignup(ministry) && !isMeAssignedToRole(ministry.id, role.id) && getRolePersons(ministry.id, role.id).length === 0">
+                                                <button type="button" @click="selfSignup(ministry, role)"
+                                                        class="ml-1 px-2 py-0.5 text-[10px] text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded transition-colors">
+                                                    +{{ __('app.schedule_me') }}
+                                                </button>
                                             </template>
-                                        </td>
-                                    </tr>
-                                </template>
-                            </template>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    {{-- Add ministry to event --}}
-                    @if($canEdit)
-                    <div x-show="availableMinistries.length > 0" class="border-t border-gray-200 dark:border-gray-700 pt-4" x-cloak>
-                        <button type="button" @click="showAddMinistry = true" class="inline-flex items-center gap-1.5 text-sm text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300 transition-colors">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                            </svg>
-                            {{ __('app.add_team') }}
-                        </button>
-                    </div>
-
-                    {{-- Add team modal --}}
-                    <template x-teleport="body">
-                        <div x-show="showAddMinistry" x-cloak
-                             class="fixed inset-0 z-[60] flex items-center justify-center p-4"
-                             @keydown.escape.window="showAddMinistry = false">
-                            <div class="absolute inset-0 bg-black/50" @click="showAddMinistry = false"></div>
-                            <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-sm overflow-hidden"
-                                 @click.stop>
-                                <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700">
-                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.add_team') }}</h3>
-                                </div>
-                                <div class="p-2 max-h-64 overflow-y-auto">
-                                    <template x-for="m in availableMinistries" :key="m.id">
-                                        <button type="button"
-                                                @click="selectedMinistryToLink = m.id; linkMinistry(); showAddMinistry = false"
-                                                class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-left">
-                                            <span class="w-3 h-3 rounded-full flex-shrink-0" :style="'background:' + m.color"></span>
-                                            <span class="text-sm font-medium text-gray-900 dark:text-white" x-text="m.name"></span>
-                                        </button>
+                                        </div>
                                     </template>
                                 </div>
-                                <div class="px-5 py-3 border-t border-gray-200 dark:border-gray-700">
-                                    <button type="button" @click="showAddMinistry = false"
-                                            class="w-full px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-xl transition-colors">
-                                        {{ __('messages.cancel') }}
+                            </template>
+
+                            <!-- Add ministry -->
+                            @if($canEdit)
+                            <div class="pt-2 border-t border-gray-200 dark:border-gray-700">
+                                <div x-show="!showAddMinistry">
+                                    <button type="button" @click="showAddMinistry = true" class="w-full flex items-center justify-center gap-1.5 px-3 py-2 text-xs text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                        {{ __('app.schedule_add_team') }}
                                     </button>
                                 </div>
-                            </div>
-                        </div>
-                    </template>
-                    @endif
-
-                    {{-- Empty state --}}
-                    <template x-if="linkedMinistries.length === 0 && totalAssigned === 0">
-                        <p class="text-sm text-gray-400 dark:text-gray-500 text-center py-2">
-                            {{ __('app.no_teams_added') }}
-                        </p>
-                    </template>
-                </div>
-
-                {{-- Assign/Action Dropdown (like matrix) --}}
-                @if($canEdit)
-                <div x-show="dropdown.open" @click="dropdown.open = false"
-                     class="fixed inset-0 bg-black/40 z-40 sm:hidden"
-                     x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
-                     x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
-                </div>
-                <div x-show="dropdown.open" x-transition:enter="transition ease-out duration-150"
-                     x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
-                     x-transition:leave="transition ease-in duration-100"
-                     x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
-                     @click.outside="dropdown.open = false"
-                     @keydown.escape.window="dropdown.open = false"
-                     class="fixed z-50 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden w-[calc(100vw-16px)] sm:w-72 max-h-[80vh] overflow-y-auto"
-                     :style="window.innerWidth < 640 ? 'top:50%;left:50%;transform:translate(-50%,-50%)' : 'top:' + dropdown.y + 'px;left:' + dropdown.x + 'px'">
-
-                    <div class="px-3 py-2 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
-                        <div class="flex items-center justify-between">
-                            <div class="min-w-0">
-                                <div class="text-xs font-semibold text-gray-900 dark:text-white truncate" x-text="dropdown.role?.name"></div>
-                                <div class="text-[10px] text-gray-500 dark:text-gray-400" x-text="dropdown.ministry?.name"></div>
-                            </div>
-                            <button @click="dropdown.open = false"
-                                class="p-1 -mr-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-
-                    {{-- Already assigned persons --}}
-                    <template x-if="dropdown.persons.length > 0">
-                        <div class="border-b border-gray-200 dark:border-gray-700">
-                            <template x-for="person in dropdown.persons" :key="person.id">
-                                <div class="flex items-center justify-between px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                                    <div class="flex items-center gap-2 min-w-0">
-                                        <span class="w-2 h-2 rounded-full flex-shrink-0" :class="statusDotClass(person.status)"></span>
-                                        <span class="text-sm text-gray-900 dark:text-white truncate" x-text="isMe(person) ? person.person_name + ' ({{ __('app.you') }})' : person.person_name"></span>
-                                        <span class="text-[10px] px-1.5 py-0.5 rounded-full flex-shrink-0"
-                                              :class="statusBadgeClass(person.status)"
-                                              x-text="statusLabel(person.status)"></span>
-                                    </div>
-                                    <div class="flex items-center gap-0.5 flex-shrink-0 ml-2">
-                                        <template x-if="person.has_telegram && person.source !== 'assignment'">
-                                            <button @click.stop="notifyPerson(person)"
-                                                class="p-1.5 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20"
-                                                :title="@js(__('app.send_to_telegram'))">
-                                                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
-                                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
-                                                </svg>
-                                            </button>
+                                <div x-show="showAddMinistry" x-cloak class="space-y-2 px-2">
+                                    <select x-model="selectedMinistryToLink" class="w-full px-2 py-1.5 text-xs border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                        <template x-for="m in availableMinistries" :key="m.id">
+                                            <option :value="m.id" x-text="m.name"></option>
                                         </template>
-                                        <button @click.stop="removePerson(person, dropdown.ministry.id, dropdown.role.id)"
-                                            class="p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20"
-                                            :title="@js(__('app.delete'))">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                    </select>
+                                    <div class="flex gap-1.5">
+                                        <button type="button" @click="linkMinistry()" :disabled="busy" class="flex-1 px-2 py-1.5 text-xs bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50">{{ __('app.schedule_add') }}</button>
+                                        <button type="button" @click="showAddMinistry = false" class="px-2 py-1.5 text-xs text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">{{ __('app.schedule_cancel') }}</button>
+                                    </div>
+                                </div>
+                            </div>
+                            @endif
+
+                            <!-- No teams yet -->
+                            <template x-if="linkedMinistries.length === 0">
+                                <div class="text-center py-4">
+                                    <p class="text-xs text-gray-400 dark:text-gray-500">{{ __('app.schedule_no_teams') }}</p>
+                                </div>
+                            </template>
+                        </div>
+
+                        <!-- Drag hint -->
+                        <div class="px-4 py-2 border-t border-gray-200 dark:border-gray-700 bg-gray-50/30 dark:bg-gray-700/20">
+                            <p class="text-[10px] text-gray-400 dark:text-gray-500 text-center flex items-center justify-center gap-1">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+                                {{ __('app.drag_to_plan_hint') }}
+                            </p>
+                        </div>
+
+                        <!-- Dropdown for assigning people to roles -->
+                        <div x-show="dropdown.open" x-cloak @click.outside="dropdown.open = false"
+                             class="fixed z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl w-56"
+                             :style="'top:'+dropdown.y+'px;left:'+dropdown.x+'px'">
+                            <div class="p-2 border-b border-gray-200 dark:border-gray-700">
+                                <input type="text" x-model="dropdown.search" x-ref="dropdownSearch" placeholder="{{ __('app.schedule_search') }}"
+                                       class="w-full px-2 py-1 text-xs border border-gray-200 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                            </div>
+                            <div class="max-h-48 overflow-y-auto p-1">
+                                <template x-for="person in filteredMembers()" :key="person.id">
+                                    <button type="button" @click="assignPerson(person)"
+                                            class="w-full px-2 py-1.5 text-left text-xs hover:bg-gray-100 dark:hover:bg-gray-700 rounded flex items-center gap-1.5">
+                                        <template x-if="person.has_telegram">
+                                            <svg class="w-3.5 h-3.5 text-blue-500 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .37z"/>
                                             </svg>
-                                        </button>
-                                    </div>
-                                </div>
-                            </template>
-                        </div>
-                    </template>
-
-                    {{-- Notes --}}
-                    <div class="px-3 py-2 border-b border-gray-200 dark:border-gray-700">
-                        <div class="flex items-center gap-1.5 mb-1">
-                            <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
-                            </svg>
-                            <span class="text-[11px] text-gray-500 dark:text-gray-400 font-medium">{{ __('app.position_note') }}</span>
-                        </div>
-                        <input type="text" :value="dropdown.cellNotes || ''"
-                               @input.debounce.600ms="saveCellNotes($event.target.value)"
-                               placeholder="{{ __('app.note_placeholder') }}"
-                               class="w-full px-2 py-1.5 text-xs rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 dark:text-gray-200 focus:ring-primary-500 focus:border-primary-500 placeholder-gray-400 dark:placeholder-gray-500">
-                    </div>
-
-                    {{-- Search & assign --}}
-                    <div>
-                        <div class="p-2">
-                            <input type="text" x-model="dropdown.search" x-ref="dropdownSearch"
-                                   placeholder="{{ __('app.search_member') }}"
-                                   class="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 dark:text-gray-200 focus:ring-primary-500 focus:border-primary-500 placeholder-gray-400 dark:placeholder-gray-500"
-                                   @keydown.escape="dropdown.open = false">
-                        </div>
-                        <div class="overflow-y-auto max-h-44 pb-1">
-                            <template x-for="member in filteredMembers()" :key="member.id">
-                                <button @click="assignPerson(member)"
-                                    class="w-full text-left px-3 py-2 text-sm hover:bg-primary-50 dark:hover:bg-primary-900/30 text-gray-700 dark:text-gray-300 transition-colors flex items-center gap-2">
-                                    <svg class="w-3.5 h-3.5 text-primary-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                                    </svg>
-                                    <span class="truncate" x-text="member.name"></span>
-                                </button>
-                            </template>
-                            <template x-if="filteredMembers().length === 0 && dropdown.search">
-                                <div class="px-3 py-3 text-sm text-gray-400 dark:text-gray-500 text-center">
-                                    {{ __('app.nobody_found') }}
-                                </div>
-                            </template>
-                        </div>
-                    </div>
-                </div>
-                {{-- Song Dropdown (floating, like matrix) --}}
-                <div x-show="songDropdownOpen" @click="songDropdownOpen = false"
-                     class="fixed inset-0 bg-black/40 z-40 sm:hidden"
-                     x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
-                     x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
-                </div>
-                <div x-show="songDropdownOpen" x-transition:enter="transition ease-out duration-150"
-                     x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
-                     x-transition:leave="transition ease-in duration-100"
-                     x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
-                     @click.outside="songDropdownOpen = false"
-                     @keydown.escape.window="songDropdownOpen = false"
-                     class="fixed z-50 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden w-[calc(100vw-16px)] sm:w-80 max-h-[80vh] overflow-y-auto"
-                     style="top:50%;left:50%;transform:translate(-50%,-50%)">
-
-                    {{-- Header --}}
-                    <div class="px-3 py-2 bg-purple-50 dark:bg-purple-900/30 border-b border-purple-200 dark:border-purple-800">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-1.5">
-                                <svg class="w-3.5 h-3.5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
-                                </svg>
-                                <span class="text-xs font-semibold text-purple-700 dark:text-purple-300">{{ __('app.songs') }}</span>
-                            </div>
-                            <button @click="songDropdownOpen = false"
-                                class="p-1 -mr-1 text-purple-400 hover:text-purple-600 dark:hover:text-purple-300 transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-
-                    {{-- Assigned songs --}}
-                    <template x-if="eventSongs.length > 0">
-                        <div class="border-b border-gray-200 dark:border-gray-700">
-                            <template x-for="(song, idx) in eventSongs" :key="song.song_id">
-                                <div class="flex items-center justify-between px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                                    <div class="flex items-center gap-2 min-w-0">
-                                        <span class="text-[10px] text-gray-400 w-4 text-right flex-shrink-0" x-text="idx + 1"></span>
-                                        <svg class="w-3.5 h-3.5 text-purple-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                            <path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.37 4.37 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z"/>
-                                        </svg>
-                                        <span class="text-sm text-gray-900 dark:text-white truncate" x-text="song.title"></span>
-                                        <template x-if="song.key">
-                                            <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400 flex-shrink-0" x-text="song.key"></span>
                                         </template>
-                                    </div>
-                                    @if($canEdit)
-                                    <button @click.stop="removeSongFromEvent(song)"
-                                        class="p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 flex-shrink-0">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                        </svg>
+                                        <span x-text="person.name"></span>
                                     </button>
-                                    @endif
-                                </div>
-                            </template>
-                        </div>
-                    </template>
-
-                    {{-- Notes for songs --}}
-                    @if($canEdit)
-                    <div class="px-3 py-2 border-b border-gray-200 dark:border-gray-700">
-                        <div class="flex items-center gap-1.5 mb-1">
-                            <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
-                            </svg>
-                            <span class="text-[11px] text-gray-500 dark:text-gray-400 font-medium">{{ __('app.position_note') }}</span>
-                        </div>
-                        <input type="text" x-model="songNotes"
-                               @input.debounce.600ms="saveSongNotes($event.target.value)"
-                               placeholder="{{ __('app.note_placeholder') }}"
-                               class="w-full px-2 py-1.5 text-xs rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 dark:text-gray-200 focus:ring-purple-500 focus:border-purple-500 placeholder-gray-400 dark:placeholder-gray-500">
-                    </div>
-                    @endif
-
-                    {{-- Search & add --}}
-                    @if($canEdit)
-                    <div>
-                        <div class="p-2">
-                            <input type="text" x-model="songSearch"
-                                   placeholder="{{ __('app.search_song') }}"
-                                   class="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 dark:text-gray-200 focus:ring-purple-500 focus:border-purple-500 placeholder-gray-400 dark:placeholder-gray-500"
-                                   @keydown.escape="songDropdownOpen = false">
-                        </div>
-                        <div class="overflow-y-auto max-h-44 pb-1">
-                            <template x-for="song in filteredAvailableSongsForEvent()" :key="song.id">
-                                <button type="button" @click="addSongToEvent(song)"
-                                    class="w-full text-left px-3 py-2 text-sm hover:bg-purple-50 dark:hover:bg-purple-900/30 text-gray-700 dark:text-gray-300 transition-colors flex items-center gap-2">
-                                    <svg class="w-3.5 h-3.5 text-purple-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                                    </svg>
-                                    <span class="truncate" x-text="song.title"></span>
-                                    <template x-if="song.key">
-                                        <span class="text-[10px] text-gray-400 ml-auto flex-shrink-0" x-text="song.key"></span>
-                                    </template>
-                                </button>
-                            </template>
-                            <template x-if="filteredAvailableSongsForEvent().length === 0 && songSearch">
-                                <div class="px-3 py-3 text-sm text-gray-400 dark:text-gray-500 text-center">{{ __('app.nobody_found') }}</div>
-                            </template>
-                            <template x-if="allChurchSongs.length === 0">
-                                <div class="px-3 py-3 text-sm text-gray-400 dark:text-gray-500 text-center">{{ __('app.no_songs_yet') }}</div>
-                            </template>
+                                </template>
+                                <template x-if="filteredMembers().length === 0">
+                                    <div class="px-2 py-2 text-xs text-gray-400 text-center">{{ __('app.nobody_found') }}</div>
+                                </template>
+                            </div>
                         </div>
                     </div>
                     @endif
-                </div>
-                @endif
-            </div>
-            @endif
+
+                </div>{{-- end flex --}}
+            </div>{{-- end combined card --}}
 
             <!-- Attendance Section -->
             @if($currentChurch->attendance_enabled)
@@ -1607,7 +1365,7 @@ function eventTeamManager() {
         availableMinistries: @json($availableMinistriesData),
         members: @json($membersByMinistry),
         assignments: @json($eventTeam->values()),
-        teamOpen: false,
+        teamOpen: true,
         showAddMinistry: false,
         selectedMinistryToLink: null,
         busy: false,
@@ -2100,6 +1858,17 @@ function responsibleEditor(itemId, initialPeople) {
         },
         getStats() {
             return { total: this.people.length, confirmed: this.people.filter(p => p.status === 'confirmed').length };
+        },
+        handlePersonDrop(event) {
+            event.currentTarget.classList.remove('!bg-primary-50', 'dark:!bg-primary-900/30', 'ring-2', 'ring-primary-400', 'ring-inset');
+            try {
+                const data = JSON.parse(event.dataTransfer.getData('application/json'));
+                if (data && data.name) {
+                    this.addPerson(data.id, data.name, data.hasTelegram || false);
+                }
+            } catch (e) {
+                console.error('Drop error:', e);
+            }
         },
         getTagClass(status) {
             if (status === 'confirmed') return 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400';
