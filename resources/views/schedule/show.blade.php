@@ -1458,13 +1458,21 @@ function eventTeamManager() {
             );
         },
 
+        getHiddenRolesForId(ministryId) {
+            const ministry = this.linkedMinistries.find(m => m.id === ministryId);
+            return ministry ? this.getHiddenRoles(ministry) : [];
+        },
+
         addRole(ministryId, roleId) {
             if (!this.visibleRoles[ministryId]) this.visibleRoles[ministryId] = [];
             if (!this.visibleRoles[ministryId].includes(roleId)) {
                 this.visibleRoles[ministryId].push(roleId);
             }
-            this.roleDropdown.open = false;
             this._saveVisibleRoles(ministryId);
+            // Auto-close when all roles added
+            if (this.getHiddenRolesForId(ministryId).length === 0) {
+                this.roleDropdown.open = false;
+            }
         },
 
         removeVisibleRole(ministryId, roleId) {
