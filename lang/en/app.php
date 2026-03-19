@@ -2866,6 +2866,8 @@ return [
     'schedule_member' => 'Member',
     'schedule_me' => 'Me',
     'schedule_add_team' => 'Add team',
+    'schedule_add_role' => 'Add role',
+    'schedule_assign' => 'Assign',
     'schedule_no_teams' => 'No teams',
     'drag_to_plan_hint' => 'Drag person to plan',
     'schedule_attendance' => 'Attendance',

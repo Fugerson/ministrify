@@ -852,11 +852,38 @@
                                             <span class="text-[10px] text-gray-400" x-text="'('+getMinistryMemberCount(ministry.id)+')'"></span>
                                         </div>
                                         @if($canEdit)
-                                        <button type="button" @click="unlinkMinistry(ministry)" class="text-gray-300 hover:text-red-500 dark:text-gray-600 dark:hover:text-red-400 transition-colors" :title="@js(__('messages.delete'))">
-                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                                        </button>
+                                        <div class="flex items-center gap-1">
+                                            <!-- Add role button (inline in header) -->
+                                            <template x-if="getHiddenRoles(ministry).length > 0">
+                                                <button type="button" @click.stop="roleDropdown = { open: roleDropdown.ministryId === ministry.id && roleDropdown.open ? false : true, ministryId: ministry.id }"
+                                                        class="p-1 text-gray-400 hover:text-primary-500 transition-colors" :title="@js(__('app.schedule_add_role'))">
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                                </button>
+                                            </template>
+                                            <button type="button" @click="unlinkMinistry(ministry)" class="p-1 text-gray-300 hover:text-red-500 dark:text-gray-600 dark:hover:text-red-400 transition-colors" :title="@js(__('messages.delete'))">
+                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                            </button>
+                                        </div>
                                         @endif
                                     </div>
+                                    <!-- Role picker dropdown (positioned under ministry header) -->
+                                    @if($canEdit)
+                                    <div class="relative" x-show="roleDropdown.open && roleDropdown.ministryId === ministry.id" x-cloak x-transition>
+                                        <div @click.outside="roleDropdown.open = false"
+                                             class="ml-3 mb-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 overflow-hidden">
+                                            <div class="px-3 py-1.5 text-[10px] text-gray-400 uppercase tracking-wide border-b border-gray-100 dark:border-gray-700">{{ __('app.schedule_add_role') }}</div>
+                                            <div class="max-h-48 overflow-y-auto p-1">
+                                                <template x-for="role in getHiddenRoles(ministry)" :key="role.id">
+                                                    <button type="button" @click="addRole(ministry.id, role.id)"
+                                                            class="w-full px-3 py-1.5 text-left text-xs hover:bg-primary-50 dark:hover:bg-primary-900/20 hover:text-primary-600 rounded flex items-center gap-2 transition-colors">
+                                                        <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                                        <span x-text="role.name"></span>
+                                                    </button>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    @endif
 
                                     <!-- Songs row (worship ministries only) -->
                                     <template x-if="ministry.is_worship && eventSongs.length > 0">
@@ -873,8 +900,8 @@
                                         </div>
                                     </template>
 
-                                    <!-- Roles with assigned people -->
-                                    <template x-for="role in ministry.roles" :key="role.id">
+                                    <!-- Roles with assigned people (only visible ones) -->
+                                    <template x-for="role in getVisibleRoles(ministry)" :key="role.id">
                                         <div class="ml-3 py-0.5">
                                             <div class="text-[11px] text-gray-500 dark:text-gray-400 px-2 mb-0.5" x-text="role.name"></div>
                                             <!-- Assigned people (DRAGGABLE) -->
@@ -901,9 +928,10 @@
                                             <!-- Empty role: click to assign -->
                                             @if($canEdit)
                                             <template x-if="getRolePersons(ministry.id, role.id).length === 0">
-                                                <div class="flex items-center gap-1 px-2 py-1 mx-1 border border-dashed border-gray-300 dark:border-gray-600 rounded-md text-[11px] text-gray-400 cursor-pointer hover:border-primary-400 hover:text-primary-500 transition-colors"
+                                                <div class="flex items-center gap-1.5 px-2 py-1 mx-1 border border-dashed border-gray-300 dark:border-gray-600 rounded-md text-[11px] text-gray-400 cursor-pointer hover:border-primary-400 hover:text-primary-500 transition-colors"
                                                      @click="openDropdown(ministry, role, $event)">
                                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                                    <span>{{ __('app.schedule_assign') }}</span>
                                                 </div>
                                             </template>
                                             @endif
@@ -916,6 +944,7 @@
                                             </template>
                                         </div>
                                     </template>
+
                                 </div>
                             </template>
 
@@ -1377,10 +1406,49 @@ function eventTeamManager() {
         songDropdownOpen: false,
         songSearch: '',
         songNotes: @json($songCellNote ?? ''),
+        visibleRoles: {},
+        roleDropdown: { open: false, ministryId: null },
 
         init() {
             if (this.availableMinistries.length > 0) {
                 this.selectedMinistryToLink = this.availableMinistries[0].id;
+            }
+            // Auto-show roles that already have assignments
+            for (const a of this.assignments) {
+                if (a.role_id && a.ministry_id) {
+                    if (!this.visibleRoles[a.ministry_id]) this.visibleRoles[a.ministry_id] = [];
+                    if (!this.visibleRoles[a.ministry_id].includes(a.role_id)) {
+                        this.visibleRoles[a.ministry_id].push(a.role_id);
+                    }
+                }
+            }
+        },
+
+        getVisibleRoles(ministry) {
+            const visible = this.visibleRoles[ministry.id] || [];
+            return ministry.roles.filter(r =>
+                visible.includes(r.id) || this.getRolePersons(ministry.id, r.id).length > 0
+            );
+        },
+
+        getHiddenRoles(ministry) {
+            const visible = this.visibleRoles[ministry.id] || [];
+            return ministry.roles.filter(r =>
+                !visible.includes(r.id) && this.getRolePersons(ministry.id, r.id).length === 0
+            );
+        },
+
+        addRole(ministryId, roleId) {
+            if (!this.visibleRoles[ministryId]) this.visibleRoles[ministryId] = [];
+            if (!this.visibleRoles[ministryId].includes(roleId)) {
+                this.visibleRoles[ministryId].push(roleId);
+            }
+            this.roleDropdown.open = false;
+        },
+
+        removeVisibleRole(ministryId, roleId) {
+            if (this.visibleRoles[ministryId]) {
+                this.visibleRoles[ministryId] = this.visibleRoles[ministryId].filter(id => id !== roleId);
             }
         },
 

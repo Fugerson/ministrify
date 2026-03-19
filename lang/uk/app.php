@@ -2424,6 +2424,8 @@ return [
     'schedule_member' => 'Учасник',
     'schedule_me' => 'Я',
     'schedule_add_team' => 'Додати команду',
+    'schedule_add_role' => 'Додати роль',
+    'schedule_assign' => 'Призначити',
     'schedule_no_teams' => 'Немає команд',
     'drag_to_plan_hint' => 'Перетягніть людину в план',
     'schedule_attendance' => 'Відвідуваність',
