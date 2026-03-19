@@ -901,8 +901,9 @@
                                             <div class="text-[11px] text-gray-500 dark:text-gray-400 px-2 mb-0.5" x-text="role.name"></div>
                                             <!-- Assigned people (DRAGGABLE) -->
                                             <template x-for="person in getRolePersons(ministry.id, role.id)" :key="person.id">
-                                                <div class="group/person flex items-center gap-1.5 px-2 py-1 mx-1 mb-0.5 rounded-md text-xs transition-all cursor-grab active:cursor-grabbing"
+                                                <div class="group/person flex items-center gap-1.5 px-2 py-1 mx-1 mb-0.5 rounded-md text-xs transition-all cursor-pointer"
                                                      :class="statusBadgeClass(person.status)"
+                                                     @click="openDropdown(ministry, role, $event)"
                                                      draggable="true"
                                                      @dragstart="$event.dataTransfer.setData('application/json', JSON.stringify({id: person.person_id, name: person.person_name, hasTelegram: person.has_telegram})); $event.dataTransfer.effectAllowed='copy'; $el.classList.add('opacity-50', 'scale-95')"
                                                      @dragend="$el.classList.remove('opacity-50', 'scale-95')">
