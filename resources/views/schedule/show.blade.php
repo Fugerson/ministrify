@@ -292,12 +292,15 @@
 
                 // Linked ministries with roles and members
                 $linkedMinistriesData = $linkedMinistries->map(function($lm) {
+                    $pivotRoles = $lm->pivot?->visible_roles;
+                    $visibleRoles = $pivotRoles ? json_decode($pivotRoles, true) : [];
                     return [
                         'id' => $lm->id,
                         'name' => $lm->name,
                         'color' => $lm->color ?? '#6B7280',
                         'is_worship' => (bool) $lm->is_worship_ministry,
                         'roles' => $lm->ministryRoles->map(fn($r) => ['id' => $r->id, 'name' => $r->name])->values(),
+                        'saved_visible_roles' => $visibleRoles,
                     ];
                 })->values();
 
@@ -1328,8 +1331,7 @@ function escapeHtml(text) {
 // Section Manager — manages visible/hidden sections on event page
 function sectionManager() {
     const allSections = [
-        { id: 'plan', label: @json(__('app.schedule_event_plan')), icon: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>' },
-        { id: 'team', label: @json(__('app.schedule_event_team')), icon: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>' },
+        { id: 'plan', label: @json(__('app.schedule_event_plan') . ' + ' . __('app.schedule_event_team')), icon: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>' },
         { id: 'attendance', label: @json(__('app.schedule_attendance')), icon: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>' },
         { id: 'tasks', label: @json(__('app.schedule_linked_tasks')), icon: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M13 3h-2a1 1 0 00-1 1v1h4V4a1 1 0 00-1-1zM9 14l2 2 4-4"/></svg>' },
         { id: 'checklist', label: @json(__('app.schedule_checklist')), icon: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>' },
@@ -1349,12 +1351,23 @@ function sectionManager() {
         },
 
         isSectionVisible(id) {
+            // plan and team are combined — if either is visible, both are
+            if (id === 'plan' || id === 'team') {
+                return this.visibleSections.includes('plan') || this.visibleSections.includes('team');
+            }
             return this.visibleSections.includes(id);
         },
 
         showSection(id) {
             if (!this.visibleSections.includes(id)) {
                 this.visibleSections.push(id);
+                // plan and team are linked — show both
+                if (id === 'plan' && !this.visibleSections.includes('team')) {
+                    this.visibleSections.push('team');
+                }
+                if (id === 'team' && !this.visibleSections.includes('plan')) {
+                    this.visibleSections.push('plan');
+                }
                 this.saveSections();
             }
         },
@@ -1413,7 +1426,10 @@ function eventTeamManager() {
             if (this.availableMinistries.length > 0) {
                 this.selectedMinistryToLink = this.availableMinistries[0].id;
             }
-            // Auto-show roles that already have assignments
+            // Load saved visible roles from server + roles with assignments
+            for (const m of this.linkedMinistries) {
+                this.visibleRoles[m.id] = [...(m.saved_visible_roles || [])];
+            }
             for (const a of this.assignments) {
                 if (a.role_id && a.ministry_id) {
                     if (!this.visibleRoles[a.ministry_id]) this.visibleRoles[a.ministry_id] = [];
@@ -1444,11 +1460,25 @@ function eventTeamManager() {
                 this.visibleRoles[ministryId].push(roleId);
             }
             this.roleDropdown.open = false;
+            this._saveVisibleRoles(ministryId);
         },
 
         removeVisibleRole(ministryId, roleId) {
             if (this.visibleRoles[ministryId]) {
                 this.visibleRoles[ministryId] = this.visibleRoles[ministryId].filter(id => id !== roleId);
+                this._saveVisibleRoles(ministryId);
+            }
+        },
+
+        async _saveVisibleRoles(ministryId) {
+            try {
+                await fetch(`/events/${this.eventId}/visible-roles/${ministryId}`, {
+                    method: 'PATCH',
+                    headers: this._headers(),
+                    body: JSON.stringify({ visible_roles: this.visibleRoles[ministryId] || [] }),
+                });
+            } catch (e) {
+                console.error('Save visible roles error:', e);
             }
         },
 

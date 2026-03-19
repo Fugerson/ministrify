@@ -72,6 +72,22 @@ class ServiceTeamController extends Controller
     }
 
     /**
+     * Update visible roles for a linked ministry
+     */
+    public function updateVisibleRoles(Request $request, Event $event, Ministry $ministry)
+    {
+        $this->authorizeChurch($event);
+
+        $visibleRoles = $request->input('visible_roles', []);
+
+        $event->linkedMinistries()->updateExistingPivot($ministry->id, [
+            'visible_roles' => json_encode(array_map('intval', $visibleRoles)),
+        ]);
+
+        return response()->json(['success' => true]);
+    }
+
+    /**
      * Add a team member to a service event
      */
     public function addTeamMember(Request $request, Event $event)
