@@ -1064,19 +1064,39 @@
                                 </div>
                             </template>
 
-                            {{-- Notes (leader only) --}}
-                            <template x-if="isLeader">
-                                <div class="px-3 py-2 border-b border-gray-200 dark:border-gray-700">
-                                    <div class="flex items-center gap-1.5 mb-1">
-                                        <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/></svg>
-                                        <span class="text-[11px] text-gray-500 dark:text-gray-400 font-medium">{{ __('app.position_note') }}</span>
-                                    </div>
-                                    <input type="text" :value="dropdown.cellNotes || ''"
-                                           @input.debounce.600ms="saveCellNotes($event.target.value)"
-                                           placeholder="{{ __('app.note_placeholder') }}"
-                                           class="w-full px-2 py-1.5 text-xs rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 dark:text-gray-200 focus:ring-primary-500 focus:border-primary-500 placeholder-gray-400 dark:placeholder-gray-500">
+                            {{-- Notes + Search (leader) --}}
+                            @if($canEdit)
+                            <div class="px-3 py-2 border-b border-gray-200 dark:border-gray-700">
+                                <div class="flex items-center gap-1.5 mb-1">
+                                    <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/></svg>
+                                    <span class="text-[11px] text-gray-500 dark:text-gray-400 font-medium">{{ __('app.position_note') }}</span>
                                 </div>
-                            </template>
+                                <input type="text" :value="dropdown.cellNotes || ''"
+                                       @input.debounce.600ms="saveCellNotes($event.target.value)"
+                                       placeholder="{{ __('app.note_placeholder') }}"
+                                       class="w-full px-2 py-1.5 text-xs rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 dark:text-gray-200 focus:ring-primary-500 focus:border-primary-500 placeholder-gray-400 dark:placeholder-gray-500">
+                            </div>
+                            <div>
+                                <div class="p-2">
+                                    <input type="text" x-model="dropdown.search" x-ref="dropdownSearch"
+                                           placeholder="{{ __('app.search_member') }}"
+                                           class="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 dark:text-gray-200 focus:ring-primary-500 focus:border-primary-500 placeholder-gray-400 dark:placeholder-gray-500"
+                                           @keydown.escape="dropdown.open = false">
+                                </div>
+                                <div class="overflow-y-auto max-h-44 pb-1">
+                                    <template x-for="member in filteredMembers()" :key="member.id">
+                                        <button @click="assignPerson(member)"
+                                                class="w-full text-left px-3 py-2 text-sm hover:bg-primary-50 dark:hover:bg-primary-900/30 text-gray-700 dark:text-gray-300 transition-colors flex items-center gap-2">
+                                            <svg class="w-3.5 h-3.5 text-primary-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                            <span class="truncate" x-text="member.name"></span>
+                                        </button>
+                                    </template>
+                                    <template x-if="filteredMembers().length === 0 && dropdown.search">
+                                        <div class="px-3 py-3 text-sm text-gray-400 dark:text-gray-500 text-center">{{ __('app.nobody_found') }}</div>
+                                    </template>
+                                </div>
+                            </div>
+                            @endif
 
                             {{-- Self-signup (non-leader) --}}
                             <template x-if="!isLeader && canSelfSignup(dropdown.ministry) && !isMeAssignedToRole(dropdown.ministry?.id, dropdown.role?.id)">
