@@ -922,11 +922,37 @@
                                             </template>
                                             <!-- Add person to role -->
                                             @if($canEdit)
+                                            <div class="relative" x-data="{ assignOpen: false }">
                                                 <div class="flex items-center gap-1.5 px-2 py-1 mx-1 border border-dashed border-gray-300 dark:border-gray-600 rounded-md text-[11px] text-gray-400 cursor-pointer hover:border-primary-400 hover:text-primary-500 transition-colors"
-                                                     @click="openDropdown(ministry, role, $event)">
+                                                     @click="assignOpen = !assignOpen; if(assignOpen) { dropdown.ministry = ministry; dropdown.role = role; dropdown.persons = getRolePersons(ministry.id, role.id); dropdown.search = ''; }">
                                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                                                     <span x-text="getRolePersons(ministry.id, role.id).length === 0 ? '{{ __('app.schedule_assign') }}' : ''"></span>
                                                 </div>
+                                                <div x-show="assignOpen" x-cloak @click.outside="assignOpen = false" x-transition
+                                                     class="absolute left-0 mt-1 w-52 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl z-50">
+                                                    <div class="p-2 border-b border-gray-200 dark:border-gray-700">
+                                                        <input type="text" x-model="dropdown.search" placeholder="{{ __('app.schedule_search') }}"
+                                                               class="w-full px-2 py-1 text-xs border border-gray-200 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                                               @click.stop x-ref="inlineSearch">
+                                                    </div>
+                                                    <div class="max-h-48 overflow-y-auto p-1">
+                                                        <template x-for="person in filteredMembers()" :key="person.id">
+                                                            <button type="button" @click="assignPerson(person); assignOpen = false"
+                                                                    class="w-full px-2 py-1.5 text-left text-xs hover:bg-gray-100 dark:hover:bg-gray-700 rounded flex items-center gap-1.5">
+                                                                <template x-if="person.has_telegram">
+                                                                    <svg class="w-3.5 h-3.5 text-blue-500 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                                                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .37z"/>
+                                                                    </svg>
+                                                                </template>
+                                                                <span x-text="person.name"></span>
+                                                            </button>
+                                                        </template>
+                                                        <template x-if="filteredMembers().length === 0">
+                                                            <div class="px-2 py-2 text-xs text-gray-400 text-center">{{ __('app.nobody_found') }}</div>
+                                                        </template>
+                                                    </div>
+                                                </div>
+                                            </div>
                                             @endif
                                             <!-- Self-signup (if current user is ministry member) -->
                                             <template x-if="canSelfSignup(ministry) && !isMeAssignedToRole(ministry.id, role.id) && getRolePersons(ministry.id, role.id).length === 0">
