@@ -2868,6 +2868,7 @@ return [
     'schedule_add_team' => 'Add team',
     'schedule_add_role' => 'Add role',
     'schedule_assign' => 'Assign',
+    'schedule_signup' => 'Sign up',
     'schedule_no_roles_in_team' => 'This team has no roles',
     'schedule_no_teams' => 'No teams',
     'drag_to_plan_hint' => 'Drag person to plan',

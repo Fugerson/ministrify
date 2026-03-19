@@ -2426,6 +2426,7 @@ return [
     'schedule_add_team' => 'Додати команду',
     'schedule_add_role' => 'Додати роль',
     'schedule_assign' => 'Призначити',
+    'schedule_signup' => 'Записатися',
     'schedule_no_roles_in_team' => 'У цієї команди немає ролей',
     'schedule_no_teams' => 'Немає команд',
     'drag_to_plan_hint' => 'Перетягніть людину в план',

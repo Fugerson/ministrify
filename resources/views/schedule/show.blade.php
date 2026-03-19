@@ -920,47 +920,23 @@
                                                     @endif
                                                 </div>
                                             </template>
-                                            <!-- Add person to role -->
-                                            @if($canEdit)
-                                            <div class="relative" x-data="{ assignOpen: false }">
-                                                <div class="flex items-center gap-1.5 px-2 py-1 mx-1 border border-dashed border-gray-300 dark:border-gray-600 rounded-md text-[11px] text-gray-400 cursor-pointer hover:border-primary-400 hover:text-primary-500 transition-colors"
-                                                     @click="assignOpen = !assignOpen; if(assignOpen) { dropdown.ministry = ministry; dropdown.role = role; dropdown.persons = getRolePersons(ministry.id, role.id); dropdown.search = ''; }">
+                                            <!-- Add person / manage role -->
+                                            <div class="flex items-center gap-1 mx-1">
+                                                @if($canEdit)
+                                                <div class="flex items-center gap-1.5 px-2 py-1 border border-dashed border-gray-300 dark:border-gray-600 rounded-md text-[11px] text-gray-400 cursor-pointer hover:border-primary-400 hover:text-primary-500 transition-colors"
+                                                     @click="openDropdown(ministry, role, $event)">
                                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                                                     <span x-text="getRolePersons(ministry.id, role.id).length === 0 ? '{{ __('app.schedule_assign') }}' : ''"></span>
                                                 </div>
-                                                <div x-show="assignOpen" x-cloak @click.outside="assignOpen = false" x-transition
-                                                     class="absolute left-0 mt-1 w-52 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl z-50">
-                                                    <div class="p-2 border-b border-gray-200 dark:border-gray-700">
-                                                        <input type="text" x-model="dropdown.search" placeholder="{{ __('app.schedule_search') }}"
-                                                               class="w-full px-2 py-1 text-xs border border-gray-200 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                                               @click.stop x-ref="inlineSearch">
-                                                    </div>
-                                                    <div class="max-h-48 overflow-y-auto p-1">
-                                                        <template x-for="person in filteredMembers()" :key="person.id">
-                                                            <button type="button" @click="assignPerson(person); assignOpen = false"
-                                                                    class="w-full px-2 py-1.5 text-left text-xs hover:bg-gray-100 dark:hover:bg-gray-700 rounded flex items-center gap-1.5">
-                                                                <template x-if="person.has_telegram">
-                                                                    <svg class="w-3.5 h-3.5 text-blue-500 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
-                                                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .37z"/>
-                                                                    </svg>
-                                                                </template>
-                                                                <span x-text="person.name"></span>
-                                                            </button>
-                                                        </template>
-                                                        <template x-if="filteredMembers().length === 0">
-                                                            <div class="px-2 py-2 text-xs text-gray-400 text-center">{{ __('app.nobody_found') }}</div>
-                                                        </template>
-                                                    </div>
-                                                </div>
+                                                @endif
+                                                <!-- Self-signup -->
+                                                <template x-if="canSelfSignup(ministry) && !isMeAssignedToRole(ministry.id, role.id) && getRolePersons(ministry.id, role.id).length === 0">
+                                                    <button type="button" @click="selfSignup(ministry, role)"
+                                                            class="px-2 py-0.5 text-[10px] text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded transition-colors">
+                                                        +{{ __('app.schedule_me') }}
+                                                    </button>
+                                                </template>
                                             </div>
-                                            @endif
-                                            <!-- Self-signup (if current user is ministry member) -->
-                                            <template x-if="canSelfSignup(ministry) && !isMeAssignedToRole(ministry.id, role.id) && getRolePersons(ministry.id, role.id).length === 0">
-                                                <button type="button" @click="selfSignup(ministry, role)"
-                                                        class="ml-1 px-2 py-0.5 text-[10px] text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded transition-colors">
-                                                    +{{ __('app.schedule_me') }}
-                                                </button>
-                                            </template>
                                         </div>
                                     </template>
 
@@ -1030,30 +1006,91 @@
                             </p>
                         </div>
 
-                        <!-- Dropdown for assigning people to roles -->
-                        <div x-show="dropdown.open" x-cloak @click.outside="dropdown.open = false"
-                             class="fixed z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl w-56"
-                             :style="'top:'+dropdown.y+'px;left:'+dropdown.x+'px'">
-                            <div class="p-2 border-b border-gray-200 dark:border-gray-700">
-                                <input type="text" x-model="dropdown.search" x-ref="dropdownSearch" placeholder="{{ __('app.schedule_search') }}"
-                                       class="w-full px-2 py-1 text-xs border border-gray-200 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                            </div>
-                            <div class="max-h-48 overflow-y-auto p-1">
-                                <template x-for="person in filteredMembers()" :key="person.id">
-                                    <button type="button" @click="assignPerson(person)"
-                                            class="w-full px-2 py-1.5 text-left text-xs hover:bg-gray-100 dark:hover:bg-gray-700 rounded flex items-center gap-1.5">
-                                        <template x-if="person.has_telegram">
-                                            <svg class="w-3.5 h-3.5 text-blue-500 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
-                                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .37z"/>
-                                            </svg>
-                                        </template>
-                                        <span x-text="person.name"></span>
+                        <!-- Rich dropdown for assigning people to roles -->
+                        <div x-show="dropdown.open" x-cloak
+                             x-transition:enter="transition ease-out duration-150"
+                             x-transition:enter-start="opacity-0 scale-95"
+                             x-transition:enter-end="opacity-100 scale-100"
+                             x-transition:leave="transition ease-in duration-100"
+                             x-transition:leave-start="opacity-100 scale-100"
+                             x-transition:leave-end="opacity-0 scale-95"
+                             @click.outside="dropdown.open = false"
+                             @keydown.escape.window="dropdown.open = false"
+                             class="fixed z-50 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden w-[calc(100vw-16px)] sm:w-72 max-h-[80vh] overflow-y-auto"
+                             :style="window.innerWidth < 640 ? 'top:50%;left:50%;transform:translate(-50%,-50%)' : 'top:'+dropdown.y+'px;left:'+dropdown.x+'px'">
+
+                            <!-- Header -->
+                            <div class="px-3 py-2 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
+                                <div class="flex items-center justify-between">
+                                    <div class="min-w-0">
+                                        <div class="text-xs font-semibold text-gray-900 dark:text-white truncate" x-text="dropdown.role?.name"></div>
+                                    </div>
+                                    <button @click="dropdown.open = false" class="p-1 -mr-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                                     </button>
-                                </template>
-                                <template x-if="filteredMembers().length === 0">
-                                    <div class="px-2 py-2 text-xs text-gray-400 text-center">{{ __('app.nobody_found') }}</div>
-                                </template>
+                                </div>
                             </div>
+
+                            <!-- Assigned people -->
+                            <template x-if="dropdown.persons.length > 0">
+                                <div class="border-b border-gray-200 dark:border-gray-700">
+                                    <template x-for="person in dropdown.persons" :key="person.id">
+                                        <div class="flex items-center justify-between px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                                            <div class="flex items-center gap-2 min-w-0">
+                                                <span class="w-2 h-2 rounded-full flex-shrink-0" :class="statusDotClass(person.status)"></span>
+                                                <span class="text-sm text-gray-900 dark:text-white truncate" x-text="person.person_name"></span>
+                                                <span class="text-[10px] px-1.5 py-0.5 rounded-full flex-shrink-0" :class="statusBadgeClass(person.status)" x-text="statusLabel(person.status)"></span>
+                                            </div>
+                                            <div class="flex items-center gap-0.5 flex-shrink-0 ml-2">
+                                                <template x-if="isLeader && person.has_telegram && person.source !== 'assignment'">
+                                                    <button @click.stop="notifyPerson(person)" class="p-1.5 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20" title="{{ __('app.schedule_send_telegram') }}">
+                                                        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>
+                                                    </button>
+                                                </template>
+                                                <template x-if="isLeader || isMe(person)">
+                                                    <button @click.stop="removePerson(person, dropdown.ministry?.id, dropdown.role?.id)" class="p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20" title="{{ __('messages.delete') }}">
+                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                    </button>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+
+                            <!-- Search & add members -->
+                            <template x-if="isLeader">
+                                <div>
+                                    <div class="p-2">
+                                        <input type="text" x-model="dropdown.search" x-ref="dropdownSearch" placeholder="{{ __('app.schedule_search') }}..."
+                                               class="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 dark:text-gray-200 focus:ring-primary-500 focus:border-primary-500 placeholder-gray-400 dark:placeholder-gray-500"
+                                               @keydown.escape="dropdown.open = false">
+                                    </div>
+                                    <div class="overflow-y-auto max-h-44 pb-1">
+                                        <template x-for="member in filteredMembers()" :key="member.id">
+                                            <button @click="assignPerson(member)"
+                                                    class="w-full text-left px-3 py-2 text-sm hover:bg-primary-50 dark:hover:bg-primary-900/30 text-gray-700 dark:text-gray-300 transition-colors flex items-center gap-2">
+                                                <svg class="w-3.5 h-3.5 text-primary-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                                <span class="truncate" x-text="member.name"></span>
+                                            </button>
+                                        </template>
+                                        <template x-if="filteredMembers().length === 0 && dropdown.search">
+                                            <div class="px-3 py-3 text-sm text-gray-400 dark:text-gray-500 text-center">{{ __('app.nobody_found') }}</div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </template>
+
+                            <!-- Self-signup for non-leaders -->
+                            <template x-if="!isLeader && canSelfSignup(dropdown.ministry) && !isMeAssignedToRole(dropdown.ministry?.id, dropdown.role?.id)">
+                                <div class="px-3 py-2 border-t border-gray-200 dark:border-gray-700">
+                                    <button @click="selfSignup(dropdown.ministry, dropdown.role); dropdown.open = false" :disabled="busy"
+                                            class="w-full px-3 py-2 text-sm font-medium bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 text-white rounded-lg transition-colors flex items-center justify-center gap-2">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                        {{ __('app.schedule_signup') }}
+                                    </button>
+                                </div>
+                            </template>
                         </div>
                     </div>
                     @endif
