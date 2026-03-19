@@ -366,6 +366,7 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
     Route::post('events/{event}/link-ministry', [ServiceTeamController::class, 'linkMinistry'])->name('events.link-ministry')->middleware('permission:events,edit');
     Route::delete('events/{event}/unlink-ministry/{ministry}', [ServiceTeamController::class, 'unlinkMinistry'])->name('events.unlink-ministry')->middleware('permission:events,edit');
     Route::patch('events/{event}/visible-roles/{ministry}', [ServiceTeamController::class, 'updateVisibleRoles'])->name('events.visible-roles')->middleware('permission:events,edit');
+    Route::patch('events/{event}/reorder-ministries', [ServiceTeamController::class, 'reorderMinistries'])->name('events.reorder-ministries')->middleware('permission:events,edit');
 
     // Self-signup (no permission:events,edit — any team member can sign up)
     Route::post('events/{event}/self-signup', [ServiceTeamController::class, 'selfSignup'])->name('events.self-signup');

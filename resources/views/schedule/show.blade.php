@@ -846,9 +846,16 @@
                         <!-- Scrollable team list -->
                         <div class="overflow-y-auto p-3 space-y-2" style="max-height: 600px;">
                             <template x-for="(ministry, mIdx) in linkedMinistries" :key="ministry.id">
-                                <div class="space-y-0.5">
+                                <div class="space-y-0.5 transition-all"
+                                     :class="{ 'opacity-50': draggingMinistry === ministry.id, 'border-t-2 border-primary-400': dragOverMinistry === ministry.id }"
+                                     @dragover="ministryDragOver(ministry.id, $event)"
+                                     @dragleave="ministryDragLeave()"
+                                     @drop.prevent="ministryDrop(ministry.id)">
                                     <!-- Ministry header -->
-                                    <div class="flex items-center justify-between px-2 py-1.5 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                                    <div class="flex items-center justify-between px-2 py-1.5 rounded-lg bg-gray-50 dark:bg-gray-700/50 cursor-grab active:cursor-grabbing"
+                                         draggable="true"
+                                         @dragstart="ministryDragStart(ministry.id)"
+                                         @dragend="ministryDragEnd()"
                                         <div class="flex items-center gap-1.5">
                                             <span class="w-1.5 h-4 rounded-full flex-shrink-0" :style="'background:'+ministry.color"></span>
                                             <span class="text-[11px] font-bold uppercase tracking-wide" :style="'color:'+ministry.color" x-text="ministry.name"></span>
@@ -1479,6 +1486,54 @@ function eventTeamManager() {
             if (this.visibleRoles[ministryId]) {
                 this.visibleRoles[ministryId] = this.visibleRoles[ministryId].filter(id => id !== roleId);
                 this._saveVisibleRoles(ministryId);
+            }
+        },
+
+        // --- Ministry drag-and-drop reorder ---
+        draggingMinistry: null,
+        dragOverMinistry: null,
+
+        ministryDragStart(ministryId) {
+            this.draggingMinistry = ministryId;
+        },
+
+        ministryDragOver(ministryId, event) {
+            event.preventDefault();
+            if (this.draggingMinistry && this.draggingMinistry !== ministryId) {
+                this.dragOverMinistry = ministryId;
+            }
+        },
+
+        ministryDragLeave() {
+            this.dragOverMinistry = null;
+        },
+
+        ministryDrop(targetMinistryId) {
+            if (!this.draggingMinistry || this.draggingMinistry === targetMinistryId) return;
+            const fromIdx = this.linkedMinistries.findIndex(m => m.id === this.draggingMinistry);
+            const toIdx = this.linkedMinistries.findIndex(m => m.id === targetMinistryId);
+            if (fromIdx === -1 || toIdx === -1) return;
+            const [moved] = this.linkedMinistries.splice(fromIdx, 1);
+            this.linkedMinistries.splice(toIdx, 0, moved);
+            this.draggingMinistry = null;
+            this.dragOverMinistry = null;
+            this._saveMinistryOrder();
+        },
+
+        ministryDragEnd() {
+            this.draggingMinistry = null;
+            this.dragOverMinistry = null;
+        },
+
+        async _saveMinistryOrder() {
+            try {
+                await fetch(`/events/${this.eventId}/reorder-ministries`, {
+                    method: 'PATCH',
+                    headers: this._headers(),
+                    body: JSON.stringify({ order: this.linkedMinistries.map(m => m.id) }),
+                });
+            } catch (e) {
+                console.error('Save ministry order error:', e);
             }
         },
 

@@ -88,6 +88,23 @@ class ServiceTeamController extends Controller
     }
 
     /**
+     * Reorder linked ministries
+     */
+    public function reorderMinistries(Request $request, Event $event)
+    {
+        $this->authorizeChurch($event);
+
+        $order = $request->input('order', []);
+        foreach ($order as $index => $ministryId) {
+            $event->linkedMinistries()->updateExistingPivot((int) $ministryId, [
+                'sort_order' => $index,
+            ]);
+        }
+
+        return response()->json(['success' => true]);
+    }
+
+    /**
      * Add a team member to a service event
      */
     public function addTeamMember(Request $request, Event $event)

@@ -178,7 +178,8 @@ class Event extends Model
     public function linkedMinistries(): BelongsToMany
     {
         return $this->belongsToMany(Ministry::class, 'event_ministry')
-            ->withPivot('visible_roles')
+            ->withPivot('visible_roles', 'sort_order')
+            ->orderByPivot('sort_order')
             ->withTimestamps();
     }
 
