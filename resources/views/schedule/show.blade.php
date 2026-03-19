@@ -852,11 +852,16 @@
                                      @dragleave="ministryDragLeave()"
                                      @drop.prevent="ministryDrop(ministry.id)">
                                     <!-- Ministry header -->
-                                    <div class="flex items-center justify-between px-2 py-1.5 rounded-lg bg-gray-50 dark:bg-gray-700/50 cursor-grab active:cursor-grabbing"
+                                    <div class="flex items-center justify-between px-2 py-1.5 rounded-lg bg-gray-50 dark:bg-gray-700/50 cursor-grab active:cursor-grabbing group/ministry"
                                          draggable="true"
                                          @dragstart="ministryDragStart(ministry.id)"
-                                         @dragend="ministryDragEnd()"
+                                         @dragend="ministryDragEnd()">
                                         <div class="flex items-center gap-1.5">
+                                            <svg class="w-3 h-3 text-gray-300 dark:text-gray-600 flex-shrink-0 opacity-0 group-hover/ministry:opacity-100 transition-opacity" fill="currentColor" viewBox="0 0 24 24">
+                                                <circle cx="9" cy="5" r="1.5"/><circle cx="15" cy="5" r="1.5"/>
+                                                <circle cx="9" cy="10" r="1.5"/><circle cx="15" cy="10" r="1.5"/>
+                                                <circle cx="9" cy="15" r="1.5"/><circle cx="15" cy="15" r="1.5"/>
+                                            </svg>
                                             <span class="w-1.5 h-4 rounded-full flex-shrink-0" :style="'background:'+ministry.color"></span>
                                             <span class="text-[11px] font-bold uppercase tracking-wide" :style="'color:'+ministry.color" x-text="ministry.name"></span>
                                             <span class="text-[10px] text-gray-400" x-text="'('+getMinistryMemberCount(ministry.id)+')'"></span>
