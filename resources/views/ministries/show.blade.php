@@ -4838,7 +4838,7 @@ function songsLibrary() {
 function ministryRolesManager() {
     return {
         roles: [],
-        defaultRoles: @json($ministry->is_worship_ministry ? [
+        defaultRoles: {!! json_encode($ministry->is_worship_ministry ? [
             ['name' => __('app.role_lead_vocal'), 'color' => '#dc2626'],
             ['name' => __('app.role_backing_vocal'), 'color' => '#f97316'],
             ['name' => __('app.role_acoustic_guitar'), 'color' => '#84cc16'],
@@ -4857,7 +4857,7 @@ function ministryRolesManager() {
             ['name' => __('app.role_barista'), 'color' => '#92400e'],
             ['name' => __('app.role_greeting'), 'color' => '#ec4899'],
             ['name' => __('app.role_host'), 'color' => '#14b8a6'],
-        ]),
+        ]) !!},
         storeUrl: '',
         baseUrl: '',
         newName: '',
@@ -5031,7 +5031,7 @@ function budgetPage() {
         currentMonth: {{ $budgetData['month'] }},
         currentYear: {{ $budgetData['year'] }},
         ministryId: {{ $ministry->id }},
-        monthNames: @json(['', __('app.month_january'), __('app.month_february'), __('app.month_march'), __('app.month_april'), __('app.month_may'), __('app.month_june'), __('app.month_july'), __('app.month_august'), __('app.month_september'), __('app.month_october'), __('app.month_november'), __('app.month_december')]),
+        monthNames: {!! json_encode(['', __('app.month_january'), __('app.month_february'), __('app.month_march'), __('app.month_april'), __('app.month_may'), __('app.month_june'), __('app.month_july'), __('app.month_august'), __('app.month_september'), __('app.month_october'), __('app.month_november'), __('app.month_december')]) !!},
 
         // Budget data (loaded via AJAX)
         budget: {
