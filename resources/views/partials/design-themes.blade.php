@@ -163,21 +163,12 @@
         background-attachment: fixed;
     }
 
-    /* Dark cards — glass effect with backdrop-blur */
+    /* Dark cards — glass-like effect WITHOUT backdrop-filter (avoids stacking context issues with dropdowns) */
     .dark main .bg-white,
     .dark main [class*="dark:bg-gray-800"] {
-        background: rgba(15, 23, 42, 0.6) !important;
-        backdrop-filter: blur(20px) !important;
-        -webkit-backdrop-filter: blur(20px) !important;
+        background: rgba(15, 23, 42, 0.85) !important;
         border: 1px solid rgba(255, 255, 255, 0.08) !important;
         box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
-    }
-
-    /* Dark glass cards in main — subtle blur for light mode too */
-    main .bg-white,
-    main [class*="dark:bg-gray-800"] {
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
     }
 
     /* Dark sidebar — glass */
@@ -292,12 +283,10 @@
     /* Light mode - still use dark elegant background, hide default light bg */
     .bg-stone-100 { background: transparent !important; }
 
-    /* Light mode cards — slightly lighter, more transparent with brighter gold */
+    /* Light mode cards — slightly lighter with brighter gold (no backdrop-filter to avoid stacking context) */
     main .bg-white,
     main [class*="dark:bg-gray-800"] {
-        background: rgba(40, 52, 72, 0.82) !important;
-        backdrop-filter: blur(12px) !important;
-        -webkit-backdrop-filter: blur(12px) !important;
+        background: rgba(40, 52, 72, 0.92) !important;
         border: 1px solid rgba(251, 191, 36, 0.2) !important;
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(251, 191, 36, 0.12) !important;
     }

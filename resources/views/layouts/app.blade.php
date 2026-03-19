@@ -192,6 +192,11 @@
 
     <style>
         [x-cloak] { display: none !important; }
+
+        /* Ensure dropdowns/popups always appear above themed cards */
+        [x-show].absolute, .absolute[class*="shadow-xl"], .absolute[class*="shadow-lg"] {
+            z-index: 50 !important;
+        }
         .touch-target { min-height: 44px; min-width: 44px; }
         html { scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
