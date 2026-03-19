@@ -920,15 +920,13 @@
                                                     @endif
                                                 </div>
                                             </template>
-                                            <!-- Empty role: click to assign -->
+                                            <!-- Add person to role -->
                                             @if($canEdit)
-                                            <template x-if="getRolePersons(ministry.id, role.id).length === 0">
                                                 <div class="flex items-center gap-1.5 px-2 py-1 mx-1 border border-dashed border-gray-300 dark:border-gray-600 rounded-md text-[11px] text-gray-400 cursor-pointer hover:border-primary-400 hover:text-primary-500 transition-colors"
                                                      @click="openDropdown(ministry, role, $event)">
                                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                                                    <span>{{ __('app.schedule_assign') }}</span>
+                                                    <span x-text="getRolePersons(ministry.id, role.id).length === 0 ? '{{ __('app.schedule_assign') }}' : ''"></span>
                                                 </div>
-                                            </template>
                                             @endif
                                             <!-- Self-signup (if current user is ministry member) -->
                                             <template x-if="canSelfSignup(ministry) && !isMeAssignedToRole(ministry.id, role.id) && getRolePersons(ministry.id, role.id).length === 0">
