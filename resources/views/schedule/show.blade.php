@@ -855,38 +855,18 @@
                                             <span class="text-[10px] text-gray-400" x-text="'('+getMinistryMemberCount(ministry.id)+')'"></span>
                                         </div>
                                         @if($canEdit)
-                                        <div class="flex items-center gap-1">
-                                            <!-- Add role button (inline in header) -->
-                                            <template x-if="getHiddenRoles(ministry).length > 0">
-                                                <button type="button" @click.stop="roleDropdown = { open: roleDropdown.ministryId === ministry.id && roleDropdown.open ? false : true, ministryId: ministry.id }"
-                                                        class="p-1 text-gray-400 hover:text-primary-500 transition-colors" :title="@js(__('app.schedule_add_role'))">
-                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                                                </button>
-                                            </template>
-                                            <button type="button" @click="unlinkMinistry(ministry)" class="p-1 text-gray-300 hover:text-red-500 dark:text-gray-600 dark:hover:text-red-400 transition-colors" :title="@js(__('messages.delete'))">
-                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                                            </button>
-                                        </div>
+                                        <button type="button" @click="unlinkMinistry(ministry)" class="p-1 text-gray-300 hover:text-red-500 dark:text-gray-600 dark:hover:text-red-400 transition-colors" :title="@js(__('messages.delete'))">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                        </button>
                                         @endif
                                     </div>
-                                    <!-- Role picker dropdown (positioned under ministry header) -->
-                                    @if($canEdit)
-                                    <div class="relative" x-show="roleDropdown.open && roleDropdown.ministryId === ministry.id" x-cloak x-transition>
-                                        <div @click.outside="roleDropdown.open = false"
-                                             class="ml-3 mb-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 overflow-hidden">
-                                            <div class="px-3 py-1.5 text-[10px] text-gray-400 uppercase tracking-wide border-b border-gray-100 dark:border-gray-700">{{ __('app.schedule_add_role') }}</div>
-                                            <div class="max-h-48 overflow-y-auto p-1">
-                                                <template x-for="role in getHiddenRoles(ministry)" :key="role.id">
-                                                    <button type="button" @click="addRole(ministry.id, role.id)"
-                                                            class="w-full px-3 py-1.5 text-left text-xs hover:bg-primary-50 dark:hover:bg-primary-900/20 hover:text-primary-600 rounded flex items-center gap-2 transition-colors">
-                                                        <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                                                        <span x-text="role.name"></span>
-                                                    </button>
-                                                </template>
-                                            </div>
+
+                                    <!-- No roles message -->
+                                    <template x-if="ministry.roles.length === 0">
+                                        <div class="ml-3 px-2 py-2 text-[11px] text-gray-400 dark:text-gray-500 italic">
+                                            {{ __('app.schedule_no_roles_in_team') }}
                                         </div>
-                                    </div>
-                                    @endif
+                                    </template>
 
                                     <!-- Songs row (worship ministries only) -->
                                     <template x-if="ministry.is_worship && eventSongs.length > 0">
@@ -948,6 +928,30 @@
                                         </div>
                                     </template>
 
+                                    <!-- Add role button (under roles list) -->
+                                    @if($canEdit)
+                                    <template x-if="getHiddenRoles(ministry).length > 0">
+                                        <div class="ml-3 mt-0.5 relative">
+                                            <button type="button" @click.stop="roleDropdown = { open: roleDropdown.ministryId === ministry.id && roleDropdown.open ? false : true, ministryId: ministry.id }"
+                                                    class="flex items-center gap-1 px-2 py-1 text-[11px] text-gray-400 hover:text-primary-500 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded transition-colors">
+                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                                {{ __('app.schedule_add_role') }}
+                                            </button>
+                                            <div x-show="roleDropdown.open && roleDropdown.ministryId === ministry.id" x-cloak @click.outside="roleDropdown.open = false" x-transition
+                                                 class="absolute left-0 bottom-full mb-1 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 overflow-hidden">
+                                                <div class="max-h-48 overflow-y-auto p-1">
+                                                    <template x-for="role in getHiddenRoles(ministry)" :key="role.id">
+                                                        <button type="button" @click="addRole(ministry.id, role.id)"
+                                                                class="w-full px-3 py-1.5 text-left text-xs hover:bg-primary-50 dark:hover:bg-primary-900/20 hover:text-primary-600 rounded flex items-center gap-2 transition-colors">
+                                                            <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                                            <span x-text="role.name"></span>
+                                                        </button>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                    @endif
                                 </div>
                             </template>
 
