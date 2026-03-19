@@ -945,12 +945,12 @@ class PersonController extends Controller
     public function updateTheme(Request $request)
     {
         $validated = $request->validate([
-            'design_theme' => 'required|string|in:,modern,glass,corporate,ocean,sunset',
+            'design_theme' => 'nullable|string|in:,modern,glass,corporate,ocean,sunset',
         ]);
 
         $user = auth()->user();
         $settings = $user->settings ?? [];
-        $settings['design_theme'] = $validated['design_theme'];
+        $settings['design_theme'] = $validated['design_theme'] ?? '';
         $user->update(['settings' => $settings]);
 
         return response()->json(['success' => true]);

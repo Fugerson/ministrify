@@ -206,10 +206,12 @@
         @media screen and (max-width: 768px) {
             input, select, textarea { font-size: 16px !important; }
         }
+        /* Base body colors — themes override these in design-themes.blade.php */
         .dark body { background-color: #111827; }
+        body { background-color: #f9fafb; }
 
         /* Prevent text overflow — wrap long words instead of breaking layout */
-        body { overflow-wrap: break-word; word-break: break-word; }
+        body { overflow-wrap: break-word; word-break: break-word; min-height: 100vh; }
         .break-anywhere { overflow-wrap: anywhere; }
 
         /* Mobile table horizontal scroll */
@@ -307,6 +309,113 @@
         }
         .scrollbar-accent::-webkit-scrollbar-thumb:hover {
             background: rgba(59, 130, 246, 0.6);
+        }
+
+        /* ========================================
+           Premium Visual Effects (from Landing)
+           ======================================== */
+
+        /* Glass card effect */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .dark .glass-card {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        /* Gradient text */
+        .gradient-text {
+            background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 40%, #818cf8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Subtle grid pattern background */
+        .grid-pattern {
+            background-image:
+                linear-gradient(rgba(59, 130, 246, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(59, 130, 246, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+        }
+        .dark .grid-pattern {
+            background-image:
+                linear-gradient(rgba(59, 130, 246, 0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(59, 130, 246, 0.04) 1px, transparent 1px);
+        }
+
+        /* Glow button */
+        .glow-btn {
+            position: relative;
+            overflow: hidden;
+        }
+        .glow-btn::before {
+            content: '';
+            position: absolute;
+            top: -2px; left: -2px; right: -2px; bottom: -2px;
+            background: linear-gradient(135deg, #3b82f6, #818cf8, #3b82f6);
+            background-size: 200% 200%;
+            animation: gradient-shift 3s ease infinite;
+            border-radius: inherit;
+            z-index: -1;
+            opacity: 0.5;
+            filter: blur(8px);
+            transition: opacity 0.3s;
+        }
+        .glow-btn:hover::before { opacity: 0.8; }
+
+        @keyframes gradient-shift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        /* Animated border gradient */
+        .border-gradient {
+            position: relative;
+        }
+        .border-gradient::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            padding: 1px;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.4), rgba(129, 140, 248, 0.4), rgba(59, 130, 246, 0.4));
+            background-size: 200% 200%;
+            animation: gradient-shift 4s ease infinite;
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+
+        /* Card glow on hover (opt-in utility class) */
+        .dark .card-glow:hover {
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.1), 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Floating blob animation */
+        @keyframes blob-float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(30px, -40px) scale(1.1); }
+            50% { transform: translate(-20px, 20px) scale(0.95); }
+            75% { transform: translate(15px, 30px) scale(1.05); }
+        }
+
+        /* Shimmer loading effect */
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .shimmer {
+            background: linear-gradient(90deg, transparent 25%, rgba(59, 130, 246, 0.08) 50%, transparent 75%);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite;
         }
 
         /* ========================================
@@ -752,6 +861,8 @@
         .page-content {
             opacity: 0;
             transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            z-index: 1;
         }
         .page-content.visible {
             opacity: 1;
@@ -840,7 +951,7 @@
     </script>
     @endif
 </head>
-<body class="font-sans antialiased bg-stone-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+<body class="font-sans antialiased bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
 
     <!-- Page Loader -->
     <div id="page-loader">
@@ -896,7 +1007,7 @@
 
         @if($menuPosition === 'top')
         <!-- Top Navigation Bar -->
-        <nav class="top-nav-bar hidden lg:flex fixed top-0 left-0 right-0 z-40 h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 items-center justify-between">
+        <nav class="top-nav-bar hidden lg:flex fixed top-0 left-0 right-0 z-40 h-16 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border-b border-gray-200/60 dark:border-gray-700/60 px-4 items-center justify-between">
             <div class="flex items-center gap-6">
                 <a wire:navigate href="{{ route('dashboard') }}" class="flex items-center gap-2 flex-shrink-0">
                     @if($currentChurch->logo)
@@ -934,7 +1045,7 @@
 
         @if($menuPosition === 'bottom')
         <!-- Bottom Dock Navigation -->
-        <nav class="bottom-dock-nav hidden lg:flex fixed bottom-0 left-0 right-0 z-40 h-16 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 items-center justify-center gap-1">
+        <nav class="bottom-dock-nav hidden lg:flex fixed bottom-0 left-0 right-0 z-40 h-16 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border-t border-gray-200/60 dark:border-gray-700/60 px-4 items-center justify-center gap-1">
             <a wire:navigate href="{{ route('dashboard') }}" class="flex flex-col items-center px-2 py-2 rounded-xl {{ request()->routeIs('dashboard') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-600' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
                 <span class="text-[10px] mt-0.5">{{ __('app.home') }}</span>
@@ -1244,7 +1355,7 @@
                x-transition:leave="transform transition ease-in duration-200"
                x-transition:leave-start="translate-x-0"
                x-transition:leave-end="{{ $menuPosition === 'right' ? 'translate-x-full' : '-translate-x-full' }}"
-               class="lg:hidden fixed inset-y-0 {{ $menuPosition === 'right' ? 'right-0' : 'left-0' }} z-50 w-[calc(100vw-3rem)] max-w-72 bg-white dark:bg-gray-800 shadow-xl flex flex-col">
+               class="lg:hidden fixed inset-y-0 {{ $menuPosition === 'right' ? 'right-0' : 'left-0' }} z-50 w-[calc(100vw-3rem)] max-w-72 bg-white/90 dark:bg-gray-800/90 backdrop-blur-2xl shadow-xl flex flex-col">
             <div class="flex items-center justify-between h-16 px-6 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
                 <a wire:navigate href="{{ route('dashboard') }}" class="flex items-center space-x-2">
                     @if($currentChurch->logo)
@@ -1596,7 +1707,7 @@
         </div>
 
         <!-- Mobile Bottom Navigation -->
-        <nav class="{{ $menuPosition !== 'bottom' ? 'hidden' : 'lg:hidden' }} fixed bottom-0 left-0 right-0 z-30 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 safe-bottom">
+        <nav class="{{ $menuPosition !== 'bottom' ? 'hidden' : 'lg:hidden' }} fixed bottom-0 left-0 right-0 z-30 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border-t border-gray-200/60 dark:border-gray-700/60 safe-bottom">
             <div class="flex items-center justify-around h-14 px-1">
                 <a wire:navigate href="{{ route('dashboard') }}" class="flex flex-col items-center justify-center w-full py-1 {{ request()->routeIs('dashboard') ? 'text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400' }}">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>

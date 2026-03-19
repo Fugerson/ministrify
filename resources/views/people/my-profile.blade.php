@@ -631,7 +631,7 @@
                              });
                              if (response.ok) {
                                  this.currentPosition = position;
-                                 setTimeout(() => Livewire.navigate(window.location.href), 200);
+                                 setTimeout(() => window.location.reload(), 200);
                              }
                          } catch (e) {
                              console.error('Menu position update error:', e);
@@ -688,7 +688,7 @@
                              });
                              if (response.ok) {
                                  this.currentTheme = theme;
-                                 setTimeout(() => Livewire.navigate(window.location.href), 200);
+                                 setTimeout(() => window.location.reload(), 200);
                              }
                          } catch (e) {
                              console.error('Theme update error:', e);
@@ -704,7 +704,7 @@
                 <div class="p-6">
                     @php
                         $themes = [
-                            ['id' => '', 'name' => __('app.theme_classic'), 'desc' => __('app.theme_classic_desc'), 'colors' => ['#fef7f0', '#fdf2f8', '#fef3c7']],
+                            ['id' => '', 'name' => __('app.theme_classic'), 'desc' => __('app.theme_classic_desc'), 'colors' => ['#f8fafc', '#dbeafe', '#3b82f6']],
                             ['id' => 'modern', 'name' => __('app.theme_morning'), 'desc' => __('app.theme_morning_desc'), 'colors' => ['#fce7f3', '#fed7aa', '#fef3c7']],
                             ['id' => 'glass', 'name' => __('app.theme_evening'), 'desc' => __('app.theme_evening_desc'), 'colors' => ['#1e1b4b', '#172554', '#fbbf24']],
                             ['id' => 'corporate', 'name' => __('app.theme_nature'), 'desc' => __('app.theme_nature_desc'), 'colors' => ['#ecfdf5', '#d1fae5', '#10b981']],
