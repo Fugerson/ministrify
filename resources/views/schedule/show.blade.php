@@ -1645,6 +1645,17 @@ function eventTeamManager() {
                     console.error('Remove person error:', e);
                 }
             }
+            // Delete cell note for this role
+            if (this.cellNotesData[String(roleId)]) {
+                delete this.cellNotesData[String(roleId)];
+                try {
+                    await fetch(`/events/${this.eventId}/cell-note`, {
+                        method: 'PATCH',
+                        headers: this._headers(),
+                        body: JSON.stringify({ role_type: 'ministry_role', role_id: roleId, notes: null }),
+                    });
+                } catch (e) {}
+            }
             // Remove role from visible
             if (this.visibleRoles[ministryId]) {
                 this.visibleRoles[ministryId] = this.visibleRoles[ministryId].filter(id => id !== roleId);
