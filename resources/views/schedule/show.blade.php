@@ -1968,7 +1968,7 @@ function eventTeamManager() {
                     const data = await resp.json();
                     const newPerson = {
                         id: data.id, person_id: member.id, person_name: data.person_name || member.name,
-                        status: data.status || 'pending', has_telegram: member.has_telegram || false,
+                        status: data.status ?? null, has_telegram: member.has_telegram || false,
                         source: 'ministry_team', notes: null,
                         ministry_id: ministry.id, role_id: role.id, role_name: role.name, role_type: 'ministry_role',
                     };

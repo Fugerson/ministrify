@@ -191,7 +191,7 @@ class ServiceTeamController extends Controller
                 'success' => true,
                 'id' => $member->id,
                 'person_name' => $person->full_name,
-                'status' => $member->status ?? 'pending',
+                'status' => $member->status,
             ]);
         }
 
