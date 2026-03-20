@@ -356,18 +356,30 @@
             @endphp
 
             <!-- Combined Plan + Team Card -->
-            <div x-show="isSectionVisible('plan') || isSectionVisible('team')" x-collapse.duration.300ms class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div x-show="isSectionVisible('plan') || isSectionVisible('team')" x-collapse.duration.300ms
+                 x-data="{ blockCollapsed: localStorage.getItem('plan_team_collapsed') === 'true' }"
+                 x-init="$watch('blockCollapsed', val => localStorage.setItem('plan_team_collapsed', val))"
+                 class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                {{-- Collapsible header --}}
+                <button type="button" @click="blockCollapsed = !blockCollapsed"
+                        class="w-full px-3 sm:px-5 py-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors"
+                        :class="blockCollapsed ? '' : 'border-b border-gray-200 dark:border-gray-700'">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" :class="{ '-rotate-90': blockCollapsed }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                        <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                        </svg>
+                        <h2 class="font-semibold text-gray-900 dark:text-white">{{ __('app.schedule_event_plan') }} + {{ __('app.schedule_event_team') }}</h2>
+                    </div>
+                </button>
+                <div x-show="!blockCollapsed" x-collapse.duration.200ms>
                 <div class="flex flex-col xl:flex-row">
                     <!-- Plan section -->
                     <div class="flex-1 min-w-0" x-data="planEditor()">
-                <div class="px-3 sm:px-5 py-4 border-b border-gray-200 dark:border-gray-700">
-                    <div class="flex flex-wrap items-center justify-between gap-2">
-                        <div class="flex items-center gap-2">
-                            <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                            </svg>
-                            <h2 class="font-semibold text-gray-900 dark:text-white">{{ __('app.schedule_event_plan') }}</h2>
-                        </div>
+                <div class="px-3 sm:px-5 py-3 border-b border-gray-200 dark:border-gray-700">
+                    <div class="flex flex-wrap items-center justify-end gap-2">
                         <div class="flex items-center gap-2" x-data="planTemplatesManager()">
                             @if($canEdit)
                             {{-- Apply Template Dropdown --}}
@@ -1193,6 +1205,7 @@
                     @endif
 
                 </div>{{-- end flex --}}
+                </div>{{-- end blockCollapsed collapse --}}
             </div>{{-- end combined card --}}
 
             <!-- Attendance Section -->
