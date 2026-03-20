@@ -594,9 +594,9 @@
                                     <td class="px-2 sm:px-3 py-3 border-r border-gray-200 dark:border-gray-700 align-top transition-colors"
                                         data-plan-item-id="{{ $item->id }}"
                                         x-data="responsibleEditor({{ $item->id }}, {{ json_encode($existingPeople) }})"
-                                        @dragover.prevent="$el.classList.add('!bg-primary-50','dark:!bg-primary-900/30','ring-2','ring-primary-400','ring-inset')"
-                                        @dragenter.prevent
-                                        @dragleave="$el.classList.remove('!bg-primary-50','dark:!bg-primary-900/30','ring-2','ring-primary-400','ring-inset')"
+                                        @dragover.prevent
+                                        @dragenter.prevent="$el.classList.add('!bg-primary-50','dark:!bg-primary-900/30','ring-2','ring-primary-400','ring-inset')"
+                                        @dragleave.prevent="$el.classList.remove('!bg-primary-50','dark:!bg-primary-900/30','ring-2','ring-primary-400','ring-inset')"
                                         @drop.prevent="handlePersonDrop($event)">
                                         <div class="flex flex-col gap-1">
                                             {{-- Selected people as tags --}}
