@@ -2430,6 +2430,8 @@ return [
     'schedule_no_roles_in_team' => 'У цієї команди немає ролей',
     'confirm_remove_role' => 'Видалити цю роль з події?',
     'confirm_remove_role_with_people' => 'Видалити роль та зняти всіх призначених?',
+    'confirm_remove_team' => 'Видалити цю команду з події?',
+    'confirm_remove_team_with_people' => 'Видалити команду та зняти всіх призначених?',
     'schedule_no_teams' => 'Немає команд',
     'drag_to_plan_hint' => 'Перетягніть людину в план',
     'schedule_attendance' => 'Відвідуваність',

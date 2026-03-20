@@ -2872,6 +2872,8 @@ return [
     'schedule_no_roles_in_team' => 'This team has no roles',
     'confirm_remove_role' => 'Remove this role from event?',
     'confirm_remove_role_with_people' => 'Remove role and unassign all people?',
+    'confirm_remove_team' => 'Remove this team from event?',
+    'confirm_remove_team_with_people' => 'Remove team and unassign all people?',
     'schedule_no_teams' => 'No teams',
     'drag_to_plan_hint' => 'Drag person to plan',
     'schedule_attendance' => 'Attendance',

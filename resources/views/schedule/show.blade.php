@@ -873,7 +873,7 @@
                                             <span class="text-[10px] text-gray-400" x-text="'('+getMinistryMemberCount(ministry.id)+')'"></span>
                                         </div>
                                         @if($canEdit)
-                                        <button type="button" @click="unlinkMinistry(ministry)" class="p-1 text-gray-300 hover:text-red-500 dark:text-gray-600 dark:hover:text-red-400 transition-colors" :title="@js(__('messages.delete'))">
+                                        <button type="button" @click="confirmUnlinkMinistry(ministry)" class="p-1 text-gray-300 hover:text-red-500 dark:text-gray-600 dark:hover:text-red-400 transition-colors" :title="@js(__('messages.delete'))">
                                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                                         </button>
                                         @endif
@@ -1851,8 +1851,23 @@ function eventTeamManager() {
             } finally { this.busy = false; }
         },
 
+        confirmUnlinkMinistry(ministry) {
+            const count = this.getMinistryMemberCount(ministry.id);
+            const msg = count > 0
+                ? @js(__('app.confirm_remove_team_with_people'))
+                : @js(__('app.confirm_remove_team'));
+            this.confirmModal = {
+                open: true,
+                title: ministry.name,
+                message: msg,
+                onConfirm: () => {
+                    this.confirmModal.open = false;
+                    this.unlinkMinistry(ministry);
+                }
+            };
+        },
+
         async unlinkMinistry(ministry) {
-            if (!await confirmDialog(@js(__('messages.confirm_remove_team_member')))) return;
             if (this.busy) return;
             this.busy = true;
             try {
