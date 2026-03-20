@@ -325,6 +325,12 @@
                     ->where('role_id', 0)
                     ->value('notes') ?? '';
 
+                // All cell notes (for roles)
+                $allCellNotes = [];
+                foreach (\App\Models\EventCellNote::where('event_id', $event->id)->where('role_type', 'ministry_role')->get() as $cn) {
+                    $allCellNotes[$cn->role_id] = $cn->notes;
+                }
+
                 // Members by ministry (for assign dropdown)
                 $membersByMinistry = [];
                 foreach ($linkedMinistries as $lm) {
@@ -930,6 +936,10 @@
                                                         <span class="truncate font-medium" :class="statusTextClass(person.status)" x-text="person.person_name"></span>
                                                     </div>
                                                 </template>
+                                                {{-- Cell note (if any) --}}
+                                                <template x-if="cellNotesData[String(role.id)]">
+                                                    <div class="text-[10px] text-amber-500 dark:text-amber-400 truncate max-w-full mt-0.5" x-text="cellNotesData[String(role.id)]"></div>
+                                                </template>
                                                 {{-- Empty: show + --}}
                                                 <template x-if="getRolePersons(ministry.id, role.id).length === 0">
                                                     <div class="flex items-center justify-center w-full h-full">
@@ -1515,6 +1525,7 @@ function eventTeamManager() {
         songDropdownOpen: false,
         songSearch: '',
         songNotes: @json($songCellNote ?? ''),
+        cellNotesData: @json($allCellNotes ?? []),
         visibleRoles: {},
         roleDropdown: { open: false, ministryId: null },
 
@@ -1767,9 +1778,11 @@ function eventTeamManager() {
         // --- Dropdown (assign person) ---
         openDropdown(ministry, role, $event) {
             const persons = this.getRolePersons(ministry.id, role.id);
-            // Get first person's notes as cell notes
-            let cellNotes = '';
-            for (const p of persons) { if (p.notes) { cellNotes = p.notes; break; } }
+            // Get cell notes: first from independent cell notes, then from person notes
+            let cellNotes = this.cellNotesData[String(role.id)] || '';
+            if (!cellNotes) {
+                for (const p of persons) { if (p.notes) { cellNotes = p.notes; break; } }
+            }
 
             if (window.innerWidth >= 640) {
                 const rect = $event.currentTarget.getBoundingClientRect();
@@ -1944,6 +1957,7 @@ function eventTeamManager() {
             if (!ministry || !role) return;
             const notes = value.trim() || null;
             this.dropdown.cellNotes = notes || '';
+            if (role.id) this.cellNotesData[String(role.id)] = notes || '';
             try {
                 await fetch(`/events/${this.eventId}/cell-note`, {
                     method: 'PATCH',
