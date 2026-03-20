@@ -961,7 +961,7 @@
                                                 {{ __('app.schedule_add_role') }}
                                             </button>
                                             <div x-show="roleDropdown.open && roleDropdown.ministryId === ministry.id" x-cloak @click.outside="roleDropdown.open = false" x-transition
-                                                 class="absolute left-0 bottom-full mb-1 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 overflow-hidden">
+                                                 class="absolute left-0 top-full mt-1 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-[60] overflow-hidden">
                                                 <div class="max-h-48 overflow-y-auto p-1">
                                                     <template x-for="role in getHiddenRoles(ministry)" :key="role.id">
                                                         <button type="button" @click="addRole(ministry.id, role.id)"
