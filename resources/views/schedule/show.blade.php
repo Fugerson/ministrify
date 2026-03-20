@@ -360,18 +360,15 @@
                 <div class="flex flex-col xl:flex-row">
                     <!-- Plan section -->
                     <div class="flex-1 min-w-0" x-data="planEditor()">
-                <div class="px-3 sm:px-5 py-4 border-b border-gray-200 dark:border-gray-700" :class="{ 'border-b-0': planCollapsed }">
+                <div class="px-3 sm:px-5 py-4 border-b border-gray-200 dark:border-gray-700">
                     <div class="flex flex-wrap items-center justify-between gap-2">
-                        <button type="button" @click="planCollapsed = !planCollapsed" class="flex items-center gap-2 hover:opacity-70 transition-opacity">
-                            <svg class="w-5 h-5 text-gray-400 transition-transform duration-200" :class="{ '-rotate-90': planCollapsed }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                            </svg>
+                        <div class="flex items-center gap-2">
                             <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                             </svg>
                             <h2 class="font-semibold text-gray-900 dark:text-white">{{ __('app.schedule_event_plan') }}</h2>
-                        </button>
-                        <div x-show="!planCollapsed" class="flex items-center gap-2" x-data="planTemplatesManager()">
+                        </div>
+                        <div class="flex items-center gap-2" x-data="planTemplatesManager()">
                             @if($canEdit)
                             {{-- Apply Template Dropdown --}}
                             <div class="relative" x-data="{ open: false }">
@@ -460,7 +457,7 @@
                     </div>
                 </div>
 
-                <div x-show="!planCollapsed" x-collapse.duration.200ms>
+                <div>
                 <div class="overflow-x-auto" style="min-height: 300px;">
                     <table class="w-full text-sm">
                         <thead class="bg-gray-50 dark:bg-gray-700/50 text-xs uppercase text-gray-500 dark:text-gray-400 sticky top-0 z-10">
