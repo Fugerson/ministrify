@@ -831,7 +831,7 @@
 
                     <!-- Team sidebar -->
                     @if($showTeamSection)
-                    <div class="xl:w-80 flex-shrink-0 border-t xl:border-t-0 xl:border-l border-gray-200 dark:border-gray-700" x-data="eventTeamManager()">
+                    <div class="xl:w-[360px] flex-shrink-0 border-t xl:border-t-0 xl:border-l border-gray-200 dark:border-gray-700" x-data="eventTeamManager()">
                         <!-- Sidebar header -->
                         <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-700/30 flex items-center justify-between">
                             <div class="flex items-center gap-2">
@@ -905,7 +905,7 @@
                                     <template x-for="role in getVisibleRoles(ministry)" :key="role.id">
                                         <div class="flex border-b border-gray-100 dark:border-gray-700/50 last:border-b-0 group/row hover:bg-gray-50/50 dark:hover:bg-gray-700/20 transition-colors">
                                             {{-- Role name (left) with note and remove button --}}
-                                            <div class="w-[90px] flex-shrink-0 px-2 py-2 border-r border-gray-100 dark:border-gray-700/50 group/role">
+                                            <div class="w-[110px] flex-shrink-0 px-2 py-2 border-r border-gray-100 dark:border-gray-700/50 group/role">
                                                 <div class="flex items-start justify-between">
                                                     <span class="text-[11px] text-gray-500 dark:text-gray-400 leading-tight" x-text="role.name"></span>
                                                     @if($canEdit)
