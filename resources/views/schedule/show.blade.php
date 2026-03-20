@@ -503,12 +503,14 @@
                                     </td>
                                     {{-- Що відбувається - єдиний підхід з інлайн посиланнями на пісні --}}
                                     @php
-                                        // Конвертуємо старий формат (song_id) в новий ([song-ID])
+                                        // Конвертуємо старий формат (song_id) в новий ([@ID])
                                         $displayTitle = $item->title ?? '';
+                                        // Міграція: [song-ID] → [@ID]
+                                        $displayTitle = preg_replace('/\[song-(\d+)\]/', '[@$1]', $displayTitle);
                                         if ($item->song_id && $item->song) {
-                                            // Якщо є прив'язана пісня і title НЕ містить її вже, додаємо [song-ID] на початок
-                                            if (!str_contains($displayTitle, '[song-' . $item->song_id . ']')) {
-                                                $displayTitle = '[song-' . $item->song_id . '] ' . $displayTitle;
+                                            // Якщо є прив'язана пісня і title НЕ містить її вже, додаємо [@ID] на початок
+                                            if (!str_contains($displayTitle, '[@' . $item->song_id . ']')) {
+                                                $displayTitle = '[@' . $item->song_id . '] ' . $displayTitle;
                                             }
                                         }
                                         $displayTitle = trim($displayTitle);
@@ -747,7 +749,7 @@
                         <div class="flex-1 min-w-[150px] relative">
                             <textarea x-model="newItem.title"
                                    @input="checkForSongTrigger($event.target.value); $el.style.height='auto'; $el.style.height=$el.scrollHeight+'px'"
-                                   @focus="if(newItem.title.match(/song-/i)) showSongs = true"
+                                   @focus="if(newItem.title.match(/@\S/i)) showSongs = true"
                                    @keydown.escape="showSongs = false"
                                    @keydown.arrow-down.prevent="if(showSongs) songIndex = Math.min(songIndex + 1, filteredSongsForNew().length - 1)"
                                    @keydown.arrow-up.prevent="if(showSongs) songIndex = Math.max(songIndex - 1, 0)"
@@ -2307,9 +2309,9 @@ function existingItemSongAutocomplete(itemId, initialTitle) {
         songIndex: 0,
 
         checkForSongTrigger(value) {
-            // Simple check: if value contains "song-" not inside brackets, show autocomplete
-            const withoutBracketed = value.replace(/\[song-\d+\]/gi, '');
-            const match = withoutBracketed.match(/song-(\S*)/i);
+            // Simple check: if value contains "@" not inside brackets, show autocomplete
+            const withoutBracketed = value.replace(/\[@\d+\]/g, '');
+            const match = withoutBracketed.match(/@(\S*)/);
             if (match) {
                 this.showSongs = true;
                 this.songSearch = (match[1] || '').toLowerCase();
@@ -2334,7 +2336,7 @@ function existingItemSongAutocomplete(itemId, initialTitle) {
         },
 
         saveTitle() {
-            if (!this.title.match(/song-/i)) {
+            if (!this.title.match(/@\S/)) {
                 updateField(this.itemId, 'title', this.title);
             }
         }
@@ -2367,10 +2369,10 @@ function titleEditor(itemId, initialTitle, existingSongId = null) {
         },
 
         checkForSongTrigger(value) {
-            // Simple check: if value contains "song-" not inside brackets, show autocomplete
-            // First remove all [song-X] patterns, then check if "song-" remains
-            const withoutBracketed = value.replace(/\[song-\d+\]/gi, '');
-            const match = withoutBracketed.match(/song-(\S*)/i);
+            // Simple check: if value contains "@" not inside brackets, show autocomplete
+            // First remove all [@X] patterns, then check if "@" remains
+            const withoutBracketed = value.replace(/\[@\d+\]/g, '');
+            const match = withoutBracketed.match(/@(\S*)/);
             if (match) {
                 this.showSongs = true;
                 this.songSearch = (match[1] || '').toLowerCase();
@@ -2390,10 +2392,9 @@ function titleEditor(itemId, initialTitle, existingSongId = null) {
 
         insertSongLink(song) {
             if (!song) return;
-            // Replace only "naked" song-xxx (not inside brackets) with [song-ID]
-            // Use a function to find and replace only the unbracketed occurrence
+            // Replace only "naked" @xxx (not inside brackets) with [@ID]
             let replaced = false;
-            this.title = this.title.replace(/(\[song-\d+\])|song-[^\s\]]*/gi, (match) => {
+            this.title = this.title.replace(/(\[@\d+\])|@[^\s\]]*/g, (match) => {
                 // If it's already a bracketed song reference, keep it
                 if (match.startsWith('[')) {
                     return match;
@@ -2401,7 +2402,7 @@ function titleEditor(itemId, initialTitle, existingSongId = null) {
                 // Only replace the first naked occurrence
                 if (!replaced) {
                     replaced = true;
-                    return `[song-${song.id}]`;
+                    return `[@${song.id}]`;
                 }
                 return match;
             });
@@ -2427,9 +2428,9 @@ function titleEditor(itemId, initialTitle, existingSongId = null) {
                 return; // No change, skip save
             }
 
-            // Extract song IDs from [song-ID] patterns
+            // Extract song IDs from [@ID] patterns
             const songIds = [];
-            this.title.replace(/\[song-(\d+)\]/g, (match, id) => {
+            this.title.replace(/\[@(\d+)\]/g, (match, id) => {
                 songIds.push(parseInt(id));
                 return match;
             });
@@ -2458,8 +2459,8 @@ function titleEditor(itemId, initialTitle, existingSongId = null) {
             // Convert newlines to <br> for display
             html = html.replace(/\n/g, '<br>');
 
-            // Replace [song-ID] with actual song links
-            html = html.replace(/\[song-(\d+)\]/g, (match, songId) => {
+            // Replace [@ID] with actual song links
+            html = html.replace(/\[@(\d+)\]/g, (match, songId) => {
                 const song = SONGS_DATA.find(s => s.id == songId);
                 if (song) {
                     const keyBadge = song.key ? `<span class="ml-1 px-1.5 py-0.5 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-xs rounded font-mono">${escapeHtml(song.key)}</span>` : '';
@@ -2831,10 +2832,10 @@ async function updateField(itemId, field, value) {
     }
 }
 
-// Collect merged team from ALL [song-ID] references in title
+// Collect merged team from ALL [@ID] references in title
 function _collectAllSongTeams(title) {
     const songIds = [];
-    (title || '').replace(/\[song-(\d+)\]/g, (m, id) => { songIds.push(parseInt(id)); return m; });
+    (title || '').replace(/\[@(\d+)\]/g, (m, id) => { songIds.push(parseInt(id)); return m; });
 
     const seen = new Set();
     const merged = [];
@@ -2995,9 +2996,9 @@ function planEditor() {
         songIndex: 0,
 
         checkForSongTrigger(value) {
-            // Simple check: if value contains "song-" not inside brackets, show autocomplete
-            const withoutBracketed = value.replace(/\[song-\d+\]/gi, '');
-            const match = withoutBracketed.match(/song-(\S*)/i);
+            // Simple check: if value contains "@" not inside brackets, show autocomplete
+            const withoutBracketed = value.replace(/\[@\d+\]/g, '');
+            const match = withoutBracketed.match(/@(\S*)/);
             if (match) {
                 this.showSongs = true;
                 this.songSearch = (match[1] || '').toLowerCase();
@@ -3017,13 +3018,13 @@ function planEditor() {
 
         selectSongForNew(song) {
             if (!song) return;
-            // Replace only "naked" song-xxx (not inside brackets) with [song-ID]
+            // Replace only "naked" @xxx (not inside brackets) with [@ID]
             let replaced = false;
-            this.newItem.title = this.newItem.title.replace(/(\[song-\d+\])|song-[^\s\]]*/gi, (match) => {
+            this.newItem.title = this.newItem.title.replace(/(\[@\d+\])|@[^\s\]]*/g, (match) => {
                 if (match.startsWith('[')) return match;
                 if (!replaced) {
                     replaced = true;
-                    return `[song-${song.id}]`;
+                    return `[@${song.id}]`;
                 }
                 return match;
             });
@@ -3153,11 +3154,13 @@ window.insertPlanRow = function(item) {
     row.className = 'hover:bg-blue-50/50 dark:hover:bg-gray-700/50 group';
     row.dataset.id = item.id;
 
-    // Build display title with [song-ID] prefix if needed
+    // Build display title with [@ID] prefix if needed
     let displayTitle = item.title || '';
+    // Міграція: [song-ID] → [@ID]
+    displayTitle = displayTitle.replace(/\[song-(\d+)\]/g, '[@$1]');
     const songId = item.song_id || (item.song ? item.song.id : null);
-    if (songId && !displayTitle.includes(`[song-${songId}]`)) {
-        displayTitle = `[song-${songId}] ${displayTitle}`.trim();
+    if (songId && !displayTitle.includes(`[@${songId}]`)) {
+        displayTitle = `[@${songId}] ${displayTitle}`.trim();
     }
 
     // Build x-data attribute (HTML-escaped JS expression)

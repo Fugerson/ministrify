@@ -74,23 +74,23 @@
                         </svg>
                     </button>
                     <div x-show="pickerOpen" @click.outside="pickerOpen = false" x-transition
-                         class="absolute left-1/2 -translate-x-1/2 top-full mt-1 z-30 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 p-3 min-w-[240px]">
-                        <div class="flex items-center justify-between mb-3">
-                            <button @click="pickerYear--" type="button" class="w-8 h-8 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"><svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg></button>
-                            <span class="text-sm font-bold text-gray-900 dark:text-white" x-text="pickerYear"></span>
-                            <button @click="pickerYear++" type="button" class="w-8 h-8 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"><svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></button>
+                         class="absolute left-1/2 -translate-x-1/2 top-full mt-2 z-50 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 min-w-[280px]">
+                        <div class="flex items-center justify-between mb-4">
+                            <button @click="pickerYear--" type="button" class="w-9 h-9 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"><svg class="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg></button>
+                            <span class="text-lg font-bold text-gray-900 dark:text-white" x-text="pickerYear"></span>
+                            <button @click="pickerYear++" type="button" class="w-9 h-9 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"><svg class="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></button>
                         </div>
-                        <div class="grid grid-cols-3 gap-1.5 mb-3">
+                        <div class="grid grid-cols-3 gap-2 mb-4">
                             <template x-for="(month, index) in spMonthsShort" :key="index">
                                 <button @click="pickMonth(pickerYear, index); pickerOpen = false" type="button"
                                     :class="startDate.getFullYear() === pickerYear && startDate.getMonth() === index ? 'bg-primary-500 text-white font-bold' : (pickerYear === new Date().getFullYear() && index === new Date().getMonth() ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 font-medium' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700')"
-                                    class="px-2 py-2 rounded-lg text-sm transition-colors">
+                                    class="px-3 py-2.5 rounded-lg font-medium text-sm transition-colors">
                                     <span x-text="month"></span>
                                 </button>
                             </template>
                         </div>
                         <button @click="goToday(); pickerOpen = false" type="button"
-                            class="w-full py-1.5 text-xs font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/30 rounded-lg transition-colors pt-2 border-t border-gray-200 dark:border-gray-700">
+                            class="w-full py-2 text-sm font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/30 rounded-lg transition-colors">
                             {{ __('common.today') }}
                         </button>
                     </div>
@@ -179,23 +179,23 @@
                         </svg>
                     </button>
                     <div x-show="pickerOpen" @click.outside="pickerOpen = false" x-transition
-                         class="absolute left-1/2 -translate-x-1/2 top-full mt-1 z-30 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 p-3 min-w-[240px]">
-                        <div class="flex items-center justify-between mb-3">
-                            <button @click="pickerYear--" type="button" class="w-8 h-8 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"><svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg></button>
-                            <span class="text-sm font-bold text-gray-900 dark:text-white" x-text="pickerYear"></span>
-                            <button @click="pickerYear++" type="button" class="w-8 h-8 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"><svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></button>
+                         class="absolute left-1/2 -translate-x-1/2 top-full mt-2 z-50 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-4 min-w-[280px]">
+                        <div class="flex items-center justify-between mb-4">
+                            <button @click="pickerYear--" type="button" class="w-9 h-9 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"><svg class="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg></button>
+                            <span class="text-lg font-bold text-gray-900 dark:text-white" x-text="pickerYear"></span>
+                            <button @click="pickerYear++" type="button" class="w-9 h-9 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"><svg class="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></button>
                         </div>
-                        <div class="grid grid-cols-3 gap-1.5 mb-3">
+                        <div class="grid grid-cols-3 gap-2 mb-4">
                             <template x-for="(month, index) in spMonthsShort" :key="index">
                                 <button @click="pickMonth(pickerYear, index); pickerOpen = false" type="button"
                                     :class="startDate.getFullYear() === pickerYear && startDate.getMonth() === index ? 'bg-primary-500 text-white font-bold' : (pickerYear === new Date().getFullYear() && index === new Date().getMonth() ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 font-medium' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700')"
-                                    class="px-2 py-2 rounded-lg text-sm transition-colors">
+                                    class="px-3 py-2.5 rounded-lg font-medium text-sm transition-colors">
                                     <span x-text="month"></span>
                                 </button>
                             </template>
                         </div>
                         <button @click="goToday(); pickerOpen = false" type="button"
-                            class="w-full py-1.5 text-xs font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/30 rounded-lg transition-colors pt-2 border-t border-gray-200 dark:border-gray-700">
+                            class="w-full py-2 text-sm font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/30 rounded-lg transition-colors">
                             {{ __('common.today') }}
                         </button>
                     </div>

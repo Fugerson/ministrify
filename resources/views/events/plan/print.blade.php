@@ -255,10 +255,11 @@
                         <div class="item-type" style="color: {{ $item->type_color }};">{{ $item->type_label }}</div>
                     @endif
                     @php
-                        // Parse [song-X] patterns and replace with song titles
+                        // Parse [@X] and legacy [song-X] patterns and replace with song titles
                         $titleHtml = e($item->title);
-                        $titleHtml = preg_replace_callback('/\[song-(\d+)\]/', function($matches) use ($songsById) {
-                            $songId = $matches[1];
+                        $titleHtml = preg_replace_callback('/\[@(\d+)\]|\[song-(\d+)\]/', function($matches) use ($songsById) {
+                            // Support both new [@ID] and legacy [song-ID] format
+                            $songId = !empty($matches[1]) ? $matches[1] : $matches[2];
                             $song = $songsById->get($songId);
                             if ($song) {
                                 $key = $song->key ? " (" . e($song->key) . ")" : '';
