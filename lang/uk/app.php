@@ -2431,6 +2431,7 @@ return [
     'confirm_remove_role' => 'Видалити цю роль з події?',
     'confirm_remove_role_with_people' => 'Видалити роль та зняти всіх призначених?',
     'schedule_plan_and_team' => 'План та команда',
+    'schedule_all_roles_added' => 'Всі ролі вже додані',
     'schedule_all_teams_added' => 'Всі команди вже додані',
     'confirm_remove_team' => 'Видалити цю команду з події?',
     'confirm_remove_team_with_people' => 'Видалити команду та зняти всіх призначених?',

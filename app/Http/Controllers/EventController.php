@@ -1171,7 +1171,22 @@ class EventController extends Controller
             : [];
         $isLeader = auth()->user()->canEdit('events');
 
-        return response()->json(compact('events', 'ministriesData', 'grid', 'members', 'cellNotes', 'currentPersonId', 'myMinistryIds', 'isLeader', 'eventSongs', 'availableSongs'));
+        // Load visible_roles from event_ministry pivot for all events
+        $visibleRolesMap = []; // eventId -> ministryId -> [roleIds]
+        if (count($eventIds) > 0) {
+            $pivotRows = \DB::table('event_ministry')
+                ->whereIn('event_id', $eventIds)
+                ->whereNotNull('visible_roles')
+                ->get(['event_id', 'ministry_id', 'visible_roles']);
+            foreach ($pivotRows as $row) {
+                $eKey = (string) $row->event_id;
+                $mKey = (string) $row->ministry_id;
+                if (!isset($visibleRolesMap[$eKey])) $visibleRolesMap[$eKey] = [];
+                $visibleRolesMap[$eKey][$mKey] = json_decode($row->visible_roles, true) ?: [];
+            }
+        }
+
+        return response()->json(compact('events', 'ministriesData', 'grid', 'members', 'cellNotes', 'currentPersonId', 'myMinistryIds', 'isLeader', 'eventSongs', 'availableSongs', 'visibleRolesMap'));
     }
 
     /**

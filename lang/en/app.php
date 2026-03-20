@@ -2873,6 +2873,7 @@ return [
     'confirm_remove_role' => 'Remove this role from event?',
     'confirm_remove_role_with_people' => 'Remove role and unassign all people?',
     'schedule_plan_and_team' => 'Plan & Team',
+    'schedule_all_roles_added' => 'All roles already added',
     'schedule_all_teams_added' => 'All teams already added',
     'confirm_remove_team' => 'Remove this team from event?',
     'confirm_remove_team_with_people' => 'Remove team and unassign all people?',
