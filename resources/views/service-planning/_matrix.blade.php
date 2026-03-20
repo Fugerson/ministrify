@@ -307,6 +307,11 @@
                                                     <span class="text-[10px] text-gray-400 dark:text-gray-500" x-text="'(' + getVisibleMinistryRoles(ministry).length + ')'"></span>
                                                 </div>
                                                 <div class="flex items-center gap-1">
+                                                    <button x-show="isLeader && getHiddenMinistryRoles(ministry).length > 0"
+                                                            @click.stop="rolePickerMinistry = ministry; rolePickerEvent = null"
+                                                            class="p-1 text-gray-400 hover:text-primary-500 transition-colors" title="{{ __('app.schedule_add_role') }}">
+                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                                    </button>
                                                     <template x-if="canSelfSignup(ministry)">
                                                         <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400 font-medium">
                                                             {{ __('app.you') }}
@@ -342,18 +347,13 @@
 
                                             {{-- Summary cell (collapsed header) --}}
                                             <template x-if="row.type === 'header'">
-                                                <div class="min-h-[32px] flex items-center justify-center gap-1 cursor-pointer group/header"
+                                                <div class="min-h-[32px] flex items-center justify-center cursor-pointer"
                                                      @click.stop="toggleMinistry(ministry.id)">
                                                     <template x-if="!isExpanded(ministry.id)">
                                                         <span class="text-xs font-semibold px-2 py-1 rounded-lg"
                                                               :class="getSummaryClasses(ministry, event)"
                                                               x-text="getSummaryText(ministry, event)"></span>
                                                     </template>
-                                                    <button x-show="isLeader && isExpanded(ministry.id) && getHiddenMinistryRolesForEvent(ministry, event).length > 0"
-                                                            @click.stop="openRolePickerForEvent(ministry, event)"
-                                                            class="p-1 text-gray-300 hover:text-primary-500 opacity-0 group-hover/header:opacity-100 transition-all rounded" title="{{ __('app.schedule_add_role') }}">
-                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                                                    </button>
                                                 </div>
                                             </template>
 
@@ -578,9 +578,9 @@
         </template>
     </div>
 
-    {{-- Role picker modal (per event) --}}
+    {{-- Role picker modal --}}
     <template x-teleport="body">
-        <div x-show="rolePickerMinistry && rolePickerEvent" x-cloak class="fixed inset-0 z-[60] flex items-center justify-center">
+        <div x-show="rolePickerMinistry" x-cloak class="fixed inset-0 z-[60] flex items-center justify-center">
             <div class="fixed inset-0 bg-black/50" @click="rolePickerMinistry = null; rolePickerEvent = null"
                  x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
                  x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"></div>
@@ -592,7 +592,8 @@
                     <div class="flex items-center justify-between">
                         <div class="min-w-0">
                             <div class="text-sm font-semibold text-gray-900 dark:text-white">{{ __('app.schedule_add_role') }}</div>
-                            <div class="text-[10px] text-gray-500 dark:text-gray-400" x-text="rolePickerEvent?.dayOfWeek + ' ' + rolePickerEvent?.dateLabel + (rolePickerEvent?.time ? ', ' + rolePickerEvent?.time : '')"></div>
+                            <div x-show="rolePickerEvent" class="text-[10px] text-gray-500 dark:text-gray-400" x-text="rolePickerEvent?.dayOfWeek + ' ' + rolePickerEvent?.dateLabel + (rolePickerEvent?.time ? ', ' + rolePickerEvent?.time : '')"></div>
+                            <div x-show="!rolePickerEvent" class="text-[10px] text-gray-500 dark:text-gray-400">{{ __('app.schedule_for_all_events') }}</div>
                         </div>
                         <button @click="rolePickerMinistry = null; rolePickerEvent = null" class="p-1 -mr-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -600,13 +601,13 @@
                     </div>
                 </div>
                 <div class="max-h-[60vh] overflow-y-auto p-2">
-                    <template x-if="rolePickerMinistry && rolePickerEvent && getHiddenMinistryRolesForEvent(rolePickerMinistry, rolePickerEvent).length === 0">
+                    <template x-if="rolePickerMinistry && getHiddenMinistryRoles(rolePickerMinistry).length === 0">
                         <div class="px-3 py-4 text-sm text-gray-400 text-center">{{ __('app.schedule_all_roles_added') }}</div>
                     </template>
-                    <template x-if="rolePickerMinistry && rolePickerEvent">
+                    <template x-if="rolePickerMinistry">
                         <div>
-                            <template x-for="role in getHiddenMinistryRolesForEvent(rolePickerMinistry, rolePickerEvent)" :key="role.id">
-                                <button type="button" @click="addRoleToEvent(rolePickerMinistry.id, role.id)"
+                            <template x-for="role in getHiddenMinistryRoles(rolePickerMinistry)" :key="role.id">
+                                <button type="button" @click="rolePickerEvent ? addRoleToEvent(rolePickerMinistry.id, role.id) : addRoleToAllEvents(rolePickerMinistry.id, role.id)"
                                         class="w-full px-3 py-2.5 text-left text-sm hover:bg-primary-50 dark:hover:bg-primary-900/20 hover:text-primary-600 rounded-lg flex items-center gap-2.5 transition-colors">
                                     <svg class="w-4 h-4 text-primary-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                                     <span x-text="role.name"></span>
