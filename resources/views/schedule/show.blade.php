@@ -1101,8 +1101,7 @@
                             </div>
 
                             {{-- Assigned persons --}}
-                            <template x-if="dropdown.persons.length > 0">
-                                <div class="border-b border-gray-200 dark:border-gray-700">
+                                <div x-show="dropdown.persons.length > 0" class="border-b border-gray-200 dark:border-gray-700">
                                     <template x-for="person in dropdown.persons" :key="person.id">
                                         <div class="flex items-center justify-between px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                                             <div class="flex items-center gap-2 min-w-0">
@@ -1112,22 +1111,19 @@
                                             </div>
                                             <div class="flex items-center gap-0.5 flex-shrink-0 ml-2">
                                                 {{-- Telegram notify --}}
-                                                <template x-if="isLeader && person.has_telegram && person.source !== 'assignment'">
-                                                    <button @click.stop="notifyPerson(person)" class="p-1.5 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20" :title="@js(__('app.send_to_telegram'))">
-                                                        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>
-                                                    </button>
-                                                </template>
-                                                {{-- Remove / unsubscribe --}}
-                                                <template x-if="isLeader || isMe(person)">
-                                                    <button @click.stop="isMe(person) && !isLeader ? selfUnsubscribe(person, dropdown.ministry?.id, dropdown.role?.id) : removePerson(person, dropdown.ministry?.id, dropdown.role?.id)" class="p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20" :title="isMe(person) ? @js(__('app.unsubscribe')) : @js(__('app.delete'))">
-                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                                    </button>
-                                                </template>
+                                                @if($canEdit)
+                                                <button x-show="person.has_telegram && person.source !== 'assignment'" @click.stop="notifyPerson(person)" class="p-1.5 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20" :title="@js(__('app.send_to_telegram'))">
+                                                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>
+                                                </button>
+                                                {{-- Remove --}}
+                                                <button @click.stop="removePerson(person, dropdown.ministry?.id, dropdown.role?.id)" class="p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20" :title="@js(__('app.delete'))">
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                </button>
+                                                @endif
                                             </div>
                                         </div>
                                     </template>
                                 </div>
-                            </template>
 
                             {{-- Notes + Search (leader) --}}
                             @if($canEdit)
