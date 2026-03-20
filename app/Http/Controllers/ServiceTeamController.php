@@ -57,6 +57,15 @@ class ServiceTeamController extends Controller
     {
         $this->authorizeChurch($event);
 
+        // Delete cell notes for all roles of this ministry
+        $roleIds = $ministry->ministryRoles()->pluck('id')->toArray();
+        if (!empty($roleIds)) {
+            \App\Models\EventCellNote::where('event_id', $event->id)
+                ->where('role_type', 'ministry_role')
+                ->whereIn('role_id', $roleIds)
+                ->delete();
+        }
+
         $event->linkedMinistries()->detach($ministry->id);
 
         // Remove all team assignments for this ministry on this event
@@ -78,10 +87,23 @@ class ServiceTeamController extends Controller
     {
         $this->authorizeChurch($event);
 
-        $visibleRoles = $request->input('visible_roles', []);
+        $visibleRoles = array_map('intval', $request->input('visible_roles', []));
+
+        // Get previous visible roles to detect removed ones
+        $pivot = $event->linkedMinistries()->where('ministry_id', $ministry->id)->first()?->pivot;
+        $previousRoles = $pivot && $pivot->visible_roles ? json_decode($pivot->visible_roles, true) : [];
+        $removedRoles = array_diff($previousRoles, $visibleRoles);
+
+        // Delete cell notes for removed roles
+        if (!empty($removedRoles)) {
+            \App\Models\EventCellNote::where('event_id', $event->id)
+                ->where('role_type', 'ministry_role')
+                ->whereIn('role_id', $removedRoles)
+                ->delete();
+        }
 
         $event->linkedMinistries()->updateExistingPivot($ministry->id, [
-            'visible_roles' => json_encode(array_map('intval', $visibleRoles)),
+            'visible_roles' => json_encode($visibleRoles),
         ]);
 
         return response()->json(['success' => true]);
