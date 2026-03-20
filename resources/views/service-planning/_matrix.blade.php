@@ -342,7 +342,7 @@
 
                                             {{-- Summary cell (collapsed header) --}}
                                             <template x-if="row.type === 'header'">
-                                                <div class="min-h-[32px] flex items-center justify-center gap-1 cursor-pointer"
+                                                <div class="min-h-[32px] flex items-center justify-center gap-1 cursor-pointer group/header"
                                                      @click.stop="toggleMinistry(ministry.id)">
                                                     <template x-if="!isExpanded(ministry.id)">
                                                         <span class="text-xs font-semibold px-2 py-1 rounded-lg"
@@ -351,7 +351,7 @@
                                                     </template>
                                                     <button x-show="isLeader && isExpanded(ministry.id) && getHiddenMinistryRolesForEvent(ministry, event).length > 0"
                                                             @click.stop="openRolePickerForEvent(ministry, event)"
-                                                            class="p-1 text-gray-400 hover:text-primary-500 transition-colors rounded" title="{{ __('app.schedule_add_role') }}">
+                                                            class="p-1 text-gray-300 hover:text-primary-500 opacity-0 group-hover/header:opacity-100 transition-all rounded" title="{{ __('app.schedule_add_role') }}">
                                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                                                     </button>
                                                 </div>
