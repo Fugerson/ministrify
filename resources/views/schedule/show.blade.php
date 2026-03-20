@@ -969,23 +969,10 @@
                             <!-- Add ministry -->
                             @if($canEdit)
                             <div class="pt-2 border-t border-gray-200 dark:border-gray-700">
-                                <div x-show="!showAddMinistry">
-                                    <button type="button" @click="showAddMinistry = true" class="w-full flex items-center justify-center gap-1.5 px-3 py-2 text-xs text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                                        {{ __('app.schedule_add_team') }}
-                                    </button>
-                                </div>
-                                <div x-show="showAddMinistry" x-cloak class="space-y-2 px-2">
-                                    <select x-model="selectedMinistryToLink" class="w-full px-2 py-1.5 text-xs border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                                        <template x-for="m in availableMinistries" :key="m.id">
-                                            <option :value="m.id" x-text="m.name"></option>
-                                        </template>
-                                    </select>
-                                    <div class="flex gap-1.5">
-                                        <button type="button" @click="linkMinistry()" :disabled="busy" class="flex-1 px-2 py-1.5 text-xs bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50">{{ __('app.schedule_add') }}</button>
-                                        <button type="button" @click="showAddMinistry = false" class="px-2 py-1.5 text-xs text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">{{ __('app.schedule_cancel') }}</button>
-                                    </div>
-                                </div>
+                                <button type="button" @click="showAddMinistry = true" class="w-full flex items-center justify-center gap-1.5 px-3 py-2 text-xs text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                    {{ __('app.schedule_add_team') }}
+                                </button>
                             </div>
                             @endif
 
@@ -1004,6 +991,38 @@
                                 {{ __('app.drag_to_plan_hint') }}
                             </p>
                         </div>
+
+                        {{-- Add ministry modal --}}
+                        <template x-teleport="body">
+                            <div x-show="showAddMinistry" x-cloak class="fixed inset-0 z-[60] flex items-center justify-center">
+                                <div class="fixed inset-0 bg-black/50" @click="showAddMinistry = false"
+                                     x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                                     x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"></div>
+                                <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 w-full max-w-xs mx-4 overflow-hidden"
+                                     x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
+                                     x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
+                                     @keydown.escape.window="showAddMinistry = false">
+                                    <div class="px-4 py-3 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                                        <span class="text-sm font-semibold text-gray-900 dark:text-white">{{ __('app.schedule_add_team') }}</span>
+                                        <button @click="showAddMinistry = false" class="p-1 -mr-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                        </button>
+                                    </div>
+                                    <div class="max-h-[60vh] overflow-y-auto p-2">
+                                        <template x-if="availableMinistries.length === 0">
+                                            <div class="px-3 py-4 text-sm text-gray-400 text-center">{{ __('app.schedule_all_teams_added') }}</div>
+                                        </template>
+                                        <template x-for="m in availableMinistries" :key="m.id">
+                                            <button type="button" @click="selectedMinistryToLink = m.id; linkMinistry(); showAddMinistry = false"
+                                                    class="w-full px-3 py-2.5 text-left text-sm hover:bg-primary-50 dark:hover:bg-primary-900/20 hover:text-primary-600 rounded-lg flex items-center gap-2.5 transition-colors">
+                                                <span class="w-2 h-5 rounded-full flex-shrink-0" :style="'background:'+m.color"></span>
+                                                <span x-text="m.name"></span>
+                                            </button>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
 
                         {{-- Role picker modal --}}
                         <template x-teleport="body">
