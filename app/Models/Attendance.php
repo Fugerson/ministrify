@@ -166,7 +166,7 @@ class Attendance extends Model
             return 0;
         }
 
-        $present = $this->total_count ?? $this->members_present ?? 0;
+        $present = $this->members_present ?? $this->total_count ?? 0;
         return round(($present / $totalMembers) * 100, 1);
     }
 
@@ -219,12 +219,13 @@ class Attendance extends Model
      */
     public function recalculateCounts(): void
     {
+        $this->refresh();
         $membersPresent = $this->records()->where('present', true)->count();
         $calculatedTotal = $membersPresent + ($this->guests_count ?? 0);
 
         $this->update([
             'members_present' => $membersPresent,
-            'total_count' => $calculatedTotal,
+            'total_count' => max($this->total_count ?? 0, $calculatedTotal),
         ]);
     }
 

@@ -355,74 +355,79 @@ class VolunteerSchedulingService
      */
     public function autoSchedule(Event $event, array $neededPositions = []): array
     {
-        $results = [
-            'assigned' => [],
-            'failed' => [],
-        ];
-
-        if (empty($neededPositions)) {
-            // Get positions from ministry that need filling
-            $ministry = $event->ministry;
-            if (!$ministry) {
-                return $results;
-            }
-
-            $neededPositions = $ministry->positions()
-                ->whereDoesntHave('assignments', fn($q) => $q->where('event_id', $event->id))
-                ->pluck('id')
-                ->toArray();
-        }
-
-        foreach ($neededPositions as $positionId) {
-            $position = Position::find($positionId);
-            if (!$position) {
-                continue;
-            }
-
-            // Get available volunteers sorted by recommendation
-            $available = $this->getAvailableVolunteers($event, $position)
-                ->filter(fn($v) => $v['is_available'])
-                ->values();
-
-            if ($available->isEmpty()) {
-                $results['failed'][] = [
-                    'position' => $position,
-                    'reason' => 'Немає доступних волонтерів',
-                ];
-                continue;
-            }
-
-            // Pick the best candidate
-            $best = $available->first();
-            $person = $best['person'];
-
-            // Create assignment
-            $assignment = Assignment::create([
-                'event_id' => $event->id,
-                'person_id' => $person->id,
-                'position_id' => $position->id,
-                'status' => 'pending',
-            ]);
-
-            // Log any warnings as conflicts (for tracking)
-            foreach ($best['conflicts'] as $conflict) {
-                if ($conflict['severity'] !== 'error') {
-                    SchedulingConflict::record($assignment->id, $conflict['type'], $conflict['details']);
-                }
-            }
-
-            // Update person's scheduling stats
-            $this->updatePersonStats($person, $event);
-
-            $results['assigned'][] = [
-                'assignment' => $assignment,
-                'person' => $person,
-                'position' => $position,
-                'warnings' => collect($best['conflicts'])->where('severity', 'warning')->values()->all(),
+        return \DB::transaction(function () use ($event, $neededPositions) {
+            $results = [
+                'assigned' => [],
+                'failed' => [],
             ];
-        }
 
-        return $results;
+            if (empty($neededPositions)) {
+                // Get positions from ministry that need filling
+                $ministry = $event->ministry;
+                if (!$ministry) {
+                    return $results;
+                }
+
+                $neededPositions = $ministry->positions()
+                    ->whereDoesntHave('assignments', fn($q) => $q->where('event_id', $event->id))
+                    ->pluck('id')
+                    ->toArray();
+            }
+
+            $assignedPersonIds = [];
+
+            foreach ($neededPositions as $positionId) {
+                $position = Position::find($positionId);
+                if (!$position) {
+                    continue;
+                }
+
+                // Get available volunteers sorted by recommendation
+                $available = $this->getAvailableVolunteers($event, $position)
+                    ->filter(fn($v) => $v['is_available'] && !in_array($v['person']->id, $assignedPersonIds))
+                    ->values();
+
+                if ($available->isEmpty()) {
+                    $results['failed'][] = [
+                        'position' => $position,
+                        'reason' => 'Немає доступних волонтерів',
+                    ];
+                    continue;
+                }
+
+                // Pick the best candidate
+                $best = $available->first();
+                $person = $best['person'];
+                $assignedPersonIds[] = $person->id;
+
+                // Create assignment
+                $assignment = Assignment::create([
+                    'event_id' => $event->id,
+                    'person_id' => $person->id,
+                    'position_id' => $position->id,
+                    'status' => 'pending',
+                ]);
+
+                // Log any warnings as conflicts (for tracking)
+                foreach ($best['conflicts'] as $conflict) {
+                    if ($conflict['severity'] !== 'error') {
+                        SchedulingConflict::record($assignment->id, $conflict['type'], $conflict['details']);
+                    }
+                }
+
+                // Update person's scheduling stats
+                $this->updatePersonStats($person, $event);
+
+                $results['assigned'][] = [
+                    'assignment' => $assignment,
+                    'person' => $person,
+                    'position' => $position,
+                    'warnings' => collect($best['conflicts'])->where('severity', 'warning')->values()->all(),
+                ];
+            }
+
+            return $results;
+        });
     }
 
     /**
@@ -436,6 +441,7 @@ class VolunteerSchedulingService
                 ->whereHas('event', fn($q) => $q->whereMonth('date', $event->date->month)->whereYear('date', $event->date->year))
                 ->count(),
             'times_scheduled_this_year' => Assignment::where('person_id', $person->id)
+                ->whereNotIn('status', ['declined'])
                 ->whereHas('event', fn($q) => $q->whereYear('date', $event->date->year))
                 ->count(),
         ]);

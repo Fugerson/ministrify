@@ -343,22 +343,29 @@ class CalendarService
      */
     private function parseIcalDate(string $dateStr): ?Carbon
     {
-        // Remove any timezone suffix
+        $isUtc = str_ends_with($dateStr, 'Z');
         $dateStr = rtrim($dateStr, 'Z');
 
         try {
+            $carbon = null;
             // Full datetime: 20231225T143000
             if (strlen($dateStr) >= 15) {
-                return Carbon::createFromFormat('Ymd\THis', $dateStr);
+                $carbon = Carbon::createFromFormat('Ymd\THis', $dateStr, $isUtc ? 'UTC' : null);
             }
             // Date with time without seconds: 20231225T1430
-            if (strlen($dateStr) >= 13) {
-                return Carbon::createFromFormat('Ymd\THi', $dateStr);
+            elseif (strlen($dateStr) >= 13) {
+                $carbon = Carbon::createFromFormat('Ymd\THi', $dateStr, $isUtc ? 'UTC' : null);
             }
             // Date only: 20231225 (all-day event)
-            if (strlen($dateStr) >= 8) {
+            elseif (strlen($dateStr) >= 8) {
                 return Carbon::createFromFormat('Ymd', substr($dateStr, 0, 8))->startOfDay();
             }
+
+            if ($carbon && $isUtc) {
+                $carbon->setTimezone(config('app.timezone'));
+            }
+
+            return $carbon;
         } catch (\Exception $e) {
             return null;
         }

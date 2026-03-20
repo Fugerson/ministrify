@@ -231,18 +231,18 @@ class AttendanceController extends Controller
         // Average attendance this month
         $monthlyAttendance = Attendance::where('church_id', $church->id)
             ->forMonth($year, $month)
-            ->selectRaw('AVG(COALESCE(members_present, total_count)) as avg')
+            ->selectRaw('AVG(COALESCE(total_count, members_present, 0)) as avg')
             ->value('avg');
 
         // Chart data (last 12 weeks)
         $chartData = [];
         for ($i = 11; $i >= 0; $i--) {
-            $weekStart = now()->subWeeks($i)->startOfWeek(Carbon::SUNDAY);
+            $weekStart = now()->subWeeks($i)->startOfWeek(Carbon::MONDAY);
             $weekEnd = $weekStart->copy()->endOfWeek();
 
             $count = Attendance::where('church_id', $church->id)
                 ->whereBetween('date', [$weekStart, $weekEnd])
-                ->selectRaw('AVG(COALESCE(members_present, total_count)) as avg')
+                ->selectRaw('AVG(COALESCE(total_count, members_present, 0)) as avg')
                 ->value('avg') ?? 0;
 
             $chartData[] = [
@@ -254,6 +254,7 @@ class AttendanceController extends Controller
         // People needing attention: previously attended but not in last 3+ weeks
         $threeWeeksAgo = now()->subWeeks(3);
         $needAttention = Person::where('church_id', $church->id)
+            ->whereNotIn('membership_status', [Person::STATUS_GUEST])
             ->whereHas('attendanceRecords', fn($q) => $q->where('present', true))
             ->whereDoesntHave('attendanceRecords', function ($q) use ($threeWeeksAgo) {
                 $q->whereHas('attendance', fn($aq) => $aq->where('date', '>=', $threeWeeksAgo))

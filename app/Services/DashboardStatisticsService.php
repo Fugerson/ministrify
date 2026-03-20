@@ -234,11 +234,11 @@ class DashboardStatisticsService
      */
     public function getAttendanceChartData(Church $church, int $weeks = 4): array
     {
-        $startDate = now()->subWeeks($weeks - 1)->startOfWeek(Carbon::SUNDAY);
+        $startDate = now()->subWeeks($weeks - 1)->startOfWeek(Carbon::MONDAY);
 
         $data = Attendance::where('church_id', $church->id)
             ->where('date', '>=', $startDate)
-            ->selectRaw('DATE_FORMAT(date, "%x%v") as week_key, MIN(date) as week_start, SUM(COALESCE(members_present, total_count)) as total')
+            ->selectRaw('DATE_FORMAT(date, "%x%v") as week_key, MIN(date) as week_start, SUM(COALESCE(total_count, members_present, 0)) as total')
             ->groupBy('week_key')
             ->orderBy('week_key')
             ->get()

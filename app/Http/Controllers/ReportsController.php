@@ -129,7 +129,11 @@ class ReportsController extends Controller
                 }))
             ->with(['attendanceRecords' => fn($q) => $q->where('present', true)
                 ->with('attendance')
-                ->whereHas('attendance', fn($aq) => $aq->orderByDesc('date'))
+                ->whereHas('attendance')
+                ->orderByDesc(
+                    \App\Models\Attendance::select('date')
+                        ->whereColumn('attendances.id', 'attendance_records.attendance_id')
+                )
                 ->limit(1)])
             ->take(20)
             ->get();

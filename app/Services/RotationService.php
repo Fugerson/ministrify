@@ -223,7 +223,7 @@ class RotationService
             ->where('status', '!=', 'declined')
             ->whereHas('event', fn($q) => $q->where('date', '<', $event->date))
             ->with('event')
-            ->latest('id')
+            ->orderByDesc(Event::select('date')->whereColumn('events.id', 'assignments.event_id'))
             ->first();
 
         if ($lastAssignment && $lastAssignment->event) {
@@ -301,6 +301,7 @@ class RotationService
 
         // Check for other events on the same day
         $hasOtherEvent = Assignment::where('person_id', $person->id)
+            ->where('event_id', '!=', $event->id)
             ->whereHas('event', fn($q) => $q->whereDate('date', $event->date))
             ->where('status', '!=', 'declined')
             ->exists();

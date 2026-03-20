@@ -233,8 +233,8 @@ class EventController extends Controller
         $query = Ministry::where('church_id', $church->id);
 
         // Non-admins without global edit permission see only their own ministries
-        if (!$user->canEdit('events') && $user->person) {
-            $query->where('leader_id', $user->person->id);
+        if (!$user->canEdit('events')) {
+            $query->where('leader_id', $user->person?->id ?? 0);
         }
 
         $ministries = $query->with('positions')->get();
@@ -393,8 +393,8 @@ class EventController extends Controller
         // Get ministries for inline editing (same filter as create)
         $ministryQuery = Ministry::where('church_id', $church->id);
         $user = auth()->user();
-        if (!$user->canEdit('events') && $user->person) {
-            $ministryQuery->where('leader_id', $user->person->id);
+        if (!$user->canEdit('events')) {
+            $ministryQuery->where('leader_id', $user->person?->id ?? 0);
         }
         $ministries = $ministryQuery->get();
 
@@ -469,8 +469,8 @@ class EventController extends Controller
         $user = auth()->user();
 
         $ministryQuery = Ministry::where('church_id', $church->id);
-        if (!$user->canEdit('events') && $user->person) {
-            $ministryQuery->where('leader_id', $user->person->id);
+        if (!$user->canEdit('events')) {
+            $ministryQuery->where('leader_id', $user->person?->id ?? 0);
         }
         $ministries = $ministryQuery->get();
 

@@ -1463,13 +1463,8 @@ class FinanceController extends Controller
                 }
             }
 
-            $monthNames = [];
-            for ($i = 1; $i <= 12; $i++) {
-                $monthNames[$i] = __('messages.month_short_' . $i);
-            }
-
             $months[] = [
-                'label' => $monthNames[$m],
+                'label' => __('messages.month_short_' . $m),
                 'year' => $y,
                 'month' => $m,
                 'planned' => round($churchPlanned + $ministryPlanned),

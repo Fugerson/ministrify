@@ -28,8 +28,8 @@ class ExpenseController extends Controller
             ->with(['ministry', 'category', 'recorder']);
 
         // Leaders can only see their ministry expenses
-        if ($user->isLeader() && $user->person) {
-            $ministryIds = $user->person->leadingMinistries()->pluck('id');
+        if ($user->isLeader()) {
+            $ministryIds = $user->person ? $user->person->leadingMinistries()->pluck('id') : collect();
             $query->whereIn('ministry_id', $ministryIds);
         }
 
@@ -41,8 +41,8 @@ class ExpenseController extends Controller
 
         // Get accessible ministries
         $ministriesQuery = Ministry::where('church_id', $church->id);
-        if ($user->isLeader() && $user->person) {
-            $ministriesQuery->where('leader_id', $user->person->id);
+        if ($user->isLeader()) {
+            $ministriesQuery->where('leader_id', $user->person?->id ?? 0);
         }
         $ministries = $ministriesQuery->get();
 
@@ -65,8 +65,8 @@ class ExpenseController extends Controller
         $user = auth()->user();
 
         $ministriesQuery = Ministry::where('church_id', $church->id);
-        if ($user->isLeader() && $user->person) {
-            $ministriesQuery->where('leader_id', $user->person->id);
+        if ($user->isLeader()) {
+            $ministriesQuery->where('leader_id', $user->person?->id ?? 0);
         }
         $ministries = $ministriesQuery->get();
 
@@ -203,7 +203,8 @@ class ExpenseController extends Controller
         $byMinistry = Ministry::where('church_id', $church->id)
             ->get()
             ->map(function ($m) use ($year, $month) {
-                $spent = Transaction::where('ministry_id', $m->id)
+                $spent = Transaction::where('church_id', $m->church_id)
+                    ->where('ministry_id', $m->id)
                     ->where('direction', Transaction::DIRECTION_OUT)
                     ->forMonth($year, $month)
                     ->completed()
@@ -249,6 +250,7 @@ class ExpenseController extends Controller
         $recentExpenses = Transaction::where('church_id', $church->id)
             ->where('direction', Transaction::DIRECTION_OUT)
             ->forMonth($year, $month)
+            ->completed()
             ->with(['ministry', 'category', 'recorder'])
             ->orderByDesc('date')
             ->limit(10)

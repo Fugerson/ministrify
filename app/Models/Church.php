@@ -736,6 +736,8 @@ class Church extends Model
 
         // Comprehensive CSS sanitization to prevent XSS attacks
         $dangerousPatterns = [
+            // HTML tags (e.g. </style> injection to break out of style context)
+            '/<\s*\/?\s*\w/i',
             // @import and vendor prefixes
             '/@-?(?:webkit-|moz-|ms-|o-)?import\b/i',
             // javascript: protocol (with possible obfuscation)

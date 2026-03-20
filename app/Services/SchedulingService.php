@@ -394,6 +394,7 @@ class SchedulingService
         $monthEnd = $event->date->copy()->endOfMonth();
 
         $monthlyCount = Assignment::where('person_id', $person->id)
+            ->where('event_id', '!=', $event->id)
             ->whereNotIn('status', ['declined'])
             ->whereHas('event', fn($q) => $q->whereBetween('date', [$monthStart, $monthEnd]))
             ->count();
@@ -504,64 +505,69 @@ class SchedulingService
      */
     public function autoSchedule(Event $event, array $positionIds = []): array
     {
-        $results = [
-            'assigned' => [],
-            'failed' => [],
-        ];
-
-        $ministry = $event->ministry;
-        if (!$ministry) {
-            return $results;
-        }
-
-        // Get positions to fill
-        if (empty($positionIds)) {
-            $positionIds = $ministry->positions()
-                ->whereDoesntHave('assignments', fn($q) => $q->where('event_id', $event->id))
-                ->pluck('id')
-                ->toArray();
-        }
-
-        foreach ($positionIds as $positionId) {
-            $position = Position::find($positionId);
-            if (!$position) continue;
-
-            $available = $this->getAvailableVolunteers($event, $position)
-                ->filter(fn($v) => $v['is_available'])
-                ->values();
-
-            if ($available->isEmpty()) {
-                $results['failed'][] = [
-                    'position' => $position,
-                    'reason' => 'Немає доступних волонтерів',
-                ];
-                continue;
-            }
-
-            $best = $available->first();
-            $person = $best['person'];
-
-            $assignment = $this->assign($event, $position, $person, notify: false);
-
-            // Log warnings as conflicts
-            foreach ($best['conflicts'] as $conflict) {
-                if ($conflict['severity'] !== 'error') {
-                    SchedulingConflict::record($assignment->id, $conflict['type'], $conflict['details']);
-                }
-            }
-
-            $this->updatePersonStats($person, $event);
-
-            $results['assigned'][] = [
-                'assignment' => $assignment,
-                'person' => $person,
-                'position' => $position,
-                'score' => $best['score'],
-                'warnings' => collect($best['conflicts'])->where('severity', 'warning')->values()->all(),
+        return \DB::transaction(function () use ($event, $positionIds) {
+            $results = [
+                'assigned' => [],
+                'failed' => [],
             ];
-        }
 
-        return $results;
+            $ministry = $event->ministry;
+            if (!$ministry) {
+                return $results;
+            }
+
+            // Get positions to fill
+            if (empty($positionIds)) {
+                $positionIds = $ministry->positions()
+                    ->whereDoesntHave('assignments', fn($q) => $q->where('event_id', $event->id))
+                    ->pluck('id')
+                    ->toArray();
+            }
+
+            $assignedPersonIds = [];
+
+            foreach ($positionIds as $positionId) {
+                $position = Position::find($positionId);
+                if (!$position) continue;
+
+                $available = $this->getAvailableVolunteers($event, $position)
+                    ->filter(fn($v) => $v['is_available'] && !in_array($v['person']->id, $assignedPersonIds))
+                    ->values();
+
+                if ($available->isEmpty()) {
+                    $results['failed'][] = [
+                        'position' => $position,
+                        'reason' => 'Немає доступних волонтерів',
+                    ];
+                    continue;
+                }
+
+                $best = $available->first();
+                $person = $best['person'];
+                $assignedPersonIds[] = $person->id;
+
+                $assignment = $this->assign($event, $position, $person, notify: false);
+
+                // Log warnings as conflicts
+                foreach ($best['conflicts'] as $conflict) {
+                    if ($conflict['severity'] !== 'error') {
+                        SchedulingConflict::record($assignment->id, $conflict['type'], $conflict['details']);
+                    }
+                }
+
+                $this->updatePersonStats($person, $event);
+
+                $results['assigned'][] = [
+                    'assignment' => $assignment,
+                    'person' => $person,
+                    'position' => $position,
+                    'score' => $best['score'],
+                    'warnings' => collect($best['conflicts'])->where('severity', 'warning')->values()->all(),
+                ];
+            }
+
+            return $results;
+        });
     }
 
     /**
@@ -684,6 +690,7 @@ class SchedulingService
                     ->whereYear('date', $event->date->year)
                 )->count(),
             'times_scheduled_this_year' => Assignment::where('person_id', $person->id)
+                ->whereNotIn('status', ['declined'])
                 ->whereHas('event', fn($q) => $q->whereYear('date', $event->date->year))
                 ->count(),
         ]);
