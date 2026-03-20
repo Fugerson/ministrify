@@ -1833,7 +1833,9 @@ function eventTeamManager() {
                             name: ministry.name,
                             color: ministry.color,
                             roles: data.roles || [],
+                            saved_visible_roles: [],
                         }];
+                        this.visibleRoles = {...this.visibleRoles, [ministry.id]: []};
                         if (data.members) {
                             this.members[String(ministry.id)] = data.members;
                         }
@@ -1876,6 +1878,16 @@ function eventTeamManager() {
                     headers: this._headers(),
                 });
                 if (resp.ok) {
+                    // Clear cellNotes for all roles of this ministry
+                    const cleanedNotes = {...this.cellNotesData};
+                    for (const role of (ministry.roles || [])) {
+                        delete cleanedNotes[String(role.id)];
+                    }
+                    this.cellNotesData = cleanedNotes;
+                    // Clear visibleRoles
+                    const cleanedRoles = {...this.visibleRoles};
+                    delete cleanedRoles[ministry.id];
+                    this.visibleRoles = cleanedRoles;
                     this.linkedMinistries = this.linkedMinistries.filter(m => m.id !== ministry.id);
                     this.assignments = this.assignments.filter(a => a.ministry_id !== ministry.id);
                     this.availableMinistries.push({ id: ministry.id, name: ministry.name, color: ministry.color });
