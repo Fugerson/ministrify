@@ -904,17 +904,22 @@
                                     <!-- Roles as table rows (matrix style) -->
                                     <template x-for="role in getVisibleRoles(ministry)" :key="role.id">
                                         <div class="flex border-b border-gray-100 dark:border-gray-700/50 last:border-b-0 group/row hover:bg-gray-50/50 dark:hover:bg-gray-700/20 transition-colors">
-                                            {{-- Role name (left) with remove button --}}
-                                            <div class="w-[90px] flex-shrink-0 px-2 py-2 border-r border-gray-100 dark:border-gray-700/50 group/role flex items-start justify-between">
-                                                <span class="text-[11px] text-gray-500 dark:text-gray-400 leading-tight" x-text="role.name"></span>
-                                                @if($canEdit)
-                                                <template x-if="getRolePersons(ministry.id, role.id).length === 0">
-                                                    <button type="button" @click.stop="removeVisibleRole(ministry.id, role.id)"
-                                                            class="p-0.5 -mr-1 text-gray-300 hover:text-red-500 opacity-0 group-hover/role:opacity-100 transition-all" title="{{ __('messages.delete') }}">
-                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                                                    </button>
+                                            {{-- Role name (left) with note and remove button --}}
+                                            <div class="w-[90px] flex-shrink-0 px-2 py-2 border-r border-gray-100 dark:border-gray-700/50 group/role">
+                                                <div class="flex items-start justify-between">
+                                                    <span class="text-[11px] text-gray-500 dark:text-gray-400 leading-tight" x-text="role.name"></span>
+                                                    @if($canEdit)
+                                                    <template x-if="getRolePersons(ministry.id, role.id).length === 0">
+                                                        <button type="button" @click.stop="removeVisibleRole(ministry.id, role.id)"
+                                                                class="p-0.5 -mr-1 text-gray-300 hover:text-red-500 opacity-0 group-hover/role:opacity-100 transition-all" title="{{ __('messages.delete') }}">
+                                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                        </button>
+                                                    </template>
+                                                    @endif
+                                                </div>
+                                                <template x-if="cellNotesData[String(role.id)]">
+                                                    <div class="text-[9px] text-amber-500 dark:text-amber-400 leading-tight mt-0.5 truncate" x-text="cellNotesData[String(role.id)]"></div>
                                                 </template>
-                                                @endif
                                             </div>
                                             {{-- Cell with people (right) - clickable --}}
                                             <div class="flex-1 min-h-[40px] flex flex-col items-start justify-center gap-0.5 rounded-lg px-1.5 py-1 mx-1 my-0.5 cursor-pointer transition-all duration-150"
@@ -935,10 +940,6 @@
                                                         <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" :class="statusDotClass(person.status)"></span>
                                                         <span class="truncate font-medium" :class="statusTextClass(person.status)" x-text="person.person_name"></span>
                                                     </div>
-                                                </template>
-                                                {{-- Cell note (if any) --}}
-                                                <template x-if="cellNotesData[String(role.id)]">
-                                                    <div class="text-[10px] text-amber-500 dark:text-amber-400 truncate max-w-full mt-0.5" x-text="cellNotesData[String(role.id)]"></div>
                                                 </template>
                                                 {{-- Empty: show + --}}
                                                 <template x-if="getRolePersons(ministry.id, role.id).length === 0">
