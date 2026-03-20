@@ -954,24 +954,12 @@
                                     <!-- Add role button (under roles list) -->
                                     @if($canEdit)
                                     <template x-if="getHiddenRoles(ministry).length > 0">
-                                        <div class="ml-3 mt-0.5 relative">
+                                        <div class="ml-3 mt-0.5">
                                             <button type="button" @click.stop="roleDropdown = { open: roleDropdown.ministryId === ministry.id && roleDropdown.open ? false : true, ministryId: ministry.id }"
                                                     class="flex items-center gap-1 px-2 py-1 text-[11px] text-gray-400 hover:text-primary-500 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded transition-colors">
                                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                                                 {{ __('app.schedule_add_role') }}
                                             </button>
-                                            <div x-show="roleDropdown.open && roleDropdown.ministryId === ministry.id" x-cloak @click.outside="roleDropdown.open = false" x-transition
-                                                 class="absolute left-0 top-full mt-1 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-[60] overflow-hidden">
-                                                <div class="max-h-48 overflow-y-auto p-1">
-                                                    <template x-for="role in getHiddenRoles(ministry)" :key="role.id">
-                                                        <button type="button" @click="addRole(ministry.id, role.id)"
-                                                                class="w-full px-3 py-1.5 text-left text-xs hover:bg-primary-50 dark:hover:bg-primary-900/20 hover:text-primary-600 rounded flex items-center gap-2 transition-colors">
-                                                            <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                                                            <span x-text="role.name"></span>
-                                                        </button>
-                                                    </template>
-                                                </div>
-                                            </div>
                                         </div>
                                     </template>
                                     @endif
@@ -1016,6 +1004,39 @@
                                 {{ __('app.drag_to_plan_hint') }}
                             </p>
                         </div>
+
+                        {{-- Role picker modal --}}
+                        <template x-teleport="body">
+                            <div x-show="roleDropdown.open" x-cloak class="fixed inset-0 z-[60] flex items-center justify-center">
+                                <div class="fixed inset-0 bg-black/50" @click="roleDropdown.open = false"
+                                     x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                                     x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"></div>
+                                <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 w-full max-w-xs mx-4 overflow-hidden"
+                                     x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
+                                     x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
+                                     @keydown.escape.window="roleDropdown.open = false">
+                                    <div class="px-4 py-3 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                                        <span class="text-sm font-semibold text-gray-900 dark:text-white">{{ __('app.schedule_add_role') }}</span>
+                                        <button @click="roleDropdown.open = false" class="p-1 -mr-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                        </button>
+                                    </div>
+                                    <div class="max-h-[60vh] overflow-y-auto p-2">
+                                        <template x-for="ministry in linkedMinistries.filter(m => getHiddenRoles(m).length > 0 && (!roleDropdown.ministryId || m.id === roleDropdown.ministryId))" :key="ministry.id">
+                                            <div>
+                                                <template x-for="role in getHiddenRoles(ministry)" :key="role.id">
+                                                    <button type="button" @click="addRole(ministry.id, role.id)"
+                                                            class="w-full px-3 py-2.5 text-left text-sm hover:bg-primary-50 dark:hover:bg-primary-900/20 hover:text-primary-600 rounded-lg flex items-center gap-2.5 transition-colors">
+                                                        <svg class="w-4 h-4 text-primary-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                                        <span x-text="role.name"></span>
+                                                    </button>
+                                                </template>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
 
                         {{-- Confirm modal --}}
                         <template x-teleport="body">
