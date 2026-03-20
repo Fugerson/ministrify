@@ -895,47 +895,40 @@
                                         </div>
                                     </template>
 
-                                    <!-- Roles with assigned people (only visible ones) -->
+                                    <!-- Roles as table rows (matrix style) -->
                                     <template x-for="role in getVisibleRoles(ministry)" :key="role.id">
-                                        <div class="ml-3 py-0.5">
-                                            <div class="text-[11px] text-gray-500 dark:text-gray-400 px-2 mb-0.5" x-text="role.name"></div>
-                                            <!-- Assigned people (DRAGGABLE) -->
-                                            <template x-for="person in getRolePersons(ministry.id, role.id)" :key="person.id">
-                                                <div class="group/person flex items-center gap-1.5 px-2 py-1 mx-1 mb-0.5 rounded-md text-xs transition-all cursor-pointer"
-                                                     :class="statusBadgeClass(person.status)"
-                                                     @click="openDropdown(ministry, role, $event)"
-                                                     draggable="true"
-                                                     @dragstart="$event.dataTransfer.setData('application/json', JSON.stringify({id: person.person_id, name: person.person_name, hasTelegram: person.has_telegram})); $event.dataTransfer.effectAllowed='copy'; $el.classList.add('opacity-50', 'scale-95')"
-                                                     @dragend="$el.classList.remove('opacity-50', 'scale-95')">
-                                                    <svg class="w-3 h-3 text-gray-400 flex-shrink-0 opacity-0 group-hover/person:opacity-100 transition-opacity" fill="currentColor" viewBox="0 0 24 24">
-                                                        <circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/>
-                                                        <circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/>
-                                                        <circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/>
-                                                    </svg>
-                                                    <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" :class="statusDotClass(person.status)"></span>
-                                                    <span class="truncate flex-1" x-text="person.person_name"></span>
-                                                    @if($canEdit)
-                                                    <button type="button" @click.stop="removePerson(person, ministry.id, role.id)" class="text-gray-400 hover:text-red-500 opacity-0 group-hover/person:opacity-100 transition-opacity">
-                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                                                    </button>
-                                                    @endif
-                                                </div>
-                                            </template>
-                                            <!-- Add person / manage role -->
-                                            <div class="flex items-center gap-1 mx-1">
-                                                @if($canEdit)
-                                                <div class="flex items-center gap-1.5 px-2 py-1 border border-dashed border-gray-300 dark:border-gray-600 rounded-md text-[11px] text-gray-400 cursor-pointer hover:border-primary-400 hover:text-primary-500 transition-colors"
-                                                     @click="openDropdown(ministry, role, $event)">
-                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                                                    <span x-text="getRolePersons(ministry.id, role.id).length === 0 ? '{{ __('app.schedule_assign') }}' : ''"></span>
-                                                </div>
-                                                @endif
-                                                <!-- Self-signup -->
-                                                <template x-if="canSelfSignup(ministry) && !isMeAssignedToRole(ministry.id, role.id) && getRolePersons(ministry.id, role.id).length === 0">
-                                                    <button type="button" @click="selfSignup(ministry, role)"
-                                                            class="px-2 py-0.5 text-[10px] text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded transition-colors">
-                                                        +{{ __('app.schedule_me') }}
-                                                    </button>
+                                        <div class="flex border-b border-gray-100 dark:border-gray-700/50 last:border-b-0 group/row hover:bg-gray-50/50 dark:hover:bg-gray-700/20 transition-colors">
+                                            {{-- Role name (left) --}}
+                                            <div class="w-[90px] flex-shrink-0 px-2 py-2 border-r border-gray-100 dark:border-gray-700/50">
+                                                <span class="text-[11px] text-gray-500 dark:text-gray-400 leading-tight" x-text="role.name"></span>
+                                            </div>
+                                            {{-- Cell with people (right) - clickable --}}
+                                            <div class="flex-1 min-h-[40px] flex flex-col items-start justify-center gap-0.5 rounded-lg px-1.5 py-1 mx-1 my-0.5 cursor-pointer transition-all duration-150"
+                                                 :class="getRolePersons(ministry.id, role.id).length === 0
+                                                     ? 'border border-dashed border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-700 hover:bg-primary-50/50 dark:hover:bg-primary-900/20'
+                                                     : (getRolePersons(ministry.id, role.id).some(p => p.status === 'declined')
+                                                         ? 'bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 ring-1 ring-red-200 dark:ring-red-800'
+                                                         : (getRolePersons(ministry.id, role.id).every(p => p.status === 'confirmed' || p.status === 'attended')
+                                                             ? 'bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30'
+                                                             : 'bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/30'))"
+                                                 @click="openDropdown(ministry, role, $event)">
+                                                {{-- People inside cell --}}
+                                                <template x-for="person in getRolePersons(ministry.id, role.id)" :key="person.id">
+                                                    <div class="flex items-center gap-1 text-xs leading-tight w-full"
+                                                         draggable="true"
+                                                         @dragstart.stop="$event.dataTransfer.setData('application/json', JSON.stringify({id: person.person_id, name: person.person_name, hasTelegram: person.has_telegram})); $event.dataTransfer.effectAllowed='copy'; $el.classList.add('opacity-50')"
+                                                         @dragend="$el.classList.remove('opacity-50')">
+                                                        <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" :class="statusDotClass(person.status)"></span>
+                                                        <span class="truncate font-medium" :class="statusTextClass(person.status)" x-text="person.person_name"></span>
+                                                    </div>
+                                                </template>
+                                                {{-- Empty: show + --}}
+                                                <template x-if="getRolePersons(ministry.id, role.id).length === 0">
+                                                    <div class="flex items-center justify-center w-full h-full">
+                                                        <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 group-hover/row:text-primary-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                                        </svg>
+                                                    </div>
                                                 </template>
                                             </div>
                                         </div>
