@@ -1610,16 +1610,26 @@ function eventTeamManager() {
             }
         },
 
-        removeVisibleRole(ministryId, roleId) {
-            // Also remove all assignments for this role
-            const persons = this.getRolePersons(ministryId, roleId);
+        async removeVisibleRole(ministryId, roleId) {
+            // Remove all assignments for this role one by one
+            const persons = [...this.getRolePersons(ministryId, roleId)];
             for (const person of persons) {
-                this.removePerson(person, ministryId, roleId);
+                try {
+                    const url = person.source === 'assignment'
+                        ? `/rotation/assignment/${person.id}`
+                        : `/events/${this.eventId}/ministry-team/${person.id}`;
+                    await fetch(url, { method: 'DELETE', headers: this._headers() });
+                    this.assignments = this.assignments.filter(a => a.id !== person.id);
+                } catch (e) {
+                    console.error('Remove person error:', e);
+                }
             }
+            // Remove role from visible
             if (this.visibleRoles[ministryId]) {
                 this.visibleRoles[ministryId] = this.visibleRoles[ministryId].filter(id => id !== roleId);
                 this._saveVisibleRoles(ministryId);
             }
+            this.showToast(@js(__('messages.deleted')));
         },
 
         // Confirm dialog for removing a role
