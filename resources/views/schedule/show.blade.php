@@ -909,12 +909,10 @@
                                                 <div class="flex items-start justify-between">
                                                     <span class="text-[11px] text-gray-500 dark:text-gray-400 leading-tight" x-text="role.name"></span>
                                                     @if($canEdit)
-                                                    <template x-if="getRolePersons(ministry.id, role.id).length === 0">
-                                                        <button type="button" @click.stop="removeVisibleRole(ministry.id, role.id)"
-                                                                class="p-0.5 -mr-1 text-gray-300 hover:text-red-500 opacity-0 group-hover/role:opacity-100 transition-all" title="{{ __('messages.delete') }}">
-                                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                                                        </button>
-                                                    </template>
+                                                    <button type="button" @click.stop="confirmRemoveRole(ministry.id, role.id, role.name)"
+                                                            class="p-0.5 -mr-1 text-gray-300 hover:text-red-500 opacity-0 group-hover/role:opacity-100 transition-all" title="{{ __('messages.delete') }}">
+                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                    </button>
                                                     @endif
                                                 </div>
                                                 <template x-if="cellNotesData[String(role.id)]">
@@ -1018,6 +1016,39 @@
                                 {{ __('app.drag_to_plan_hint') }}
                             </p>
                         </div>
+
+                        {{-- Confirm modal --}}
+                        <template x-teleport="body">
+                            <div x-show="confirmModal.open" x-cloak class="fixed inset-0 z-[60] flex items-center justify-center">
+                                <div class="fixed inset-0 bg-black/50" @click="confirmModal.open = false"
+                                     x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                                     x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"></div>
+                                <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 w-full max-w-sm mx-4 overflow-hidden"
+                                     x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
+                                     x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
+                                     @keydown.escape.window="confirmModal.open = false">
+                                    <div class="px-5 py-4">
+                                        <div class="flex items-center gap-3 mb-3">
+                                            <div class="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center flex-shrink-0">
+                                                <svg class="w-5 h-5 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                            </div>
+                                            <div>
+                                                <h3 class="text-sm font-semibold text-gray-900 dark:text-white" x-text="confirmModal.title"></h3>
+                                                <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5" x-text="confirmModal.message"></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="px-5 py-3 bg-gray-50 dark:bg-gray-700/50 flex justify-end gap-2">
+                                        <button @click="confirmModal.open = false" class="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors">
+                                            {{ __('app.schedule_cancel') }}
+                                        </button>
+                                        <button @click="confirmModal.onConfirm && confirmModal.onConfirm()" class="px-4 py-2 text-sm bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors">
+                                            {{ __('messages.delete') }}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
 
                         {{-- Mobile backdrop overlay --}}
                         <div x-show="dropdown.open" @click="dropdown.open = false"
@@ -1580,10 +1611,34 @@ function eventTeamManager() {
         },
 
         removeVisibleRole(ministryId, roleId) {
+            // Also remove all assignments for this role
+            const persons = this.getRolePersons(ministryId, roleId);
+            for (const person of persons) {
+                this.removePerson(person, ministryId, roleId);
+            }
             if (this.visibleRoles[ministryId]) {
                 this.visibleRoles[ministryId] = this.visibleRoles[ministryId].filter(id => id !== roleId);
                 this._saveVisibleRoles(ministryId);
             }
+        },
+
+        // Confirm dialog for removing a role
+        confirmModal: { open: false, title: '', message: '', onConfirm: null },
+
+        confirmRemoveRole(ministryId, roleId, roleName) {
+            const persons = this.getRolePersons(ministryId, roleId);
+            const msg = persons.length > 0
+                ? @js(__('app.confirm_remove_role_with_people'))
+                : @js(__('app.confirm_remove_role'));
+            this.confirmModal = {
+                open: true,
+                title: roleName,
+                message: msg,
+                onConfirm: () => {
+                    this.removeVisibleRole(ministryId, roleId);
+                    this.confirmModal.open = false;
+                }
+            };
         },
 
         // --- Ministry drag-and-drop reorder ---

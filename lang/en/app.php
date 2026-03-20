@@ -2870,6 +2870,8 @@ return [
     'schedule_assign' => 'Assign',
     'schedule_signup' => 'Sign up',
     'schedule_no_roles_in_team' => 'This team has no roles',
+    'confirm_remove_role' => 'Remove this role from event?',
+    'confirm_remove_role_with_people' => 'Remove role and unassign all people?',
     'schedule_no_teams' => 'No teams',
     'drag_to_plan_hint' => 'Drag person to plan',
     'schedule_attendance' => 'Attendance',

@@ -2428,6 +2428,8 @@ return [
     'schedule_assign' => 'Призначити',
     'schedule_signup' => 'Записатися',
     'schedule_no_roles_in_team' => 'У цієї команди немає ролей',
+    'confirm_remove_role' => 'Видалити цю роль з події?',
+    'confirm_remove_role_with_people' => 'Видалити роль та зняти всіх призначених?',
     'schedule_no_teams' => 'Немає команд',
     'drag_to_plan_hint' => 'Перетягніть людину в план',
     'schedule_attendance' => 'Відвідуваність',
