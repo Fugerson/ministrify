@@ -471,14 +471,14 @@
 
                 <div>
                 <div class="overflow-x-auto" style="min-height: 300px;">
-                    <table class="w-full text-sm">
+                    <table class="w-full text-sm" style="table-layout: fixed;">
                         <thead class="bg-gray-50 dark:bg-gray-700/50 text-[10px] uppercase text-gray-500 dark:text-gray-400 sticky top-0 z-10">
                             <tr>
                                 <th class="px-0.5 py-2" style="width: 24px;"></th>
                                 <th class="px-1 sm:px-2 py-2 text-left" style="width: 60px;">{{ __('app.schedule_time_col') }}</th>
-                                <th class="px-1 sm:px-2 py-2 text-left" style="width: 18%;">{{ __('app.schedule_what_happens') }}</th>
-                                <th class="px-1 sm:px-2 py-2 text-left" style="width: 1px;">{{ __('app.schedule_responsible') }}</th>
-                                <th class="px-1 sm:px-2 py-2 text-left hidden sm:table-cell" style="width: 45%;">{{ __('app.schedule_comments') }}</th>
+                                <th class="px-1 sm:px-2 py-2 text-left" style="width: 20%;">{{ __('app.schedule_what_happens') }}</th>
+                                <th class="px-1 sm:px-2 py-2 text-left" style="width: 15%;">{{ __('app.schedule_responsible') }}</th>
+                                <th class="px-1 sm:px-2 py-2 text-left hidden sm:table-cell" style="width: 40%;">{{ __('app.schedule_comments') }}</th>
                                 <th class="px-1 py-2" style="width: 32px;"></th>
                             </tr>
                         </thead>
@@ -515,10 +515,10 @@
                                         }
                                         $displayTitle = trim($displayTitle);
                                     @endphp
-                                    <td class="px-1 sm:px-1.5 py-1.5 border-r border-gray-200 dark:border-gray-700 align-top">
+                                    <td class="px-1 sm:px-1.5 py-1.5 border-r border-gray-200 dark:border-gray-700 align-top overflow-hidden">
                                         <div class="relative" x-data="titleEditor({{ $item->id }}, {{ Js::from($displayTitle) }}, {{ $item->song_id ?? 'null' }})">
                                             {{-- Display mode --}}
-                                            <div x-show="!editing" @click="startEditing()" class="cursor-text min-h-[1.25rem] px-0.5 py-0.5 text-xs text-gray-900 dark:text-white break-words" x-html="renderWithSongLinks(title)"></div>
+                                            <div x-show="!editing" @click="startEditing()" class="cursor-text min-h-[1.25rem] px-0.5 py-0.5 text-xs text-gray-900 dark:text-white break-words overflow-hidden" x-html="renderWithSongLinks(title)"></div>
                                             {{-- Edit mode --}}
                                             <div x-show="editing" class="relative">
                                                 <textarea x-ref="input" x-model="title"
