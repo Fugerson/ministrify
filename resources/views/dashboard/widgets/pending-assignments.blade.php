@@ -1,4 +1,5 @@
 {{-- Pending Assignments Widget --}}
+@if((!empty($pendingUsers) && count($pendingUsers) > 0) || count($pendingAssignments) > 0)
 <div class="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/30 dark:to-orange-900/30 rounded-2xl border border-amber-100 dark:border-amber-800 p-4">
     <div class="flex items-start gap-3">
         <div class="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900 flex items-center justify-center flex-shrink-0">
@@ -70,9 +71,8 @@
                     {{ __('app.all_assignments', ['count' => $pendingAssignments->count()]) }}
                 </a>
             @endif
-            @elseif(empty($pendingUsers) || count($pendingUsers) === 0)
-            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ __('app.no_assignments_to_confirm') }}</p>
             @endif
         </div>
     </div>
 </div>
+@endif
