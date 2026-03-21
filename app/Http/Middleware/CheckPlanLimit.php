@@ -30,7 +30,7 @@ class CheckPlanLimit
                         'resource' => $resource,
                         'limit' => $check['limit'],
                     ]),
-                    'upgrade_url' => route('landing.pricing'),
+                    'upgrade_url' => url('/pricing'),
                 ], 403);
             }
 

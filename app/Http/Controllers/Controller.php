@@ -68,7 +68,7 @@ abstract class Controller extends BaseController
             $message = __('messages.plan_limit_reached', ['resource' => $resource, 'limit' => $limit]);
 
             if (request()->expectsJson()) {
-                abort(response()->json(['message' => $message, 'upgrade_url' => route('landing.pricing')], 403));
+                abort(response()->json(['message' => $message, 'upgrade_url' => url('/pricing')], 403));
             }
 
             abort(403, $message);
@@ -87,7 +87,7 @@ abstract class Controller extends BaseController
             $message = __('messages.plan_feature_unavailable');
 
             if (request()->expectsJson()) {
-                abort(response()->json(['message' => $message, 'upgrade_url' => route('landing.pricing')], 403));
+                abort(response()->json(['message' => $message, 'upgrade_url' => url('/pricing')], 403));
             }
 
             abort(403, $message);

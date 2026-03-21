@@ -20,7 +20,7 @@ class CheckPlanFeature
             if ($request->expectsJson()) {
                 return response()->json([
                     'message' => __('messages.plan_feature_unavailable'),
-                    'upgrade_url' => route('landing.pricing'),
+                    'upgrade_url' => url('/pricing'),
                 ], 403);
             }
 
