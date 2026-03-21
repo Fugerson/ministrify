@@ -1,13 +1,14 @@
 <!-- Card Slide-Over Panel -->
-<div x-show="cardPanel.open" x-cloak class="fixed inset-0 z-50 overflow-hidden">
+<div x-show="cardPanel.open" x-cloak
+     x-transition:enter="transition-opacity ease-out duration-200"
+     x-transition:enter-start="opacity-0"
+     x-transition:enter-end="opacity-100"
+     x-transition:leave="transition-opacity ease-in duration-150"
+     x-transition:leave-start="opacity-100"
+     x-transition:leave-end="opacity-0"
+     class="fixed inset-0 z-50 overflow-hidden">
     <!-- Backdrop -->
-    <div class="absolute inset-0 bg-black/40" @click="closePanel()" x-show="cardPanel.open"
-         x-transition:enter="transition-opacity ease-out duration-200"
-         x-transition:enter-start="opacity-0"
-         x-transition:enter-end="opacity-100"
-         x-transition:leave="transition-opacity ease-in duration-150"
-         x-transition:leave-start="opacity-100"
-         x-transition:leave-end="opacity-0"></div>
+    <div class="absolute inset-0 bg-black/25" @click="closePanel()"></div>
 
     <!-- Panel -->
     <div class="absolute inset-y-0 right-0 flex max-w-full">

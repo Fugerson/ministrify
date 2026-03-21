@@ -274,7 +274,7 @@
                                         </button>
                                         <div x-show="colMenu" @click.away="colMenu = false" x-transition
                                              class="absolute right-0 top-8 z-50 w-40 bg-white dark:bg-gray-700 rounded-xl shadow-lg border border-gray-200 dark:border-gray-600 py-1">
-                                            <button @click="renameColumn({{ $column->id }}, '{{ addslashes($column->name) }}'); colMenu = false"
+                                            <button @click="openRenameColumnModal({{ $column->id }}, '{{ addslashes($column->name) }}'); colMenu = false"
                                                     class="w-full px-3 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center gap-2">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                                 {{ __('app.board_rename') }}
@@ -447,7 +447,7 @@
 
                 @if(auth()->user()->canCreate('boards'))
                 <div class="flex-shrink-0 w-[calc(100vw-2rem)] sm:w-72 md:w-80">
-                    <button @click="addColumn()"
+                    <button @click="openAddColumnModal()"
                             class="w-full p-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 hover:border-gray-400 dark:hover:border-gray-500 transition-colors flex items-center justify-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
@@ -472,6 +472,37 @@
 
     <!-- Keyboard Shortcuts Modal -->
     @include('boards._shortcuts_modal')
+
+    <!-- Add Column Modal -->
+    <div x-show="addColumnModal.open" x-cloak
+         x-transition:enter="transition-opacity ease-out duration-150"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition-opacity ease-in duration-100"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-50 flex items-center justify-center">
+        <div class="absolute inset-0 bg-black/25" @click="addColumnModal.open = false"></div>
+        <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 w-full max-w-sm mx-4 p-6"
+             x-transition:enter="transition ease-out duration-150"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100"
+             x-transition:leave="transition ease-in duration-100"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-95"
+             @click.stop>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4" x-text="addColumnModal.renameId ? @js(__('app.board_rename_column')) : @js(__('app.board_add_column'))"></h3>
+            <input x-ref="columnNameInput" x-model="addColumnModal.name" type="text"
+                   placeholder="{{ __('app.board_column_name_placeholder') }}"
+                   @keydown.enter="addColumnModal.renameId ? renameColumn(addColumnModal.renameId, addColumnModal.name) : addColumn(); addColumnModal.open = false"
+                   @keydown.escape="addColumnModal.open = false"
+                   class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+            <div class="flex justify-end gap-2 mt-4">
+                <button @click="addColumnModal.open = false" class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">{{ __('common.cancel') }}</button>
+                <button @click="addColumnModal.renameId ? renameColumn(addColumnModal.renameId, addColumnModal.name) : addColumn(); addColumnModal.open = false" class="px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors" x-text="addColumnModal.renameId ? @js(__('common.save')) : @js(__('common.create'))"></button>
+            </div>
+        </div>
+    </div>
 </div>
 
 @php
@@ -519,6 +550,7 @@ function churchBoard() {
             cardId: null,
             error: null
         },
+        addColumnModal: { open: false, name: '' },
         addCardModal: {
             open: false,
             loading: false,
@@ -1128,9 +1160,14 @@ function churchBoard() {
             }
         },
 
+        openAddColumnModal() {
+            this.addColumnModal = { open: true, name: '' };
+            this.$nextTick(() => this.$refs.columnNameInput?.focus());
+        },
         async addColumn() {
-            const name = prompt(@js(__('app.board_new_column_name')));
+            const name = this.addColumnModal.name;
             if (!name || !name.trim()) return;
+            this.addColumnModal.open = false;
             try {
                 const response = await fetch(`/boards/{{ $board->id }}/columns`, {
                     method: 'POST',
@@ -1142,9 +1179,13 @@ function churchBoard() {
             } catch (e) { console.error(e); }
         },
 
+        openRenameColumnModal(columnId, currentName) {
+            this.addColumnModal = { open: true, name: currentName, renameId: columnId };
+            this.$nextTick(() => this.$refs.columnNameInput?.focus());
+        },
         async renameColumn(columnId, currentName) {
-            const name = prompt(@js(__('app.board_new_column_rename')), currentName);
-            if (!name || !name.trim() || name.trim() === currentName) return;
+            const name = currentName;
+            if (!name || !name.trim()) return;
             try {
                 const response = await fetch(`/boards/columns/${columnId}`, {
                     method: 'PUT',

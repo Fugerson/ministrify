@@ -60,6 +60,8 @@ abstract class Controller extends BaseController
      */
     protected function checkPlanLimit(string $resource): void
     {
+        if (auth()->user()?->is_super_admin) return;
+
         $church = $this->getCurrentChurch();
         $planService = app(PlanService::class);
 
@@ -81,6 +83,8 @@ abstract class Controller extends BaseController
      */
     protected function checkPlanFeature(string $feature): void
     {
+        if (auth()->user()?->is_super_admin) return;
+
         $church = $this->getCurrentChurch();
 
         if (!$church->hasFeature($feature)) {
