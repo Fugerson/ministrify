@@ -359,7 +359,7 @@
             <div x-show="isSectionVisible('plan') || isSectionVisible('team')" x-collapse.duration.300ms
                  x-data="{ blockCollapsed: localStorage.getItem('plan_team_collapsed') === 'true' }"
                  x-init="$watch('blockCollapsed', val => localStorage.setItem('plan_team_collapsed', val))"
-                 class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                 class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
                 {{-- Collapsible header --}}
                 <button type="button" @click="blockCollapsed = !blockCollapsed"
                         class="w-full px-3 sm:px-5 py-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors"
@@ -515,7 +515,7 @@
                                         }
                                         $displayTitle = trim($displayTitle);
                                     @endphp
-                                    <td class="px-1 sm:px-1.5 py-1.5 border-r border-gray-200 dark:border-gray-700 align-top overflow-hidden">
+                                    <td class="px-1 sm:px-1.5 py-1.5 border-r border-gray-200 dark:border-gray-700 align-top">
                                         <div class="relative" x-data="titleEditor({{ $item->id }}, {{ Js::from($displayTitle) }}, {{ $item->song_id ?? 'null' }})">
                                             {{-- Display mode --}}
                                             <div x-show="!editing" @click="startEditing()" class="cursor-text min-h-[1.25rem] px-0.5 py-0.5 text-xs text-gray-900 dark:text-white break-words overflow-hidden" x-html="renderWithSongLinks(title)"></div>
