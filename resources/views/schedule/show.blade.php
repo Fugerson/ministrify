@@ -471,15 +471,15 @@
 
                 <div>
                 <div class="overflow-x-auto" style="min-height: 300px;">
-                    <table class="w-full text-sm table-fixed">
+                    <table class="w-full text-sm">
                         <thead class="bg-gray-50 dark:bg-gray-700/50 text-xs uppercase text-gray-500 dark:text-gray-400 sticky top-0 z-10">
                             <tr>
                                 <th class="px-1 py-4" style="width: 30px;"></th>
-                                <th class="px-2 sm:px-3 py-4 text-left" style="width: 60px;">{{ __('app.schedule_time_col') }}</th>
-                                <th class="px-2 sm:px-3 py-4 text-left" style="width: 35%;">{{ __('app.schedule_what_happens') }}</th>
+                                <th class="px-2 sm:px-3 py-4 text-left" style="width: 70px;">{{ __('app.schedule_time_col') }}</th>
+                                <th class="px-2 sm:px-3 py-4 text-left" style="width: 28%;">{{ __('app.schedule_what_happens') }}</th>
                                 <th class="px-2 sm:px-3 py-4 text-left" style="width: 1px;">{{ __('app.schedule_responsible') }}</th>
-                                <th class="px-2 sm:px-3 py-4 text-left hidden sm:table-cell" style="width: 20%;">{{ __('app.schedule_comments') }}</th>
-                                <th class="px-2 py-4" style="width: 36px;"></th>
+                                <th class="px-2 sm:px-3 py-4 text-left hidden sm:table-cell" style="width: 35%;">{{ __('app.schedule_comments') }}</th>
+                                <th class="px-2 py-4" style="width: 40px;"></th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -499,7 +499,7 @@
                                         <input type="time"
                                                value="{{ $item->start_time ? \Carbon\Carbon::parse($item->start_time)->format('H:i') : '' }}"
                                                @change="updateField({{ $item->id }}, 'start_time', $event.target.value)"
-                                               class="min-w-[4rem] sm:min-w-[5rem] px-1 sm:px-1.5 py-1.5 text-sm font-semibold text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 cursor-pointer">
+                                               class="min-w-[4.5rem] sm:min-w-[5.5rem] px-1.5 sm:px-2 py-1.5 text-sm font-semibold text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 cursor-pointer">
                                     </td>
                                     {{-- Що відбувається - єдиний підхід з інлайн посиланнями на пісні --}}
                                     @php
