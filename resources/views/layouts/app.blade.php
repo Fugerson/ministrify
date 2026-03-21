@@ -1031,7 +1031,9 @@
                     @if(auth()->user()->canView('events'))<a wire:navigate href="{{ route('schedule') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('schedule') || request()->routeIs('events.*') || request()->routeIs('service-planning') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('app.schedule') }}</a>@endif
                     @if(auth()->user()->canView('finances'))<a wire:navigate href="{{ route('finances.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('finances.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('app.finances') }}</a>@endif
                     @if(auth()->user()->canView('announcements'))<a wire:navigate href="{{ route('announcements.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('announcements.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('app.communications') }}</a>@endif
+                    {{-- TODO: reports temporarily hidden
                     @if(auth()->user()->canView('reports'))<a wire:navigate href="{{ route('reports.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('reports.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('app.reports') }}</a>@endif
+                    --}}
                     @if(auth()->user()->canView('resources'))<a wire:navigate href="{{ route('resources.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('resources.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('app.resources') }}</a>@endif
                     @if(auth()->user()->canView('boards'))<a wire:navigate href="{{ route('boards.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('boards.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('app.tasks') }}</a>@endif
                     @endhasChurchRole
@@ -1092,12 +1094,14 @@
                 <span class="text-[10px] mt-0.5">{{ __('app.communications') }}</span>
             </a>
             @endif
+            {{-- TODO: reports temporarily hidden
             @if(auth()->user()->canView('reports'))
             <a wire:navigate href="{{ route('reports.index') }}" class="flex flex-col items-center px-2 py-2 rounded-xl {{ request()->routeIs('reports.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-600' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                 <span class="text-[10px] mt-0.5">{{ __('app.reports') }}</span>
             </a>
             @endif
+            --}}
             @if(auth()->user()->canView('resources'))
             <a wire:navigate href="{{ route('resources.index') }}" class="flex flex-col items-center px-2 py-2 rounded-xl {{ request()->routeIs('resources.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-600' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
@@ -1233,6 +1237,7 @@
                     <span x-show="!collapsed" class="sidebar-text">{{ __('app.finances') }}</span>
                 </a>
                 @endif
+                {{-- TODO: reports temporarily hidden
                 @if(auth()->user()->canView('reports'))
                 <a wire:navigate href="{{ route('reports.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('reports.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? @js( __("app.reports") ) : ''">
                     <svg class="w-5 h-5 sidebar-icon flex-shrink-0" :class="collapsed ? '' : 'mr-3'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1241,6 +1246,7 @@
                     <span x-show="!collapsed" class="sidebar-text">{{ __('app.reports') }}</span>
                 </a>
                 @endif
+                --}}
                 @if(auth()->user()->canView('resources'))
                 <a wire:navigate href="{{ route('resources.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('resources.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? @js( __("app.resources") ) : ''">
                     <svg class="w-5 h-5 sidebar-icon flex-shrink-0" :class="collapsed ? '' : 'mr-3'" fill="none" stroke="currentColor" viewBox="0 0 24 24">

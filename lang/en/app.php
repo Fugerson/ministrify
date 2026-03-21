@@ -693,7 +693,7 @@ return [
 
     // Extended Ministry
     'planning' => 'Planning',
-    'tasks' => 'Tasks',
+    'tasks' => 'Task Tracker',
     'resources' => 'Resources',
     'grid' => 'Grid',
     'list' => 'List',

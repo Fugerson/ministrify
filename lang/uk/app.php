@@ -701,7 +701,7 @@ return [
 
     // Extended Ministry
     'planning' => 'Планування',
-    'tasks' => 'Завдання',
+    'tasks' => 'Трекер завдань',
     'resources' => 'Ресурси',
     'grid' => 'Сітка',
     'list' => 'Список',
