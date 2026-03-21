@@ -1571,9 +1571,7 @@
                             </div>
                         </div>
                         @endif
-                        <a wire:navigate href="{{ route('my-schedule') }}" class="w-11 h-11 flex items-center justify-center text-gray-400 hover:text-primary-600 active:bg-gray-100 dark:active:bg-gray-700 rounded-xl" title="{{ __('app.my_schedule') }}">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                        </a>
+                        {{-- my-schedule link hidden temporarily --}}
                         <a wire:navigate href="{{ route('my-profile') }}" class="w-11 h-11 flex items-center justify-center">
                             <x-user-avatar size="md" />
                         </a>

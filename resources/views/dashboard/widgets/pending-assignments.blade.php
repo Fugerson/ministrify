@@ -66,11 +66,7 @@
                 </div>
                 @endforeach
             </div>
-            @if($pendingAssignments->count() > 3)
-                <a href="{{ route('my-schedule') }}" class="block mt-2 text-center text-xs text-primary-600 dark:text-primary-400 hover:underline">
-                    {{ __('app.all_assignments', ['count' => $pendingAssignments->count()]) }}
-                </a>
-            @endif
+            {{-- my-schedule link hidden temporarily --}}
             @endif
         </div>
     </div>

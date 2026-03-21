@@ -1,11 +1,5 @@
 {{-- User profile link for header (avatar + name + logout) --}}
 <div class="flex items-center gap-1" x-data="{ profileOpen: false }">
-    <a href="{{ route('my-schedule') }}" class="p-2 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors" title="{{ __('app.my_schedule') }}">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-        </svg>
-    </a>
-
     <div class="relative">
         <button @click="profileOpen = !profileOpen" class="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors">
             <x-user-avatar size="sm" />
@@ -18,15 +12,13 @@
             <a href="{{ route('my-profile') }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">{{ __('app.my_profile') }}</a>
 
             {{-- Language switcher --}}
-            @php
-                $currentLocale = app()->getLocale();
-                $otherLocale = $currentLocale === 'uk' ? 'en' : 'uk';
-                $otherFlag = $otherLocale === 'uk' ? '🇺🇦' : '🇬🇧';
-                $otherLabel = $otherLocale === 'en' ? 'English' : 'Українська';
-            @endphp
-            <button onclick="switchLocaleAccount('{{ $otherLocale }}')" class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
-                <span>{{ $otherFlag }}</span> {{ $otherLabel }}
-            </button>
+            <div class="px-4 py-2">
+                <select onchange="switchLocaleAccount(this.value)"
+                        class="w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white py-1.5">
+                    <option value="uk" {{ app()->getLocale() === 'uk' ? 'selected' : '' }}>🇺🇦 Українська</option>
+                    <option value="en" {{ app()->getLocale() === 'en' ? 'selected' : '' }}>🇬🇧 English</option>
+                </select>
+            </div>
 
             <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
 
