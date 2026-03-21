@@ -472,21 +472,21 @@
                 <div>
                 <div class="overflow-x-auto" style="min-height: 300px;">
                     <table class="w-full text-sm">
-                        <thead class="bg-gray-50 dark:bg-gray-700/50 text-xs uppercase text-gray-500 dark:text-gray-400 sticky top-0 z-10">
+                        <thead class="bg-gray-50 dark:bg-gray-700/50 text-[10px] uppercase text-gray-500 dark:text-gray-400 sticky top-0 z-10">
                             <tr>
-                                <th class="px-1 py-4" style="width: 30px;"></th>
-                                <th class="px-2 sm:px-3 py-4 text-left" style="width: 70px;">{{ __('app.schedule_time_col') }}</th>
-                                <th class="px-2 sm:px-3 py-4 text-left" style="width: 28%;">{{ __('app.schedule_what_happens') }}</th>
-                                <th class="px-2 sm:px-3 py-4 text-left" style="width: 1px;">{{ __('app.schedule_responsible') }}</th>
-                                <th class="px-2 sm:px-3 py-4 text-left hidden sm:table-cell" style="width: 35%;">{{ __('app.schedule_comments') }}</th>
-                                <th class="px-2 py-4" style="width: 40px;"></th>
+                                <th class="px-0.5 py-2" style="width: 24px;"></th>
+                                <th class="px-1 sm:px-2 py-2 text-left" style="width: 60px;">{{ __('app.schedule_time_col') }}</th>
+                                <th class="px-1 sm:px-2 py-2 text-left" style="width: 28%;">{{ __('app.schedule_what_happens') }}</th>
+                                <th class="px-1 sm:px-2 py-2 text-left" style="width: 1px;">{{ __('app.schedule_responsible') }}</th>
+                                <th class="px-1 sm:px-2 py-2 text-left hidden sm:table-cell" style="width: 35%;">{{ __('app.schedule_comments') }}</th>
+                                <th class="px-1 py-2" style="width: 32px;"></th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                             @forelse($event->planItems->sortBy('sort_order') as $item)
                                 <tr class="hover:bg-blue-50/50 dark:hover:bg-gray-700/50 group" data-id="{{ $item->id }}">
                                     {{-- Drag handle --}}
-                                    <td class="px-1 py-3 cursor-grab active:cursor-grabbing drag-handle">
+                                    <td class="px-0.5 py-1.5 cursor-grab active:cursor-grabbing drag-handle">
                                         <svg class="w-4 h-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" fill="currentColor" viewBox="0 0 24 24">
                                             <circle cx="9" cy="5" r="1.5"/><circle cx="15" cy="5" r="1.5"/>
                                             <circle cx="9" cy="10" r="1.5"/><circle cx="15" cy="10" r="1.5"/>
@@ -495,11 +495,11 @@
                                         </svg>
                                     </td>
                                     {{-- Час --}}
-                                    <td class="px-2 sm:px-3 py-3 border-r border-gray-200 dark:border-gray-700">
+                                    <td class="px-1 sm:px-1.5 py-1.5 border-r border-gray-200 dark:border-gray-700">
                                         <input type="time"
                                                value="{{ $item->start_time ? \Carbon\Carbon::parse($item->start_time)->format('H:i') : '' }}"
                                                @change="updateField({{ $item->id }}, 'start_time', $event.target.value)"
-                                               class="min-w-[4.5rem] sm:min-w-[5.5rem] px-1.5 sm:px-2 py-1.5 text-sm font-semibold text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 cursor-pointer">
+                                               class="min-w-[3.5rem] sm:min-w-[4.5rem] px-1 py-1 text-xs font-semibold text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-700 rounded focus:ring-1 focus:ring-primary-500 focus:border-primary-500 cursor-pointer">
                                     </td>
                                     {{-- Що відбувається - єдиний підхід з інлайн посиланнями на пісні --}}
                                     @php
@@ -515,10 +515,10 @@
                                         }
                                         $displayTitle = trim($displayTitle);
                                     @endphp
-                                    <td class="px-2 sm:px-3 py-3 border-r border-gray-200 dark:border-gray-700 align-top">
+                                    <td class="px-1 sm:px-1.5 py-1.5 border-r border-gray-200 dark:border-gray-700 align-top">
                                         <div class="relative" x-data="titleEditor({{ $item->id }}, {{ Js::from($displayTitle) }}, {{ $item->song_id ?? 'null' }})">
                                             {{-- Display mode --}}
-                                            <div x-show="!editing" @click="startEditing()" class="cursor-text min-h-[1.5rem] px-1 py-1 text-sm text-gray-900 dark:text-white break-words" x-html="renderWithSongLinks(title)"></div>
+                                            <div x-show="!editing" @click="startEditing()" class="cursor-text min-h-[1.25rem] px-0.5 py-0.5 text-xs text-gray-900 dark:text-white break-words" x-html="renderWithSongLinks(title)"></div>
                                             {{-- Edit mode --}}
                                             <div x-show="editing" class="relative">
                                                 <textarea x-ref="input" x-model="title"
@@ -593,7 +593,7 @@
                                         $declinedCount = count(array_filter($existingPeople, fn($p) => ($p['status'] ?? null) === 'declined'));
                                         $notAskedCount = count(array_filter($existingPeople, fn($p) => ($p['status'] ?? null) === null && $p['hasTelegram']));
                                     @endphp
-                                    <td class="px-2 sm:px-3 py-3 border-r border-gray-200 dark:border-gray-700 align-top transition-colors"
+                                    <td class="px-1 sm:px-1.5 py-1.5 border-r border-gray-200 dark:border-gray-700 align-top transition-colors"
                                         data-plan-item-id="{{ $item->id }}"
                                         x-data="responsibleEditor({{ $item->id }}, {{ json_encode($existingPeople) }})"
                                         @dragover.prevent
@@ -707,17 +707,17 @@
                                         </div>
                                     </td>
                                     {{-- Коментарі --}}
-                                    <td class="px-2 sm:px-3 py-3 border-r border-gray-200 dark:border-gray-700 align-top hidden sm:table-cell">
+                                    <td class="px-1 sm:px-1.5 py-1.5 border-r border-gray-200 dark:border-gray-700 align-top hidden sm:table-cell">
                                         <textarea placeholder="{{ __('app.schedule_notes_placeholder') }}"
                                                   @change="updateField({{ $item->id }}, 'notes', $event.target.value)"
                                                   rows="1"
-                                                  class="w-full px-1 py-1 text-sm text-gray-500 dark:text-gray-400 bg-transparent border-0 focus:ring-1 focus:ring-primary-500 rounded resize-none break-words"
+                                                  class="w-full px-0.5 py-0.5 text-xs text-gray-500 dark:text-gray-400 bg-transparent border-0 focus:ring-1 focus:ring-primary-500 rounded resize-none break-words"
                                                   style="word-wrap: break-word; overflow-wrap: break-word;"
                                                   x-init="$nextTick(() => { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; })"
                                                   oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px'">{{ $item->notes }}</textarea>
                                     </td>
                                     {{-- Actions --}}
-                                    <td class="px-3 py-3 text-center">
+                                    <td class="px-1 py-1.5 text-center">
                                         <button type="button"
                                                 @click="deleteItem({{ $item->id }})"
                                                 class="p-1 text-gray-400 hover:text-red-500 transition-colors"
