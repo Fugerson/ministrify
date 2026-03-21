@@ -1541,6 +1541,8 @@ return [
     'month_october' => 'October',
     'month_november' => 'November',
     'month_december' => 'December',
+    'apply' => 'Apply',
+    'date_range_label' => 'Custom range',
     'amount_label_currency' => 'Amount (₴) *',
     'notes_label_simple' => 'Notes',
     'church_item_category_title' => 'Bind a transaction category — actuals will be calculated automatically from transactions of this category',
@@ -2853,7 +2855,7 @@ return [
     'schedule_comments' => 'Comments',
     'schedule_worship_no_songs' => 'Worship team has not selected songs yet.',
     'schedule_choose_songs' => 'Choose songs',
-    'schedule_text_song_placeholder' => 'Text... (type song- to search for a song)',
+    'schedule_text_song_placeholder' => 'Text... (type @ to search for a song)',
     'schedule_add' => 'Add',
     'schedule_search' => 'Search...',
     'schedule_what_happens_placeholder' => 'What happens... (song- for song)',
@@ -2939,7 +2941,7 @@ return [
     'schedule_no_telegram' => 'No Telegram',
     'schedule_additional_text' => 'Additional text...',
     'schedule_description_placeholder' => 'Description of item... (song- for song)',
-    'schedule_enter_song' => 'Type song- to search for a song',
+    'schedule_enter_song' => 'Type @ to search for a song',
     'schedule_remove_song' => 'Remove song',
     'schedule_error_status' => 'Error',
     'schedule_error_alert' => 'Error',
@@ -6408,6 +6410,8 @@ return [
     'month_october' => 'October',
     'month_november' => 'November',
     'month_december' => 'December',
+    'apply' => 'Apply',
+    'date_range_label' => 'Custom range',
 
     // Music key labels
     'key_c_major' => 'C Major',
@@ -6951,4 +6955,6 @@ return [
     'month_october' => 'October',
     'month_november' => 'November',
     'month_december' => 'December',
+    'apply' => 'Apply',
+    'date_range_label' => 'Custom range',
 ];

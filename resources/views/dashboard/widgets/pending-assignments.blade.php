@@ -44,7 +44,7 @@
                 <div class="bg-white dark:bg-gray-800 rounded-xl p-3 flex items-center justify-between gap-3" x-data="{ responding: false }">
                     <a href="{{ route('events.show', $assignment->event) }}" class="min-w-0 hover:opacity-80 transition-opacity">
                         <p class="font-medium text-gray-900 dark:text-white text-sm truncate">{{ $assignment->event?->title }}</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ $assignment->event?->date?->format('d.m') }} &bull; {{ $assignment->position?->name }}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ $assignment->event?->date?->locale(app()->getLocale())->translatedFormat('D') }}, {{ $assignment->event?->date?->format('d.m') }} &bull; {{ $assignment->position?->name }}</p>
                     </a>
                     <div class="flex gap-2 flex-shrink-0" x-show="!responding">
                         <button @click="responding = true; fetch('/api/pwa/responsibilities/{{ $assignment->id }}/confirm', { method: 'POST', headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content, 'Accept': 'application/json' } }).then(() => $el.closest('[x-data]').remove())"

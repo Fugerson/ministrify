@@ -89,10 +89,26 @@
                                 </button>
                             </template>
                         </div>
-                        <button @click="goToday(); pickerOpen = false" type="button"
-                            class="w-full py-2 text-sm font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/30 rounded-lg transition-colors">
-                            {{ __('common.today') }}
-                        </button>
+                        <div class="flex gap-2 mb-3">
+                            <button @click="goToday(); pickerOpen = false" type="button"
+                                class="flex-1 py-2 text-sm font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/30 rounded-lg transition-colors">
+                                {{ __('common.today') }}
+                            </button>
+                        </div>
+                        <div class="border-t border-gray-200 dark:border-gray-700 pt-3">
+                            <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">{{ __('app.date_range_label') }}</p>
+                            <div class="flex items-center gap-2">
+                                <input type="date" x-ref="rangeStart" :value="formatDate(startDate)"
+                                    class="flex-1 text-xs rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white py-1.5 px-2">
+                                <span class="text-gray-400 text-xs">–</span>
+                                <input type="date" x-ref="rangeEnd" :value="formatDate(endDate)"
+                                    class="flex-1 text-xs rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white py-1.5 px-2">
+                            </div>
+                            <button @click="applyRange($refs.rangeStart.value, $refs.rangeEnd.value); pickerOpen = false" type="button"
+                                class="w-full mt-2 py-1.5 text-xs font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors">
+                                {{ __('app.apply') }}
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <button @click="nextPeriod()" type="button"
@@ -194,10 +210,26 @@
                                 </button>
                             </template>
                         </div>
-                        <button @click="goToday(); pickerOpen = false" type="button"
-                            class="w-full py-2 text-sm font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/30 rounded-lg transition-colors">
-                            {{ __('common.today') }}
-                        </button>
+                        <div class="flex gap-2 mb-3">
+                            <button @click="goToday(); pickerOpen = false" type="button"
+                                class="flex-1 py-2 text-sm font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/30 rounded-lg transition-colors">
+                                {{ __('common.today') }}
+                            </button>
+                        </div>
+                        <div class="border-t border-gray-200 dark:border-gray-700 pt-3">
+                            <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">{{ __('app.date_range_label') }}</p>
+                            <div class="flex items-center gap-2">
+                                <input type="date" x-ref="rangeStart" :value="formatDate(startDate)"
+                                    class="flex-1 text-xs rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white py-1.5 px-2">
+                                <span class="text-gray-400 text-xs">–</span>
+                                <input type="date" x-ref="rangeEnd" :value="formatDate(endDate)"
+                                    class="flex-1 text-xs rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white py-1.5 px-2">
+                            </div>
+                            <button @click="applyRange($refs.rangeStart.value, $refs.rangeEnd.value); pickerOpen = false" type="button"
+                                class="w-full mt-2 py-1.5 text-xs font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors">
+                                {{ __('app.apply') }}
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <button @click="nextPeriod()" type="button"
@@ -835,7 +867,7 @@ function servicePlanningMatrix() {
 
         updatePeriodLabel() {
             const months = {!! json_encode(explode(',', __('app.cal_months'))) !!};
-            if (this.viewMode === 'week') {
+            if (this.viewMode === 'week' || this.viewMode === 'range') {
                 const sd = this.startDate;
                 const ed = this.endDate;
                 const fmt = (d) => d.getDate() + '.' + String(d.getMonth() + 1).padStart(2, '0');
@@ -850,7 +882,12 @@ function servicePlanningMatrix() {
         },
 
         prevPeriod() {
-            if (this.viewMode === 'week') {
+            if (this.viewMode === 'range') {
+                const diff = Math.round((this.endDate - this.startDate) / 86400000) + 1;
+                const s = new Date(this.startDate); s.setDate(s.getDate() - diff);
+                const e = new Date(this.endDate); e.setDate(e.getDate() - diff);
+                this.startDate = s; this.endDate = e;
+            } else if (this.viewMode === 'week') {
                 const d = new Date(this.startDate);
                 d.setDate(d.getDate() - 7);
                 this.setWeek(d);
@@ -861,7 +898,12 @@ function servicePlanningMatrix() {
         },
 
         nextPeriod() {
-            if (this.viewMode === 'week') {
+            if (this.viewMode === 'range') {
+                const diff = Math.round((this.endDate - this.startDate) / 86400000) + 1;
+                const s = new Date(this.startDate); s.setDate(s.getDate() + diff);
+                const e = new Date(this.endDate); e.setDate(e.getDate() + diff);
+                this.startDate = s; this.endDate = e;
+            } else if (this.viewMode === 'week') {
                 const d = new Date(this.startDate);
                 d.setDate(d.getDate() + 7);
                 this.setWeek(d);
@@ -884,6 +926,17 @@ function servicePlanningMatrix() {
             this.viewMode = 'month';
             localStorage.setItem('sp_viewMode', 'month');
             this.setMonth(year, monthIndex);
+            this.loadData();
+        },
+
+        applyRange(startStr, endStr) {
+            if (!startStr || !endStr) return;
+            const s = new Date(startStr + 'T00:00:00');
+            const e = new Date(endStr + 'T00:00:00');
+            if (isNaN(s) || isNaN(e) || s > e) return;
+            this.startDate = s;
+            this.endDate = e;
+            this.viewMode = 'range';
             this.loadData();
         },
 
