@@ -266,8 +266,8 @@
     <div class="flex gap-6 items-start">
 
         <!-- Filter Sidebar (always visible on desktop, togglable on mobile) -->
-        <aside :class="showFilterSidebar ? 'block' : 'hidden lg:block'" class="w-full lg:w-72 shrink-0">
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
+        <aside :class="showFilterSidebar ? 'block' : 'hidden lg:block'" class="w-full lg:w-72 shrink-0 lg:sticky lg:top-20 lg:self-start">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
 
                 <!-- Header -->
                 <div class="flex items-center justify-between px-4 py-2.5 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800 z-10">
