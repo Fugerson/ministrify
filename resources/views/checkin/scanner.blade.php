@@ -212,7 +212,7 @@ function qrScanner() {
                 this.cameraActive = true;
             } catch (error) {
                 console.error('Camera error:', error);
-                alert(@js(__('app.camera_access_error')));
+                showGlobalToast(@js(__('app.camera_access_error')), 'error');
             }
         },
 
@@ -262,11 +262,11 @@ function qrScanner() {
                         this.attendanceCount++;
                     }
                 } else {
-                    alert(data.message || @js(__('app.checkin_error_registration')));
+                    showGlobalToast(data.message || @js(__('app.checkin_error_registration')), 'error');
                 }
             } catch (error) {
                 console.error('Check-in error:', error);
-                alert(@js(__('app.checkin_connection_error_short')));
+                showGlobalToast(@js(__('app.checkin_connection_error_short')), 'error');
             }
 
             // Resume scanning after a short delay

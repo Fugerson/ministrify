@@ -247,7 +247,7 @@ function personLinker(userId, suggestedMatches) {
                 // For servant approvals roleId is null — use default volunteer role
                 // For church role approvals, roleId must be selected
                 if (roleId === '') {
-                    alert(@js( __('app.select_role_alert') ));
+                    showGlobalToast(@js( __('app.select_role_alert') ), 'warning');
                     return;
                 }
             }
@@ -268,13 +268,13 @@ function personLinker(userId, suggestedMatches) {
             .then(r => r.json())
             .then(data => {
                 if (data.success) {
-                    alert(data.message);
+                    showGlobalToast(data.message, 'success');
                     Livewire.navigate(window.location.href);
                 } else {
-                    alert(@js(__('app.error') ) + ': ' + data.message);
+                    showGlobalToast(@js(__('app.error') ) + ': ' + data.message, 'error');
                 }
             })
-            .catch(err => alert(@js(__('app.request_error') ) + ': ' + err));
+            .catch(err => showGlobalToast(@js(__('app.request_error') ) + ': ' + err, 'error'));
         }
     };
 }
@@ -309,13 +309,13 @@ onPageReady(function() {
             .then(r => r.json())
             .then(data => {
                 if (data.success) {
-                    alert(data.message);
+                    showGlobalToast(data.message, 'success');
                     Livewire.navigate(window.location.href);
                 } else {
-                    alert(@js(__('app.error') ) + ': ' + data.message);
+                    showGlobalToast(@js(__('app.error') ) + ': ' + data.message, 'error');
                 }
             })
-            .catch(err => alert(@js(__('app.request_error') ) + ': ' + err));
+            .catch(err => showGlobalToast(@js(__('app.request_error') ) + ': ' + err, 'error'));
         });
     }
 });

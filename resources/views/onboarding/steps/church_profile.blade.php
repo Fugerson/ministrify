@@ -76,7 +76,7 @@
                     </svg>
                     <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ __('app.choose_file') }}</span>
                     <input type="file" name="logo" accept="image/*,.heic,.heif" class="hidden"
-                           @change="const f=$event.target.files[0]; if(f){if(f.size>2*1024*1024){alert(_t.max_file_size);$event.target.value='';return}preview=URL.createObjectURL(f)}">
+                           @change="const f=$event.target.files[0]; if(f){if(f.size>2*1024*1024){showGlobalToast(_t.max_file_size,'warning');$event.target.value='';return}preview=URL.createObjectURL(f)}">
                 </label>
             </div>
         </div>

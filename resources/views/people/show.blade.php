@@ -1255,10 +1255,10 @@ function userRoleManager() {
                     this.generatedPassword = data.password;
                     this.showPasswordModal = true;
                 } else {
-                    alert(data.message || @json(__('app.reset_password_error')));
+                    showGlobalToast(data.message || @json(__('app.reset_password_error')), 'error');
                 }
             } catch (error) {
-                alert(@json(__('app.error_connection')));
+                showGlobalToast(@json(__('app.error_connection')), 'error');
             } finally {
                 this.resettingPassword = false;
             }
@@ -1283,11 +1283,11 @@ function userRoleManager() {
                 if (response.ok) {
                     this.editingEmail = false;
                 } else {
-                    alert(data.message || @json(__('app.update_email_error')));
+                    showGlobalToast(data.message || @json(__('app.update_email_error')), 'error');
                     this.userEmail = '{{ $person->user?->email ?? "" }}';
                 }
             } catch (error) {
-                alert(@json(__('app.error_connection')));
+                showGlobalToast(@json(__('app.error_connection')), 'error');
                 this.userEmail = '{{ $person->user?->email ?? "" }}';
             }
         },
@@ -1424,10 +1424,10 @@ function shepherdSearch() {
                     this.searchQuery = '';
                     this.isOpen = false;
                 } else {
-                    alert(data.message || @json(__('app.error_short')));
+                    showGlobalToast(data.message || @json(__('app.error_short')), 'error');
                 }
             } catch (error) {
-                alert(@json(__('app.error_connection')));
+                showGlobalToast(@json(__('app.error_connection')), 'error');
             } finally {
                 this.updating = false;
             }
@@ -1451,10 +1451,10 @@ function shepherdSearch() {
                     this.searchQuery = '';
                     this.isOpen = false;
                 } else {
-                    alert(data.message || @json(__('app.error_short')));
+                    showGlobalToast(data.message || @json(__('app.error_short')), 'error');
                 }
             } catch (error) {
-                alert(@json(__('app.error_connection')));
+                showGlobalToast(@json(__('app.error_connection')), 'error');
             } finally {
                 this.updating = false;
             }

@@ -432,10 +432,10 @@ function resourcesManager() {
                         _addResourceFile(file.name);
                     } else {
                         const data = await response.json().catch(() => ({}));
-                        alert(data.message || @js(__('app.upload_error')));
+                        showGlobalToast(data.message || @js(__('app.upload_error')), 'error');
                     }
                 } catch (error) {
-                    alert(@js(__('app.upload_error')));
+                    showGlobalToast(@js(__('app.upload_error')), 'error');
                 }
             }
 

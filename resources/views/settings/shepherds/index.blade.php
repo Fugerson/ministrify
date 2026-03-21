@@ -252,10 +252,10 @@ function shepherdsManager() {
                     }
                 } else {
                     const data = await response.json().catch(() => ({}));
-                    alert(data.message || translations.errorAdding);
+                    showGlobalToast(data.message || translations.errorAdding, 'error');
                 }
             } catch (error) {
-                alert(translations.connectionError);
+                showGlobalToast(translations.connectionError, 'error');
             }
         },
 
@@ -292,10 +292,10 @@ function shepherdsManager() {
                     if (window.showGlobalToast) showGlobalToast(translations.shepherdRemoved, 'success');
                 } else {
                     const data = await response.json().catch(() => ({}));
-                    alert(data.message || translations.errorDeleting);
+                    showGlobalToast(data.message || translations.errorDeleting, 'error');
                 }
             } catch (error) {
-                alert(translations.connectionError);
+                showGlobalToast(translations.connectionError, 'error');
             }
         }
     }

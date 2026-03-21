@@ -2082,11 +2082,11 @@
                                                 this.editing = false;
                                             } else {
                                                 const data = await res.json();
-                                                alert(data.message || @js( __('app.settings_error') ));
+                                                showGlobalToast(data.message || @js( __('app.settings_error') ), 'error');
                                             }
                                         } catch (e) {
                                             console.error(e);
-                                            alert(@js( __('app.settings_save_error') ));
+                                            showGlobalToast(@js( __('app.settings_save_error') ), 'error');
                                         } finally {
                                             this.saving = false;
                                         }

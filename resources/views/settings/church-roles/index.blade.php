@@ -294,10 +294,10 @@ function churchRolesManager() {
                     if (window.showGlobalToast) showGlobalToast(@js(__('app.status_updated_toast')), 'success');
                 } else {
                     const data = await response.json().catch(() => ({}));
-                    alert(data.message || @js(__('app.error')));
+                    showGlobalToast(data.message || @js(__('app.error')), 'error');
                 }
             } catch (error) {
-                alert(@js(__('app.error_connection')));
+                showGlobalToast(@js(__('app.error_connection')), 'error');
             }
         },
 
@@ -316,7 +316,7 @@ function churchRolesManager() {
                     this.showPermissionsModal = true;
                 }
             } catch (error) {
-                alert(@js(__('app.error_loading_permissions')));
+                showGlobalToast(@js(__('app.error_loading_permissions')), 'error');
             }
         },
 
@@ -349,10 +349,10 @@ function churchRolesManager() {
                     if (window.showGlobalToast) showGlobalToast(@js(__('app.permissions_saved_toast')), 'success');
                 } else {
                     const data = await response.json().catch(() => ({}));
-                    alert(data.message || @js(__('app.error_saving')));
+                    showGlobalToast(data.message || @js(__('app.error_saving')), 'error');
                 }
             } catch (error) {
-                alert(@js(__('app.error_connection')));
+                showGlobalToast(@js(__('app.error_connection')), 'error');
             } finally {
                 this.savingPermissions = false;
             }
@@ -380,10 +380,10 @@ function churchRolesManager() {
                     if (window.showGlobalToast) showGlobalToast(@js(__('app.role_added_toast')), 'success');
                 } else {
                     const data = await response.json().catch(() => ({}));
-                    alert(data.message || @js(__('app.error_adding')));
+                    showGlobalToast(data.message || @js(__('app.error_adding')), 'error');
                 }
             } catch (error) {
-                alert(@js(__('app.error_connection')));
+                showGlobalToast(@js(__('app.error_connection')), 'error');
             }
         },
 
@@ -420,10 +420,10 @@ function churchRolesManager() {
                     if (window.showGlobalToast) showGlobalToast(@js(__('app.role_deleted_toast')), 'success');
                 } else {
                     const data = await response.json().catch(() => ({}));
-                    alert(data.message || @js(__('app.error_deleting_role')));
+                    showGlobalToast(data.message || @js(__('app.error_deleting_role')), 'error');
                 }
             } catch (error) {
-                alert(@js(__('app.error_connection')));
+                showGlobalToast(@js(__('app.error_connection')), 'error');
             }
         },
 
@@ -482,10 +482,10 @@ function churchRolesManager() {
                     Livewire.navigate(window.location.href);
                 } else {
                     const data = await response.json().catch(() => ({}));
-                    alert(data.message || @js(__('app.error_resetting')));
+                    showGlobalToast(data.message || @js(__('app.error_resetting')), 'error');
                 }
             } catch (error) {
-                alert(@js(__('app.error_connection')));
+                showGlobalToast(@js(__('app.error_connection')), 'error');
             }
         }
     }

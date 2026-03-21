@@ -785,11 +785,11 @@ function quickEdit() {
                         if (row) row.user_id = true; // Mark as having access
                     });
                 } else {
-                    alert(data.message || @json(__('app.bulk_action_error')));
+                    showGlobalToast(data.message || @json(__('app.bulk_action_error')), 'error');
                 }
             } catch (error) {
                 console.error('Grant access error:', error);
-                alert(@json(__('app.error_granting_access')));
+                showGlobalToast(@json(__('app.error_granting_access')), 'error');
             } finally {
                 this.grantAccessLoading = false;
             }
@@ -864,11 +864,11 @@ function quickEdit() {
 
                     this.toast({!! json_encode(__('app.saved_stats', ['created' => ':created', 'updated' => ':updated', 'deleted' => ':deleted'])) !!}.replace(':created', data.stats.created).replace(':updated', data.stats.updated).replace(':deleted', data.stats.deleted));
                 } else {
-                    alert(data.message || @json(__('app.save_error')));
+                    showGlobalToast(data.message || @json(__('app.save_error')), 'error');
                 }
             } catch (error) {
                 console.error('Save error:', error);
-                alert(@json(__('app.save_error')));
+                showGlobalToast(@json(__('app.save_error')), 'error');
             } finally {
                 this.saving = false;
             }
@@ -906,11 +906,11 @@ function quickEdit() {
                     row.photo_url = data.photo_url;
                     this.toast(@json(__('app.photo_uploaded')));
                 } else {
-                    alert(data.message || @json(__('app.photo_upload_error')));
+                    showGlobalToast(data.message || @json(__('app.photo_upload_error')), 'error');
                 }
             } catch (error) {
                 console.error('Photo upload error:', error);
-                alert(@json(__('app.photo_upload_error')));
+                showGlobalToast(@json(__('app.photo_upload_error')), 'error');
             } finally {
                 row.uploadingPhoto = false;
                 event.target.value = '';
@@ -939,11 +939,11 @@ function quickEdit() {
                     row.photo_url = null;
                     this.toast(@json(__('app.photo_deleted')));
                 } else {
-                    alert(data.message || @json(__('app.photo_delete_error')));
+                    showGlobalToast(data.message || @json(__('app.photo_delete_error')), 'error');
                 }
             } catch (error) {
                 console.error('Photo delete error:', error);
-                alert(@json(__('app.photo_delete_error')));
+                showGlobalToast(@json(__('app.photo_delete_error')), 'error');
             }
         },
 

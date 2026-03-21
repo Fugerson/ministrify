@@ -102,7 +102,7 @@ function photoCropperModal() {
                 });
 
                 if (!canvas) {
-                    alert('Canvas error — null');
+                    showGlobalToast('Canvas error — null', 'error');
                     this.confirming = false;
                     return;
                 }
@@ -123,7 +123,7 @@ function photoCropperModal() {
                 this.close();
             } catch (e) {
                 console.error('Crop error:', e);
-                alert('Crop error: ' + e.message);
+                showGlobalToast('Crop error: ' + e.message, 'error');
                 this.confirming = false;
             }
         },
