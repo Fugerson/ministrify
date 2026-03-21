@@ -2,7 +2,8 @@
 <html lang="{{ app()->getLocale() }}" x-data="{
     darkMode: localStorage.getItem('theme') !== 'light',
     searchOpen: false,
-    fabOpen: false
+    fabOpen: false,
+    searchQuery: ''
 }" :class="{ 'dark': darkMode }">
 <head>
     <script>
@@ -1815,6 +1816,7 @@
                      x-transition:leave-end="opacity-0 scale-95"
                      class="relative inline-block w-full max-w-xl mt-16 text-left align-middle transition-all transform"
                      x-data="globalSearch()"
+                     x-init="query = $root.searchQuery; $nextTick(() => { $refs.searchInput.focus(); if (query.length >= 2) search(); })"
                      @keydown.arrow-down.prevent="selectNext()"
                      @keydown.arrow-up.prevent="selectPrev()"
                      @keydown.enter.prevent="goToSelected()">
@@ -1827,8 +1829,7 @@
                             <input type="text"
                                    x-ref="searchInput"
                                    x-model="query"
-                                   @input.debounce.300ms="search()"
-                                   x-init="$nextTick(() => $refs.searchInput.focus())"
+                                   @input.debounce.300ms="search(); $root.searchQuery = query"
                                    placeholder="{{ __('app.search_everything') }}"
                                    class="w-full px-4 py-4 text-gray-900 dark:text-white bg-transparent border-0 focus:ring-0 focus:outline-none placeholder-gray-400">
                             <kbd class="hidden sm:inline-flex px-2 py-1 text-xs text-gray-400 bg-gray-100 dark:bg-gray-700 rounded">ESC</kbd>

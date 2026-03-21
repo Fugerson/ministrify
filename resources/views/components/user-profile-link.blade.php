@@ -11,15 +11,6 @@
             {{-- Profile --}}
             <a href="{{ route('my-profile') }}" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">{{ __('app.my_profile') }}</a>
 
-            {{-- Language switcher --}}
-            <div class="px-4 py-2">
-                <select onchange="switchLocaleAccount(this.value)"
-                        class="w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white py-1.5">
-                    <option value="uk" {{ app()->getLocale() === 'uk' ? 'selected' : '' }}>🇺🇦 Українська</option>
-                    <option value="en" {{ app()->getLocale() === 'en' ? 'selected' : '' }}>🇬🇧 English</option>
-                </select>
-            </div>
-
             <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
 
             {{-- Logout --}}
