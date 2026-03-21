@@ -96,12 +96,21 @@ class Church extends Model
      */
     public function getPlanConfig(): array
     {
-        return config('plans.plans.' . ($this->plan ?? 'free'), config('plans.plans.free'));
+        $plan = $this->plan ?? 'free';
+        $config = config("plans.plans.{$plan}");
+        if (!$config) {
+            $config = config('plans.plans.free');
+        }
+        // Ultimate fallback — if config/plans.php is not loaded
+        return $config ?? [
+            'limits' => ['people' => -1, 'users' => -1, 'ministries' => -1, 'groups' => -1, 'events_per_month' => -1, 'storage_mb' => 5000],
+            'features' => ['dashboard', 'people', 'groups', 'ministries', 'events', 'attendance', 'finances', 'reports', 'boards', 'announcements', 'resources', 'website', 'google_calendar', 'telegram_bot', 'custom_roles'],
+        ];
     }
 
     public function getPlanLimit(string $resource): int
     {
-        return $this->getPlanConfig()['limits'][$resource] ?? 0;
+        return $this->getPlanConfig()['limits'][$resource] ?? -1;
     }
 
     public function hasFeature(string $feature): bool
