@@ -841,7 +841,7 @@
 
                     <!-- Team sidebar -->
                     @if($showTeamSection)
-                    <div class="xl:w-[22%] flex-shrink-0 border-t xl:border-t-0 xl:border-l border-gray-200 dark:border-gray-700" x-data="eventTeamManager()">
+                    <div class="xl:w-[34%] flex-shrink-0 border-t xl:border-t-0 xl:border-l border-gray-200 dark:border-gray-700" x-data="eventTeamManager()">
                         <!-- Sidebar header -->
                         <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-700/30 flex items-center justify-between">
                             <div class="flex items-center gap-2">

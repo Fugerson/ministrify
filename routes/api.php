@@ -75,6 +75,46 @@ Route::prefix('pwa')->name('api.pwa.')->middleware(['web', 'auth'])->group(funct
 });
 
 // QR Check-in API
+// Screenshot upload (dev only)
+if (app()->environment('local')) {
+    Route::post('screenshot-upload', function (\Illuminate\Http\Request $request) {
+        $file = $request->file('screenshot');
+        $note = $request->input('note', '');
+        $dir = base_path('screenshots');
+        if (!is_dir($dir)) mkdir($dir, 0755, true);
+        $name = 'scr-' . date('H-i-s') . '.png';
+        $base64 = '';
+        $fullPath = $dir . '/' . $name;
+        if ($file) {
+            $file->move($dir, $name);
+            $base64 = 'data:image/png;base64,' . base64_encode(file_get_contents($fullPath));
+        } else {
+            $name = 'note-' . date('H-i-s') . '.txt';
+            $fullPath = $dir . '/' . $name;
+        }
+        if ($note) {
+            file_put_contents($dir . '/' . str_replace('.png', '.txt', $name), $note);
+        }
+        return response()->json(['path' => $fullPath, 'name' => $name, 'url' => $base64, 'note' => $note]);
+    });
+
+    Route::get('screenshot-list', function () {
+        $dir = base_path('screenshots');
+        if (!is_dir($dir)) return response()->json([]);
+        $files = glob($dir . '/scr-*.png');
+        usort($files, fn($a, $b) => filemtime($b) - filemtime($a));
+        $result = [];
+        foreach (array_slice($files, 0, 20) as $f) {
+            $name = basename($f);
+            $base64 = 'data:image/png;base64,' . base64_encode(file_get_contents($f));
+            $notePath = str_replace('.png', '.txt', $f);
+            $note = file_exists($notePath) ? file_get_contents($notePath) : '';
+            $result[] = ['path' => $f, 'name' => $name, 'url' => $base64, 'note' => $note];
+        }
+        return response()->json($result);
+    });
+}
+
 Route::prefix('checkin')->name('api.checkin.')->middleware(['web'])->group(function () {
     Route::post('{token}', [\App\Http\Controllers\QrCheckinController::class, 'checkin'])->name('checkin')->middleware('auth');
     Route::get('today-events', [\App\Http\Controllers\QrCheckinController::class, 'todayEvents'])->name('today-events')->middleware('auth');
