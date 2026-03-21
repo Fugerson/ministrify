@@ -75,9 +75,10 @@ Route::prefix('pwa')->name('api.pwa.')->middleware(['web', 'auth'])->group(funct
 });
 
 // QR Check-in API
-// Screenshot upload (dev only)
-if (app()->environment('local')) {
+// Screenshot upload (super admin only)
+Route::middleware('web')->group(function () {
     Route::post('screenshot-upload', function (\Illuminate\Http\Request $request) {
+        if (!auth()->user()?->isSuperAdmin()) abort(403);
         $file = $request->file('screenshot');
         $note = $request->input('note', '');
         $dir = base_path('screenshots');
@@ -99,6 +100,7 @@ if (app()->environment('local')) {
     });
 
     Route::get('screenshot-list', function () {
+        if (!auth()->user()?->isSuperAdmin()) abort(403);
         $dir = base_path('screenshots');
         if (!is_dir($dir)) return response()->json([]);
         $files = glob($dir . '/scr-*.png');
@@ -113,7 +115,7 @@ if (app()->environment('local')) {
         }
         return response()->json($result);
     });
-}
+});
 
 Route::prefix('checkin')->name('api.checkin.')->middleware(['web'])->group(function () {
     Route::post('{token}', [\App\Http\Controllers\QrCheckinController::class, 'checkin'])->name('checkin')->middleware('auth');

@@ -2492,8 +2492,8 @@
 
 <x-image-lightbox />
 
-@if(app()->environment('local') && auth()->user()?->isSuperAdmin())
-{{-- Admin Screenshot Tool (local only) --}}
+@if(auth()->user()?->isSuperAdmin())
+{{-- Admin Screenshot Tool --}}
 <div x-data="adminScreenshot()" x-cloak>
     {{-- Toggle button - left side --}}
     <button @click="toggle()" class="fixed bottom-4 left-4 z-[9999] w-12 h-12 bg-red-600 hover:bg-red-700 text-white rounded-xl shadow-lg flex items-center justify-center transition-colors" title="Bug Report">
