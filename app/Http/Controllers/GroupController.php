@@ -41,6 +41,7 @@ class GroupController extends Controller
 
     public function store(Request $request)
     {
+        $this->checkPlanLimit('groups');
         $this->authorize('create', Group::class);
 
         $validated = $request->validate([

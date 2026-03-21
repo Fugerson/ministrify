@@ -188,6 +188,8 @@ class PersonController extends Controller
 
     public function store(Request $request)
     {
+        $this->checkPlanLimit('people');
+
         if (!auth()->user()->canCreate('people')) {
             return $this->errorResponse($request, __('messages.no_permission_to_create'));
         }

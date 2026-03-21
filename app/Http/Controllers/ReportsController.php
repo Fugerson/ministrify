@@ -20,6 +20,8 @@ class ReportsController extends Controller
 {
     public function index()
     {
+        $this->checkPlanFeature('reports');
+
         if (!auth()->user()->canView('reports')) {
             return redirect()->route('dashboard')->with('error', __('У вас немає доступу до цього розділу. Зверніться до адміністратора церкви для отримання потрібних прав.'));
         }

@@ -56,5 +56,7 @@ class Kernel extends HttpKernel
         'permission' => \App\Http\Middleware\CheckPermission::class,
         'telegram.webhook' => \App\Http\Middleware\ValidateTelegramWebhook::class,
         'tma.validate' => \App\Http\Middleware\ValidateTelegramMiniApp::class,
+        'plan.limit' => \App\Http\Middleware\CheckPlanLimit::class,
+        'plan.feature' => \App\Http\Middleware\CheckPlanFeature::class,
     ];
 }

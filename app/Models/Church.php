@@ -67,6 +67,9 @@ class Church extends Model
         'privatbank_auto_sync',
         'privatbank_last_sync',
         'enabled_currencies',
+        'plan',
+        'plan_expires_at',
+        'plan_changed_at',
     ];
 
     protected $casts = [
@@ -84,11 +87,28 @@ class Church extends Model
         'privatbank_auto_sync' => 'boolean',
         'privatbank_last_sync' => 'datetime',
         'enabled_currencies' => 'array',
+        'plan_expires_at' => 'datetime',
+        'plan_changed_at' => 'datetime',
     ];
 
     /**
      * Get telegram bot token (with decryption error handling)
      */
+    public function getPlanConfig(): array
+    {
+        return config('plans.plans.' . ($this->plan ?? 'free'), config('plans.plans.free'));
+    }
+
+    public function getPlanLimit(string $resource): int
+    {
+        return $this->getPlanConfig()['limits'][$resource] ?? 0;
+    }
+
+    public function hasFeature(string $feature): bool
+    {
+        return in_array($feature, $this->getPlanConfig()['features'] ?? []);
+    }
+
     public function getTelegramBotTokenAttribute($value): ?string
     {
         if (empty($value)) {

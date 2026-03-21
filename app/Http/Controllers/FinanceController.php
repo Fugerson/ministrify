@@ -26,6 +26,8 @@ class FinanceController extends Controller
 {
     public function index(Request $request)
     {
+        $this->checkPlanFeature('finances');
+
         if (!auth()->user()->canView('finances')) {
             return $this->errorResponse($request, __('messages.no_access_to_section'));
         }

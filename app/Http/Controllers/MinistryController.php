@@ -62,6 +62,7 @@ class MinistryController extends Controller
 
     public function store(Request $request)
     {
+        $this->checkPlanLimit('ministries');
         $this->authorize('create', Ministry::class);
 
         $validated = $request->validate([

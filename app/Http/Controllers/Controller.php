@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AuditLog;
 use App\Models\Church;
+use App\Services\PlanService;
 use Illuminate\Database\Eloquent\Model;
 use App\Http\Controllers\Traits\RespondsWithJson;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -51,6 +52,46 @@ abstract class Controller extends BaseController
         }
 
         return $this->cachedChurch = $church;
+    }
+
+    /**
+     * Check if current church can create more of a resource (plan limit).
+     * Aborts with 403 if limit reached.
+     */
+    protected function checkPlanLimit(string $resource): void
+    {
+        $church = $this->getCurrentChurch();
+        $planService = app(PlanService::class);
+
+        if (!$planService->canCreate($church, $resource)) {
+            $limit = $church->getPlanLimit($resource);
+            $message = __('messages.plan_limit_reached', ['resource' => $resource, 'limit' => $limit]);
+
+            if (request()->expectsJson()) {
+                abort(response()->json(['message' => $message, 'upgrade_url' => route('landing.pricing')], 403));
+            }
+
+            abort(403, $message);
+        }
+    }
+
+    /**
+     * Check if current church has a feature on its plan.
+     * Aborts with 403 if not available.
+     */
+    protected function checkPlanFeature(string $feature): void
+    {
+        $church = $this->getCurrentChurch();
+
+        if (!$church->hasFeature($feature)) {
+            $message = __('messages.plan_feature_unavailable');
+
+            if (request()->expectsJson()) {
+                abort(response()->json(['message' => $message, 'upgrade_url' => route('landing.pricing')], 403));
+            }
+
+            abort(403, $message);
+        }
     }
 
     /**

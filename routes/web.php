@@ -138,6 +138,7 @@ Route::get('/', [LandingController::class, 'home'])->name('landing.home');
 Route::get('features', [LandingController::class, 'features'])->name('landing.features');
 Route::get('contact', [LandingController::class, 'contact'])->name('landing.contact');
 Route::post('contact', [LandingController::class, 'sendContact'])->name('landing.contact.send')->middleware('throttle:5,1');
+Route::get('pricing', [LandingController::class, 'pricing'])->name('landing.pricing');
 Route::get('register-church', [LandingController::class, 'register'])->name('landing.register');
 Route::post('register-church', [LandingController::class, 'processRegistration'])->name('landing.register.process')->middleware('throttle:3,1');
 Route::get('docs', [LandingController::class, 'docs'])->name('landing.docs');

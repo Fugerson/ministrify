@@ -559,4 +559,9 @@ return [
 
     // Telegram notifications
     'notification_already_sent' => 'Запит вже надіслано, очікуємо відповідь',
+
+    // Plan limits
+    'plan_limit_reached' => 'Ви досягли ліміту :limit для :resource на вашому поточному плані. Будь ласка, оновіть план.',
+    'plan_feature_unavailable' => 'Ця функція недоступна на вашому поточному плані. Будь ласка, оновіть план.',
+    'plan_usage_warning' => 'Ви використовуєте :percentage% ліміту :resource (:current/:limit).',
 ];

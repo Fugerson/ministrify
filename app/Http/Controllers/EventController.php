@@ -246,6 +246,7 @@ class EventController extends Controller
 
     public function store(Request $request)
     {
+        $this->checkPlanLimit('events_per_month');
         $this->authorize('create', Event::class);
 
         $validated = $request->validate([

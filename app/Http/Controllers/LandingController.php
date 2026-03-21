@@ -85,6 +85,12 @@ class LandingController extends Controller
     /**
      * Documentation page
      */
+    public function pricing()
+    {
+        return Response::view('landing.pricing')
+            ->header('Cache-Control', 'public, max-age=3600, must-revalidate');
+    }
+
     public function docs()
     {
         return Response::view('landing.docs')

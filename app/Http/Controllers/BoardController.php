@@ -21,6 +21,8 @@ class BoardController extends Controller
     // Task Tracker - Single board for all church tasks
     public function index(Request $request)
     {
+        $this->checkPlanFeature('boards');
+
         if (!auth()->user()->canView('boards')) {
             return redirect()->route('dashboard')->with('error', __('У вас немає доступу до цього розділу. Зверніться до адміністратора церкви для отримання потрібних прав.'));
         }

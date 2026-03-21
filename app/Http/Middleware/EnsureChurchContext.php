@@ -100,6 +100,9 @@ class EnsureChurchContext
             $user->setRelation('person', $person);
         }
 
+        // Store church on request for middleware access
+        $request->attributes->set('currentChurch', $church);
+
         // Share church with all views
         view()->share('currentChurch', $church);
 

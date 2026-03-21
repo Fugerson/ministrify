@@ -560,4 +560,9 @@ return [
 
     // Telegram notifications
     'notification_already_sent' => 'Request already sent, waiting for response',
+
+    // Plan limits
+    'plan_limit_reached' => 'You have reached the limit of :limit for :resource on your current plan. Please upgrade to add more.',
+    'plan_feature_unavailable' => 'This feature is not available on your current plan. Please upgrade to access it.',
+    'plan_usage_warning' => 'You are using :percentage% of your :resource limit (:current/:limit).',
 ];
