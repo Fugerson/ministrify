@@ -758,52 +758,7 @@
                 @endif
             </div>
 
-            <!-- Blockout Dates -->
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="flex items-center gap-2">
-                        <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
-                        </svg>
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.unavailability_periods') }}</h3>
-                    </div>
-                    <a href="{{ route('blockouts.index') }}" class="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400">
-                        {{ __('app.manage') }}
-                    </a>
-                </div>
-
-                @php
-                    $activeBlockouts = $person->blockoutDates()->active()->upcoming()->take(3)->get();
-                @endphp
-
-                @if($activeBlockouts->isNotEmpty())
-                <div class="space-y-2 mb-4">
-                    @foreach($activeBlockouts as $blockout)
-                    <div class="flex items-center gap-3 py-2 border-b border-gray-200 dark:border-gray-700 last:border-0">
-                        <div class="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
-                            <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
-                            </svg>
-                        </div>
-                        <div class="flex-1">
-                            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $blockout->date_range }}</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ $blockout->reason_label }}</p>
-                        </div>
-                    </div>
-                    @endforeach
-                </div>
-                @else
-                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">{{ __('app.no_active_unavailability') }}</p>
-                @endif
-
-                <a href="{{ route('blockouts.create') }}"
-                   class="w-full flex items-center justify-center gap-2 px-3 py-2 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 text-sm font-medium transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                    </svg>
-                    {{ __('app.add_period') }}
-                </a>
-            </div>
+            {{-- Blockout Dates — hidden temporarily --}}
 
             <!-- Language Setting -->
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
