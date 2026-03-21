@@ -1030,7 +1030,7 @@
                     @if(auth()->user()->canView('ministries'))<a wire:navigate href="{{ route('ministries.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('ministries.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('ui.teams') }}</a>@endif
                     @if(auth()->user()->canView('events'))<a wire:navigate href="{{ route('schedule') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('schedule') || request()->routeIs('events.*') || request()->routeIs('service-planning') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('app.schedule') }}</a>@endif
                     @if(auth()->user()->canView('finances'))<a wire:navigate href="{{ route('finances.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('finances.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('app.finances') }}</a>@endif
-                    @if(auth()->user()->canView('announcements'))<a wire:navigate href="{{ route('announcements.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('announcements.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('app.communications') }}</a>@endif
+                    @if(false && auth()->user()->canView('announcements'))<a wire:navigate href="{{ route('announcements.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('announcements.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('app.communications') }}</a>@endif
                     {{-- TODO: reports temporarily hidden
                     @if(auth()->user()->canView('reports'))<a wire:navigate href="{{ route('reports.index') }}" class="px-3 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('reports.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">{{ __('app.reports') }}</a>@endif
                     --}}
@@ -1088,7 +1088,7 @@
                 <span class="text-[10px] mt-0.5">{{ __('app.finances') }}</span>
             </a>
             @endif
-            @if(auth()->user()->canView('announcements'))
+            @if(false && auth()->user()->canView('announcements'))
             <a wire:navigate href="{{ route('announcements.index') }}" class="flex flex-col items-center px-2 py-2 rounded-xl {{ request()->routeIs('announcements.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-600' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
                 <span class="text-[10px] mt-0.5">{{ __('app.communications') }}</span>
@@ -1210,7 +1210,7 @@
                 @endif
                 @endhasChurchRole
                 @hasChurchRole
-                @if(auth()->user()->canView('announcements') && auth()->user()->church_id && auth()->user()->churchRole)
+                @if(false && auth()->user()->canView('announcements') && auth()->user()->church_id && auth()->user()->churchRole)
                 <div x-data="pmBadge()" x-init="startPolling()" @pm-read.window="fetchCount()" class="relative">
                     <a wire:navigate href="{{ route('announcements.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('announcements.*') || request()->routeIs('pm.*') || request()->routeIs('messages.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? @js( __("app.communications") ) : ''">
                         <svg class="w-5 h-5 sidebar-icon flex-shrink-0" :class="collapsed ? '' : 'mr-3'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1220,7 +1220,7 @@
                         <span x-cloak x-show="$store.pmCount > 0" x-text="$store.pmCount > 99 ? '99+' : $store.pmCount" class="sidebar-badge px-2 py-0.5 text-xs font-bold bg-red-500 text-white rounded-full"></span>
                     </a>
                 </div>
-                @elseif(auth()->user()->canView('announcements'))
+                @elseif(false && auth()->user()->canView('announcements'))
                 <a wire:navigate href="{{ route('announcements.index') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl {{ request()->routeIs('announcements.*') || request()->routeIs('pm.*') || request()->routeIs('messages.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}" :title="collapsed ? @js( __("app.communications") ) : ''">
                     <svg class="w-5 h-5 sidebar-icon flex-shrink-0" :class="collapsed ? '' : 'mr-3'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
@@ -1414,7 +1414,7 @@
                 @endif
                 @endhasChurchRole
                 @hasChurchRole
-                @if(auth()->user()->canView('announcements') && auth()->user()->church_id && auth()->user()->churchRole)
+                @if(false && auth()->user()->canView('announcements') && auth()->user()->church_id && auth()->user()->churchRole)
                 <div x-data="pmBadge()" x-init="startPolling()" @pm-read.window="fetchCount()">
                     <a wire:navigate href="{{ route('announcements.index') }}" @click="sidebarOpen = false" class="flex items-center justify-between px-4 py-3 text-base font-medium rounded-xl {{ request()->routeIs('announcements.*') || request()->routeIs('pm.*') || request()->routeIs('messages.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                         <span class="flex items-center">
@@ -1424,7 +1424,7 @@
                         <span x-cloak x-show="$store.pmCount > 0" x-text="$store.pmCount > 99 ? '99+' : $store.pmCount" class="px-2 py-0.5 text-xs font-bold bg-red-500 text-white rounded-full"></span>
                     </a>
                 </div>
-                @elseif(auth()->user()->canView('announcements'))
+                @elseif(false && auth()->user()->canView('announcements'))
                 <a wire:navigate href="{{ route('announcements.index') }}" @click="sidebarOpen = false" class="flex items-center px-4 py-3 text-base font-medium rounded-xl {{ request()->routeIs('announcements.*') || request()->routeIs('pm.*') || request()->routeIs('messages.*') ? 'bg-primary-50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
                     <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
                     {{ __('app.communications') }}
@@ -1736,7 +1736,7 @@
                     <span class="text-[10px] mt-0.5 font-medium">{{ __('app.schedule') }}</span>
                 </a>
                 @endif
-                @if(auth()->user()->canView('announcements'))
+                @if(false && auth()->user()->canView('announcements'))
                 <a wire:navigate href="{{ route('announcements.index') }}" class="flex flex-col items-center justify-center w-full py-1 {{ request()->routeIs('announcements.*') || request()->routeIs('pm.*') ? 'text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400' }}">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
                     <span class="text-[10px] mt-0.5 font-medium">{{ __('app.chat') }}</span>
@@ -2037,6 +2037,8 @@
 
                     startPolling() {
                         if (pmPollingStarted) return;
+                        // TODO: PM temporarily disabled
+                        return;
                         pmPollingStarted = true;
                         this.fetchCount();
                         setInterval(() => this.fetchCount(), 30000); // кожні 30 сек
