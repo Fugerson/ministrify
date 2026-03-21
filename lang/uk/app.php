@@ -2091,6 +2091,8 @@ return [
     'board_error' => 'Помилка',
     'board_new_column_rename' => 'Нова назва колонки:',
     'board_column_renamed' => 'Колонку перейменовано',
+    'board_column_name_placeholder' => 'Назва колонки',
+    'board_rename_column' => 'Перейменувати колонку',
     'board_delete_column_confirm' => 'Видалити цю колонку? Колонка повинна бути порожньою.',
     'board_column_deleted' => 'Колонку видалено',
     'board_cannot_delete_column_with_cards' => 'Неможливо видалити колонку з картками',

@@ -104,6 +104,8 @@ return [
     'no' => 'No',
     'confirm' => 'Confirm',
     'cancel' => 'Cancel',
+    'create' => 'Create',
+    'save' => 'Save',
     'close' => 'Close',
     'download' => 'Download',
     'upload' => 'Upload',

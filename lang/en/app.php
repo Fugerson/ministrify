@@ -2059,6 +2059,8 @@ return [
     'board_error' => 'Error',
     'board_new_column_rename' => 'New column name:',
     'board_column_renamed' => 'Column renamed',
+    'board_column_name_placeholder' => 'Column name',
+    'board_rename_column' => 'Rename column',
     'board_delete_column_confirm' => 'Delete this column? Column must be empty.',
     'board_column_deleted' => 'Column deleted',
     'board_cannot_delete_column_with_cards' => 'Cannot delete column with cards',
