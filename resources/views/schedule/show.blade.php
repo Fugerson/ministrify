@@ -476,9 +476,9 @@
                             <tr>
                                 <th class="px-0.5 py-2" style="width: 24px;"></th>
                                 <th class="px-1 sm:px-2 py-2 text-left" style="width: 60px;">{{ __('app.schedule_time_col') }}</th>
-                                <th class="px-1 sm:px-2 py-2 text-left" style="width: 28%;">{{ __('app.schedule_what_happens') }}</th>
+                                <th class="px-1 sm:px-2 py-2 text-left" style="width: 22%;">{{ __('app.schedule_what_happens') }}</th>
                                 <th class="px-1 sm:px-2 py-2 text-left" style="width: 1px;">{{ __('app.schedule_responsible') }}</th>
-                                <th class="px-1 sm:px-2 py-2 text-left hidden sm:table-cell" style="width: 35%;">{{ __('app.schedule_comments') }}</th>
+                                <th class="px-1 sm:px-2 py-2 text-left hidden sm:table-cell" style="width: 40%;">{{ __('app.schedule_comments') }}</th>
                                 <th class="px-1 py-2" style="width: 32px;"></th>
                             </tr>
                         </thead>
