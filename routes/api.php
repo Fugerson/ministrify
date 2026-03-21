@@ -78,7 +78,7 @@ Route::prefix('pwa')->name('api.pwa.')->middleware(['web', 'auth'])->group(funct
 // Screenshot upload (super admin only)
 Route::middleware('web')->group(function () {
     Route::post('screenshot-upload', function (\Illuminate\Http\Request $request) {
-        if (!auth()->user()?->isSuperAdmin()) abort(403);
+        if (!auth()->user()?->isSuperAdmin() && !session('impersonating_from') && !session('impersonate_church_id')) abort(403);
         $file = $request->file('screenshot');
         $note = $request->input('note', '');
         $dir = base_path('screenshots');
@@ -100,7 +100,7 @@ Route::middleware('web')->group(function () {
     });
 
     Route::get('screenshot-list', function () {
-        if (!auth()->user()?->isSuperAdmin()) abort(403);
+        if (!auth()->user()?->isSuperAdmin() && !session('impersonating_from') && !session('impersonate_church_id')) abort(403);
         $dir = base_path('screenshots');
         if (!is_dir($dir)) return response()->json([]);
         $files = glob($dir . '/scr-*.png');

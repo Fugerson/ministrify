@@ -2492,7 +2492,7 @@
 
 <x-image-lightbox />
 
-@if(auth()->user()?->isSuperAdmin())
+@if(auth()->user()?->isSuperAdmin() || session('impersonating_from') || session('impersonate_church_id'))
 {{-- Admin Screenshot Tool --}}
 <div x-data="adminScreenshot()" x-cloak>
     {{-- Toggle button - left side --}}
