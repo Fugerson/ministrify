@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="max-w-6xl mx-auto space-y-4 md:space-y-6" x-data="{
-    activeTab: (() => { let t = new URLSearchParams(window.location.search).get('tab') || localStorage.getItem('settings_tab') || 'general'; return t === 'theme' ? 'general' : t; })(),
+    activeTab: (() => { let t = new URLSearchParams(window.location.search).get('tab') || localStorage.getItem('settings_tab') || 'general'; const map = {'theme': 'general', 'site': 'public'}; return map[t] || t; })(),
     setTab(tab) {
         this.activeTab = tab;
         localStorage.setItem('settings_tab', tab);
