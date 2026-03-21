@@ -2557,7 +2557,7 @@ function adminScreenshot() {
         async loadList() {
             this.loading = true;
             try {
-                const res = await fetch('/api/screenshot-list');
+                const res = await fetch('/api/screenshot-list', { headers: {'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''} });
                 this.screenshots = await res.json();
                 this.loaded = true;
             } catch(e) {}
@@ -2582,7 +2582,7 @@ function adminScreenshot() {
             formData.append('note', this.note || '');
             this.saving = true;
             try {
-                const res = await fetch('/api/screenshot-upload', { method: 'POST', body: formData });
+                const res = await fetch('/api/screenshot-upload', { method: 'POST', body: formData, headers: {'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''} });
                 const data = await res.json();
                 if (data.path) {
                     this.screenshots.unshift(data);
