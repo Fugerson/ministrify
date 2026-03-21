@@ -603,7 +603,7 @@
                                         <div class="flex flex-col gap-1">
                                             {{-- Selected people as tags --}}
                                             <template x-for="(person, index) in people" :key="index">
-                                                <span class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-lg" :class="getTagClass(person.status)">
+                                                <span class="group/tag inline-flex items-center gap-0.5 text-[11px] leading-tight px-1.5 py-0.5 rounded" :class="getTagClass(person.status)">
                                                     {{-- Status icon --}}
                                                     <template x-if="person.status === 'confirmed'">
                                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -627,7 +627,7 @@
                                                     <button type="button"
                                                             x-show="person.hasTelegram && (!person.status || person.status === 'declined')"
                                                             @click="askPerson(person, index)"
-                                                            class="text-blue-500 hover:text-blue-700"
+                                                            class="hidden group-hover/tag:inline-flex text-blue-500 hover:text-blue-700"
                                                             :title="person.status === 'declined' ? @js(__('app.schedule_ask_again')) : @js(__('app.schedule_ask_telegram'))">
                                                         <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
                                                             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .37z"/>
@@ -638,7 +638,7 @@
                                                     <button type="button"
                                                             x-show="person.hasTelegram && person.status === 'pending'"
                                                             @click="askPerson(person, index)"
-                                                            class="text-yellow-600 hover:text-yellow-700"
+                                                            class="hidden group-hover/tag:inline-flex text-yellow-600 hover:text-yellow-700"
                                                             title="{{ __('app.schedule_remind') }}">
                                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
@@ -646,14 +646,14 @@
                                                     </button>
 
                                                     {{-- No telegram indicator --}}
-                                                    <span x-show="person.id && !person.hasTelegram && !person.status" class="text-gray-400" title=@js( __('app.schedule_no_telegram') )>
+                                                    <span x-show="person.id && !person.hasTelegram && !person.status" class="hidden group-hover/tag:inline-flex text-gray-400" title=@js( __('app.schedule_no_telegram') )>
                                                         <svg class="w-3 h-3 opacity-50" fill="currentColor" viewBox="0 0 24 24">
                                                             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .37z"/>
                                                         </svg>
                                                     </span>
 
                                                     {{-- Remove button --}}
-                                                    <button type="button" @click="removePerson(index)" class="text-gray-400 hover:text-red-500">
+                                                    <button type="button" @click="removePerson(index)" class="hidden group-hover/tag:inline-flex text-gray-400 hover:text-red-500">
                                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                                         </svg>
@@ -665,11 +665,10 @@
                                             <div class="relative">
                                                 <button type="button"
                                                         @click="open = !open"
-                                                        class="inline-flex items-center gap-1 text-xs px-2 py-1 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg border border-dashed border-gray-300 dark:border-gray-600">
-                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        class="inline-flex items-center text-[11px] px-1 py-0.5 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded border border-dashed border-gray-300 dark:border-gray-600">
+                                                    <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                                     </svg>
-                                                    <span x-show="people.length === 0">{{ __('app.schedule_add') }}</span>
                                                 </button>
 
                                                 {{-- Dropdown --}}
@@ -842,7 +841,7 @@
 
                     <!-- Team sidebar -->
                     @if($showTeamSection)
-                    <div class="xl:w-[360px] flex-shrink-0 border-t xl:border-t-0 xl:border-l border-gray-200 dark:border-gray-700" x-data="eventTeamManager()">
+                    <div class="xl:w-[22%] flex-shrink-0 border-t xl:border-t-0 xl:border-l border-gray-200 dark:border-gray-700" x-data="eventTeamManager()">
                         <!-- Sidebar header -->
                         <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-700/30 flex items-center justify-between">
                             <div class="flex items-center gap-2">
