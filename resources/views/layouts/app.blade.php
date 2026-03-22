@@ -2546,7 +2546,10 @@
                     <div class="flex-1 min-w-0">
                         <div x-show="s.note" class="text-[11px] text-yellow-400 mb-0.5" x-text="s.note"></div>
                         <div class="text-[10px] text-gray-500" x-text="s.name"></div>
-                        <button @click="copyPath(s.path)" class="text-[10px] text-green-400 hover:text-green-300 font-mono truncate block max-w-full text-left" x-text="copied === s.path ? 'Copied!' : s.path"></button>
+                        <div class="flex items-center gap-1">
+                            <button @click="copyPath(s.path)" class="text-[10px] text-green-400 hover:text-green-300 font-mono truncate text-left" x-text="copied === s.path ? 'Copied!' : s.path"></button>
+                            <button @click="copyInfo(s)" class="shrink-0 px-1.5 py-0.5 text-[9px] bg-gray-700 hover:bg-gray-600 text-gray-300 rounded transition-colors" x-text="copiedInfo === s.path ? '✓' : '📋'"></button>
+                        </div>
                     </div>
                 </div>
             </template>
@@ -2565,7 +2568,8 @@
 <script>
 function adminScreenshot() {
     return {
-        open: false, zone: false, screenshots: [], msg: '', msgType: 'ok', copied: null, loading: false, saving: false, loaded: false, preview: null, note: '', pendingBlob: null,
+        open: false, zone: false, screenshots: [], msg: '', msgType: 'ok', copied: null, copiedInfo: null, loading: false, saving: false, loaded: false, preview: null, note: '', pendingBlob: null,
+        env: '{{ app()->environment() }}',
         async toggle() {
             this.open = !this.open;
             if (this.open && !this.loaded) await this.loadList();
@@ -2573,10 +2577,15 @@ function adminScreenshot() {
         async loadList() {
             this.loading = true;
             try {
-                const res = await fetch('/api/screenshot-list', { headers: {'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''} });
-                this.screenshots = await res.json();
+                const res = await fetch('/api/screenshot-list', { credentials: 'same-origin', headers: {'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''} });
+                if (!res.ok) {
+                    console.error('Screenshot list error:', res.status, res.statusText);
+                    this.screenshots = [];
+                } else {
+                    this.screenshots = await res.json();
+                }
                 this.loaded = true;
-            } catch(e) {}
+            } catch(e) { console.error('Screenshot list fetch error:', e); }
             this.loading = false;
         },
         async handlePaste(e) {
@@ -2618,6 +2627,13 @@ function adminScreenshot() {
             navigator.clipboard.writeText(path);
             this.copied = path;
             setTimeout(() => this.copied = null, 1500);
+        },
+        copyInfo(s) {
+            const label = this.env === 'production' ? 'PROD' : 'LOCAL';
+            const text = `[${label}] ${s.path}` + (s.note ? ` — ${s.note}` : '');
+            navigator.clipboard.writeText(text);
+            this.copiedInfo = s.path;
+            setTimeout(() => this.copiedInfo = null, 1500);
         }
     };
 }
