@@ -489,15 +489,13 @@ class ServicePlanController extends Controller
                 }
             }
 
-            // Calculate times
+            // Calculate times — always ensure end_time so next item chains correctly
             $itemStartTime = $startTime ?: $defaultStartTime;
-            $itemEndTime = null;
-            if ($duration) {
-                $itemEndTime = \Carbon\Carbon::parse($itemStartTime)->addMinutes($duration)->format('H:i');
-                $defaultStartTime = $itemEndTime; // Next item starts after this one
-            } elseif ($startTime) {
-                $defaultStartTime = $startTime; // Use this time for reference
+            if (!$duration) {
+                $duration = $detectedType ? ServicePlanItem::getDefaultDuration($detectedType) : 5;
             }
+            $itemEndTime = \Carbon\Carbon::parse($itemStartTime)->addMinutes($duration)->format('H:i');
+            $defaultStartTime = $itemEndTime; // Next item starts after this one
 
             $maxOrder++;
             $event->planItems()->create([

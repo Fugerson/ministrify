@@ -203,18 +203,32 @@ class Event extends Model
 
     public function duplicatePlanFrom(Event $source): void
     {
-        foreach ($source->planItems as $item) {
+        $defaultStart = $this->time ? $this->time->format('H:i') : '10:00';
+
+        foreach ($source->planItems()->orderBy('sort_order')->get() as $item) {
+            // Use source times if valid, otherwise recalculate sequentially
+            $startTime = $item->start_time;
+            $endTime = $item->end_time;
+
+            if (!$startTime || !$endTime) {
+                $startTime = $defaultStart;
+                $duration = $item->type ? ServicePlanItem::getDefaultDuration($item->type) : 5;
+                $endTime = \Carbon\Carbon::parse($startTime)->addMinutes($duration)->format('H:i');
+            }
+
             $this->planItems()->create([
                 'title' => $item->title,
                 'description' => $item->description,
                 'type' => $item->type,
-                'start_time' => $item->start_time,
-                'end_time' => $item->end_time,
+                'start_time' => $startTime,
+                'end_time' => $endTime,
                 'sort_order' => $item->sort_order,
                 'notes' => $item->notes,
                 'status' => ServicePlanItem::STATUS_PLANNED,
-                // responsible_id is not copied - needs to be assigned fresh
             ]);
+
+            // Advance default start for next item
+            $defaultStart = \Carbon\Carbon::parse($endTime instanceof \Carbon\Carbon ? $endTime->format('H:i') : $endTime)->format('H:i');
         }
     }
 
