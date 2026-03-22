@@ -499,7 +499,7 @@
                                         <input type="time"
                                                value="{{ $item->start_time ? \Carbon\Carbon::parse($item->start_time)->format('H:i') : '' }}"
                                                @change="updateField({{ $item->id }}, 'start_time', $event.target.value)"
-                                               class="min-w-[3.5rem] sm:min-w-[4.5rem] px-1 py-1 text-xs font-semibold text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-700 rounded focus:ring-1 focus:ring-primary-500 focus:border-primary-500 cursor-pointer">
+                                               class="min-w-[3.5rem] sm:min-w-[4.5rem] px-1 py-1 text-xs font-bold text-primary-800 dark:text-white bg-primary-50 dark:bg-primary-800/50 border border-primary-200 dark:border-primary-600 rounded focus:ring-1 focus:ring-primary-500 focus:border-primary-500 cursor-pointer">
                                     </td>
                                     {{-- Що відбувається - єдиний підхід з інлайн посиланнями на пісні --}}
                                     @php
@@ -743,7 +743,7 @@
                 <div class="p-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-700/30">
                     <form @submit.prevent="addItem()" class="flex flex-wrap items-start gap-2">
                         <input type="time" x-model="newItem.start_time"
-                               class="min-w-[5rem] sm:min-w-[6rem] px-1.5 sm:px-2 py-2 text-sm font-semibold text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-700 rounded-lg focus:ring-2 focus:ring-primary-500 cursor-pointer">
+                               class="min-w-[5rem] sm:min-w-[6rem] px-1.5 sm:px-2 py-2 text-sm font-bold text-primary-800 dark:text-white bg-primary-50 dark:bg-primary-800/50 border border-primary-200 dark:border-primary-600 rounded-lg focus:ring-2 focus:ring-primary-500 cursor-pointer">
                         {{-- Title with song autocomplete --}}
                         <div class="flex-1 min-w-[150px] relative">
                             <textarea x-model="newItem.title"
@@ -3196,7 +3196,7 @@ window.insertPlanRow = function(item) {
             <input type="time"
                    value="${startTime}"
                    onchange="updateField(${item.id}, 'start_time', this.value)"
-                   class="min-w-[4.5rem] sm:min-w-[5.5rem] px-1.5 sm:px-2 py-1.5 text-sm font-semibold text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 cursor-pointer">
+                   class="min-w-[4.5rem] sm:min-w-[5.5rem] px-1.5 sm:px-2 py-1.5 text-sm font-bold text-primary-800 dark:text-white bg-primary-50 dark:bg-primary-800/50 border border-primary-200 dark:border-primary-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 cursor-pointer">
         </td>
         <td class="px-2 sm:px-3 py-3 border-r border-gray-200 dark:border-gray-700 align-top">
             <div class="relative" x-data="${xDataAttr}">
