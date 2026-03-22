@@ -26,7 +26,7 @@
 
     {{-- Day of week headers (Monday first) --}}
     <div class="grid grid-cols-7 mb-1">
-        <template x-for="day in [@json(__('app.day_mon')), @json(__('app.day_tue')), @json(__('app.day_wed')), @json(__('app.day_thu')), @json(__('app.day_fri')), @json(__('app.day_sat')), @json(__('app.day_sun'))]" :key="day">
+        <template x-for="day in dayNames" :key="day">
             <div class="text-center text-xs font-medium text-gray-400 dark:text-gray-500 py-1" x-text="day"></div>
         </template>
     </div>
@@ -88,10 +88,13 @@ function miniCalendar() {
     const today = new Date();
     const initialEvents = @json($calendarEvents ?? []);
 
+    const dayNames = {!! json_encode([__('app.day_mon'), __('app.day_tue'), __('app.day_wed'), __('app.day_thu'), __('app.day_fri'), __('app.day_sat'), __('app.day_sun')]) !!};
+
     return {
         month: today.getMonth(),
         year: today.getFullYear(),
         eventDates: initialEvents,
+        dayNames: dayNames,
         loading: false,
 
         get monthName() {
