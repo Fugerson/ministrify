@@ -813,7 +813,17 @@ function servicePlanningMatrix() {
 
         init() {
             this.hiddenEventTitles = new Set(this._savedFilters.hiddenEventTitles);
-            if (this.viewMode === 'week') {
+            if (this.viewMode === 'range') {
+                const rs = localStorage.getItem('sp_rangeStart');
+                const re = localStorage.getItem('sp_rangeEnd');
+                if (rs && re) {
+                    this.startDate = new Date(rs + 'T00:00:00');
+                    this.endDate = new Date(re + 'T00:00:00');
+                } else {
+                    this.viewMode = 'month';
+                    this.setMonth(new Date().getFullYear(), new Date().getMonth());
+                }
+            } else if (this.viewMode === 'week') {
                 this.setWeek(new Date());
             } else {
                 this.setMonth(new Date().getFullYear(), new Date().getMonth());
@@ -843,6 +853,8 @@ function servicePlanningMatrix() {
             if (this.viewMode === 'week') return;
             this.viewMode = 'week';
             localStorage.setItem('sp_viewMode', 'week');
+            localStorage.removeItem('sp_rangeStart');
+            localStorage.removeItem('sp_rangeEnd');
             this.setWeek(new Date());
             this.loadData();
         },
@@ -851,6 +863,8 @@ function servicePlanningMatrix() {
             if (this.viewMode === 'month') return;
             this.viewMode = 'month';
             localStorage.setItem('sp_viewMode', 'month');
+            localStorage.removeItem('sp_rangeStart');
+            localStorage.removeItem('sp_rangeEnd');
             this.setMonth(new Date().getFullYear(), new Date().getMonth());
             this.loadData();
         },
@@ -937,6 +951,9 @@ function servicePlanningMatrix() {
             this.startDate = s;
             this.endDate = e;
             this.viewMode = 'range';
+            localStorage.setItem('sp_viewMode', 'range');
+            localStorage.setItem('sp_rangeStart', startStr);
+            localStorage.setItem('sp_rangeEnd', endStr);
             this.loadData();
         },
 
