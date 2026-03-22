@@ -82,6 +82,24 @@ class ServicePlanController extends Controller
             $validated['responsible_names'] = null;
         }
 
+        // When start_time changes, shift end_time to preserve duration
+        if (array_key_exists('start_time', $validated) && !array_key_exists('end_time', $validated)) {
+            $newStart = $validated['start_time'];
+            $oldStart = $item->getRawOriginal('start_time'); // e.g. "10:30:00"
+            $oldEnd = $item->getRawOriginal('end_time');
+
+            if ($newStart && $oldStart && $oldEnd) {
+                $oldStartCarbon = \Carbon\Carbon::parse($oldStart);
+                $oldEndCarbon = \Carbon\Carbon::parse($oldEnd);
+                $durationMinutes = $oldStartCarbon->diffInMinutes($oldEndCarbon, false);
+                if ($durationMinutes <= 0) $durationMinutes = 5; // fallback
+                $validated['end_time'] = \Carbon\Carbon::parse($newStart)->addMinutes($durationMinutes)->format('H:i');
+            } elseif ($newStart && !$oldEnd) {
+                // No end_time existed — set default 5 min
+                $validated['end_time'] = \Carbon\Carbon::parse($newStart)->addMinutes(5)->format('H:i');
+            }
+        }
+
         $item->update($validated);
 
         if ($request->ajax()) {
