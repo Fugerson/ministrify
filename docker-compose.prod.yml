@@ -118,7 +118,7 @@ services:
     container_name: ministrify_queue
     restart: always
     working_dir: /var/www/html
-    command: php artisan queue:work redis --sleep=3 --tries=3 --max-time=3600
+    command: php artisan horizon
     environment:
       - APP_NAME=Ministrify
       - APP_ENV=production

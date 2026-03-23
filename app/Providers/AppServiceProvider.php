@@ -6,6 +6,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\URL;
+use Laravel\Pulse\Facades\Pulse;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -39,6 +40,9 @@ class AppServiceProvider extends ServiceProvider
         Blade::if('role', function (string $role) {
             return auth()->check() && auth()->user()->hasRole($role);
         });
+
+        // Pulse dashboard authorization (super admin only)
+        Pulse::auth(fn ($request) => $request->user()?->isSuperAdmin() ?? false);
 
         // Check if user has ANY church role assigned (not a pending self-registered user)
         // Super admins always have access (whether impersonating a church or not)

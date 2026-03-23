@@ -61,8 +61,13 @@ echo -e "${GREEN}[6/8] Running migrations...${NC}"
 docker compose -f docker-compose.prod.yml exec -T app php artisan migrate --force
 echo -e "${GREEN}Done${NC}"
 
-# Step 7: Cache configuration
-echo -e "${GREEN}[7/8] Caching configuration...${NC}"
+# Step 7: Restart Horizon
+echo -e "${GREEN}[7/9] Restarting Horizon...${NC}"
+docker compose -f docker-compose.prod.yml exec -T app php artisan horizon:terminate 2>/dev/null || true
+echo -e "${GREEN}Done${NC}"
+
+# Step 8: Cache configuration
+echo -e "${GREEN}[8/9] Caching configuration...${NC}"
 docker compose -f docker-compose.prod.yml exec -T app php artisan config:clear
 docker compose -f docker-compose.prod.yml exec -T app php artisan config:cache
 docker compose -f docker-compose.prod.yml exec -T app php artisan route:cache
@@ -70,8 +75,8 @@ docker compose -f docker-compose.prod.yml exec -T app php artisan view:cache
 docker compose -f docker-compose.prod.yml exec -T app php artisan storage:link 2>/dev/null || true
 echo -e "${GREEN}Done${NC}"
 
-# Step 8: Test application
-echo -e "${GREEN}[8/8] Testing application...${NC}"
+# Step 9: Test application
+echo -e "${GREEN}[9/9] Testing application...${NC}"
 sleep 3
 RESPONSE=$(docker compose -f docker-compose.prod.yml exec -T nginx curl -s -o /dev/null -w "%{http_code}" http://localhost 2>/dev/null || echo "000")
 

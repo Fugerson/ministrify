@@ -26,7 +26,6 @@ yarn-error.log
 !/storage/framework/.gitkeep
 /storage/logs/
 !/storage/logs/.gitkeep
-.github/
 
 # Capacitor / Android
 /android/app/src/main/assets/public/

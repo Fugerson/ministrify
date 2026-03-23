@@ -58,6 +58,16 @@ class Kernel extends ConsoleKernel
         $schedule->command('app:sync-google-calendar')
             ->everyFifteenMinutes()
             ->description('Sync Google Calendar events for connected users');
+
+        // Horizon metrics snapshots
+        $schedule->command('horizon:snapshot')
+            ->everyFiveMinutes()
+            ->description('Capture Horizon queue metrics snapshot');
+
+        // Pulse server metrics check
+        $schedule->command('pulse:check')
+            ->everyFiveMinutes()
+            ->description('Record Pulse server metrics');
     }
 
     protected function commands(): void
