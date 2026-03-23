@@ -41,6 +41,9 @@ jobs:
       - name: Generate application key
         run: php artisan key:generate
 
+      - name: Prepare storage directories
+        run: mkdir -p storage/framework/{cache,sessions,views,testing}
+
       - name: Run tests
         run: php artisan test
         env:
