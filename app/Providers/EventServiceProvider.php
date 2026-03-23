@@ -16,6 +16,9 @@ class EventServiceProvider extends ServiceProvider
         Registered::class => [
             SendEmailVerificationNotification::class,
         ],
+        \Laravel\Horizon\Events\LongWaitDetected::class => [
+            \App\Listeners\SendHorizonAlertToTelegram::class,
+        ],
     ];
 
     public function boot(): void
