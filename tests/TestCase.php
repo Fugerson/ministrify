@@ -11,6 +11,12 @@ abstract class TestCase extends BaseTestCase
 {
     use CreatesApplication;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        \Illuminate\Support\Facades\Cache::flush();
+    }
+
     protected function createChurchWithAdmin(): array
     {
         $church = Church::factory()->create();
