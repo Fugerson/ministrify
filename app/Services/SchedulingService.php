@@ -815,12 +815,12 @@ class SchedulingService
             return 'Ніколи';
         }
 
-        $weeks = $date->diffInWeeks(now());
+        $weeks = (int) $date->diffInWeeks(now());
         if ($weeks === 0) return 'Цього тижня';
         if ($weeks === 1) return '1 тиждень тому';
         if ($weeks < 4) return "{$weeks} тижні тому";
 
-        $months = $date->diffInMonths(now());
+        $months = (int) $date->diffInMonths(now());
         if ($months === 1) return '1 місяць тому';
         if ($months < 12) return "{$months} місяці тому";
 
