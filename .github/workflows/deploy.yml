@@ -21,7 +21,6 @@ jobs:
           port: 2222
           username: root
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script_stop: true
           command_timeout: 10m
           script: |
             cd /var/www/ministrify
