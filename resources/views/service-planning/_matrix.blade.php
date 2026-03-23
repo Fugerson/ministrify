@@ -334,7 +334,7 @@
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                                                     </svg>
                                                     <span class="w-1 h-4 rounded-full flex-shrink-0" :style="'background:' + (ministry.color || '#6B7280')"></span>
-                                                    <span class="text-[9px] sm:text-[11px] font-bold uppercase tracking-wide truncate max-w-[55px] sm:max-w-none"
+                                                    <span class="text-[9px] sm:text-[11px] font-bold uppercase tracking-wide"
                                                           :style="'color:' + (ministry.color || '#6B7280')"
                                                           x-text="ministry.name"></span>
                                                     <span class="text-[10px] text-gray-400 dark:text-gray-500" x-text="'(' + getVisibleMinistryRoles(ministry).length + ')'"></span>
@@ -358,7 +358,7 @@
                                         <template x-if="row.type === 'role'">
                                             <div class="flex items-center gap-1.5 sm:gap-2 pl-4 sm:pl-6">
                                                 <span class="w-1.5 h-1.5 rounded-full flex-shrink-0 bg-gray-300 dark:bg-gray-600"></span>
-                                                <span class="text-[10px] sm:text-sm font-medium text-gray-700 dark:text-gray-300 truncate max-w-[50px] sm:max-w-none" x-text="row.role.name"></span>
+                                                <span class="text-[10px] sm:text-sm font-medium text-gray-700 dark:text-gray-300" x-text="row.role.name"></span>
                                             </div>
                                         </template>
 
