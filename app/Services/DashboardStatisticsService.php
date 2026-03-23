@@ -8,6 +8,7 @@ use App\Models\Event;
 use App\Models\Person;
 use App\Models\Transaction;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
@@ -88,13 +89,13 @@ class DashboardStatisticsService
             ->where('church_id', $church->id)
             ->whereNull('deleted_at')
             ->whereNotNull('birth_date')
-            ->selectRaw("
+            ->selectRaw('
                 SUM(CASE WHEN TIMESTAMPDIFF(YEAR, birth_date, ?) <= 12 THEN 1 ELSE 0 END) as children,
                 SUM(CASE WHEN TIMESTAMPDIFF(YEAR, birth_date, ?) BETWEEN 13 AND 17 THEN 1 ELSE 0 END) as teens,
                 SUM(CASE WHEN TIMESTAMPDIFF(YEAR, birth_date, ?) BETWEEN 18 AND 35 THEN 1 ELSE 0 END) as youth,
                 SUM(CASE WHEN TIMESTAMPDIFF(YEAR, birth_date, ?) BETWEEN 36 AND 59 THEN 1 ELSE 0 END) as adults,
                 SUM(CASE WHEN TIMESTAMPDIFF(YEAR, birth_date, ?) >= 60 THEN 1 ELSE 0 END) as seniors
-            ", [$today, $today, $today, $today, $today])
+            ', [$today, $today, $today, $today, $today])
             ->first();
 
         return [
@@ -126,7 +127,7 @@ class DashboardStatisticsService
             ->count('person_id');
 
         $ministriesWithEvents = $church->ministries()
-            ->whereHas('events', fn($q) => $q->where('date', '>=', now()))
+            ->whereHas('events', fn ($q) => $q->where('date', '>=', now()))
             ->count();
 
         return [
@@ -184,10 +185,10 @@ class DashboardStatisticsService
             ->whereNull('deleted_at')
             ->whereMonth('date', now()->month)
             ->whereYear('date', now()->year)
-            ->selectRaw("
+            ->selectRaw('
                 COUNT(*) as total,
                 SUM(CASE WHEN date >= ? THEN 1 ELSE 0 END) as upcoming
-            ", [now()->toDateString()])
+            ', [now()->toDateString()])
             ->first();
 
         return [
@@ -217,7 +218,7 @@ class DashboardStatisticsService
             ->groupBy('transactions.category_id', 'transaction_categories.name')
             ->orderByDesc('total_amount')
             ->get()
-            ->map(fn($row) => [
+            ->map(fn ($row) => [
                 'name' => $row->category_name ?? 'Без категорії',
                 'amount' => $row->total_amount,
                 'count' => $row->count,
@@ -248,7 +249,7 @@ class DashboardStatisticsService
         $currentWeek = $startDate->copy();
 
         for ($i = 0; $i < $weeks; $i++) {
-            $weekKey = $currentWeek->format('o') . str_pad($currentWeek->format('W'), 2, '0', STR_PAD_LEFT);
+            $weekKey = $currentWeek->format('o').str_pad($currentWeek->format('W'), 2, '0', STR_PAD_LEFT);
             $chartData[] = [
                 'label' => $currentWeek->format('d.m'),
                 'value' => (int) ($data[$weekKey]->total ?? 0),
@@ -262,14 +263,14 @@ class DashboardStatisticsService
     /**
      * Get people needing attention (no attendance in N weeks)
      */
-    public function getPeopleNeedingAttention(Church $church, int $weeks = 3): \Illuminate\Database\Eloquent\Collection
+    public function getPeopleNeedingAttention(Church $church, int $weeks = 3): Collection
     {
         $cutoffDate = now()->subWeeks($weeks);
 
         return Person::where('church_id', $church->id)
-            ->whereHas('attendanceRecords', fn($q) => $q->where('present', true))
+            ->whereHas('attendanceRecords', fn ($q) => $q->where('present', true))
             ->whereDoesntHave('attendanceRecords', function ($q) use ($cutoffDate) {
-                $q->whereHas('attendance', fn($aq) => $aq->where('date', '>=', $cutoffDate))
+                $q->whereHas('attendance', fn ($aq) => $aq->where('date', '>=', $cutoffDate))
                     ->where('present', true);
             })
             ->whereIn('membership_status', [Person::STATUS_MEMBER, Person::STATUS_SERVANT, Person::STATUS_LEADER, Person::STATUS_ACTIVE])

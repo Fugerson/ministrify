@@ -3,11 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Person;
-use App\Models\Tag;
-use App\Models\Ministry;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 use League\Csv\Reader;
 
 class MigrationController extends Controller
@@ -51,7 +49,7 @@ class MigrationController extends Controller
 
         // Detect delimiter (tab for Planning Center, comma for others)
         $firstLine = strtok($content, "\n");
-        $delimiter = (substr_count($firstLine, "\t") > substr_count($firstLine, ",")) ? "\t" : ",";
+        $delimiter = (substr_count($firstLine, "\t") > substr_count($firstLine, ',')) ? "\t" : ',';
 
         $csv = Reader::createFromString($content);
         $csv->setDelimiter($delimiter);
@@ -98,7 +96,7 @@ class MigrationController extends Controller
             foreach ($churchHubFields as $field => $patterns) {
                 foreach ($patterns as $pattern) {
                     if (str_contains($headerLower, $pattern)) {
-                        if (!isset($mappings[$field])) {
+                        if (! isset($mappings[$field])) {
                             $mappings[$field] = $header;
                         }
                         break 2;
@@ -129,7 +127,7 @@ class MigrationController extends Controller
             ]);
 
             $deleteCount = Person::where('church_id', $church->id)->count();
-            logger()->warning("Mass delete requested", [
+            logger()->warning('Mass delete requested', [
                 'church_id' => $church->id,
                 'user_id' => auth()->id(),
                 'count' => $deleteCount,
@@ -149,7 +147,7 @@ class MigrationController extends Controller
 
         // Detect delimiter
         $firstLine = strtok($content, "\n");
-        $delimiter = (substr_count($firstLine, "\t") > substr_count($firstLine, ",")) ? "\t" : ",";
+        $delimiter = (substr_count($firstLine, "\t") > substr_count($firstLine, ',')) ? "\t" : ',';
 
         $csv = Reader::createFromString($content);
         $csv->setDelimiter($delimiter);
@@ -163,7 +161,7 @@ class MigrationController extends Controller
             if ($clearExisting) {
                 $deletedCount = Person::where('church_id', $church->id)->count();
                 Person::where('church_id', $church->id)->delete();
-                logger()->warning("Mass delete executed", [
+                logger()->warning('Mass delete executed', [
                     'church_id' => $church->id,
                     'user_id' => auth()->id(),
                     'deleted_count' => $deletedCount,
@@ -182,6 +180,7 @@ class MigrationController extends Controller
                     // Skip if no name
                     if (empty($firstName) && empty($lastName)) {
                         $skipped++;
+
                         continue;
                     }
 
@@ -226,9 +225,9 @@ class MigrationController extends Controller
                     );
                     $imported++;
                 } catch (\Exception $e) {
-                    $errors[] = "Рядок " . ($index + 2) . ": " . $e->getMessage();
+                    $errors[] = 'Рядок '.($index + 2).': '.$e->getMessage();
                     if (count($errors) > 10) {
-                        $errors[] = "... та інші помилки";
+                        $errors[] = '... та інші помилки';
                         break;
                     }
                 }
@@ -244,6 +243,7 @@ class MigrationController extends Controller
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
+
             return response()->json([
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -253,7 +253,7 @@ class MigrationController extends Controller
 
     protected function getValue(array $row, array $mappings, string $field): ?string
     {
-        if (!isset($mappings[$field]) || empty($mappings[$field])) {
+        if (! isset($mappings[$field]) || empty($mappings[$field])) {
             return null;
         }
 
@@ -278,6 +278,7 @@ class MigrationController extends Controller
             if (preg_match('/^\d{2}\.\d{2}\.\d{4}$/', $value)) {
                 return Carbon::createFromFormat('d.m.Y', $value);
             }
+
             return Carbon::parse($value);
         } catch (\Exception $e) {
             return null;

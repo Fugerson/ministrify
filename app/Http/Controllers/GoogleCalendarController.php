@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Event;
 use App\Services\GoogleCalendarService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -20,7 +21,7 @@ class GoogleCalendarController extends Controller
      */
     public function redirect()
     {
-        if (!$this->googleCalendar->isConfigured()) {
+        if (! $this->googleCalendar->isConfigured()) {
             return back()->with('error', 'Google Calendar integration is not configured.');
         }
 
@@ -47,13 +48,13 @@ class GoogleCalendarController extends Controller
         }
 
         $code = $request->get('code');
-        if (!$code) {
+        if (! $code) {
             return redirect()->route('settings.index')
                 ->with('error', 'No authorization code received.');
         }
 
         $tokens = $this->googleCalendar->exchangeCode($code);
-        if (!$tokens) {
+        if (! $tokens) {
             return redirect()->route('settings.index')
                 ->with('error', 'Failed to exchange authorization code.');
         }
@@ -99,20 +100,20 @@ class GoogleCalendarController extends Controller
         $user = auth()->user();
         $accessToken = $this->googleCalendar->getValidToken($user);
 
-        if (!$accessToken) {
+        if (! $accessToken) {
             return response()->json(['error' => 'Not connected to Google Calendar'], 401);
         }
 
         $raw = $this->googleCalendar->listCalendars($accessToken);
 
         $calendars = collect($raw)
-            ->filter(fn($c) => ($c['id'] ?? '') !== 'primary')
+            ->filter(fn ($c) => ($c['id'] ?? '') !== 'primary')
             ->map(function ($c) {
                 $id = $c['id'] ?? '';
                 $role = $c['accessRole'] ?? 'reader';
                 $isImport = str_contains($id, '@import.calendar.google.com');
                 $isHoliday = str_contains($id, '#holiday@group.v.calendar.google.com');
-                $canSync = !$isImport && !$isHoliday && in_array($role, ['owner', 'writer']);
+                $canSync = ! $isImport && ! $isHoliday && in_array($role, ['owner', 'writer']);
 
                 return [
                     'id' => $id,
@@ -185,9 +186,10 @@ class GoogleCalendarController extends Controller
             );
         } catch (\Exception $e) {
             \Log::error('fullSync controller error', ['error' => $e->getMessage()]);
+
             return response()->json([
                 'success' => false,
-                'error' => 'Помилка синхронізації: ' . $e->getMessage(),
+                'error' => 'Помилка синхронізації: '.$e->getMessage(),
             ], 500);
         }
 
@@ -208,18 +210,28 @@ class GoogleCalendarController extends Controller
                 $message = "Всі події вже синхронізовані ({$toSkipped} подій)";
             } else {
                 $parts = [];
-                if ($toGoogle['created'] > 0) $parts[] = "{$toGoogle['created']} → Google";
-                if ($toGoogle['updated'] > 0) $parts[] = "{$toGoogle['updated']} оновлено в Google";
-                if (($toGoogle['deleted'] ?? 0) > 0) $parts[] = "{$toGoogle['deleted']} видалено з Google";
-                if ($fromGoogle['created'] > 0) $parts[] = "{$fromGoogle['created']} ← Google";
-                if ($fromGoogle['updated'] > 0) $parts[] = "{$fromGoogle['updated']} оновлено з Google";
-                $message = $parts ? "Синхронізовано: " . implode(', ', $parts) : "Немає змін";
+                if ($toGoogle['created'] > 0) {
+                    $parts[] = "{$toGoogle['created']} → Google";
+                }
+                if ($toGoogle['updated'] > 0) {
+                    $parts[] = "{$toGoogle['updated']} оновлено в Google";
+                }
+                if (($toGoogle['deleted'] ?? 0) > 0) {
+                    $parts[] = "{$toGoogle['deleted']} видалено з Google";
+                }
+                if ($fromGoogle['created'] > 0) {
+                    $parts[] = "{$fromGoogle['created']} ← Google";
+                }
+                if ($fromGoogle['updated'] > 0) {
+                    $parts[] = "{$fromGoogle['updated']} оновлено з Google";
+                }
+                $message = $parts ? 'Синхронізовано: '.implode(', ', $parts) : 'Немає змін';
             }
             if (($toGoogle['failed'] ?? 0) > 0) {
                 $message .= " | {$toGoogle['failed']} помилок";
             }
-            if (!empty($result['errors'])) {
-                $message .= " | " . implode('; ', array_slice($result['errors'], 0, 3));
+            if (! empty($result['errors'])) {
+                $message .= ' | '.implode('; ', array_slice($result['errors'], 0, 3));
             }
 
             if ($request->wantsJson()) {
@@ -316,13 +328,14 @@ class GoogleCalendarController extends Controller
     protected function getCalendarMappings($user): array
     {
         $gc = $user->settings['google_calendar'] ?? [];
-        if (!empty($gc['calendars'])) {
+        if (! empty($gc['calendars'])) {
             return $gc['calendars'];
         }
         // Backward compatibility: old single-calendar format → array
-        if (!empty($gc['calendar_id'])) {
+        if (! empty($gc['calendar_id'])) {
             return [['calendar_id' => $gc['calendar_id'], 'ministry_id' => $gc['ministry_id'] ?? null]];
         }
+
         return [['calendar_id' => 'primary', 'ministry_id' => null]];
     }
 
@@ -341,7 +354,7 @@ class GoogleCalendarController extends Controller
         $seen = [];
         $calendars = [];
         foreach ($validated['calendars'] as $mapping) {
-            if (!in_array($mapping['calendar_id'], $seen)) {
+            if (! in_array($mapping['calendar_id'], $seen)) {
                 $seen[] = $mapping['calendar_id'];
                 $calendars[] = [
                     'calendar_id' => $mapping['calendar_id'],
@@ -397,17 +410,17 @@ class GoogleCalendarController extends Controller
                     foreach (['created', 'updated'] as $key) {
                         $aggregated['from_google'][$key] += $result['from_google'][$key] ?? 0;
                     }
-                    if (!empty($result['errors'])) {
+                    if (! empty($result['errors'])) {
                         $errors = array_merge($errors, $result['errors']);
                     }
                 } else {
                     $allSuccess = false;
-                    $errors[] = ($result['error'] ?? 'Unknown error') . " (calendar: {$calendarId})";
+                    $errors[] = ($result['error'] ?? 'Unknown error')." (calendar: {$calendarId})";
                 }
             } catch (\Exception $e) {
                 \Log::error('fullSyncAll error', ['calendar_id' => $calendarId, 'error' => $e->getMessage()]);
                 $allSuccess = false;
-                $errors[] = $e->getMessage() . " (calendar: {$calendarId})";
+                $errors[] = $e->getMessage()." (calendar: {$calendarId})";
             }
         }
 
@@ -431,18 +444,28 @@ class GoogleCalendarController extends Controller
             $message = "Всі події вже синхронізовані ({$toGoogle['skipped']} подій)";
         } else {
             $parts = [];
-            if ($toGoogle['created'] > 0) $parts[] = "{$toGoogle['created']} → Google";
-            if ($toGoogle['updated'] > 0) $parts[] = "{$toGoogle['updated']} оновлено в Google";
-            if ($toGoogle['deleted'] > 0) $parts[] = "{$toGoogle['deleted']} видалено з Google";
-            if ($fromGoogle['created'] > 0) $parts[] = "{$fromGoogle['created']} ← Google";
-            if ($fromGoogle['updated'] > 0) $parts[] = "{$fromGoogle['updated']} оновлено з Google";
-            $message = $parts ? "Синхронізовано: " . implode(', ', $parts) : "Немає змін";
+            if ($toGoogle['created'] > 0) {
+                $parts[] = "{$toGoogle['created']} → Google";
+            }
+            if ($toGoogle['updated'] > 0) {
+                $parts[] = "{$toGoogle['updated']} оновлено в Google";
+            }
+            if ($toGoogle['deleted'] > 0) {
+                $parts[] = "{$toGoogle['deleted']} видалено з Google";
+            }
+            if ($fromGoogle['created'] > 0) {
+                $parts[] = "{$fromGoogle['created']} ← Google";
+            }
+            if ($fromGoogle['updated'] > 0) {
+                $parts[] = "{$fromGoogle['updated']} оновлено з Google";
+            }
+            $message = $parts ? 'Синхронізовано: '.implode(', ', $parts) : 'Немає змін';
         }
         if ($toGoogle['failed'] > 0) {
             $message .= " | {$toGoogle['failed']} помилок";
         }
-        if (!empty($errors)) {
-            $message .= " | " . implode('; ', array_slice($errors, 0, 3));
+        if (! empty($errors)) {
+            $message .= ' | '.implode('; ', array_slice($errors, 0, 3));
         }
 
         return response()->json([
@@ -512,7 +535,7 @@ class GoogleCalendarController extends Controller
     {
         $church = $this->getCurrentChurch();
 
-        $count = \App\Models\Event::where('church_id', $church->id)
+        $count = Event::where('church_id', $church->id)
             ->whereNotNull('google_event_id')
             ->update([
                 'google_event_id' => null,
@@ -538,7 +561,7 @@ class GoogleCalendarController extends Controller
         ]);
 
         $church = $this->getCurrentChurch();
-        $query = \App\Models\Event::where('church_id', $church->id);
+        $query = Event::where('church_id', $church->id);
 
         switch ($validated['scope']) {
             case 'synced':
@@ -551,7 +574,7 @@ class GoogleCalendarController extends Controller
                 $query->whereNotNull('google_event_id')
                     ->where(function ($q) {
                         $q->whereNull('notes')
-                          ->orWhere('notes', 'not like', '%Створено в Ministrify%');
+                            ->orWhere('notes', 'not like', '%Створено в Ministrify%');
                     });
                 break;
             case 'all':

@@ -3,9 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Models\Church;
+use App\Models\ChurchRole;
+use App\Models\Event;
+use App\Models\Person;
+use App\Models\SupportMessage;
+use App\Models\SupportTicket;
+use App\Models\User;
 use App\Rules\Honeypot;
 use App\Rules\Recaptcha;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Validation\Rule;
@@ -19,8 +26,8 @@ class LandingController extends Controller
     {
         $stats = [
             'churches' => Church::count(),
-            'members' => \App\Models\Person::count(),
-            'events' => \App\Models\Event::count(),
+            'members' => Person::count(),
+            'events' => Event::count(),
         ];
 
         return Response::view('landing.home', compact('stats'))
@@ -63,17 +70,17 @@ class LandingController extends Controller
         ]);
 
         // Create support ticket
-        $ticket = \App\Models\SupportTicket::create([
+        $ticket = SupportTicket::create([
             'guest_name' => $validated['name'],
             'guest_email' => $validated['email'],
-            'subject' => 'Повідомлення з контактної форми' . ($validated['church'] ? ' — ' . $validated['church'] : ''),
+            'subject' => 'Повідомлення з контактної форми'.($validated['church'] ? ' — '.$validated['church'] : ''),
             'category' => 'question',
             'priority' => 'normal',
             'status' => 'open',
         ]);
 
         // Add the message
-        \App\Models\SupportMessage::create([
+        SupportMessage::create([
             'ticket_id' => $ticket->id,
             'message' => $validated['message'],
             'is_from_admin' => false,
@@ -165,16 +172,16 @@ class LandingController extends Controller
         $church = Church::create([
             'name' => $validated['church_name'],
             'city' => $validated['city'],
-            'slug' => \Str::slug($validated['church_name']) . '-' . \Str::random(4),
+            'slug' => \Str::slug($validated['church_name']).'-'.\Str::random(4),
         ]);
 
         // Restore soft-deleted user or create new admin user
         // Query ChurchRole directly instead of via relationship - the relationship
         // would return empty due to Eloquent caching (roles were just created in booted())
-        $adminRole = \App\Models\ChurchRole::where('church_id', $church->id)
+        $adminRole = ChurchRole::where('church_id', $church->id)
             ->where('is_admin_role', true)
             ->first();
-        $trashedUser = \App\Models\User::onlyTrashed()->where('email', $validated['email'])->first();
+        $trashedUser = User::onlyTrashed()->where('email', $validated['email'])->first();
 
         if ($trashedUser) {
             $trashedUser->restore();
@@ -194,7 +201,7 @@ class LandingController extends Controller
                 'church_id' => $church->id,
             ]);
         } else {
-            $user = \App\Models\User::create([
+            $user = User::create([
                 'name' => $validated['admin_name'],
                 'email' => $validated['email'],
                 'phone' => $validated['phone'] ?? null,
@@ -206,12 +213,12 @@ class LandingController extends Controller
         }
 
         // Create person record for admin (if not already exists)
-        $person = \App\Models\Person::where('user_id', $user->id)
+        $person = Person::where('user_id', $user->id)
             ->where('church_id', $church->id)
             ->first();
 
-        if (!$person) {
-            $person = \App\Models\Person::create([
+        if (! $person) {
+            $person = Person::create([
                 'church_id' => $church->id,
                 'user_id' => $user->id,
                 'first_name' => explode(' ', $validated['admin_name'])[0],
@@ -224,7 +231,7 @@ class LandingController extends Controller
         }
 
         // Create pivot record
-        \Illuminate\Support\Facades\DB::table('church_user')->updateOrInsert(
+        DB::table('church_user')->updateOrInsert(
             ['user_id' => $user->id, 'church_id' => $church->id],
             [
                 'church_role_id' => $adminRole?->id,

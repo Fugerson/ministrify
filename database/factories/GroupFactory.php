@@ -14,7 +14,8 @@ class GroupFactory extends Factory
 
     public function definition(): array
     {
-        $name = fake()->randomElement(['Мала група', 'Домашня група', 'Молитовна група']) . ' ' . fake()->lastName();
+        $name = fake()->randomElement(['Мала група', 'Домашня група', 'Молитовна група']).' '.fake()->lastName();
+
         return [
             'church_id' => Church::factory(),
             'name' => $name,

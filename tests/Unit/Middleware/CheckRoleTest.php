@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Tests\TestCase;
 
 class CheckRoleTest extends TestCase
@@ -16,12 +17,13 @@ class CheckRoleTest extends TestCase
     use RefreshDatabase;
 
     private CheckRole $middleware;
+
     private Church $church;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->middleware = new CheckRole();
+        $this->middleware = new CheckRole;
         $this->church = Church::factory()->create();
     }
 
@@ -74,7 +76,7 @@ class CheckRoleTest extends TestCase
         $request = Request::create('/test', 'GET');
         $request->setUserResolver(fn () => $user);
 
-        $this->expectException(\Symfony\Component\HttpKernel\Exception\HttpException::class);
+        $this->expectException(HttpException::class);
 
         $this->middleware->handle($request, function () {
             return new Response('OK');

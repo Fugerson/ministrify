@@ -2,11 +2,11 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -26,7 +26,7 @@ class AppServiceProvider extends ServiceProvider
         }
 
         // Prevent lazy loading in development
-        Model::preventLazyLoading(!$this->app->isProduction());
+        Model::preventLazyLoading(! $this->app->isProduction());
 
         // Custom Blade directives for roles
         Blade::if('admin', function () {
@@ -47,7 +47,7 @@ class AppServiceProvider extends ServiceProvider
         // Check if user has ANY church role assigned (not a pending self-registered user)
         // Super admins always have access (whether impersonating a church or not)
         Blade::if('hasChurchRole', function () {
-            if (!auth()->check()) {
+            if (! auth()->check()) {
                 return false;
             }
             $user = auth()->user();
@@ -55,6 +55,7 @@ class AppServiceProvider extends ServiceProvider
             if ($user->isSuperAdmin()) {
                 return true;
             }
+
             // Regular users need a church role
             return $user->churchRole !== null;
         });

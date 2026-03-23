@@ -5,16 +5,15 @@ namespace Database\Seeders;
 use App\Models\Announcement;
 use App\Models\Assignment;
 use App\Models\Attendance;
+use App\Models\AttendanceRecord;
 use App\Models\Board;
 use App\Models\BoardCard;
 use App\Models\BoardColumn;
-use App\Models\AttendanceRecord;
 use App\Models\Church;
 use App\Models\ChurchRole;
 use App\Models\DonationCampaign;
 use App\Models\Event;
 use App\Models\EventResponsibility;
-use App\Models\ExpenseCategory;
 use App\Models\FamilyRelationship;
 use App\Models\Group;
 use App\Models\Ministry;
@@ -34,13 +33,21 @@ use Illuminate\Support\Str;
 class DemoChurchSeeder extends Seeder
 {
     private Church $church;
+
     private array $people = [];
+
     private array $ministries = [];
+
     private array $positions = [];
+
     private array $groups = [];
+
     private array $events = [];
+
     private array $tags = [];
+
     private array $ministryTypes = [];
+
     private User $admin;
 
     public function run(): void
@@ -103,7 +110,7 @@ class DemoChurchSeeder extends Seeder
         $this->command->info('=== LOGIN CREDENTIALS ===');
         $this->command->info('Email: demo@ministrify.church');
         $this->command->info('Password: demo2024');
-        $this->command->info('Public URL: ' . url('/church/' . $this->church->slug));
+        $this->command->info('Public URL: '.url('/church/'.$this->church->slug));
     }
 
     private function createChurch(): void
@@ -277,7 +284,7 @@ class DemoChurchSeeder extends Seeder
             }
 
             $person = Person::create($data);
-            $this->people[$person->last_name . '_' . $person->first_name] = $person;
+            $this->people[$person->last_name.'_'.$person->first_name] = $person;
         }
 
         // Link admin user to pastor (Person has user_id, not User has person_id)
@@ -427,7 +434,7 @@ class DemoChurchSeeder extends Seeder
             // Create positions
             foreach ($data['positions'] as $posData) {
                 $position = Position::create(array_merge($posData, ['ministry_id' => $ministry->id]));
-                $this->positions[$ministry->name . '_' . $posData['name']] = $position;
+                $this->positions[$ministry->name.'_'.$posData['name']] = $position;
             }
 
             // Add members with positions
@@ -437,7 +444,7 @@ class DemoChurchSeeder extends Seeder
 
                 // Assign first position to first member, etc.
                 if (isset($data['positions'][$index])) {
-                    $posKey = $ministry->name . '_' . $data['positions'][$index]['name'];
+                    $posKey = $ministry->name.'_'.$data['positions'][$index]['name'];
                     if (isset($this->positions[$posKey])) {
                         $positionIds[] = $this->positions[$posKey]->id;
                     }
@@ -537,7 +544,7 @@ class DemoChurchSeeder extends Seeder
                 'location' => 'Головний зал',
                 'notes' => 'Регулярне недільне богослужіння',
             ]);
-            $this->events['sunday_past_' . $i] = $event;
+            $this->events['sunday_past_'.$i] = $event;
 
             // Add service plan
             $this->createServicePlan($event);
@@ -560,7 +567,7 @@ class DemoChurchSeeder extends Seeder
                 'location' => 'Головний зал',
                 'notes' => 'Регулярне недільне богослужіння',
             ]);
-            $this->events['sunday_' . $i] = $event;
+            $this->events['sunday_'.$i] = $event;
 
             if ($i === 0) {
                 $this->createServicePlan($event);
@@ -682,7 +689,7 @@ class DemoChurchSeeder extends Seeder
             ];
 
             foreach ($assignments as $data) {
-                $positionKey = $ministry->name . '_' . $data['position'];
+                $positionKey = $ministry->name.'_'.$data['position'];
                 if (isset($this->positions[$positionKey])) {
                     Assignment::create([
                         'event_id' => $event->id,
@@ -768,7 +775,9 @@ class DemoChurchSeeder extends Seeder
             // Weekly tithes and offerings (4 Sundays)
             for ($week = 1; $week <= 4; $week++) {
                 $sundayDate = Carbon::create($year, $monthNum, 1)->nthOfMonth($week, Carbon::SUNDAY);
-                if ($sundayDate->month != $monthNum) continue;
+                if ($sundayDate->month != $monthNum) {
+                    continue;
+                }
 
                 // Tithes from regular givers
                 $givers = ['Петренко_Олександр', 'Коваленко_Михайло', 'Шевченко_Андрій', 'Ткаченко_Віктор', 'Олійник_Сергій'];
@@ -820,7 +829,7 @@ class DemoChurchSeeder extends Seeder
                 'currency' => 'UAH',
                 'date' => $monthStart->copy()->addDays(4),
                 'category_id' => $expenseCategories['Оренда приміщення']->id,
-                'description' => 'Оренда приміщення за ' . $date->translatedFormat('F Y'),
+                'description' => 'Оренда приміщення за '.$date->translatedFormat('F Y'),
                 'payment_method' => 'transfer',
                 'status' => Transaction::STATUS_COMPLETED,
                 'recorded_by' => $this->admin->id,
@@ -935,7 +944,9 @@ class DemoChurchSeeder extends Seeder
 
         // Attendance for past Sunday services
         foreach (['sunday_past_4', 'sunday_past_3', 'sunday_past_2', 'sunday_past_1'] as $key) {
-            if (!isset($this->events[$key])) continue;
+            if (! isset($this->events[$key])) {
+                continue;
+            }
 
             $event = $this->events[$key];
 
@@ -959,9 +970,11 @@ class DemoChurchSeeder extends Seeder
                     'attendance_id' => $attendance->id,
                     'person_id' => $member->id,
                     'present' => $isPresent,
-                    'checked_in_at' => $isPresent ? '09:' . str_pad(rand(30, 59), 2, '0', STR_PAD_LEFT) : null,
+                    'checked_in_at' => $isPresent ? '09:'.str_pad(rand(30, 59), 2, '0', STR_PAD_LEFT) : null,
                 ]);
-                if ($isPresent) $presentCount++;
+                if ($isPresent) {
+                    $presentCount++;
+                }
             }
 
             $attendance->update([
@@ -975,7 +988,7 @@ class DemoChurchSeeder extends Seeder
             $groupMembers = $group->members()->get();
 
             for ($week = 4; $week >= 1; $week--) {
-                $meetingDay = match($group->meeting_day) {
+                $meetingDay = match ($group->meeting_day) {
                     'tuesday' => Carbon::TUESDAY,
                     'thursday' => Carbon::THURSDAY,
                     'saturday' => Carbon::SATURDAY,
@@ -1004,7 +1017,9 @@ class DemoChurchSeeder extends Seeder
                         'person_id' => $member->id,
                         'present' => $isPresent,
                     ]);
-                    if ($isPresent) $presentCount++;
+                    if ($isPresent) {
+                        $presentCount++;
+                    }
                 }
 
                 $attendance->update([
@@ -1028,7 +1043,7 @@ class DemoChurchSeeder extends Seeder
             ],
             [
                 'title' => 'Весняна конференція "Нове життя"',
-                'content' => "Запрошуємо всіх на нашу щорічну весняну конференцію!\n\nДата: " . Carbon::now()->addMonths(2)->format('d.m.Y') . "\n\nУ програмі:\n- Потужні проповіді від запрошених спікерів\n- Прославлення\n- Семінари\n- Спілкування\n\nРеєстрація відкрита!",
+                'content' => "Запрошуємо всіх на нашу щорічну весняну конференцію!\n\nДата: ".Carbon::now()->addMonths(2)->format('d.m.Y')."\n\nУ програмі:\n- Потужні проповіді від запрошених спікерів\n- Прославлення\n- Семінари\n- Спілкування\n\nРеєстрація відкрита!",
                 'is_pinned' => true,
                 'days_ago' => 7,
             ],

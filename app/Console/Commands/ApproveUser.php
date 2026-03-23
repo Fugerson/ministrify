@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\User;
 use Illuminate\Console\Command;
 
 class ApproveUser extends Command
@@ -13,19 +14,21 @@ class ApproveUser extends Command
     public function handle()
     {
         $email = $this->argument('email');
-        $user = \App\Models\User::where('email', $email)->first();
+        $user = User::where('email', $email)->first();
 
-        if (!$user) {
+        if (! $user) {
             $this->error("User not found: $email");
+
             return;
         }
 
         $this->info("Found: {$user->name} ({$user->email})");
-        $this->info("Status: " . ($user->servant_approval_status ?? 'no status'));
-        $this->info("Requested role: " . ($user->requestedChurchRole?->name ?? 'none'));
+        $this->info('Status: '.($user->servant_approval_status ?? 'no status'));
+        $this->info('Requested role: '.($user->requestedChurchRole?->name ?? 'none'));
 
-        if (!$user->requested_church_role_id) {
-            $this->error("No requested role to approve");
+        if (! $user->requested_church_role_id) {
+            $this->error('No requested role to approve');
+
             return;
         }
 
@@ -46,6 +49,6 @@ class ApproveUser extends Command
                 'updated_at' => now(),
             ]);
 
-        $this->info("✅ Approved! Role: " . $user->requestedChurchRole->name);
+        $this->info('✅ Approved! Role: '.$user->requestedChurchRole->name);
     }
 }

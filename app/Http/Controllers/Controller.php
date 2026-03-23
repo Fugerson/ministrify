@@ -2,18 +2,22 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Traits\RespondsWithJson;
 use App\Models\AuditLog;
 use App\Models\Church;
+use App\Models\Person;
+use App\Models\User;
 use App\Services\PlanService;
 use Illuminate\Database\Eloquent\Model;
-use App\Http\Controllers\Traits\RespondsWithJson;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Routing\Controller as BaseController;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 abstract class Controller extends BaseController
 {
-    use AuthorizesRequests, ValidatesRequests, RespondsWithJson;
+    use AuthorizesRequests, RespondsWithJson, ValidatesRequests;
 
     /**
      * Per-request cache for current church to avoid repeated DB lookups.
@@ -39,14 +43,14 @@ abstract class Controller extends BaseController
         }
 
         // Super admin without impersonation - redirect to system panel
-        if ($user->is_super_admin && !$user->church_id) {
+        if ($user->is_super_admin && ! $user->church_id) {
             abort(redirect()->route('system.index')
                 ->with('warning', __('messages.select_church_to_work')));
         }
 
         $church = $user->church;
 
-        if (!$church) {
+        if (! $church) {
             abort(redirect()->route('dashboard')
                 ->with('error', __('messages.feature_requires_church')));
         }
@@ -60,12 +64,14 @@ abstract class Controller extends BaseController
      */
     protected function checkPlanLimit(string $resource): void
     {
-        if (auth()->user()?->is_super_admin) return;
+        if (auth()->user()?->is_super_admin) {
+            return;
+        }
 
         $church = $this->getCurrentChurch();
         $planService = app(PlanService::class);
 
-        if (!$planService->canCreate($church, $resource)) {
+        if (! $planService->canCreate($church, $resource)) {
             $limit = $church->getPlanLimit($resource);
             $message = __('messages.plan_limit_reached', ['resource' => $resource, 'limit' => $limit]);
 
@@ -83,11 +89,13 @@ abstract class Controller extends BaseController
      */
     protected function checkPlanFeature(string $feature): void
     {
-        if (auth()->user()?->is_super_admin) return;
+        if (auth()->user()?->is_super_admin) {
+            return;
+        }
 
         $church = $this->getCurrentChurch();
 
-        if (!$church->hasFeature($feature)) {
+        if (! $church->hasFeature($feature)) {
             $message = __('messages.plan_feature_unavailable');
 
             if (request()->expectsJson()) {
@@ -102,21 +110,22 @@ abstract class Controller extends BaseController
      * Authorize that a model belongs to the current church.
      * Use this for any model with church_id field.
      *
-     * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
+     * @throws NotFoundHttpException
      */
     protected function authorizeChurch(Model $model): void
     {
-        if (!isset($model->church_id)) {
+        if (! isset($model->church_id)) {
             return;
         }
 
         $churchId = $this->getCurrentChurch()->id;
 
         // For User models, check via pivot (user may belong to multiple churches)
-        if ($model instanceof \App\Models\User) {
-            if (!$model->belongsToChurch($churchId)) {
+        if ($model instanceof User) {
+            if (! $model->belongsToChurch($churchId)) {
                 abort(404);
             }
+
             return;
         }
 
@@ -129,13 +138,13 @@ abstract class Controller extends BaseController
      * Authorize that the current user has a person profile.
      * Required for some operations like assignments.
      *
-     * @throws \Symfony\Component\HttpKernel\Exception\HttpException
+     * @throws HttpException
      */
-    protected function requirePersonProfile(): \App\Models\Person
+    protected function requirePersonProfile(): Person
     {
         $person = auth()->user()->person;
 
-        if (!$person) {
+        if (! $person) {
             abort(403, __('messages.person_profile_required'));
         }
 
@@ -145,7 +154,7 @@ abstract class Controller extends BaseController
     /**
      * Get current user's person profile or null.
      */
-    protected function getCurrentPerson(): ?\App\Models\Person
+    protected function getCurrentPerson(): ?Person
     {
         return auth()->user()->person;
     }
@@ -164,6 +173,7 @@ abstract class Controller extends BaseController
     protected function isLeaderOrAbove(): bool
     {
         $user = auth()->user();
+
         return $user->isAdmin() || $user->isLeader();
     }
 
@@ -173,13 +183,13 @@ abstract class Controller extends BaseController
      */
     protected function validateChurchRelation(string $modelClass, ?int $id): ?Model
     {
-        if (!$id) {
+        if (! $id) {
             return null;
         }
 
         $model = $modelClass::find($id);
 
-        if (!$model || $model->church_id !== $this->getCurrentChurch()->id) {
+        if (! $model || $model->church_id !== $this->getCurrentChurch()->id) {
             return null;
         }
 
@@ -190,13 +200,13 @@ abstract class Controller extends BaseController
      * Log a custom audit action.
      * Use for actions that don't automatically trigger model events.
      *
-     * @param string $action Action name (e.g., 'exported', 'imported', 'bulk_deleted')
-     * @param string $modelType Model class name without namespace (e.g., 'Person')
-     * @param int|null $modelId Model ID if applicable
-     * @param string|null $modelName Human-readable model name
-     * @param array|null $newValues Additional data to log
-     * @param array|null $oldValues Previous state if applicable
-     * @param string|null $notes Additional notes
+     * @param  string  $action  Action name (e.g., 'exported', 'imported', 'bulk_deleted')
+     * @param  string  $modelType  Model class name without namespace (e.g., 'Person')
+     * @param  int|null  $modelId  Model ID if applicable
+     * @param  string|null  $modelName  Human-readable model name
+     * @param  array|null  $newValues  Additional data to log
+     * @param  array|null  $oldValues  Previous state if applicable
+     * @param  string|null  $notes  Additional notes
      */
     protected function logAuditAction(
         string $action,
@@ -207,26 +217,26 @@ abstract class Controller extends BaseController
         ?array $oldValues = null,
         ?string $notes = null
     ): void {
-        if (!auth()->check()) {
+        if (! auth()->check()) {
             return;
         }
 
         $user = auth()->user();
 
         // Skip logging for super admin in system admin panel (not impersonating)
-        if ($user->isSuperAdmin() && !session('impersonating_from')) {
+        if ($user->isSuperAdmin() && ! session('impersonating_from')) {
             return;
         }
 
         $churchId = $this->cachedChurch?->id ?? $user->church_id ?? null;
 
-        if (!$churchId) {
+        if (! $churchId) {
             return;
         }
 
         $userName = $user->name;
         if (session('impersonating_from')) {
-            $userName = $user->name . ' (via super admin #' . session('impersonating_from') . ')';
+            $userName = $user->name.' (via super admin #'.session('impersonating_from').')';
         }
 
         AuditLog::create([
@@ -234,7 +244,7 @@ abstract class Controller extends BaseController
             'user_id' => $user->id,
             'user_name' => $userName,
             'action' => $action,
-            'model_type' => 'App\\Models\\' . $modelType,
+            'model_type' => 'App\\Models\\'.$modelType,
             'model_id' => $modelId,
             'model_name' => $modelName,
             'old_values' => $oldValues,

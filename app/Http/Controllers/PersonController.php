@@ -2,15 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\AuditLog;
+use App\Exports\PeopleExport;
+use App\Http\Controllers\Api\TelegramController;
+use App\Imports\PeopleImport;
 use App\Models\ChurchRole;
+use App\Models\Ministry;
 use App\Models\Person;
 use App\Models\Tag;
-use App\Models\User;
+use App\Models\Transaction;
 use App\Models\UnavailableDate;
-use App\Exports\PeopleExport;
-use App\Imports\PeopleImport;
+use App\Models\User;
+use App\Notifications\AccessGranted;
 use App\Rules\BelongsToChurch;
+use App\Services\ImageService;
+use App\Services\PersonMergeService;
+use App\Services\TelegramService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -19,12 +25,11 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
-use App\Services\ImageService;
-use App\Services\PersonMergeService;
 
 class PersonController extends Controller
 {
     protected ImageService $imageService;
+
     protected PersonMergeService $mergeService;
 
     public function __construct(ImageService $imageService, PersonMergeService $mergeService)
@@ -32,9 +37,10 @@ class PersonController extends Controller
         $this->imageService = $imageService;
         $this->mergeService = $mergeService;
     }
+
     public function index(Request $request)
     {
-        if (!auth()->user()->canView('people')) {
+        if (! auth()->user()->canView('people')) {
             return $this->errorResponse($request, __('messages.no_access_to_section'));
         }
 
@@ -85,7 +91,7 @@ class PersonController extends Controller
 
         $tags = Tag::where('church_id', $church->id)->get();
         $ministries = $church->ministries()->with('positions')->get();
-        $churchRoles = \App\Models\ChurchRole::where('church_id', $church->id)->orderBy('sort_order')->get();
+        $churchRoles = ChurchRole::where('church_id', $church->id)->orderBy('sort_order')->get();
 
         // Calculate statistics using database aggregation (optimized)
         $today = now();
@@ -174,14 +180,14 @@ class PersonController extends Controller
 
     public function create(Request $request)
     {
-        if (!auth()->user()->canCreate('people')) {
+        if (! auth()->user()->canCreate('people')) {
             return $this->errorResponse($request, __('messages.no_permission_to_create'));
         }
 
         $church = $this->getCurrentChurch();
         $tags = Tag::where('church_id', $church->id)->get();
         $ministries = $church->ministries()->with('positions')->get();
-        $churchRoles = \App\Models\ChurchRole::where('church_id', $church->id)->orderBy('sort_order')->get();
+        $churchRoles = ChurchRole::where('church_id', $church->id)->orderBy('sort_order')->get();
 
         return view('people.create', compact('tags', 'ministries', 'churchRoles'));
     }
@@ -190,7 +196,7 @@ class PersonController extends Controller
     {
         $this->checkPlanLimit('people');
 
-        if (!auth()->user()->canCreate('people')) {
+        if (! auth()->user()->canCreate('people')) {
             return $this->errorResponse($request, __('messages.no_permission_to_create'));
         }
 
@@ -207,9 +213,9 @@ class PersonController extends Controller
             'gender' => 'nullable|in:male,female',
             'marital_status' => 'nullable|in:single,married,widowed,divorced',
             'joined_date' => 'nullable|date',
-            'membership_status' => 'nullable|in:' . implode(',', array_keys(\App\Models\Person::MEMBERSHIP_STATUSES)),
+            'membership_status' => 'nullable|in:'.implode(',', array_keys(Person::MEMBERSHIP_STATUSES)),
             'church_role' => 'nullable|in:member,servant,deacon,presbyter,pastor',
-            'church_role_id' => ['nullable', \Illuminate\Validation\Rule::exists('church_roles', 'id')->where('church_id', $this->getCurrentChurch()->id)],
+            'church_role_id' => ['nullable', Rule::exists('church_roles', 'id')->where('church_id', $this->getCurrentChurch()->id)],
             'notes' => 'nullable|string|max:5000',
             'photo' => 'nullable|mimes:jpg,jpeg,png,gif,webp,heic,heif|max:2048',
             'photo_full' => 'nullable|mimes:jpg,jpeg,png,gif,webp,heic,heif|max:5120',
@@ -247,7 +253,7 @@ class PersonController extends Controller
         $validated['church_id'] = $church->id;
 
         // Check for duplicate by email in same church
-        if (!empty($validated['email'])) {
+        if (! empty($validated['email'])) {
             $existingPerson = Person::where('email', $validated['email'])
                 ->where('church_id', $church->id)
                 ->first();
@@ -258,7 +264,7 @@ class PersonController extends Controller
         }
 
         // Check for duplicate by phone in same church
-        if (!empty($validated['phone'])) {
+        if (! empty($validated['phone'])) {
             $existingByPhone = Person::findByPhoneInChurch($validated['phone'], $church->id, false);
 
             if ($existingByPhone) {
@@ -267,16 +273,20 @@ class PersonController extends Controller
         }
 
         // Check for duplicate by name in same church (unless explicitly forced)
-        if (!$request->boolean('force_duplicate')) {
+        if (! $request->boolean('force_duplicate')) {
             $existingByName = Person::where('church_id', $church->id)
                 ->where('first_name', $validated['first_name'])
                 ->where('last_name', $validated['last_name'])
                 ->first();
 
             if ($existingByName) {
-                $info = $existingByName->first_name . ' ' . $existingByName->last_name;
-                if ($existingByName->phone) $info .= ', ' . __('messages.phone_short') . ': ' . $existingByName->phone;
-                if ($existingByName->email) $info .= ', email: ' . $existingByName->email;
+                $info = $existingByName->first_name.' '.$existingByName->last_name;
+                if ($existingByName->phone) {
+                    $info .= ', '.__('messages.phone_short').': '.$existingByName->phone;
+                }
+                if ($existingByName->email) {
+                    $info .= ', email: '.$existingByName->email;
+                }
 
                 if ($request->wantsJson()) {
                     return response()->json([
@@ -287,10 +297,11 @@ class PersonController extends Controller
                             'name' => $existingByName->full_name,
                             'info' => $info,
                             'url' => route('people.show', $existingByName),
-                            'photo_url' => $existingByName->photo ? \Illuminate\Support\Facades\Storage::url($existingByName->photo) : null,
+                            'photo_url' => $existingByName->photo ? Storage::url($existingByName->photo) : null,
                         ],
                     ], 409);
                 }
+
                 return redirect()->route('people.show', $existingByName)
                     ->with('warning', __('messages.person_duplicate_name'));
             }
@@ -300,7 +311,7 @@ class PersonController extends Controller
 
         // Attach tags (only tags belonging to this church)
         if ($request->has('tags')) {
-            $validTagIds = \App\Models\Tag::where('church_id', $church->id)
+            $validTagIds = Tag::where('church_id', $church->id)
                 ->whereIn('id', $request->tags)
                 ->pluck('id')
                 ->toArray();
@@ -309,11 +320,11 @@ class PersonController extends Controller
 
         // Attach ministries with positions (only ministries belonging to this church)
         if ($request->has('ministries')) {
-            $validMinistryIds = \App\Models\Ministry::where('church_id', $church->id)
+            $validMinistryIds = Ministry::where('church_id', $church->id)
                 ->pluck('id')
                 ->toArray();
             foreach ($request->ministries as $ministryId => $data) {
-                if (!empty($data['selected']) && in_array((int) $ministryId, $validMinistryIds)) {
+                if (! empty($data['selected']) && in_array((int) $ministryId, $validMinistryIds)) {
                     $person->ministries()->attach($ministryId, [
                         'position_ids' => json_encode($data['positions'] ?? []),
                     ]);
@@ -333,24 +344,24 @@ class PersonController extends Controller
         $isOwnProfile = auth()->user()->person && auth()->user()->person->id === $person->id;
 
         $person->load(['tags', 'ministries.positions', 'groups', 'user', 'churchRoleRelation', 'shepherd', 'sheep.churchRoleRelation', 'assignments' => function ($q) {
-            $q->whereHas('event', fn($eq) => $eq->where('date', '>=', now()->subMonths(3)))
-              ->with(['event.ministry', 'position']);
+            $q->whereHas('event', fn ($eq) => $eq->where('date', '>=', now()->subMonths(3)))
+                ->with(['event.ministry', 'position']);
         }]);
 
         // Sort assignments by event date descending (not by created_at)
-        $person->setRelation('assignments', $person->assignments->sortByDesc(fn($a) => $a->event?->date)->values());
+        $person->setRelation('assignments', $person->assignments->sortByDesc(fn ($a) => $a->event?->date)->values());
 
         // Stats
         $stats = [
             'services_this_month' => $person->assignments()
                 ->where('status', 'confirmed')
-                ->whereHas('event', fn($q) => $q->whereMonth('date', now()->month)->whereYear('date', now()->year))
+                ->whereHas('event', fn ($q) => $q->whereMonth('date', now()->month)->whereYear('date', now()->year))
                 ->count(),
             'services_total' => $person->assignments()
                 ->where('status', 'confirmed')
                 ->count(),
             'attendance_3_months' => $person->attendanceRecords()
-                ->whereHas('attendance', fn($q) => $q->where('date', '>=', now()->subMonths(3)))
+                ->whereHas('attendance', fn ($q) => $q->where('date', '>=', now()->subMonths(3)))
                 ->where('present', true)
                 ->count(),
             'attendance_rate' => $this->calculateAttendanceRate($person),
@@ -359,7 +370,7 @@ class PersonController extends Controller
                 ->where('present', true)
                 ->with('attendance')
                 ->get()
-                ->sortByDesc(fn($r) => $r->attendance?->date)
+                ->sortByDesc(fn ($r) => $r->attendance?->date)
                 ->first()?->attendance?->date,
             'membership_days' => $person->joined_date ? now()->diffInDays($person->joined_date) : null,
         ];
@@ -369,10 +380,10 @@ class PersonController extends Controller
 
         // Get attendance records
         $attendanceRecords = $person->attendanceRecords()
-            ->whereHas('attendance', fn($q) => $q->where('date', '>=', now()->subMonths(3)))
+            ->whereHas('attendance', fn ($q) => $q->where('date', '>=', now()->subMonths(3)))
             ->with('attendance')
             ->get()
-            ->map(fn($r) => [
+            ->map(fn ($r) => [
                 'type' => 'attendance',
                 'date' => $r->attendance?->date,
                 'title' => $r->present ? __('messages.attended_service') : __('messages.missed_service'),
@@ -382,13 +393,13 @@ class PersonController extends Controller
 
         // Get assignments
         $assignmentRecords = $person->assignments()
-            ->whereHas('event', fn($q) => $q->where('date', '>=', now()->subMonths(3)))
+            ->whereHas('event', fn ($q) => $q->where('date', '>=', now()->subMonths(3)))
             ->with(['event.ministry', 'position'])
             ->get()
-            ->map(fn($a) => [
+            ->map(fn ($a) => [
                 'type' => 'assignment',
                 'date' => $a->event?->date,
-                'title' => ($a->event?->title ?? __('messages.event')) . ' - ' . ($a->position?->name ?? __('messages.position')),
+                'title' => ($a->event?->title ?? __('messages.event')).' - '.($a->position?->name ?? __('messages.position')),
                 'subtitle' => $a->event?->ministry?->name ?? __('messages.ministry'),
                 'icon' => $a->status === 'confirmed' ? '🎯' : ($a->status === 'pending' ? '⏳' : '❌'),
                 'color' => $a->status === 'confirmed' ? 'green' : ($a->status === 'pending' ? 'yellow' : 'red'),
@@ -396,14 +407,14 @@ class PersonController extends Controller
             ]);
 
         $activities = $attendanceRecords->merge($assignmentRecords)
-            ->filter(fn($a) => $a['date'] !== null)
+            ->filter(fn ($a) => $a['date'] !== null)
             ->sortByDesc('date')
             ->take(20)
             ->values();
 
         // Attendance chart data (last 12 weeks) — uses already-loaded records
         $allAttendanceRecords = $person->attendanceRecords()
-            ->whereHas('attendance', fn($q) => $q->where('date', '>=', now()->subWeeks(12)->startOfWeek()))
+            ->whereHas('attendance', fn ($q) => $q->where('date', '>=', now()->subWeeks(12)->startOfWeek()))
             ->with('attendance')
             ->where('present', true)
             ->get();
@@ -416,7 +427,7 @@ class PersonController extends Controller
             $attendanceChartData[] = [
                 'week' => $weekStart->format('d.m'),
                 'count' => $allAttendanceRecords->filter(
-                    fn($r) => $r->attendance?->date?->between($weekStart, $weekEnd)
+                    fn ($r) => $r->attendance?->date?->between($weekStart, $weekEnd)
                 )->count(),
             ];
         }
@@ -432,7 +443,7 @@ class PersonController extends Controller
         if ($canEditProfile) {
             $tags = Tag::where('church_id', $church->id)->get();
             $ministries = $church->ministries()->with('positions')->get();
-            $churchRoles = \App\Models\ChurchRole::where('church_id', $church->id)->orderBy('sort_order')->get();
+            $churchRoles = ChurchRole::where('church_id', $church->id)->orderBy('sort_order')->get();
             if ($church->shepherds_enabled) {
                 $shepherds = Person::where('church_id', $church->id)
                     ->where('is_shepherd', true)
@@ -448,7 +459,7 @@ class PersonController extends Controller
     private function calculateAttendanceRate(Person $person): ?int
     {
         $totalEvents = $person->attendanceRecords()
-            ->whereHas('attendance', fn($q) => $q->where('date', '>=', now()->subMonths(3)))
+            ->whereHas('attendance', fn ($q) => $q->where('date', '>=', now()->subMonths(3)))
             ->count();
 
         if ($totalEvents === 0) {
@@ -456,7 +467,7 @@ class PersonController extends Controller
         }
 
         $attended = $person->attendanceRecords()
-            ->whereHas('attendance', fn($q) => $q->where('date', '>=', now()->subMonths(3)))
+            ->whereHas('attendance', fn ($q) => $q->where('date', '>=', now()->subMonths(3)))
             ->where('present', true)
             ->count();
 
@@ -470,14 +481,14 @@ class PersonController extends Controller
         $user = auth()->user();
         $isOwnProfile = $user->person && $user->person->id === $person->id;
 
-        if (!$isOwnProfile && !$user->canEdit('people')) {
+        if (! $isOwnProfile && ! $user->canEdit('people')) {
             return $this->errorResponse($request, __('messages.no_permission_to_edit'));
         }
 
         $church = $this->getCurrentChurch();
         $tags = Tag::where('church_id', $church->id)->get();
         $ministries = $church->ministries()->with('positions')->get();
-        $churchRoles = \App\Models\ChurchRole::where('church_id', $church->id)->orderBy('sort_order')->get();
+        $churchRoles = ChurchRole::where('church_id', $church->id)->orderBy('sort_order')->get();
 
         $person->load(['tags', 'ministries']);
 
@@ -493,7 +504,7 @@ class PersonController extends Controller
         $canEditPeople = $user->canEdit('people');
 
         // If not own profile and no edit permission, deny access
-        if (!$isOwnProfile && !$canEditPeople) {
+        if (! $isOwnProfile && ! $canEditPeople) {
             abort(403, __('messages.no_permission_to_edit_profile'));
         }
 
@@ -512,9 +523,9 @@ class PersonController extends Controller
                 'gender' => 'nullable|in:male,female',
                 'marital_status' => 'nullable|in:single,married,widowed,divorced',
                 'joined_date' => 'nullable|date',
-                'membership_status' => 'nullable|in:' . implode(',', array_keys(\App\Models\Person::MEMBERSHIP_STATUSES)),
+                'membership_status' => 'nullable|in:'.implode(',', array_keys(Person::MEMBERSHIP_STATUSES)),
                 'church_role' => 'nullable|in:member,servant,deacon,presbyter,pastor',
-                'church_role_id' => ['nullable', \Illuminate\Validation\Rule::exists('church_roles', 'id')->where('church_id', $this->getCurrentChurch()->id)],
+                'church_role_id' => ['nullable', Rule::exists('church_roles', 'id')->where('church_id', $this->getCurrentChurch()->id)],
                 'notes' => 'nullable|string|max:5000',
                 'photo' => 'nullable|mimes:jpg,jpeg,png,gif,webp,heic,heif|max:5120',
                 'photo_full' => 'nullable|mimes:jpg,jpeg,png,gif,webp,heic,heif|max:5120',
@@ -584,7 +595,7 @@ class PersonController extends Controller
         // Sync tags (users with edit permission only, validated by church_id)
         if ($canEditPeople) {
             $churchId = $this->getCurrentChurch()->id;
-            $validTagIds = \App\Models\Tag::where('church_id', $churchId)
+            $validTagIds = Tag::where('church_id', $churchId)
                 ->whereIn('id', $request->tags ?? [])
                 ->pluck('id')
                 ->toArray();
@@ -594,13 +605,13 @@ class PersonController extends Controller
         // Sync ministries with positions (users with edit permission only, validated by church_id)
         if ($canEditPeople) {
             $churchId = $churchId ?? $this->getCurrentChurch()->id;
-            $validMinistryIds = \App\Models\Ministry::where('church_id', $churchId)
+            $validMinistryIds = Ministry::where('church_id', $churchId)
                 ->pluck('id')
                 ->toArray();
             $person->ministries()->detach();
             if ($request->has('ministries')) {
                 foreach ($request->ministries as $ministryId => $data) {
-                    if (!empty($data['selected']) && in_array((int) $ministryId, $validMinistryIds)) {
+                    if (! empty($data['selected']) && in_array((int) $ministryId, $validMinistryIds)) {
                         $person->ministries()->attach($ministryId, [
                             'position_ids' => json_encode($data['positions'] ?? []),
                         ]);
@@ -616,7 +627,7 @@ class PersonController extends Controller
     {
         $this->authorizeChurch($person);
 
-        if (!auth()->user()->canDelete('people')) {
+        if (! auth()->user()->canDelete('people')) {
             return $this->errorResponse($request, __('messages.no_permission_to_delete'));
         }
 
@@ -629,7 +640,7 @@ class PersonController extends Controller
     {
         $this->authorizeChurch($person);
 
-        if (!auth()->user()->canDelete('people')) {
+        if (! auth()->user()->canDelete('people')) {
             return $this->errorResponse($request, __('messages.no_permission_to_restore'));
         }
 
@@ -640,13 +651,13 @@ class PersonController extends Controller
 
     public function export(Request $request)
     {
-        if (!auth()->user()->canView('people')) {
+        if (! auth()->user()->canView('people')) {
             abort(403, __('messages.insufficient_permissions_export'));
         }
 
         $church = $this->getCurrentChurch();
         $ids = $request->has('ids') ? explode(',', $request->get('ids')) : null;
-        $filename = 'people_' . now()->format('Y-m-d') . '.xlsx';
+        $filename = 'people_'.now()->format('Y-m-d').'.xlsx';
 
         // Log export action
         $this->logAuditAction('exported', 'Person', null, __('messages.audit_people_export'), [
@@ -659,7 +670,7 @@ class PersonController extends Controller
 
     public function import(Request $request)
     {
-        if (!auth()->user()->canCreate('people')) {
+        if (! auth()->user()->canCreate('people')) {
             abort(403, __('messages.insufficient_permissions_import'));
         }
 
@@ -679,7 +690,7 @@ class PersonController extends Controller
 
             return $this->successResponse($request, __('messages.people_imported'));
         } catch (\Exception $e) {
-            return $this->errorResponse($request, __('messages.import_error') . ': ' . $e->getMessage());
+            return $this->errorResponse($request, __('messages.import_error').': '.$e->getMessage());
         }
     }
 
@@ -687,7 +698,7 @@ class PersonController extends Controller
     {
         $user = auth()->user();
 
-        if (!$user->person) {
+        if (! $user->person) {
             return redirect()->route('dashboard')->with('error', __('app.profile_not_found'));
         }
 
@@ -697,9 +708,9 @@ class PersonController extends Controller
 
         $upcomingAssignments = $person->assignments()
             ->with(['event.ministry', 'position'])
-            ->whereHas('event', fn($q) => $q->where('date', '>=', now()))
+            ->whereHas('event', fn ($q) => $q->where('date', '>=', now()))
             ->get()
-            ->sortBy(fn($a) => $a->event?->date)
+            ->sortBy(fn ($a) => $a->event?->date)
             ->values();
 
         return view('people.my-profile', compact('person', 'upcomingAssignments'));
@@ -709,7 +720,7 @@ class PersonController extends Controller
     {
         $user = auth()->user();
 
-        if (!$user->person) {
+        if (! $user->person) {
             return redirect()->route('dashboard')->with('error', __('app.profile_not_found'));
         }
 
@@ -717,7 +728,7 @@ class PersonController extends Controller
         $church = $this->getCurrentChurch();
 
         // Get transactions (donations) for this person
-        $query = \App\Models\Transaction::where('church_id', $church->id)
+        $query = Transaction::where('church_id', $church->id)
             ->where('person_id', $person->id)
             ->incoming()
             ->completed()
@@ -734,14 +745,14 @@ class PersonController extends Controller
 
         // Calculate statistics
         $stats = [
-            'total_this_year' => \App\Models\Transaction::where('church_id', $church->id)
+            'total_this_year' => Transaction::where('church_id', $church->id)
                 ->where('person_id', $person->id)
                 ->incoming()
                 ->completed()
                 ->whereYear('date', now()->year)
                 ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')
                 ->value('total') ?? 0,
-            'total_this_month' => \App\Models\Transaction::where('church_id', $church->id)
+            'total_this_month' => Transaction::where('church_id', $church->id)
                 ->where('person_id', $person->id)
                 ->incoming()
                 ->completed()
@@ -749,13 +760,13 @@ class PersonController extends Controller
                 ->whereMonth('date', now()->month)
                 ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')
                 ->value('total') ?? 0,
-            'total_lifetime' => \App\Models\Transaction::where('church_id', $church->id)
+            'total_lifetime' => Transaction::where('church_id', $church->id)
                 ->where('person_id', $person->id)
                 ->incoming()
                 ->completed()
                 ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')
                 ->value('total') ?? 0,
-            'donations_count' => \App\Models\Transaction::where('church_id', $church->id)
+            'donations_count' => Transaction::where('church_id', $church->id)
                 ->where('person_id', $person->id)
                 ->incoming()
                 ->completed()
@@ -763,7 +774,7 @@ class PersonController extends Controller
         ];
 
         // Get available years for filter
-        $years = \App\Models\Transaction::where('church_id', $church->id)
+        $years = Transaction::where('church_id', $church->id)
             ->where('person_id', $person->id)
             ->incoming()
             ->selectRaw('YEAR(date) as year')
@@ -772,7 +783,7 @@ class PersonController extends Controller
             ->pluck('year');
 
         // Monthly breakdown for current year
-        $monthlyData = \App\Models\Transaction::where('church_id', $church->id)
+        $monthlyData = Transaction::where('church_id', $church->id)
             ->where('person_id', $person->id)
             ->incoming()
             ->completed()
@@ -790,7 +801,7 @@ class PersonController extends Controller
     {
         $user = auth()->user();
 
-        if (!$user->person) {
+        if (! $user->person) {
             abort(404);
         }
 
@@ -800,6 +811,7 @@ class PersonController extends Controller
             $this->imageService->delete($person->photo);
             $this->imageService->delete($person->photo_full);
             $person->update(['photo' => null, 'photo_full' => null]);
+
             return response()->json(['photo_url' => null]);
         }
 
@@ -826,7 +838,7 @@ class PersonController extends Controller
     {
         $user = auth()->user();
 
-        if (!$user->person) {
+        if (! $user->person) {
             abort(404);
         }
 
@@ -852,9 +864,9 @@ class PersonController extends Controller
             'new_password' => 'required|string|min:8|confirmed',
         ]);
 
-        if (!Hash::check($request->current_password, $user->password)) {
+        if (! Hash::check($request->current_password, $user->password)) {
             return response()->json([
-                'errors' => ['current_password' => [__('app.current_password_incorrect')]]
+                'errors' => ['current_password' => [__('app.current_password_incorrect')]],
             ], 422);
         }
 
@@ -867,7 +879,7 @@ class PersonController extends Controller
     {
         $user = auth()->user();
 
-        if (!$user->person) {
+        if (! $user->person) {
             abort(404);
         }
 
@@ -887,7 +899,7 @@ class PersonController extends Controller
     {
         $user = auth()->user();
 
-        if (!$user->person || $unavailableDate->person_id !== $user->person->id) {
+        if (! $user->person || $unavailableDate->person_id !== $user->person->id) {
             abort(403);
         }
 
@@ -900,21 +912,21 @@ class PersonController extends Controller
     {
         $user = auth()->user();
 
-        if (!$user->person) {
+        if (! $user->person) {
             return response()->json(['error' => __('messages.profile_not_found')], 404);
         }
 
         $church = $this->getCurrentChurch();
 
-        if (!config('services.telegram.bot_token')) {
+        if (! config('services.telegram.bot_token')) {
             return response()->json(['error' => __('messages.telegram_bot_not_configured')], 400);
         }
 
-        $code = \App\Http\Controllers\Api\TelegramController::generateLinkingCode($user->person);
+        $code = TelegramController::generateLinkingCode($user->person);
 
         // Get bot username for link
         try {
-            $telegram = \App\Services\TelegramService::make();
+            $telegram = TelegramService::make();
             $botInfo = $telegram->getMe();
             $botUsername = $botInfo['username'];
         } catch (\Exception $e) {
@@ -932,7 +944,7 @@ class PersonController extends Controller
     {
         $user = auth()->user();
 
-        if (!$user->person) {
+        if (! $user->person) {
             return $this->errorResponse($request, __('messages.profile_not_found'));
         }
 
@@ -976,17 +988,17 @@ class PersonController extends Controller
     {
         $this->authorizeChurch($person);
 
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             return response()->json(['message' => __('messages.insufficient_permissions')], 403);
         }
 
         $church = $this->getCurrentChurch();
 
         $validated = $request->validate([
-            'church_role_id' => ['nullable', \Illuminate\Validation\Rule::exists('church_roles', 'id')->where('church_id', $church->id)],
+            'church_role_id' => ['nullable', Rule::exists('church_roles', 'id')->where('church_id', $church->id)],
         ]);
 
-        if (!$person->user) {
+        if (! $person->user) {
             return response()->json(['message' => __('messages.user_has_no_account')], 404);
         }
 
@@ -1011,8 +1023,8 @@ class PersonController extends Controller
             ]);
 
         // Log role change
-        $oldRoleName = $oldRoleId ? \App\Models\ChurchRole::find($oldRoleId)?->name : __('messages.no_role');
-        $newRoleName = $newRoleId ? \App\Models\ChurchRole::find($newRoleId)?->name : __('messages.no_role');
+        $oldRoleName = $oldRoleId ? ChurchRole::find($oldRoleId)?->name : __('messages.no_role');
+        $newRoleName = $newRoleId ? ChurchRole::find($newRoleId)?->name : __('messages.no_role');
         $this->logAuditAction('role_changed', 'User', $person->user->id, $person->full_name, [
             'new_role' => $newRoleName,
         ], [
@@ -1021,8 +1033,8 @@ class PersonController extends Controller
 
         // Send notification if access was granted
         if ($hadNoRole && $newRoleId !== null) {
-            $role = \App\Models\ChurchRole::find($newRoleId);
-            $person->user->notify(new \App\Notifications\AccessGranted($role->name, $church->name));
+            $role = ChurchRole::find($newRoleId);
+            $person->user->notify(new AccessGranted($role->name, $church->name));
         }
 
         return response()->json(['success' => true]);
@@ -1032,16 +1044,16 @@ class PersonController extends Controller
     {
         $this->authorizeChurch($person);
 
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             return response()->json(['message' => __('messages.insufficient_permissions')], 403);
         }
 
-        if (!$person->user) {
+        if (! $person->user) {
             return response()->json(['message' => __('messages.user_has_no_account')], 404);
         }
 
         $validated = $request->validate([
-            'email' => 'required|email|unique:users,email,' . $person->user->id,
+            'email' => 'required|email|unique:users,email,'.$person->user->id,
         ]);
 
         $oldEmail = $person->user->email;
@@ -1061,7 +1073,7 @@ class PersonController extends Controller
     {
         $this->authorizeChurch($person);
 
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             return response()->json(['message' => __('messages.insufficient_permissions')], 403);
         }
 
@@ -1146,11 +1158,11 @@ class PersonController extends Controller
     {
         $this->authorizeChurch($person);
 
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             return response()->json(['message' => __('messages.insufficient_permissions')], 403);
         }
 
-        if (!$person->user) {
+        if (! $person->user) {
             return response()->json(['message' => __('messages.user_has_no_account')], 404);
         }
 
@@ -1182,13 +1194,13 @@ class PersonController extends Controller
         $isShepherdSelfAssign = $currentUser->person?->is_shepherd
             && $request->input('shepherd_id') == $currentUser->person->id;
 
-        if (!$currentUser->isAdmin() && !$currentUser->canEdit('people') && !$isShepherdSelfAssign) {
+        if (! $currentUser->isAdmin() && ! $currentUser->canEdit('people') && ! $isShepherdSelfAssign) {
             return response()->json(['message' => __('messages.insufficient_permissions')], 403);
         }
 
         $church = $this->getCurrentChurch();
 
-        if (!$church->shepherds_enabled) {
+        if (! $church->shepherds_enabled) {
             return response()->json(['message' => __('messages.shepherds_feature_disabled')], 400);
         }
 
@@ -1207,11 +1219,11 @@ class PersonController extends Controller
             $church = $this->getCurrentChurch();
             $shepherd = Person::where('church_id', $church->id)->find($shepherdId);
 
-            if (!$shepherd) {
+            if (! $shepherd) {
                 return response()->json(['message' => __('messages.shepherd_not_found')], 404);
             }
 
-            if (!$shepherd->is_shepherd) {
+            if (! $shepherd->is_shepherd) {
                 return response()->json(['message' => __('messages.person_is_not_shepherd')], 400);
             }
 
@@ -1240,7 +1252,7 @@ class PersonController extends Controller
      */
     public function quickEdit(Request $request)
     {
-        if (!auth()->user()->canView('people')) {
+        if (! auth()->user()->canView('people')) {
             return $this->errorResponse($request, __('messages.no_access_to_section'));
         }
 
@@ -1277,7 +1289,7 @@ class PersonController extends Controller
                 'baptism_date' => $p->baptism_date?->format('Y-m-d'),
                 'anniversary' => $p->anniversary?->format('Y-m-d'),
                 'notes' => $p->notes,
-                'photo_url' => $p->photo ? \Illuminate\Support\Facades\Storage::url($p->photo) : null,
+                'photo_url' => $p->photo ? Storage::url($p->photo) : null,
                 'user_id' => $p->user_id,
                 'uploadingPhoto' => false,
                 'isDirty' => false,
@@ -1295,7 +1307,7 @@ class PersonController extends Controller
      */
     public function quickSave(Request $request)
     {
-        if (!auth()->user()->canEdit('people')) {
+        if (! auth()->user()->canEdit('people')) {
             abort(403);
         }
 
@@ -1312,7 +1324,7 @@ class PersonController extends Controller
             'marital_status' => 'nullable|in:single,married,widowed,divorced',
             'membership_status' => 'nullable|in:guest,newcomer,member,servant,leader,leadership',
             'church_role' => 'nullable|in:member,servant,deacon,presbyter,pastor',
-            'ministry_id' => ['nullable', \Illuminate\Validation\Rule::exists('ministries', 'id')->where('church_id', $church->id)],
+            'ministry_id' => ['nullable', Rule::exists('ministries', 'id')->where('church_id', $church->id)],
             'address' => 'nullable|string|max:500',
             'first_visit_date' => 'nullable|date',
             'joined_date' => 'nullable|date',
@@ -1323,11 +1335,11 @@ class PersonController extends Controller
 
         $validated = $request->validate([
             'create' => 'array',
-            ...collect($fieldRules)->mapWithKeys(fn($rule, $key) => ["create.*.{$key}" => $rule])->toArray(),
+            ...collect($fieldRules)->mapWithKeys(fn ($rule, $key) => ["create.*.{$key}" => $rule])->toArray(),
 
             'update' => 'array',
             'update.*.id' => 'required|exists:people,id',
-            ...collect($fieldRules)->mapWithKeys(fn($rule, $key) => ["update.*.{$key}" => $rule])->toArray(),
+            ...collect($fieldRules)->mapWithKeys(fn ($rule, $key) => ["update.*.{$key}" => $rule])->toArray(),
 
             'delete' => 'array',
             'delete.*' => 'exists:people,id',
@@ -1406,7 +1418,7 @@ class PersonController extends Controller
             }
 
             $created[] = ['id' => $person->id];
-            if (!$isDuplicate) {
+            if (! $isDuplicate) {
                 $stats['created']++;
             }
         }
@@ -1414,7 +1426,9 @@ class PersonController extends Controller
         // Update existing people
         foreach ($validated['update'] ?? [] as $data) {
             $person = Person::where('church_id', $church->id)->find($data['id']);
-            if (!$person) continue;
+            if (! $person) {
+                continue;
+            }
 
             $hasMinistryField = array_key_exists('ministry_id', $data);
             $ministryId = $data['ministry_id'] ?? null;
@@ -1434,7 +1448,7 @@ class PersonController extends Controller
         }
 
         // Delete people (requires delete permission)
-        if (!empty($validated['delete']) && auth()->user()->canDelete('people')) {
+        if (! empty($validated['delete']) && auth()->user()->canDelete('people')) {
             foreach ($validated['delete'] as $id) {
                 $person = Person::where('church_id', $church->id)->find($id);
                 if ($person) {
@@ -1473,7 +1487,7 @@ class PersonController extends Controller
         }
 
         // Check edit permission (own profile or canEdit('people'))
-        if (!auth()->user()->can('update', $person)) {
+        if (! auth()->user()->can('update', $person)) {
             return response()->json(['success' => false, 'message' => __('messages.insufficient_permissions')], 403);
         }
 
@@ -1497,7 +1511,7 @@ class PersonController extends Controller
 
             return response()->json([
                 'success' => true,
-                'photo_url' => \Illuminate\Support\Facades\Storage::url($path),
+                'photo_url' => Storage::url($path),
             ]);
         } catch (\Exception $e) {
             \Log::error('Photo upload failed', [
@@ -1527,7 +1541,7 @@ class PersonController extends Controller
         }
 
         // Check edit permission (own profile or canEdit('people'))
-        if (!auth()->user()->can('update', $person)) {
+        if (! auth()->user()->can('update', $person)) {
             return response()->json(['success' => false, 'message' => __('messages.insufficient_permissions')], 403);
         }
 
@@ -1568,7 +1582,7 @@ class PersonController extends Controller
         switch ($validated['action']) {
             case 'ministry':
                 $ministry = $church->ministries()->find($validated['value']);
-                if (!$ministry) {
+                if (! $ministry) {
                     return response()->json(['success' => false, 'message' => __('messages.ministry_not_found')]);
                 }
 
@@ -1585,12 +1599,12 @@ class PersonController extends Controller
                 return response()->json([
                     'success' => true,
                     'message' => __('messages.bulk_ministry_added', ['count' => $people->count(), 'name' => $ministry->name]),
-                    'reload' => true
+                    'reload' => true,
                 ]);
 
             case 'tag':
                 $tag = $church->tags()->find($validated['value']);
-                if (!$tag) {
+                if (! $tag) {
                     return response()->json(['success' => false, 'message' => __('messages.tag_not_found')]);
                 }
 
@@ -1607,11 +1621,11 @@ class PersonController extends Controller
                 return response()->json([
                     'success' => true,
                     'message' => __('messages.bulk_tag_added', ['name' => $tag->name, 'count' => $people->count()]),
-                    'reload' => true
+                    'reload' => true,
                 ]);
 
             case 'message':
-                if (!config('services.telegram.bot_token')) {
+                if (! config('services.telegram.bot_token')) {
                     return response()->json(['success' => false, 'message' => __('messages.telegram_bot_not_configured')]);
                 }
 
@@ -1620,7 +1634,7 @@ class PersonController extends Controller
                     return response()->json(['success' => false, 'message' => __('messages.message_cannot_be_empty')]);
                 }
 
-                $telegram = \App\Services\TelegramService::make();
+                $telegram = TelegramService::make();
                 $sent = 0;
 
                 foreach ($people as $person) {
@@ -1646,17 +1660,17 @@ class PersonController extends Controller
                 ]);
 
             case 'grant_access':
-                if (!auth()->user()->isAdmin()) {
+                if (! auth()->user()->isAdmin()) {
                     return response()->json(['success' => false, 'message' => __('messages.insufficient_permissions')]);
                 }
 
                 $churchRoleId = $validated['church_role_id'] ?? null;
-                if (!$churchRoleId) {
+                if (! $churchRoleId) {
                     return response()->json(['success' => false, 'message' => __('messages.select_access_level')]);
                 }
 
                 $churchRole = $church->churchRoles()->find($churchRoleId);
-                if (!$churchRole) {
+                if (! $churchRole) {
                     return response()->json(['success' => false, 'message' => __('messages.role_not_found')]);
                 }
 
@@ -1668,18 +1682,21 @@ class PersonController extends Controller
                     // Skip if already has user account
                     if ($person->user_id) {
                         $skipped++;
+
                         continue;
                     }
 
                     // Skip if no email
                     if (empty($person->email)) {
                         $noEmail++;
+
                         continue;
                     }
 
                     // Check if email already exists
                     if (User::where('email', $person->email)->exists()) {
                         $skipped++;
+
                         continue;
                     }
 
@@ -1720,10 +1737,10 @@ class PersonController extends Controller
 
                 $message = __('messages.bulk_accounts_created', ['count' => $created]);
                 if ($skipped > 0) {
-                    $message .= ' ' . __('messages.bulk_accounts_skipped', ['count' => $skipped]);
+                    $message .= ' '.__('messages.bulk_accounts_skipped', ['count' => $skipped]);
                 }
                 if ($noEmail > 0) {
-                    $message .= ' ' . __('messages.bulk_accounts_no_email', ['count' => $noEmail]);
+                    $message .= ' '.__('messages.bulk_accounts_no_email', ['count' => $noEmail]);
                 }
 
                 // Log bulk access grant
@@ -1739,11 +1756,11 @@ class PersonController extends Controller
                 return response()->json([
                     'success' => true,
                     'message' => $message,
-                    'reload' => true
+                    'reload' => true,
                 ]);
 
             case 'delete':
-                if (!auth()->user()->canDelete('people')) {
+                if (! auth()->user()->canDelete('people')) {
                     return response()->json(['success' => false, 'message' => __('messages.insufficient_permissions_delete')]);
                 }
 
@@ -1761,7 +1778,7 @@ class PersonController extends Controller
                 return response()->json([
                     'success' => true,
                     'message' => __('messages.bulk_people_deleted', ['count' => $people->count()]),
-                    'reload' => true
+                    'reload' => true,
                 ]);
         }
 
@@ -1773,7 +1790,7 @@ class PersonController extends Controller
      */
     public function findDuplicates()
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             return response()->json(['message' => __('messages.insufficient_permissions')], 403);
         }
 
@@ -1781,7 +1798,7 @@ class PersonController extends Controller
         $pairs = $this->mergeService->findDuplicates($church->id);
 
         // Eager load relationships for all people in pairs
-        $personIds = $pairs->flatMap(fn($p) => [$p['personA']->id, $p['personB']->id])->unique();
+        $personIds = $pairs->flatMap(fn ($p) => [$p['personA']->id, $p['personB']->id])->unique();
         if ($personIds->isNotEmpty()) {
             $loaded = Person::with(['ministries', 'tags'])->whereIn('id', $personIds)->get()->keyBy('id');
             $pairs = $pairs->map(function ($pair) use ($loaded) {
@@ -1809,7 +1826,7 @@ class PersonController extends Controller
      */
     public function mergePeople(Request $request)
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             return response()->json(['message' => __('messages.insufficient_permissions')], 403);
         }
 
@@ -1825,7 +1842,7 @@ class PersonController extends Controller
         $primary = Person::where('church_id', $church->id)->findOrFail($validated['primary_id']);
         $secondary = Person::where('church_id', $church->id)->findOrFail($validated['secondary_id']);
 
-        if (!empty($validated['field_selections'])) {
+        if (! empty($validated['field_selections'])) {
             $this->mergeService->mergeWithFieldSelection($primary, $secondary, $validated['field_selections']);
         } else {
             $this->mergeService->merge($primary, $secondary);
@@ -1851,7 +1868,7 @@ class PersonController extends Controller
             'last_name' => $person->last_name,
             'phone' => $person->phone,
             'email' => $person->email,
-            'photo_url' => $person->photo ? \Illuminate\Support\Facades\Storage::url($person->photo) : null,
+            'photo_url' => $person->photo ? Storage::url($person->photo) : null,
             'birth_date' => $person->birth_date?->format('d.m.Y'),
             'gender' => $person->gender,
             'membership_status' => $person->membership_status,

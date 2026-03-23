@@ -35,6 +35,7 @@ class BoardCardAttachment extends Model
             $bytes /= 1024;
             $index++;
         }
-        return round($bytes, 2) . ' ' . $units[$index];
+
+        return round($bytes, 2).' '.$units[$index];
     }
 }

@@ -10,8 +10,9 @@ class Honeypot implements ValidationRule
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         // Honeypot field must be empty — bots fill it in
-        if (!empty($value)) {
+        if (! empty($value)) {
             $fail('Форму не вдалося відправити.');
+
             return;
         }
 

@@ -6,7 +6,6 @@ use App\Models\Church;
 use App\Models\ChurchRole;
 use App\Models\ChurchRolePermission;
 use App\Models\Ministry;
-use App\Models\Person;
 use App\Models\User;
 use App\Policies\MinistryPolicy;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -18,14 +17,16 @@ class MinistryPolicyTest extends TestCase
     use RefreshDatabase;
 
     private MinistryPolicy $policy;
+
     private Church $church;
+
     private Ministry $ministry;
 
     protected function setUp(): void
     {
         parent::setUp();
         Cache::flush();
-        $this->policy = new MinistryPolicy();
+        $this->policy = new MinistryPolicy;
         $this->church = Church::factory()->create();
         $this->ministry = Ministry::factory()->forChurch($this->church)->create();
     }
@@ -38,6 +39,7 @@ class MinistryPolicyTest extends TestCase
             'module' => $module,
             'actions' => [$action],
         ]);
+
         return User::factory()->create([
             'church_id' => $this->church->id,
             'church_role_id' => $role->id,

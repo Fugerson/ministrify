@@ -2,14 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Traits\Auditable;
 
 class GalleryPhoto extends Model
 {
-    use HasFactory, Auditable;
+    use Auditable, HasFactory;
 
     protected $fillable = [
         'gallery_id',
@@ -49,7 +49,9 @@ class GalleryPhoto extends Model
 
     public function getFormattedSizeAttribute(): string
     {
-        if (!$this->file_size) return '-';
+        if (! $this->file_size) {
+            return '-';
+        }
 
         $bytes = $this->file_size;
         $units = ['B', 'KB', 'MB'];
@@ -60,18 +62,21 @@ class GalleryPhoto extends Model
             $i++;
         }
 
-        return round($bytes, 1) . ' ' . $units[$i];
+        return round($bytes, 1).' '.$units[$i];
     }
 
     public function getAspectRatioAttribute(): ?string
     {
-        if (!$this->width || !$this->height) return null;
+        if (! $this->width || ! $this->height) {
+            return null;
+        }
 
         $a = $this->width;
         $b = $this->height;
         while ($b !== 0) {
             [$a, $b] = [$b, $a % $b];
         }
-        return ($this->width / $a) . ':' . ($this->height / $a);
+
+        return ($this->width / $a).':'.($this->height / $a);
     }
 }

@@ -10,6 +10,7 @@ use Illuminate\Support\Str;
 class MonobankService
 {
     private string $token;
+
     private string $apiUrl = 'https://api.monobank.ua/api/merchant/invoice/create';
 
     public function __construct(Church $church)
@@ -20,12 +21,12 @@ class MonobankService
 
     public function isConfigured(): bool
     {
-        return !empty($this->token);
+        return ! empty($this->token);
     }
 
     public function createPayment(OnlineDonation $donation, string $redirectUrl, string $webhookUrl): ?array
     {
-        $reference = 'donation_' . $donation->id . '_' . Str::random(8);
+        $reference = 'donation_'.$donation->id.'_'.Str::random(8);
 
         $donation->update(['provider_order_id' => $reference]);
 
@@ -38,7 +39,7 @@ class MonobankService
                 'ccy' => 980, // UAH
                 'merchantPaymInfo' => [
                     'reference' => $reference,
-                    'destination' => $donation->description ?? 'Пожертва для ' . $donation->church->name,
+                    'destination' => $donation->description ?? 'Пожертва для '.$donation->church->name,
                 ],
                 'redirectUrl' => $redirectUrl,
                 'webHookUrl' => $webhookUrl,
@@ -60,10 +61,12 @@ class MonobankService
             }
 
             $donation->markAsFailed($response->body(), $response->json() ?? []);
+
             return null;
 
         } catch (\Exception $e) {
             $donation->markAsFailed($e->getMessage());
+
             return null;
         }
     }
@@ -71,10 +74,14 @@ class MonobankService
     public function handleWebhook(array $data): void
     {
         $reference = $data['reference'] ?? null;
-        if (!$reference) return;
+        if (! $reference) {
+            return;
+        }
 
         $donation = OnlineDonation::where('provider_order_id', $reference)->first();
-        if (!$donation) return;
+        if (! $donation) {
+            return;
+        }
 
         $status = $data['status'] ?? '';
         $invoiceId = $data['invoiceId'] ?? null;
@@ -105,12 +112,13 @@ class MonobankService
      * Monobank public key for webhook signature verification
      * From: https://api.monobank.ua/docs/acquiring.html
      */
-    private const MONOBANK_PUBLIC_KEY = "LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUZrd0V3WUhLb1pJemowQ0FRWUlLb1pJemowREFRY0RRZ0FFb1pGckM0alhaS3pnVXlxTXFlNmVkblVMNXl2QQordSs5d3RkakVqRjEyTjNkdm8vS2FaQ0hGQ0RBVUlHTVU0Z1FKUHZlL0pPdWVvSElQQnpWMUlxTUNnPT0KLS0tLS1FTkQgUFVCTElDIEtFWS0tLS0tCg==";
+    private const MONOBANK_PUBLIC_KEY = 'LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUZrd0V3WUhLb1pJemowQ0FRWUlLb1pJemowREFRY0RRZ0FFb1pGckM0alhaS3pnVXlxTXFlNmVkblVMNXl2QQordSs5d3RkakVqRjEyTjNkdm8vS2FaQ0hGQ0RBVUlHTVU0Z1FKUHZlL0pPdWVvSElQQnpWMUlxTUNnPT0KLS0tLS1FTkQgUFVCTElDIEtFWS0tLS0tCg==';
 
     public function verifySignature(string $body, string $signature): bool
     {
         if (empty($signature)) {
             \Log::warning('MonobankService: Webhook received without signature');
+
             return false;
         }
 
@@ -118,8 +126,9 @@ class MonobankService
             $publicKeyPem = base64_decode(self::MONOBANK_PUBLIC_KEY);
             $publicKey = openssl_pkey_get_public($publicKeyPem);
 
-            if (!$publicKey) {
+            if (! $publicKey) {
                 \Log::error('MonobankService: Failed to load public key');
+
                 return false;
             }
 
@@ -132,17 +141,20 @@ class MonobankService
                 \Log::warning('MonobankService: Invalid webhook signature', [
                     'body_length' => strlen($body),
                 ]);
+
                 return false;
             } else {
                 \Log::error('MonobankService: Signature verification error', [
                     'error' => openssl_error_string(),
                 ]);
+
                 return false;
             }
         } catch (\Exception $e) {
             \Log::error('MonobankService: Signature verification exception', [
                 'error' => $e->getMessage(),
             ]);
+
             return false;
         }
     }

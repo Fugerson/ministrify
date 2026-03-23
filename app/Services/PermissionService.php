@@ -15,7 +15,7 @@ class PermissionService
     {
         $user = Auth::user();
 
-        if (!$user) {
+        if (! $user) {
             return false;
         }
 
@@ -61,7 +61,7 @@ class PermissionService
     {
         $user = Auth::user();
 
-        if (!$user) {
+        if (! $user) {
             return [];
         }
 
@@ -69,13 +69,13 @@ class PermissionService
             return array_keys(ChurchRolePermission::MODULES);
         }
 
-        if (!$user->churchRole) {
+        if (! $user->churchRole) {
             return [];
         }
 
         $permissions = $user->churchRole->getAllPermissions();
 
-        return array_keys(array_filter($permissions, fn($perms) => in_array('view', $perms)));
+        return array_keys(array_filter($permissions, fn ($perms) => in_array('view', $perms)));
     }
 
     /**

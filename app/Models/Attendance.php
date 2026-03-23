@@ -11,12 +11,15 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class Attendance extends Model
 {
-    use HasFactory, Auditable;
+    use Auditable, HasFactory;
 
     // Attendance types
     public const TYPE_SERVICE = 'service';
+
     public const TYPE_GROUP = 'group';
+
     public const TYPE_EVENT = 'event';
+
     public const TYPE_MEETING = 'meeting';
 
     public const TYPES = [
@@ -77,6 +80,7 @@ class Attendance extends Model
 
     /**
      * Get the group if this is a group attendance.
+     *
      * @deprecated Use attendable() instead. This returns null when attendable_type is not Group.
      */
     public function group(): BelongsTo
@@ -167,6 +171,7 @@ class Attendance extends Model
         }
 
         $present = $this->members_present ?? $this->total_count ?? 0;
+
         return round(($present / $totalMembers) * 100, 1);
     }
 

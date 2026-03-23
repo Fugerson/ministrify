@@ -14,6 +14,7 @@ class AuditableTest extends TestCase
     use RefreshDatabase;
 
     private Church $church;
+
     private User $user;
 
     protected function setUp(): void

@@ -21,6 +21,7 @@ class SyncMonobankTransactions extends Command
 
         if ($churches->isEmpty()) {
             $this->info('No churches with auto-sync enabled');
+
             return self::SUCCESS;
         }
 
@@ -37,8 +38,9 @@ class SyncMonobankTransactions extends Command
             try {
                 $service = new MonobankPersonalService($church);
 
-                if (!$service->isConfigured()) {
-                    $this->warn("  Token not configured, skipping");
+                if (! $service->isConfigured()) {
+                    $this->warn('  Token not configured, skipping');
+
                     continue;
                 }
 

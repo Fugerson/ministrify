@@ -37,17 +37,19 @@ class NbuExchangeRateService
                     'json' => '',
                 ]);
 
-            if (!$response->successful()) {
+            if (! $response->successful()) {
                 Log::error('NBU API request failed', [
                     'status' => $response->status(),
                     'date' => $dateString,
                 ]);
+
                 return ['success' => false, 'error' => 'API request failed'];
             }
 
             $rates = $response->json();
             if (empty($rates)) {
                 Log::warning('NBU API returned empty response', ['date' => $dateString]);
+
                 return ['success' => false, 'error' => 'Empty response from NBU'];
             }
 
@@ -55,7 +57,7 @@ class NbuExchangeRateService
             foreach ($rates as $rate) {
                 $currencyCode = $this->getCurrencyCodeFromNumeric($rate['r030'] ?? null);
 
-                if (!$currencyCode) {
+                if (! $currencyCode) {
                     continue;
                 }
 
@@ -106,7 +108,7 @@ class NbuExchangeRateService
 
         while ($current->lte($endDate)) {
             // Skip weekends - NBU doesn't publish rates on weekends
-            if (!$current->isWeekend()) {
+            if (! $current->isWeekend()) {
                 $result = $this->syncRates($current);
                 $results[$current->format('Y-m-d')] = $result;
 
@@ -125,7 +127,7 @@ class NbuExchangeRateService
      */
     private function getCurrencyCodeFromNumeric(?int $numericCode): ?string
     {
-        if (!$numericCode) {
+        if (! $numericCode) {
             return null;
         }
 

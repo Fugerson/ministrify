@@ -2,14 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Traits\Auditable;
 
 class FamilyRelationship extends Model
 {
-    use HasFactory, Auditable;
+    use Auditable, HasFactory;
 
     protected $fillable = [
         'church_id',
@@ -19,8 +19,11 @@ class FamilyRelationship extends Model
     ];
 
     public const TYPE_SPOUSE = 'spouse';
+
     public const TYPE_CHILD = 'child';
+
     public const TYPE_PARENT = 'parent';
+
     public const TYPE_SIBLING = 'sibling';
 
     public static function getTypes(): array

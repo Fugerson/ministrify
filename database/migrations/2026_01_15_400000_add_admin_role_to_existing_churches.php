@@ -17,7 +17,7 @@ return new class extends Migration
                 ->where('is_admin_role', true)
                 ->exists();
 
-            if (!$hasAdminRole) {
+            if (! $hasAdminRole) {
                 ChurchRole::create([
                     'church_id' => $church->id,
                     'name' => 'Адміністратор церкви',

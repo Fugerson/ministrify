@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -56,6 +57,7 @@ class PrivatbankTransaction extends Model
     {
         $amount = number_format($this->amount_uah, 2, ',', ' ');
         $sign = $this->is_income ? '+' : '-';
+
         return "{$sign}{$amount} ₴";
     }
 
@@ -78,6 +80,7 @@ class PrivatbankTransaction extends Model
         if ($this->description) {
             return $this->description;
         }
+
         return 'Невідомий відправник';
     }
 
@@ -134,7 +137,7 @@ class PrivatbankTransaction extends Model
 
         return self::updateOrCreate(
             ['privat_id' => $data['tranId'] ?? $data['appcode'] ?? md5(
-                ($data['trandate'] ?? '') . ($data['trantime'] ?? '') . ($data['cardamount'] ?? $data['amount'] ?? '') . ($data['description'] ?? '')
+                ($data['trandate'] ?? '').($data['trantime'] ?? '').($data['cardamount'] ?? $data['amount'] ?? '').($data['description'] ?? '')
             )],
             [
                 'church_id' => $churchId,
@@ -163,26 +166,27 @@ class PrivatbankTransaction extends Model
         $value = preg_replace('/[A-Z]{3}$/', '', trim($value));
         // Convert to float and then to kopiykas
         $float = (float) str_replace([' ', ','], ['', '.'], $value);
+
         return (int) round($float * 100);
     }
 
     /**
      * Parse date and time from PrivatBank format
      */
-    protected static function parseDateTime(string $date, string $time): \Carbon\Carbon
+    protected static function parseDateTime(string $date, string $time): Carbon
     {
         if (empty($date)) {
             return now();
         }
 
         // PrivatBank uses DD.MM.YYYY format
-        $dateTime = trim($date . ' ' . $time);
+        $dateTime = trim($date.' '.$time);
 
         try {
-            return \Carbon\Carbon::createFromFormat('d.m.Y H:i:s', $dateTime);
+            return Carbon::createFromFormat('d.m.Y H:i:s', $dateTime);
         } catch (\Exception $e) {
             try {
-                return \Carbon\Carbon::createFromFormat('d.m.Y', $date)->startOfDay();
+                return Carbon::createFromFormat('d.m.Y', $date)->startOfDay();
             } catch (\Exception $e) {
                 return now();
             }

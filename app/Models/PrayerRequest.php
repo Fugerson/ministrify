@@ -5,13 +5,13 @@ namespace App\Models;
 use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class PrayerRequest extends Model
 {
-    use HasFactory, SoftDeletes, Auditable;
+    use Auditable, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'church_id',
@@ -42,7 +42,9 @@ class PrayerRequest extends Model
     ];
 
     const STATUS_ACTIVE = 'active';
+
     const STATUS_ANSWERED = 'answered';
+
     const STATUS_CLOSED = 'closed';
 
     public function church(): BelongsTo
@@ -86,12 +88,13 @@ class PrayerRequest extends Model
         if ($this->is_anonymous) {
             return 'Анонімно';
         }
+
         return $this->person?->full_name ?? $this->user?->name ?? 'Невідомо';
     }
 
     public function getStatusLabelAttribute(): string
     {
-        return match($this->status) {
+        return match ($this->status) {
             self::STATUS_ACTIVE => 'Активне',
             self::STATUS_ANSWERED => 'Відповідь отримано',
             self::STATUS_CLOSED => 'Закрито',
@@ -101,7 +104,7 @@ class PrayerRequest extends Model
 
     public function getStatusColorAttribute(): string
     {
-        return match($this->status) {
+        return match ($this->status) {
             self::STATUS_ACTIVE => 'blue',
             self::STATUS_ANSWERED => 'green',
             self::STATUS_CLOSED => 'gray',
@@ -111,7 +114,7 @@ class PrayerRequest extends Model
 
     public function markAsPrayed(User $user): void
     {
-        if (!$this->prayedBy()->where('user_id', $user->id)->exists()) {
+        if (! $this->prayedBy()->where('user_id', $user->id)->exists()) {
             $this->prayedBy()->attach($user->id, ['prayed_at' => now()]);
             $this->increment('prayer_count');
         }

@@ -3,15 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Models\Group;
+use App\Models\GroupGuest;
 use App\Models\Person;
 use App\Rules\BelongsToChurch;
+use App\Services\ImageService;
 use Illuminate\Http\Request;
 
 class GroupController extends Controller
 {
     public function index(Request $request)
     {
-        if (!auth()->user()->canView('groups')) {
+        if (! auth()->user()->canView('groups')) {
             return $this->errorResponse($request, __('У вас немає доступу до цього розділу. Зверніться до адміністратора церкви для отримання потрібних прав.'));
         }
 
@@ -74,7 +76,7 @@ class GroupController extends Controller
     {
         $this->authorize('view', $group);
 
-        $group->load(['leader', 'members', 'guests', 'attendances' => fn($q) => $q->orderByDesc('date')->limit(10)]);
+        $group->load(['leader', 'members', 'guests', 'attendances' => fn ($q) => $q->orderByDesc('date')->limit(10)]);
 
         $availablePeople = Person::where('church_id', $this->getCurrentChurch()->id)
             ->whereNotIn('id', $group->members->pluck('id'))
@@ -129,7 +131,7 @@ class GroupController extends Controller
 
         // Ensure new leader is a member with leader role
         if ($group->leader_id) {
-            if (!$group->members()->where('people.id', $group->leader_id)->exists()) {
+            if (! $group->members()->where('people.id', $group->leader_id)->exists()) {
                 $group->members()->attach($group->leader_id, [
                     'role' => 'leader',
                     'joined_at' => now(),
@@ -168,7 +170,7 @@ class GroupController extends Controller
             ]);
 
             if ($request->hasFile('photo')) {
-                $validated['photo'] = app(\App\Services\ImageService::class)->storeProfilePhoto(
+                $validated['photo'] = app(ImageService::class)->storeProfilePhoto(
                     $request->file('photo'),
                     'people'
                 );
@@ -177,7 +179,7 @@ class GroupController extends Controller
             $validated['church_id'] = $this->getCurrentChurch()->id;
             $validated['group_id'] = $group->id;
 
-            $guest = \App\Models\GroupGuest::create($validated);
+            $guest = GroupGuest::create($validated);
 
             $this->logAuditAction('member_added', 'Group', $group->id, $group->name, [
                 'guest_id' => $guest->id,
@@ -268,6 +270,7 @@ class GroupController extends Controller
         ]);
 
         $roleLabel = Group::ROLES[$validated['role']] ?? $validated['role'];
+
         return $this->successResponse($request, "Роль змінено на: {$roleLabel}");
     }
 }

@@ -14,7 +14,7 @@ class SecurityHeadersTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->middleware = new SecurityHeaders();
+        $this->middleware = new SecurityHeaders;
     }
 
     public function test_sets_x_frame_options(): void

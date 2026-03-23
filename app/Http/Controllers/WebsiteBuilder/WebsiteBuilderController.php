@@ -4,7 +4,6 @@ namespace App\Http\Controllers\WebsiteBuilder;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Traits\RequiresChurch;
-use Illuminate\Http\Request;
 
 class WebsiteBuilderController extends Controller
 {
@@ -34,7 +33,7 @@ class WebsiteBuilderController extends Controller
 
     public function editor()
     {
-        if (!auth()->user()->canEdit('website')) {
+        if (! auth()->user()->canEdit('website')) {
             abort(403);
         }
 
@@ -49,6 +48,7 @@ class WebsiteBuilderController extends Controller
             ->values()
             ->map(function ($section) use ($availableSections) {
                 $config = $availableSections[$section['id']] ?? [];
+
                 return array_merge($section, [
                     'name' => $config['name'] ?? $section['id'],
                     'description' => $config['description'] ?? '',
@@ -63,7 +63,7 @@ class WebsiteBuilderController extends Controller
             'hero' => $church->hero_settings,
         ];
 
-        $previewUrl = route('public.church', $church->slug) . '?preview=1';
+        $previewUrl = route('public.church', $church->slug).'?preview=1';
 
         return view('website-builder.editor', compact(
             'church', 'sections', 'sectionSettings', 'designSettings', 'previewUrl'
@@ -72,11 +72,12 @@ class WebsiteBuilderController extends Controller
 
     public function preview()
     {
-        if (!auth()->user()->canEdit('website')) {
+        if (! auth()->user()->canEdit('website')) {
             abort(403);
         }
 
         $church = $this->getChurchOrFail();
+
         return redirect()->route('public.church', $church->slug);
     }
 }

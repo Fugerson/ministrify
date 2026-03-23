@@ -43,7 +43,9 @@ class MonobankSenderMapping extends Model
             $mapping = self::where('church_id', $churchId)
                 ->where('sender_iban', $iban)
                 ->first();
-            if ($mapping) return $mapping;
+            if ($mapping) {
+                return $mapping;
+            }
         }
 
         if ($name) {
@@ -65,7 +67,7 @@ class MonobankSenderMapping extends Model
         int $categoryId,
         ?int $personId = null
     ): self {
-        if (!$iban && !$name) {
+        if (! $iban && ! $name) {
             // Cannot create mapping without identifier — skip
             return new self([
                 'church_id' => $churchId,
@@ -76,8 +78,11 @@ class MonobankSenderMapping extends Model
 
         $mapping = self::where('church_id', $churchId)
             ->where(function ($q) use ($iban, $name) {
-                if ($iban) $q->where('sender_iban', $iban);
-                else $q->where('sender_name', $name);
+                if ($iban) {
+                    $q->where('sender_iban', $iban);
+                } else {
+                    $q->where('sender_name', $name);
+                }
             })
             ->first();
 
@@ -87,6 +92,7 @@ class MonobankSenderMapping extends Model
                 'category_id' => $categoryId,
                 'person_id' => $personId,
             ]);
+
             return $mapping;
         }
 

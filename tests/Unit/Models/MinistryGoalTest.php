@@ -6,7 +6,6 @@ use App\Models\Church;
 use App\Models\Ministry;
 use App\Models\MinistryGoal;
 use App\Models\MinistryTask;
-use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -15,6 +14,7 @@ class MinistryGoalTest extends TestCase
     use RefreshDatabase;
 
     private Church $church;
+
     private Ministry $ministry;
 
     protected function setUp(): void

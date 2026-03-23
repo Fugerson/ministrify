@@ -2,27 +2,28 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\SupportTicketReply;
+use App\Models\AdminTask;
 use App\Models\AuditLog;
 use App\Models\Church;
 use App\Models\ChurchRole;
-use App\Models\User;
-use App\Models\Person;
 use App\Models\Event;
-use App\Models\Transaction;
-use App\Models\SupportTicket;
-use App\Models\SupportMessage;
-use App\Models\AdminTask;
 use App\Models\PageVisit;
+use App\Models\Person;
+use App\Models\SupportMessage;
+use App\Models\SupportTicket;
+use App\Models\TelegramMessage;
+use App\Models\Transaction;
+use App\Models\User;
+use App\Services\ImageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
-use App\Mail\SupportTicketReply;
-use App\Services\ImageService;
 
 class SystemAdminController extends Controller
 {
@@ -82,7 +83,7 @@ class SystemAdminController extends Controller
             $s = addcslashes($request->search, '%_');
             $query->where(function ($q) use ($s) {
                 $q->where('name', 'like', "%{$s}%")
-                  ->orWhere('city', 'like', "%{$s}%");
+                    ->orWhere('city', 'like', "%{$s}%");
             });
         }
 
@@ -132,7 +133,7 @@ class SystemAdminController extends Controller
             $s = addcslashes($request->search, '%_');
             $query->where(function ($q) use ($s) {
                 $q->where('name', 'like', "%{$s}%")
-                  ->orWhere('email', 'like', "%{$s}%");
+                    ->orWhere('email', 'like', "%{$s}%");
             });
         }
 
@@ -196,6 +197,7 @@ class SystemAdminController extends Controller
     {
         $churches = Church::orderBy('name')->get();
         $churchRoles = ChurchRole::with('church')->orderBy('church_id')->orderBy('sort_order')->get();
+
         return view('system-admin.users.edit', compact('user', 'churches', 'churchRoles'));
     }
 
@@ -206,7 +208,7 @@ class SystemAdminController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $user->id,
+            'email' => 'required|email|unique:users,email,'.$user->id,
             'church_id' => 'nullable|exists:churches,id',
             'church_role_id' => 'nullable|exists:church_roles,id',
             'is_super_admin' => 'boolean',
@@ -238,7 +240,7 @@ class SystemAdminController extends Controller
             $user->church_id = $validated['church_id'];
         }
 
-        if (!empty($validated['password'])) {
+        if (! empty($validated['password'])) {
             $user->password = Hash::make($validated['password']);
         }
 
@@ -257,6 +259,7 @@ class SystemAdminController extends Controller
             if (request()->expectsJson()) {
                 return response()->json(['success' => false, 'message' => 'Неможливо видалити себе.'], 403);
             }
+
             return back()->with('error', 'Неможливо видалити себе.');
         }
 
@@ -301,6 +304,7 @@ class SystemAdminController extends Controller
             if (request()->expectsJson()) {
                 return response()->json(['success' => false, 'message' => 'Неможливо видалити себе.'], 403);
             }
+
             return back()->with('error', 'Неможливо видалити себе.');
         }
 
@@ -372,7 +376,7 @@ class SystemAdminController extends Controller
                 $s = addcslashes($request->search, '%_');
                 $query->where(function ($q) use ($s) {
                     $q->where('model_name', 'like', "%{$s}%")
-                      ->orWhere('user_name', 'like', "%{$s}%");
+                        ->orWhere('user_name', 'like', "%{$s}%");
                 });
             }
 
@@ -389,7 +393,7 @@ class SystemAdminController extends Controller
             }
 
             if ($request->model) {
-                $query->where('model_type', 'App\\Models\\' . $request->model);
+                $query->where('model_type', 'App\\Models\\'.$request->model);
             }
 
             if ($request->from) {
@@ -408,8 +412,8 @@ class SystemAdminController extends Controller
                 $s = addcslashes($request->search, '%_');
                 $query->where(function ($q) use ($s) {
                     $q->where('url', 'like', "%{$s}%")
-                      ->orWhere('user_name', 'like', "%{$s}%")
-                      ->orWhere('route_name', 'like', "%{$s}%");
+                        ->orWhere('user_name', 'like', "%{$s}%")
+                        ->orWhere('route_name', 'like', "%{$s}%");
                 });
             }
 
@@ -442,7 +446,7 @@ class SystemAdminController extends Controller
     {
         $churches = Church::orderBy('name')->get();
 
-        $query = \App\Models\TelegramMessage::with(['person', 'church']);
+        $query = TelegramMessage::with(['person', 'church']);
 
         if ($request->church_id) {
             $query->where('church_id', $request->church_id);
@@ -456,7 +460,7 @@ class SystemAdminController extends Controller
             $s = addcslashes($request->search, '%_');
             $query->where(function ($q) use ($s) {
                 $q->where('message', 'like', "%{$s}%")
-                  ->orWhereHas('person', fn($p) => $p->where('first_name', 'like', "%{$s}%")->orWhere('last_name', 'like', "%{$s}%"));
+                    ->orWhereHas('person', fn ($p) => $p->where('first_name', 'like', "%{$s}%")->orWhere('last_name', 'like', "%{$s}%"));
             });
         }
 
@@ -471,10 +475,10 @@ class SystemAdminController extends Controller
         $messages = $query->latest()->paginate(50)->withQueryString();
 
         $stats = [
-            'total' => \App\Models\TelegramMessage::count(),
-            'outgoing' => \App\Models\TelegramMessage::where('direction', 'outgoing')->count(),
-            'incoming' => \App\Models\TelegramMessage::where('direction', 'incoming')->count(),
-            'today' => \App\Models\TelegramMessage::whereDate('created_at', today())->count(),
+            'total' => TelegramMessage::count(),
+            'outgoing' => TelegramMessage::where('direction', 'outgoing')->count(),
+            'incoming' => TelegramMessage::where('direction', 'incoming')->count(),
+            'today' => TelegramMessage::whereDate('created_at', today())->count(),
         ];
 
         return view('system-admin.telegram-log', compact('messages', 'churches', 'stats'));
@@ -495,7 +499,7 @@ class SystemAdminController extends Controller
             if ($action === 'all') {
                 $count = PageVisit::count();
                 PageVisit::query()->delete();
-            } elseif (!empty($ids)) {
+            } elseif (! empty($ids)) {
                 $count = PageVisit::whereIn('id', $ids)->count();
                 PageVisit::whereIn('id', $ids)->delete();
             }
@@ -503,7 +507,7 @@ class SystemAdminController extends Controller
             if ($action === 'all') {
                 $count = AuditLog::count();
                 AuditLog::query()->delete();
-            } elseif (!empty($ids)) {
+            } elseif (! empty($ids)) {
                 $count = AuditLog::whereIn('id', $ids)->count();
                 AuditLog::whereIn('id', $ids)->delete();
             }
@@ -542,6 +546,7 @@ class SystemAdminController extends Controller
                     ->count(),
             ];
         }
+
         return $months;
     }
 
@@ -572,13 +577,13 @@ class SystemAdminController extends Controller
             'name' => $validated['name'],
             'city' => $validated['city'],
             'address' => $validated['address'],
-            'slug' => \Illuminate\Support\Str::slug($validated['name']),
+            'slug' => Str::slug($validated['name']),
         ]);
 
         // Restore soft-deleted user or create new admin user
         // Query ChurchRole directly instead of via relationship - the relationship
         // would return empty due to Eloquent caching (roles were just created in booted())
-        $adminRole = \App\Models\ChurchRole::where('church_id', $church->id)
+        $adminRole = ChurchRole::where('church_id', $church->id)
             ->where('is_admin_role', true)
             ->first();
         $trashedUser = User::onlyTrashed()->where('email', $validated['admin_email'])->first();
@@ -611,13 +616,13 @@ class SystemAdminController extends Controller
         }
 
         // Create Person record for admin (if not already exists for this church)
-        $person = \App\Models\Person::where('user_id', $user->id)
+        $person = Person::where('user_id', $user->id)
             ->where('church_id', $church->id)
             ->first();
 
-        if (!$person) {
+        if (! $person) {
             $nameParts = explode(' ', $validated['admin_name'], 2);
-            $person = \App\Models\Person::create([
+            $person = Person::create([
                 'church_id' => $church->id,
                 'user_id' => $user->id,
                 'first_name' => $nameParts[0],
@@ -730,7 +735,7 @@ class SystemAdminController extends Controller
                     DB::table('family_relationships')
                         ->where(function ($q) use ($person) {
                             $q->where('person_id', $person->id)
-                              ->orWhere('related_person_id', $person->id);
+                                ->orWhere('related_person_id', $person->id);
                         })
                         ->delete();
                 }
@@ -863,6 +868,7 @@ class SystemAdminController extends Controller
         // Transform for frontend
         $ticketsData = $tickets->map(function ($ticket) {
             $isOwn = $ticket->church_id === null && $ticket->user_id === auth()->id();
+
             return [
                 'id' => $ticket->id,
                 'subject' => $ticket->subject,
@@ -974,14 +980,14 @@ class SystemAdminController extends Controller
 
         $ticket = SupportTicket::findOrFail($validated['ticket_id']);
 
-        if (!empty($validated['status'])) {
+        if (! empty($validated['status'])) {
             $ticket->status = $validated['status'];
             if ($validated['status'] === 'resolved') {
                 $ticket->resolved_at = now();
             }
         }
 
-        if (!empty($validated['priority'])) {
+        if (! empty($validated['priority'])) {
             $ticket->priority = $validated['priority'];
         }
 
@@ -1057,7 +1063,7 @@ class SystemAdminController extends Controller
             if ($request->status === 'resolved') {
                 $updateData['resolved_at'] = now();
             }
-        } elseif (!$request->boolean('is_internal')) {
+        } elseif (! $request->boolean('is_internal')) {
             // If not internal note, set status to waiting for user response
             $updateData['status'] = 'waiting';
         }
@@ -1065,7 +1071,7 @@ class SystemAdminController extends Controller
         $ticket->update($updateData);
 
         // Send email notification (not for internal notes)
-        if (!$request->boolean('is_internal')) {
+        if (! $request->boolean('is_internal')) {
             $recipientEmail = $ticket->guest_email ?? $ticket->user?->email;
             if ($recipientEmail) {
                 Mail::to($recipientEmail)->send(new SupportTicketReply($ticket, $message));
@@ -1152,7 +1158,7 @@ class SystemAdminController extends Controller
             $s = addcslashes($request->search, '%_');
             $query->where(function ($q) use ($s) {
                 $q->where('title', 'like', "%{$s}%")
-                  ->orWhere('description', 'like', "%{$s}%");
+                    ->orWhere('description', 'like', "%{$s}%");
             });
         }
 
@@ -1271,7 +1277,7 @@ class SystemAdminController extends Controller
 
         $task->status = $validated['status'];
 
-        if ($validated['status'] === 'done' && !$task->completed_at) {
+        if ($validated['status'] === 'done' && ! $task->completed_at) {
             $task->completed_at = now();
         } elseif ($validated['status'] !== 'done') {
             $task->completed_at = null;

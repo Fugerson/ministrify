@@ -2,15 +2,15 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Traits\Auditable;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class StaffMember extends Model
 {
-    use HasFactory, SoftDeletes, Auditable;
+    use Auditable, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'church_id',
@@ -93,6 +93,7 @@ class StaffMember extends Model
         if ($this->person?->photo) {
             return \Storage::url($this->person->photo);
         }
+
         return null;
     }
 }

@@ -89,7 +89,7 @@ return [
     'event_details' => 'Деталі события',
     'upcoming_events' => 'Майбутні события',
     'past_events' => 'Минулі события',
-    'today_events' => "Сьогоднішні события",
+    'today_events' => 'Сьогоднішні события',
     'this_week_events' => 'События цього тижня',
 
     // Attendance
@@ -338,7 +338,7 @@ return [
     'next_event_cmd' => 'наступна подія',
     'help_cmd' => 'допомога',
     'disconnect_telegram' => 'Відʼєднати Telegram',
-    'confirm_disconnect_telegram' => "Ви впевнені? Ви перестанете отримувати сповіщення.",
+    'confirm_disconnect_telegram' => 'Ви впевнені? Ви перестанете отримувати сповіщення.',
     'connect_telegram_desc' => 'Підключіть Telegram, щоб отримувати сповіщення про призначення на події, нагадування та важливі повідомлення.',
     'connection_code_valid' => 'Ваш код для підключення (дійсний 10 хвилин):',
     'instruction' => 'Інструкція',
@@ -4547,7 +4547,6 @@ return [
     'report_who' => 'Хто',
     'report_deleted_user' => 'Видалений користувач',
     'you_already_have' => 'У вас вже є',
-
 
     // === Auto-added missing translations ===
     'other_enter_custom' => 'Інше (введіть вручну)...',

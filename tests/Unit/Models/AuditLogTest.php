@@ -5,7 +5,6 @@ namespace Tests\Unit\Models;
 use App\Models\AuditLog;
 use App\Models\Church;
 use App\Models\Person;
-use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

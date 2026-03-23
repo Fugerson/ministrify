@@ -16,7 +16,7 @@ class MyScheduleController extends Controller
     {
         $user = $request->user();
 
-        if (!$user || !$user->person) {
+        if (! $user || ! $user->person) {
             return response()->json([
                 'error' => 'No profile found',
                 'responsibilities' => [],
@@ -27,17 +27,17 @@ class MyScheduleController extends Controller
 
         $responsibilities = $user->person->responsibilities()
             ->with(['event.ministry:id,name,color'])
-            ->whereHas('event', fn($q) => $q->where('church_id', $churchId)->where('date', '>=', now()->startOfDay()))
+            ->whereHas('event', fn ($q) => $q->where('church_id', $churchId)->where('date', '>=', now()->startOfDay()))
             ->get()
-            ->sortBy(fn($r) => $r->event->date)
+            ->sortBy(fn ($r) => $r->event->date)
             ->values();
 
         // Also include events where user is assigned (ministry positions)
         $assignments = $user->person->assignments()
             ->with(['event.ministry:id,name,color', 'position'])
-            ->whereHas('event', fn($q) => $q->where('church_id', $churchId)->where('date', '>=', now()->startOfDay()))
+            ->whereHas('event', fn ($q) => $q->where('church_id', $churchId)->where('date', '>=', now()->startOfDay()))
             ->get()
-            ->sortBy(fn($a) => $a->event->date)
+            ->sortBy(fn ($a) => $a->event->date)
             ->values();
 
         // Merge both into a unified list
@@ -68,7 +68,7 @@ class MyScheduleController extends Controller
 
         foreach ($assignments as $a) {
             $items->push([
-                'id' => 'a_' . $a->id,
+                'id' => 'a_'.$a->id,
                 'type' => 'assignment',
                 'name' => $a->position?->name ?? 'Призначення',
                 'status' => $a->status,
@@ -106,13 +106,13 @@ class MyScheduleController extends Controller
     {
         $user = $request->user();
 
-        if (!$user || !$user->person) {
+        if (! $user || ! $user->person) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
         $responsibility = $user->person->responsibilities()->find($id);
 
-        if (!$responsibility) {
+        if (! $responsibility) {
             return response()->json(['error' => 'Not found'], 404);
         }
 
@@ -135,13 +135,13 @@ class MyScheduleController extends Controller
     {
         $user = $request->user();
 
-        if (!$user || !$user->person) {
+        if (! $user || ! $user->person) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
         $responsibility = $user->person->responsibilities()->find($id);
 
-        if (!$responsibility) {
+        if (! $responsibility) {
             return response()->json(['error' => 'Not found'], 404);
         }
 
@@ -164,13 +164,13 @@ class MyScheduleController extends Controller
     {
         $user = $request->user();
 
-        if (!$user || !$user->person) {
+        if (! $user || ! $user->person) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
         $assignment = $user->person->assignments()->find($id);
 
-        if (!$assignment) {
+        if (! $assignment) {
             return response()->json(['error' => 'Not found'], 404);
         }
 
@@ -193,13 +193,13 @@ class MyScheduleController extends Controller
     {
         $user = $request->user();
 
-        if (!$user || !$user->person) {
+        if (! $user || ! $user->person) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
         $assignment = $user->person->assignments()->find($id);
 
-        if (!$assignment) {
+        if (! $assignment) {
             return response()->json(['error' => 'Not found'], 404);
         }
 

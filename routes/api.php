@@ -1,10 +1,14 @@
 <?php
 
 use App\Http\Controllers\Api\CalendarController;
+use App\Http\Controllers\Api\DeviceTokenController;
+use App\Http\Controllers\Api\MyScheduleController;
 use App\Http\Controllers\Api\TelegramController;
 use App\Http\Controllers\Api\TelegramMiniAppController;
 use App\Http\Controllers\PublicSiteController;
 use App\Http\Controllers\PushSubscriptionController;
+use App\Http\Controllers\QrCheckinController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -65,60 +69,70 @@ Route::prefix('push')->name('api.push.')->group(function () {
 
 // PWA Offline API (requires auth via web session)
 Route::prefix('pwa')->name('api.pwa.')->middleware(['web', 'auth'])->group(function () {
-    Route::get('my-schedule', [\App\Http\Controllers\Api\MyScheduleController::class, 'index'])->name('my-schedule');
-    Route::post('responsibilities/{id}/confirm', [\App\Http\Controllers\Api\MyScheduleController::class, 'confirm'])->name('responsibilities.confirm');
-    Route::post('responsibilities/{id}/decline', [\App\Http\Controllers\Api\MyScheduleController::class, 'decline'])->name('responsibilities.decline');
-    Route::post('assignments/{id}/confirm', [\App\Http\Controllers\Api\MyScheduleController::class, 'confirmAssignment'])->name('assignments.confirm');
-    Route::post('assignments/{id}/decline', [\App\Http\Controllers\Api\MyScheduleController::class, 'declineAssignment'])->name('assignments.decline');
-    Route::post('device-token', [\App\Http\Controllers\Api\DeviceTokenController::class, 'store'])->name('device-token');
-    Route::delete('device-token', [\App\Http\Controllers\Api\DeviceTokenController::class, 'destroy'])->name('device-token.destroy');
+    Route::get('my-schedule', [MyScheduleController::class, 'index'])->name('my-schedule');
+    Route::post('responsibilities/{id}/confirm', [MyScheduleController::class, 'confirm'])->name('responsibilities.confirm');
+    Route::post('responsibilities/{id}/decline', [MyScheduleController::class, 'decline'])->name('responsibilities.decline');
+    Route::post('assignments/{id}/confirm', [MyScheduleController::class, 'confirmAssignment'])->name('assignments.confirm');
+    Route::post('assignments/{id}/decline', [MyScheduleController::class, 'declineAssignment'])->name('assignments.decline');
+    Route::post('device-token', [DeviceTokenController::class, 'store'])->name('device-token');
+    Route::delete('device-token', [DeviceTokenController::class, 'destroy'])->name('device-token.destroy');
 });
 
 // QR Check-in API
 // Screenshot upload (super admin only)
 Route::middleware('web')->group(function () {
-    Route::post('screenshot-upload', function (\Illuminate\Http\Request $request) {
-        if (!auth('web')->user()?->isSuperAdmin() && !session('impersonating_from') && !session('impersonate_church_id')) abort(403);
+    Route::post('screenshot-upload', function (Request $request) {
+        if (! auth('web')->user()?->isSuperAdmin() && ! session('impersonating_from') && ! session('impersonate_church_id')) {
+            abort(403);
+        }
         $file = $request->file('screenshot');
         $note = $request->input('note', '');
         $dir = base_path('screenshots');
-        if (!is_dir($dir)) mkdir($dir, 0755, true);
-        $name = 'scr-' . date('H-i-s') . '.png';
+        if (! is_dir($dir)) {
+            mkdir($dir, 0755, true);
+        }
+        $name = 'scr-'.date('H-i-s').'.png';
         $base64 = '';
-        $fullPath = $dir . '/' . $name;
+        $fullPath = $dir.'/'.$name;
         if ($file) {
             $file->move($dir, $name);
-            $base64 = 'data:image/png;base64,' . base64_encode(file_get_contents($fullPath));
+            $base64 = 'data:image/png;base64,'.base64_encode(file_get_contents($fullPath));
         } else {
-            $name = 'note-' . date('H-i-s') . '.txt';
-            $fullPath = $dir . '/' . $name;
+            $name = 'note-'.date('H-i-s').'.txt';
+            $fullPath = $dir.'/'.$name;
         }
         if ($note) {
-            file_put_contents($dir . '/' . str_replace('.png', '.txt', $name), $note);
+            file_put_contents($dir.'/'.str_replace('.png', '.txt', $name), $note);
         }
+
         return response()->json(['path' => $fullPath, 'name' => $name, 'url' => $base64, 'note' => $note]);
     });
 
     Route::get('screenshot-list', function () {
-        if (!auth('web')->user()?->isSuperAdmin() && !session('impersonating_from') && !session('impersonate_church_id')) abort(403);
+        if (! auth('web')->user()?->isSuperAdmin() && ! session('impersonating_from') && ! session('impersonate_church_id')) {
+            abort(403);
+        }
         $dir = base_path('screenshots');
-        if (!is_dir($dir)) return response()->json([]);
-        $files = glob($dir . '/scr-*.png');
-        usort($files, fn($a, $b) => filemtime($b) - filemtime($a));
+        if (! is_dir($dir)) {
+            return response()->json([]);
+        }
+        $files = glob($dir.'/scr-*.png');
+        usort($files, fn ($a, $b) => filemtime($b) - filemtime($a));
         $result = [];
         foreach (array_slice($files, 0, 20) as $f) {
             $name = basename($f);
-            $base64 = 'data:image/png;base64,' . base64_encode(file_get_contents($f));
+            $base64 = 'data:image/png;base64,'.base64_encode(file_get_contents($f));
             $notePath = str_replace('.png', '.txt', $f);
             $note = file_exists($notePath) ? file_get_contents($notePath) : '';
             $result[] = ['path' => $f, 'name' => $name, 'url' => $base64, 'note' => $note];
         }
+
         return response()->json($result);
     });
 });
 
 Route::prefix('checkin')->name('api.checkin.')->middleware(['web'])->group(function () {
-    Route::post('{token}', [\App\Http\Controllers\QrCheckinController::class, 'checkin'])->name('checkin')->middleware('auth');
-    Route::get('today-events', [\App\Http\Controllers\QrCheckinController::class, 'todayEvents'])->name('today-events')->middleware('auth');
-    Route::post('admin', [\App\Http\Controllers\QrCheckinController::class, 'adminCheckin'])->name('admin')->middleware('auth');
+    Route::post('{token}', [QrCheckinController::class, 'checkin'])->name('checkin')->middleware('auth');
+    Route::get('today-events', [QrCheckinController::class, 'todayEvents'])->name('today-events')->middleware('auth');
+    Route::post('admin', [QrCheckinController::class, 'adminCheckin'])->name('admin')->middleware('auth');
 });

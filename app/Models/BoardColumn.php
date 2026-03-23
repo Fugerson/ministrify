@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Traits\Auditable;
 
 class BoardColumn extends Model
 {
@@ -40,7 +40,10 @@ class BoardColumn extends Model
 
     public function isAtLimit(): bool
     {
-        if ($this->card_limit === null) return false;
+        if ($this->card_limit === null) {
+            return false;
+        }
+
         return $this->card_count >= $this->card_limit;
     }
 }

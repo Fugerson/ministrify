@@ -2,20 +2,19 @@
 
 namespace Database\Seeders;
 
-use App\Models\Church;
-use App\Models\User;
-use App\Models\Person;
-use App\Models\Ministry;
-use App\Models\Group;
-use App\Models\Event;
 use App\Models\Announcement;
+use App\Models\Church;
+use App\Models\Event;
 use App\Models\Expense;
+use App\Models\ExpenseCategory;
+use App\Models\Group;
 use App\Models\Income;
 use App\Models\IncomeCategory;
-use App\Models\ExpenseCategory;
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
+use App\Models\Ministry;
+use App\Models\Person;
+use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Database\Seeder;
 
 class TestDataSeeder extends Seeder
 {
@@ -23,18 +22,18 @@ class TestDataSeeder extends Seeder
         'Олександр', 'Максим', 'Артем', 'Дмитро', 'Андрій', 'Іван', 'Микола', 'Сергій', 'Володимир', 'Петро',
         'Олексій', 'Євген', 'Віталій', 'Юрій', 'Роман', 'Павло', 'Ігор', 'Богдан', 'Тарас', 'Олег',
         'Марія', 'Анна', 'Олена', 'Ірина', 'Наталія', 'Тетяна', 'Юлія', 'Світлана', 'Вікторія', 'Катерина',
-        'Оксана', 'Людмила', 'Галина', 'Надія', 'Любов', 'Валентина', 'Софія', 'Дарина', 'Аліна', 'Діана'
+        'Оксана', 'Людмила', 'Галина', 'Надія', 'Любов', 'Валентина', 'Софія', 'Дарина', 'Аліна', 'Діана',
     ];
 
     private $lastNames = [
         'Шевченко', 'Бондаренко', 'Коваленко', 'Ткаченко', 'Кравченко', 'Олійник', 'Шевчук', 'Поліщук', 'Бойко', 'Мельник',
         'Ткачук', 'Марченко', 'Савченко', 'Руденко', 'Павленко', 'Лисенко', 'Петренко', 'Кузьменко', 'Мороз', 'Левченко',
-        'Гончаренко', 'Клименко', 'Пономаренко', 'Кравчук', 'Харченко', 'Захарченко', 'Семенко', 'Литвиненко', 'Романенко', 'Гриценко'
+        'Гончаренко', 'Клименко', 'Пономаренко', 'Кравчук', 'Харченко', 'Захарченко', 'Семенко', 'Литвиненко', 'Романенко', 'Гриценко',
     ];
 
     private $streets = [
         'вул. Соборна', 'вул. Шевченка', 'вул. Незалежності', 'вул. Грушевського', 'вул. Франка',
-        'вул. Лесі Українки', 'вул. Миру', 'вул. Перемоги', 'просп. Свободи', 'вул. Центральна'
+        'вул. Лесі Українки', 'вул. Миру', 'вул. Перемоги', 'просп. Свободи', 'вул. Центральна',
     ];
 
     public function run(): void
@@ -54,12 +53,12 @@ class TestDataSeeder extends Seeder
 
         // Update church with more details
         $church->update([
-            'address' => $this->streets[array_rand($this->streets)] . ', ' . rand(1, 150),
-            'public_phone' => '+380' . rand(50, 99) . rand(1000000, 9999999),
-            'public_email' => 'info@' . \Str::slug($church->name) . '.church.ua',
-            'website_url' => 'https://' . \Str::slug($church->name) . '.church.ua',
+            'address' => $this->streets[array_rand($this->streets)].', '.rand(1, 150),
+            'public_phone' => '+380'.rand(50, 99).rand(1000000, 9999999),
+            'public_email' => 'info@'.\Str::slug($church->name).'.church.ua',
+            'website_url' => 'https://'.\Str::slug($church->name).'.church.ua',
             'public_description' => 'Ласкаво просимо до нашої церкви! Ми - громада віруючих людей, які прагнуть жити за Божими заповідями та нести любов у світ.',
-            'pastor_name' => $this->firstNames[array_rand(array_slice($this->firstNames, 0, 20))] . ' ' . $this->lastNames[array_rand($this->lastNames)],
+            'pastor_name' => $this->firstNames[array_rand(array_slice($this->firstNames, 0, 20))].' '.$this->lastNames[array_rand($this->lastNames)],
             'service_times' => "Неділя: 10:00\nСереда: 19:00",
         ]);
 
@@ -123,11 +122,11 @@ class TestDataSeeder extends Seeder
             $isMale = in_array($firstName, array_slice($this->firstNames, 0, 20));
 
             // Generate unique email
-            $baseEmail = strtolower(\Str::slug($firstName . '.' . $lastName, '.'));
-            $email = $baseEmail . '@example.com';
+            $baseEmail = strtolower(\Str::slug($firstName.'.'.$lastName, '.'));
+            $email = $baseEmail.'@example.com';
             $counter = 1;
             while (in_array($email, $usedEmails)) {
-                $email = $baseEmail . $counter . '@example.com';
+                $email = $baseEmail.$counter.'@example.com';
                 $counter++;
             }
             $usedEmails[] = $email;
@@ -139,9 +138,9 @@ class TestDataSeeder extends Seeder
                 'first_name' => $firstName,
                 'last_name' => $lastName,
                 'email' => $email,
-                'phone' => '+380' . rand(50, 99) . rand(1000000, 9999999),
+                'phone' => '+380'.rand(50, 99).rand(1000000, 9999999),
                 'birth_date' => Carbon::create($birthYear, rand(1, 12), rand(1, 28)),
-                'address' => $this->streets[array_rand($this->streets)] . ', ' . rand(1, 100) . ', кв. ' . rand(1, 50),
+                'address' => $this->streets[array_rand($this->streets)].', '.rand(1, 100).', кв. '.rand(1, 50),
                 'joined_date' => Carbon::now()->subDays(rand(30, 1500)),
                 'notes' => rand(0, 5) === 0 ? 'Активний член громади' : null,
             ]);
@@ -164,7 +163,7 @@ class TestDataSeeder extends Seeder
         ];
 
         $ministries = [];
-        $adultPeople = array_values(array_filter($people, fn($p) => $p->birth_date && $p->birth_date->age >= 16));
+        $adultPeople = array_values(array_filter($people, fn ($p) => $p->birth_date && $p->birth_date->age >= 16));
 
         foreach ($ministryData as $data) {
             $ministry = Ministry::create([
@@ -203,8 +202,10 @@ class TestDataSeeder extends Seeder
             ['name' => 'Чоловіче братство', 'day' => 'monday', 'color' => '#3B82F6'],
         ];
 
-        $adultPeople = array_values(array_filter($people, fn($p) => $p->birth_date && $p->birth_date->age >= 18));
-        if (empty($adultPeople)) return;
+        $adultPeople = array_values(array_filter($people, fn ($p) => $p->birth_date && $p->birth_date->age >= 18));
+        if (empty($adultPeople)) {
+            return;
+        }
 
         foreach ($groupData as $data) {
             $leader = $adultPeople[array_rand($adultPeople)];
@@ -214,8 +215,8 @@ class TestDataSeeder extends Seeder
                 'name' => $data['name'],
                 'description' => 'Зустрічі щотижня для спілкування, молитви та вивчення Біблії',
                 'meeting_day' => $data['day'],
-                'meeting_time' => rand(18, 19) . ':00:00',
-                'location' => $this->streets[array_rand($this->streets)] . ', ' . rand(1, 50),
+                'meeting_time' => rand(18, 19).':00:00',
+                'location' => $this->streets[array_rand($this->streets)].', '.rand(1, 50),
                 'leader_id' => $leader->id,
                 'color' => $data['color'],
             ]);
@@ -236,7 +237,9 @@ class TestDataSeeder extends Seeder
 
     private function createEvents(Church $church, array $ministries): void
     {
-        if (empty($ministries)) return;
+        if (empty($ministries)) {
+            return;
+        }
 
         // Create events for next 4 weeks
         for ($week = 0; $week < 4; $week++) {
@@ -279,7 +282,7 @@ class TestDataSeeder extends Seeder
                 'title' => $event['title'],
                 'notes' => 'Запрошуємо на особливу подію!',
                 'date' => $date->format('Y-m-d'),
-                'time' => rand(10, 17) . ':00:00',
+                'time' => rand(10, 17).':00:00',
                 'ministry_id' => $ministries[$index % count($ministries)]->id,
             ]);
         }
@@ -288,7 +291,9 @@ class TestDataSeeder extends Seeder
     private function createAnnouncements(Church $church): void
     {
         $admin = User::where('church_id', $church->id)->where('role', 'admin')->first();
-        if (!$admin) return;
+        if (! $admin) {
+            return;
+        }
 
         $announcements = [
             [
@@ -327,7 +332,9 @@ class TestDataSeeder extends Seeder
         $expenseCategories = ExpenseCategory::where('church_id', $church->id)->get();
 
         $admin = User::where('church_id', $church->id)->where('role', 'admin')->first();
-        if (!$admin || $incomeCategories->isEmpty() || $expenseCategories->isEmpty() || empty($ministries)) return;
+        if (! $admin || $incomeCategories->isEmpty() || $expenseCategories->isEmpty() || empty($ministries)) {
+            return;
+        }
 
         // Create incomes for last 3 months
         for ($month = 0; $month < 3; $month++) {

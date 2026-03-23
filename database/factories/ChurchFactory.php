@@ -13,7 +13,7 @@ class ChurchFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->company() . ' Church',
+            'name' => fake()->company().' Church',
             'slug' => Str::slug(fake()->unique()->company()),
             'city' => fake()->city(),
             'address' => fake()->address(),

@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Event;
+use App\Models\EventCellNote;
 use App\Models\EventMinistryTeam;
 use App\Models\Ministry;
 use App\Models\MinistryRole;
 use App\Models\Person;
+use App\Models\TelegramMessage;
 use App\Services\TelegramService;
 use Illuminate\Http\Request;
 
@@ -25,15 +27,15 @@ class ServiceTeamController extends Controller
 
         $churchId = $this->getCurrentChurch()->id;
         $ministry = Ministry::find($validated['ministry_id']);
-        if (!$ministry || $ministry->church_id !== $churchId) {
+        if (! $ministry || $ministry->church_id !== $churchId) {
             abort(404);
         }
 
         $event->linkedMinistries()->syncWithoutDetaching([$ministry->id]);
 
         if ($request->wantsJson()) {
-            $roles = $ministry->ministryRoles()->orderBy('name')->get(['id', 'name'])->map(fn($r) => ['id' => $r->id, 'name' => $r->name])->values();
-            $members = $ministry->members()->orderBy('last_name')->get(['people.id', 'first_name', 'last_name', 'telegram_chat_id'])->map(fn($p) => [
+            $roles = $ministry->ministryRoles()->orderBy('name')->get(['id', 'name'])->map(fn ($r) => ['id' => $r->id, 'name' => $r->name])->values();
+            $members = $ministry->members()->orderBy('last_name')->get(['people.id', 'first_name', 'last_name', 'telegram_chat_id'])->map(fn ($p) => [
                 'id' => $p->id,
                 'name' => $p->full_name,
                 'has_telegram' => (bool) $p->telegram_chat_id,
@@ -59,8 +61,8 @@ class ServiceTeamController extends Controller
 
         // Delete cell notes for all roles of this ministry
         $roleIds = $ministry->ministryRoles()->pluck('id')->toArray();
-        if (!empty($roleIds)) {
-            \App\Models\EventCellNote::where('event_id', $event->id)
+        if (! empty($roleIds)) {
+            EventCellNote::where('event_id', $event->id)
                 ->where('role_type', 'ministry_role')
                 ->whereIn('role_id', $roleIds)
                 ->delete();
@@ -95,8 +97,8 @@ class ServiceTeamController extends Controller
         $removedRoles = array_diff($previousRoles, $visibleRoles);
 
         // Delete cell notes for removed roles
-        if (!empty($removedRoles)) {
-            \App\Models\EventCellNote::where('event_id', $event->id)
+        if (! empty($removedRoles)) {
+            EventCellNote::where('event_id', $event->id)
                 ->where('role_type', 'ministry_role')
                 ->whereIn('role_id', $removedRoles)
                 ->delete();
@@ -145,7 +147,7 @@ class ServiceTeamController extends Controller
 
         // Verify ministry belongs to same church
         $ministry = Ministry::find($validated['ministry_id']);
-        if (!$ministry || $ministry->church_id !== $churchId) {
+        if (! $ministry || $ministry->church_id !== $churchId) {
             abort(404);
         }
 
@@ -153,14 +155,14 @@ class ServiceTeamController extends Controller
         $event->linkedMinistries()->syncWithoutDetaching([$ministry->id]);
 
         // Verify person belongs to same church
-        $person = \App\Models\Person::find($validated['person_id']);
-        if (!$person || $person->church_id !== $churchId) {
+        $person = Person::find($validated['person_id']);
+        if (! $person || $person->church_id !== $churchId) {
             abort(404);
         }
 
         // Verify role belongs to the ministry
         $role = MinistryRole::find($validated['ministry_role_id']);
-        if (!$role || $role->ministry_id !== $ministry->id) {
+        if (! $role || $role->ministry_id !== $ministry->id) {
             abort(404);
         }
 
@@ -175,6 +177,7 @@ class ServiceTeamController extends Controller
             if ($request->wantsJson()) {
                 return response()->json(['error' => 'Ця людина вже призначена на цю роль'], 422);
             }
+
             return back()->with('error', 'Ця людина вже призначена на цю роль');
         }
 
@@ -250,15 +253,15 @@ class ServiceTeamController extends Controller
         }
 
         $person = $member->person;
-        if (!$person) {
+        if (! $person) {
             return response()->json(['success' => false, 'message' => 'Людину не знайдено'], 422);
         }
 
-        if (!$person->telegram_chat_id) {
+        if (! $person->telegram_chat_id) {
             return response()->json(['success' => false, 'message' => 'У цієї людини не підключений Telegram'], 422);
         }
 
-        if (!config('services.telegram.bot_token')) {
+        if (! config('services.telegram.bot_token')) {
             return response()->json(['success' => false, 'message' => 'Telegram бот не налаштований'], 500);
         }
 
@@ -274,11 +277,11 @@ class ServiceTeamController extends Controller
         $timeStr = $event->time ? $event->time->format('H:i') : 'час уточнюється';
 
         $message = "📋 <b>Запит на участь</b>\n\n"
-            . "🏛 {$event->title}\n"
-            . "📅 {$event->date->format('d.m.Y')} ({$dayName})\n"
-            . "⏰ {$timeStr}\n"
-            . "🎯 {$roleName}\n\n"
-            . "Чи можете ви взяти участь?";
+            ."🏛 {$event->title}\n"
+            ."📅 {$event->date->format('d.m.Y')} ({$dayName})\n"
+            ."⏰ {$timeStr}\n"
+            ."🎯 {$roleName}\n\n"
+            .'Чи можете ви взяти участь?';
 
         $keyboard = [
             [
@@ -290,7 +293,7 @@ class ServiceTeamController extends Controller
         $sent = $telegram->sendMessage($person->telegram_chat_id, $message, $keyboard);
 
         if ($sent) {
-            \App\Models\TelegramMessage::create([
+            TelegramMessage::create([
                 'church_id' => $event->church_id,
                 'person_id' => $person->id,
                 'direction' => 'outgoing',
@@ -299,6 +302,7 @@ class ServiceTeamController extends Controller
             ]);
 
             $member->update(['status' => 'pending']);
+
             return response()->json(['success' => true, 'message' => __('messages.telegram_request_sent')]);
         }
 
@@ -318,30 +322,30 @@ class ServiceTeamController extends Controller
         ]);
 
         $person = auth()->user()->person;
-        if (!$person) {
+        if (! $person) {
             return $this->errorResponse($request, __('app.not_team_member'));
         }
 
         $churchId = $this->getCurrentChurch()->id;
 
         $ministry = Ministry::find($validated['ministry_id']);
-        if (!$ministry || $ministry->church_id !== $churchId) {
+        if (! $ministry || $ministry->church_id !== $churchId) {
             abort(404);
         }
 
         // Verify ministry is linked to this event
-        if (!$event->linkedMinistries()->where('ministries.id', $ministry->id)->exists()) {
+        if (! $event->linkedMinistries()->where('ministries.id', $ministry->id)->exists()) {
             return $this->errorResponse($request, __('app.ministry_not_linked'));
         }
 
         // Check user is a member of this ministry
-        if (!$ministry->members()->where('people.id', $person->id)->exists()) {
+        if (! $ministry->members()->where('people.id', $person->id)->exists()) {
             return $this->errorResponse($request, __('app.not_team_member'));
         }
 
         // Verify role belongs to the ministry
         $role = MinistryRole::find($validated['ministry_role_id']);
-        if (!$role || $role->ministry_id !== $ministry->id) {
+        if (! $role || $role->ministry_id !== $ministry->id) {
             abort(404);
         }
 
@@ -379,7 +383,7 @@ class ServiceTeamController extends Controller
         }
 
         $person = auth()->user()->person;
-        if (!$person || $member->person_id !== $person->id) {
+        if (! $person || $member->person_id !== $person->id) {
             return $this->errorResponse($request, __('messages.can_only_delete_own'));
         }
 
@@ -399,6 +403,7 @@ class ServiceTeamController extends Controller
 
         if ($ministryId) {
             $ministry = Ministry::find($ministryId);
+
             return $ministry && $ministry->isMember();
         }
 

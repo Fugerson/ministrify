@@ -2,16 +2,16 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use App\Traits\Auditable;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Song extends Model
 {
-    use HasFactory, SoftDeletes, Auditable;
+    use Auditable, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'church_id',
@@ -112,11 +112,14 @@ class Song extends Model
 
     public function getYoutubeIdAttribute(): ?string
     {
-        if (!$this->youtube_url) return null;
+        if (! $this->youtube_url) {
+            return null;
+        }
 
         if (preg_match('/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/', $this->youtube_url, $matches)) {
             return $matches[1];
         }
+
         return null;
     }
 
@@ -128,9 +131,12 @@ class Song extends Model
 
     public function scopeSearch($query, ?string $search)
     {
-        if (!$search) return $query;
+        if (! $search) {
+            return $query;
+        }
 
         $search = addcslashes($search, '%_');
+
         return $query->where(function ($q) use ($search) {
             $q->where('title', 'like', "%{$search}%")
                 ->orWhere('artist', 'like', "%{$search}%")
@@ -140,20 +146,28 @@ class Song extends Model
 
     public function scopeWithKey($query, ?string $key)
     {
-        if (!$key) return $query;
+        if (! $key) {
+            return $query;
+        }
+
         return $query->where('key', $key);
     }
 
     public function scopeWithTag($query, ?string $tag)
     {
-        if (!$tag) return $query;
+        if (! $tag) {
+            return $query;
+        }
+
         return $query->whereJsonContains('tags', $tag);
     }
 
     // Parse ChordPro format and return HTML with chords highlighted
     public function getChordsHtmlAttribute(): string
     {
-        if (!$this->chords) return '';
+        if (! $this->chords) {
+            return '';
+        }
 
         // Convert [Chord] to <span class="chord">Chord</span>
         $html = preg_replace(
@@ -169,7 +183,7 @@ class Song extends Model
     // Transpose chords to a different key
     public function transposeChords(string $fromKey, string $toKey): string
     {
-        if (!$this->chords || $fromKey === $toKey) {
+        if (! $this->chords || $fromKey === $toKey) {
             return $this->chords ?? '';
         }
 
@@ -215,7 +229,8 @@ class Song extends Model
                 }
 
                 $newIndex = ($noteIndex + $semitones + 12) % 12;
-                return '[' . $notes[$newIndex] . $suffix . ']';
+
+                return '['.$notes[$newIndex].$suffix.']';
             },
             $this->chords
         );

@@ -3,15 +3,19 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Middleware\ValidateTelegramMiniApp;
+use App\Models\Assignment;
 use App\Models\EventMinistryTeam;
 use App\Models\EventResponsibility;
 use App\Models\Person;
 use App\Models\ServicePlanItem;
 use App\Models\TelegramMessage;
-use App\Models\User;
 use App\Services\TelegramService;
+use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
 class TelegramController extends Controller
@@ -20,9 +24,10 @@ class TelegramController extends Controller
 
     private function telegram(): TelegramService
     {
-        if (!$this->telegram) {
+        if (! $this->telegram) {
             $this->telegram = TelegramService::make();
         }
+
         return $this->telegram;
     }
 
@@ -45,14 +50,14 @@ class TelegramController extends Controller
         return response()->json(['ok' => true]);
     }
 
-    private function handleCallbackQuery(array $callbackQuery): \Illuminate\Http\JsonResponse
+    private function handleCallbackQuery(array $callbackQuery): JsonResponse
     {
         $chatId = $callbackQuery['message']['chat']['id'];
         $data = $callbackQuery['data'];
 
         $person = Person::where('telegram_chat_id', $chatId)->first();
 
-        if (!$person) {
+        if (! $person) {
             return response()->json(['ok' => true]);
         }
 
@@ -85,7 +90,7 @@ class TelegramController extends Controller
         $responsibility = EventResponsibility::with('event')->find($responsibilityId);
 
         // Security: verify ownership AND church isolation
-        if (!$responsibility || $responsibility->person_id !== $person->id || !$responsibility->event) {
+        if (! $responsibility || $responsibility->person_id !== $person->id || ! $responsibility->event) {
             return;
         }
 
@@ -107,7 +112,7 @@ class TelegramController extends Controller
 
         $responseMessage = $isConfirm
             ? "✅ Супер! Ви берете на себе: {$responsibility->name}"
-            : "😔 Зрозуміло, пошукаємо когось іншого.";
+            : '😔 Зрозуміло, пошукаємо когось іншого.';
 
         $this->telegram()->sendMessage($chatId, $responseMessage);
     }
@@ -116,7 +121,7 @@ class TelegramController extends Controller
     {
         $item = ServicePlanItem::with('event')->find($itemId);
 
-        if (!$item || ($targetPersonId !== $person->id && $item->responsible_id !== $person->id)) {
+        if (! $item || ($targetPersonId !== $person->id && $item->responsible_id !== $person->id)) {
             return;
         }
 
@@ -131,7 +136,7 @@ class TelegramController extends Controller
         $event = $item->event;
         $eventTitle = $event?->title ?? '';
         $dateStr = $event?->date?->format('d.m.Y') ?? '';
-        $timeStr = $item->start_time ? \Carbon\Carbon::parse($item->start_time)->format('H:i') : '';
+        $timeStr = $item->start_time ? Carbon::parse($item->start_time)->format('H:i') : '';
 
         $logMessage = $isConfirm
             ? "✅ Підтверджено: {$item->title} ({$eventTitle}, {$dateStr})"
@@ -141,15 +146,15 @@ class TelegramController extends Controller
 
         if ($isConfirm) {
             $responseMessage = "✅ Чудово! Ви підтвердили участь.\n\n"
-                . "🏛 {$eventTitle}\n"
-                . "📅 {$dateStr}\n"
-                . ($timeStr ? "⏰ {$timeStr}\n" : "")
-                . "📝 {$item->title}";
+                ."🏛 {$eventTitle}\n"
+                ."📅 {$dateStr}\n"
+                .($timeStr ? "⏰ {$timeStr}\n" : '')
+                ."📝 {$item->title}";
         } else {
             $responseMessage = "😔 Зрозуміло, пошукаємо когось іншого.\n\n"
-                . "🏛 {$eventTitle}\n"
-                . "📅 {$dateStr}\n"
-                . "📝 {$item->title}";
+                ."🏛 {$eventTitle}\n"
+                ."📅 {$dateStr}\n"
+                ."📝 {$item->title}";
         }
 
         $this->telegram()->sendMessage($chatId, $responseMessage);
@@ -159,7 +164,7 @@ class TelegramController extends Controller
     {
         $member = EventMinistryTeam::with(['event', 'ministryRole'])->find($memberId);
 
-        if (!$member || $member->person_id !== $person->id || !$member->event) {
+        if (! $member || $member->person_id !== $person->id || ! $member->event) {
             return;
         }
 
@@ -183,14 +188,14 @@ class TelegramController extends Controller
 
         if ($isConfirm) {
             $responseMessage = "✅ Чудово! Ви підтвердили участь.\n\n"
-                . "🏛 {$eventTitle}\n"
-                . "📅 {$dateStr}" . ($timeStr ? " о {$timeStr}" : "") . "\n"
-                . "👤 {$roleName}";
+                ."🏛 {$eventTitle}\n"
+                ."📅 {$dateStr}".($timeStr ? " о {$timeStr}" : '')."\n"
+                ."👤 {$roleName}";
         } else {
             $responseMessage = "😔 Зрозуміло, пошукаємо когось іншого.\n\n"
-                . "🏛 {$eventTitle}\n"
-                . "📅 {$dateStr}\n"
-                . "👤 {$roleName}";
+                ."🏛 {$eventTitle}\n"
+                ."📅 {$dateStr}\n"
+                ."👤 {$roleName}";
         }
 
         $this->telegram()->sendMessage($chatId, $responseMessage);
@@ -198,9 +203,9 @@ class TelegramController extends Controller
 
     private function handleAssignmentCallback(string $action, int $assignmentId, Person $person, string $chatId): void
     {
-        $assignment = \App\Models\Assignment::with(['event.ministry', 'position'])->find($assignmentId);
+        $assignment = Assignment::with(['event.ministry', 'position'])->find($assignmentId);
 
-        if (!$assignment || $assignment->person_id !== $person->id || !$assignment->event || !$assignment->position || !$assignment->event->ministry) {
+        if (! $assignment || $assignment->person_id !== $person->id || ! $assignment->event || ! $assignment->position || ! $assignment->event->ministry) {
             return;
         }
 
@@ -223,18 +228,18 @@ class TelegramController extends Controller
 
             $this->saveMessage($person, "✅ Підтверджено: {$ministryName} - {$positionName} ({$eventTitle}, {$dateStr})");
             $responseMessage = "✅ Чудово! Ви підтвердили участь.\n\n"
-                . "🏛 {$eventTitle}\n"
-                . "📅 {$dateStr}" . ($timeStr ? " о {$timeStr}" : "") . "\n"
-                . "👥 {$ministryName}" . ($positionName ? " — {$positionName}" : "");
+                ."🏛 {$eventTitle}\n"
+                ."📅 {$dateStr}".($timeStr ? " о {$timeStr}" : '')."\n"
+                ."👥 {$ministryName}".($positionName ? " — {$positionName}" : '');
             $this->telegram()->sendMessage($chatId, $responseMessage);
         } else {
             $assignment->decline();
 
             $this->saveMessage($person, "❌ Відхилено: {$ministryName} - {$positionName} ({$eventTitle}, {$dateStr})");
             $responseMessage = "😔 Зрозуміло. Повідомлення надіслано лідеру.\n\n"
-                . "🏛 {$eventTitle}\n"
-                . "📅 {$dateStr}\n"
-                . "👥 {$ministryName}" . ($positionName ? " — {$positionName}" : "");
+                ."🏛 {$eventTitle}\n"
+                ."📅 {$dateStr}\n"
+                ."👥 {$ministryName}".($positionName ? " — {$positionName}" : '');
             $this->telegram()->sendMessage($chatId, $responseMessage);
 
             // Notify ministry leader
@@ -260,7 +265,7 @@ class TelegramController extends Controller
         }
     }
 
-    private function handleMessage(array $message): \Illuminate\Http\JsonResponse
+    private function handleMessage(array $message): JsonResponse
     {
         $chatId = $message['chat']['id'];
         $text = $message['text'] ?? '';
@@ -273,10 +278,10 @@ class TelegramController extends Controller
         $person = Person::where('telegram_chat_id', $chatId)->first();
 
         // Auto-link by username (only if exactly one match)
-        if (!$person && $username) {
+        if (! $person && $username) {
             $matchingPeople = Person::where(function ($q) use ($username) {
-                $q->where('telegram_username', '@' . $username)
-                  ->orWhere('telegram_username', $username);
+                $q->where('telegram_username', '@'.$username)
+                    ->orWhere('telegram_username', $username);
             })->get();
 
             if ($matchingPeople->count() === 1) {
@@ -298,14 +303,14 @@ class TelegramController extends Controller
         }
 
         // Save incoming message
-        if ($person && !empty($text)) {
+        if ($person && ! empty($text)) {
             $this->saveMessage($person, $text, $message['message_id'] ?? null);
         }
 
         return response()->json(['ok' => true]);
     }
 
-    private function handleCommand(string $text, string $chatId, ?Person $person, bool $wasJustLinked = false): \Illuminate\Http\JsonResponse
+    private function handleCommand(string $text, string $chatId, ?Person $person, bool $wasJustLinked = false): JsonResponse
     {
         $command = strtolower(explode(' ', $text)[0]);
 
@@ -318,17 +323,17 @@ class TelegramController extends Controller
 
                     $this->telegram()->sendMessage($chatId,
                         "{$greeting}\n\n"
-                        . "Доступні команди:\n"
-                        . "/schedule — ваш розклад\n"
-                        . "/next — наступне служіння\n"
-                        . "/app — відкрити додаток\n"
-                        . "/help — допомога"
+                        ."Доступні команди:\n"
+                        ."/schedule — ваш розклад\n"
+                        ."/next — наступне служіння\n"
+                        ."/app — відкрити додаток\n"
+                        .'/help — допомога'
                     );
                 } else {
                     $this->telegram()->sendMessage($chatId,
                         "👋 Вітаємо в Ministrify!\n\n"
-                        . "Ваш акаунт не знайдено.\n\n"
-                        . "Якщо ви член церкви — зверніться до адміністратора, щоб вас додали в систему."
+                        ."Ваш акаунт не знайдено.\n\n"
+                        .'Якщо ви член церкви — зверніться до адміністратора, щоб вас додали в систему.'
                     );
                 }
                 break;
@@ -353,9 +358,9 @@ class TelegramController extends Controller
                 if ($person) {
                     $this->telegram()->sendMessage($chatId,
                         "📅 Щоб вказати дати недоступності:\n\n"
-                        . "1. Увійдіть в Ministrify\n"
-                        . "2. Перейдіть в «Мій профіль»\n"
-                        . "3. Додайте дати недоступності"
+                        ."1. Увійдіть в Ministrify\n"
+                        ."2. Перейдіть в «Мій профіль»\n"
+                        .'3. Додайте дати недоступності'
                     );
                 } else {
                     $this->telegram()->sendMessage($chatId, '❌ Ваш акаунт не підключено.');
@@ -364,20 +369,20 @@ class TelegramController extends Controller
 
             case '/app':
                 if ($person) {
-                    $token = \App\Http\Middleware\ValidateTelegramMiniApp::generateAuthToken($person);
-                    $appUrl = route('telegram.app') . '?token=' . $token;
+                    $token = ValidateTelegramMiniApp::generateAuthToken($person);
+                    $appUrl = route('telegram.app').'?token='.$token;
                 } else {
                     $appUrl = route('telegram.app');
                 }
-                \Illuminate\Support\Facades\Http::post(
-                    "https://api.telegram.org/bot" . config('services.telegram.bot_token') . "/sendMessage",
+                Http::post(
+                    'https://api.telegram.org/bot'.config('services.telegram.bot_token').'/sendMessage',
                     [
                         'chat_id' => $chatId,
                         'text' => "📱 <b>Ministrify App</b>\n\nНатисніть кнопку нижче, щоб відкрити додаток:",
                         'parse_mode' => 'HTML',
                         'reply_markup' => json_encode([
                             'keyboard' => [
-                                [['text' => "📱 Відкрити додаток", 'web_app' => ['url' => $appUrl]]],
+                                [['text' => '📱 Відкрити додаток', 'web_app' => ['url' => $appUrl]]],
                             ],
                             'resize_keyboard' => true,
                         ]),
@@ -388,13 +393,13 @@ class TelegramController extends Controller
             case '/help':
                 $this->telegram()->sendMessage($chatId,
                     "📚 <b>Допомога Ministrify</b>\n\n"
-                    . "/start — початок роботи\n"
-                    . "/schedule — ваш розклад на місяць\n"
-                    . "/next — наступне служіння\n"
-                    . "/app — відкрити додаток\n"
-                    . "/unavailable — вказати недоступність\n"
-                    . "/help — ця допомога\n\n"
-                    . "Якщо є питання — зверніться до адміністратора."
+                    ."/start — початок роботи\n"
+                    ."/schedule — ваш розклад на місяць\n"
+                    ."/next — наступне служіння\n"
+                    ."/app — відкрити додаток\n"
+                    ."/unavailable — вказати недоступність\n"
+                    ."/help — ця допомога\n\n"
+                    .'Якщо є питання — зверніться до адміністратора.'
                 );
                 break;
 
@@ -406,19 +411,21 @@ class TelegramController extends Controller
         return response()->json(['ok' => true]);
     }
 
-    private function handleLinkingCode(string $code, string $chatId): \Illuminate\Http\JsonResponse
+    private function handleLinkingCode(string $code, string $chatId): JsonResponse
     {
         $cached = Cache::get("telegram_link_{$code}");
 
-        if (!$cached) {
+        if (! $cached) {
             $this->telegram()->sendMessage($chatId, '❌ Невірний або застарілий код.');
+
             return response()->json(['ok' => true]);
         }
 
         $person = Person::find($cached['person_id']);
 
-        if (!$person) {
+        if (! $person) {
             $this->telegram()->sendMessage($chatId, '❌ Помилка: людину не знайдено.');
+
             return response()->json(['ok' => true]);
         }
 
@@ -427,10 +434,10 @@ class TelegramController extends Controller
 
         $this->telegram()->sendMessage($chatId,
             "✅ Акаунт успішно підключено!\n\n"
-            . "Тепер ви будете отримувати сповіщення про служіння.\n\n"
-            . "Доступні команди:\n"
-            . "/schedule — ваш розклад\n"
-            . "/next — наступне служіння"
+            ."Тепер ви будете отримувати сповіщення про служіння.\n\n"
+            ."Доступні команди:\n"
+            ."/schedule — ваш розклад\n"
+            .'/next — наступне служіння'
         );
 
         return response()->json(['ok' => true]);
@@ -453,9 +460,9 @@ class TelegramController extends Controller
             ->get() ?? collect();
 
         $message = "🔗 <b>Автопідключення Telegram</b>\n\n"
-            . "👤 {$person->full_name}\n"
-            . "📱 @{$username}\n\n"
-            . "Користувач автоматично підключився до бота.";
+            ."👤 {$person->full_name}\n"
+            ."📱 @{$username}\n\n"
+            .'Користувач автоматично підключився до бота.';
 
         foreach ($admins as $admin) {
             try {
@@ -465,7 +472,6 @@ class TelegramController extends Controller
             }
         }
     }
-
 
     private function saveMessage(Person $person, string $text, ?int $telegramMessageId = null): void
     {
@@ -483,7 +489,7 @@ class TelegramController extends Controller
     {
         $cached = Cache::get("telegram_link_{$code}");
 
-        if (!$cached) {
+        if (! $cached) {
             return response()->json(['error' => 'Invalid code'], 404);
         }
 

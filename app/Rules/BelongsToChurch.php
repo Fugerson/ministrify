@@ -17,7 +17,9 @@ use Illuminate\Database\Eloquent\Model;
 class BelongsToChurch implements ValidationRule
 {
     protected string $modelClass;
+
     protected ?string $type;
+
     protected string $message;
 
     public function __construct(string $modelClass, ?string $type = null)
@@ -37,8 +39,9 @@ class BelongsToChurch implements ValidationRule
         }
 
         $user = auth()->user();
-        if (!$user) {
+        if (! $user) {
             $fail($this->message);
+
             return;
         }
 
@@ -47,22 +50,25 @@ class BelongsToChurch implements ValidationRule
             ? session('impersonate_church_id')
             : $user->church_id;
 
-        if (!$churchId) {
+        if (! $churchId) {
             $fail($this->message);
+
             return;
         }
 
         // Find the model
         $model = $this->modelClass::find($value);
 
-        if (!$model) {
+        if (! $model) {
             $fail('Обраний запис не знайдено.');
+
             return;
         }
 
         // Check church_id
-        if (!isset($model->church_id) || $model->church_id !== $churchId) {
+        if (! isset($model->church_id) || $model->church_id !== $churchId) {
             $fail($this->message);
+
             return;
         }
 

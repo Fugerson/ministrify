@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Announcement extends Model
 {
-    use HasFactory, Auditable;
+    use Auditable, HasFactory;
 
     protected $fillable = [
         'church_id',
@@ -53,7 +53,7 @@ class Announcement extends Model
 
     public function markAsReadBy(User $user): void
     {
-        if (!$this->isReadBy($user)) {
+        if (! $this->isReadBy($user)) {
             $this->readByUsers()->attach($user->id, ['read_at' => now()]);
         }
     }

@@ -2,19 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Person;
-use App\Models\Event;
-use App\Models\Transaction;
+use App\Exports\AttendanceExport;
+use App\Exports\TransactionsExport;
+use App\Exports\VolunteersExport;
 use App\Models\Assignment;
 use App\Models\Attendance;
 use App\Models\AttendanceRecord;
-use App\Exports\VolunteersExport;
-use App\Exports\TransactionsExport;
-use App\Exports\AttendanceExport;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Maatwebsite\Excel\Facades\Excel;
+use App\Models\Event;
+use App\Models\Person;
+use App\Models\Transaction;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ReportsController extends Controller
 {
@@ -22,7 +21,7 @@ class ReportsController extends Controller
     {
         $this->checkPlanFeature('reports');
 
-        if (!auth()->user()->canView('reports')) {
+        if (! auth()->user()->canView('reports')) {
             return redirect()->route('dashboard')->with('error', __('У вас немає доступу до цього розділу. Зверніться до адміністратора церкви для отримання потрібних прав.'));
         }
 
@@ -32,8 +31,8 @@ class ReportsController extends Controller
         $stats = [
             'total_members' => Person::where('church_id', $church->id)->where('membership_status', '!=', Person::STATUS_GUEST)->count(),
             'active_members' => Person::where('church_id', $church->id)
-                ->whereHas('attendanceRecords', fn($q) => $q->where('present', true)
-                    ->whereHas('attendance', fn($aq) => $aq->where('date', '>=', now()->subMonths(3))))
+                ->whereHas('attendanceRecords', fn ($q) => $q->where('present', true)
+                    ->whereHas('attendance', fn ($aq) => $aq->where('date', '>=', now()->subMonths(3))))
                 ->count(),
             'total_events' => Event::where('church_id', $church->id)->where('date', '>=', now()->startOfYear())->count(),
             'total_volunteers' => Person::where('church_id', $church->id)
@@ -49,7 +48,7 @@ class ReportsController extends Controller
         abort_unless(auth()->user()->canView('reports'), 403);
         $church = $this->getCurrentChurch();
 
-        if (!$church->attendance_enabled) {
+        if (! $church->attendance_enabled) {
             abort(403, 'Функцію відвідуваності вимкнено для вашої церкви.');
         }
 
@@ -65,7 +64,7 @@ class ReportsController extends Controller
                 ->whereMonth('date', $m);
 
             if ($ministryId) {
-                $sessionsQuery->whereHas('attendable', fn($q) => $q->where('ministry_id', $ministryId));
+                $sessionsQuery->whereHas('attendable', fn ($q) => $q->where('ministry_id', $ministryId));
             }
 
             // Count unique people who attended
@@ -86,7 +85,7 @@ class ReportsController extends Controller
         $weekdayQuery = Attendance::where('church_id', $church->id)
             ->whereYear('date', $year);
         if ($ministryId) {
-            $weekdayQuery->whereHas('attendable', fn($q) => $q->where('ministry_id', $ministryId));
+            $weekdayQuery->whereHas('attendable', fn ($q) => $q->where('ministry_id', $ministryId));
         }
         $weekdayData = (clone $weekdayQuery)
             ->selectRaw('DAYOFWEEK(date) as day, SUM(COALESCE(total_count, members_present, 0)) as count')
@@ -110,30 +109,30 @@ class ReportsController extends Controller
             $q->where('present', true)
                 ->whereHas('attendance', function ($aq) use ($ministryId) {
                     if ($ministryId) {
-                        $aq->whereHas('attendable', fn($mq) => $mq->where('ministry_id', $ministryId));
+                        $aq->whereHas('attendable', fn ($mq) => $mq->where('ministry_id', $ministryId));
                     }
                 });
         };
         $inactiveMembers = $inactiveQuery
-            ->whereHas('attendanceRecords', fn($q) => $q->where('present', true)
+            ->whereHas('attendanceRecords', fn ($q) => $q->where('present', true)
                 ->whereHas('attendance', function ($aq) use ($ministryId) {
                     $aq->where('date', '<', now()->subMonths(3));
                     if ($ministryId) {
-                        $aq->whereHas('attendable', fn($mq) => $mq->where('ministry_id', $ministryId));
+                        $aq->whereHas('attendable', fn ($mq) => $mq->where('ministry_id', $ministryId));
                     }
                 }))
-            ->whereDoesntHave('attendanceRecords', fn($q) => $q->where('present', true)
+            ->whereDoesntHave('attendanceRecords', fn ($q) => $q->where('present', true)
                 ->whereHas('attendance', function ($aq) use ($ministryId) {
                     $aq->where('date', '>=', now()->subMonths(3));
                     if ($ministryId) {
-                        $aq->whereHas('attendable', fn($mq) => $mq->where('ministry_id', $ministryId));
+                        $aq->whereHas('attendable', fn ($mq) => $mq->where('ministry_id', $ministryId));
                     }
                 }))
-            ->with(['attendanceRecords' => fn($q) => $q->where('present', true)
+            ->with(['attendanceRecords' => fn ($q) => $q->where('present', true)
                 ->with('attendance')
                 ->whereHas('attendance')
                 ->orderByDesc(
-                    \App\Models\Attendance::select('date')
+                    Attendance::select('date')
                         ->whereColumn('attendances.id', 'attendance_records.attendance_id')
                 )
                 ->limit(1)])
@@ -142,18 +141,18 @@ class ReportsController extends Controller
 
         // Top attendees (filtered by ministry if selected)
         $topAttendees = Person::where('church_id', $church->id)
-            ->whereHas('attendanceRecords', fn($q) => $q->where('present', true)
+            ->whereHas('attendanceRecords', fn ($q) => $q->where('present', true)
                 ->whereHas('attendance', function ($aq) use ($year, $ministryId) {
                     $aq->whereYear('date', $year);
                     if ($ministryId) {
-                        $aq->whereHas('attendable', fn($mq) => $mq->where('ministry_id', $ministryId));
+                        $aq->whereHas('attendable', fn ($mq) => $mq->where('ministry_id', $ministryId));
                     }
                 }))
-            ->withCount(['attendanceRecords' => fn($q) => $q->where('present', true)
+            ->withCount(['attendanceRecords' => fn ($q) => $q->where('present', true)
                 ->whereHas('attendance', function ($aq) use ($year, $ministryId) {
                     $aq->whereYear('date', $year);
                     if ($ministryId) {
-                        $aq->whereHas('attendable', fn($mq) => $mq->where('ministry_id', $ministryId));
+                        $aq->whereHas('attendable', fn ($mq) => $mq->where('ministry_id', $ministryId));
                     }
                 })])
             ->orderByDesc('attendance_records_count')
@@ -278,8 +277,8 @@ class ReportsController extends Controller
 
         // Top volunteers by assignments (include soft-deleted events for historical reports)
         $topVolunteers = Person::where('church_id', $church->id)
-            ->whereHas('assignments', fn($q) => $q->whereHas('event', fn($e) => $e->withTrashed()->whereYear('date', $year)))
-            ->withCount(['assignments' => fn($q) => $q->whereHas('event', fn($e) => $e->withTrashed()->whereYear('date', $year))])
+            ->whereHas('assignments', fn ($q) => $q->whereHas('event', fn ($e) => $e->withTrashed()->whereYear('date', $year)))
+            ->withCount(['assignments' => fn ($q) => $q->whereHas('event', fn ($e) => $e->withTrashed()->whereYear('date', $year))])
             ->orderByDesc('assignments_count')
             ->take(15)
             ->get();
@@ -287,14 +286,14 @@ class ReportsController extends Controller
         // Monthly volunteer activity
         $monthlyData = [];
         for ($m = 1; $m <= 12; $m++) {
-            $assignments = Assignment::whereHas('event', fn($q) => $q
+            $assignments = Assignment::whereHas('event', fn ($q) => $q
                 ->withTrashed()
                 ->where('church_id', $church->id)
                 ->whereYear('date', $year)
                 ->whereMonth('date', $m)
             )->count();
 
-            $uniqueVolunteers = Assignment::whereHas('event', fn($q) => $q
+            $uniqueVolunteers = Assignment::whereHas('event', fn ($q) => $q
                 ->withTrashed()
                 ->where('church_id', $church->id)
                 ->whereYear('date', $year)
@@ -309,23 +308,23 @@ class ReportsController extends Controller
         }
 
         // Volunteer distribution by ministry
-        $byMinistry = Assignment::whereHas('event', fn($q) => $q
+        $byMinistry = Assignment::whereHas('event', fn ($q) => $q
             ->withTrashed()
             ->where('church_id', $church->id)
             ->whereYear('date', $year)
         )
-        ->join('events', 'assignments.event_id', '=', 'events.id')
-        ->join('ministries', 'events.ministry_id', '=', 'ministries.id')
-        ->whereNull('ministries.deleted_at')
-        ->selectRaw('ministries.name, ministries.color, COUNT(*) as count')
-        ->groupBy('ministries.id', 'ministries.name', 'ministries.color')
-        ->orderByDesc('count')
-        ->get();
+            ->join('events', 'assignments.event_id', '=', 'events.id')
+            ->join('ministries', 'events.ministry_id', '=', 'ministries.id')
+            ->whereNull('ministries.deleted_at')
+            ->selectRaw('ministries.name, ministries.color, COUNT(*) as count')
+            ->groupBy('ministries.id', 'ministries.name', 'ministries.color')
+            ->orderByDesc('count')
+            ->get();
 
         // People who haven't volunteered in 3+ months
         $inactiveVolunteers = Person::where('church_id', $church->id)
-            ->whereHas('assignments', fn($q) => $q->whereHas('event', fn($e) => $e->withTrashed()->where('date', '<', now()->subMonths(3))))
-            ->whereDoesntHave('assignments', fn($q) => $q->whereHas('event', fn($e) => $e->withTrashed()->where('date', '>=', now()->subMonths(3))))
+            ->whereHas('assignments', fn ($q) => $q->whereHas('event', fn ($e) => $e->withTrashed()->where('date', '<', now()->subMonths(3))))
+            ->whereDoesntHave('assignments', fn ($q) => $q->whereHas('event', fn ($e) => $e->withTrashed()->where('date', '>=', now()->subMonths(3))))
             ->take(20)
             ->get();
 

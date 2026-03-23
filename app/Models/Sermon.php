@@ -2,16 +2,16 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
-use App\Traits\Auditable;
 
 class Sermon extends Model
 {
-    use HasFactory, SoftDeletes, Auditable;
+    use Auditable, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'church_id',
@@ -53,7 +53,7 @@ class Sermon extends Model
                 $slug = $baseSlug;
                 $counter = 1;
                 while (self::where('slug', $slug)->where('church_id', $sermon->church_id)->exists()) {
-                    $slug = $baseSlug . '-' . $counter++;
+                    $slug = $baseSlug.'-'.$counter++;
                 }
                 $sermon->slug = $slug;
             }
@@ -97,27 +97,35 @@ class Sermon extends Model
 
     public function getYoutubeIdAttribute(): ?string
     {
-        if (!$this->youtube_url) return null;
+        if (! $this->youtube_url) {
+            return null;
+        }
 
         if (preg_match('/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]+)/', $this->youtube_url, $matches)) {
             return $matches[1];
         }
+
         return null;
     }
 
     public function getVimeoIdAttribute(): ?string
     {
-        if (!$this->vimeo_url) return null;
+        if (! $this->vimeo_url) {
+            return null;
+        }
 
         if (preg_match('/vimeo\.com\/(\d+)/', $this->vimeo_url, $matches)) {
             return $matches[1];
         }
+
         return null;
     }
 
     public function getFormattedDurationAttribute(): ?string
     {
-        if (!$this->duration_seconds) return null;
+        if (! $this->duration_seconds) {
+            return null;
+        }
 
         $hours = floor($this->duration_seconds / 3600);
         $minutes = floor(($this->duration_seconds % 3600) / 60);
@@ -126,6 +134,7 @@ class Sermon extends Model
         if ($hours > 0) {
             return sprintf('%d:%02d:%02d', $hours, $minutes, $seconds);
         }
+
         return sprintf('%d:%02d', $minutes, $seconds);
     }
 
@@ -138,6 +147,7 @@ class Sermon extends Model
         if ($this->youtube_id) {
             return "https://img.youtube.com/vi/{$this->youtube_id}/maxresdefault.jpg";
         }
+
         return null;
     }
 

@@ -17,7 +17,7 @@ class TwoFactorServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new TwoFactorService();
+        $this->service = new TwoFactorService;
     }
 
     // ==================
@@ -166,7 +166,9 @@ class TwoFactorServiceTest extends TestCase
 
         for ($i = 0; $i < strlen($input); $i++) {
             $val = strpos($alphabet, strtoupper($input[$i]));
-            if ($val === false) continue;
+            if ($val === false) {
+                continue;
+            }
             $buffer = ($buffer << 5) | $val;
             $bitsLeft += 5;
             if ($bitsLeft >= 8) {
@@ -174,6 +176,7 @@ class TwoFactorServiceTest extends TestCase
                 $output .= chr(($buffer >> $bitsLeft) & 0xFF);
             }
         }
+
         return $output;
     }
 }

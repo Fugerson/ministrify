@@ -65,7 +65,7 @@ class MinistryMeeting extends Model
 
     public function getStatusLabelAttribute(): string
     {
-        return match($this->status) {
+        return match ($this->status) {
             'planned' => 'Заплановано',
             'in_progress' => 'В процесі',
             'completed' => 'Завершено',
@@ -76,7 +76,7 @@ class MinistryMeeting extends Model
 
     public function getStatusColorAttribute(): string
     {
-        return match($this->status) {
+        return match ($this->status) {
             'planned' => 'blue',
             'in_progress' => 'yellow',
             'completed' => 'green',
@@ -87,9 +87,10 @@ class MinistryMeeting extends Model
 
     public function getDurationAttribute(): ?int
     {
-        if (!$this->start_time || !$this->end_time) {
+        if (! $this->start_time || ! $this->end_time) {
             return null;
         }
+
         return $this->start_time->diffInMinutes($this->end_time);
     }
 

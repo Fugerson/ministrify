@@ -56,7 +56,7 @@ class BoardCardActivity extends Model
         $userName = $this->user->name ?? 'Хтось';
         $checklistTitle = $this->metadata['title'] ?? '';
 
-        return match($this->action) {
+        return match ($this->action) {
             'created' => "{$userName} створив завдання",
             'updated' => $this->getUpdateDescription($userName),
             'moved' => "{$userName} перемістив у \"{$this->new_value}\"",
@@ -82,7 +82,7 @@ class BoardCardActivity extends Model
 
     private function getUpdateDescription(string $userName): string
     {
-        return match($this->field) {
+        return match ($this->field) {
             'title' => "{$userName} змінив назву",
             'description' => "{$userName} змінив опис",
             'priority' => "{$userName} змінив пріоритет на {$this->getPriorityLabel($this->new_value)}",
@@ -95,7 +95,7 @@ class BoardCardActivity extends Model
 
     private function getPriorityLabel(?string $priority): string
     {
-        return match($priority) {
+        return match ($priority) {
             'urgent' => 'Терміновий',
             'high' => 'Високий',
             'medium' => 'Середній',

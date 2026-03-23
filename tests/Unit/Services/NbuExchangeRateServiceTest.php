@@ -16,7 +16,7 @@ class NbuExchangeRateServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new NbuExchangeRateService();
+        $this->service = new NbuExchangeRateService;
     }
 
     public function test_sync_rates_creates_records(): void

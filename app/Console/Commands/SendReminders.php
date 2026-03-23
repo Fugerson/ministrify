@@ -2,9 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Assignment;
 use App\Models\Event;
-use App\Models\EventResponsibility;
 use App\Services\TelegramService;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
@@ -12,6 +10,7 @@ use Illuminate\Console\Command;
 class SendReminders extends Command
 {
     protected $signature = 'app:send-reminders';
+
     protected $description = 'Send reminders for upcoming assignments based on event settings';
 
     public function handle(): int
@@ -50,7 +49,7 @@ class SendReminders extends Command
                     foreach ($responsibilities as $responsibility) {
                         $church = $responsibility->person->church ?? null;
 
-                        if (!$church || !config('services.telegram.bot_token') || !$responsibility->person->telegram_chat_id) {
+                        if (! $church || ! config('services.telegram.bot_token') || ! $responsibility->person->telegram_chat_id) {
                             continue;
                         }
 
@@ -104,11 +103,11 @@ class SendReminders extends Command
      */
     private function shouldSendReminder(Event $event, array $reminder, Carbon $now): bool
     {
-        if (!$event->time) {
+        if (! $event->time) {
             return false;
         }
 
-        $eventDateTime = Carbon::parse($event->date->format('Y-m-d') . ' ' . $event->time->format('H:i'));
+        $eventDateTime = Carbon::parse($event->date->format('Y-m-d').' '.$event->time->format('H:i'));
 
         if ($reminder['type'] === 'days') {
             // For days-based reminders, check if we're at the specified time on the correct day

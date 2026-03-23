@@ -14,7 +14,7 @@ class ChurchSwitchController extends Controller
 
         $user = auth()->user();
 
-        if (!$user->belongsToChurch($request->church_id)) {
+        if (! $user->belongsToChurch($request->church_id)) {
             abort(403, 'Ви не є членом цієї церкви.');
         }
 

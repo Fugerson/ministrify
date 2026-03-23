@@ -18,7 +18,7 @@ class VisitorFollowupService
         }
 
         $church = $person->church;
-        if (!$church) {
+        if (! $church) {
             return;
         }
 
@@ -27,13 +27,13 @@ class VisitorFollowupService
             ->where('name', 'Трекер завдань')
             ->first();
 
-        if (!$board) {
+        if (! $board) {
             return;
         }
 
         // Find the first column (usually "To Do" or similar)
         $column = $board->columns()->orderBy('position')->first();
-        if (!$column) {
+        if (! $column) {
             return;
         }
 
@@ -68,8 +68,8 @@ class VisitorFollowupService
     private function buildTaskDescription(Person $person): string
     {
         $lines = [
-            "## Інформація про гостя",
-            "",
+            '## Інформація про гостя',
+            '',
             "**Ім'я:** {$person->full_name}",
         ];
 
@@ -82,15 +82,15 @@ class VisitorFollowupService
         }
 
         if ($person->first_visit_date) {
-            $lines[] = "**Перший візит:** " . $person->first_visit_date->format('d.m.Y');
+            $lines[] = '**Перший візит:** '.$person->first_visit_date->format('d.m.Y');
         }
 
-        $lines[] = "";
-        $lines[] = "## Завдання";
+        $lines[] = '';
+        $lines[] = '## Завдання';
         $lines[] = "- [ ] Зв'язатися протягом 3 днів";
-        $lines[] = "- [ ] Дізнатися про враження від візиту";
-        $lines[] = "- [ ] Запросити на наступне богослужіння";
-        $lines[] = "- [ ] Додати до групи новоприбулих (якщо є)";
+        $lines[] = '- [ ] Дізнатися про враження від візиту';
+        $lines[] = '- [ ] Запросити на наступне богослужіння';
+        $lines[] = '- [ ] Додати до групи новоприбулих (якщо є)';
 
         return implode("\n", $lines);
     }
@@ -114,10 +114,10 @@ class VisitorFollowupService
         $noReturn = Person::where('church_id', $churchId)
             ->where('membership_status', Person::STATUS_GUEST)
             ->whereRaw('COALESCE(first_visit_date, created_at) <= ?', [$oneWeekAgo])
-            ->whereHas('attendanceRecords', fn($q) => $q->where('present', true))
+            ->whereHas('attendanceRecords', fn ($q) => $q->where('present', true))
             ->whereDoesntHave('attendanceRecords', function ($q) use ($oneWeekAgo) {
                 $q->where('present', true)
-                  ->whereHas('attendance', fn($aq) => $aq->where('date', '>=', $oneWeekAgo));
+                    ->whereHas('attendance', fn ($aq) => $aq->where('date', '>=', $oneWeekAgo));
             })
             ->get();
 

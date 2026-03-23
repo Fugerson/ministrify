@@ -9,21 +9,19 @@ use Symfony\Component\HttpFoundation\Response;
 
 class CheckPlanLimit
 {
-    public function __construct(protected PlanService $planService)
-    {
-    }
+    public function __construct(protected PlanService $planService) {}
 
     public function handle(Request $request, Closure $next, string $resource): Response
     {
         $church = $request->attributes->get('currentChurch');
 
-        if (!$church) {
+        if (! $church) {
             return $next($request);
         }
 
         $check = $this->planService->checkLimit($church, $resource);
 
-        if (!$check['allowed']) {
+        if (! $check['allowed']) {
             if ($request->expectsJson()) {
                 return response()->json([
                     'message' => __('messages.plan_limit_reached', [

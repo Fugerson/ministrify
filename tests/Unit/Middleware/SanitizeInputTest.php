@@ -14,7 +14,7 @@ class SanitizeInputTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->middleware = new SanitizeInput();
+        $this->middleware = new SanitizeInput;
     }
 
     public function test_removes_null_bytes(): void
@@ -25,6 +25,7 @@ class SanitizeInputTest extends TestCase
 
         $this->middleware->handle($request, function ($req) {
             $this->assertEquals('TestName', $req->input('name'));
+
             return new Response('OK');
         });
     }
@@ -37,6 +38,7 @@ class SanitizeInputTest extends TestCase
 
         $this->middleware->handle($request, function ($req) {
             $this->assertEquals('Test Name', $req->input('name'));
+
             return new Response('OK');
         });
     }
@@ -49,6 +51,7 @@ class SanitizeInputTest extends TestCase
 
         $this->middleware->handle($request, function ($req) {
             $this->assertEquals('TestName', $req->input('name'));
+
             return new Response('OK');
         });
     }
@@ -62,6 +65,7 @@ class SanitizeInputTest extends TestCase
         $this->middleware->handle($request, function ($req) {
             $this->assertStringContainsString("\n", $req->input('notes'));
             $this->assertStringContainsString("\t", $req->input('notes'));
+
             return new Response('OK');
         });
     }
@@ -80,6 +84,7 @@ class SanitizeInputTest extends TestCase
             $this->assertEquals("Test\0Password", $req->input('password_confirmation'));
             $this->assertEquals("Old\0Pass", $req->input('current_password'));
             $this->assertEquals("New\0Pass", $req->input('new_password'));
+
             return new Response('OK');
         });
     }
@@ -94,6 +99,7 @@ class SanitizeInputTest extends TestCase
 
         $this->middleware->handle($request, function ($req) {
             $this->assertEquals('NestedValue', $req->input('data.name'));
+
             return new Response('OK');
         });
     }

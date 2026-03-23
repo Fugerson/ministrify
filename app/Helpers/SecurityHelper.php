@@ -99,7 +99,7 @@ class SecurityHelper
         $end = substr($value, -$visibleChars);
         $masked = str_repeat('*', $length - ($visibleChars * 2));
 
-        return $start . $masked . $end;
+        return $start.$masked.$end;
     }
 
     /**

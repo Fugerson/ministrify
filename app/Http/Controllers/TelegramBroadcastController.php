@@ -23,7 +23,7 @@ class TelegramBroadcastController extends Controller
             ->orderBy('first_name')
             ->get();
 
-        $hasBot = !empty(config('services.telegram.bot_token'));
+        $hasBot = ! empty(config('services.telegram.bot_token'));
 
         return view('telegram.broadcast', compact('recipients', 'hasBot'));
     }
@@ -73,6 +73,6 @@ class TelegramBroadcastController extends Controller
             }
         }
 
-        return $this->successResponse($request, "Надіслано: {$sent} повідомлень" . ($failed > 0 ? ", помилок: {$failed}" : ''));
+        return $this->successResponse($request, "Надіслано: {$sent} повідомлень".($failed > 0 ? ", помилок: {$failed}" : ''));
     }
 }

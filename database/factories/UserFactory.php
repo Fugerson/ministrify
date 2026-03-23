@@ -37,7 +37,7 @@ class UserFactory extends Factory
     public function admin(): static
     {
         return $this->afterCreating(function (User $user) {
-            if (!$user->church_id) {
+            if (! $user->church_id) {
                 return;
             }
             $role = ChurchRole::firstOrCreate(
@@ -51,7 +51,7 @@ class UserFactory extends Factory
     public function leader(): static
     {
         return $this->afterCreating(function (User $user) {
-            if (!$user->church_id) {
+            if (! $user->church_id) {
                 return;
             }
             $role = ChurchRole::firstOrCreate(
@@ -65,7 +65,7 @@ class UserFactory extends Factory
     public function volunteer(): static
     {
         return $this->afterCreating(function (User $user) {
-            if (!$user->church_id) {
+            if (! $user->church_id) {
                 return;
             }
             $role = ChurchRole::firstOrCreate(

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\Auditable;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Position extends Model
 {
-    use HasFactory, Auditable, SoftDeletes;
+    use Auditable, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'ministry_id',
@@ -29,13 +30,14 @@ class Position extends Model
         return $this->hasMany(Assignment::class);
     }
 
-    public function getAvailablePeople(): \Illuminate\Database\Eloquent\Collection
+    public function getAvailablePeople(): Collection
     {
-        if (!$this->ministry) {
-            return new \Illuminate\Database\Eloquent\Collection();
+        if (! $this->ministry) {
+            return new Collection;
         }
+
         return $this->ministry->members()
             ->get()
-            ->filter(fn($person) => $person->hasPositionInMinistry($this->ministry, $this));
+            ->filter(fn ($person) => $person->hasPositionInMinistry($this->ministry, $this));
     }
 }

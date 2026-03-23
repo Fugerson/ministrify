@@ -53,7 +53,7 @@ class RolePermissionController extends Controller
             ->where('church_id', $church->id)
             ->first();
 
-        if (!$role) {
+        if (! $role) {
             return response()->json(['error' => 'Role not found'], 404);
         }
 
@@ -86,10 +86,11 @@ class RolePermissionController extends Controller
             ->where('church_id', $church->id)
             ->first();
 
-        if (!$role) {
+        if (! $role) {
             if ($request->wantsJson()) {
                 return response()->json(['error' => 'Роль не знайдена'], 404);
             }
+
             return back()->with('error', 'Роль не знайдена');
         }
 
@@ -99,7 +100,7 @@ class RolePermissionController extends Controller
 
         // Re-create default permissions based on role slug
         $defaults = ChurchRole::DEFAULT_PERMISSIONS[$role->slug] ?? [];
-        if (!empty($defaults)) {
+        if (! empty($defaults)) {
             $role->setPermissions($defaults);
         }
 

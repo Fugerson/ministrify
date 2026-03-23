@@ -21,6 +21,7 @@ class SermonController extends Controller
 
         if ($request->wantsJson()) {
             $sermons = $church->sermons()->with('series', 'speaker')->latest('sermon_date')->limit(50)->get();
+
             return response()->json(['items' => $sermons]);
         }
 

@@ -2,15 +2,15 @@
 
 namespace App\Console\Commands;
 
+use App\Models\AttendanceRecord;
 use App\Models\Church;
 use App\Models\Person;
-use App\Models\AttendanceRecord;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
 
 class CheckAttendanceAlerts extends Command
 {
     protected $signature = 'app:check-attendance-alerts {--weeks=3 : Number of weeks without attendance}';
+
     protected $description = 'Check for people who have not attended for X weeks';
 
     public function handle(): int
@@ -41,7 +41,8 @@ class CheckAttendanceAlerts extends Command
                 ->get();
 
             if ($absentPeople->isEmpty()) {
-                $this->line("  No alerts.");
+                $this->line('  No alerts.');
+
                 continue;
             }
 

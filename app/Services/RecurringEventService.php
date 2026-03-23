@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Event;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 
 class RecurringEventService
 {
@@ -128,6 +129,7 @@ class RecurringEventService
                 do {
                     $date->addDay();
                 } while ($date->isWeekend());
+
                 return $date;
 
             case 'custom':
@@ -172,7 +174,7 @@ class RecurringEventService
     /**
      * Get all events in a recurring series
      */
-    public function getRecurringSeries(Event $event): \Illuminate\Database\Eloquent\Collection
+    public function getRecurringSeries(Event $event): Collection
     {
         $parentId = $event->parent_event_id ?? $event->id;
 

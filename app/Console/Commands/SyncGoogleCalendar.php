@@ -21,6 +21,7 @@ class SyncGoogleCalendar extends Command
 
         if ($users->isEmpty()) {
             $this->info('No users with Google Calendar connected');
+
             return self::SUCCESS;
         }
 
@@ -34,18 +35,18 @@ class SyncGoogleCalendar extends Command
 
             // Multi-calendar mappings with backward compatibility
             $mappings = $settings['calendars']
-                ?? (!empty($settings['calendar_id'])
+                ?? (! empty($settings['calendar_id'])
                     ? [['calendar_id' => $settings['calendar_id'], 'ministry_id' => $settings['ministry_id'] ?? null]]
                     : [['calendar_id' => 'primary', 'ministry_id' => null]]);
 
             // Use stored church_id for cross-church isolation (not active church)
             $storedChurchId = $settings['church_id'] ?? null;
             $church = $storedChurchId ? Church::find($storedChurchId) : $user->church;
-            if (!$church) {
+            if (! $church) {
                 continue;
             }
 
-            $this->line("- {$user->name} ({$church->name}), " . count($mappings) . " calendar(s)...");
+            $this->line("- {$user->name} ({$church->name}), ".count($mappings).' calendar(s)...');
 
             $userSynced = false;
 
@@ -62,7 +63,7 @@ class SyncGoogleCalendar extends Command
                         $this->info("  [{$calendarId}] OK: →G {$toGoogle['created']}+{$toGoogle['updated']}, ←G {$fromGoogle['created']}+{$fromGoogle['updated']}");
                         $userSynced = true;
                     } else {
-                        $this->error("  [{$calendarId}] Error: " . ($result['error'] ?? 'Unknown'));
+                        $this->error("  [{$calendarId}] Error: ".($result['error'] ?? 'Unknown'));
                         $errors++;
                     }
                 } catch (\Exception $e) {

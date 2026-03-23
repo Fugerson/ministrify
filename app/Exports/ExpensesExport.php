@@ -12,7 +12,9 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 class ExpensesExport implements FromCollection, WithHeadings, WithMapping, WithStyles
 {
     protected int $churchId;
+
     protected ?int $month;
+
     protected ?int $year;
 
     public function __construct(int $churchId, ?int $month = null, ?int $year = null)

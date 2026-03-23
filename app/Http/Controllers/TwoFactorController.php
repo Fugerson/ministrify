@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AuditLog;
+use App\Models\User;
 use App\Services\TwoFactorService;
 use Illuminate\Http\Request;
 
@@ -64,11 +65,11 @@ class TwoFactorController extends Controller
         $user = auth()->user();
         $secret = session('2fa_secret');
 
-        if (!$secret) {
+        if (! $secret) {
             return back()->with('error', __('messages.session_expired'));
         }
 
-        if (!$this->twoFactor->verify($secret, $request->code)) {
+        if (! $this->twoFactor->verify($secret, $request->code)) {
             return back()->with('error', __('messages.invalid_code_try_again'));
         }
 
@@ -118,7 +119,7 @@ class TwoFactorController extends Controller
 
         $user = auth()->user();
 
-        if (!$user->two_factor_confirmed_at) {
+        if (! $user->two_factor_confirmed_at) {
             return back()->with('error', __('messages.2fa_not_enabled'));
         }
 
@@ -136,7 +137,7 @@ class TwoFactorController extends Controller
      */
     public function challenge()
     {
-        if (!session('2fa_user_id')) {
+        if (! session('2fa_user_id')) {
             return redirect()->route('login');
         }
 
@@ -153,19 +154,19 @@ class TwoFactorController extends Controller
         ]);
 
         $userId = session('2fa_user_id');
-        if (!$userId) {
+        if (! $userId) {
             return redirect()->route('login');
         }
 
-        $user = \App\Models\User::find($userId);
-        if (!$user) {
+        $user = User::find($userId);
+        if (! $user) {
             return redirect()->route('login');
         }
 
         $code = str_replace('-', '', $request->code);
 
         // Try TOTP code first
-        if (!$user->two_factor_secret) {
+        if (! $user->two_factor_secret) {
             return redirect()->route('login')->with('error', __('messages.2fa_not_configured'));
         }
         $secret = decrypt($user->two_factor_secret);
@@ -192,6 +193,7 @@ class TwoFactorController extends Controller
             }
 
             $redirect = $user->isSuperAdmin() ? route('system.index') : route('dashboard');
+
             return redirect()->intended($redirect);
         }
 
@@ -219,6 +221,7 @@ class TwoFactorController extends Controller
             }
 
             $redirect = $user->isSuperAdmin() ? route('system.index') : route('dashboard');
+
             return redirect()->intended($redirect)
                 ->with('warning', __('messages.recovery_code_used', ['count' => count(json_decode(decrypt($user->two_factor_recovery_codes), true))]));
         }

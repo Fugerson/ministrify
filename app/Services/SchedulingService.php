@@ -25,6 +25,7 @@ use Illuminate\Support\Collection;
 class SchedulingService
 {
     protected ?Church $church = null;
+
     protected array $config;
 
     public function __construct(?Church $church = null)
@@ -47,6 +48,7 @@ class SchedulingService
     public function forChurch(Church $church): self
     {
         $this->church = $church;
+
         return $this;
     }
 
@@ -56,6 +58,7 @@ class SchedulingService
     public function setConfig(array $config): self
     {
         $this->config = array_merge($this->config, $config);
+
         return $this;
     }
 
@@ -111,13 +114,13 @@ class SchedulingService
             ->forMinistry($event->ministry_id)
             ->first();
 
-        if (!$blockout) {
+        if (! $blockout) {
             return null;
         }
 
         // Check time overlap if not all-day
-        if (!$blockout->all_day && $event->time) {
-            if (!$blockout->coversDateTime($event->date, $event->time)) {
+        if (! $blockout->all_day && $event->time) {
+            if (! $blockout->coversDateTime($event->date, $event->time)) {
                 return null;
             }
         }
@@ -125,7 +128,7 @@ class SchedulingService
         return [
             'type' => 'blockout',
             'severity' => 'error',
-            'details' => $blockout->reason_label . ($blockout->reason_note ? ': ' . $blockout->reason_note : ''),
+            'details' => $blockout->reason_label.($blockout->reason_note ? ': '.$blockout->reason_note : ''),
             'blockout_id' => $blockout->id,
             'date_range' => $blockout->date_range,
         ];
@@ -140,28 +143,28 @@ class SchedulingService
             ->where('status', '!=', 'declined')
             ->whereHas('event', function ($q) use ($event) {
                 $q->where('id', '!=', $event->id)
-                  ->whereDate('date', $event->date);
+                    ->whereDate('date', $event->date);
             })
             ->with('event.ministry')
             ->first();
 
-        if (!$concurrent) {
+        if (! $concurrent) {
             return null;
         }
 
         $otherEvent = $concurrent->event;
 
         // Check time overlap
-        if ($event->time && $otherEvent->time && !$this->eventsOverlap($event, $otherEvent)) {
+        if ($event->time && $otherEvent->time && ! $this->eventsOverlap($event, $otherEvent)) {
             return null;
         }
 
         return [
             'type' => 'concurrent',
             'severity' => 'warning',
-            'details' => "Вже призначений на «{$otherEvent->title}»" .
-                        ($otherEvent->ministry ? " ({$otherEvent->ministry->name})" : '') .
-                        ($otherEvent->time ? " о " . Carbon::parse($otherEvent->time)->format('H:i') : ''),
+            'details' => "Вже призначений на «{$otherEvent->title}»".
+                        ($otherEvent->ministry ? " ({$otherEvent->ministry->name})" : '').
+                        ($otherEvent->time ? ' о '.Carbon::parse($otherEvent->time)->format('H:i') : ''),
             'other_event_id' => $otherEvent->id,
             'other_assignment_id' => $concurrent->id,
         ];
@@ -177,7 +180,7 @@ class SchedulingService
             ->where('church_id', $event->church_id)
             ->first();
 
-        if (!$preference) {
+        if (! $preference) {
             return [];
         }
 
@@ -186,7 +189,7 @@ class SchedulingService
 
         // Count current assignments this month
         $monthCount = Assignment::where('person_id', $person->id)
-            ->whereHas('event', fn($q) => $q
+            ->whereHas('event', fn ($q) => $q
                 ->whereMonth('date', $month)
                 ->whereYear('date', $year)
                 ->where('id', '!=', $event->id)
@@ -219,7 +222,7 @@ class SchedulingService
             $ministryMax = $preference->getMaxForMinistry($event->ministry_id);
             if ($ministryMax) {
                 $ministryCount = Assignment::where('person_id', $person->id)
-                    ->whereHas('event', fn($q) => $q
+                    ->whereHas('event', fn ($q) => $q
                         ->where('ministry_id', $event->ministry_id)
                         ->whereMonth('date', $month)
                         ->whereYear('date', $year)
@@ -243,7 +246,7 @@ class SchedulingService
             if ($positionMax) {
                 $positionCount = Assignment::where('person_id', $person->id)
                     ->where('position_id', $position->id)
-                    ->whereHas('event', fn($q) => $q
+                    ->whereHas('event', fn ($q) => $q
                         ->whereMonth('date', $month)
                         ->whereYear('date', $year)
                         ->where('id', '!=', $event->id)
@@ -272,12 +275,12 @@ class SchedulingService
             ->where('church_id', $event->church_id)
             ->first();
 
-        if (!$preference || $preference->household_preference === 'none' || !$preference->prefer_with_person_id) {
+        if (! $preference || $preference->household_preference === 'none' || ! $preference->prefer_with_person_id) {
             return null;
         }
 
         $partner = Person::find($preference->prefer_with_person_id);
-        if (!$partner) {
+        if (! $partner) {
             return null;
         }
 
@@ -285,7 +288,7 @@ class SchedulingService
             ->where('event_id', $event->id)
             ->exists();
 
-        if ($preference->household_preference === 'together' && !$partnerAssigned) {
+        if ($preference->household_preference === 'together' && ! $partnerAssigned) {
             return [
                 'type' => 'household',
                 'severity' => 'info',
@@ -321,7 +324,7 @@ class SchedulingService
      */
     protected function eventsOverlap(Event $event1, Event $event2): bool
     {
-        if (!$event1->time || !$event2->time) {
+        if (! $event1->time || ! $event2->time) {
             return true; // Assume overlap if no times set
         }
 
@@ -346,12 +349,12 @@ class SchedulingService
     public function getAvailableVolunteers(Event $event, ?Position $position = null): Collection
     {
         $ministry = $event->ministry;
-        if (!$ministry) {
+        if (! $ministry) {
             return collect();
         }
 
         $volunteers = $ministry->members()
-            ->with(['schedulingPreference', 'blockoutDates' => fn($q) => $q->active()->forDate($event->date)])
+            ->with(['schedulingPreference', 'blockoutDates' => fn ($q) => $q->active()->forDate($event->date)])
             ->get();
 
         return $volunteers->map(function ($person) use ($event, $position) {
@@ -363,7 +366,7 @@ class SchedulingService
                 'conflicts' => $conflicts,
                 'has_errors' => $hasErrors,
                 'has_warnings' => collect($conflicts)->where('severity', 'warning')->isNotEmpty(),
-                'is_available' => !$hasErrors,
+                'is_available' => ! $hasErrors,
                 'score' => $this->calculateScore($person, $event, $position),
             ];
         })->sortByDesc('score');
@@ -396,7 +399,7 @@ class SchedulingService
         $monthlyCount = Assignment::where('person_id', $person->id)
             ->where('event_id', '!=', $event->id)
             ->whereNotIn('status', ['declined'])
-            ->whereHas('event', fn($q) => $q->whereBetween('date', [$monthStart, $monthEnd]))
+            ->whereHas('event', fn ($q) => $q->whereBetween('date', [$monthStart, $monthEnd]))
             ->count();
 
         if ($monthlyCount >= $this->config['max_assignments_per_month']) {
@@ -406,7 +409,7 @@ class SchedulingService
         // Check rest days since last assignment
         $lastAssignment = Assignment::where('person_id', $person->id)
             ->whereNotIn('status', ['declined'])
-            ->whereHas('event', fn($q) => $q->where('date', '<', $event->date))
+            ->whereHas('event', fn ($q) => $q->where('date', '<', $event->date))
             ->with('event')
             ->orderByDesc(Event::select('date')->whereColumn('events.id', 'assignments.event_id'))
             ->first();
@@ -422,6 +425,7 @@ class SchedulingService
         }
 
         $maxPerMonth = $this->config['max_assignments_per_month'] ?: 4;
+
         return max(0, min(1, 1 - ($monthlyCount / $maxPerMonth)));
     }
 
@@ -431,12 +435,12 @@ class SchedulingService
     protected function getSkillScore(Person $person, Position $position): float
     {
         $ministry = $position->ministry;
-        if (!$ministry) {
+        if (! $ministry) {
             return 0;
         }
 
         $pivot = $person->ministries()->where('ministry_id', $ministry->id)->first()?->pivot;
-        if (!$pivot || !$pivot->position_ids) {
+        if (! $pivot || ! $pivot->position_ids) {
             return 0;
         }
 
@@ -444,13 +448,13 @@ class SchedulingService
             ? $pivot->position_ids
             : json_decode($pivot->position_ids, true);
 
-        if (!in_array($position->id, $positionIds ?? [])) {
+        if (! in_array($position->id, $positionIds ?? [])) {
             return 0;
         }
 
         $level = 'intermediate';
 
-        return match($level) {
+        return match ($level) {
             'expert' => 1.0,
             'advanced' => 0.8,
             'intermediate' => 0.6,
@@ -466,7 +470,7 @@ class SchedulingService
     {
         $availability = $person->availability ?? [];
 
-        if (!empty($availability)) {
+        if (! empty($availability)) {
             $dayName = strtolower($event->date->format('l'));
             if (isset($availability[$dayName]) && $availability[$dayName] === false) {
                 return 0;
@@ -486,7 +490,7 @@ class SchedulingService
         // Check if already serving that day
         $hasOtherAssignment = Assignment::where('person_id', $person->id)
             ->where('status', '!=', 'declined')
-            ->whereHas('event', fn($q) => $q->whereDate('date', $event->date)->where('id', '!=', $event->id))
+            ->whereHas('event', fn ($q) => $q->whereDate('date', $event->date)->where('id', '!=', $event->id))
             ->exists();
 
         if ($hasOtherAssignment) {
@@ -512,14 +516,14 @@ class SchedulingService
             ];
 
             $ministry = $event->ministry;
-            if (!$ministry) {
+            if (! $ministry) {
                 return $results;
             }
 
             // Get positions to fill
             if (empty($positionIds)) {
                 $positionIds = $ministry->positions()
-                    ->whereDoesntHave('assignments', fn($q) => $q->where('event_id', $event->id))
+                    ->whereDoesntHave('assignments', fn ($q) => $q->where('event_id', $event->id))
                     ->pluck('id')
                     ->toArray();
             }
@@ -528,10 +532,12 @@ class SchedulingService
 
             foreach ($positionIds as $positionId) {
                 $position = Position::find($positionId);
-                if (!$position) continue;
+                if (! $position) {
+                    continue;
+                }
 
                 $available = $this->getAvailableVolunteers($event, $position)
-                    ->filter(fn($v) => $v['is_available'] && !in_array($v['person']->id, $assignedPersonIds))
+                    ->filter(fn ($v) => $v['is_available'] && ! in_array($v['person']->id, $assignedPersonIds))
                     ->values();
 
                 if ($available->isEmpty()) {
@@ -539,6 +545,7 @@ class SchedulingService
                         'position' => $position,
                         'reason' => 'Немає доступних волонтерів',
                     ];
+
                     continue;
                 }
 
@@ -627,16 +634,16 @@ class SchedulingService
     public function notifyAssignment(Assignment $assignment): bool
     {
         $person = $assignment->person;
-        if (!$person) {
+        if (! $person) {
             return false;
         }
         $church = $person->church;
 
-        if (!$church?->isNotificationEnabled('notify_on_assignment')) {
+        if (! $church?->isNotificationEnabled('notify_on_assignment')) {
             return false;
         }
 
-        if (!$person->telegram_chat_id || !config('services.telegram.bot_token')) {
+        if (! $person->telegram_chat_id || ! config('services.telegram.bot_token')) {
             return false;
         }
 
@@ -644,6 +651,7 @@ class SchedulingService
             $telegram = TelegramService::make();
             $telegram->sendAssignmentNotification($assignment);
             $assignment->update(['notified_at' => now()]);
+
             return true;
         } catch (\Exception $e) {
             return false;
@@ -685,13 +693,13 @@ class SchedulingService
             'last_scheduled_at' => now(),
             'times_scheduled_this_month' => Assignment::where('person_id', $person->id)
                 ->whereNotIn('status', ['declined'])
-                ->whereHas('event', fn($q) => $q
+                ->whereHas('event', fn ($q) => $q
                     ->whereMonth('date', $event->date->month)
                     ->whereYear('date', $event->date->year)
                 )->count(),
             'times_scheduled_this_year' => Assignment::where('person_id', $person->id)
                 ->whereNotIn('status', ['declined'])
-                ->whereHas('event', fn($q) => $q->whereYear('date', $event->date->year))
+                ->whereHas('event', fn ($q) => $q->whereYear('date', $event->date->year))
                 ->count(),
         ]);
     }
@@ -704,7 +712,7 @@ class SchedulingService
         $fromDate = $fromDate ?? now()->subMonths(3);
 
         $assignments = Assignment::where('person_id', $person->id)
-            ->whereHas('event', fn($q) => $q->where('date', '>=', $fromDate))
+            ->whereHas('event', fn ($q) => $q->where('date', '>=', $fromDate))
             ->with(['event.ministry', 'position'])
             ->get();
 
@@ -714,10 +722,10 @@ class SchedulingService
             'declined' => $assignments->where('status', 'declined')->count(),
             'pending' => $assignments->where('status', 'pending')->count(),
             'by_ministry' => $assignments->groupBy('event.ministry.name')
-                ->map(fn($group) => $group->count())
+                ->map(fn ($group) => $group->count())
                 ->toArray(),
             'by_position' => $assignments->groupBy('position.name')
-                ->map(fn($group) => $group->count())
+                ->map(fn ($group) => $group->count())
                 ->toArray(),
             'last_served' => $assignments
                 ->whereIn('status', ['confirmed', 'completed'])
@@ -758,7 +766,7 @@ class SchedulingService
             ];
         }
 
-        uasort($memberStats, fn($a, $b) => $a['assignments'] <=> $b['assignments']);
+        uasort($memberStats, fn ($a, $b) => $a['assignments'] <=> $b['assignments']);
 
         $totalAssignments = array_sum(array_column($memberStats, 'assignments'));
         $avgPerMember = $members->count() > 0
@@ -766,7 +774,7 @@ class SchedulingService
             : 0;
 
         return [
-            'period' => $startDate->format('d.m.Y') . ' - ' . $endDate->format('d.m.Y'),
+            'period' => $startDate->format('d.m.Y').' - '.$endDate->format('d.m.Y'),
             'ministry' => $ministry->name,
             'total_events' => $events->count(),
             'total_assignments' => $totalAssignments,
@@ -793,7 +801,7 @@ class SchedulingService
         }
 
         // Standard deviation
-        $variance = array_reduce($values, fn($c, $v) => $c + pow($v - $mean, 2), 0) / count($values);
+        $variance = array_reduce($values, fn ($c, $v) => $c + pow($v - $mean, 2), 0) / count($values);
         $stdDev = sqrt($variance);
 
         // Coefficient of variation (lower = more balanced)
@@ -811,18 +819,28 @@ class SchedulingService
      */
     public function formatLastScheduled(?Carbon $date): string
     {
-        if (!$date) {
+        if (! $date) {
             return 'Ніколи';
         }
 
         $weeks = (int) $date->diffInWeeks(now());
-        if ($weeks === 0) return 'Цього тижня';
-        if ($weeks === 1) return '1 тиждень тому';
-        if ($weeks < 4) return "{$weeks} тижні тому";
+        if ($weeks === 0) {
+            return 'Цього тижня';
+        }
+        if ($weeks === 1) {
+            return '1 тиждень тому';
+        }
+        if ($weeks < 4) {
+            return "{$weeks} тижні тому";
+        }
 
         $months = (int) $date->diffInMonths(now());
-        if ($months === 1) return '1 місяць тому';
-        if ($months < 12) return "{$months} місяці тому";
+        if ($months === 1) {
+            return '1 місяць тому';
+        }
+        if ($months < 12) {
+            return "{$months} місяці тому";
+        }
 
         return $date->format('d.m.Y');
     }
@@ -833,7 +851,9 @@ class SchedulingService
     public function getConflictBadge(array $conflict): string
     {
         $config = SchedulingConflict::CONFLICT_TYPES[$conflict['type']] ?? null;
-        if (!$config) return '';
+        if (! $config) {
+            return '';
+        }
 
         $colorClasses = match ($config['color']) {
             'red' => 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
@@ -860,9 +880,9 @@ class SchedulingService
         $volunteers = $this->getAvailableVolunteers($event, $position);
 
         return [
-            'available' => $volunteers->filter(fn($v) => $v['is_available'] && !$v['has_warnings'])->values(),
-            'warnings' => $volunteers->filter(fn($v) => $v['is_available'] && $v['has_warnings'])->values(),
-            'unavailable' => $volunteers->filter(fn($v) => !$v['is_available'])->values(),
+            'available' => $volunteers->filter(fn ($v) => $v['is_available'] && ! $v['has_warnings'])->values(),
+            'warnings' => $volunteers->filter(fn ($v) => $v['is_available'] && $v['has_warnings'])->values(),
+            'unavailable' => $volunteers->filter(fn ($v) => ! $v['is_available'])->values(),
         ];
     }
 }

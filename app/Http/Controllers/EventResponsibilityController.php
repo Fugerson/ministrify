@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Event;
 use App\Models\EventResponsibility;
 use App\Models\Person;
-use App\Models\TelegramMessage;
 use App\Services\TelegramService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class EventResponsibilityController extends Controller
@@ -110,6 +110,7 @@ class EventResponsibilityController extends Controller
         if ($user->person && $user->person->id === $responsibility->person_id
             && $responsibility->event && $responsibility->event->church_id === $church->id) {
             $responsibility->confirm();
+
             return $this->successResponse($request, 'Ви підтвердили участь.');
         }
 
@@ -129,6 +130,7 @@ class EventResponsibilityController extends Controller
         if ($user->person && $user->person->id === $responsibility->person_id
             && $responsibility->event && $responsibility->event->church_id === $church->id) {
             $responsibility->decline();
+
             return $this->successResponse($request, 'Ви відхилили участь.');
         }
 
@@ -144,7 +146,7 @@ class EventResponsibilityController extends Controller
         $event = $responsibility->event;
         $this->authorizeChurch($event);
 
-        if (!$responsibility->person_id) {
+        if (! $responsibility->person_id) {
             return $this->errorResponse($request, 'Немає призначеної людини.');
         }
 
@@ -168,7 +170,7 @@ class EventResponsibilityController extends Controller
 
         $lastCheck = $request->get('since');
         try {
-            $lastCheckTime = $lastCheck && $lastCheck !== 'undefined' ? \Carbon\Carbon::parse($lastCheck) : now()->subMinutes(5);
+            $lastCheckTime = $lastCheck && $lastCheck !== 'undefined' ? Carbon::parse($lastCheck) : now()->subMinutes(5);
         } catch (\Exception $e) {
             $lastCheckTime = now()->subMinutes(5);
         }
@@ -177,7 +179,7 @@ class EventResponsibilityController extends Controller
             ->with('person:id,first_name,last_name')
             ->orderBy('id')
             ->get()
-            ->map(fn($r) => [
+            ->map(fn ($r) => [
                 'id' => $r->id,
                 'name' => $r->name,
                 'status' => $r->status,
@@ -188,13 +190,13 @@ class EventResponsibilityController extends Controller
             ]);
 
         // Check for new responses to show notifications
-        $newResponses = $responsibilities->filter(fn($r) => $r['is_new_response']);
+        $newResponses = $responsibilities->filter(fn ($r) => $r['is_new_response']);
 
         // Plan item statuses (responsible_statuses JSON field)
         $planItems = $event->planItems()
             ->whereNotNull('responsible_statuses')
             ->get(['id', 'title', 'responsible_statuses', 'responsible_names', 'updated_at'])
-            ->map(fn($item) => [
+            ->map(fn ($item) => [
                 'id' => $item->id,
                 'title' => $item->title,
                 'statuses' => $item->responsible_statuses ?? [],
@@ -206,7 +208,7 @@ class EventResponsibilityController extends Controller
         $teamMembers = $event->ministryTeams()
             ->with('person:id,first_name,last_name')
             ->get(['id', 'person_id', 'status', 'updated_at'])
-            ->map(fn($m) => [
+            ->map(fn ($m) => [
                 'id' => $m->id,
                 'person_id' => $m->person_id,
                 'person_name' => $m->person?->full_name,
@@ -230,15 +232,15 @@ class EventResponsibilityController extends Controller
         $church = $event?->church;
 
         // Null checks before accessing properties
-        if (!$person || !$event || !$church) {
+        if (! $person || ! $event || ! $church) {
             return;
         }
 
-        if (!$church->isNotificationEnabled('notify_on_responsibility')) {
+        if (! $church->isNotificationEnabled('notify_on_responsibility')) {
             return;
         }
 
-        if (!$person->telegram_chat_id || !config('services.telegram.bot_token')) {
+        if (! $person->telegram_chat_id || ! config('services.telegram.bot_token')) {
             return;
         }
 
@@ -247,10 +249,10 @@ class EventResponsibilityController extends Controller
 
             $timeStr = $event->time ? $event->time->format('H:i') : 'весь день';
             $message = "🔔 <b>Нова відповідальність!</b>\n\n"
-                . "📅 {$event->date->format('d.m.Y')}, {$timeStr}\n"
-                . "📍 {$event->title}\n"
-                . "🎯 <b>{$responsibility->name}</b>\n\n"
-                . "Ви можете взяти це на себе?";
+                ."📅 {$event->date->format('d.m.Y')}, {$timeStr}\n"
+                ."📍 {$event->title}\n"
+                ."🎯 <b>{$responsibility->name}</b>\n\n"
+                .'Ви можете взяти це на себе?';
 
             $keyboard = [
                 [

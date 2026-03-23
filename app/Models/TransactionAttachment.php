@@ -2,14 +2,15 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Storage;
-use App\Traits\Auditable;
 
 class TransactionAttachment extends Model
 {
     use Auditable;
+
     protected $fillable = [
         'transaction_id',
         'filename',
@@ -49,14 +50,14 @@ class TransactionAttachment extends Model
         $bytes = $this->size ?? 0;
 
         if ($bytes >= 1048576) {
-            return number_format($bytes / 1048576, 1) . ' MB';
+            return number_format($bytes / 1048576, 1).' MB';
         }
 
         if ($bytes >= 1024) {
-            return number_format($bytes / 1024, 1) . ' KB';
+            return number_format($bytes / 1024, 1).' KB';
         }
 
-        return $bytes . ' B';
+        return $bytes.' B';
     }
 
     public function deleteFile(): bool

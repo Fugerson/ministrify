@@ -12,11 +12,11 @@ class CheckPlanFeature
     {
         $church = $request->attributes->get('currentChurch');
 
-        if (!$church) {
+        if (! $church) {
             return $next($request);
         }
 
-        if (!$church->hasFeature($feature)) {
+        if (! $church->hasFeature($feature)) {
             if ($request->expectsJson()) {
                 return response()->json([
                     'message' => __('messages.plan_feature_unavailable'),

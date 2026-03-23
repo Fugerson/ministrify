@@ -20,6 +20,7 @@ class CleanPageVisits extends Command
 
         if ($count === 0) {
             $this->info('No old page visits to clean.');
+
             return self::SUCCESS;
         }
 

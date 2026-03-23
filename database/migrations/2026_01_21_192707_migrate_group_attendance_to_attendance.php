@@ -3,7 +3,6 @@
 use App\Models\Attendance;
 use App\Models\Group;
 use App\Models\GroupAttendance;
-use App\Models\GroupAttendanceRecord;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -16,7 +15,7 @@ return new class extends Migration
     public function up(): void
     {
         // Check if source tables exist
-        if (!Schema::hasTable('group_attendances')) {
+        if (! Schema::hasTable('group_attendances')) {
             return;
         }
 

@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\DB;
 class RotationService
 {
     protected Church $church;
+
     protected array $config;
 
     public function __construct(Church $church)
@@ -42,12 +43,13 @@ class RotationService
 
         // Ensure numeric values are positive to prevent division by zero
         foreach ($filtered as $key => $value) {
-            if (!is_numeric($value) || $value < 0) {
+            if (! is_numeric($value) || $value < 0) {
                 unset($filtered[$key]);
             }
         }
 
         $this->config = array_merge($this->config, $filtered);
+
         return $this;
     }
 
@@ -57,74 +59,75 @@ class RotationService
     public function autoAssignEvent(Event $event): array
     {
         return DB::transaction(function () use ($event) {
-        $results = [
-            'assigned' => [],
-            'unassigned' => [],
-            'conflicts' => [],
-        ];
+            $results = [
+                'assigned' => [],
+                'unassigned' => [],
+                'conflicts' => [],
+            ];
 
-        $ministry = $event->ministry;
-        if (!$ministry) {
-            return $results;
-        }
-
-        $positions = $ministry->positions()->get();
-
-        foreach ($positions as $position) {
-            // Check if position already has enough assignments
-            $currentCount = $event->assignments()
-                ->where('position_id', $position->id)
-                ->count();
-
-            $neededCount = $position->max_per_event ?? 1;
-
-            if ($currentCount >= $neededCount) {
-                continue;
+            $ministry = $event->ministry;
+            if (! $ministry) {
+                return $results;
             }
 
-            // Find best candidates for this position
-            $candidates = $this->getCandidatesForPosition($event, $position);
+            $positions = $ministry->positions()->get();
 
-            for ($i = $currentCount; $i < $neededCount; $i++) {
-                if ($candidates->isEmpty()) {
-                    $results['unassigned'][] = [
-                        'position' => $position->name,
-                        'reason' => 'Немає доступних кандидатів',
-                    ];
-                    break;
-                }
+            foreach ($positions as $position) {
+                // Check if position already has enough assignments
+                $currentCount = $event->assignments()
+                    ->where('position_id', $position->id)
+                    ->count();
 
-                $bestCandidate = $candidates->shift();
+                $neededCount = $position->max_per_event ?? 1;
 
-                // Check for conflicts
-                $conflict = $this->checkConflicts($bestCandidate['person'], $event);
-                if ($conflict) {
-                    $results['conflicts'][] = [
-                        'person' => $bestCandidate['person']->full_name,
-                        'position' => $position->name,
-                        'reason' => $conflict,
-                    ];
+                if ($currentCount >= $neededCount) {
                     continue;
                 }
 
-                // Create assignment
-                $assignment = Assignment::create([
-                    'event_id' => $event->id,
-                    'person_id' => $bestCandidate['person']->id,
-                    'position_id' => $position->id,
-                    'status' => 'pending',
-                    'assigned_by' => auth()->id(),
-                ]);
+                // Find best candidates for this position
+                $candidates = $this->getCandidatesForPosition($event, $position);
 
-                $results['assigned'][] = [
-                    'person' => $bestCandidate['person']->full_name,
-                    'position' => $position->name,
-                    'score' => $bestCandidate['score'],
-                ];
+                for ($i = $currentCount; $i < $neededCount; $i++) {
+                    if ($candidates->isEmpty()) {
+                        $results['unassigned'][] = [
+                            'position' => $position->name,
+                            'reason' => 'Немає доступних кандидатів',
+                        ];
+                        break;
+                    }
+
+                    $bestCandidate = $candidates->shift();
+
+                    // Check for conflicts
+                    $conflict = $this->checkConflicts($bestCandidate['person'], $event);
+                    if ($conflict) {
+                        $results['conflicts'][] = [
+                            'person' => $bestCandidate['person']->full_name,
+                            'position' => $position->name,
+                            'reason' => $conflict,
+                        ];
+
+                        continue;
+                    }
+
+                    // Create assignment
+                    $assignment = Assignment::create([
+                        'event_id' => $event->id,
+                        'person_id' => $bestCandidate['person']->id,
+                        'position_id' => $position->id,
+                        'status' => 'pending',
+                        'assigned_by' => auth()->id(),
+                    ]);
+
+                    $results['assigned'][] = [
+                        'person' => $bestCandidate['person']->full_name,
+                        'position' => $position->name,
+                        'score' => $bestCandidate['score'],
+                    ];
+                }
             }
-        }
 
-        return $results;
+            return $results;
         }); // end DB::transaction
     }
 
@@ -171,9 +174,9 @@ class RotationService
                 'score' => $this->calculateScore($person, $event, $position),
             ];
         })
-        ->filter(fn($c) => $c['score'] > 0)
-        ->sortByDesc('score')
-        ->values();
+            ->filter(fn ($c) => $c['score'] > 0)
+            ->sortByDesc('score')
+            ->values();
     }
 
     /**
@@ -221,7 +224,7 @@ class RotationService
         // Check last assignment date (exclude declined)
         $lastAssignment = Assignment::where('person_id', $person->id)
             ->where('status', '!=', 'declined')
-            ->whereHas('event', fn($q) => $q->where('date', '<', $event->date))
+            ->whereHas('event', fn ($q) => $q->where('date', '<', $event->date))
             ->with('event')
             ->orderByDesc(Event::select('date')->whereColumn('events.id', 'assignments.event_id'))
             ->first();
@@ -236,6 +239,7 @@ class RotationService
         // Higher score for less frequent volunteers
         $maxPerMonth = $this->config['max_assignments_per_month'] ?: 4;
         $score = 1 - ($monthlyCount / $maxPerMonth);
+
         return max(0, min(1, $score));
     }
 
@@ -246,12 +250,12 @@ class RotationService
     {
         // Check if person has this position via ministry_person pivot (position_ids is JSON)
         $ministry = $position->ministry;
-        if (!$ministry) {
+        if (! $ministry) {
             return 0;
         }
 
         $pivot = $person->ministries()->where('ministry_id', $ministry->id)->first()?->pivot;
-        if (!$pivot || !$pivot->position_ids) {
+        if (! $pivot || ! $pivot->position_ids) {
             return 0;
         }
 
@@ -259,13 +263,13 @@ class RotationService
             ? $pivot->position_ids
             : json_decode($pivot->position_ids, true);
 
-        if (!in_array($position->id, $positionIds ?? [])) {
+        if (! in_array($position->id, $positionIds ?? [])) {
             return 0;
         }
 
         $level = $pivot->experience_level ?? 'intermediate';
 
-        return match($level) {
+        return match ($level) {
             'expert' => 1.0,
             'advanced' => 0.8,
             'intermediate' => 0.6,
@@ -302,7 +306,7 @@ class RotationService
         // Check for other events on the same day
         $hasOtherEvent = Assignment::where('person_id', $person->id)
             ->where('event_id', '!=', $event->id)
-            ->whereHas('event', fn($q) => $q->whereDate('date', $event->date))
+            ->whereHas('event', fn ($q) => $q->whereDate('date', $event->date))
             ->where('status', '!=', 'declined')
             ->exists();
 
@@ -333,7 +337,7 @@ class RotationService
             ->where('id', '!=', $event->id)
             ->whereHas('assignments', function ($q) use ($person) {
                 $q->where('person_id', $person->id)
-                  ->where('status', '!=', 'declined');
+                    ->where('status', '!=', 'declined');
             })
             ->first();
 
@@ -349,7 +353,7 @@ class RotationService
      */
     protected function timesOverlap(Event $event1, Event $event2): bool
     {
-        if (!$event1->time || !$event2->time) {
+        if (! $event1->time || ! $event2->time) {
             return true; // Assume overlap if no times set
         }
 
@@ -360,7 +364,7 @@ class RotationService
         $start2 = $event2->time;
 
         // All-day events always overlap with same-day events
-        if (!$start1 || !$start2) {
+        if (! $start1 || ! $start2) {
             return true;
         }
 
@@ -378,7 +382,7 @@ class RotationService
         $fromDate = $fromDate ?? now()->subMonths(3);
 
         $assignments = Assignment::where('person_id', $person->id)
-            ->whereHas('event', fn($q) => $q->where('date', '>=', $fromDate))
+            ->whereHas('event', fn ($q) => $q->where('date', '>=', $fromDate))
             ->with(['event.ministry', 'position'])
             ->get();
 
@@ -387,9 +391,9 @@ class RotationService
             'confirmed' => $assignments->where('status', 'confirmed')->count(),
             'declined' => $assignments->where('status', 'declined')->count(),
             'by_ministry' => $assignments->groupBy('event.ministry.name')
-                ->map(fn($group) => $group->count()),
+                ->map(fn ($group) => $group->count()),
             'by_position' => $assignments->groupBy('position.name')
-                ->map(fn($group) => $group->count()),
+                ->map(fn ($group) => $group->count()),
             'last_served' => $assignments
                 ->whereIn('status', ['confirmed', 'attended'])
                 ->sortByDesc('event.date')
@@ -428,7 +432,7 @@ class RotationService
         }
 
         // Sort by assignments (least first for fairness analysis)
-        uasort($memberStats, fn($a, $b) => $a['assignments'] <=> $b['assignments']);
+        uasort($memberStats, fn ($a, $b) => $a['assignments'] <=> $b['assignments']);
 
         $totalAssignments = array_sum(array_column($memberStats, 'assignments'));
         $avgPerMember = $members->count() > 0
@@ -436,7 +440,7 @@ class RotationService
             : 0;
 
         return [
-            'period' => $startDate->format('d.m.Y') . ' - ' . $endDate->format('d.m.Y'),
+            'period' => $startDate->format('d.m.Y').' - '.$endDate->format('d.m.Y'),
             'ministry' => $ministry->name,
             'total_events' => $events->count(),
             'total_assignments' => $totalAssignments,

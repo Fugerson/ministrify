@@ -27,7 +27,7 @@ class QrCheckinController extends Controller
     {
         $event = Event::findByCheckinToken($token);
 
-        if (!$event) {
+        if (! $event) {
             abort(404, 'Подію не знайдено');
         }
 
@@ -44,14 +44,14 @@ class QrCheckinController extends Controller
     {
         $event = Event::findByCheckinToken($token);
 
-        if (!$event) {
+        if (! $event) {
             return response()->json([
                 'success' => false,
                 'message' => 'Подію не знайдено',
             ], 404);
         }
 
-        if (!$event->qr_checkin_enabled) {
+        if (! $event->qr_checkin_enabled) {
             return response()->json([
                 'success' => false,
                 'message' => 'QR check-in вимкнено для цієї події',
@@ -61,7 +61,7 @@ class QrCheckinController extends Controller
         $user = auth()->user();
         $person = $user?->person;
 
-        if (!$person) {
+        if (! $person) {
             return response()->json([
                 'success' => false,
                 'message' => 'Профіль не знайдено. Увійдіть в систему.',
@@ -218,11 +218,11 @@ class QrCheckinController extends Controller
         $this->authorize('update', $event);
 
         $event->update([
-            'qr_checkin_enabled' => !$event->qr_checkin_enabled,
+            'qr_checkin_enabled' => ! $event->qr_checkin_enabled,
         ]);
 
         // Generate token if enabling and no token exists
-        if ($event->qr_checkin_enabled && !$event->checkin_token) {
+        if ($event->qr_checkin_enabled && ! $event->checkin_token) {
             $event->generateCheckinToken();
         }
 

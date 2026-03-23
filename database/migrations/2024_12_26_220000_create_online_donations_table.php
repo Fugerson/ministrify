@@ -46,7 +46,7 @@ return new class extends Migration
         });
 
         // Add payment settings to churches if not exists
-        if (!Schema::hasColumn('churches', 'payment_settings')) {
+        if (! Schema::hasColumn('churches', 'payment_settings')) {
             Schema::table('churches', function (Blueprint $table) {
                 $table->json('payment_settings')->nullable()->after('settings');
             });

@@ -16,7 +16,7 @@ class ShepherdController extends Controller
         $church = $this->getCurrentChurch();
 
         // Redirect if feature is disabled
-        if (!$church->shepherds_enabled) {
+        if (! $church->shepherds_enabled) {
             return redirect()->route('settings.index')
                 ->with('error', 'Функція опікунів вимкнена');
         }
@@ -38,21 +38,21 @@ class ShepherdController extends Controller
             ->get();
 
         // Prepare data for JavaScript
-        $shepherdsJson = $shepherds->map(fn($s) => [
+        $shepherdsJson = $shepherds->map(fn ($s) => [
             'id' => $s->id,
             'full_name' => $s->full_name,
             'photo' => $s->photo ? \Storage::url($s->photo) : null,
             'role' => $s->churchRoleRelation?->name,
             'sheep_count' => $s->sheep_count,
-            'initials' => mb_substr($s->first_name, 0, 1) . mb_substr($s->last_name, 0, 1),
+            'initials' => mb_substr($s->first_name, 0, 1).mb_substr($s->last_name, 0, 1),
         ]);
 
-        $availablePeopleJson = $availablePeople->sortBy('last_name')->values()->map(fn($p) => [
+        $availablePeopleJson = $availablePeople->sortBy('last_name')->values()->map(fn ($p) => [
             'id' => $p->id,
             'full_name' => $p->full_name,
             'photo' => $p->photo ? \Storage::url($p->photo) : null,
             'role' => $p->churchRoleRelation?->name,
-            'initials' => mb_substr($p->first_name, 0, 1) . mb_substr($p->last_name, 0, 1),
+            'initials' => mb_substr($p->first_name, 0, 1).mb_substr($p->last_name, 0, 1),
         ]);
 
         return view('settings.shepherds.index', compact('shepherds', 'availablePeople', 'shepherdsJson', 'availablePeopleJson'));
@@ -71,7 +71,7 @@ class ShepherdController extends Controller
 
         $church = $this->getCurrentChurch();
 
-        if (!$church->shepherds_enabled) {
+        if (! $church->shepherds_enabled) {
             return response()->json(['message' => 'Функція опікунів вимкнена'], 400);
         }
 
@@ -81,6 +81,7 @@ class ShepherdController extends Controller
 
         if ($request->wantsJson()) {
             $person->load('churchRoleRelation');
+
             return response()->json([
                 'success' => true,
                 'shepherd' => [
@@ -91,7 +92,7 @@ class ShepherdController extends Controller
                     'photo' => $person->photo ? \Storage::url($person->photo) : null,
                     'role' => $person->churchRoleRelation?->name,
                     'sheep_count' => 0,
-                    'initials' => mb_substr($person->first_name, 0, 1) . mb_substr($person->last_name, 0, 1),
+                    'initials' => mb_substr($person->first_name, 0, 1).mb_substr($person->last_name, 0, 1),
                 ],
             ]);
         }

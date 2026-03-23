@@ -51,6 +51,7 @@ class ChurchBudgetItem extends Model
     public function getPlannedForMonth(int $month): float
     {
         $amounts = $this->amounts ?? [];
+
         return (float) ($amounts[(string) $month] ?? 0);
     }
 
@@ -65,7 +66,7 @@ class ChurchBudgetItem extends Model
 
     public function getActualSpendingForMonth(int $month, ?int $year = null): float
     {
-        if (!$this->category_id) {
+        if (! $this->category_id) {
             return 0;
         }
 
@@ -85,7 +86,7 @@ class ChurchBudgetItem extends Model
 
     public function getMatchedTransactions(int $month, ?int $year = null)
     {
-        if (!$this->category_id) {
+        if (! $this->category_id) {
             return collect();
         }
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\WebsiteBuilder;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Traits\RequiresChurch;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class SectionController extends Controller
 {
@@ -20,6 +21,7 @@ class SectionController extends Controller
         $sections = collect($currentSections)
             ->map(function ($section) use ($availableSections) {
                 $sectionConfig = $availableSections[$section['id']] ?? [];
+
                 return array_merge($section, $sectionConfig);
             })
             ->sortBy('order')
@@ -66,8 +68,9 @@ class SectionController extends Controller
         $sections = collect($sections)
             ->map(function ($section) use ($sectionId, $request) {
                 if ($section['id'] === $sectionId) {
-                    $section['enabled'] = $request->boolean('enabled', !($section['enabled'] ?? false));
+                    $section['enabled'] = $request->boolean('enabled', ! ($section['enabled'] ?? false));
                 }
+
                 return $section;
             })
             ->all();
@@ -84,7 +87,7 @@ class SectionController extends Controller
         $allowedSections = ['hero', 'about', 'service_times', 'events', 'sermons', 'gallery', 'testimonials', 'donations', 'contact', 'cta', 'faq', 'blog', 'groups', 'ministries', 'leadership', 'pastor_message'];
 
         $validated = $request->validate([
-            'section_id' => ['required', 'string', \Illuminate\Validation\Rule::in($allowedSections)],
+            'section_id' => ['required', 'string', Rule::in($allowedSections)],
             'settings' => 'required|array',
         ]);
 

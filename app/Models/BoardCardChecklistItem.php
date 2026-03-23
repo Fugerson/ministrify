@@ -25,6 +25,6 @@ class BoardCardChecklistItem extends Model
 
     public function toggle(): void
     {
-        $this->update(['is_completed' => !$this->is_completed]);
+        $this->update(['is_completed' => ! $this->is_completed]);
     }
 }

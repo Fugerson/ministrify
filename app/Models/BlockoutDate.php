@@ -2,16 +2,16 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Carbon\Carbon;
-use App\Traits\Auditable;
 
 class BlockoutDate extends Model
 {
-    use HasFactory, Auditable;
+    use Auditable, HasFactory;
 
     protected $fillable = [
         'person_id',
@@ -103,7 +103,7 @@ class BlockoutDate extends Model
             $q->where(function ($inner) use ($startDate, $endDate) {
                 // Blockout starts before end and ends after start
                 $inner->where('start_date', '<=', $endDate)
-                      ->where('end_date', '>=', $startDate);
+                    ->where('end_date', '>=', $startDate);
             });
         });
     }
@@ -114,8 +114,9 @@ class BlockoutDate extends Model
     public function scopeForDate($query, $date)
     {
         $date = Carbon::parse($date)->format('Y-m-d');
+
         return $query->where('start_date', '<=', $date)
-                     ->where('end_date', '>=', $date);
+            ->where('end_date', '>=', $date);
     }
 
     /**
@@ -125,7 +126,7 @@ class BlockoutDate extends Model
     {
         return $query->where(function ($q) use ($ministryId) {
             $q->where('applies_to_all', true)
-              ->orWhereHas('ministries', fn($m) => $m->where('ministries.id', $ministryId));
+                ->orWhereHas('ministries', fn ($m) => $m->where('ministries.id', $ministryId));
         });
     }
 
@@ -153,13 +154,13 @@ class BlockoutDate extends Model
 
         // Handle recurring blockouts
         if ($this->recurrence !== 'none') {
-            if (!$this->matchesRecurrencePattern($checkDate)) {
+            if (! $this->matchesRecurrencePattern($checkDate)) {
                 return false;
             }
         }
 
         // If all day, no need to check time
-        if ($this->all_day || !$time) {
+        if ($this->all_day || ! $time) {
             return true;
         }
 
@@ -186,6 +187,7 @@ class BlockoutDate extends Model
 
             case 'biweekly':
                 $weeksDiff = $this->start_date->diffInWeeks($date);
+
                 return $weeksDiff % 2 === 0 && $date->dayOfWeek === $this->start_date->dayOfWeek;
 
             case 'monthly':
@@ -221,10 +223,12 @@ class BlockoutDate extends Model
                 while ($lastOccurrence->dayOfWeek !== $dayOfWeek) {
                     $lastOccurrence->subDay();
                 }
+
                 return $date->day === $lastOccurrence->day;
             }
 
             $weekOfMonthActual = ceil($date->day / 7);
+
             return $weekOfMonthActual === $weekOfMonth;
         }
 
@@ -252,7 +256,8 @@ class BlockoutDate extends Model
         if ($this->start_date->eq($this->end_date)) {
             return $this->start_date->format('d.m.Y');
         }
-        return $this->start_date->format('d.m') . ' — ' . $this->end_date->format('d.m.Y');
+
+        return $this->start_date->format('d.m').' — '.$this->end_date->format('d.m.Y');
     }
 
     /**
@@ -263,7 +268,8 @@ class BlockoutDate extends Model
         if ($this->all_day) {
             return 'Весь день';
         }
-        return Carbon::parse($this->start_time)->format('H:i') . ' — ' . Carbon::parse($this->end_time)->format('H:i');
+
+        return Carbon::parse($this->start_time)->format('H:i').' — '.Carbon::parse($this->end_time)->format('H:i');
     }
 
     /**
@@ -274,6 +280,7 @@ class BlockoutDate extends Model
         if ($this->applies_to_all) {
             return true;
         }
+
         return $this->ministries()->where('ministries.id', $ministryId)->exists();
     }
 
@@ -304,10 +311,10 @@ class BlockoutDate extends Model
             ->where('end_date', '<', now()->format('Y-m-d'))
             ->where(function ($q) {
                 $q->where('recurrence', 'none')
-                  ->orWhere(function ($inner) {
-                      $inner->whereNotNull('recurrence_end_date')
+                    ->orWhere(function ($inner) {
+                        $inner->whereNotNull('recurrence_end_date')
                             ->where('recurrence_end_date', '<', now()->format('Y-m-d'));
-                  });
+                    });
             })
             ->update(['status' => 'expired']);
     }

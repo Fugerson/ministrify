@@ -26,7 +26,7 @@ class WorshipTeamController extends Controller
         $events = Event::where('church_id', $this->getCurrentChurch()->id)
             ->where('is_service', true)
             ->where('date', '>=', now()->subDays(7))
-            ->with(['songs', 'ministryTeams' => fn($q) => $q->where('ministry_id', $ministry->id)->with('person', 'ministryRole')])
+            ->with(['songs', 'ministryTeams' => fn ($q) => $q->where('ministry_id', $ministry->id)->with('person', 'ministryRole')])
             ->orderBy('date')
             ->orderBy('time')
             ->get();
@@ -44,7 +44,7 @@ class WorshipTeamController extends Controller
         $this->authorizeChurch($ministry);
 
         $period = $request->get('period', 'month');
-        $startDate = match($period) {
+        $startDate = match ($period) {
             'month' => now()->startOfMonth(),
             '3months' => now()->subMonths(3),
             '6months' => now()->subMonths(6),
@@ -116,15 +116,15 @@ class WorshipTeamController extends Controller
         foreach ($topParticipants as $participant) {
             $participant->person = $people[$participant->person_id] ?? null;
             $participantRoleIds = ($allRoleIds[$participant->person_id] ?? collect())->pluck('ministry_role_id')->unique();
-            $participant->roles = $participantRoleIds->map(fn($id) => $rolesById[$id] ?? null)->filter()->values();
+            $participant->roles = $participantRoleIds->map(fn ($id) => $rolesById[$id] ?? null)->filter()->values();
         }
 
         // Top songs
         $topSongs = Song::where('church_id', $churchId)
-            ->whereIn('id', function($q) use ($eventIds) {
+            ->whereIn('id', function ($q) use ($eventIds) {
                 $q->select('song_id')->from('event_songs')->whereIn('event_id', $eventIds);
             })
-            ->withCount(['events as play_count' => function($q) use ($eventIds) {
+            ->withCount(['events as play_count' => function ($q) use ($eventIds) {
                 $q->whereIn('events.id', $eventIds);
             }])
             ->orderByDesc('play_count')
@@ -133,7 +133,7 @@ class WorshipTeamController extends Controller
 
         // Role distribution
         $roleStats = MinistryRole::where('ministry_id', $ministry->id)
-            ->withCount(['eventTeamMembers as count' => function($q) use ($eventIds) {
+            ->withCount(['eventTeamMembers as count' => function ($q) use ($eventIds) {
                 $q->whereIn('event_id', $eventIds);
             }])
             ->orderByDesc('count')
@@ -143,7 +143,7 @@ class WorshipTeamController extends Controller
         $recentEvents = Event::where('church_id', $churchId)
             ->where('is_service', true)
             ->where('date', '<=', now())
-            ->withCount(['songs as songs_count', 'ministryTeams as team_count' => function($q) use ($ministry) {
+            ->withCount(['songs as songs_count', 'ministryTeams as team_count' => function ($q) use ($ministry) {
                 $q->where('ministry_id', $ministry->id);
             }])
             ->orderByDesc('date')
@@ -178,13 +178,13 @@ class WorshipTeamController extends Controller
         $this->authorizeChurch($ministry);
         $this->authorizeChurch($event);
 
-        $event->load(['songs', 'ministryTeams' => fn($q) => $q->where('ministry_id', $ministry->id)->with('person', 'ministryRole')]);
+        $event->load(['songs', 'ministryTeams' => fn ($q) => $q->where('ministry_id', $ministry->id)->with('person', 'ministryRole')]);
 
         $ministryRoles = $ministry->ministryRoles()->orderBy('sort_order')->get();
 
         // Get ministry members
         $members = $ministry->members()->get();
-        if ($ministry->leader && !$members->contains('id', $ministry->leader->id)) {
+        if ($ministry->leader && ! $members->contains('id', $ministry->leader->id)) {
             $members->prepend($ministry->leader);
         }
 
@@ -209,15 +209,16 @@ class WorshipTeamController extends Controller
                 'date' => $event->date->translatedFormat('l, j F Y'),
                 'time' => $event->time?->format('H:i'),
             ],
-            'songs' => $ministry->is_worship_ministry ? $event->songs->map(function($s) use ($teamBySong) {
+            'songs' => $ministry->is_worship_ministry ? $event->songs->map(function ($s) use ($teamBySong) {
                 $songTeam = $teamBySong->get($s->pivot->id, collect());
+
                 return [
                     'id' => $s->id,
                     'event_song_id' => $s->pivot->id,
                     'title' => $s->title,
                     'key' => $s->pivot->key,
                     'url' => route('songs.show', $s),
-                    'team' => $songTeam->map(fn($t) => [
+                    'team' => $songTeam->map(fn ($t) => [
                         'id' => $t->id,
                         'person_id' => $t->person_id,
                         'person_name' => $t->person?->full_name ?? __('common.deleted'),
@@ -226,22 +227,22 @@ class WorshipTeamController extends Controller
                     ])->values(),
                 ];
             }) : [],
-            'generalTeam' => $generalTeam->map(fn($t) => [
+            'generalTeam' => $generalTeam->map(fn ($t) => [
                 'id' => $t->id,
                 'person_id' => $t->person_id,
                 'person_name' => $t->person?->full_name ?? __('common.deleted'),
                 'role_id' => $t->ministry_role_id,
                 'role_name' => $t->ministryRole?->name ?? '',
             ])->values(),
-            'ministryRoles' => $ministryRoles->map(fn($r) => [
+            'ministryRoles' => $ministryRoles->map(fn ($r) => [
                 'id' => $r->id,
                 'name' => $r->name,
             ]),
-            'members' => $members->map(fn($m) => [
+            'members' => $members->map(fn ($m) => [
                 'id' => $m->id,
                 'name' => $m->full_name,
             ]),
-            'availableSongs' => $availableSongs->map(fn($s) => [
+            'availableSongs' => $availableSongs->map(fn ($s) => [
                 'id' => $s->id,
                 'title' => $s->title,
                 'key' => $s->key,
@@ -358,13 +359,13 @@ class WorshipTeamController extends Controller
 
         // Verify ministry belongs to same church
         $ministry = Ministry::find($validated['ministry_id']);
-        if (!$ministry || $ministry->church_id !== $this->getCurrentChurch()->id) {
+        if (! $ministry || $ministry->church_id !== $this->getCurrentChurch()->id) {
             abort(404);
         }
 
         // Verify role belongs to the ministry
         $role = MinistryRole::find($validated['ministry_role_id']);
-        if (!$role || $role->ministry_id !== $ministry->id) {
+        if (! $role || $role->ministry_id !== $ministry->id) {
             abort(404);
         }
 
@@ -374,7 +375,7 @@ class WorshipTeamController extends Controller
             ->where('person_id', $validated['person_id'])
             ->where('ministry_role_id', $validated['ministry_role_id']);
 
-        if (!empty($validated['event_song_id'])) {
+        if (! empty($validated['event_song_id'])) {
             $query->where('event_song_id', $validated['event_song_id']);
         } else {
             $query->whereNull('event_song_id');
@@ -384,6 +385,7 @@ class WorshipTeamController extends Controller
             if ($request->wantsJson()) {
                 return response()->json(['error' => 'Ця людина вже призначена на цю роль для цієї пісні'], 422);
             }
+
             return back()->with('error', 'Ця людина вже призначена на цю роль для цієї пісні');
         }
 
@@ -484,6 +486,7 @@ class WorshipTeamController extends Controller
         // If specific ministry provided, check membership
         if ($ministryId) {
             $ministry = Ministry::find($ministryId);
+
             return $ministry && $ministry->isMember();
         }
 
@@ -491,7 +494,7 @@ class WorshipTeamController extends Controller
         return Ministry::where('church_id', $this->getCurrentChurch()->id)
             ->whereHas('ministryRoles')
             ->get()
-            ->contains(fn($m) => $m->isMember());
+            ->contains(fn ($m) => $m->isMember());
     }
 
     protected function authorizeChurch($model): void

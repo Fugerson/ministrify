@@ -7,8 +7,8 @@ use App\Models\DonationCampaign;
 use App\Models\Transaction;
 use App\Services\LiqPayService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class DonationController extends Controller
@@ -51,7 +51,7 @@ class DonationController extends Controller
             'status' => Transaction::STATUS_PENDING,
             'payment_method' => $paymentMethod,
             'is_anonymous' => $validated['is_anonymous'] ?? false,
-            'order_id' => 'DON-' . strtoupper(Str::random(12)),
+            'order_id' => 'DON-'.strtoupper(Str::random(12)),
         ]);
 
         if ($validated['payment_method'] === 'liqpay') {
@@ -71,6 +71,7 @@ class DonationController extends Controller
         $privateKey = $church->getLiqpayPrivateKey();
         if (empty($settings['liqpay_public_key']) || empty($privateKey)) {
             $transaction->update(['status' => Transaction::STATUS_FAILED, 'notes' => 'LiqPay не налаштовано']);
+
             return $this->errorResponse($request, 'LiqPay не налаштовано для цієї церкви');
         }
 
@@ -104,6 +105,7 @@ class DonationController extends Controller
 
         if (empty($jarId)) {
             $transaction->update(['status' => Transaction::STATUS_FAILED, 'notes' => 'Monobank банка не налаштована']);
+
             return $this->errorResponse($request, 'Monobank банка не налаштована');
         }
 
@@ -132,8 +134,9 @@ class DonationController extends Controller
         $data = $request->input('data');
         $signature = $request->input('signature');
 
-        if (!$data || !$signature) {
+        if (! $data || ! $signature) {
             Log::warning('LiqPay callback: missing data or signature', ['slug' => $slug]);
+
             return response()->json(['status' => 'error', 'message' => 'Missing data'], 400);
         }
 
@@ -142,8 +145,9 @@ class DonationController extends Controller
             $church->getLiqpayPrivateKey() ?? ''
         );
 
-        if (!$liqpay->verifySignature($data, $signature)) {
+        if (! $liqpay->verifySignature($data, $signature)) {
             Log::warning('LiqPay callback: invalid signature', ['slug' => $slug]);
+
             return response()->json(['status' => 'error', 'message' => 'Invalid signature'], 400);
         }
 
@@ -161,8 +165,9 @@ class DonationController extends Controller
         return DB::transaction(function () use ($orderId, $status) {
             $transaction = Transaction::where('order_id', $orderId)->lockForUpdate()->first();
 
-            if (!$transaction) {
+            if (! $transaction) {
                 Log::warning('LiqPay callback: transaction not found', ['order_id' => $orderId]);
+
                 return response()->json(['status' => 'error', 'message' => 'Transaction not found'], 404);
             }
 
@@ -172,6 +177,7 @@ class DonationController extends Controller
                     'order_id' => $orderId,
                     'current_status' => $transaction->status,
                 ]);
+
                 return response()->json(['status' => 'ok', 'message' => 'Already processed']);
             }
 
@@ -325,7 +331,7 @@ class DonationController extends Controller
             abort(403);
         }
 
-        $campaign->update(['is_active' => !$campaign->is_active]);
+        $campaign->update(['is_active' => ! $campaign->is_active]);
 
         return $this->successResponse($request, $campaign->is_active ? 'Кампанію активовано!' : 'Кампанію призупинено!');
     }
@@ -356,7 +362,7 @@ class DonationController extends Controller
         abort_unless(auth()->user()->canView('finances'), 403);
         $church = $this->getCurrentChurch();
 
-        if (!$church->slug || !$church->public_site_enabled) {
+        if (! $church->slug || ! $church->public_site_enabled) {
             return $this->errorResponse($request, 'Спочатку увімкніть публічний сайт та встановіть URL');
         }
 
@@ -392,7 +398,7 @@ class DonationController extends Controller
         $callback = function () use ($transactions) {
             $file = fopen('php://output', 'w');
             // BOM for Excel UTF-8
-            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
 
             fputcsv($file, ['Дата', 'Донатор', 'Email', 'Сума', 'Призначення', 'Метод', 'Статус']);
 

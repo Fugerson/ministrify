@@ -7,7 +7,6 @@ use App\Models\Transaction;
 use App\Models\TransactionCategory;
 use App\Rules\BelongsToChurch;
 use App\Services\ImageService;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
@@ -155,7 +154,7 @@ class ExpenseController extends Controller
         // Handle receipt upload
         $paymentData = $expense->payment_data ?? [];
         if ($request->hasFile('receipt_photo')) {
-            if (!empty($paymentData['receipt_photo'])) {
+            if (! empty($paymentData['receipt_photo'])) {
                 Storage::disk('public')->delete($paymentData['receipt_photo']);
             }
             $stored = ImageService::storeWithHeicConversion($request->file('receipt_photo'), 'receipts');
@@ -169,7 +168,7 @@ class ExpenseController extends Controller
             'category_id' => $validated['category_id'],
             'date' => $validated['date'],
             'notes' => $validated['notes'],
-            'payment_data' => !empty($paymentData) ? $paymentData : null,
+            'payment_data' => ! empty($paymentData) ? $paymentData : null,
         ]);
 
         return $this->successResponse($request, 'Витрату оновлено.', 'finances.transactions', ['filter' => 'expense']);
@@ -183,7 +182,7 @@ class ExpenseController extends Controller
         }
 
         $paymentData = $expense->payment_data ?? [];
-        if (!empty($paymentData['receipt_photo'])) {
+        if (! empty($paymentData['receipt_photo'])) {
             Storage::disk('public')->delete($paymentData['receipt_photo']);
         }
 
@@ -212,6 +211,7 @@ class ExpenseController extends Controller
                 $percentage = $m->monthly_budget > 0
                     ? round(($spent / $m->monthly_budget) * 100, 1)
                     : 0;
+
                 return [
                     'id' => $m->id,
                     'name' => $m->name,
@@ -233,6 +233,7 @@ class ExpenseController extends Controller
                     ->forMonth($year, $month)
                     ->completed()
                     ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')->value('total') ?? 0;
+
                 return $cat;
             });
 

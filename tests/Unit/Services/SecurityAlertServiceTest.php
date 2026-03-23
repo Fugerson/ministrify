@@ -15,7 +15,7 @@ class SecurityAlertServiceTest extends TestCase
     {
         parent::setUp();
         Cache::flush();
-        $this->service = new SecurityAlertService();
+        $this->service = new SecurityAlertService;
     }
 
     // ==================
@@ -48,7 +48,7 @@ class SecurityAlertServiceTest extends TestCase
         // Pre-seed cache to simulate a previous alert (so the first call is also deduplicated)
         $cacheKey = 'security_alert:xss:1.2.3.4';
         Cache::put($cacheKey, true, 60);
-        Cache::put($cacheKey . ':count', 1, 60);
+        Cache::put($cacheKey.':count', 1, 60);
 
         Log::shouldReceive('channel')->never();
 
@@ -87,7 +87,7 @@ class SecurityAlertServiceTest extends TestCase
         $method = new \ReflectionMethod(SecurityAlertService::class, 'sanitizeUrl');
         $method->setAccessible(true);
 
-        $longUrl = 'https://example.com/' . str_repeat('a', 300);
+        $longUrl = 'https://example.com/'.str_repeat('a', 300);
         $result = $method->invoke($this->service, $longUrl);
 
         $this->assertLessThanOrEqual(200, strlen($result));

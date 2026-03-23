@@ -57,26 +57,26 @@ class CurrencyHelper
                 // Western format: $1,234.56
                 $formatted = number_format(abs($amount), 2, '.', ',');
                 $symbol = $showSymbol ? self::symbol($currency) : '';
-                $result = $symbol . $formatted;
+                $result = $symbol.$formatted;
                 break;
 
             case 'UAH':
             default:
                 // Ukrainian format: 1 234,56 ₴
                 $formatted = number_format(abs($amount), 0, ',', ' ');
-                $symbol = $showSymbol ? ' ' . self::symbol($currency) : '';
-                $result = $formatted . $symbol;
+                $symbol = $showSymbol ? ' '.self::symbol($currency) : '';
+                $result = $formatted.$symbol;
                 break;
         }
 
         // Add negative sign if needed
-        return $amount < 0 ? '-' . $result : $result;
+        return $amount < 0 ? '-'.$result : $result;
     }
 
     /**
      * Format an amount with a sign prefix (+/-).
      */
-    public static function formatWithSign(float $amount, string $currency = 'UAH', string $direction = null): string
+    public static function formatWithSign(float $amount, string $currency = 'UAH', ?string $direction = null): string
     {
         $sign = '';
         if ($direction === 'in' || $amount > 0) {
@@ -85,7 +85,7 @@ class CurrencyHelper
             $sign = '-';
         }
 
-        return $sign . self::format(abs($amount), $currency);
+        return $sign.self::format(abs($amount), $currency);
     }
 
     /**
@@ -96,14 +96,14 @@ class CurrencyHelper
         $currency = strtoupper($currency);
 
         if ($amount >= 1000000) {
-            $formatted = number_format($amount / 1000000, 1, '.', '') . 'M';
+            $formatted = number_format($amount / 1000000, 1, '.', '').'M';
         } elseif ($amount >= 1000) {
-            $formatted = number_format($amount / 1000, 1, '.', '') . 'K';
+            $formatted = number_format($amount / 1000, 1, '.', '').'K';
         } else {
             $formatted = number_format($amount, 0, ',', ' ');
         }
 
-        return self::symbol($currency) . $formatted;
+        return self::symbol($currency).$formatted;
     }
 
     /**
@@ -113,8 +113,9 @@ class CurrencyHelper
     {
         $options = [];
         foreach (self::CURRENCIES as $code) {
-            $options[$code] = self::symbol($code) . ' ' . self::name($code);
+            $options[$code] = self::symbol($code).' '.self::name($code);
         }
+
         return $options;
     }
 

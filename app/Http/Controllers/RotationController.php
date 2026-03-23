@@ -94,13 +94,13 @@ class RotationController extends Controller
             return response()->json([
                 'success' => true,
                 'results' => $results,
-                'message' => count($results['assigned']) . ' призначень створено',
+                'message' => count($results['assigned']).' призначень створено',
             ]);
         }
 
-        $message = count($results['assigned']) . ' волонтерів призначено.';
+        $message = count($results['assigned']).' волонтерів призначено.';
         if (count($results['unassigned']) > 0) {
-            $message .= ' ' . count($results['unassigned']) . ' позицій залишилось без призначення.';
+            $message .= ' '.count($results['unassigned']).' позицій залишилось без призначення.';
         }
 
         return back()->with('success', $message);
@@ -143,7 +143,7 @@ class RotationController extends Controller
             ]);
         }
 
-        return back()->with('success', "Розподіл завершено: {$totalAssigned} призначень для " . count($results) . " подій.");
+        return back()->with('success', "Розподіл завершено: {$totalAssigned} призначень для ".count($results).' подій.');
     }
 
     /**
@@ -207,7 +207,7 @@ class RotationController extends Controller
 
         // Get candidates for each position
         $ministry = $event->ministry;
-        if (!$ministry) {
+        if (! $ministry) {
             return response()->json(['preview' => [], 'message' => 'Подія без служіння']);
         }
         $positions = $ministry->positions()->get();
@@ -229,6 +229,7 @@ class RotationController extends Controller
                     'needed' => $neededCount,
                     'candidates' => [],
                 ];
+
                 continue;
             }
 
@@ -242,7 +243,7 @@ class RotationController extends Controller
                 'status' => 'open',
                 'current' => $currentCount,
                 'needed' => $neededCount,
-                'candidates' => $candidates->take(5)->map(fn($c) => [
+                'candidates' => $candidates->take(5)->map(fn ($c) => [
                     'id' => $c['person']->id,
                     'name' => $c['person']->full_name,
                     'score' => $c['score'],
@@ -275,7 +276,7 @@ class RotationController extends Controller
         ]);
 
         $church = $this->getCurrentChurch();
-        $position = Position::whereHas('ministry', fn($q) => $q->where('church_id', $church->id))->findOrFail($validated['position_id']);
+        $position = Position::whereHas('ministry', fn ($q) => $q->where('church_id', $church->id))->findOrFail($validated['position_id']);
         $person = Person::where('church_id', $church->id)->findOrFail($validated['person_id']);
 
         // Check duplicate
@@ -335,5 +336,4 @@ class RotationController extends Controller
 
         return response()->json(['success' => true]);
     }
-
 }

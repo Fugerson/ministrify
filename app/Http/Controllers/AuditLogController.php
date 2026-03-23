@@ -22,7 +22,7 @@ class AuditLogController extends Controller
 
         // Filter by model type
         if ($modelType = $request->get('model')) {
-            $query->where('model_type', 'App\\Models\\' . $modelType);
+            $query->where('model_type', 'App\\Models\\'.$modelType);
         }
 
         // Filter by user
@@ -43,7 +43,7 @@ class AuditLogController extends Controller
             $search = addcslashes($search, '%_');
             $query->where(function ($q) use ($search) {
                 $q->where('model_name', 'like', "%{$search}%")
-                  ->orWhere('user_name', 'like', "%{$search}%");
+                    ->orWhere('user_name', 'like', "%{$search}%");
             });
         }
 

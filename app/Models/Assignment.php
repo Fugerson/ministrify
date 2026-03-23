@@ -11,12 +11,15 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Assignment extends Model
 {
-    use HasFactory, SoftDeletes, Auditable;
+    use Auditable, HasFactory, SoftDeletes;
 
     // Status constants
     const STATUS_PENDING = 'pending';
+
     const STATUS_CONFIRMED = 'confirmed';
+
     const STATUS_DECLINED = 'declined';
+
     const STATUS_ATTENDED = 'attended';
 
     const STATUSES = [
@@ -96,8 +99,10 @@ class Assignment extends Model
     {
         if ($this->blockout_override) {
             $conflict = $this->schedulingConflicts()->where('conflict_type', 'blockout')->first();
-            return $conflict ? "Blockout: {$conflict->conflict_details}" : "Призначено під час blockout";
+
+            return $conflict ? "Blockout: {$conflict->conflict_details}" : 'Призначено під час blockout';
         }
+
         return null;
     }
 
@@ -128,6 +133,7 @@ class Assignment extends Model
     public function canTransitionTo(string $newStatus): bool
     {
         $allowedTransitions = self::TRANSITIONS[$this->status] ?? [];
+
         return in_array($newStatus, $allowedTransitions);
     }
 
@@ -136,7 +142,7 @@ class Assignment extends Model
      */
     public function transitionTo(string $newStatus): bool
     {
-        if (!$this->canTransitionTo($newStatus)) {
+        if (! $this->canTransitionTo($newStatus)) {
             return false;
         }
 
@@ -155,7 +161,7 @@ class Assignment extends Model
 
     public function confirm(): bool
     {
-        if (!$this->canTransitionTo(self::STATUS_CONFIRMED)) {
+        if (! $this->canTransitionTo(self::STATUS_CONFIRMED)) {
             return false;
         }
 
@@ -169,7 +175,7 @@ class Assignment extends Model
 
     public function decline(): bool
     {
-        if (!$this->canTransitionTo(self::STATUS_DECLINED)) {
+        if (! $this->canTransitionTo(self::STATUS_DECLINED)) {
             return false;
         }
 
@@ -183,11 +189,12 @@ class Assignment extends Model
 
     public function markAsAttended(): bool
     {
-        if (!$this->canTransitionTo(self::STATUS_ATTENDED)) {
+        if (! $this->canTransitionTo(self::STATUS_ATTENDED)) {
             return false;
         }
 
         $this->update(['status' => self::STATUS_ATTENDED]);
+
         return true;
     }
 
@@ -219,13 +226,13 @@ class Assignment extends Model
 
     public function scopeForUpcomingEvents($query)
     {
-        return $query->whereHas('event', fn($q) => $q->where('date', '>=', now()->startOfDay()));
+        return $query->whereHas('event', fn ($q) => $q->where('date', '>=', now()->startOfDay()));
     }
 
     // Attributes
     public function getStatusIconAttribute(): string
     {
-        return match($this->status) {
+        return match ($this->status) {
             self::STATUS_PENDING => '⏳',
             self::STATUS_CONFIRMED => '✅',
             self::STATUS_DECLINED => '❌',
@@ -241,7 +248,7 @@ class Assignment extends Model
 
     public function getStatusColorAttribute(): string
     {
-        return match($this->status) {
+        return match ($this->status) {
             self::STATUS_PENDING => 'yellow',
             self::STATUS_CONFIRMED => 'green',
             self::STATUS_DECLINED => 'red',

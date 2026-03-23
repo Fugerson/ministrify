@@ -9,7 +9,7 @@ class LocaleSwitchController extends Controller
     public function switch(string $locale)
     {
         $available = config('app.available_locales', ['uk', 'en']);
-        if (!in_array($locale, $available)) {
+        if (! in_array($locale, $available)) {
             abort(400);
         }
 

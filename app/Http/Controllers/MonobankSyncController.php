@@ -2,15 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\MonobankTransaction;
+use App\Models\Church;
 use App\Models\MonobankSenderMapping;
+use App\Models\MonobankTransaction;
+use App\Models\Person;
 use App\Models\Transaction;
 use App\Models\TransactionCategory;
-use App\Models\Person;
 use App\Services\MonobankPersonalService;
-use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class MonobankSyncController extends Controller
 {
@@ -78,9 +80,9 @@ class MonobankSyncController extends Controller
             $search = addcslashes($request->search, '%_');
             $query->where(function ($q) use ($search) {
                 $q->where('counterpart_name', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%")
-                  ->orWhere('comment', 'like', "%{$search}%")
-                  ->orWhere('counterpart_iban', 'like', "%{$search}%");
+                    ->orWhere('description', 'like', "%{$search}%")
+                    ->orWhere('comment', 'like', "%{$search}%")
+                    ->orWhere('counterpart_iban', 'like', "%{$search}%");
             });
         }
 
@@ -101,10 +103,10 @@ class MonobankSyncController extends Controller
         $sortDir = $request->get('dir', 'desc');
 
         $allowedSorts = ['mono_time', 'amount', 'counterpart_name', 'mcc'];
-        if (!in_array($sortField, $allowedSorts)) {
+        if (! in_array($sortField, $allowedSorts)) {
             $sortField = 'mono_time';
         }
-        if (!in_array($sortDir, ['asc', 'desc'])) {
+        if (! in_array($sortDir, ['asc', 'desc'])) {
             $sortDir = 'desc';
         }
 
@@ -204,15 +206,16 @@ class MonobankSyncController extends Controller
         ]);
 
         $church = $this->getCurrentChurch();
-        $service = new MonobankPersonalService();
+        $service = new MonobankPersonalService;
 
         // Validate token
         $validation = $service->validateToken($request->token);
 
-        if (!$validation) {
+        if (! $validation) {
             if ($request->wantsJson()) {
                 return response()->json(['success' => false, 'message' => 'Невірний токен або помилка з\'єднання з Monobank', 'errors' => ['token' => ['Невірний токен або помилка з\'єднання з Monobank']]], 422);
             }
+
             return back()->withErrors(['token' => 'Невірний токен або помилка з\'єднання з Monobank']);
         }
 
@@ -220,7 +223,7 @@ class MonobankSyncController extends Controller
         $accountId = $request->account_id;
 
         // If no account selected, use first UAH account
-        if (!$accountId && !empty($validation['accounts'])) {
+        if (! $accountId && ! empty($validation['accounts'])) {
             $accountId = $validation['accounts'][0]['id'];
         }
 
@@ -256,7 +259,7 @@ class MonobankSyncController extends Controller
     public function disconnect(Request $request)
     {
         $church = $this->getCurrentChurch();
-        $service = new MonobankPersonalService();
+        $service = new MonobankPersonalService;
         $service->disconnect($church);
 
         // Log Monobank disconnection
@@ -363,7 +366,7 @@ class MonobankSyncController extends Controller
         ]);
 
         // Use DB transaction with lock to prevent duplicate imports
-        $transaction = \Illuminate\Support\Facades\DB::transaction(function () use ($church, $monoTransaction, $request) {
+        $transaction = DB::transaction(function () use ($church, $monoTransaction, $request) {
             $monoTransaction = MonobankTransaction::where('id', $monoTransaction->id)
                 ->lockForUpdate()
                 ->first();
@@ -395,7 +398,7 @@ class MonobankSyncController extends Controller
             return $transaction;
         });
 
-        if (!$transaction) {
+        if (! $transaction) {
             return $this->errorResponse($request, 'Транзакція вже оброблена');
         }
 
@@ -466,7 +469,7 @@ class MonobankSyncController extends Controller
         $imported = 0;
 
         foreach ($request->transaction_ids as $id) {
-            \Illuminate\Support\Facades\DB::transaction(function () use ($id, $church, $request, &$imported) {
+            DB::transaction(function () use ($id, $church, $request, &$imported) {
                 $monoTx = MonobankTransaction::where('id', $id)
                     ->where('church_id', $church->id)
                     ->where('is_processed', false)
@@ -474,7 +477,9 @@ class MonobankSyncController extends Controller
                     ->lockForUpdate()
                     ->first();
 
-                if (!$monoTx) return;
+                if (! $monoTx) {
+                    return;
+                }
 
                 // Try to find person by IBAN
                 $personId = null;
@@ -571,6 +576,7 @@ class MonobankSyncController extends Controller
         return response()->json($transactions->map(function ($tx) {
             $data = $tx->toArray();
             $data['masked_iban'] = $tx->masked_iban;
+
             return $data;
         }));
     }
@@ -581,9 +587,10 @@ class MonobankSyncController extends Controller
     public function toggleAutoSync(Request $request)
     {
         $church = $this->getCurrentChurch();
-        $church->update(['monobank_auto_sync' => !$church->monobank_auto_sync]);
+        $church->update(['monobank_auto_sync' => ! $church->monobank_auto_sync]);
 
         $status = $church->monobank_auto_sync ? 'увімкнено' : 'вимкнено';
+
         return $this->successResponse($request, "Автосинхронізацію {$status}");
     }
 
@@ -593,9 +600,9 @@ class MonobankSyncController extends Controller
     public function webhook(Request $request, string $secret)
     {
         // Find church by webhook secret
-        $church = \App\Models\Church::where('monobank_webhook_secret', $secret)->first();
+        $church = Church::where('monobank_webhook_secret', $secret)->first();
 
-        if (!$church) {
+        if (! $church) {
             return response('Invalid secret', 404);
         }
 
@@ -628,7 +635,7 @@ class MonobankSyncController extends Controller
         $service = new MonobankPersonalService($church);
 
         // Generate webhook secret if not exists
-        if (!$church->monobank_webhook_secret) {
+        if (! $church->monobank_webhook_secret) {
             $church->update(['monobank_webhook_secret' => bin2hex(random_bytes(16))]);
         }
 

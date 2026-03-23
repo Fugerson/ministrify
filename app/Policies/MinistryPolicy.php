@@ -25,7 +25,7 @@ class MinistryPolicy
         }
 
         // Check visibility settings
-        if (!$ministry->canAccess($user)) {
+        if (! $ministry->canAccess($user)) {
             return false;
         }
 

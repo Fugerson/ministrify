@@ -12,6 +12,7 @@ class SettingsControllerTest extends TestCase
     use RefreshDatabase;
 
     private Church $church;
+
     private User $admin;
 
     protected function setUp(): void

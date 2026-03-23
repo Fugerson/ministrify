@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Board;
 use App\Models\BoardCard;
 use App\Models\BoardCardActivity;
+use App\Models\BoardCardAttachment;
 use App\Models\BoardCardChecklistItem;
 use App\Models\BoardCardComment;
 use App\Models\BoardColumn;
@@ -13,8 +14,10 @@ use App\Models\Event;
 use App\Models\Group;
 use App\Models\Ministry;
 use App\Models\Person;
+use App\Rules\BelongsToChurch;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class BoardController extends Controller
 {
@@ -23,7 +26,7 @@ class BoardController extends Controller
     {
         $this->checkPlanFeature('boards');
 
-        if (!auth()->user()->canView('boards')) {
+        if (! auth()->user()->canView('boards')) {
             return redirect()->route('dashboard')->with('error', __('У вас немає доступу до цього розділу. Зверніться до адміністратора церкви для отримання потрібних прав.'));
         }
 
@@ -55,11 +58,11 @@ class BoardController extends Controller
         // Include cards with show_in_general=true OR cards belonging to epics with show_in_general=true
         $mainColumnsByPosition = $board->columns->keyBy('position');
         $generalCards = BoardCard::where(function ($q) {
-                $q->where('show_in_general', true)
-                  ->orWhereHas('epic', function ($eq) {
-                      $eq->where('show_in_general', true);
-                  });
-            })
+            $q->where('show_in_general', true)
+                ->orWhereHas('epic', function ($eq) {
+                    $eq->where('show_in_general', true);
+                });
+        })
             ->whereHas('column.board', function ($q) use ($church) {
                 $q->where('church_id', $church->id)->whereNotNull('ministry_id');
             })
@@ -112,6 +115,7 @@ class BoardController extends Controller
             $stat = $epicStatsRaw[$epic->id] ?? null;
             $total = $stat ? (int) $stat->total : 0;
             $completed = $stat ? (int) $stat->completed : 0;
+
             return [
                 'id' => $epic->id,
                 'name' => $epic->name,
@@ -130,12 +134,12 @@ class BoardController extends Controller
     // Kanban board for a specific ministry
     public function show(Board $board)
     {
-        if (!auth()->user()->canView('boards')) {
+        if (! auth()->user()->canView('boards')) {
             return redirect()->route('dashboard')->with('error', __('У вас немає доступу до цього розділу. Зверніться до адміністратора церкви для отримання потрібних прав.'));
         }
 
         // Church-wide board — redirect to index
-        if (!$board->ministry_id) {
+        if (! $board->ministry_id) {
             return redirect()->route('boards.index');
         }
 
@@ -170,6 +174,7 @@ class BoardController extends Controller
             $stat = $epicStatsRaw[$epic->id] ?? null;
             $total = $stat ? (int) $stat->total : 0;
             $completed = $stat ? (int) $stat->completed : 0;
+
             return [
                 'id' => $epic->id,
                 'name' => $epic->name,
@@ -187,6 +192,7 @@ class BoardController extends Controller
     public function create()
     {
         abort_unless(auth()->user()->canCreate('boards'), 403);
+
         return view('boards.create');
     }
 
@@ -222,6 +228,7 @@ class BoardController extends Controller
     public function edit(Board $board)
     {
         $this->authorizeBoard($board);
+
         return view('boards.edit', compact('board'));
     }
 
@@ -337,7 +344,7 @@ class BoardController extends Controller
         // Verify all columns belong to this board
         $boardColumnIds = $board->columns()->pluck('id')->toArray();
         foreach ($positions['positions'] as $index => $columnId) {
-            if (!in_array($columnId, $boardColumnIds)) {
+            if (! in_array($columnId, $boardColumnIds)) {
                 abort(403, __('messages.column_not_belongs_to_board'));
             }
             BoardColumn::where('id', $columnId)->update(['position' => $index]);
@@ -360,12 +367,12 @@ class BoardController extends Controller
             'description' => 'nullable|string|max:2000',
             'priority' => 'nullable|in:low,medium,high,urgent',
             'due_date' => 'nullable|date',
-            'assigned_to' => ['nullable', new \App\Rules\BelongsToChurch(\App\Models\Person::class)],
-            'epic_id' => ['nullable', \Illuminate\Validation\Rule::exists('board_epics', 'id')->whereIn('board_id', Board::where('church_id', $this->getCurrentChurch()->id)->pluck('id'))],
-            'event_id' => ['nullable', new \App\Rules\BelongsToChurch(\App\Models\Event::class)],
-            'ministry_id' => ['nullable', new \App\Rules\BelongsToChurch(\App\Models\Ministry::class)],
-            'group_id' => ['nullable', new \App\Rules\BelongsToChurch(\App\Models\Group::class)],
-            'person_id' => ['nullable', new \App\Rules\BelongsToChurch(\App\Models\Person::class)],
+            'assigned_to' => ['nullable', new BelongsToChurch(Person::class)],
+            'epic_id' => ['nullable', Rule::exists('board_epics', 'id')->whereIn('board_id', Board::where('church_id', $this->getCurrentChurch()->id)->pluck('id'))],
+            'event_id' => ['nullable', new BelongsToChurch(Event::class)],
+            'ministry_id' => ['nullable', new BelongsToChurch(Ministry::class)],
+            'group_id' => ['nullable', new BelongsToChurch(Group::class)],
+            'person_id' => ['nullable', new BelongsToChurch(Person::class)],
             'entity_type' => 'nullable|in:event,ministry,group,person',
         ]);
 
@@ -400,20 +407,20 @@ class BoardController extends Controller
         ]);
 
         $board = Board::find($validated['board_id']);
-        if (!$board) {
+        if (! $board) {
             return $this->errorResponse($request, __('messages.board_not_found'));
         }
         $this->authorizeBoard($board);
 
         // Get the first column (typically "To Do")
         $column = $board->columns()->orderBy('position')->first();
-        if (!$column) {
+        if (! $column) {
             return $this->errorResponse($request, __('messages.board_has_no_columns'));
         }
 
         // Get entity details
         $entityData = $this->getEntityData($validated['entity_type'], $validated['entity_id'], $church->id);
-        if (!$entityData) {
+        if (! $entityData) {
             return $this->errorResponse($request, __('messages.entity_not_found'));
         }
 
@@ -438,7 +445,7 @@ class BoardController extends Controller
 
     private function getEntityData(string $type, int $id, int $churchId): ?array
     {
-        return match($type) {
+        return match ($type) {
             'event' => $this->getEventData($id, $churchId),
             'ministry' => $this->getMinistryData($id, $churchId),
             'group' => $this->getGroupData($id, $churchId),
@@ -450,7 +457,9 @@ class BoardController extends Controller
     private function getEventData(int $id, int $churchId): ?array
     {
         $event = Event::where('id', $id)->where('church_id', $churchId)->first();
-        if (!$event) return null;
+        if (! $event) {
+            return null;
+        }
 
         $dateStr = $event->date ? $event->date->format('d.m.Y') : '';
         $timeStr = $event->time ? $event->time->format('H:i') : '';
@@ -458,7 +467,7 @@ class BoardController extends Controller
 
         return [
             'title' => __('messages.preparation_prefix', ['title' => $event->title]),
-            'description' => __('messages.event_description', ['title' => $event->title]) . "\n" . __('messages.event_date_label', ['date' => $fullDateTime]) . "\n\n{$event->description}",
+            'description' => __('messages.event_description', ['title' => $event->title])."\n".__('messages.event_date_label', ['date' => $fullDateTime])."\n\n{$event->description}",
             'priority' => $event->date && $event->date->isBefore(now()->addDays(3)) ? 'high' : 'medium',
             'due_date' => $event->date ? $event->date->subDay() : now(),
         ];
@@ -467,11 +476,13 @@ class BoardController extends Controller
     private function getMinistryData(int $id, int $churchId): ?array
     {
         $ministry = Ministry::where('id', $id)->where('church_id', $churchId)->first();
-        if (!$ministry) return null;
+        if (! $ministry) {
+            return null;
+        }
 
         return [
             'title' => __('messages.task_prefix', ['title' => $ministry->name]),
-            'description' => __('messages.ministry_description', ['title' => $ministry->name]) . "\n\n{$ministry->description}",
+            'description' => __('messages.ministry_description', ['title' => $ministry->name])."\n\n{$ministry->description}",
             'priority' => 'medium',
             'due_date' => null,
         ];
@@ -480,11 +491,13 @@ class BoardController extends Controller
     private function getGroupData(int $id, int $churchId): ?array
     {
         $group = Group::where('id', $id)->where('church_id', $churchId)->first();
-        if (!$group) return null;
+        if (! $group) {
+            return null;
+        }
 
         return [
             'title' => __('messages.task_prefix', ['title' => $group->name]),
-            'description' => __('messages.group_description', ['title' => $group->name]) . "\n\n{$group->description}",
+            'description' => __('messages.group_description', ['title' => $group->name])."\n\n{$group->description}",
             'priority' => 'medium',
             'due_date' => null,
         ];
@@ -493,11 +506,13 @@ class BoardController extends Controller
     private function getPersonData(int $id, int $churchId): ?array
     {
         $person = Person::where('id', $id)->where('church_id', $churchId)->first();
-        if (!$person) return null;
+        if (! $person) {
+            return null;
+        }
 
         return [
             'title' => __('messages.task_prefix', ['title' => $person->full_name]),
-            'description' => __('messages.person_description', ['name' => $person->full_name]) . "\n" . __('messages.phone_label', ['phone' => $person->phone]) . "\n" . __('messages.email_label', ['email' => $person->email]),
+            'description' => __('messages.person_description', ['name' => $person->full_name])."\n".__('messages.phone_label', ['phone' => $person->phone])."\n".__('messages.email_label', ['email' => $person->email]),
             'priority' => 'medium',
             'due_date' => null,
         ];
@@ -505,7 +520,7 @@ class BoardController extends Controller
 
     private function getEntityTypeLabel(string $type): string
     {
-        return match($type) {
+        return match ($type) {
             'event' => __('messages.entity_type_event'),
             'ministry' => __('messages.entity_type_ministry'),
             'group' => __('messages.entity_type_group'),
@@ -569,7 +584,7 @@ class BoardController extends Controller
 
             // Get other cards for linking (excluding current and already related)
             $relatedIds = $allRelated->pluck('id')->push($card->id)->toArray();
-            $availableCards = BoardCard::whereHas('column.board', fn($q) => $q->where('church_id', $church->id))
+            $availableCards = BoardCard::whereHas('column.board', fn ($q) => $q->where('church_id', $church->id))
                 ->whereNotIn('id', $relatedIds)
                 ->with('column')
                 ->orderBy('created_at', 'desc')
@@ -580,7 +595,7 @@ class BoardController extends Controller
                 'card' => $card,
                 'column_name' => $card->column?->name ?? '',
                 'columns' => $card->column?->board?->columns ?? [],
-                'comments' => $card->comments->map(fn($c) => [
+                'comments' => $card->comments->map(fn ($c) => [
                     'id' => $c->id,
                     'content' => $c->content,
                     'user_name' => $c->user?->name ?? __('common.deleted'),
@@ -590,20 +605,20 @@ class BoardController extends Controller
                     'updated_at' => $c->updated_at->diffForHumans(),
                     'is_edited' => $c->created_at->ne($c->updated_at),
                     'is_mine' => $c->user_id === auth()->id(),
-                    'attachments' => $c->attachments ? collect($c->attachments)->map(fn($a) => [
+                    'attachments' => $c->attachments ? collect($c->attachments)->map(fn ($a) => [
                         'name' => $a['name'],
                         'url' => \Storage::url($a['path']),
                         'mime_type' => $a['mime_type'],
                         'is_image' => str_starts_with($a['mime_type'], 'image/'),
                     ])->toArray() : [],
                 ]),
-                'checklist' => $card->checklistItems->map(fn($i) => [
+                'checklist' => $card->checklistItems->map(fn ($i) => [
                     'id' => $i->id,
                     'title' => $i->title,
                     'is_completed' => $i->is_completed,
                 ]),
                 'checklist_progress' => $card->checklist_progress,
-                'attachments' => $card->attachments->map(fn($a) => [
+                'attachments' => $card->attachments->map(fn ($a) => [
                     'id' => $a->id,
                     'name' => $a->name,
                     'size' => $a->size_for_humans,
@@ -613,23 +628,23 @@ class BoardController extends Controller
                     'created_at' => $a->created_at->diffForHumans(),
                     'is_image' => str_starts_with($a->mime_type, 'image/'),
                 ]),
-                'related_cards' => $allRelated->map(fn($r) => [
+                'related_cards' => $allRelated->map(fn ($r) => [
                     'id' => $r->id,
                     'title' => $r->title,
                     'column_name' => $r->column->name,
                     'is_completed' => $r->is_completed,
                 ]),
-                'available_cards' => $availableCards->map(fn($c) => [
+                'available_cards' => $availableCards->map(fn ($c) => [
                     'id' => $c->id,
                     'title' => $c->title,
                     'column_name' => $c->column->name,
                 ]),
-                'people' => $people->map(fn($p) => [
+                'people' => $people->map(fn ($p) => [
                     'id' => $p->id,
                     'name' => $p->full_name,
                     'initial' => mb_substr($p->first_name, 0, 1),
                 ]),
-                'activities' => $card->activities->take(50)->map(fn($a) => [
+                'activities' => $card->activities->take(50)->map(fn ($a) => [
                     'id' => $a->id,
                     'action' => $a->action,
                     'field' => $a->field,
@@ -659,28 +674,28 @@ class BoardController extends Controller
             'description' => 'nullable|string|max:2000',
             'priority' => 'nullable|in:low,medium,high,urgent',
             'due_date' => 'nullable|date',
-            'assigned_to' => ['nullable', new \App\Rules\BelongsToChurch(\App\Models\Person::class)],
-            'epic_id' => ['nullable', \Illuminate\Validation\Rule::exists('board_epics', 'id')->whereIn('board_id', Board::where('church_id', $this->getCurrentChurch()->id)->pluck('id'))],
+            'assigned_to' => ['nullable', new BelongsToChurch(Person::class)],
+            'epic_id' => ['nullable', Rule::exists('board_epics', 'id')->whereIn('board_id', Board::where('church_id', $this->getCurrentChurch()->id)->pluck('id'))],
             'column_id' => 'nullable|exists:board_columns,id',
             'show_in_general' => 'nullable|boolean',
         ]);
 
         // Verify column belongs to the same board if provided
-        if (!empty($validated['column_id'])) {
+        if (! empty($validated['column_id'])) {
             $targetColumn = BoardColumn::find($validated['column_id']);
-            if (!$targetColumn) {
+            if (! $targetColumn) {
                 abort(404);
             }
             // Cross-board: card from ministry board shown on main board via show_in_general
             if ($targetColumn->board_id !== $card->column->board_id) {
                 $isGeneral = $card->show_in_general || ($card->epic && $card->epic->show_in_general);
-                if (!$isGeneral) {
+                if (! $isGeneral) {
                     abort(403, __('messages.column_not_belongs_to_board'));
                 }
                 $matchingColumn = BoardColumn::where('board_id', $card->column->board_id)
                     ->where('position', $targetColumn->position)
                     ->first();
-                if (!$matchingColumn) {
+                if (! $matchingColumn) {
                     $matchingColumn = BoardColumn::where('board_id', $card->column->board_id)
                         ->orderBy('position')
                         ->skip($targetColumn->position)
@@ -693,7 +708,7 @@ class BoardController extends Controller
         // Track changes for activity log
         $changes = [];
         foreach (['title', 'description', 'priority', 'due_date', 'assigned_to', 'epic_id', 'column_id'] as $field) {
-            if (array_key_exists($field, $validated) && $card->$field != $validated[$field]) {
+            if (array_key_exists($field, $validated) && $validated[$field] != $card->$field) {
                 $oldValue = $card->$field;
                 $newValue = $validated[$field];
 
@@ -738,7 +753,7 @@ class BoardController extends Controller
 
         // Verify target column belongs to the same board
         $targetColumn = BoardColumn::find($validated['column_id']);
-        if (!$targetColumn) {
+        if (! $targetColumn) {
             abort(404);
         }
 
@@ -750,14 +765,14 @@ class BoardController extends Controller
         // Cross-board move: card from ministry board shown on main board via show_in_general
         if ($targetColumn->board_id !== $card->column->board_id) {
             $isGeneral = $card->show_in_general || ($card->epic && $card->epic->show_in_general);
-            if (!$isGeneral) {
+            if (! $isGeneral) {
                 abort(403, __('messages.column_not_belongs_to_board'));
             }
             // Find matching column on the card's own board by position
             $matchingColumn = BoardColumn::where('board_id', $card->column->board_id)
                 ->where('position', $targetColumn->position)
                 ->first();
-            if (!$matchingColumn) {
+            if (! $matchingColumn) {
                 $matchingColumn = BoardColumn::where('board_id', $card->column->board_id)
                     ->orderBy('position')
                     ->skip($targetColumn->position)
@@ -817,7 +832,7 @@ class BoardController extends Controller
 
         // Create duplicate
         $newCard = $card->replicate(['is_completed', 'completed_at']);
-        $newCard->title = $card->title . ' ' . __('messages.copy_suffix');
+        $newCard->title = $card->title.' '.__('messages.copy_suffix');
         $newCard->is_completed = false;
         $newCard->completed_at = null;
         $newCard->created_by = auth()->id();
@@ -853,7 +868,7 @@ class BoardController extends Controller
 
         // Must have either content or files
         $content = $validated['content'] ?? null;
-        if (empty($content) && !$request->hasFile('files')) {
+        if (empty($content) && ! $request->hasFile('files')) {
             return response()->json(['error' => __('messages.text_or_file_required')], 422);
         }
 
@@ -874,7 +889,7 @@ class BoardController extends Controller
         $comment = $card->comments()->create([
             'user_id' => auth()->id(),
             'content' => $validated['content'] ?? '',
-            'attachments' => !empty($attachments) ? $attachments : null,
+            'attachments' => ! empty($attachments) ? $attachments : null,
         ]);
 
         // Log activity
@@ -891,7 +906,7 @@ class BoardController extends Controller
                 'user_initial' => mb_substr(auth()->user()->name, 0, 1),
                 'created_at' => $comment->created_at->diffForHumans(),
                 'is_mine' => true,
-                'attachments' => $comment->attachments ? collect($comment->attachments)->map(fn($a) => [
+                'attachments' => $comment->attachments ? collect($comment->attachments)->map(fn ($a) => [
                     'name' => $a['name'],
                     'url' => \Storage::url($a['path']),
                     'mime_type' => $a['mime_type'],
@@ -1004,7 +1019,7 @@ class BoardController extends Controller
 
         $comment->update([
             'content' => $newContent,
-            'attachments' => !empty($attachments) ? $attachments : null,
+            'attachments' => ! empty($attachments) ? $attachments : null,
         ]);
 
         // Log activity
@@ -1023,7 +1038,7 @@ class BoardController extends Controller
                 return [
                     'name' => $att['name'],
                     'url' => \Storage::url($att['path']),
-                    'size' => isset($att['size']) ? number_format($att['size'] / 1024, 1) . ' KB' : '',
+                    'size' => isset($att['size']) ? number_format($att['size'] / 1024, 1).' KB' : '',
                     'is_image' => str_starts_with($att['mime_type'] ?? '', 'image/'),
                 ];
             })->toArray(),
@@ -1041,23 +1056,23 @@ class BoardController extends Controller
 
         $attachments = $comment->attachments ?? [];
 
-        if (!isset($attachments[$index])) {
+        if (! isset($attachments[$index])) {
             return response()->json(['error' => __('messages.attachment_not_found')], 404);
         }
 
         // Delete file from storage
         $attachment = $attachments[$index];
-        if (!empty($attachment['path'])) {
+        if (! empty($attachment['path'])) {
             \Storage::disk('public')->delete($attachment['path']);
         }
 
         // Remove from array
         array_splice($attachments, $index, 1);
-        $comment->update(['attachments' => !empty($attachments) ? $attachments : null]);
+        $comment->update(['attachments' => ! empty($attachments) ? $attachments : null]);
 
         return response()->json([
             'success' => true,
-            'attachments' => collect($attachments)->map(fn($a) => [
+            'attachments' => collect($attachments)->map(fn ($a) => [
                 'name' => $a['name'],
                 'url' => \Storage::url($a['path']),
                 'mime_type' => $a['mime_type'],
@@ -1103,7 +1118,7 @@ class BoardController extends Controller
         ]);
     }
 
-    public function destroyAttachment(Request $request, \App\Models\BoardCardAttachment $attachment)
+    public function destroyAttachment(Request $request, BoardCardAttachment $attachment)
     {
         $this->authorizeCardAccess($attachment->card);
 
@@ -1143,7 +1158,7 @@ class BoardController extends Controller
         $exists = $card->relatedCards()->where('related_card_id', $validated['related_card_id'])->exists()
             || $card->relatedFrom()->where('card_id', $validated['related_card_id'])->exists();
 
-        if (!$exists) {
+        if (! $exists) {
             $card->relatedCards()->attach($validated['related_card_id'], ['relation_type' => 'related']);
 
             // Log activity
@@ -1180,7 +1195,7 @@ class BoardController extends Controller
             abort(404);
         }
 
-        if (!$board->canAccess(auth()->user())) {
+        if (! $board->canAccess(auth()->user())) {
             abort(403);
         }
     }
@@ -1203,7 +1218,7 @@ class BoardController extends Controller
             return;
         }
 
-        if (!$board->canAccess(auth()->user())) {
+        if (! $board->canAccess(auth()->user())) {
             abort(403);
         }
     }

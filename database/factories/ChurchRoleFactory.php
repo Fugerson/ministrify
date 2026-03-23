@@ -14,10 +14,11 @@ class ChurchRoleFactory extends Factory
     public function definition(): array
     {
         $name = fake()->randomElement(['Звукорежисер', 'Медіа', 'Дизайнер', 'Фотограф']);
+
         return [
             'church_id' => Church::factory(),
             'name' => $name,
-            'slug' => Str::slug($name) . '-' . Str::random(4),
+            'slug' => Str::slug($name).'-'.Str::random(4),
             'color' => fake()->hexColor(),
             'sort_order' => fake()->numberBetween(0, 10),
             'is_admin_role' => false,
@@ -29,7 +30,7 @@ class ChurchRoleFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'name' => 'Адміністратор',
-            'slug' => 'admin-' . Str::random(4),
+            'slug' => 'admin-'.Str::random(4),
             'is_admin_role' => true,
         ]);
     }

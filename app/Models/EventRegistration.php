@@ -2,15 +2,15 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
-use App\Traits\Auditable;
 
 class EventRegistration extends Model
 {
-    use HasFactory, Auditable;
+    use Auditable, HasFactory;
 
     protected $hidden = [
         'confirmation_token',

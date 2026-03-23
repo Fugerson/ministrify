@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\FamilyRelationship;
 use App\Models\Person;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class FamilyRelationshipController extends Controller
@@ -43,13 +42,13 @@ class FamilyRelationshipController extends Controller
             ->where(function ($query) use ($person, $relatedPerson, $validated) {
                 $query->where(function ($q) use ($person, $relatedPerson, $validated) {
                     $q->where('person_id', $person->id)
-                      ->where('related_person_id', $relatedPerson->id)
-                      ->where('relationship_type', $validated['relationship_type']);
+                        ->where('related_person_id', $relatedPerson->id)
+                        ->where('relationship_type', $validated['relationship_type']);
                 })->orWhere(function ($q) use ($person, $relatedPerson, $validated) {
                     $inverseType = FamilyRelationship::getInverseType($validated['relationship_type']);
                     $q->where('person_id', $relatedPerson->id)
-                      ->where('related_person_id', $person->id)
-                      ->where('relationship_type', $inverseType);
+                        ->where('related_person_id', $person->id)
+                        ->where('relationship_type', $inverseType);
                 });
             })
             ->exists();
@@ -64,10 +63,10 @@ class FamilyRelationshipController extends Controller
                 // Check if inverse pair exists with ANY parent/child type
                 $query->where(function ($q) use ($person, $relatedPerson) {
                     $q->where('person_id', $relatedPerson->id)
-                      ->where('related_person_id', $person->id);
+                        ->where('related_person_id', $person->id);
                 })->orWhere(function ($q) use ($person, $relatedPerson) {
                     $q->where('person_id', $person->id)
-                      ->where('related_person_id', $relatedPerson->id);
+                        ->where('related_person_id', $relatedPerson->id);
                 });
             })
             ->exists();
@@ -82,7 +81,7 @@ class FamilyRelationshipController extends Controller
                 ->where('relationship_type', FamilyRelationship::TYPE_SPOUSE)
                 ->where(function ($q) use ($person) {
                     $q->where('person_id', $person->id)
-                      ->orWhere('related_person_id', $person->id);
+                        ->orWhere('related_person_id', $person->id);
                 })
                 ->exists();
 
@@ -90,16 +89,16 @@ class FamilyRelationshipController extends Controller
                 ->where('relationship_type', FamilyRelationship::TYPE_SPOUSE)
                 ->where(function ($q) use ($relatedPerson) {
                     $q->where('person_id', $relatedPerson->id)
-                      ->orWhere('related_person_id', $relatedPerson->id);
+                        ->orWhere('related_person_id', $relatedPerson->id);
                 })
                 ->exists();
 
             if ($personHasSpouse) {
-                return $this->errorResponse($request, $person->full_name . ' вже має чоловіка/дружину');
+                return $this->errorResponse($request, $person->full_name.' вже має чоловіка/дружину');
             }
 
             if ($relatedHasSpouse) {
-                return $this->errorResponse($request, $relatedPerson->full_name . ' вже має чоловіка/дружину');
+                return $this->errorResponse($request, $relatedPerson->full_name.' вже має чоловіка/дружину');
             }
         }
 
@@ -160,7 +159,7 @@ class FamilyRelationshipController extends Controller
             ->when($search, function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('first_name', 'like', "%{$search}%")
-                      ->orWhere('last_name', 'like', "%{$search}%");
+                        ->orWhere('last_name', 'like', "%{$search}%");
                 });
             })
             ->select('id', 'first_name', 'last_name', 'photo')

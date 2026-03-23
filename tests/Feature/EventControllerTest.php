@@ -16,7 +16,9 @@ class EventControllerTest extends TestCase
     use RefreshDatabase;
 
     private Church $church;
+
     private User $admin;
+
     private Ministry $ministry;
 
     protected function setUp(): void

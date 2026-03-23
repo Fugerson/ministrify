@@ -73,7 +73,7 @@ class PositionController extends Controller
             ->get();
 
         foreach ($positions as $position) {
-            if (!$position->ministry || $position->ministry->church_id !== $church->id) {
+            if (! $position->ministry || $position->ministry->church_id !== $church->id) {
                 abort(403, 'Немає доступу до цієї позиції.');
             }
         }
@@ -82,7 +82,7 @@ class PositionController extends Controller
         $ministryIds = $positions->pluck('ministry.id')->unique();
         $user = auth()->user();
 
-        if (!$user->isAdmin()) {
+        if (! $user->isAdmin()) {
             foreach ($ministryIds as $ministryId) {
                 $ministry = Ministry::find($ministryId);
                 if ($ministry) {

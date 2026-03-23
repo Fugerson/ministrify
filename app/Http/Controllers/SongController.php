@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Song;
 use App\Models\Event;
+use App\Models\Song;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -69,7 +69,7 @@ class SongController extends Controller
 
     public function store(Request $request)
     {
-        if (!auth()->user()->canCreate('ministries')) {
+        if (! auth()->user()->canCreate('ministries')) {
             abort(403);
         }
         $validated = $request->validate([
@@ -94,16 +94,16 @@ class SongController extends Controller
         $church = $this->getCurrentChurch();
 
         // Clean empty values
-        $validated['youtube_url'] = !empty($validated['youtube_url']) ? $validated['youtube_url'] : null;
-        $validated['spotify_url'] = !empty($validated['spotify_url']) ? $validated['spotify_url'] : null;
-        $validated['bpm'] = !empty($validated['bpm']) ? (int)$validated['bpm'] : null;
+        $validated['youtube_url'] = ! empty($validated['youtube_url']) ? $validated['youtube_url'] : null;
+        $validated['spotify_url'] = ! empty($validated['spotify_url']) ? $validated['spotify_url'] : null;
+        $validated['bpm'] = ! empty($validated['bpm']) ? (int) $validated['bpm'] : null;
 
         // Filter out empty links
-        $resourceLinks = collect($validated['resource_links'] ?? [])->filter(fn($l) => !empty($l['label']) && !empty($l['url']))->values()->all();
+        $resourceLinks = collect($validated['resource_links'] ?? [])->filter(fn ($l) => ! empty($l['label']) && ! empty($l['url']))->values()->all();
 
         // Combine selected tags with new tag
         $tags = $validated['tags'] ?? [];
-        if (!empty($validated['new_tag'])) {
+        if (! empty($validated['new_tag'])) {
             $newTags = array_map('trim', explode(',', $validated['new_tag']));
             $tags = array_merge($tags, array_filter($newTags));
         }
@@ -120,9 +120,9 @@ class SongController extends Controller
             'ccli_number' => $validated['ccli_number'],
             'youtube_url' => $validated['youtube_url'],
             'spotify_url' => $validated['spotify_url'],
-            'tags' => !empty($tags) ? array_values($tags) : null,
+            'tags' => ! empty($tags) ? array_values($tags) : null,
             'notes' => $validated['notes'],
-            'resource_links' => !empty($resourceLinks) ? $resourceLinks : null,
+            'resource_links' => ! empty($resourceLinks) ? $resourceLinks : null,
             'created_by' => auth()->id(),
         ]);
 
@@ -147,7 +147,7 @@ class SongController extends Controller
                     'resource_links' => $song->resource_links ?? [],
                     'times_used' => $song->times_used ?? 0,
                     'created_at' => $song->created_at,
-                ]
+                ],
             ]);
         }
 
@@ -158,7 +158,7 @@ class SongController extends Controller
     {
         $this->authorizeChurch($song);
 
-        $song->load(['creator', 'events' => fn($q) => $q->latest('date')->limit(10)]);
+        $song->load(['creator', 'events' => fn ($q) => $q->latest('date')->limit(10)]);
 
         return view('songs.show', compact('song'));
     }
@@ -191,7 +191,7 @@ class SongController extends Controller
     public function update(Request $request, Song $song)
     {
         $this->authorizeChurch($song);
-        if (!auth()->user()->canEdit('ministries')) {
+        if (! auth()->user()->canEdit('ministries')) {
             abort(403);
         }
 
@@ -215,16 +215,16 @@ class SongController extends Controller
         ]);
 
         // Clean empty values
-        $validated['youtube_url'] = !empty($validated['youtube_url']) ? $validated['youtube_url'] : null;
-        $validated['spotify_url'] = !empty($validated['spotify_url']) ? $validated['spotify_url'] : null;
-        $validated['bpm'] = !empty($validated['bpm']) ? (int)$validated['bpm'] : null;
+        $validated['youtube_url'] = ! empty($validated['youtube_url']) ? $validated['youtube_url'] : null;
+        $validated['spotify_url'] = ! empty($validated['spotify_url']) ? $validated['spotify_url'] : null;
+        $validated['bpm'] = ! empty($validated['bpm']) ? (int) $validated['bpm'] : null;
 
         // Filter out empty links
-        $resourceLinks = collect($validated['resource_links'] ?? [])->filter(fn($l) => !empty($l['label']) && !empty($l['url']))->values()->all();
+        $resourceLinks = collect($validated['resource_links'] ?? [])->filter(fn ($l) => ! empty($l['label']) && ! empty($l['url']))->values()->all();
 
         // Combine selected tags with new tag
         $tags = $validated['tags'] ?? [];
-        if (!empty($validated['new_tag'])) {
+        if (! empty($validated['new_tag'])) {
             $newTags = array_map('trim', explode(',', $validated['new_tag']));
             $tags = array_merge($tags, array_filter($newTags));
         }
@@ -240,9 +240,9 @@ class SongController extends Controller
             'ccli_number' => $validated['ccli_number'],
             'youtube_url' => $validated['youtube_url'],
             'spotify_url' => $validated['spotify_url'],
-            'tags' => !empty($tags) ? array_values($tags) : null,
+            'tags' => ! empty($tags) ? array_values($tags) : null,
             'notes' => $validated['notes'],
-            'resource_links' => !empty($resourceLinks) ? $resourceLinks : null,
+            'resource_links' => ! empty($resourceLinks) ? $resourceLinks : null,
         ]);
 
         if ($request->wantsJson()) {
@@ -266,7 +266,7 @@ class SongController extends Controller
                     'resource_links' => $song->resource_links ?? [],
                     'times_used' => $song->times_used ?? 0,
                     'created_at' => $song->created_at,
-                ]
+                ],
             ]);
         }
 
@@ -286,17 +286,17 @@ class SongController extends Controller
         $tags = $song->tags ?? [];
 
         // Remove old tag if present
-        if (!empty($validated['from_tag'])) {
-            $tags = array_values(array_filter($tags, fn($t) => $t !== $validated['from_tag']));
+        if (! empty($validated['from_tag'])) {
+            $tags = array_values(array_filter($tags, fn ($t) => $t !== $validated['from_tag']));
         }
 
         // Add new tag if not already present
-        if (!empty($validated['to_tag']) && !in_array($validated['to_tag'], $tags)) {
+        if (! empty($validated['to_tag']) && ! in_array($validated['to_tag'], $tags)) {
             $tags[] = $validated['to_tag'];
         }
 
         $song->update([
-            'tags' => !empty($tags) ? array_values($tags) : null,
+            'tags' => ! empty($tags) ? array_values($tags) : null,
         ]);
 
         return response()->json([
@@ -308,7 +308,7 @@ class SongController extends Controller
     public function destroy(Request $request, Song $song)
     {
         $this->authorizeChurch($song);
-        if (!auth()->user()->canDelete('ministries')) {
+        if (! auth()->user()->canDelete('ministries')) {
             abort(403);
         }
 
@@ -388,6 +388,7 @@ class SongController extends Controller
     public function importPage()
     {
         abort_unless(auth()->user()->canCreate('ministries'), 403);
+
         return view('songs.import');
     }
 
@@ -405,7 +406,7 @@ class SongController extends Controller
 
         // Detect delimiter
         $firstLine = strtok($content, "\n");
-        $delimiter = (substr_count($firstLine, "\t") > substr_count($firstLine, ",")) ? "\t" : ",";
+        $delimiter = (substr_count($firstLine, "\t") > substr_count($firstLine, ',')) ? "\t" : ',';
 
         $csv = Reader::createFromString($content);
         $csv->setDelimiter($delimiter);
@@ -443,7 +444,7 @@ class SongController extends Controller
         $content = preg_replace('/^\xEF\xBB\xBF/', '', $content);
 
         $firstLine = strtok($content, "\n");
-        $delimiter = (substr_count($firstLine, "\t") > substr_count($firstLine, ",")) ? "\t" : ",";
+        $delimiter = (substr_count($firstLine, "\t") > substr_count($firstLine, ',')) ? "\t" : ',';
 
         $csv = Reader::createFromString($content);
         $csv->setDelimiter($delimiter);
@@ -462,6 +463,7 @@ class SongController extends Controller
                     $title = $this->getSongValue($row, $mappings, 'title');
                     if (empty($title)) {
                         $skipped++;
+
                         continue;
                     }
 
@@ -482,11 +484,11 @@ class SongController extends Controller
 
                     // Validate key
                     $key = $this->getSongValue($row, $mappings, 'key');
-                    if ($key && !isset(Song::keyLabels()[$key])) {
+                    if ($key && ! isset(Song::keyLabels()[$key])) {
                         // Try extracting from link fragment
                         $key = null;
                     }
-                    if (!$key && $link) {
+                    if (! $key && $link) {
                         $key = $this->extractKeyFromUrl($link);
                     }
 
@@ -494,7 +496,9 @@ class SongController extends Controller
                     $bpm = $this->getSongValue($row, $mappings, 'bpm');
                     if ($bpm) {
                         $bpm = (int) $bpm;
-                        if ($bpm < 30 || $bpm > 300) $bpm = null;
+                        if ($bpm < 30 || $bpm > 300) {
+                            $bpm = null;
+                        }
                     }
 
                     // Parse tags
@@ -504,13 +508,15 @@ class SongController extends Controller
                         $tags = array_values(array_unique(array_filter(
                             array_map('trim', preg_split('/[,;|]/', $tagsRaw))
                         )));
-                        if (empty($tags)) $tags = null;
+                        if (empty($tags)) {
+                            $tags = null;
+                        }
                     }
 
                     // Notes
                     $notes = $this->getSongValue($row, $mappings, 'notes');
                     if ($extraNotes) {
-                        $notes = $notes ? $notes . "\n" . $extraNotes : $extraNotes;
+                        $notes = $notes ? $notes."\n".$extraNotes : $extraNotes;
                     }
 
                     Song::updateOrCreate(
@@ -533,9 +539,9 @@ class SongController extends Controller
                     );
                     $imported++;
                 } catch (\Exception $e) {
-                    $errors[] = "Рядок " . ($index + 2) . ": " . $e->getMessage();
+                    $errors[] = 'Рядок '.($index + 2).': '.$e->getMessage();
                     if (count($errors) > 10) {
-                        $errors[] = "... та інші помилки";
+                        $errors[] = '... та інші помилки';
                         break;
                     }
                 }
@@ -551,6 +557,7 @@ class SongController extends Controller
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
+
             return response()->json([
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -578,7 +585,7 @@ class SongController extends Controller
             foreach ($fields as $field => $patterns) {
                 foreach ($patterns as $pattern) {
                     if (str_contains($headerLower, $pattern)) {
-                        if (!isset($mappings[$field])) {
+                        if (! isset($mappings[$field])) {
                             $mappings[$field] = $header;
                         }
                         break 2;
@@ -596,15 +603,19 @@ class SongController extends Controller
             return null;
         }
         $value = $row[$mappings[$field]] ?? null;
+
         return $value ? trim($value) : null;
     }
 
     protected function extractKeyFromUrl(?string $url): ?string
     {
-        if (!$url) return null;
+        if (! $url) {
+            return null;
+        }
         if (preg_match('/#([A-G][#b]?m?)/', $url, $m)) {
             return isset(Song::keyLabels()[$m[1]]) ? $m[1] : null;
         }
+
         return null;
     }
 

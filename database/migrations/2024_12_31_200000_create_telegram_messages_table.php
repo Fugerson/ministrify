@@ -17,7 +17,7 @@ return new class extends Migration
             $table->bigInteger('telegram_message_id')->nullable();
             $table->boolean('is_read')->default(false);
             $table->timestamps();
-            
+
             $table->index(['church_id', 'person_id', 'created_at']);
         });
     }

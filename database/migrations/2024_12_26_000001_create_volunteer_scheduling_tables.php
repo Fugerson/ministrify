@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         // Blockout Dates - коли волонтер недоступний
-        if (!Schema::hasTable('blockout_dates')) {
+        if (! Schema::hasTable('blockout_dates')) {
             Schema::create('blockout_dates', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('person_id')->constrained()->onDelete('cascade');
@@ -36,7 +36,7 @@ return new class extends Migration
         }
 
         // Blockout-Ministry pivot
-        if (!Schema::hasTable('blockout_date_ministry')) {
+        if (! Schema::hasTable('blockout_date_ministry')) {
             Schema::create('blockout_date_ministry', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('blockout_date_id')->constrained()->onDelete('cascade');
@@ -46,7 +46,7 @@ return new class extends Migration
         }
 
         // Scheduling Preferences
-        if (!Schema::hasTable('scheduling_preferences')) {
+        if (! Schema::hasTable('scheduling_preferences')) {
             Schema::create('scheduling_preferences', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('person_id')->constrained()->onDelete('cascade');
@@ -64,7 +64,7 @@ return new class extends Migration
         }
 
         // Ministry-specific preferences
-        if (!Schema::hasTable('ministry_preferences')) {
+        if (! Schema::hasTable('ministry_preferences')) {
             Schema::create('ministry_preferences', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('scheduling_preference_id')->constrained()->onDelete('cascade');
@@ -76,7 +76,7 @@ return new class extends Migration
         }
 
         // Position-specific preferences
-        if (!Schema::hasTable('position_preferences')) {
+        if (! Schema::hasTable('position_preferences')) {
             Schema::create('position_preferences', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('scheduling_preference_id')->constrained()->onDelete('cascade');
@@ -89,47 +89,47 @@ return new class extends Migration
 
         // Add tracking fields to people table
         Schema::table('people', function (Blueprint $table) {
-            if (!Schema::hasColumn('people', 'last_scheduled_at')) {
+            if (! Schema::hasColumn('people', 'last_scheduled_at')) {
                 $table->timestamp('last_scheduled_at')->nullable();
             }
-            if (!Schema::hasColumn('people', 'times_scheduled_this_month')) {
+            if (! Schema::hasColumn('people', 'times_scheduled_this_month')) {
                 $table->unsignedInteger('times_scheduled_this_month')->default(0);
             }
-            if (!Schema::hasColumn('people', 'times_scheduled_this_year')) {
+            if (! Schema::hasColumn('people', 'times_scheduled_this_year')) {
                 $table->unsignedInteger('times_scheduled_this_year')->default(0);
             }
         });
 
         // Add tracking fields to assignments table
         Schema::table('assignments', function (Blueprint $table) {
-            if (!Schema::hasColumn('assignments', 'email_sent_at')) {
+            if (! Schema::hasColumn('assignments', 'email_sent_at')) {
                 $table->timestamp('email_sent_at')->nullable();
             }
-            if (!Schema::hasColumn('assignments', 'email_opened_at')) {
+            if (! Schema::hasColumn('assignments', 'email_opened_at')) {
                 $table->timestamp('email_opened_at')->nullable();
             }
-            if (!Schema::hasColumn('assignments', 'responded_at')) {
+            if (! Schema::hasColumn('assignments', 'responded_at')) {
                 $table->timestamp('responded_at')->nullable();
             }
-            if (!Schema::hasColumn('assignments', 'blockout_override')) {
+            if (! Schema::hasColumn('assignments', 'blockout_override')) {
                 $table->boolean('blockout_override')->default(false);
             }
-            if (!Schema::hasColumn('assignments', 'preference_override')) {
+            if (! Schema::hasColumn('assignments', 'preference_override')) {
                 $table->boolean('preference_override')->default(false);
             }
-            if (!Schema::hasColumn('assignments', 'conflict_override')) {
+            if (! Schema::hasColumn('assignments', 'conflict_override')) {
                 $table->boolean('conflict_override')->default(false);
             }
-            if (!Schema::hasColumn('assignments', 'decline_reason')) {
+            if (! Schema::hasColumn('assignments', 'decline_reason')) {
                 $table->string('decline_reason')->nullable();
             }
-            if (!Schema::hasColumn('assignments', 'assignment_notes')) {
+            if (! Schema::hasColumn('assignments', 'assignment_notes')) {
                 $table->text('assignment_notes')->nullable();
             }
         });
 
         // Scheduling conflicts log
-        if (!Schema::hasTable('scheduling_conflicts')) {
+        if (! Schema::hasTable('scheduling_conflicts')) {
             Schema::create('scheduling_conflicts', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('assignment_id')->constrained()->onDelete('cascade');
@@ -158,7 +158,7 @@ return new class extends Migration
 
         Schema::table('assignments', function (Blueprint $table) {
             $columns = ['email_sent_at', 'email_opened_at', 'responded_at', 'blockout_override',
-                        'preference_override', 'conflict_override', 'decline_reason', 'assignment_notes'];
+                'preference_override', 'conflict_override', 'decline_reason', 'assignment_notes'];
             foreach ($columns as $col) {
                 if (Schema::hasColumn('assignments', $col)) {
                     $table->dropColumn($col);

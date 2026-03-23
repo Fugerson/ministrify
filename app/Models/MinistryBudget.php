@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class MinistryBudget extends Model
 {
-    use HasFactory, Auditable;
+    use Auditable, HasFactory;
 
     protected $fillable = [
         'church_id',
@@ -85,7 +85,7 @@ class MinistryBudget extends Model
 
     public function getPeriodLabelAttribute(): string
     {
-        return $this->month_name . ' ' . $this->year;
+        return $this->month_name.' '.$this->year;
     }
 
     // ==================
@@ -98,7 +98,7 @@ class MinistryBudget extends Model
     public function getEffectiveBudget(): float
     {
         if ($this->items->isNotEmpty()) {
-            return (float) $this->items->sum(fn($item) => $item->getMonthlyPlanned());
+            return (float) $this->items->sum(fn ($item) => $item->getMonthlyPlanned());
         }
 
         return (float) $this->monthly_budget;

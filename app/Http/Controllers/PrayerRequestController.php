@@ -22,7 +22,7 @@ class PrayerRequestController extends Controller
         }
 
         // Filter: show all or only public
-        if (!auth()->user()->hasRole(['admin', 'leader'])) {
+        if (! auth()->user()->hasRole(['admin', 'leader'])) {
             $query->where(function ($q) {
                 $q->where('is_public', true)
                     ->orWhere('user_id', auth()->id())
@@ -78,9 +78,9 @@ class PrayerRequestController extends Controller
         $this->authorizeChurch($prayerRequest);
 
         // Check if user can view private request
-        if (!$prayerRequest->is_public) {
+        if (! $prayerRequest->is_public) {
             $user = auth()->user();
-            if (!$user->hasRole(['admin', 'leader'])
+            if (! $user->hasRole(['admin', 'leader'])
                 && $prayerRequest->user_id !== $user->id
                 && $prayerRequest->person_id !== $user->person?->id) {
                 abort(403);

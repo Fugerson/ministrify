@@ -63,13 +63,13 @@ class VolunteerSchedulingService
             ->forMinistry($event->ministry_id)
             ->first();
 
-        if (!$blockout) {
+        if (! $blockout) {
             return null;
         }
 
         // Check time overlap if not all-day blockout
-        if (!$blockout->all_day && $event->time) {
-            if (!$blockout->coversDateTime($event->date, $event->time)) {
+        if (! $blockout->all_day && $event->time) {
+            if (! $blockout->coversDateTime($event->date, $event->time)) {
                 return null;
             }
         }
@@ -77,7 +77,7 @@ class VolunteerSchedulingService
         return [
             'type' => 'blockout',
             'severity' => 'error',
-            'details' => $blockout->reason_label . ($blockout->reason_note ? ': ' . $blockout->reason_note : ''),
+            'details' => $blockout->reason_label.($blockout->reason_note ? ': '.$blockout->reason_note : ''),
             'blockout_id' => $blockout->id,
             'date_range' => $blockout->date_range,
         ];
@@ -92,28 +92,28 @@ class VolunteerSchedulingService
         $concurrentAssignment = Assignment::where('person_id', $person->id)
             ->whereHas('event', function ($q) use ($event) {
                 $q->where('id', '!=', $event->id)
-                  ->where('date', $event->date)
-                  ->where(function ($timeQ) use ($event) {
-                      // Same time or overlapping
-                      if ($event->time && $event->end_time) {
-                          $timeQ->where(function ($inner) use ($event) {
-                              $inner->whereBetween('time', [$event->time, $event->end_time])
+                    ->where('date', $event->date)
+                    ->where(function ($timeQ) use ($event) {
+                        // Same time or overlapping
+                        if ($event->time && $event->end_time) {
+                            $timeQ->where(function ($inner) use ($event) {
+                                $inner->whereBetween('time', [$event->time, $event->end_time])
                                     ->orWhereBetween('end_time', [$event->time, $event->end_time])
                                     ->orWhere(function ($overlap) use ($event) {
                                         $overlap->where('time', '<=', $event->time)
-                                                ->where('end_time', '>=', $event->end_time);
+                                            ->where('end_time', '>=', $event->end_time);
                                     });
-                          });
-                      } else {
-                          // No time specified, any event on same day is potential conflict
-                          $timeQ->whereNotNull('id');
-                      }
-                  });
+                            });
+                        } else {
+                            // No time specified, any event on same day is potential conflict
+                            $timeQ->whereNotNull('id');
+                        }
+                    });
             })
             ->with('event.ministry')
             ->first();
 
-        if (!$concurrentAssignment) {
+        if (! $concurrentAssignment) {
             return null;
         }
 
@@ -122,9 +122,9 @@ class VolunteerSchedulingService
         return [
             'type' => 'concurrent',
             'severity' => 'warning',
-            'details' => "Вже призначений на «{$otherEvent->title}»" .
-                        ($otherEvent->ministry ? " ({$otherEvent->ministry->name})" : '') .
-                        ($otherEvent->time ? " о " . Carbon::parse($otherEvent->time)->format('H:i') : ''),
+            'details' => "Вже призначений на «{$otherEvent->title}»".
+                        ($otherEvent->ministry ? " ({$otherEvent->ministry->name})" : '').
+                        ($otherEvent->time ? ' о '.Carbon::parse($otherEvent->time)->format('H:i') : ''),
             'other_event_id' => $otherEvent->id,
             'other_assignment_id' => $concurrentAssignment->id,
         ];
@@ -140,7 +140,7 @@ class VolunteerSchedulingService
             ->where('church_id', $event->church_id)
             ->first();
 
-        if (!$preference) {
+        if (! $preference) {
             return [];
         }
 
@@ -151,8 +151,8 @@ class VolunteerSchedulingService
         $currentMonthCount = Assignment::where('person_id', $person->id)
             ->whereHas('event', function ($q) use ($eventMonth, $eventYear, $event) {
                 $q->whereMonth('date', $eventMonth)
-                  ->whereYear('date', $eventYear)
-                  ->where('id', '!=', $event->id);
+                    ->whereYear('date', $eventYear)
+                    ->where('id', '!=', $event->id);
             })
             ->count();
 
@@ -161,7 +161,7 @@ class VolunteerSchedulingService
             $conflicts[] = [
                 'type' => 'max_limit',
                 'severity' => 'error',
-                'details' => "Досягнуто максимум ({$preference->max_times_per_month} разів/місяць). " .
+                'details' => "Досягнуто максимум ({$preference->max_times_per_month} разів/місяць). ".
                             "Цього місяця вже: {$currentMonthCount}",
                 'current_count' => $currentMonthCount,
                 'max_count' => $preference->max_times_per_month,
@@ -173,7 +173,7 @@ class VolunteerSchedulingService
             $conflicts[] = [
                 'type' => 'preference_limit',
                 'severity' => 'warning',
-                'details' => "Перевищує бажане ({$preference->preferred_times_per_month} разів/місяць). " .
+                'details' => "Перевищує бажане ({$preference->preferred_times_per_month} разів/місяць). ".
                             "Цього місяця: {$currentMonthCount}",
                 'current_count' => $currentMonthCount,
                 'preferred_count' => $preference->preferred_times_per_month,
@@ -187,9 +187,9 @@ class VolunteerSchedulingService
                 $ministryCount = Assignment::where('person_id', $person->id)
                     ->whereHas('event', function ($q) use ($eventMonth, $eventYear, $event) {
                         $q->where('ministry_id', $event->ministry_id)
-                          ->whereMonth('date', $eventMonth)
-                          ->whereYear('date', $eventYear)
-                          ->where('id', '!=', $event->id);
+                            ->whereMonth('date', $eventMonth)
+                            ->whereYear('date', $eventYear)
+                            ->where('id', '!=', $event->id);
                     })
                     ->count();
 
@@ -197,7 +197,7 @@ class VolunteerSchedulingService
                     $conflicts[] = [
                         'type' => 'max_limit',
                         'severity' => 'error',
-                        'details' => "Максимум для цього служіння ({$ministryMax} разів/місяць). " .
+                        'details' => "Максимум для цього служіння ({$ministryMax} разів/місяць). ".
                                     "Цього місяця: {$ministryCount}",
                         'current_count' => $ministryCount,
                         'max_count' => $ministryMax,
@@ -215,8 +215,8 @@ class VolunteerSchedulingService
                     ->where('position_id', $position->id)
                     ->whereHas('event', function ($q) use ($eventMonth, $eventYear, $event) {
                         $q->whereMonth('date', $eventMonth)
-                          ->whereYear('date', $eventYear)
-                          ->where('id', '!=', $event->id);
+                            ->whereYear('date', $eventYear)
+                            ->where('id', '!=', $event->id);
                     })
                     ->count();
 
@@ -224,7 +224,7 @@ class VolunteerSchedulingService
                     $conflicts[] = [
                         'type' => 'max_limit',
                         'severity' => 'error',
-                        'details' => "Максимум для позиції «{$position->name}» ({$positionMax} разів/місяць). " .
+                        'details' => "Максимум для позиції «{$position->name}» ({$positionMax} разів/місяць). ".
                                     "Цього місяця: {$positionCount}",
                         'current_count' => $positionCount,
                         'max_count' => $positionMax,
@@ -246,12 +246,12 @@ class VolunteerSchedulingService
             ->where('church_id', $event->church_id)
             ->first();
 
-        if (!$preference || $preference->household_preference === 'none' || !$preference->prefer_with_person_id) {
+        if (! $preference || $preference->household_preference === 'none' || ! $preference->prefer_with_person_id) {
             return null;
         }
 
         $partner = Person::find($preference->prefer_with_person_id);
-        if (!$partner) {
+        if (! $partner) {
             return null;
         }
 
@@ -260,7 +260,7 @@ class VolunteerSchedulingService
             ->where('event_id', $event->id)
             ->exists();
 
-        if ($preference->household_preference === 'together' && !$partnerAssigned) {
+        if ($preference->household_preference === 'together' && ! $partnerAssigned) {
             return [
                 'type' => 'household',
                 'severity' => 'info',
@@ -291,7 +291,7 @@ class VolunteerSchedulingService
     public function getAvailableVolunteers(Event $event, ?Position $position = null): Collection
     {
         $ministry = $event->ministry;
-        if (!$ministry) {
+        if (! $ministry) {
             return collect();
         }
 
@@ -311,7 +311,7 @@ class VolunteerSchedulingService
                 'conflicts' => $conflicts,
                 'has_errors' => collect($conflicts)->where('severity', 'error')->isNotEmpty(),
                 'has_warnings' => collect($conflicts)->where('severity', 'warning')->isNotEmpty(),
-                'is_available' => empty($conflicts) || !collect($conflicts)->where('severity', 'error')->isNotEmpty(),
+                'is_available' => empty($conflicts) || ! collect($conflicts)->where('severity', 'error')->isNotEmpty(),
                 'last_scheduled_at' => $person->last_scheduled_at,
                 'times_this_month' => $person->times_scheduled_this_month,
                 'sort_score' => $this->calculateSortScore($person, $conflicts),
@@ -364,12 +364,12 @@ class VolunteerSchedulingService
             if (empty($neededPositions)) {
                 // Get positions from ministry that need filling
                 $ministry = $event->ministry;
-                if (!$ministry) {
+                if (! $ministry) {
                     return $results;
                 }
 
                 $neededPositions = $ministry->positions()
-                    ->whereDoesntHave('assignments', fn($q) => $q->where('event_id', $event->id))
+                    ->whereDoesntHave('assignments', fn ($q) => $q->where('event_id', $event->id))
                     ->pluck('id')
                     ->toArray();
             }
@@ -378,13 +378,13 @@ class VolunteerSchedulingService
 
             foreach ($neededPositions as $positionId) {
                 $position = Position::find($positionId);
-                if (!$position) {
+                if (! $position) {
                     continue;
                 }
 
                 // Get available volunteers sorted by recommendation
                 $available = $this->getAvailableVolunteers($event, $position)
-                    ->filter(fn($v) => $v['is_available'] && !in_array($v['person']->id, $assignedPersonIds))
+                    ->filter(fn ($v) => $v['is_available'] && ! in_array($v['person']->id, $assignedPersonIds))
                     ->values();
 
                 if ($available->isEmpty()) {
@@ -392,6 +392,7 @@ class VolunteerSchedulingService
                         'position' => $position,
                         'reason' => 'Немає доступних волонтерів',
                     ];
+
                     continue;
                 }
 
@@ -438,11 +439,11 @@ class VolunteerSchedulingService
         $person->update([
             'last_scheduled_at' => now(),
             'times_scheduled_this_month' => Assignment::where('person_id', $person->id)
-                ->whereHas('event', fn($q) => $q->whereMonth('date', $event->date->month)->whereYear('date', $event->date->year))
+                ->whereHas('event', fn ($q) => $q->whereMonth('date', $event->date->month)->whereYear('date', $event->date->year))
                 ->count(),
             'times_scheduled_this_year' => Assignment::where('person_id', $person->id)
                 ->whereNotIn('status', ['declined'])
-                ->whereHas('event', fn($q) => $q->whereYear('date', $event->date->year))
+                ->whereHas('event', fn ($q) => $q->whereYear('date', $event->date->year))
                 ->count(),
         ]);
     }
@@ -452,7 +453,7 @@ class VolunteerSchedulingService
      */
     public function formatLastScheduled(?Carbon $date): string
     {
-        if (!$date) {
+        if (! $date) {
             return 'Ніколи';
         }
 
@@ -484,7 +485,7 @@ class VolunteerSchedulingService
     public function getConflictBadge(array $conflict): string
     {
         $config = SchedulingConflict::CONFLICT_TYPES[$conflict['type']] ?? null;
-        if (!$config) {
+        if (! $config) {
             return '';
         }
 

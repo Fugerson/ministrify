@@ -17,7 +17,7 @@ class ResourceController extends Controller
      */
     public function index(Request $request, ?Resource $folder = null)
     {
-        if (!auth()->user()->canView('resources')) {
+        if (! auth()->user()->canView('resources')) {
             return $this->errorResponse($request, __('У вас немає доступу до цього розділу. Зверніться до адміністратора церкви для отримання потрібних прав.'));
         }
 
@@ -58,7 +58,7 @@ class ResourceController extends Controller
      */
     public function createFolder(Request $request)
     {
-        if (!auth()->user()->canCreate('resources')) {
+        if (! auth()->user()->canCreate('resources')) {
             abort(403);
         }
         $validated = $request->validate([
@@ -94,7 +94,7 @@ class ResourceController extends Controller
      */
     public function upload(Request $request)
     {
-        if (!auth()->user()->canCreate('resources')) {
+        if (! auth()->user()->canCreate('resources')) {
             abort(403);
         }
         $churchId = $this->getCurrentChurch()->id;
@@ -108,7 +108,7 @@ class ResourceController extends Controller
             'file' => [
                 'required',
                 'file',
-                'max:' . (Resource::MAX_FILE_SIZE / 1024), // KB
+                'max:'.(Resource::MAX_FILE_SIZE / 1024), // KB
             ],
             'parent_id' => 'nullable|exists:resources,id',
         ]);
@@ -116,12 +116,12 @@ class ResourceController extends Controller
         $file = $request->file('file');
 
         // Check mime type
-        if (!in_array($file->getMimeType(), Resource::ALLOWED_MIMES)) {
+        if (! in_array($file->getMimeType(), Resource::ALLOWED_MIMES)) {
             return $this->errorResponse($request, 'Цей тип файлу не підтримується');
         }
 
         // Check church storage limit
-        if (!Resource::canUpload($churchId, $file->getSize())) {
+        if (! Resource::canUpload($churchId, $file->getSize())) {
             return $this->errorResponse($request, 'Перевищено ліміт сховища. Видаліть непотрібні файли.');
         }
 
@@ -159,7 +159,7 @@ class ResourceController extends Controller
             abort(404);
         }
 
-        if (!$resource->isFile() || !$resource->file_path) {
+        if (! $resource->isFile() || ! $resource->file_path) {
             abort(404);
         }
 
@@ -174,7 +174,7 @@ class ResourceController extends Controller
         if ($resource->church_id !== $this->getCurrentChurch()->id) {
             abort(404);
         }
-        if (!auth()->user()->canEdit('resources')) {
+        if (! auth()->user()->canEdit('resources')) {
             abort(403);
         }
 
@@ -195,7 +195,7 @@ class ResourceController extends Controller
         if ($resource->church_id !== $this->getCurrentChurch()->id) {
             abort(404);
         }
-        if (!auth()->user()->canDelete('resources')) {
+        if (! auth()->user()->canDelete('resources')) {
             abort(403);
         }
 
@@ -222,7 +222,7 @@ class ResourceController extends Controller
         if ($resource->church_id !== $this->getCurrentChurch()->id) {
             abort(404);
         }
-        if (!auth()->user()->canEdit('resources')) {
+        if (! auth()->user()->canEdit('resources')) {
             abort(403);
         }
 
@@ -277,6 +277,7 @@ class ResourceController extends Controller
             }
             $current = $current->parent;
         }
+
         return false;
     }
 
@@ -409,7 +410,7 @@ class ResourceController extends Controller
             Gate::authorize('contribute-ministry', $ministry);
         }
 
-        if (!$resource->isDocument()) {
+        if (! $resource->isDocument()) {
             abort(422, 'Це не документ');
         }
 
@@ -419,7 +420,7 @@ class ResourceController extends Controller
         ]);
 
         $data = ['content' => $validated['content'] ?? ''];
-        if (!empty($validated['name'])) {
+        if (! empty($validated['name'])) {
             $data['name'] = $validated['name'];
         }
         $resource->update($data);
@@ -444,18 +445,18 @@ class ResourceController extends Controller
             'file' => [
                 'required',
                 'file',
-                'max:' . (Resource::MAX_FILE_SIZE / 1024),
+                'max:'.(Resource::MAX_FILE_SIZE / 1024),
             ],
             'parent_id' => 'nullable|exists:resources,id',
         ]);
 
         $file = $request->file('file');
 
-        if (!in_array($file->getMimeType(), Resource::ALLOWED_MIMES)) {
+        if (! in_array($file->getMimeType(), Resource::ALLOWED_MIMES)) {
             return $this->errorResponse($request, 'Цей тип файлу не підтримується');
         }
 
-        if (!Resource::canUpload($churchId, $file->getSize())) {
+        if (! Resource::canUpload($churchId, $file->getSize())) {
             return $this->errorResponse($request, 'Перевищено ліміт сховища');
         }
 

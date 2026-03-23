@@ -10,8 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @deprecated Use Transaction model with direction = 'out' instead.
  * This model is kept for backward compatibility with existing data.
  * All new expenses should use the Transaction model.
- *
- * @see \App\Models\Transaction
+ * @see Transaction
  */
 class Expense extends Model
 {

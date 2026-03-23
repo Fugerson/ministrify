@@ -2,14 +2,15 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Traits\Auditable;
 
 class EventChecklist extends Model
 {
     use Auditable;
+
     protected $fillable = [
         'event_id',
         'checklist_template_id',
@@ -33,9 +34,12 @@ class EventChecklist extends Model
     public function getProgressAttribute(): int
     {
         $total = $this->items->count();
-        if ($total === 0) return 100;
+        if ($total === 0) {
+            return 100;
+        }
 
         $completed = $this->items->where('is_completed', true)->count();
+
         return (int) round(($completed / $total) * 100);
     }
 }

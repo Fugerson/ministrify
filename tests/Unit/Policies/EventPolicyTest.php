@@ -19,14 +19,16 @@ class EventPolicyTest extends TestCase
     use RefreshDatabase;
 
     private EventPolicy $policy;
+
     private Church $church;
+
     private Ministry $ministry;
 
     protected function setUp(): void
     {
         parent::setUp();
         Cache::flush();
-        $this->policy = new EventPolicy();
+        $this->policy = new EventPolicy;
         $this->church = Church::factory()->create();
         $this->ministry = Ministry::factory()->forChurch($this->church)->create();
     }
@@ -39,6 +41,7 @@ class EventPolicyTest extends TestCase
             'module' => $module,
             'actions' => [$action],
         ]);
+
         return User::factory()->create([
             'church_id' => $this->church->id,
             'church_role_id' => $role->id,

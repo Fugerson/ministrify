@@ -10,10 +10,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Collection;
 
 class Group extends Model
 {
-    use HasFactory, SoftDeletes, Auditable;
+    use Auditable, HasFactory, SoftDeletes;
 
     protected static function booted(): void
     {
@@ -33,7 +34,9 @@ class Group extends Model
     protected array $computedCache = [];
 
     public const STATUS_ACTIVE = 'active';
+
     public const STATUS_PAUSED = 'paused';
+
     public const STATUS_VACATION = 'vacation';
 
     public const STATUSES = [
@@ -52,8 +55,11 @@ class Group extends Model
     }
 
     public const ROLE_LEADER = 'leader';
+
     public const ROLE_ASSISTANT = 'assistant';
+
     public const ROLE_MEMBER = 'member';
+
     public const ROLE_GUEST = 'guest';
 
     public const ROLES = [
@@ -98,7 +104,9 @@ class Group extends Model
 
     public function getMeetingDayNameAttribute(): ?string
     {
-        if (!$this->meeting_day) return null;
+        if (! $this->meeting_day) {
+            return null;
+        }
 
         $days = [
             'monday' => __('app.monday'),
@@ -120,7 +128,7 @@ class Group extends Model
 
     public function getStatusColorAttribute(): string
     {
-        return match($this->status) {
+        return match ($this->status) {
             self::STATUS_ACTIVE => 'green',
             self::STATUS_PAUSED => 'yellow',
             self::STATUS_VACATION => 'blue',
@@ -181,6 +189,7 @@ class Group extends Model
 
     /**
      * Legacy: Get old GroupAttendance records
+     *
      * @deprecated Use attendances() instead
      */
     public function legacyAttendances(): HasMany
@@ -196,6 +205,7 @@ class Group extends Model
         if (array_key_exists('last_attendance', $this->computedCache)) {
             return $this->computedCache['last_attendance'];
         }
+
         return $this->computedCache['last_attendance'] = $this->attendances()->orderByDesc('date')->first();
     }
 
@@ -209,9 +219,11 @@ class Group extends Model
         }
 
         $attendances = $this->attendances()->take(10)->get();
-        if ($attendances->isEmpty()) return $this->computedCache['average_attendance'] = 0;
+        if ($attendances->isEmpty()) {
+            return $this->computedCache['average_attendance'] = 0;
+        }
 
-        return $this->computedCache['average_attendance'] = round($attendances->avg(fn($a) => $a->total_count ?? $a->members_present ?? 0), 1);
+        return $this->computedCache['average_attendance'] = round($attendances->avg(fn ($a) => $a->total_count ?? $a->members_present ?? 0), 1);
     }
 
     /**
@@ -223,24 +235,33 @@ class Group extends Model
             return $this->computedCache['attendance_trend'];
         }
 
-        $recent = $this->attendances()->orderByDesc('date')->take(4)->get()->map(fn($a) => $a->total_count ?? $a->members_present ?? 0)->reverse()->values();
-        if ($recent->count() < 2) return $this->computedCache['attendance_trend'] = 'stable';
+        $recent = $this->attendances()->orderByDesc('date')->take(4)->get()->map(fn ($a) => $a->total_count ?? $a->members_present ?? 0)->reverse()->values();
+        if ($recent->count() < 2) {
+            return $this->computedCache['attendance_trend'] = 'stable';
+        }
 
         $half = (int) floor($recent->count() / 2);
         $first = $recent->take($half)->avg();
         $last = $recent->skip($half)->avg();
 
-        if ($last > $first * 1.1) return $this->computedCache['attendance_trend'] = 'up';
-        if ($last < $first * 0.9) return $this->computedCache['attendance_trend'] = 'down';
+        if ($last > $first * 1.1) {
+            return $this->computedCache['attendance_trend'] = 'up';
+        }
+        if ($last < $first * 0.9) {
+            return $this->computedCache['attendance_trend'] = 'down';
+        }
+
         return $this->computedCache['attendance_trend'] = 'stable';
     }
 
     /**
      * Batch load attendance stats for a collection of groups (prevents N+1)
      */
-    public static function loadAttendanceStats(\Illuminate\Support\Collection $groups): void
+    public static function loadAttendanceStats(Collection $groups): void
     {
-        if ($groups->isEmpty()) return;
+        if ($groups->isEmpty()) {
+            return;
+        }
 
         $groupIds = $groups->pluck('id');
 
@@ -257,10 +278,10 @@ class Group extends Model
             $group->computedCache['last_attendance'] = $groupAttendances->first();
             $group->computedCache['average_attendance'] = $groupAttendances->isEmpty()
                 ? 0
-                : round($groupAttendances->avg(fn($a) => $a->total_count ?? $a->members_present ?? 0), 1);
+                : round($groupAttendances->avg(fn ($a) => $a->total_count ?? $a->members_present ?? 0), 1);
 
             // Calculate trend
-            $recent = $groupAttendances->take(4)->map(fn($a) => $a->total_count ?? $a->members_present ?? 0)->reverse()->values();
+            $recent = $groupAttendances->take(4)->map(fn ($a) => $a->total_count ?? $a->members_present ?? 0)->reverse()->values();
             if ($recent->count() < 2) {
                 $group->computedCache['attendance_trend'] = 'stable';
             } else {

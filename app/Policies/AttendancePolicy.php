@@ -3,6 +3,8 @@
 namespace App\Policies;
 
 use App\Models\Attendance;
+use App\Models\Event;
+use App\Models\Group;
 use App\Models\User;
 
 class AttendancePolicy
@@ -26,14 +28,14 @@ class AttendancePolicy
 
         // Group/ministry leaders can view attendance for their entities
         if ($user->person) {
-            if ($attendance->attendable_type === \App\Models\Group::class) {
+            if ($attendance->attendable_type === Group::class) {
                 $group = $attendance->attendable;
                 if ($group && $group->leader_id === $user->person->id) {
                     return true;
                 }
             }
 
-            if ($attendance->attendable_type === \App\Models\Event::class) {
+            if ($attendance->attendable_type === Event::class) {
                 $event = $attendance->attendable;
                 if ($event && $event->ministry && $event->ministry->leader_id === $user->person->id) {
                     return true;
@@ -55,7 +57,7 @@ class AttendancePolicy
     /**
      * Can record attendance for a group
      */
-    public function recordForGroup(User $user, \App\Models\Group $group): bool
+    public function recordForGroup(User $user, Group $group): bool
     {
         if ($user->church_id !== $group->church_id) {
             return false;
@@ -77,7 +79,7 @@ class AttendancePolicy
     /**
      * Can record attendance for an event
      */
-    public function recordForEvent(User $user, \App\Models\Event $event): bool
+    public function recordForEvent(User $user, Event $event): bool
     {
         if ($user->church_id !== $event->church_id) {
             return false;
@@ -107,14 +109,14 @@ class AttendancePolicy
 
         // Group/ministry leaders can update their entities' attendance
         if ($user->person) {
-            if ($attendance->attendable_type === \App\Models\Group::class) {
+            if ($attendance->attendable_type === Group::class) {
                 $group = $attendance->attendable;
                 if ($group && $group->leader_id === $user->person->id) {
                     return true;
                 }
             }
 
-            if ($attendance->attendable_type === \App\Models\Event::class) {
+            if ($attendance->attendable_type === Event::class) {
                 $event = $attendance->attendable;
                 if ($event && $event->ministry && $event->ministry->leader_id === $user->person->id) {
                     return true;

@@ -5069,7 +5069,7 @@ return [
 
     // Public group page
     'public_group_join' => 'Join the Group',
-    'public_group_join_desc' => "Fill out the form and the group leader will contact you",
+    'public_group_join_desc' => 'Fill out the form and the group leader will contact you',
     'public_group_tell_about_yourself' => 'Tell us a bit about yourself...',
 
     // Public contact page

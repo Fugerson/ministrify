@@ -4,7 +4,6 @@ namespace Tests\Unit\Requests;
 
 use App\Http\Requests\UpdatePersonRequest;
 use App\Models\Church;
-use App\Models\Person;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Validator;
@@ -15,6 +14,7 @@ class UpdatePersonRequestTest extends TestCase
     use RefreshDatabase;
 
     private Church $church;
+
     private User $user;
 
     protected function setUp(): void
@@ -27,7 +27,7 @@ class UpdatePersonRequestTest extends TestCase
 
     public function test_first_name_is_required(): void
     {
-        $request = new UpdatePersonRequest();
+        $request = new UpdatePersonRequest;
         $request->setUserResolver(fn () => $this->user);
         $rules = $request->rules();
 
@@ -38,7 +38,7 @@ class UpdatePersonRequestTest extends TestCase
 
     public function test_valid_data_passes(): void
     {
-        $request = new UpdatePersonRequest();
+        $request = new UpdatePersonRequest;
         $request->setUserResolver(fn () => $this->user);
         $rules = $request->rules();
 
@@ -51,13 +51,13 @@ class UpdatePersonRequestTest extends TestCase
 
     public function test_authorize_returns_true(): void
     {
-        $request = new UpdatePersonRequest();
+        $request = new UpdatePersonRequest;
         $this->assertTrue($request->authorize());
     }
 
     public function test_custom_messages_exist(): void
     {
-        $request = new UpdatePersonRequest();
+        $request = new UpdatePersonRequest;
         $messages = $request->messages();
 
         $this->assertArrayHasKey('first_name.required', $messages);

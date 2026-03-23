@@ -6,7 +6,8 @@ use App\Models\ChurchRole;
 use App\Models\ChurchRolePermission;
 use App\Models\Person;
 use App\Models\User;
-use Illuminate\Auth\Events\PasswordReset;
+use App\Notifications\AccessGranted;
+use App\Rules\SecurePassword;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -14,8 +15,6 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
-use App\Rules\SecurePassword;
-use App\Notifications\AccessGranted;
 
 class UserController extends Controller
 {
@@ -41,12 +40,12 @@ class UserController extends Controller
             ->keyBy('user_id');
 
         $users->each(function ($user) use ($peopleByUserId, $churchRolesById) {
-                $user->setRelation('person', $peopleByUserId[$user->id] ?? null);
-                $pivotRoleId = $user->pivot->church_role_id;
-                $user->setRelation('churchRole',
-                    $pivotRoleId ? ($churchRolesById[$pivotRoleId] ?? null) : null
-                );
-            });
+            $user->setRelation('person', $peopleByUserId[$user->id] ?? null);
+            $pivotRoleId = $user->pivot->church_role_id;
+            $user->setRelation('churchRole',
+                $pivotRoleId ? ($churchRolesById[$pivotRoleId] ?? null) : null
+            );
+        });
 
         return view('settings.users.index', compact('users', 'churchRoles'));
     }
@@ -82,7 +81,7 @@ class UserController extends Controller
         $name = $validated['name'] ?? null;
         $email = $validated['email'] ?? null;
 
-        if (!empty($validated['person_id'])) {
+        if (! empty($validated['person_id'])) {
             $person = Person::where('id', $validated['person_id'])
                 ->where('church_id', $church->id)
                 ->firstOrFail();
@@ -109,10 +108,10 @@ class UserController extends Controller
             }
 
             // Add to this church via pivot
-            $personId = !empty($validated['person_id']) ? $person->id : null;
+            $personId = ! empty($validated['person_id']) ? $person->id : null;
 
             // Find or create Person
-            if (!$personId) {
+            if (! $personId) {
                 // Try to find existing unlinked Person by email
                 $foundPerson = Person::where('church_id', $church->id)
                     ->where('email', $email)
@@ -120,7 +119,7 @@ class UserController extends Controller
                     ->first();
 
                 // Fallback: try by name
-                if (!$foundPerson) {
+                if (! $foundPerson) {
                     $nameParts = explode(' ', $name, 2);
                     $fn = $nameParts[0];
                     $ln = $nameParts[1] ?? '';
@@ -198,7 +197,7 @@ class UserController extends Controller
 
         // Link to person if provided, otherwise find by email or create new Person
         $personId = null;
-        if (!empty($validated['person_id'])) {
+        if (! empty($validated['person_id'])) {
             $person->update(['user_id' => $user->id]);
             $personId = $person->id;
         } else {
@@ -209,7 +208,7 @@ class UserController extends Controller
                 ->first();
 
             // Fallback: try to find by name
-            if (!$existingPerson) {
+            if (! $existingPerson) {
                 $nameParts = explode(' ', $name, 2);
                 $fn = $nameParts[0];
                 $ln = $nameParts[1] ?? '';
@@ -225,7 +224,7 @@ class UserController extends Controller
             if ($existingPerson) {
                 $existingPerson->update(['user_id' => $user->id]);
                 $personId = $existingPerson->id;
-            } elseif (!Person::where('user_id', $user->id)->where('church_id', $church->id)->exists()) {
+            } elseif (! Person::where('user_id', $user->id)->where('church_id', $church->id)->exists()) {
                 $nameParts = explode(' ', $name, 2);
                 $newPerson = Person::create([
                     'church_id' => $church->id,
@@ -283,7 +282,7 @@ class UserController extends Controller
         $people = Person::where('church_id', $church->id)
             ->where(function ($q) use ($user) {
                 $q->whereDoesntHave('user')
-                  ->orWhere('user_id', $user->id);
+                    ->orWhere('user_id', $user->id);
             })
             ->orderBy('last_name')
             ->get();
@@ -318,8 +317,8 @@ class UserController extends Controller
 
         // Prevent non-admins from assigning admin roles (privilege escalation)
         if ($churchRoleId) {
-            $targetRole = \App\Models\ChurchRole::find($churchRoleId);
-            if ($targetRole && $targetRole->is_admin_role && !auth()->user()->isAdmin()) {
+            $targetRole = ChurchRole::find($churchRoleId);
+            if ($targetRole && $targetRole->is_admin_role && ! auth()->user()->isAdmin()) {
                 return $this->errorResponse($request, __('messages.only_admins_can_assign_admin_roles'));
             }
         }
@@ -329,12 +328,12 @@ class UserController extends Controller
             ->where('user_id', $user->id)
             ->where('church_id', $church->id)
             ->first();
-        $hadNoRole = !$pivotRecord || $pivotRecord->church_role_id === null;
+        $hadNoRole = ! $pivotRecord || $pivotRecord->church_role_id === null;
 
         // link_person_id: lightweight linking (approval flow) — no name/email override
         $linkPersonId = $validated['link_person_id'] ?? null;
 
-        if (!empty($validated['person_id'])) {
+        if (! empty($validated['person_id'])) {
             $person = Person::where('id', $validated['person_id'])
                 ->where('church_id', $church->id)
                 ->firstOrFail();
@@ -347,6 +346,7 @@ class UserController extends Controller
                 if ($request->expectsJson()) {
                     return response()->json(['message' => $error], 422);
                 }
+
                 return back()->withInput()->withErrors(['person_id' => $error]);
             }
 
@@ -356,6 +356,7 @@ class UserController extends Controller
                 if ($request->expectsJson()) {
                     return response()->json(['message' => $error], 422);
                 }
+
                 return back()->withInput()->withErrors(['person_id' => $error]);
             }
         } elseif ($linkPersonId) {
@@ -364,7 +365,7 @@ class UserController extends Controller
                 ->where('church_id', $church->id)
                 ->first();
 
-            if (!$linkPerson) {
+            if (! $linkPerson) {
                 return response()->json(['message' => __('messages.selected_person_not_found')], 422);
             }
             if ($linkPerson->user_id && $linkPerson->user_id !== $user->id) {
@@ -372,14 +373,19 @@ class UserController extends Controller
             }
 
             // Use existing User name/email — don't override
-            if (empty($name)) $name = $user->name;
-            if (empty($email)) $email = $user->email;
+            if (empty($name)) {
+                $name = $user->name;
+            }
+            if (empty($email)) {
+                $email = $user->email;
+            }
         } else {
             // No person selected - require name and email
             if (empty($name) || empty($email)) {
                 if ($request->expectsJson()) {
                     return response()->json(['message' => __('messages.provide_name_and_email')], 422);
                 }
+
                 return back()->withInput()->withErrors(['name' => __('messages.provide_name_and_email')]);
             }
         }
@@ -394,7 +400,7 @@ class UserController extends Controller
         }
         $user->update($updateData);
 
-        if (!empty($validated['password'])) {
+        if (! empty($validated['password'])) {
             $user->update(['password' => Hash::make($validated['password'])]);
         }
 
@@ -402,7 +408,7 @@ class UserController extends Controller
         $oldPerson = Person::where('user_id', $user->id)->where('church_id', $church->id)->first();
         $newPersonId = $validated['person_id'] ?? $linkPersonId;
 
-        if ($newPersonId && (!$oldPerson || $oldPerson->id !== (int) $newPersonId)) {
+        if ($newPersonId && (! $oldPerson || $oldPerson->id !== (int) $newPersonId)) {
             // Detach old person first (unique constraint: user_id + church_id)
             if ($oldPerson) {
                 $oldPerson->update(['user_id' => null]);
@@ -422,18 +428,18 @@ class UserController extends Controller
                     || $oldPerson->transactions()->exists()
                     || $oldPerson->attendanceRecords()->exists();
 
-                if (!$hasData) {
+                if (! $hasData) {
                     $oldPerson->delete();
                 }
             }
-        } elseif (!$newPersonId && $oldPerson && $request->has('person_id')) {
+        } elseif (! $newPersonId && $oldPerson && $request->has('person_id')) {
             // Unlinking person entirely (only when explicitly cleared in the form)
             $oldPerson->update(['user_id' => null]);
         }
 
         // Auto-create Person if user has none after all operations
         $currentPerson = Person::where('user_id', $user->id)->where('church_id', $church->id)->first();
-        if (!$currentPerson) {
+        if (! $currentPerson) {
             $nameParts = explode(' ', $name, 2);
             $currentPerson = Person::create([
                 'church_id' => $church->id,
@@ -445,7 +451,7 @@ class UserController extends Controller
             $newPersonId = $currentPerson->id;
         }
 
-        if (!$newPersonId) {
+        if (! $newPersonId) {
             $newPersonId = $currentPerson->id;
         }
 
@@ -500,7 +506,7 @@ class UserController extends Controller
             ->where('church_id', $church->id)
             ->first();
         if ($userPivot && $userPivot->church_role_id) {
-            $userRole = \App\Models\ChurchRole::find($userPivot->church_role_id);
+            $userRole = ChurchRole::find($userPivot->church_role_id);
             if ($userRole && $userRole->is_admin_role) {
                 $adminCount = DB::table('church_user')
                     ->join('church_roles', 'church_user.church_role_id', '=', 'church_roles.id')
@@ -610,7 +616,7 @@ class UserController extends Controller
         }
 
         $overridesInput = $request->input('overrides', []);
-        if (!is_array($overridesInput)) {
+        if (! is_array($overridesInput)) {
             $overridesInput = [];
         }
 
@@ -619,7 +625,7 @@ class UserController extends Controller
         $cleanOverrides = [];
 
         foreach ($overridesInput as $module => $actions) {
-            if (!is_array($actions) || !array_key_exists($module, ChurchRolePermission::MODULES)) {
+            if (! is_array($actions) || ! array_key_exists($module, ChurchRolePermission::MODULES)) {
                 continue;
             }
 
@@ -632,7 +638,7 @@ class UserController extends Controller
                 $allowedActions
             ));
 
-            if (!empty($extra)) {
+            if (! empty($extra)) {
                 $cleanOverrides[$module] = $extra;
             }
         }
@@ -660,9 +666,10 @@ class UserController extends Controller
     protected function authorizeChurch($model): void
     {
         if ($model instanceof User) {
-            if (!$model->belongsToChurch($this->getCurrentChurch()->id)) {
+            if (! $model->belongsToChurch($this->getCurrentChurch()->id)) {
                 abort(404);
             }
+
             return;
         }
 

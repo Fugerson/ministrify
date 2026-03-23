@@ -15,13 +15,15 @@ class RecurringEventServiceTest extends TestCase
     use RefreshDatabase;
 
     private RecurringEventService $service;
+
     private Church $church;
+
     private Ministry $ministry;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new RecurringEventService();
+        $this->service = new RecurringEventService;
         $this->church = Church::factory()->create();
         $this->ministry = Ministry::factory()->forChurch($this->church)->create();
     }

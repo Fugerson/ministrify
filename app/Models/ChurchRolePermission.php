@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Traits\Auditable;
 
 class ChurchRolePermission extends Model
 {
@@ -117,9 +117,10 @@ class ChurchRolePermission extends Model
     {
         $modules = self::MODULES;
         foreach ($modules as $key => &$module) {
-            $module['label'] = __('app.perm_module_' . $key);
-            $module['description'] = __('app.perm_module_' . $key . '_desc');
+            $module['label'] = __('app.perm_module_'.$key);
+            $module['description'] = __('app.perm_module_'.$key.'_desc');
         }
+
         return $modules;
     }
 

@@ -10,8 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @deprecated Use Transaction model with direction = 'in' instead.
  * This model is kept for backward compatibility with existing data.
  * All new income records should use the Transaction model.
- *
- * @see \App\Models\Transaction
+ * @see Transaction
  */
 class Income extends Model
 {
@@ -69,22 +68,22 @@ class Income extends Model
 
     public function scopeTithes($query)
     {
-        return $query->whereHas('category', fn($q) => $q->where('is_tithe', true));
+        return $query->whereHas('category', fn ($q) => $q->where('is_tithe', true));
     }
 
     public function scopeOfferings($query)
     {
-        return $query->whereHas('category', fn($q) => $q->where('is_offering', true));
+        return $query->whereHas('category', fn ($q) => $q->where('is_offering', true));
     }
 
     public function scopeDonations($query)
     {
-        return $query->whereHas('category', fn($q) => $q->where('is_donation', true));
+        return $query->whereHas('category', fn ($q) => $q->where('is_donation', true));
     }
 
     public function getPaymentMethodLabelAttribute(): string
     {
-        return match($this->payment_method) {
+        return match ($this->payment_method) {
             'cash' => 'Готівка',
             'card' => 'Картка',
             'transfer' => 'Переказ',
@@ -98,6 +97,7 @@ class Income extends Model
         if ($this->is_anonymous) {
             return 'Анонімно';
         }
+
         return $this->person?->full_name ?? 'Не вказано';
     }
 }

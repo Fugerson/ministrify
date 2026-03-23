@@ -2,15 +2,15 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
     public function up(): void
     {
         // 1. Add event_song_id to event_ministry_team (skip if already exists from partial run)
-        if (!Schema::hasColumn('event_ministry_team', 'event_song_id')) {
+        if (! Schema::hasColumn('event_ministry_team', 'event_song_id')) {
             Schema::table('event_ministry_team', function (Blueprint $table) {
                 $table->unsignedBigInteger('event_song_id')->nullable()->after('ministry_role_id');
                 $table->foreign('event_song_id')->references('id')->on('event_songs')->onDelete('cascade');
@@ -73,7 +73,7 @@ return new class extends Migration
                         ->where('id', $record->worship_role_id)
                         ->value('name');
 
-                    if (!$worshipRoleName || !isset($ministryRolesByName[$worshipRoleName])) {
+                    if (! $worshipRoleName || ! isset($ministryRolesByName[$worshipRoleName])) {
                         continue;
                     }
 
@@ -88,7 +88,7 @@ return new class extends Migration
                         ->where('event_song_id', $record->event_song_id)
                         ->exists();
 
-                    if (!$exists) {
+                    if (! $exists) {
                         DB::table('event_ministry_team')->insert([
                             'event_id' => $record->event_id,
                             'ministry_id' => $ministry->id,

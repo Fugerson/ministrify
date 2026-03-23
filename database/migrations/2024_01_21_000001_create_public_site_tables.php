@@ -159,7 +159,7 @@ return new class extends Migration
             $table->dropColumn([
                 'slug', 'public_site_enabled', 'public_description', 'public_email', 'public_phone',
                 'website_url', 'facebook_url', 'instagram_url', 'youtube_url', 'service_times',
-                'cover_image', 'pastor_name', 'pastor_photo', 'pastor_message'
+                'cover_image', 'pastor_name', 'pastor_photo', 'pastor_message',
             ]);
         });
     }

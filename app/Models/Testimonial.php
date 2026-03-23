@@ -2,15 +2,15 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Traits\Auditable;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Testimonial extends Model
 {
-    use HasFactory, SoftDeletes, Auditable;
+    use Auditable, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'church_id',
@@ -73,17 +73,20 @@ class Testimonial extends Model
 
     public function getYoutubeIdAttribute(): ?string
     {
-        if (!$this->video_url) return null;
+        if (! $this->video_url) {
+            return null;
+        }
 
         if (preg_match('/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]+)/', $this->video_url, $matches)) {
             return $matches[1];
         }
+
         return null;
     }
 
     public function hasVideo(): bool
     {
-        return !empty($this->video_url);
+        return ! empty($this->video_url);
     }
 
     public function getAuthorPhotoUrlAttribute(): ?string
@@ -94,6 +97,7 @@ class Testimonial extends Model
         if ($this->person?->photo) {
             return \Storage::url($this->person->photo);
         }
+
         return null;
     }
 }

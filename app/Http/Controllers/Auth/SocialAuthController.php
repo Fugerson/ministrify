@@ -5,11 +5,16 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
 use App\Models\Church;
+use App\Models\ChurchRole;
+use App\Models\ExpenseCategory;
+use App\Models\Person;
+use App\Models\Tag;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
 
 class SocialAuthController extends Controller
@@ -36,6 +41,7 @@ class SocialAuthController extends Controller
             $googleUser = Socialite::driver('google')->user();
         } catch (\Exception $e) {
             Log::error('Google OAuth failed', ['error' => $e->getMessage()]);
+
             return redirect()->route('login')
                 ->with('error', __('messages.google_login_failed'));
         }
@@ -45,7 +51,7 @@ class SocialAuthController extends Controller
             ->where('google_id', $googleUser->getId())
             ->first();
 
-        if (!$user) {
+        if (! $user) {
             $user = User::withTrashed()
                 ->where('email', $googleUser->getEmail())
                 ->first();
@@ -70,6 +76,7 @@ class SocialAuthController extends Controller
                     'user_id' => $user->id,
                     'email' => $googleUser->getEmail(),
                 ]);
+
                 return redirect()->route('login')
                     ->with('error', __('messages.account_not_found'));
             }
@@ -77,22 +84,22 @@ class SocialAuthController extends Controller
 
         if ($user) {
             // Update google_id if not set (user registered via email before)
-            if (!$user->google_id) {
+            if (! $user->google_id) {
                 $user->update(['google_id' => $googleUser->getId()]);
             }
 
             // Mark email as verified if not already (Google verified it)
-            if (!$user->hasVerifiedEmail()) {
+            if (! $user->hasVerifiedEmail()) {
                 $user->markEmailAsVerified();
             }
 
             // Check if user is trying to join a specific church via Google
             $joinChurchId = $request->session()->pull('google_join_church_id');
             if ($joinChurchId) {
-                $church = \App\Models\Church::find($joinChurchId);
+                $church = Church::find($joinChurchId);
                 if ($church) {
                     // Join if not already a member
-                    if (!$user->belongsToChurch($joinChurchId)) {
+                    if (! $user->belongsToChurch($joinChurchId)) {
                         if ($church->getSetting('self_registration_enabled') !== false) {
                             $user->joinChurch($church->id);
                         }
@@ -200,9 +207,9 @@ class SocialAuthController extends Controller
      */
     protected function createUserForChurch(Request $request, $googleUser, $churchId)
     {
-        $church = \App\Models\Church::find($churchId);
+        $church = Church::find($churchId);
 
-        if (!$church) {
+        if (! $church) {
             return redirect()->route('join')->with('error', __('messages.church_not_found'));
         }
 
@@ -215,10 +222,10 @@ class SocialAuthController extends Controller
         $existingUser = User::where('email', $googleUser->getEmail())->first();
         if ($existingUser) {
 
-            if (!$existingUser->google_id) {
+            if (! $existingUser->google_id) {
                 $existingUser->update(['google_id' => $googleUser->getId()]);
             }
-            if (!$existingUser->hasVerifiedEmail()) {
+            if (! $existingUser->hasVerifiedEmail()) {
                 $existingUser->markEmailAsVerified();
             }
 
@@ -270,7 +277,7 @@ class SocialAuthController extends Controller
             'name' => $googleUser->getName(),
             'email' => $googleUser->getEmail(),
             'google_id' => $googleUser->getId(),
-            'password' => bcrypt(\Illuminate\Support\Str::random(32)),
+            'password' => bcrypt(Str::random(32)),
             'church_role_id' => null,
             'onboarding_completed' => true,
         ]);
@@ -308,7 +315,7 @@ class SocialAuthController extends Controller
     {
         $googleUser = $request->session()->get('google_user');
 
-        if (!$googleUser) {
+        if (! $googleUser) {
             return redirect()->route('login');
         }
 
@@ -328,7 +335,7 @@ class SocialAuthController extends Controller
     {
         $googleUser = $request->session()->get('google_user');
 
-        if (!$googleUser) {
+        if (! $googleUser) {
             return redirect()->route('login');
         }
 
@@ -356,14 +363,14 @@ class SocialAuthController extends Controller
         // Wipe old soft-deleted user completely (allow re-registration from scratch)
         $this->wipeTrashedUser($googleUser['email']);
 
-        $baseSlug = \Illuminate\Support\Str::slug($validated['church_name']);
+        $baseSlug = Str::slug($validated['church_name']);
         $slug = $baseSlug;
         $counter = 1;
-        while (\App\Models\Church::where('slug', $slug)->exists()) {
-            $slug = $baseSlug . '-' . $counter++;
+        while (Church::where('slug', $slug)->exists()) {
+            $slug = $baseSlug.'-'.$counter++;
         }
 
-        $church = \App\Models\Church::create([
+        $church = Church::create([
             'name' => $validated['church_name'],
             'city' => $validated['city'],
             'slug' => $slug,
@@ -377,7 +384,7 @@ class SocialAuthController extends Controller
         ]);
 
         // Get admin role - query directly instead of via relationship due to Eloquent caching
-        $adminRole = \App\Models\ChurchRole::where('church_id', $church->id)
+        $adminRole = ChurchRole::where('church_id', $church->id)
             ->where('is_admin_role', true)
             ->first();
 
@@ -386,17 +393,17 @@ class SocialAuthController extends Controller
             'name' => $googleUser['name'],
             'email' => $googleUser['email'],
             'google_id' => $googleUser['id'],
-            'password' => bcrypt(\Illuminate\Support\Str::random(32)),
+            'password' => bcrypt(Str::random(32)),
             'role' => 'admin',
             'church_role_id' => $adminRole?->id,
         ]);
         $user->markEmailAsVerified();
 
         // Create Person record for admin (if not already exists)
-        $person = \App\Models\Person::where('user_id', $user->id)->where('church_id', $church->id)->first();
-        if (!$person) {
+        $person = Person::where('user_id', $user->id)->where('church_id', $church->id)->first();
+        if (! $person) {
             $nameParts = explode(' ', $googleUser['name'], 2);
-            $person = \App\Models\Person::create([
+            $person = Person::create([
                 'church_id' => $church->id,
                 'user_id' => $user->id,
                 'first_name' => $nameParts[0],
@@ -426,7 +433,7 @@ class SocialAuthController extends Controller
         ];
 
         foreach ($defaultTags as $tag) {
-            \App\Models\Tag::create([
+            Tag::create([
                 'church_id' => $church->id,
                 'name' => $tag['name'],
                 'color' => $tag['color'],
@@ -436,7 +443,7 @@ class SocialAuthController extends Controller
         // Create default expense categories
         $defaultCategories = ['Обладнання', 'Витратні матеріали', 'Їжа та напої', 'Оренда', 'Транспорт', 'Інше'];
         foreach ($defaultCategories as $category) {
-            \App\Models\ExpenseCategory::create([
+            ExpenseCategory::create([
                 'church_id' => $church->id,
                 'name' => $category,
             ]);
@@ -484,7 +491,7 @@ class SocialAuthController extends Controller
             'name' => $googleUser['name'],
             'email' => $googleUser['email'],
             'google_id' => $googleUser['id'],
-            'password' => bcrypt(\Illuminate\Support\Str::random(32)),
+            'password' => bcrypt(Str::random(32)),
             'onboarding_completed' => true,
         ]);
         $user->markEmailAsVerified();
@@ -521,12 +528,12 @@ class SocialAuthController extends Controller
     private function wipeTrashedUser(string $email): void
     {
         $oldUser = User::onlyTrashed()->where('email', $email)->first();
-        if (!$oldUser) {
+        if (! $oldUser) {
             return;
         }
 
         DB::table('church_user')->where('user_id', $oldUser->id)->delete();
-        \App\Models\Person::where('user_id', $oldUser->id)->forceDelete();
+        Person::where('user_id', $oldUser->id)->forceDelete();
         $oldUser->forceDelete();
     }
 }

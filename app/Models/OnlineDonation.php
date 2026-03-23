@@ -2,14 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Traits\Auditable;
 
 class OnlineDonation extends Model
 {
-    use HasFactory, Auditable;
+    use Auditable, HasFactory;
 
     protected $hidden = [
         'provider_response',
@@ -51,12 +51,17 @@ class OnlineDonation extends Model
     ];
 
     const STATUS_PENDING = 'pending';
+
     const STATUS_PROCESSING = 'processing';
+
     const STATUS_SUCCESS = 'success';
+
     const STATUS_FAILED = 'failed';
+
     const STATUS_REFUNDED = 'refunded';
 
     const PROVIDER_LIQPAY = 'liqpay';
+
     const PROVIDER_MONOBANK = 'monobank';
 
     public function church(): BelongsTo
@@ -76,7 +81,7 @@ class OnlineDonation extends Model
 
     public function getStatusLabelAttribute(): string
     {
-        return match($this->status) {
+        return match ($this->status) {
             self::STATUS_PENDING => 'Очікує',
             self::STATUS_PROCESSING => 'Обробка',
             self::STATUS_SUCCESS => 'Успішно',
@@ -88,7 +93,7 @@ class OnlineDonation extends Model
 
     public function getStatusColorAttribute(): string
     {
-        return match($this->status) {
+        return match ($this->status) {
             self::STATUS_PENDING => 'yellow',
             self::STATUS_PROCESSING => 'blue',
             self::STATUS_SUCCESS => 'green',
@@ -100,7 +105,7 @@ class OnlineDonation extends Model
 
     public function getProviderLabelAttribute(): string
     {
-        return match($this->provider) {
+        return match ($this->provider) {
             self::PROVIDER_LIQPAY => 'LiqPay',
             self::PROVIDER_MONOBANK => 'Monobank',
             default => $this->provider,
@@ -112,6 +117,7 @@ class OnlineDonation extends Model
         if ($this->is_anonymous) {
             return 'Анонімно';
         }
+
         return $this->donor_name ?? $this->person?->full_name ?? 'Невідомо';
     }
 
@@ -138,7 +144,9 @@ class OnlineDonation extends Model
 
     private function createTransaction(): void
     {
-        if ($this->transaction_id) return;
+        if ($this->transaction_id) {
+            return;
+        }
 
         $church = $this->church;
 
@@ -164,7 +172,7 @@ class OnlineDonation extends Model
             'is_anonymous' => $this->is_anonymous,
             'currency' => $this->currency ?? 'UAH',
             'payment_method' => $this->provider,
-            'description' => 'Онлайн пожертва через ' . $this->provider_label,
+            'description' => 'Онлайн пожертва через '.$this->provider_label,
             'notes' => $this->description,
             'status' => Transaction::STATUS_COMPLETED,
         ]);

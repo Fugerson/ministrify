@@ -94,7 +94,7 @@ class SchedulingConflict extends Model
     /**
      * Create a conflict record for an assignment
      */
-    public static function record($assignmentId, string $type, string $details = null): self
+    public static function record($assignmentId, string $type, ?string $details = null): self
     {
         return self::create([
             'assignment_id' => $assignmentId,

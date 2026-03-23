@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 class Board extends Model
 {
     use Auditable;
+
     protected $fillable = [
         'church_id',
         'ministry_id',
@@ -73,7 +74,7 @@ class Board extends Model
     public function scopeAccessibleBy($query, User $user)
     {
         $query->where('church_id', $user->church_id)
-              ->where('is_archived', false);
+            ->where('is_archived', false);
 
         if ($user->isAdmin()) {
             return $query;
@@ -81,7 +82,7 @@ class Board extends Model
 
         $personId = $user->person?->id;
 
-        return $query->where(function ($q) use ($user, $personId) {
+        return $query->where(function ($q) use ($personId) {
             // Church-wide boards
             $q->whereNull('ministry_id');
 
@@ -89,7 +90,7 @@ class Board extends Model
                 // Ministry boards where user is member
                 $q->orWhereHas('ministry', function ($mq) use ($personId) {
                     $mq->where('leader_id', $personId)
-                        ->orWhereHas('members', fn($pq) => $pq->where('person_id', $personId));
+                        ->orWhereHas('members', fn ($pq) => $pq->where('person_id', $personId));
                 });
             }
         });
@@ -123,7 +124,10 @@ class Board extends Model
     public function getProgressAttribute(): int
     {
         $total = $this->card_count;
-        if ($total === 0) return 0;
+        if ($total === 0) {
+            return 0;
+        }
+
         return (int) round(($this->completed_card_count / $total) * 100);
     }
 }

@@ -2,8 +2,8 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -119,9 +119,9 @@ return new class extends Migration
                         ->on($referencedTable)
                         ->onDelete($onDelete);
                 });
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 // Log but don't fail - foreign key might already exist with different name
-                \Log::warning("Could not add foreign key on {$table}.{$column}: " . $e->getMessage());
+                Log::warning("Could not add foreign key on {$table}.{$column}: ".$e->getMessage());
             }
         }
     }
@@ -132,7 +132,7 @@ return new class extends Migration
             Schema::table($table, function (Blueprint $t) use ($foreignKeyName) {
                 $t->dropForeign($foreignKeyName);
             });
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Key might not exist
         }
     }

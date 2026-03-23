@@ -24,7 +24,7 @@ class TemplateController extends Controller
         $church = $this->getChurchOrFail();
         $templates = config('public_site_templates.templates', []);
 
-        if (!isset($templates[$template])) {
+        if (! isset($templates[$template])) {
             return $this->errorResponse($request, 'Невідомий шаблон');
         }
 

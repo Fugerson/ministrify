@@ -13,7 +13,7 @@ return new class extends Migration
         });
 
         // Also add original_filename and mime_type to gallery_photos if missing
-        if (!Schema::hasColumn('gallery_photos', 'original_filename')) {
+        if (! Schema::hasColumn('gallery_photos', 'original_filename')) {
             Schema::table('gallery_photos', function (Blueprint $table) {
                 $table->string('original_filename')->nullable()->after('file_path');
                 $table->string('mime_type')->nullable()->after('original_filename');

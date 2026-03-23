@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class MinistryGoal extends Model
 {
-    use HasFactory, SoftDeletes, Auditable;
+    use Auditable, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'church_id',
@@ -95,9 +95,10 @@ class MinistryGoal extends Model
 
     public function getDaysRemainingAttribute(): ?int
     {
-        if (!$this->due_date || $this->status !== 'active') {
+        if (! $this->due_date || $this->status !== 'active') {
             return null;
         }
+
         return (int) now()->startOfDay()->diffInDays($this->due_date->startOfDay(), false);
     }
 
@@ -109,12 +110,13 @@ class MinistryGoal extends Model
         }
 
         $completedTasks = $this->tasks()->where('status', 'done')->count();
+
         return (int) round(($completedTasks / $totalTasks) * 100);
     }
 
     public function getStatusColorAttribute(): string
     {
-        return match($this->status) {
+        return match ($this->status) {
             'active' => 'blue',
             'completed' => 'green',
             'on_hold' => 'yellow',

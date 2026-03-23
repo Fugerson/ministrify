@@ -5,15 +5,12 @@ namespace Tests\Feature;
 use App\Models\Announcement;
 use App\Models\Attendance;
 use App\Models\Board;
-use App\Models\BoardCard;
 use App\Models\Church;
 use App\Models\Event;
 use App\Models\Group;
 use App\Models\Ministry;
 use App\Models\Person;
-use App\Models\Resource;
 use App\Models\Song;
-use App\Models\Tag;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -27,10 +24,15 @@ class RoutesSmokeTest extends TestCase
     use RefreshDatabase;
 
     private Church $church;
+
     private User $admin;
+
     private Person $person;
+
     private Ministry $ministry;
+
     private Group $group;
+
     private Event $event;
 
     protected function setUp(): void

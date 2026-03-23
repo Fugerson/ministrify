@@ -18,7 +18,9 @@ class SchedulingServiceTest extends TestCase
     use RefreshDatabase;
 
     private SchedulingService $service;
+
     private Church $church;
+
     private Ministry $ministry;
 
     protected function setUp(): void
@@ -347,7 +349,7 @@ class SchedulingServiceTest extends TestCase
 
     public function test_for_church_sets_context(): void
     {
-        $service = new SchedulingService();
+        $service = new SchedulingService;
         $result = $service->forChurch($this->church);
 
         $this->assertInstanceOf(SchedulingService::class, $result);

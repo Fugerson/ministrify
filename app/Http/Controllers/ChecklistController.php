@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\ChecklistTemplate;
-use App\Models\ChecklistTemplateItem;
 use App\Models\Event;
 use App\Models\EventChecklist;
 use App\Models\EventChecklistItem;
@@ -146,9 +145,9 @@ class ChecklistController extends Controller
         ]);
 
         // Verify template belongs to church
-        if (!empty($validated['template_id'])) {
+        if (! empty($validated['template_id'])) {
             $template = ChecklistTemplate::with('items')->find($validated['template_id']);
-            if (!$template || $template->church_id !== $church->id) {
+            if (! $template || $template->church_id !== $church->id) {
                 abort(403);
             }
         }
@@ -160,7 +159,7 @@ class ChecklistController extends Controller
         ]);
 
         // If template selected, copy items from template
-        if (!empty($validated['template_id'])) {
+        if (! empty($validated['template_id'])) {
             foreach ($template->items as $item) {
                 $checklist->items()->create([
                     'title' => $item->title,
@@ -180,7 +179,7 @@ class ChecklistController extends Controller
         return $this->successResponse($request, 'Чеклист додано до події.', 'events.show', [$event], [
             'checklist' => [
                 'id' => $checklist->id,
-                'items' => $checklist->items->map(fn($i) => [
+                'items' => $checklist->items->map(fn ($i) => [
                     'id' => $i->id,
                     'title' => $i->title,
                     'description' => $i->description,
@@ -223,7 +222,7 @@ class ChecklistController extends Controller
     {
         $this->authorizeChecklistItem($item);
 
-        $newValue = !$item->is_completed;
+        $newValue = ! $item->is_completed;
         $item->update([
             'is_completed' => $newValue,
             'completed_by' => $newValue ? auth()->id() : null,
@@ -232,6 +231,7 @@ class ChecklistController extends Controller
 
         if (request()->wantsJson()) {
             $item->refresh();
+
             return response()->json([
                 'success' => true,
                 'is_completed' => $item->is_completed,
@@ -288,7 +288,7 @@ class ChecklistController extends Controller
     {
         $checklist->loadMissing('event');
         $church = $this->getCurrentChurch();
-        if (!$checklist->event || $checklist->event->church_id !== $church->id) {
+        if (! $checklist->event || $checklist->event->church_id !== $church->id) {
             abort(403);
         }
     }
@@ -297,7 +297,7 @@ class ChecklistController extends Controller
     {
         $item->loadMissing('eventChecklist.event');
         $church = $this->getCurrentChurch();
-        if (!$item->eventChecklist?->event || $item->eventChecklist->event->church_id !== $church->id) {
+        if (! $item->eventChecklist?->event || $item->eventChecklist->event->church_id !== $church->id) {
             abort(403);
         }
     }

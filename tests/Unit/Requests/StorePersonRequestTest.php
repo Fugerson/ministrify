@@ -4,7 +4,6 @@ namespace Tests\Unit\Requests;
 
 use App\Http\Requests\StorePersonRequest;
 use App\Models\Church;
-use App\Models\Person;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Validator;
@@ -15,6 +14,7 @@ class StorePersonRequestTest extends TestCase
     use RefreshDatabase;
 
     private Church $church;
+
     private User $user;
 
     protected function setUp(): void
@@ -27,8 +27,9 @@ class StorePersonRequestTest extends TestCase
 
     private function getRules(): array
     {
-        $request = new StorePersonRequest();
+        $request = new StorePersonRequest;
         $request->setUserResolver(fn () => $this->user);
+
         return $request->rules();
     }
 
@@ -108,7 +109,7 @@ class StorePersonRequestTest extends TestCase
 
     public function test_custom_messages(): void
     {
-        $request = new StorePersonRequest();
+        $request = new StorePersonRequest;
         $messages = $request->messages();
 
         $this->assertArrayHasKey('first_name.required', $messages);

@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Models\Event;
+use App\Models\Ministry;
 use App\Models\User;
 
 class EventPolicy
@@ -25,7 +26,7 @@ class EventPolicy
 
         // Ministry leaders can create events for their ministries
         if ($user->person) {
-            return \App\Models\Ministry::where('church_id', $user->church_id)
+            return Ministry::where('church_id', $user->church_id)
                 ->where('leader_id', $user->person->id)
                 ->exists();
         }
@@ -97,7 +98,7 @@ class EventPolicy
         }
 
         // No person profile - no access
-        if (!$user->person) {
+        if (! $user->person) {
             return false;
         }
 

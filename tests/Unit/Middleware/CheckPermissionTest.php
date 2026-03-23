@@ -10,6 +10,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Tests\TestCase;
 
 class CheckPermissionTest extends TestCase
@@ -17,12 +18,13 @@ class CheckPermissionTest extends TestCase
     use RefreshDatabase;
 
     private CheckPermission $middleware;
+
     private Church $church;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->middleware = new CheckPermission();
+        $this->middleware = new CheckPermission;
         $this->church = Church::factory()->create();
     }
 
@@ -60,7 +62,7 @@ class CheckPermissionTest extends TestCase
         $request = Request::create('/test', 'GET');
         $request->setUserResolver(fn () => $user);
 
-        $this->expectException(\Symfony\Component\HttpKernel\Exception\HttpException::class);
+        $this->expectException(HttpException::class);
 
         $this->middleware->handle($request, function () {
             return new Response('OK');
@@ -72,7 +74,7 @@ class CheckPermissionTest extends TestCase
         $request = Request::create('/test', 'GET');
         $request->setUserResolver(fn () => null);
 
-        $this->expectException(\Symfony\Component\HttpKernel\Exception\HttpException::class);
+        $this->expectException(HttpException::class);
 
         $this->middleware->handle($request, function () {
             return new Response('OK');

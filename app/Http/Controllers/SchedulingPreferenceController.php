@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\SchedulingPreference;
 use App\Models\MinistryPreference;
+use App\Models\Person;
+use App\Models\Position;
 use App\Models\PositionPreference;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -17,7 +18,7 @@ class SchedulingPreferenceController extends Controller
     {
         $person = auth()->user()->person;
 
-        if (!$person) {
+        if (! $person) {
             return $this->errorResponse(request(), 'Профіль не знайдено');
         }
 
@@ -27,7 +28,7 @@ class SchedulingPreferenceController extends Controller
         $ministries = $person->ministries()->with('positions')->get();
 
         // Get other people from the same church for "prefer with" option
-        $otherPeople = \App\Models\Person::where('church_id', $person->church_id)
+        $otherPeople = Person::where('church_id', $person->church_id)
             ->where('id', '!=', $person->id)
             ->whereHas('ministries')
             ->orderBy('first_name')
@@ -43,7 +44,7 @@ class SchedulingPreferenceController extends Controller
     {
         $person = auth()->user()->person;
 
-        if (!$person) {
+        if (! $person) {
             return $this->errorResponse($request, 'Профіль не знайдено');
         }
 
@@ -68,12 +69,12 @@ class SchedulingPreferenceController extends Controller
     {
         $person = auth()->user()->person;
 
-        if (!$person) {
+        if (! $person) {
             return response()->json(['error' => 'Профіль не знайдено'], 404);
         }
 
         // Verify person belongs to this ministry
-        if (!$person->ministries()->where('ministries.id', $ministryId)->exists()) {
+        if (! $person->ministries()->where('ministries.id', $ministryId)->exists()) {
             return response()->json(['error' => 'Ви не належите до цього служіння'], 403);
         }
 
@@ -102,13 +103,13 @@ class SchedulingPreferenceController extends Controller
     {
         $person = auth()->user()->person;
 
-        if (!$person) {
+        if (! $person) {
             return response()->json(['error' => 'Профіль не знайдено'], 404);
         }
 
         // Verify position belongs to current church
-        $positionExists = \App\Models\Position::where('id', $positionId)
-            ->whereHas('ministry', fn($q) => $q->where('church_id', $this->getCurrentChurch()->id))
+        $positionExists = Position::where('id', $positionId)
+            ->whereHas('ministry', fn ($q) => $q->where('church_id', $this->getCurrentChurch()->id))
             ->exists();
         abort_unless($positionExists, 404);
 
@@ -137,7 +138,7 @@ class SchedulingPreferenceController extends Controller
     {
         $person = auth()->user()->person;
 
-        if (!$person) {
+        if (! $person) {
             return response()->json(['error' => 'Профіль не знайдено'], 404);
         }
 
@@ -158,7 +159,7 @@ class SchedulingPreferenceController extends Controller
     {
         $person = auth()->user()->person;
 
-        if (!$person) {
+        if (! $person) {
             return response()->json(['error' => 'Профіль не знайдено'], 404);
         }
 

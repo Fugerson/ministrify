@@ -27,7 +27,7 @@ class ServantsApproved extends Notification implements ShouldQueue
             ->subject("✅ Вас одобрено як служителя в {$this->churchName}")
             ->greeting("Привіт {$notifiable->name}!")
             ->line("Ваша заявка на роль **{$this->roleName}** в церкві **{$this->churchName}** була одобрена!")
-            ->line("Тепер у вас є доступ до всіх функцій служителя.")
+            ->line('Тепер у вас є доступ до всіх функцій служителя.')
             ->action('Перейти до панелі', route('dashboard'))
             ->line('Дякуємо за участь у служінні!');
     }

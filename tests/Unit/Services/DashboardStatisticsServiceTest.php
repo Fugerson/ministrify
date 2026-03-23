@@ -7,6 +7,7 @@ use App\Models\Ministry;
 use App\Models\Person;
 use App\Services\DashboardStatisticsService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class DashboardStatisticsServiceTest extends TestCase
@@ -14,18 +15,19 @@ class DashboardStatisticsServiceTest extends TestCase
     use RefreshDatabase;
 
     private DashboardStatisticsService $service;
+
     private Church $church;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new DashboardStatisticsService();
+        $this->service = new DashboardStatisticsService;
         $this->church = Church::factory()->create();
     }
 
     public function test_get_people_stats_returns_keys(): void
     {
-        if (\Illuminate\Support\Facades\DB::getDriverName() === 'sqlite') {
+        if (DB::getDriverName() === 'sqlite') {
             $this->markTestSkipped('Dashboard uses MySQL-specific MONTH() function');
         }
 
@@ -46,7 +48,7 @@ class DashboardStatisticsServiceTest extends TestCase
 
     public function test_get_people_stats_with_people(): void
     {
-        if (\Illuminate\Support\Facades\DB::getDriverName() === 'sqlite') {
+        if (DB::getDriverName() === 'sqlite') {
             $this->markTestSkipped('Dashboard uses MySQL-specific MONTH() function');
         }
 

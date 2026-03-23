@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\CurrencyHelper;
 use App\Models\Board;
 use App\Models\BoardCard;
+use App\Models\BudgetItem;
+use App\Models\Church;
 use App\Models\Event;
 use App\Models\EventMinistryTeam;
 use App\Models\EventSong;
-use App\Models\BudgetItem;
 use App\Models\Ministry;
 use App\Models\MinistryBudget;
 use App\Models\MinistryRole;
@@ -17,9 +19,9 @@ use App\Models\Song;
 use App\Models\Transaction;
 use App\Models\TransactionCategory;
 use App\Models\WorshipRole;
-use App\Helpers\CurrencyHelper;
 use App\Rules\BelongsToChurch;
 use App\Services\ImageService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
@@ -27,7 +29,7 @@ class MinistryController extends Controller
 {
     public function index()
     {
-        if (!auth()->user()->canView('ministries')) {
+        if (! auth()->user()->canView('ministries')) {
             return redirect()->route('dashboard')->with('error', __('У вас немає доступу до цього розділу. Зверніться до адміністратора церкви для отримання потрібних прав.'));
         }
 
@@ -78,7 +80,7 @@ class MinistryController extends Controller
         $ministry = Ministry::create($validated);
 
         // Add leader as member
-        if ($ministry->leader_id && !$ministry->members()->where('people.id', $ministry->leader_id)->exists()) {
+        if ($ministry->leader_id && ! $ministry->members()->where('people.id', $ministry->leader_id)->exists()) {
             $ministry->members()->attach($ministry->leader_id, [
                 'role' => 'leader',
                 'joined_at' => now(),
@@ -88,7 +90,7 @@ class MinistryController extends Controller
         // Create default positions if provided
         if ($request->has('positions')) {
             foreach ($request->positions as $index => $positionName) {
-                if (!empty($positionName)) {
+                if (! empty($positionName)) {
                     $ministry->positions()->create([
                         'name' => $positionName,
                         'sort_order' => $index,
@@ -97,7 +99,7 @@ class MinistryController extends Controller
             }
         }
 
-        \App\Models\Church::clearMinistriesCache($church->id);
+        Church::clearMinistriesCache($church->id);
 
         return $this->successResponse($request, __('messages.ministry_created'), 'ministries.show', [$ministry]);
     }
@@ -108,7 +110,7 @@ class MinistryController extends Controller
         Gate::authorize('view-ministry', $ministry);
 
         // Check private access
-        if (!$ministry->canAccess()) {
+        if (! $ministry->canAccess()) {
             abort(403, __('messages.ministry_private_access'));
         }
 
@@ -118,9 +120,9 @@ class MinistryController extends Controller
             'leader',
             'positions',
             'members',
-            'events' => fn($q) => $q->orderBy('date')->orderBy('time')->with(['ministry.positions', 'assignments']),
-            'transactions' => fn($q) => $q->completed()->with(['category', 'attachments'])->orderByDesc('date'),
-            'goals' => fn($q) => $q->with(['tasks.assignee', 'creator'])->orderByDesc('created_at'),
+            'events' => fn ($q) => $q->orderBy('date')->orderBy('time')->with(['ministry.positions', 'assignments']),
+            'transactions' => fn ($q) => $q->completed()->with(['category', 'attachments'])->orderByDesc('date'),
+            'goals' => fn ($q) => $q->with(['tasks.assignee', 'creator'])->orderByDesc('created_at'),
         ]);
 
         // Default tab: 'goals' for managers, 'schedule' for others
@@ -197,7 +199,7 @@ class MinistryController extends Controller
             ->where(function ($q) use ($ministry) {
                 if ($ministry->is_worship_ministry || $ministry->is_sunday_service_part) {
                     $q->where('service_type', 'sunday_service')
-                      ->orWhere('ministry_id', $ministry->id);
+                        ->orWhere('ministry_id', $ministry->id);
                 } else {
                     $q->where('ministry_id', $ministry->id);
                 }
@@ -286,6 +288,7 @@ class MinistryController extends Controller
             $stat = $epicStatsRaw[$epic->id] ?? null;
             $total = $stat ? (int) $stat->total : 0;
             $completed = $stat ? (int) $stat->completed : 0;
+
             return [
                 'id' => $epic->id,
                 'name' => $epic->name,
@@ -397,7 +400,7 @@ class MinistryController extends Controller
         $budgetData = [
             'budget' => $ministryBudget,
             'items' => $budgetItems,
-            'has_items' => !empty($budgetItems),
+            'has_items' => ! empty($budgetItems),
             'effective_budget' => $ministryBudget ? $ministryBudget->getEffectiveBudget() : 0,
             'total_spent' => $totalSpent,
             'total_income' => (float) $totalIncome,
@@ -408,7 +411,7 @@ class MinistryController extends Controller
             'unmatched_spent' => max(0, $totalSpent - $itemsSpentTotal),
             'year' => $budgetYear,
             'month' => $budgetMonth,
-            'month_name' => $monthNames[$budgetMonth] . ' ' . $budgetYear,
+            'month_name' => $monthNames[$budgetMonth].' '.$budgetYear,
         ];
 
         $expenseCategories = TransactionCategory::where('church_id', $church->id)
@@ -487,7 +490,7 @@ class MinistryController extends Controller
                     'planned_date' => $item->planned_date?->format('Y-m-d'),
                     'actual' => $itemSpent,
                     'difference' => $monthlyPlanned - $itemSpent,
-                    'responsible' => $item->responsiblePeople->map(fn($p) => [
+                    'responsible' => $item->responsiblePeople->map(fn ($p) => [
                         'id' => $p->id,
                         'name' => $p->short_name ?? $p->first_name,
                     ]),
@@ -537,7 +540,7 @@ class MinistryController extends Controller
             'success' => true,
             'budget_id' => $ministryBudget?->id,
             'items' => $budgetItems,
-            'has_items' => !empty($budgetItems),
+            'has_items' => ! empty($budgetItems),
             'effective_budget' => $effectiveBudget,
             'total_spent' => $totalSpent,
             'total_income' => (float) $totalIncome,
@@ -575,7 +578,7 @@ class MinistryController extends Controller
             ->with('items.responsiblePeople')
             ->first();
 
-        if (!$sourceBudget || $sourceBudget->items->isEmpty()) {
+        if (! $sourceBudget || $sourceBudget->items->isEmpty()) {
             return response()->json(['success' => false, 'message' => __('messages.no_budget_items_to_copy')], 422);
         }
 
@@ -589,7 +592,7 @@ class MinistryController extends Controller
             return response()->json(['success' => false, 'message' => __('messages.target_month_has_items')], 422);
         }
 
-        if (!$targetBudget) {
+        if (! $targetBudget) {
             $targetBudget = MinistryBudget::create([
                 'church_id' => $church->id,
                 'ministry_id' => $ministry->id,
@@ -600,8 +603,8 @@ class MinistryController extends Controller
         }
 
         // Calculate month difference for shifting planned_date
-        $sourceDate = \Carbon\Carbon::create($validated['from_year'], $validated['from_month'], 1);
-        $targetDate = \Carbon\Carbon::create($validated['to_year'], $validated['to_month'], 1);
+        $sourceDate = Carbon::create($validated['from_year'], $validated['from_month'], 1);
+        $targetDate = Carbon::create($validated['to_year'], $validated['to_month'], 1);
         $monthDiff = $sourceDate->diffInMonths($targetDate, false);
 
         foreach ($sourceBudget->items as $item) {
@@ -686,7 +689,7 @@ class MinistryController extends Controller
 
         // Resolve category: existing ID or create from custom name
         $categoryId = $validated['category_id'] ?? null;
-        if (!$categoryId && !empty($validated['category_name'])) {
+        if (! $categoryId && ! empty($validated['category_name'])) {
             $category = TransactionCategory::firstOrCreate([
                 'church_id' => $church->id,
                 'name' => trim($validated['category_name']),
@@ -720,7 +723,7 @@ class MinistryController extends Controller
             'sort_order' => $maxSort + 1,
         ]);
 
-        if (!empty($validated['person_ids'])) {
+        if (! empty($validated['person_ids'])) {
             $item->responsiblePeople()->attach($validated['person_ids']);
         }
 
@@ -733,7 +736,9 @@ class MinistryController extends Controller
     public function updateBudgetItem(Request $request, BudgetItem $budgetItem)
     {
         $church = $this->getCurrentChurch();
-        if ($budgetItem->church_id !== $church->id) abort(404);
+        if ($budgetItem->church_id !== $church->id) {
+            abort(404);
+        }
 
         $ministry = $budgetItem->ministryBudget->ministry;
         Gate::authorize('contribute-ministry', $ministry);
@@ -753,7 +758,7 @@ class MinistryController extends Controller
         // Resolve category: existing ID or create from custom name
         $church = $this->getCurrentChurch();
         $categoryId = $validated['category_id'] ?? null;
-        if (!$categoryId && !empty($validated['category_name'])) {
+        if (! $categoryId && ! empty($validated['category_name'])) {
             $category = TransactionCategory::firstOrCreate([
                 'church_id' => $church->id,
                 'name' => trim($validated['category_name']),
@@ -794,7 +799,9 @@ class MinistryController extends Controller
     public function destroyBudgetItem(Request $request, BudgetItem $budgetItem)
     {
         $church = $this->getCurrentChurch();
-        if ($budgetItem->church_id !== $church->id) abort(404);
+        if ($budgetItem->church_id !== $church->id) {
+            abort(404);
+        }
 
         $ministry = $budgetItem->ministryBudget->ministry;
         Gate::authorize('contribute-ministry', $ministry);
@@ -850,7 +857,7 @@ class MinistryController extends Controller
 
         // If custom category name provided, find or create
         $categoryId = $validated['category_id'] ?? null;
-        if (!$categoryId && !empty($validated['category_name'])) {
+        if (! $categoryId && ! empty($validated['category_name'])) {
             $category = TransactionCategory::firstOrCreate([
                 'church_id' => $church->id,
                 'name' => trim($validated['category_name']),
@@ -913,7 +920,7 @@ class MinistryController extends Controller
                 'payment_method' => $transaction->payment_method,
                 'budget_item_id' => $transaction->budget_item_id,
                 'notes' => $transaction->notes,
-                'attachments' => $transaction->attachments->map(fn($a) => [
+                'attachments' => $transaction->attachments->map(fn ($a) => [
                     'id' => $a->id,
                     'url' => \Storage::url($a->path),
                     'is_image' => str_starts_with($a->mime_type, 'image/'),
@@ -929,7 +936,9 @@ class MinistryController extends Controller
     public function editExpenseData(Transaction $transaction)
     {
         $church = $this->getCurrentChurch();
-        if ($transaction->church_id !== $church->id) abort(404);
+        if ($transaction->church_id !== $church->id) {
+            abort(404);
+        }
 
         $ministry = Ministry::findOrFail($transaction->ministry_id);
         Gate::authorize('contribute-ministry', $ministry);
@@ -949,7 +958,7 @@ class MinistryController extends Controller
                 'payment_method' => $transaction->payment_method,
                 'budget_item_id' => $transaction->budget_item_id,
                 'notes' => $transaction->notes,
-                'attachments' => $transaction->attachments->map(fn($a) => [
+                'attachments' => $transaction->attachments->map(fn ($a) => [
                     'id' => $a->id,
                     'url' => \Storage::url($a->path),
                     'is_image' => str_starts_with($a->mime_type, 'image/'),
@@ -965,7 +974,9 @@ class MinistryController extends Controller
     public function updateExpense(Request $request, Transaction $transaction)
     {
         $church = $this->getCurrentChurch();
-        if ($transaction->church_id !== $church->id) abort(404);
+        if ($transaction->church_id !== $church->id) {
+            abort(404);
+        }
 
         $ministry = Ministry::findOrFail($transaction->ministry_id);
         Gate::authorize('contribute-ministry', $ministry);
@@ -989,7 +1000,7 @@ class MinistryController extends Controller
 
         // If custom category name provided, find or create
         $categoryId = $validated['category_id'] ?? null;
-        if (!$categoryId && !empty($validated['category_name'])) {
+        if (! $categoryId && ! empty($validated['category_name'])) {
             $category = TransactionCategory::firstOrCreate([
                 'church_id' => $church->id,
                 'name' => trim($validated['category_name']),
@@ -1012,11 +1023,11 @@ class MinistryController extends Controller
             'notes' => $validated['notes'] ?? null,
         ]);
 
-        if (!empty($validated['delete_attachments'])) {
+        if (! empty($validated['delete_attachments'])) {
             $transaction->attachments()
                 ->whereIn('id', $validated['delete_attachments'])
                 ->get()
-                ->each(fn($att) => $att->delete());
+                ->each(fn ($att) => $att->delete());
         }
 
         if ($request->hasFile('receipts')) {
@@ -1053,7 +1064,7 @@ class MinistryController extends Controller
                 'payment_method' => $transaction->payment_method,
                 'budget_item_id' => $transaction->budget_item_id,
                 'notes' => $transaction->notes,
-                'attachments' => $transaction->attachments->map(fn($a) => [
+                'attachments' => $transaction->attachments->map(fn ($a) => [
                     'id' => $a->id,
                     'url' => \Storage::url($a->path),
                     'is_image' => str_starts_with($a->mime_type, 'image/'),
@@ -1069,7 +1080,9 @@ class MinistryController extends Controller
     public function destroyExpense(Transaction $transaction)
     {
         $church = $this->getCurrentChurch();
-        if ($transaction->church_id !== $church->id) abort(404);
+        if ($transaction->church_id !== $church->id) {
+            abort(404);
+        }
 
         $ministry = Ministry::findOrFail($transaction->ministry_id);
         Gate::authorize('contribute-ministry', $ministry);
@@ -1135,8 +1148,12 @@ class MinistryController extends Controller
     public function deleteIncome(Transaction $transaction)
     {
         $church = $this->getCurrentChurch();
-        if ($transaction->church_id !== $church->id) abort(404);
-        if ($transaction->direction !== Transaction::DIRECTION_IN) abort(404);
+        if ($transaction->church_id !== $church->id) {
+            abort(404);
+        }
+        if ($transaction->direction !== Transaction::DIRECTION_IN) {
+            abort(404);
+        }
 
         $ministry = Ministry::findOrFail($transaction->ministry_id);
         Gate::authorize('contribute-ministry', $ministry);
@@ -1166,11 +1183,11 @@ class MinistryController extends Controller
             ->orderBy('time')
             ->get();
 
-        $events = $rawEvents->map(fn($e) => [
+        $events = $rawEvents->map(fn ($e) => [
             'id' => $e->id,
             'title' => $e->title,
             'date' => $e->date->format('Y-m-d'),
-            'dateLabel' => $e->date->format('j') . ' ' . $monthNames[$e->date->month],
+            'dateLabel' => $e->date->format('j').' '.$monthNames[$e->date->month],
             'dayOfWeek' => mb_substr($e->date->translatedFormat('D'), 0, 2),
             'dataUrl' => route('ministries.worship-events.data', [$ministry, $e]),
             'eventUrl' => route('ministries.worship-events.show', [$ministry, $e]),
@@ -1180,7 +1197,7 @@ class MinistryController extends Controller
         ]);
 
         $roles = $ministry->ministryRoles()->orderBy('sort_order')->get()
-            ->map(fn($r) => [
+            ->map(fn ($r) => [
                 'id' => $r->id,
                 'name' => $r->name,
                 'icon' => $r->icon,
@@ -1198,23 +1215,23 @@ class MinistryController extends Controller
         foreach ($teamEntries as $entry) {
             $roleId = (string) $entry->ministry_role_id;
             $eventId = (string) $entry->event_id;
-            $key = $roleId . '-' . $eventId . '-' . $entry->person_id;
+            $key = $roleId.'-'.$eventId.'-'.$entry->person_id;
 
             if (isset($seen[$key])) {
                 continue;
             }
             $seen[$key] = true;
 
-            if (!isset($grid[$roleId])) {
+            if (! isset($grid[$roleId])) {
                 $grid[$roleId] = [];
             }
-            if (!isset($grid[$roleId][$eventId])) {
+            if (! isset($grid[$roleId][$eventId])) {
                 $grid[$roleId][$eventId] = [];
             }
 
             $person = $entry->person;
             $personName = $person
-                ? $person->first_name . ' ' . mb_substr($person->last_name, 0, 1) . '.'
+                ? $person->first_name.' '.mb_substr($person->last_name, 0, 1).'.'
                 : '?';
 
             $grid[$roleId][$eventId][] = [
@@ -1227,7 +1244,7 @@ class MinistryController extends Controller
         }
 
         $members = $ministry->members()->orderBy('last_name')->get()
-            ->map(fn($m) => [
+            ->map(fn ($m) => [
                 'id' => $m->id,
                 'name' => $m->full_name,
                 'has_telegram' => (bool) $m->telegram_chat_id,
@@ -1243,7 +1260,7 @@ class MinistryController extends Controller
 
             foreach ($eventSongs as $es) {
                 $eId = (string) $es->event_id;
-                if (!isset($songs[$eId])) {
+                if (! isset($songs[$eId])) {
                     $songs[$eId] = [];
                 }
                 $songs[$eId][] = [
@@ -1264,6 +1281,7 @@ class MinistryController extends Controller
             $eId = (string) $e['id'];
             $e['songsCount'] = count($songs[$eId] ?? []);
             $e['teamCount'] = $teamByEvent[$eId] ?? 0;
+
             return $e;
         });
 
@@ -1324,7 +1342,7 @@ class MinistryController extends Controller
                     ]);
                 }
             }
-        } elseif ($ministry->leader_id && !$ministry->members()->where('people.id', $ministry->leader_id)->exists()) {
+        } elseif ($ministry->leader_id && ! $ministry->members()->where('people.id', $ministry->leader_id)->exists()) {
             // Leader unchanged but not in members yet
             $ministry->members()->attach($ministry->leader_id, [
                 'role' => 'leader',
@@ -1332,7 +1350,7 @@ class MinistryController extends Controller
             ]);
         }
 
-        \App\Models\Church::clearMinistriesCache($ministry->church_id);
+        Church::clearMinistriesCache($ministry->church_id);
 
         return $this->successResponse($request, __('messages.ministry_updated'), 'ministries.show', [$ministry]);
     }
@@ -1345,7 +1363,7 @@ class MinistryController extends Controller
         $churchId = $ministry->church_id;
         $ministry->delete();
 
-        \App\Models\Church::clearMinistriesCache($churchId);
+        Church::clearMinistriesCache($churchId);
 
         return $this->successResponse($request, __('messages.ministry_deleted'), 'ministries.index');
     }
@@ -1358,9 +1376,9 @@ class MinistryController extends Controller
             ->select('people.id', 'people.first_name', 'people.last_name')
             ->orderBy('people.first_name')
             ->get()
-            ->map(fn($p) => [
+            ->map(fn ($p) => [
                 'id' => $p->id,
-                'name' => $p->full_name ?? ($p->first_name . ' ' . $p->last_name),
+                'name' => $p->full_name ?? ($p->first_name.' '.$p->last_name),
             ]);
 
         return response()->json(['members' => $members]);
@@ -1372,7 +1390,7 @@ class MinistryController extends Controller
         Gate::authorize('contribute-ministry', $ministry);
 
         $validated = $request->validate([
-            'person_id' => ['required', new \App\Rules\BelongsToChurch(\App\Models\Person::class)],
+            'person_id' => ['required', new BelongsToChurch(Person::class)],
             'position_ids' => 'nullable|array',
         ]);
 
@@ -1484,7 +1502,7 @@ class MinistryController extends Controller
 
         $oldValue = $ministry->is_private;
         $ministry->update([
-            'is_private' => !$ministry->is_private,
+            'is_private' => ! $ministry->is_private,
         ]);
 
         // Log privacy toggle
@@ -1559,7 +1577,7 @@ class MinistryController extends Controller
         $this->authorizeChurch($ministry);
         Gate::authorize('contribute-ministry', $ministry);
 
-        if (!$ministry->is_worship_ministry) {
+        if (! $ministry->is_worship_ministry) {
             abort(404);
         }
 
@@ -1588,7 +1606,7 @@ class MinistryController extends Controller
         $this->authorizeChurch($role);
         Gate::authorize('contribute-ministry', $ministry);
 
-        if (!$ministry->is_worship_ministry) {
+        if (! $ministry->is_worship_ministry) {
             abort(404);
         }
 
@@ -1609,7 +1627,7 @@ class MinistryController extends Controller
         $this->authorizeChurch($role);
         Gate::authorize('contribute-ministry', $ministry);
 
-        if (!$ministry->is_worship_ministry) {
+        if (! $ministry->is_worship_ministry) {
             abort(404);
         }
 
@@ -1634,8 +1652,8 @@ class MinistryController extends Controller
         $role = MinistryRole::create([
             'ministry_id' => $ministry->id,
             'name' => $validated['name'],
-            'icon' => !empty($validated['icon']) ? $validated['icon'] : null,
-            'color' => !empty($validated['color']) ? $validated['color'] : null,
+            'icon' => ! empty($validated['icon']) ? $validated['icon'] : null,
+            'color' => ! empty($validated['color']) ? $validated['color'] : null,
             'sort_order' => $maxOrder + 1,
         ]);
 
@@ -1657,8 +1675,8 @@ class MinistryController extends Controller
             'color' => 'nullable|string|max:20',
         ]);
 
-        $validated['icon'] = !empty($validated['icon']) ? $validated['icon'] : null;
-        $validated['color'] = !empty($validated['color']) ? $validated['color'] : null;
+        $validated['icon'] = ! empty($validated['icon']) ? $validated['icon'] : null;
+        $validated['color'] = ! empty($validated['color']) ? $validated['color'] : null;
         $role->update($validated);
 
         return $this->successResponse($request, __('messages.role_updated'));

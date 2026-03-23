@@ -2,16 +2,16 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
-use App\Traits\Auditable;
 
 class BlogPost extends Model
 {
-    use HasFactory, SoftDeletes, Auditable;
+    use Auditable, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'church_id',
@@ -44,8 +44,11 @@ class BlogPost extends Model
     ];
 
     const STATUS_DRAFT = 'draft';
+
     const STATUS_PUBLISHED = 'published';
+
     const STATUS_SCHEDULED = 'scheduled';
+
     const STATUS_ARCHIVED = 'archived';
 
     const STATUSES = [
@@ -63,7 +66,7 @@ class BlogPost extends Model
                 $slug = $baseSlug;
                 $counter = 1;
                 while (self::where('slug', $slug)->where('church_id', $post->church_id)->exists()) {
-                    $slug = $baseSlug . '-' . $counter++;
+                    $slug = $baseSlug.'-'.$counter++;
                 }
                 $post->slug = $slug;
             }
@@ -134,6 +137,7 @@ class BlogPost extends Model
     public function getReadTimeAttribute(): int
     {
         $wordCount = str_word_count(strip_tags($this->content ?? ''));
+
         return max(1, (int) ceil($wordCount / 200));
     }
 
@@ -147,6 +151,7 @@ class BlogPost extends Model
         if ($this->excerpt) {
             return $this->excerpt;
         }
+
         return Str::limit(strip_tags($this->content ?? ''), 160);
     }
 

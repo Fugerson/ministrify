@@ -13,10 +13,12 @@ return new class extends Migration
     {
         $driver = Schema::getConnection()->getDriverName();
         if ($driver === 'sqlite') {
-            $indexes = \DB::select("SELECT name FROM sqlite_master WHERE type='index' AND name=?", [$indexName]);
+            $indexes = DB::select("SELECT name FROM sqlite_master WHERE type='index' AND name=?", [$indexName]);
+
             return count($indexes) > 0;
         }
-        $indexes = \DB::select("SHOW INDEX FROM {$table} WHERE Key_name = ?", [$indexName]);
+        $indexes = DB::select("SHOW INDEX FROM {$table} WHERE Key_name = ?", [$indexName]);
+
         return count($indexes) > 0;
     }
 
@@ -27,66 +29,66 @@ return new class extends Migration
     {
         // Transactions - frequently filtered columns
         Schema::table('transactions', function (Blueprint $table) {
-            if (!$this->indexExists('transactions', 'transactions_date_index')) {
+            if (! $this->indexExists('transactions', 'transactions_date_index')) {
                 $table->index('date');
             }
-            if (!$this->indexExists('transactions', 'transactions_direction_index')) {
+            if (! $this->indexExists('transactions', 'transactions_direction_index')) {
                 $table->index('direction');
             }
-            if (!$this->indexExists('transactions', 'transactions_status_index')) {
+            if (! $this->indexExists('transactions', 'transactions_status_index')) {
                 $table->index('status');
             }
-            if (!$this->indexExists('transactions', 'transactions_source_type_index')) {
+            if (! $this->indexExists('transactions', 'transactions_source_type_index')) {
                 $table->index('source_type');
             }
         });
 
         // People - frequently filtered columns
         Schema::table('people', function (Blueprint $table) {
-            if (!$this->indexExists('people', 'people_church_role_id_index')) {
+            if (! $this->indexExists('people', 'people_church_role_id_index')) {
                 $table->index('church_role_id');
             }
-            if (!$this->indexExists('people', 'people_shepherd_id_index')) {
+            if (! $this->indexExists('people', 'people_shepherd_id_index')) {
                 $table->index('shepherd_id');
             }
-            if (!$this->indexExists('people', 'people_is_shepherd_index')) {
+            if (! $this->indexExists('people', 'people_is_shepherd_index')) {
                 $table->index('is_shepherd');
             }
         });
 
         // Events - frequently filtered columns
         Schema::table('events', function (Blueprint $table) {
-            if (!$this->indexExists('events', 'events_is_service_index')) {
+            if (! $this->indexExists('events', 'events_is_service_index')) {
                 $table->index('is_service');
             }
-            if (!$this->indexExists('events', 'events_track_attendance_index')) {
+            if (! $this->indexExists('events', 'events_track_attendance_index')) {
                 $table->index('track_attendance');
             }
         });
 
         // Attendances - type filter
         Schema::table('attendances', function (Blueprint $table) {
-            if (!$this->indexExists('attendances', 'attendances_type_index')) {
+            if (! $this->indexExists('attendances', 'attendances_type_index')) {
                 $table->index('type');
             }
         });
 
         // Board cards - frequently used filters
         Schema::table('board_cards', function (Blueprint $table) {
-            if (!$this->indexExists('board_cards', 'board_cards_priority_index')) {
+            if (! $this->indexExists('board_cards', 'board_cards_priority_index')) {
                 $table->index('priority');
             }
-            if (!$this->indexExists('board_cards', 'board_cards_due_date_index')) {
+            if (! $this->indexExists('board_cards', 'board_cards_due_date_index')) {
                 $table->index('due_date');
             }
-            if (!$this->indexExists('board_cards', 'board_cards_is_completed_index')) {
+            if (! $this->indexExists('board_cards', 'board_cards_is_completed_index')) {
                 $table->index('is_completed');
             }
         });
 
         // Audit logs - sorting and filtering
         Schema::table('audit_logs', function (Blueprint $table) {
-            if (!$this->indexExists('audit_logs', 'audit_logs_action_index')) {
+            if (! $this->indexExists('audit_logs', 'audit_logs_action_index')) {
                 $table->index('action');
             }
         });

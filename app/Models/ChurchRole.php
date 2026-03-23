@@ -12,7 +12,7 @@ use Illuminate\Support\Str;
 
 class ChurchRole extends Model
 {
-    use HasFactory, Auditable;
+    use Auditable, HasFactory;
 
     protected $fillable = [
         'church_id',
@@ -104,6 +104,7 @@ class ChurchRole extends Model
 
         $actions = Cache::remember($cacheKey, 3600, function () use ($module) {
             $permission = $this->permissions()->where('module', $module)->first();
+
             return $permission?->actions ?? [];
         });
 
@@ -121,6 +122,7 @@ class ChurchRole extends Model
             foreach (ChurchRolePermission::MODULES as $module => $config) {
                 $result[$module] = $config['actions'];
             }
+
             return $result;
         }
 
@@ -131,7 +133,7 @@ class ChurchRole extends Model
 
         // Fill missing modules with empty arrays
         foreach (array_keys(ChurchRolePermission::MODULES) as $module) {
-            if (!isset($permissions[$module])) {
+            if (! isset($permissions[$module])) {
                 $permissions[$module] = [];
             }
         }
@@ -146,7 +148,7 @@ class ChurchRole extends Model
     {
         foreach ($permissions as $module => $actions) {
             // Skip invalid modules
-            if (!array_key_exists($module, ChurchRolePermission::MODULES)) {
+            if (! array_key_exists($module, ChurchRolePermission::MODULES)) {
                 continue;
             }
 

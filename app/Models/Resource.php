@@ -2,15 +2,15 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Traits\Auditable;
 
 class Resource extends Model
 {
-    use HasFactory, Auditable;
+    use Auditable, HasFactory;
 
     protected $fillable = [
         'church_id',
@@ -104,7 +104,7 @@ class Resource extends Model
 
     public function getFormattedSizeAttribute(): string
     {
-        if (!$this->file_size) {
+        if (! $this->file_size) {
             return '—';
         }
 
@@ -117,7 +117,7 @@ class Resource extends Model
             $i++;
         }
 
-        return round($bytes, 1) . ' ' . $units[$i];
+        return round($bytes, 1).' '.$units[$i];
     }
 
     public function getIconAttribute(): string
@@ -148,6 +148,7 @@ class Resource extends Model
     public static function canUpload(int $churchId, int $fileSize): bool
     {
         $currentUsage = static::getChurchUsage($churchId);
+
         return ($currentUsage + $fileSize) <= static::MAX_CHURCH_STORAGE;
     }
 }

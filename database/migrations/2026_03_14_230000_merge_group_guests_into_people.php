@@ -48,7 +48,7 @@ return new class extends Migration
                     ->where('person_id', $personId)
                     ->exists();
 
-                if (!$exists) {
+                if (! $exists) {
                     DB::table('attendance_records')->insert([
                         'attendance_id' => $ga->attendance_id,
                         'person_id' => $personId,

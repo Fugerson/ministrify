@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Person;
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -33,11 +34,13 @@ class PersonMergeService
             }
         }
         foreach ($phoneGroups as $group) {
-            if (count($group) < 2) continue;
+            if (count($group) < 2) {
+                continue;
+            }
             for ($i = 0; $i < count($group); $i++) {
                 for ($j = $i + 1; $j < count($group); $j++) {
-                    $key = min($group[$i]->id, $group[$j]->id) . '-' . max($group[$i]->id, $group[$j]->id);
-                    if (!isset($seen[$key])) {
+                    $key = min($group[$i]->id, $group[$j]->id).'-'.max($group[$i]->id, $group[$j]->id);
+                    if (! isset($seen[$key])) {
                         $seen[$key] = ['personA' => $group[$i], 'personB' => $group[$j], 'reasons' => []];
                     }
                     $seen[$key]['reasons'][] = 'phone';
@@ -53,11 +56,13 @@ class PersonMergeService
             }
         }
         foreach ($emailGroups as $group) {
-            if (count($group) < 2) continue;
+            if (count($group) < 2) {
+                continue;
+            }
             for ($i = 0; $i < count($group); $i++) {
                 for ($j = $i + 1; $j < count($group); $j++) {
-                    $key = min($group[$i]->id, $group[$j]->id) . '-' . max($group[$i]->id, $group[$j]->id);
-                    if (!isset($seen[$key])) {
+                    $key = min($group[$i]->id, $group[$j]->id).'-'.max($group[$i]->id, $group[$j]->id);
+                    if (! isset($seen[$key])) {
                         $seen[$key] = ['personA' => $group[$i], 'personB' => $group[$j], 'reasons' => []];
                     }
                     $seen[$key]['reasons'][] = 'email';
@@ -68,17 +73,19 @@ class PersonMergeService
         // Strategy 3: Full name match (case-insensitive, trimmed)
         $nameGroups = [];
         foreach ($people as $person) {
-            $nameKey = mb_strtolower(trim($person->first_name) . ' ' . trim($person->last_name));
+            $nameKey = mb_strtolower(trim($person->first_name).' '.trim($person->last_name));
             if ($nameKey && $nameKey !== ' ') {
                 $nameGroups[$nameKey][] = $person;
             }
         }
         foreach ($nameGroups as $group) {
-            if (count($group) < 2) continue;
+            if (count($group) < 2) {
+                continue;
+            }
             for ($i = 0; $i < count($group); $i++) {
                 for ($j = $i + 1; $j < count($group); $j++) {
-                    $key = min($group[$i]->id, $group[$j]->id) . '-' . max($group[$i]->id, $group[$j]->id);
-                    if (!isset($seen[$key])) {
+                    $key = min($group[$i]->id, $group[$j]->id).'-'.max($group[$i]->id, $group[$j]->id);
+                    if (! isset($seen[$key])) {
                         $seen[$key] = ['personA' => $group[$i], 'personB' => $group[$j], 'reasons' => []];
                     }
                     $seen[$key]['reasons'][] = 'name';
@@ -87,7 +94,7 @@ class PersonMergeService
         }
 
         // Strategy 4: Similar email (same prefix before @ or Levenshtein ≤ 2)
-        $emailPeople = $people->filter(fn($p) => !empty($p->email));
+        $emailPeople = $people->filter(fn ($p) => ! empty($p->email));
         $emailArray = $emailPeople->values()->all();
         for ($i = 0; $i < count($emailArray); $i++) {
             for ($j = $i + 1; $j < count($emailArray); $j++) {
@@ -105,8 +112,8 @@ class PersonMergeService
                     || levenshtein($emailA, $emailB) <= 2;
 
                 if ($isSimilar) {
-                    $key = min($emailArray[$i]->id, $emailArray[$j]->id) . '-' . max($emailArray[$i]->id, $emailArray[$j]->id);
-                    if (!isset($seen[$key])) {
+                    $key = min($emailArray[$i]->id, $emailArray[$j]->id).'-'.max($emailArray[$i]->id, $emailArray[$j]->id);
+                    if (! isset($seen[$key])) {
                         $seen[$key] = ['personA' => $emailArray[$i], 'personB' => $emailArray[$j], 'reasons' => []];
                     }
                     $seen[$key]['reasons'][] = 'similar_email';
@@ -140,7 +147,7 @@ class PersonMergeService
 
             $updates = [];
             foreach ($scalarFields as $field) {
-                if (empty($primary->{$field}) && !empty($secondary->{$field})) {
+                if (empty($primary->{$field}) && ! empty($secondary->{$field})) {
                     $updates[$field] = $secondary->{$field};
                 }
             }
@@ -148,21 +155,21 @@ class PersonMergeService
             // For date fields, keep the earliest (most meaningful) value
             $dateFields = ['first_visit_date', 'joined_date', 'baptism_date'];
             foreach ($dateFields as $dateField) {
-                if (!empty($primary->{$dateField}) && !empty($secondary->{$dateField})) {
-                    $primaryDate = \Carbon\Carbon::parse($primary->{$dateField});
-                    $secondaryDate = \Carbon\Carbon::parse($secondary->{$dateField});
+                if (! empty($primary->{$dateField}) && ! empty($secondary->{$dateField})) {
+                    $primaryDate = Carbon::parse($primary->{$dateField});
+                    $secondaryDate = Carbon::parse($secondary->{$dateField});
                     if ($secondaryDate->lt($primaryDate)) {
                         $updates[$dateField] = $secondary->{$dateField};
                     }
                 }
             }
 
-            if (!empty($updates)) {
+            if (! empty($updates)) {
                 $primary->update($updates);
             }
 
             // 2. Transfer user account link
-            if (!$primary->user_id && $secondary->user_id) {
+            if (! $primary->user_id && $secondary->user_id) {
                 // Unlink secondary first
                 $userId = $secondary->user_id;
                 $secondary->update(['user_id' => null]);
@@ -334,7 +341,7 @@ class PersonMergeService
                 ->update(['shepherd_id' => $primary->id]);
 
             // If secondary had a shepherd but primary doesn't
-            if (!$primary->shepherd_id && $secondary->shepherd_id && $secondary->shepherd_id !== $primary->id) {
+            if (! $primary->shepherd_id && $secondary->shepherd_id && $secondary->shepherd_id !== $primary->id) {
                 $primary->update(['shepherd_id' => $secondary->shepherd_id]);
             }
 
@@ -364,9 +371,9 @@ class PersonMergeService
     /**
      * Merge two people with explicit field selection (git-merge style).
      *
-     * @param Person $personA The base/primary person (receives merged data)
-     * @param Person $personB The secondary person (will be soft-deleted)
-     * @param array $fieldSelections ['phone' => 'A', 'email' => 'B', ...] — which person's value to keep per field
+     * @param  Person  $personA  The base/primary person (receives merged data)
+     * @param  Person  $personB  The secondary person (will be soft-deleted)
+     * @param  array  $fieldSelections  ['phone' => 'A', 'email' => 'B', ...] — which person's value to keep per field
      */
     public function mergeWithFieldSelection(Person $personA, Person $personB, array $fieldSelections): void
     {
@@ -396,18 +403,18 @@ class PersonMergeService
                     // 'A' means keep personA's value — no action needed
                 } else {
                     // No explicit selection — fallback: fill NULLs from secondary
-                    if (empty($personA->{$field}) && !empty($personB->{$field})) {
+                    if (empty($personA->{$field}) && ! empty($personB->{$field})) {
                         $updates[$field] = $personB->{$field};
                     }
                 }
             }
 
-            if (!empty($updates)) {
+            if (! empty($updates)) {
                 $personA->update($updates);
             }
 
             // 2. Transfer user account link
-            if (!$personA->user_id && $personB->user_id) {
+            if (! $personA->user_id && $personB->user_id) {
                 $userId = $personB->user_id;
                 $personB->update(['user_id' => null]);
                 $personA->update(['user_id' => $userId]);
@@ -569,7 +576,7 @@ class PersonMergeService
                 ->update(['shepherd_id' => $personA->id]);
 
             // If secondary had a shepherd but primary doesn't
-            if (!$personA->shepherd_id && $personB->shepherd_id && $personB->shepherd_id !== $personA->id) {
+            if (! $personA->shepherd_id && $personB->shepherd_id && $personB->shepherd_id !== $personA->id) {
                 $personA->update(['shepherd_id' => $personB->shepherd_id]);
             }
 

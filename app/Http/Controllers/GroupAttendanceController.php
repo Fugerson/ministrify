@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Attendance;
 use App\Models\AttendanceRecord;
 use App\Models\Group;
+use App\Models\Person;
+use App\Rules\BelongsToChurch;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -14,7 +16,7 @@ class GroupAttendanceController extends Controller
     protected function checkAttendanceEnabled(): void
     {
         $church = $this->getCurrentChurch();
-        if (!$church->attendance_enabled) {
+        if (! $church->attendance_enabled) {
             abort(403, 'Функцію відвідуваності вимкнено для вашої церкви.');
         }
     }
@@ -36,7 +38,7 @@ class GroupAttendanceController extends Controller
             ->get()
             ->reverse()
             ->values()
-            ->map(fn($a) => [
+            ->map(fn ($a) => [
                 'date' => $a->date->format('d.m'),
                 'members' => $a->members_present,
                 'guests' => $a->guests_count,
@@ -94,6 +96,7 @@ class GroupAttendanceController extends Controller
                         'redirect_url' => route('groups.attendance.edit', [$group, $existing]),
                     ], 422);
                 }
+
                 return redirect()->route('groups.attendance.edit', [$group, $existing])
                     ->with('info', 'Відвідуваність за цю дату вже існує. Ви можете її редагувати.');
             }
@@ -253,7 +256,7 @@ class GroupAttendanceController extends Controller
         // Add new members if any
         $existingPersonIds = $attendance->records->pluck('person_id')->toArray();
         foreach ($allMembers as $member) {
-            if (!in_array($member->id, $existingPersonIds)) {
+            if (! in_array($member->id, $existingPersonIds)) {
                 AttendanceRecord::updateOrCreate(
                     [
                         'attendance_id' => $attendance->id,
@@ -293,7 +296,7 @@ class GroupAttendanceController extends Controller
         // Get or create today's attendance
         $attendance = $group->attendances()->whereDate('date', today())->first();
 
-        if (!$attendance) {
+        if (! $attendance) {
             $attendance = $group->createAttendance([
                 'date' => today(),
                 'time' => now()->format('H:i'),
@@ -302,7 +305,7 @@ class GroupAttendanceController extends Controller
             ]);
 
             // Create empty records for members (excluding old guest pivots)
-            foreach ($group->members->filter(fn($m) => $m->pivot->role !== 'guest') as $member) {
+            foreach ($group->members->filter(fn ($m) => $m->pivot->role !== 'guest') as $member) {
                 AttendanceRecord::create([
                     'attendance_id' => $attendance->id,
                     'person_id' => $member->id,
@@ -345,7 +348,7 @@ class GroupAttendanceController extends Controller
                 ->first();
 
             if ($existing) {
-                $newPresent = !$existing->present;
+                $newPresent = ! $existing->present;
                 DB::table('group_guest_attendance')
                     ->where('id', $existing->id)
                     ->update(['present' => $newPresent, 'updated_at' => now()]);
@@ -372,15 +375,15 @@ class GroupAttendanceController extends Controller
         }
 
         $validated = $request->validate([
-            'person_id' => ['required', new \App\Rules\BelongsToChurch(\App\Models\Person::class)],
+            'person_id' => ['required', new BelongsToChurch(Person::class)],
         ]);
 
         $record = $attendance->records()->where('person_id', $validated['person_id'])->first();
 
         if ($record) {
             $record->update([
-                'present' => !$record->present,
-                'checked_in_at' => !$record->present ? now()->format('H:i') : null,
+                'present' => ! $record->present,
+                'checked_in_at' => ! $record->present ? now()->format('H:i') : null,
             ]);
         } else {
             $record = AttendanceRecord::create([

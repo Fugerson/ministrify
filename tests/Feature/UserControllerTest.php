@@ -7,6 +7,7 @@ use App\Models\ChurchRole;
 use App\Models\Person;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class UserControllerTest extends TestCase
@@ -14,6 +15,7 @@ class UserControllerTest extends TestCase
     use RefreshDatabase;
 
     private Church $church;
+
     private User $admin;
 
     protected function setUp(): void
@@ -114,7 +116,7 @@ class UserControllerTest extends TestCase
 
     public function test_admin_can_delete_user(): void
     {
-        if (\Illuminate\Support\Facades\DB::getDriverName() === 'sqlite') {
+        if (DB::getDriverName() === 'sqlite') {
             $this->markTestSkipped('SQLite does not support nullable church_id (FK constraint differs from MySQL)');
         }
 

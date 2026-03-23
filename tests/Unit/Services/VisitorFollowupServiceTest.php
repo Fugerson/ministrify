@@ -16,12 +16,13 @@ class VisitorFollowupServiceTest extends TestCase
     use RefreshDatabase;
 
     private VisitorFollowupService $service;
+
     private Church $church;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new VisitorFollowupService();
+        $this->service = new VisitorFollowupService;
         $this->church = Church::factory()->create();
     }
 
@@ -31,6 +32,7 @@ class VisitorFollowupServiceTest extends TestCase
             'church_id' => $this->church->id,
             'name' => 'Трекер завдань',
         ]);
+
         return BoardColumn::create([
             'board_id' => $board->id,
             'name' => 'To Do',

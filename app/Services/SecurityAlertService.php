@@ -16,7 +16,7 @@ class SecurityAlertService
 
     public function alert(string $type, string $message, array $context = []): void
     {
-        if (!config('security.alerts.enabled', true)) {
+        if (! config('security.alerts.enabled', true)) {
             return;
         }
 
@@ -26,13 +26,14 @@ class SecurityAlertService
 
         // Deduplication: increment counter if already alerted recently
         if (Cache::has($cacheKey)) {
-            Cache::increment($cacheKey . ':count');
+            Cache::increment($cacheKey.':count');
+
             return;
         }
 
         // Mark this type+IP as alerted
         Cache::put($cacheKey, true, $cooldown);
-        Cache::put($cacheKey . ':count', 1, $cooldown);
+        Cache::put($cacheKey.':count', 1, $cooldown);
 
         // Log to security channel
         Log::channel('security')->warning($message, array_merge($context, ['type' => $type]));
@@ -46,7 +47,7 @@ class SecurityAlertService
         $token = config('services.telegram.alert_bot_token');
         $chatId = config('services.telegram.alert_chat_id');
 
-        if (!$token || !$chatId) {
+        if (! $token || ! $chatId) {
             return;
         }
 
@@ -76,10 +77,10 @@ class SecurityAlertService
         $time = now()->format('Y-m-d H:i:s');
 
         $text = "🚨 *АТАКА: {$label}* {$emoji}\n"
-            . "🌐 IP: `{$ip}`\n"
-            . "🔗 URL: `{$url}`\n"
-            . "📝 {$details}\n"
-            . "⏰ {$time}";
+            ."🌐 IP: `{$ip}`\n"
+            ."🔗 URL: `{$url}`\n"
+            ."📝 {$details}\n"
+            ."⏰ {$time}";
 
         try {
             Http::timeout(5)->post(
@@ -101,7 +102,7 @@ class SecurityAlertService
     protected function sanitizeUrl(string $url): string
     {
         $parsed = parse_url($url);
-        if (!$parsed || empty($parsed['query'])) {
+        if (! $parsed || empty($parsed['query'])) {
             return mb_substr($url, 0, 200);
         }
 
@@ -115,7 +116,7 @@ class SecurityAlertService
 
         $clean = ($parsed['path'] ?? '/');
         if ($params) {
-            $clean .= '?' . http_build_query($params);
+            $clean .= '?'.http_build_query($params);
         }
 
         return mb_substr($clean, 0, 200);
@@ -129,6 +130,7 @@ class SecurityAlertService
                 return true;
             }
         }
+
         return false;
     }
 
@@ -148,11 +150,11 @@ class SecurityAlertService
         $domain = $parts[1];
 
         if (mb_strlen($name) <= 2) {
-            $masked = $name[0] . '***';
+            $masked = $name[0].'***';
         } else {
-            $masked = $name[0] . str_repeat('*', mb_strlen($name) - 2) . mb_substr($name, -1);
+            $masked = $name[0].str_repeat('*', mb_strlen($name) - 2).mb_substr($name, -1);
         }
 
-        return $masked . '@' . $domain;
+        return $masked.'@'.$domain;
     }
 }

@@ -17,6 +17,7 @@ class TwoFactorService
         for ($i = 0; $i < 16; $i++) {
             $secret .= $chars[random_int(0, strlen($chars) - 1)];
         }
+
         return $secret;
     }
 
@@ -92,10 +93,14 @@ class TwoFactorService
 
         for ($i = 0; $i < strlen($input); $i++) {
             $char = $input[$i];
-            if ($char === '=') break;
+            if ($char === '=') {
+                break;
+            }
 
             $val = strpos($alphabet, strtoupper($char));
-            if ($val === false) continue;
+            if ($val === false) {
+                continue;
+            }
 
             $buffer = ($buffer << 5) | $val;
             $bitsLeft += 5;
@@ -116,8 +121,9 @@ class TwoFactorService
     {
         $codes = [];
         for ($i = 0; $i < 8; $i++) {
-            $codes[] = Str::random(4) . '-' . Str::random(4);
+            $codes[] = Str::random(4).'-'.Str::random(4);
         }
+
         return $codes;
     }
 
@@ -134,6 +140,7 @@ class TwoFactorService
                 unset($codes[$index]);
                 $user->two_factor_recovery_codes = encrypt(json_encode(array_values($codes)));
                 $user->save();
+
                 return true;
             }
         }
@@ -151,7 +158,7 @@ class TwoFactorService
         // The actual QR rendering happens in the browser with qrcode.js
         $encodedData = htmlspecialchars($data, ENT_QUOTES, 'UTF-8');
 
-        return '<div id="qr-code-container" class="flex justify-center" data-qr-content="' . $encodedData . '"></div>
+        return '<div id="qr-code-container" class="flex justify-center" data-qr-content="'.$encodedData.'"></div>
                 <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
                 <script>
                     (function() {

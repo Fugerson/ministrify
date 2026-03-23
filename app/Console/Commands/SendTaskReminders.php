@@ -11,6 +11,7 @@ use Illuminate\Console\Command;
 class SendTaskReminders extends Command
 {
     protected $signature = 'app:send-task-reminders';
+
     protected $description = 'Send reminders for tasks with upcoming deadlines';
 
     public function handle(): int
@@ -20,8 +21,9 @@ class SendTaskReminders extends Command
 
         $this->info("Checking task deadlines for {$today->format('Y-m-d')}");
 
-        if (!config('services.telegram.bot_token')) {
+        if (! config('services.telegram.bot_token')) {
             $this->warn('Telegram bot not configured');
+
             return self::SUCCESS;
         }
 
@@ -33,26 +35,26 @@ class SendTaskReminders extends Command
             $settings = $church->settings['notifications'] ?? [];
 
             // Check if task reminders are enabled (default: true)
-            if (!($settings['task_reminders'] ?? true)) {
+            if (! ($settings['task_reminders'] ?? true)) {
                 continue;
             }
 
             // Find tasks due today (not completed)
-            $tasksDueToday = BoardCard::whereHas('column.board', fn($q) => $q->where('church_id', $church->id))
+            $tasksDueToday = BoardCard::whereHas('column.board', fn ($q) => $q->where('church_id', $church->id))
                 ->where('is_completed', false)
                 ->whereDate('due_date', $today)
                 ->with(['assignee', 'column.board'])
                 ->get();
 
             // Find tasks due tomorrow (not completed)
-            $tasksDueTomorrow = BoardCard::whereHas('column.board', fn($q) => $q->where('church_id', $church->id))
+            $tasksDueTomorrow = BoardCard::whereHas('column.board', fn ($q) => $q->where('church_id', $church->id))
                 ->where('is_completed', false)
                 ->whereDate('due_date', $tomorrow)
                 ->with(['assignee', 'column.board'])
                 ->get();
 
             // Find overdue tasks
-            $tasksOverdue = BoardCard::whereHas('column.board', fn($q) => $q->where('church_id', $church->id))
+            $tasksOverdue = BoardCard::whereHas('column.board', fn ($q) => $q->where('church_id', $church->id))
                 ->where('is_completed', false)
                 ->whereDate('due_date', '<', $today)
                 ->with(['assignee', 'column.board'])
@@ -70,19 +72,19 @@ class SendTaskReminders extends Command
                 $tasksByAssignee = $allTasks->groupBy('assigned_to');
 
                 foreach ($tasksByAssignee as $assigneeId => $tasks) {
-                    if (!$assigneeId) {
+                    if (! $assigneeId) {
                         continue;
                     }
 
                     $assignee = $tasks->first()->assignee;
 
-                    if (!$assignee || !$assignee->telegram_chat_id) {
+                    if (! $assignee || ! $assignee->telegram_chat_id) {
                         continue;
                     }
 
-                    $personTasksToday = $tasks->filter(fn($t) => $t->due_date->isToday());
-                    $personTasksTomorrow = $tasks->filter(fn($t) => $t->due_date->isTomorrow());
-                    $personTasksOverdue = $tasks->filter(fn($t) => $t->due_date->isPast() && !$t->due_date->isToday());
+                    $personTasksToday = $tasks->filter(fn ($t) => $t->due_date->isToday());
+                    $personTasksTomorrow = $tasks->filter(fn ($t) => $t->due_date->isTomorrow());
+                    $personTasksOverdue = $tasks->filter(fn ($t) => $t->due_date->isPast() && ! $t->due_date->isToday());
 
                     $message = $this->buildMessage($personTasksToday, $personTasksTomorrow, $personTasksOverdue, $church);
 
@@ -97,6 +99,7 @@ class SendTaskReminders extends Command
         }
 
         $this->info("Done! Sent {$sent} task reminders.");
+
         return self::SUCCESS;
     }
 

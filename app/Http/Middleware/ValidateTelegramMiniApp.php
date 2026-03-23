@@ -20,28 +20,31 @@ class ValidateTelegramMiniApp
                 ?? $this->parseToken($authToken)
                 ?? Person::whereNotNull('telegram_chat_id')->first();
 
-            if (!$person) {
+            if (! $person) {
                 return response()->json(['error' => 'No linked person found'], 401);
             }
 
             $request->attributes->set('tma_person', $person);
+
             return $next($request);
         }
 
         // Strategy 1: Validate initData (Telegram HMAC-SHA-256)
-        if (!empty($initData)) {
+        if (! empty($initData)) {
             $person = $this->validateInitData($initData);
             if ($person) {
                 $request->attributes->set('tma_person', $person);
+
                 return $next($request);
             }
         }
 
         // Strategy 2: Validate auth token (fallback for clients that don't pass initData)
-        if (!empty($authToken)) {
+        if (! empty($authToken)) {
             $person = $this->parseToken($authToken);
             if ($person) {
                 $request->attributes->set('tma_person', $person);
+
                 return $next($request);
             }
         }
@@ -65,7 +68,7 @@ class ValidateTelegramMiniApp
         ksort($checkParams);
 
         $dataCheckString = collect($checkParams)
-            ->map(fn($value, $key) => "{$key}={$value}")
+            ->map(fn ($value, $key) => "{$key}={$value}")
             ->implode("\n");
 
         // Validate HMAC-SHA-256
@@ -73,7 +76,7 @@ class ValidateTelegramMiniApp
         $secretKey = hash_hmac('sha256', $botToken, 'WebAppData', true);
         $calculatedHash = bin2hex(hash_hmac('sha256', $dataCheckString, $secretKey, true));
 
-        if (!hash_equals($calculatedHash, $hash)) {
+        if (! hash_equals($calculatedHash, $hash)) {
             return null;
         }
 
@@ -96,7 +99,7 @@ class ValidateTelegramMiniApp
 
         try {
             $decoded = base64_decode($token, true);
-            if (!$decoded) {
+            if (! $decoded) {
                 return null;
             }
 
@@ -108,9 +111,9 @@ class ValidateTelegramMiniApp
             [$personId, $timestamp, $signature] = $parts;
 
             // Verify HMAC signature
-            $data = $personId . ':' . $timestamp;
+            $data = $personId.':'.$timestamp;
             $expected = hash_hmac('sha256', $data, config('app.key'));
-            if (!hash_equals($expected, $signature)) {
+            if (! hash_equals($expected, $signature)) {
                 return null;
             }
 
@@ -139,7 +142,7 @@ class ValidateTelegramMiniApp
 
         $userData = json_decode($params['user'], true);
 
-        if (!$userData || empty($userData['id'])) {
+        if (! $userData || empty($userData['id'])) {
             return null;
         }
 
@@ -151,9 +154,9 @@ class ValidateTelegramMiniApp
      */
     public static function generateAuthToken(Person $person): string
     {
-        $data = $person->id . ':' . time();
+        $data = $person->id.':'.time();
         $signature = hash_hmac('sha256', $data, config('app.key'));
 
-        return base64_encode($data . ':' . $signature);
+        return base64_encode($data.':'.$signature);
     }
 }

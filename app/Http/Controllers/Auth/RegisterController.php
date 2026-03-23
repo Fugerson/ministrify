@@ -10,10 +10,13 @@ use App\Models\ExpenseCategory;
 use App\Models\Person;
 use App\Models\Tag;
 use App\Models\User;
+use App\Notifications\NewPendingApproval;
 use App\Rules\SecurePassword;
+use App\Services\TelegramService;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -72,7 +75,7 @@ class RegisterController extends Controller
 
         if ($existingUser) {
             // Verify password
-            if (!Hash::check($request->password, $existingUser->password)) {
+            if (! Hash::check($request->password, $existingUser->password)) {
                 return back()->withInput()->withErrors(['password' => __('messages.wrong_password_existing_account')]);
             }
 
@@ -169,7 +172,7 @@ class RegisterController extends Controller
             ]);
         }
 
-        if (!$existingPerson && $firstName && $lastName) {
+        if (! $existingPerson && $firstName && $lastName) {
             $existingPerson = Person::where('church_id', $church->id)
                 ->where('first_name', $firstName)
                 ->where('last_name', $lastName)
@@ -182,7 +185,7 @@ class RegisterController extends Controller
             }
         }
 
-        if (!$existingPerson && $request->phone) {
+        if (! $existingPerson && $request->phone) {
             $existingPerson = Person::findByPhoneInChurch($request->phone, $church->id, false);
 
             if ($existingPerson && $existingPerson->user_id) {
@@ -277,21 +280,21 @@ class RegisterController extends Controller
 
             foreach ($admins as $admin) {
                 // Email
-                $admin->notify(new \App\Notifications\NewPendingApproval(
+                $admin->notify(new NewPendingApproval(
                     $user->name, $user->email, $church->name
                 ));
 
                 // Telegram
                 if ($admin->person?->telegram_chat_id) {
                     try {
-                        $tg = new \App\Services\TelegramService();
+                        $tg = new TelegramService;
                         $tg->sendMessage(
                             $admin->person->telegram_chat_id,
                             "🔔 <b>Новий користувач очікує одобрення</b>\n\n"
-                            . "👤 {$user->name}\n"
-                            . "📧 {$user->email}\n"
-                            . "⛪ {$church->name}\n\n"
-                            . "Перейдіть в налаштування щоб одобрити або відхилити заявку."
+                            ."👤 {$user->name}\n"
+                            ."📧 {$user->email}\n"
+                            ."⛪ {$church->name}\n\n"
+                            .'Перейдіть в налаштування щоб одобрити або відхилити заявку.'
                         );
                     } catch (\Exception $e) {
                         Log::warning('Failed to send Telegram approval notification', ['admin_id' => $admin->id, 'error' => $e->getMessage()]);
@@ -299,7 +302,7 @@ class RegisterController extends Controller
                 }
             }
 
-            \Illuminate\Support\Facades\Cache::forget("church:{$church->id}:pending_approvals");
+            Cache::forget("church:{$church->id}:pending_approvals");
         } catch (\Exception $e) {
             Log::warning('Failed to notify admins about pending approval', ['error' => $e->getMessage()]);
         }
@@ -333,7 +336,7 @@ class RegisterController extends Controller
             $slug = $baseSlug;
             $counter = 1;
             while (Church::where('slug', $slug)->exists()) {
-                $slug = $baseSlug . '-' . $counter++;
+                $slug = $baseSlug.'-'.$counter++;
             }
 
             $church = Church::create([
@@ -351,7 +354,7 @@ class RegisterController extends Controller
 
             // Query ChurchRole directly instead of via relationship - the relationship
             // would return empty due to Eloquent caching (roles were just created in booted())
-            $adminRole = \App\Models\ChurchRole::where('church_id', $church->id)
+            $adminRole = ChurchRole::where('church_id', $church->id)
                 ->where('is_admin_role', true)
                 ->first();
 
@@ -366,7 +369,7 @@ class RegisterController extends Controller
 
             // Create Person record for admin (if not already exists for THIS church)
             $person = Person::where('user_id', $user->id)->where('church_id', $church->id)->first();
-            if (!$person) {
+            if (! $person) {
                 $nameParts = explode(' ', $request->name, 2);
                 $person = Person::create([
                     'church_id' => $church->id,

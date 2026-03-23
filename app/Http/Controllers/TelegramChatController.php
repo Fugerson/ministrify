@@ -33,7 +33,7 @@ class TelegramChatController extends Controller
                 return $person->telegramMessages->first()?->created_at;
             });
 
-        $hasBot = !empty(config('services.telegram.bot_token'));
+        $hasBot = ! empty(config('services.telegram.bot_token'));
         $totalUnread = TelegramMessage::where('church_id', $church->id)
             ->where('direction', 'incoming')
             ->where('is_read', false)
@@ -69,7 +69,7 @@ class TelegramChatController extends Controller
             ->orderBy('created_at', 'asc')
             ->get();
 
-        $hasBot = !empty(config('services.telegram.bot_token'));
+        $hasBot = ! empty(config('services.telegram.bot_token'));
 
         return view('telegram.chat', compact('person', 'messages', 'hasBot'));
     }
@@ -111,7 +111,7 @@ class TelegramChatController extends Controller
 
             return $this->successResponse($request, 'Надіслано');
         } catch (\Exception $e) {
-            return $this->errorResponse($request, 'Помилка надсилання: ' . $e->getMessage());
+            return $this->errorResponse($request, 'Помилка надсилання: '.$e->getMessage());
         }
     }
 }

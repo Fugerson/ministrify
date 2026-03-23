@@ -11,6 +11,7 @@ use App\Models\Person;
 use App\Models\Tag;
 use App\Services\TelegramService;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class MessageController extends Controller
 {
@@ -42,15 +43,15 @@ class MessageController extends Controller
     {
         $churchId = $this->getCurrentChurch()->id;
         $allRecipients = $this->getRecipients($request, $churchId, telegramOnly: false);
-        $withTelegram = $allRecipients->filter(fn($p) => !empty($p->telegram_chat_id))->count();
+        $withTelegram = $allRecipients->filter(fn ($p) => ! empty($p->telegram_chat_id))->count();
 
         return response()->json([
             'total' => $allRecipients->count(),
             'with_telegram' => $withTelegram,
             'without_telegram' => $allRecipients->count() - $withTelegram,
-            'preview' => $allRecipients->take(10)->map(fn($p) => [
+            'preview' => $allRecipients->take(10)->map(fn ($p) => [
                 'name' => $p->full_name,
-                'telegram' => !empty($p->telegram_chat_id),
+                'telegram' => ! empty($p->telegram_chat_id),
             ]),
         ]);
     }
@@ -60,31 +61,32 @@ class MessageController extends Controller
         $validated = $request->validate([
             'message' => 'required|string|max:4000',
             'recipient_type' => 'required|in:all,tag,ministry,group,custom,gender,birthday,membership,age,new_members,role',
-            'tag_id' => ['nullable', \Illuminate\Validation\Rule::exists('tags', 'id')->where('church_id', $this->getCurrentChurch()->id)],
-            'ministry_id' => ['nullable', \Illuminate\Validation\Rule::exists('ministries', 'id')->where('church_id', $this->getCurrentChurch()->id)],
-            'group_id' => ['nullable', \Illuminate\Validation\Rule::exists('groups', 'id')->where('church_id', $this->getCurrentChurch()->id)],
+            'tag_id' => ['nullable', Rule::exists('tags', 'id')->where('church_id', $this->getCurrentChurch()->id)],
+            'ministry_id' => ['nullable', Rule::exists('ministries', 'id')->where('church_id', $this->getCurrentChurch()->id)],
+            'group_id' => ['nullable', Rule::exists('groups', 'id')->where('church_id', $this->getCurrentChurch()->id)],
             'person_ids' => 'nullable|array',
             'gender' => 'nullable|in:male,female',
             'membership_status' => 'nullable|string',
             'age_group' => 'nullable|in:youth,adults,seniors',
-            'church_role_id' => ['nullable', \Illuminate\Validation\Rule::exists('church_roles', 'id')->where('church_id', $this->getCurrentChurch()->id)],
+            'church_role_id' => ['nullable', Rule::exists('church_roles', 'id')->where('church_id', $this->getCurrentChurch()->id)],
         ]);
 
         $church = $this->getCurrentChurch();
         $churchId = $church->id;
         $allRecipients = $this->getRecipients($request, $churchId, telegramOnly: false);
-        $recipients = $allRecipients->filter(fn($p) => !empty($p->telegram_chat_id));
+        $recipients = $allRecipients->filter(fn ($p) => ! empty($p->telegram_chat_id));
         $skippedNoTelegram = $allRecipients->count() - $recipients->count();
 
         if ($recipients->isEmpty()) {
             $msg = __('app.no_telegram_recipients');
             if ($skippedNoTelegram > 0) {
-                $msg .= ' (' . __('app.count_without_telegram', ['count' => $skippedNoTelegram]) . ')';
+                $msg .= ' ('.__('app.count_without_telegram', ['count' => $skippedNoTelegram]).')';
             }
+
             return $this->errorResponse($request, $msg);
         }
 
-        if (!config('services.telegram.bot_token')) {
+        if (! config('services.telegram.bot_token')) {
             return $this->errorResponse($request, __('app.telegram_bot_not_configured'));
         }
 
@@ -128,10 +130,10 @@ class MessageController extends Controller
 
         $msg = __('Надіслано: :sent', ['sent' => $sent]);
         if ($skippedNoTelegram > 0) {
-            $msg .= ', ' . __('пропущено (без Telegram): :skipped', ['skipped' => $skippedNoTelegram]);
+            $msg .= ', '.__('пропущено (без Telegram): :skipped', ['skipped' => $skippedNoTelegram]);
         }
         if ($failed > 0) {
-            $msg .= ', ' . __('помилок: :failed', ['failed' => $failed]);
+            $msg .= ', '.__('помилок: :failed', ['failed' => $failed]);
         }
 
         return $this->successResponse($request, $msg, 'messages.index');
@@ -177,13 +179,13 @@ class MessageController extends Controller
                 // No additional filter — send to everyone
                 break;
             case 'tag':
-                $query->whereHas('tags', fn($q) => $q->where('tags.id', $request->tag_id));
+                $query->whereHas('tags', fn ($q) => $q->where('tags.id', $request->tag_id));
                 break;
             case 'ministry':
-                $query->whereHas('ministries', fn($q) => $q->where('ministries.id', $request->ministry_id));
+                $query->whereHas('ministries', fn ($q) => $q->where('ministries.id', $request->ministry_id));
                 break;
             case 'group':
-                $query->whereHas('groups', fn($q) => $q->where('groups.id', $request->group_id));
+                $query->whereHas('groups', fn ($q) => $q->where('groups.id', $request->group_id));
                 break;
             case 'custom':
                 if ($request->person_ids && is_array($request->person_ids) && count($request->person_ids) > 0) {
@@ -214,10 +216,10 @@ class MessageController extends Controller
                 if ($request->age_group) {
                     $now = now();
                     $ageRanges = [
-                        'child'   => ['min' => 0,  'max' => 12],
-                        'teen'    => ['min' => 13, 'max' => 17],
-                        'youth'   => ['min' => 18, 'max' => 35],
-                        'adults'  => ['min' => 36, 'max' => 59],
+                        'child' => ['min' => 0,  'max' => 12],
+                        'teen' => ['min' => 13, 'max' => 17],
+                        'youth' => ['min' => 18, 'max' => 35],
+                        'adults' => ['min' => 36, 'max' => 59],
                         'seniors' => ['min' => 60, 'max' => 150],
                     ];
                     $range = $ageRanges[$request->age_group] ?? null;
@@ -241,7 +243,7 @@ class MessageController extends Controller
                 break;
             case 'role':
                 if ($request->church_role_id) {
-                    $query->whereHas('user', fn($q) => $q->where('church_role_id', $request->church_role_id));
+                    $query->whereHas('user', fn ($q) => $q->where('church_role_id', $request->church_role_id));
                 } else {
                     $query->whereRaw('1=0'); // No role selected
                 }

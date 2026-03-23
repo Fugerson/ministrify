@@ -2,14 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Traits\Auditable;
 
 class Faq extends Model
 {
-    use HasFactory, Auditable;
+    use Auditable, HasFactory;
 
     protected $fillable = [
         'church_id',
@@ -50,7 +50,10 @@ class Faq extends Model
 
     public function scopeByCategory($query, ?string $category)
     {
-        if (!$category) return $query;
+        if (! $category) {
+            return $query;
+        }
+
         return $query->where('category', $category);
     }
 

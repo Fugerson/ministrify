@@ -12,6 +12,7 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 class AttendanceExport implements FromCollection, WithHeadings, WithMapping, WithStyles
 {
     protected int $churchId;
+
     protected int $year;
 
     public function __construct(int $churchId, int $year)
@@ -22,7 +23,7 @@ class AttendanceExport implements FromCollection, WithHeadings, WithMapping, Wit
 
     public function collection()
     {
-        return AttendanceRecord::whereHas('attendance', fn($q) => $q
+        return AttendanceRecord::whereHas('attendance', fn ($q) => $q
             ->where('church_id', $this->churchId)
             ->whereYear('date', $this->year))
             ->with(['person', 'attendance.attendable'])

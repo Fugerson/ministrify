@@ -14,63 +14,63 @@ return new class extends Migration
     {
         // Assignments table - critical for event/person lookups
         Schema::table('assignments', function (Blueprint $table) {
-            if (!$this->hasIndex('assignments', 'assignments_event_id_index')) {
+            if (! $this->hasIndex('assignments', 'assignments_event_id_index')) {
                 $table->index('event_id');
             }
-            if (!$this->hasIndex('assignments', 'assignments_person_id_index')) {
+            if (! $this->hasIndex('assignments', 'assignments_person_id_index')) {
                 $table->index('person_id');
             }
-            if (!$this->hasIndex('assignments', 'assignments_position_id_index')) {
+            if (! $this->hasIndex('assignments', 'assignments_position_id_index')) {
                 $table->index('position_id');
             }
-            if (!$this->hasIndex('assignments', 'assignments_status_index')) {
+            if (! $this->hasIndex('assignments', 'assignments_status_index')) {
                 $table->index('status');
             }
         });
 
         // Ministries table
         Schema::table('ministries', function (Blueprint $table) {
-            if (!$this->hasIndex('ministries', 'ministries_church_id_index')) {
+            if (! $this->hasIndex('ministries', 'ministries_church_id_index')) {
                 $table->index('church_id');
             }
-            if (!$this->hasIndex('ministries', 'ministries_leader_id_index')) {
+            if (! $this->hasIndex('ministries', 'ministries_leader_id_index')) {
                 $table->index('leader_id');
             }
         });
 
         // Events table - ministry lookups
         Schema::table('events', function (Blueprint $table) {
-            if (!$this->hasIndex('events', 'events_ministry_id_index')) {
+            if (! $this->hasIndex('events', 'events_ministry_id_index')) {
                 $table->index('ministry_id');
             }
         });
 
         // People table - created_at for filtering
         Schema::table('people', function (Blueprint $table) {
-            if (!$this->hasIndex('people', 'people_created_at_index')) {
+            if (! $this->hasIndex('people', 'people_created_at_index')) {
                 $table->index('created_at');
             }
-            if (!$this->hasIndex('people', 'people_user_id_index') && Schema::hasColumn('people', 'user_id')) {
+            if (! $this->hasIndex('people', 'people_user_id_index') && Schema::hasColumn('people', 'user_id')) {
                 $table->index('user_id');
             }
         });
 
         // Transactions table - category lookups
         Schema::table('transactions', function (Blueprint $table) {
-            if (!$this->hasIndex('transactions', 'transactions_category_id_index') && Schema::hasColumn('transactions', 'category_id')) {
+            if (! $this->hasIndex('transactions', 'transactions_category_id_index') && Schema::hasColumn('transactions', 'category_id')) {
                 $table->index('category_id');
             }
-            if (!$this->hasIndex('transactions', 'transactions_ministry_id_index') && Schema::hasColumn('transactions', 'ministry_id')) {
+            if (! $this->hasIndex('transactions', 'transactions_ministry_id_index') && Schema::hasColumn('transactions', 'ministry_id')) {
                 $table->index('ministry_id');
             }
-            if (!$this->hasIndex('transactions', 'transactions_type_index') && Schema::hasColumn('transactions', 'type')) {
+            if (! $this->hasIndex('transactions', 'transactions_type_index') && Schema::hasColumn('transactions', 'type')) {
                 $table->index('type');
             }
         });
 
         // Groups table
         Schema::table('groups', function (Blueprint $table) {
-            if (!$this->hasIndex('groups', 'groups_leader_id_index')) {
+            if (! $this->hasIndex('groups', 'groups_leader_id_index')) {
                 $table->index('leader_id');
             }
         });
@@ -78,7 +78,7 @@ return new class extends Migration
         // Group_person pivot - person lookups
         if (Schema::hasTable('group_person')) {
             Schema::table('group_person', function (Blueprint $table) {
-                if (!$this->hasIndex('group_person', 'group_person_person_id_index')) {
+                if (! $this->hasIndex('group_person', 'group_person_person_id_index')) {
                     $table->index('person_id');
                 }
             });
@@ -87,7 +87,7 @@ return new class extends Migration
         // Ministry_person pivot - person lookups
         if (Schema::hasTable('ministry_person')) {
             Schema::table('ministry_person', function (Blueprint $table) {
-                if (!$this->hasIndex('ministry_person', 'ministry_person_person_id_index')) {
+                if (! $this->hasIndex('ministry_person', 'ministry_person_person_id_index')) {
                     $table->index('person_id');
                 }
             });
@@ -95,7 +95,7 @@ return new class extends Migration
 
         // Attendances table
         Schema::table('attendances', function (Blueprint $table) {
-            if (!$this->hasIndex('attendances', 'attendances_event_id_index') && Schema::hasColumn('attendances', 'event_id')) {
+            if (! $this->hasIndex('attendances', 'attendances_event_id_index') && Schema::hasColumn('attendances', 'event_id')) {
                 $table->index('event_id');
             }
         });
@@ -103,7 +103,7 @@ return new class extends Migration
         // Attendance_records - person lookups
         if (Schema::hasTable('attendance_records')) {
             Schema::table('attendance_records', function (Blueprint $table) {
-                if (!$this->hasIndex('attendance_records', 'attendance_records_person_id_index')) {
+                if (! $this->hasIndex('attendance_records', 'attendance_records_person_id_index')) {
                     $table->index('person_id');
                 }
             });
@@ -112,10 +112,10 @@ return new class extends Migration
         // Board cards - column and assigned_to lookups
         if (Schema::hasTable('board_cards')) {
             Schema::table('board_cards', function (Blueprint $table) {
-                if (!$this->hasIndex('board_cards', 'board_cards_column_id_index')) {
+                if (! $this->hasIndex('board_cards', 'board_cards_column_id_index')) {
                     $table->index('column_id');
                 }
-                if (!$this->hasIndex('board_cards', 'board_cards_assigned_to_index') && Schema::hasColumn('board_cards', 'assigned_to')) {
+                if (! $this->hasIndex('board_cards', 'board_cards_assigned_to_index') && Schema::hasColumn('board_cards', 'assigned_to')) {
                     $table->index('assigned_to');
                 }
             });
@@ -124,7 +124,7 @@ return new class extends Migration
         // Board card comments
         if (Schema::hasTable('board_card_comments')) {
             Schema::table('board_card_comments', function (Blueprint $table) {
-                if (!$this->hasIndex('board_card_comments', 'board_card_comments_card_id_index')) {
+                if (! $this->hasIndex('board_card_comments', 'board_card_comments_card_id_index')) {
                     $table->index('card_id');
                 }
             });
@@ -133,7 +133,7 @@ return new class extends Migration
         // Service plan items
         if (Schema::hasTable('service_plan_items')) {
             Schema::table('service_plan_items', function (Blueprint $table) {
-                if (!$this->hasIndex('service_plan_items', 'service_plan_items_event_id_index')) {
+                if (! $this->hasIndex('service_plan_items', 'service_plan_items_event_id_index')) {
                     $table->index('event_id');
                 }
             });
@@ -237,6 +237,7 @@ return new class extends Migration
                 return true;
             }
         }
+
         return false;
     }
 };

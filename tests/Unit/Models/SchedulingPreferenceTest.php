@@ -15,6 +15,7 @@ class SchedulingPreferenceTest extends TestCase
     use RefreshDatabase;
 
     private Church $church;
+
     private Person $person;
 
     protected function setUp(): void

@@ -14,11 +14,12 @@ class BlockoutDateFactory extends Factory
     public function definition(): array
     {
         $startDate = fake()->dateTimeBetween('now', '+2 months');
+
         return [
             'person_id' => Person::factory(),
             'church_id' => Church::factory(),
             'start_date' => $startDate,
-            'end_date' => (clone $startDate)->modify('+' . fake()->numberBetween(1, 7) . ' days'),
+            'end_date' => (clone $startDate)->modify('+'.fake()->numberBetween(1, 7).' days'),
             'all_day' => true,
             'reason' => fake()->randomElement(array_keys(BlockoutDate::REASONS)),
             'applies_to_all' => true,

@@ -19,13 +19,14 @@ class TransactionPolicyTest extends TestCase
     use RefreshDatabase;
 
     private TransactionPolicy $policy;
+
     private Church $church;
 
     protected function setUp(): void
     {
         parent::setUp();
         Cache::flush();
-        $this->policy = new TransactionPolicy();
+        $this->policy = new TransactionPolicy;
         $this->church = Church::factory()->create();
     }
 
@@ -37,6 +38,7 @@ class TransactionPolicyTest extends TestCase
             'module' => $module,
             'actions' => [$action],
         ]);
+
         return User::factory()->create([
             'church_id' => $this->church->id,
             'church_role_id' => $role->id,

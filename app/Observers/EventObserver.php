@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Models\Event;
+use App\Models\User;
 use App\Services\GoogleCalendarService;
 use Illuminate\Support\Facades\Log;
 
@@ -39,12 +40,12 @@ class EventObserver
      */
     public function deleted(Event $event): void
     {
-        if (!$event->google_event_id || !$event->google_calendar_id) {
+        if (! $event->google_event_id || ! $event->google_calendar_id) {
             return;
         }
 
         $user = $this->getSyncUser($event);
-        if (!$user) {
+        if (! $user) {
             return;
         }
 
@@ -69,12 +70,12 @@ class EventObserver
     protected function pushToGoogle(Event $event): void
     {
         $user = $this->getSyncUser($event);
-        if (!$user) {
+        if (! $user) {
             return;
         }
 
         $calendarId = $this->getCalendarId($user);
-        if (!$calendarId) {
+        if (! $calendarId) {
             return;
         }
 
@@ -82,7 +83,7 @@ class EventObserver
             $service = app(GoogleCalendarService::class);
             $accessToken = $service->getValidToken($user);
 
-            if (!$accessToken) {
+            if (! $accessToken) {
                 return;
             }
 
@@ -132,9 +133,9 @@ class EventObserver
     /**
      * Get a user who can sync this event's church
      */
-    protected function getSyncUser(Event $event): ?\App\Models\User
+    protected function getSyncUser(Event $event): ?User
     {
-        return \App\Models\User::whereHas('churches', fn ($q) => $q->where('churches.id', $event->church_id))
+        return User::whereHas('churches', fn ($q) => $q->where('churches.id', $event->church_id))
             ->whereNotNull('settings->google_calendar->access_token')
             ->first();
     }
@@ -142,9 +143,10 @@ class EventObserver
     /**
      * Get the calendar ID from user settings (saved during manual sync)
      */
-    protected function getCalendarId(\App\Models\User $user): ?string
+    protected function getCalendarId(User $user): ?string
     {
         $settings = $user->settings ?? [];
+
         return $settings['google_calendar']['calendar_id'] ?? 'primary';
     }
 }

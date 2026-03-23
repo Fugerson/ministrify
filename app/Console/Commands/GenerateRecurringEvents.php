@@ -3,12 +3,13 @@
 namespace App\Console\Commands;
 
 use App\Models\Event;
-use Illuminate\Console\Command;
 use Carbon\Carbon;
+use Illuminate\Console\Command;
 
 class GenerateRecurringEvents extends Command
 {
     protected $signature = 'app:generate-recurring-events {--weeks=4 : Number of weeks to generate}';
+
     protected $description = 'Generate recurring events for the specified number of weeks';
 
     public function handle(): int
@@ -26,7 +27,7 @@ class GenerateRecurringEvents extends Command
         foreach ($recurringEvents as $event) {
             $rule = $event->recurrence_rule;
 
-            if (!$rule || !isset($rule['frequency'])) {
+            if (! $rule || ! isset($rule['frequency'])) {
                 continue;
             }
 
@@ -39,7 +40,7 @@ class GenerateRecurringEvents extends Command
                     ->whereDate('date', $date)
                     ->exists();
 
-                if (!$exists) {
+                if (! $exists) {
                     Event::withoutEvents(function () use ($event, $date) {
                         Event::create([
                             'church_id' => $event->church_id,
@@ -72,7 +73,7 @@ class GenerateRecurringEvents extends Command
         $startDate = now()->startOfDay();
         $endDate = now()->addWeeks($weeks)->endOfDay();
 
-        if ($frequency === 'weekly' && !empty($days)) {
+        if ($frequency === 'weekly' && ! empty($days)) {
             $dayMap = [
                 'sun' => Carbon::SUNDAY,
                 'mon' => Carbon::MONDAY,
@@ -85,7 +86,9 @@ class GenerateRecurringEvents extends Command
 
             foreach ($days as $day) {
                 $dayNumber = $dayMap[strtolower($day)] ?? null;
-                if ($dayNumber === null) continue;
+                if ($dayNumber === null) {
+                    continue;
+                }
 
                 $current = $startDate->copy();
                 while ($current->dayOfWeek !== $dayNumber) {

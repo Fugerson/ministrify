@@ -46,7 +46,7 @@ class ServicePlanSeeder extends Seeder
             ServicePlanItem::create([
                 'event_id' => $eventId,
                 'title' => $item[1],
-                'start_time' => '2026-01-08 ' . $item[0] . ':00',
+                'start_time' => '2026-01-08 '.$item[0].':00',
                 'responsible_names' => $item[2] ?: null,
                 'notes' => $item[3] ?: null,
                 'sort_order' => $order,
@@ -54,6 +54,6 @@ class ServicePlanSeeder extends Seeder
             ]);
         }
 
-        $this->command->info('Added ' . count($items) . ' plan items!');
+        $this->command->info('Added '.count($items).' plan items!');
     }
 }

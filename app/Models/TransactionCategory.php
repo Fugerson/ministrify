@@ -2,18 +2,20 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Traits\Auditable;
 
 class TransactionCategory extends Model
 {
-    use HasFactory, Auditable;
+    use Auditable, HasFactory;
 
     public const TYPE_INCOME = 'income';
+
     public const TYPE_EXPENSE = 'expense';
+
     public const TYPE_BOTH = 'both';
 
     protected $fillable = [

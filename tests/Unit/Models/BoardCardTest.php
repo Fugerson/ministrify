@@ -15,6 +15,7 @@ class BoardCardTest extends TestCase
     use RefreshDatabase;
 
     private Church $church;
+
     private BoardColumn $column;
 
     protected function setUp(): void

@@ -14,6 +14,7 @@ class StoreExpenseRequestTest extends TestCase
     use RefreshDatabase;
 
     private Church $church;
+
     private User $user;
 
     protected function setUp(): void
@@ -26,8 +27,9 @@ class StoreExpenseRequestTest extends TestCase
 
     private function getRules(): array
     {
-        $request = new StoreExpenseRequest();
+        $request = new StoreExpenseRequest;
         $request->setUserResolver(fn () => $this->user);
+
         return $request->rules();
     }
 

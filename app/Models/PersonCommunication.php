@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Traits\Auditable;
 
 class PersonCommunication extends Model
 {
     use Auditable;
+
     protected $fillable = [
         'person_id',
         'user_id',
@@ -34,7 +35,7 @@ class PersonCommunication extends Model
 
     public function getTypeIconAttribute(): string
     {
-        return match($this->type) {
+        return match ($this->type) {
             'telegram' => '📱',
             'phone' => '📞',
             'meeting' => '🤝',
@@ -45,7 +46,7 @@ class PersonCommunication extends Model
 
     public function getTypeLabelAttribute(): string
     {
-        return match($this->type) {
+        return match ($this->type) {
             'telegram' => 'Telegram',
             'phone' => 'Дзвінок',
             'meeting' => 'Зустріч',

@@ -2,15 +2,15 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Traits\Auditable;
 
 class EventTaskTemplate extends Model
 {
-    use HasFactory, Auditable;
+    use Auditable, HasFactory;
 
     protected $fillable = [
         'church_id',
@@ -52,14 +52,14 @@ class EventTaskTemplate extends Model
             ->where('name', 'Трекер завдань')
             ->first();
 
-        if (!$board) {
+        if (! $board) {
             return $createdCards;
         }
 
         $column = $board->columns()->where('name', 'До виконання')->first()
             ?? $board->columns()->first();
 
-        if (!$column) {
+        if (! $column) {
             return $createdCards;
         }
 

@@ -32,7 +32,7 @@ class ServantsRejected extends Notification implements ShouldQueue
             $mail->line("**Причина:** {$this->reason}");
         }
 
-        $mail->line("Ви можете спробувати подати нову заявку пізніше.")
+        $mail->line('Ви можете спробувати подати нову заявку пізніше.')
             ->action('Перейти до панелі', route('dashboard'))
             ->line('Дякуємо розуміння!');
 

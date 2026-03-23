@@ -9,13 +9,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            if (!Schema::hasColumn('users', 'onboarding_state')) {
+            if (! Schema::hasColumn('users', 'onboarding_state')) {
                 $table->json('onboarding_state')->nullable()->after('onboarding_completed');
             }
-            if (!Schema::hasColumn('users', 'onboarding_started_at')) {
+            if (! Schema::hasColumn('users', 'onboarding_started_at')) {
                 $table->timestamp('onboarding_started_at')->nullable()->after('onboarding_state');
             }
-            if (!Schema::hasColumn('users', 'onboarding_completed_at')) {
+            if (! Schema::hasColumn('users', 'onboarding_completed_at')) {
                 $table->timestamp('onboarding_completed_at')->nullable()->after('onboarding_started_at');
             }
         });

@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\PushSubscription;
 use App\Services\WebPushService;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class PushSubscriptionController extends Controller
 {
@@ -16,7 +16,7 @@ class PushSubscriptionController extends Controller
     {
         $publicKey = config('services.vapid.public_key');
 
-        if (!$publicKey) {
+        if (! $publicKey) {
             return response()->json([
                 'error' => 'Push notifications not configured',
             ], 503);

@@ -49,8 +49,8 @@ class DesignController extends Controller
         $availableFonts = array_keys(config('public_site_templates.fonts', []));
 
         $validated = $request->validate([
-            'heading' => 'nullable|string|in:' . implode(',', $availableFonts),
-            'body' => 'nullable|string|in:' . implode(',', $availableFonts),
+            'heading' => 'nullable|string|in:'.implode(',', $availableFonts),
+            'body' => 'nullable|string|in:'.implode(',', $availableFonts),
         ]);
 
         $church->setPublicSiteSetting('fonts', array_filter($validated));
@@ -197,7 +197,7 @@ class DesignController extends Controller
         $slides = $heroSettings['slides'] ?? [];
 
         if (isset($slides[$index])) {
-            if (!empty($slides[$index]['image'])) {
+            if (! empty($slides[$index]['image'])) {
                 Storage::disk('public')->delete($slides[$index]['image']);
             }
             unset($slides[$index]);

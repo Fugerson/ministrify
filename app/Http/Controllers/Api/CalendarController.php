@@ -18,13 +18,13 @@ class CalendarController extends Controller
     {
         $token = $request->get('token');
 
-        if (!$token) {
+        if (! $token) {
             abort(401, 'Token required');
         }
 
         $church = Church::where('calendar_token', $token)->first();
 
-        if (!$church) {
+        if (! $church) {
             abort(404, 'Calendar not found');
         }
 
@@ -46,13 +46,13 @@ class CalendarController extends Controller
     {
         $token = $request->get('token');
 
-        if (!$token) {
+        if (! $token) {
             return response()->json(['error' => 'Token required'], 401);
         }
 
         $church = Church::where('calendar_token', $token)->first();
 
-        if (!$church) {
+        if (! $church) {
             return response()->json(['error' => 'Calendar not found'], 404);
         }
 
@@ -75,7 +75,7 @@ class CalendarController extends Controller
         }
 
         // Default: upcoming events
-        if (!$request->get('start') && !$request->get('end')) {
+        if (! $request->get('start') && ! $request->get('end')) {
             $query->where('date', '>=', now()->startOfDay());
         }
 
@@ -92,7 +92,7 @@ class CalendarController extends Controller
                     'title' => $event->title,
                     'date' => $event->date->format('Y-m-d'),
                     'time' => $event->time?->format('H:i'),
-                    'datetime' => $event->date->format('Y-m-d') . ($event->time ? 'T' . $event->time->format('H:i:s') : ''),
+                    'datetime' => $event->date->format('Y-m-d').($event->time ? 'T'.$event->time->format('H:i:s') : ''),
                     'location' => $event->location,
                     'notes' => $event->notes,
                     'is_public' => $event->is_public,
@@ -114,13 +114,13 @@ class CalendarController extends Controller
     {
         $token = $request->get('token');
 
-        if (!$token) {
+        if (! $token) {
             return response()->json(['error' => 'Token required'], 401);
         }
 
         $church = Church::where('calendar_token', $token)->first();
 
-        if (!$church) {
+        if (! $church) {
             return response()->json(['error' => 'Calendar not found'], 404);
         }
 
@@ -130,7 +130,7 @@ class CalendarController extends Controller
             ->with(['ministry:id,name,color'])
             ->first();
 
-        if (!$event) {
+        if (! $event) {
             return response()->json(['error' => 'Event not found'], 404);
         }
 
@@ -140,7 +140,7 @@ class CalendarController extends Controller
                 'title' => $event->title,
                 'date' => $event->date->format('Y-m-d'),
                 'time' => $event->time?->format('H:i'),
-                'datetime' => $event->date->format('Y-m-d') . ($event->time ? 'T' . $event->time->format('H:i:s') : ''),
+                'datetime' => $event->date->format('Y-m-d').($event->time ? 'T'.$event->time->format('H:i:s') : ''),
                 'location' => $event->location,
                 'notes' => $event->notes,
                 'public_description' => $event->public_description,
@@ -164,13 +164,13 @@ class CalendarController extends Controller
     {
         $token = $request->get('token');
 
-        if (!$token) {
+        if (! $token) {
             return response()->json(['error' => 'Token required'], 401);
         }
 
         $church = Church::where('calendar_token', $token)->first();
 
-        if (!$church) {
+        if (! $church) {
             return response()->json(['error' => 'Calendar not found'], 404);
         }
 

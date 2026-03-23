@@ -31,7 +31,7 @@ return new class extends Migration
             Schema::table('service_plan_items', function (Blueprint $table) {
                 $table->enum('type', [
                     'worship', 'sermon', 'announcement', 'prayer', 'offering',
-                    'testimony', 'baptism', 'communion', 'child_blessing', 'special', 'other'
+                    'testimony', 'baptism', 'communion', 'child_blessing', 'special', 'other',
                 ])->default('other')->change();
             });
         }

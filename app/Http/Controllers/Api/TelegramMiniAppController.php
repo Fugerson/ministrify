@@ -34,7 +34,7 @@ class TelegramMiniAppController extends Controller
             ->orderBy('date')
             ->orderBy('time')
             ->get()
-            ->map(fn(Event $event) => [
+            ->map(fn (Event $event) => [
                 'id' => $event->id,
                 'title' => $event->title,
                 'date' => $event->date->format('Y-m-d'),
@@ -64,14 +64,14 @@ class TelegramMiniAppController extends Controller
         // Assignments (position-based)
         $assignments = $person->assignments()
             ->with(['event.ministry:id,name,color', 'position:id,name'])
-            ->whereHas('event', fn($q) => $q
+            ->whereHas('event', fn ($q) => $q
                 ->where('date', '>=', now()->startOfDay())
                 ->where('church_id', $person->church_id)
             )
             ->get()
-            ->sortBy(fn($a) => $a->event->date)
+            ->sortBy(fn ($a) => $a->event->date)
             ->values()
-            ->map(fn(Assignment $a) => [
+            ->map(fn (Assignment $a) => [
                 'id' => $a->id,
                 'type' => 'assignment',
                 'status' => $a->status,
@@ -93,14 +93,14 @@ class TelegramMiniAppController extends Controller
         // Responsibilities (custom tasks)
         $responsibilities = $person->responsibilities()
             ->with(['event.ministry:id,name,color'])
-            ->whereHas('event', fn($q) => $q
+            ->whereHas('event', fn ($q) => $q
                 ->where('date', '>=', now()->startOfDay())
                 ->where('church_id', $person->church_id)
             )
             ->get()
-            ->sortBy(fn($r) => $r->event->date)
+            ->sortBy(fn ($r) => $r->event->date)
             ->values()
-            ->map(fn(EventResponsibility $r) => [
+            ->map(fn (EventResponsibility $r) => [
                 'id' => $r->id,
                 'type' => 'responsibility',
                 'name' => $r->name,
@@ -121,15 +121,15 @@ class TelegramMiniAppController extends Controller
 
         // Service plan items where person is responsible
         $planItems = ServicePlanItem::where('responsible_id', $person->id)
-            ->whereHas('event', fn($q) => $q
+            ->whereHas('event', fn ($q) => $q
                 ->where('date', '>=', now()->startOfDay())
                 ->where('church_id', $person->church_id)
             )
             ->with(['event.ministry:id,name,color', 'song:id,title,artist,key'])
             ->get()
-            ->sortBy(fn($item) => $item->event->date)
+            ->sortBy(fn ($item) => $item->event->date)
             ->values()
-            ->map(fn(ServicePlanItem $item) => [
+            ->map(fn (ServicePlanItem $item) => [
                 'id' => $item->id,
                 'type' => 'plan_item',
                 'title' => $item->title,
@@ -167,7 +167,7 @@ class TelegramMiniAppController extends Controller
         $person = $this->person($request);
         $assignment = Assignment::with('event')->find($id);
 
-        if (!$assignment || $assignment->person_id !== $person->id) {
+        if (! $assignment || $assignment->person_id !== $person->id) {
             return response()->json(['error' => 'Not found'], 404);
         }
 
@@ -175,7 +175,7 @@ class TelegramMiniAppController extends Controller
             return response()->json(['error' => 'Forbidden'], 403);
         }
 
-        if (!$assignment->confirm()) {
+        if (! $assignment->confirm()) {
             return response()->json(['error' => 'Cannot confirm this assignment'], 422);
         }
 
@@ -187,7 +187,7 @@ class TelegramMiniAppController extends Controller
         $person = $this->person($request);
         $assignment = Assignment::with('event')->find($id);
 
-        if (!$assignment || $assignment->person_id !== $person->id) {
+        if (! $assignment || $assignment->person_id !== $person->id) {
             return response()->json(['error' => 'Not found'], 404);
         }
 
@@ -195,7 +195,7 @@ class TelegramMiniAppController extends Controller
             return response()->json(['error' => 'Forbidden'], 403);
         }
 
-        if (!$assignment->decline()) {
+        if (! $assignment->decline()) {
             return response()->json(['error' => 'Cannot decline this assignment'], 422);
         }
 
@@ -207,7 +207,7 @@ class TelegramMiniAppController extends Controller
         $person = $this->person($request);
         $responsibility = EventResponsibility::with('event')->find($id);
 
-        if (!$responsibility || $responsibility->person_id !== $person->id) {
+        if (! $responsibility || $responsibility->person_id !== $person->id) {
             return response()->json(['error' => 'Not found'], 404);
         }
 
@@ -225,7 +225,7 @@ class TelegramMiniAppController extends Controller
         $person = $this->person($request);
         $responsibility = EventResponsibility::with('event')->find($id);
 
-        if (!$responsibility || $responsibility->person_id !== $person->id) {
+        if (! $responsibility || $responsibility->person_id !== $person->id) {
             return response()->json(['error' => 'Not found'], 404);
         }
 
@@ -243,7 +243,7 @@ class TelegramMiniAppController extends Controller
         $person = $this->person($request);
         $item = ServicePlanItem::with('event')->find($id);
 
-        if (!$item || $item->responsible_id !== $person->id) {
+        if (! $item || $item->responsible_id !== $person->id) {
             return response()->json(['error' => 'Not found'], 404);
         }
 
@@ -261,7 +261,7 @@ class TelegramMiniAppController extends Controller
         $person = $this->person($request);
         $item = ServicePlanItem::with('event')->find($id);
 
-        if (!$item || $item->responsible_id !== $person->id) {
+        if (! $item || $item->responsible_id !== $person->id) {
             return response()->json(['error' => 'Not found'], 404);
         }
 
@@ -287,7 +287,7 @@ class TelegramMiniAppController extends Controller
             ->orderByDesc('published_at')
             ->limit(30)
             ->get()
-            ->map(fn(Announcement $a) => [
+            ->map(fn (Announcement $a) => [
                 'id' => $a->id,
                 'title' => $a->title,
                 'content' => $a->content,
@@ -313,7 +313,7 @@ class TelegramMiniAppController extends Controller
             ->orderByDesc('created_at')
             ->limit(30)
             ->get()
-            ->map(fn(PrayerRequest $p) => [
+            ->map(fn (PrayerRequest $p) => [
                 'id' => $p->id,
                 'title' => $p->title,
                 'description' => $p->description,
@@ -338,7 +338,7 @@ class TelegramMiniAppController extends Controller
             ->public()
             ->find($id);
 
-        if (!$prayer) {
+        if (! $prayer) {
             return response()->json(['error' => 'Not found'], 404);
         }
 
@@ -415,11 +415,11 @@ class TelegramMiniAppController extends Controller
                 'membership_status' => $person->membership_status,
                 'membership_label' => $person->membership_status_label ?? null,
                 'joined_date' => $person->joined_date?->translatedFormat('d M Y'),
-                'ministries' => $person->ministries->map(fn($m) => [
+                'ministries' => $person->ministries->map(fn ($m) => [
                     'name' => $m->name,
                     'color' => $m->color,
                 ]),
-                'groups' => $person->groups->map(fn($g) => [
+                'groups' => $person->groups->map(fn ($g) => [
                     'name' => $g->name,
                     'meeting_day' => $g->meeting_day,
                     'meeting_time' => $g->meeting_time?->format('H:i'),

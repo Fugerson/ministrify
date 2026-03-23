@@ -6,7 +6,6 @@ use App\Models\Church;
 use App\Models\Ministry;
 use App\Models\MinistryGoal;
 use App\Models\MinistryTask;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class MinistryTaskFactory extends Factory

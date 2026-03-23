@@ -2,14 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ChurchRole;
 use App\Models\Ministry;
 use App\Models\Person;
 use App\Models\User;
 use App\Services\ImageService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class OnboardingController extends Controller
 {
@@ -18,7 +21,7 @@ class OnboardingController extends Controller
         $user = auth()->user();
 
         // Initialize onboarding if not started or state is corrupt
-        if (!is_array($user->onboarding_state)) {
+        if (! is_array($user->onboarding_state)) {
             $user->startOnboarding();
             $user->refresh();
         }
@@ -41,7 +44,7 @@ class OnboardingController extends Controller
 
     public function step(string $step)
     {
-        if (!array_key_exists($step, User::ONBOARDING_STEPS)) {
+        if (! array_key_exists($step, User::ONBOARDING_STEPS)) {
             abort(404);
         }
 
@@ -74,7 +77,7 @@ class OnboardingController extends Controller
 
     public function saveStep(Request $request, string $step)
     {
-        if (!array_key_exists($step, User::ONBOARDING_STEPS)) {
+        if (! array_key_exists($step, User::ONBOARDING_STEPS)) {
             abort(404);
         }
 
@@ -92,7 +95,7 @@ class OnboardingController extends Controller
                 'feature_tour' => $this->handleFeatureTour($request),
                 default => [],
             };
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (ValidationException $e) {
             return response()->json([
                 'success' => false,
                 'message' => __('messages.validation_error'),
@@ -110,6 +113,7 @@ class OnboardingController extends Controller
         // Check if this was the last step
         if ($step === 'feature_tour') {
             $user->finishOnboarding();
+
             return response()->json([
                 'success' => true,
                 'completed' => true,
@@ -131,7 +135,7 @@ class OnboardingController extends Controller
 
     public function skip(Request $request, string $step)
     {
-        if (!array_key_exists($step, User::ONBOARDING_STEPS)) {
+        if (! array_key_exists($step, User::ONBOARDING_STEPS)) {
             abort(404);
         }
 
@@ -222,8 +226,8 @@ class OnboardingController extends Controller
         }
 
         // Only update fields that were actually submitted
-        $updateData = array_filter($validated, fn($value) => $value !== null && $value !== '');
-        if (!empty($updateData)) {
+        $updateData = array_filter($validated, fn ($value) => $value !== null && $value !== '');
+        if (! empty($updateData)) {
             $church->update($updateData);
         }
 
@@ -247,15 +251,19 @@ class OnboardingController extends Controller
         $createdIds = [];
         foreach ($validated['ministries'] as $name) {
             $name = trim($name);
-            if (empty($name)) continue;
+            if (empty($name)) {
+                continue;
+            }
 
             // Check if ministry with this name already exists
             $exists = $church->ministries()->where('name', $name)->exists();
-            if ($exists) continue;
+            if ($exists) {
+                continue;
+            }
 
             $ministry = $church->ministries()->create([
                 'name' => $name,
-                'slug' => Str::slug($name) . '-' . Str::random(4),
+                'slug' => Str::slug($name).'-'.Str::random(4),
             ]);
             $createdIds[] = $ministry->id;
         }
@@ -271,9 +279,9 @@ class OnboardingController extends Controller
         if ($mode === 'manual') {
             // Check if people array is provided and has data
             $people = $request->input('people', []);
-            $hasValidPeople = collect($people)->filter(fn($p) => !empty($p['first_name']))->isNotEmpty();
+            $hasValidPeople = collect($people)->filter(fn ($p) => ! empty($p['first_name']))->isNotEmpty();
 
-            if (!$hasValidPeople) {
+            if (! $hasValidPeople) {
                 // Allow completing without data (optional step)
                 return ['mode' => $mode, 'added_count' => 0, 'skipped' => true];
             }
@@ -287,7 +295,9 @@ class OnboardingController extends Controller
             ]);
 
             foreach ($validated['people'] as $personData) {
-                if (empty($personData['first_name'])) continue;
+                if (empty($personData['first_name'])) {
+                    continue;
+                }
 
                 $person = $church->people()->create([
                     'first_name' => $personData['first_name'],
@@ -299,7 +309,7 @@ class OnboardingController extends Controller
             }
         } elseif ($mode === 'csv') {
             // Check if CSV file is provided
-            if (!$request->hasFile('csv_file')) {
+            if (! $request->hasFile('csv_file')) {
                 return ['mode' => $mode, 'added_count' => 0, 'skipped' => true];
             }
 
@@ -327,7 +337,7 @@ class OnboardingController extends Controller
                     }
                 }
 
-                if (!empty($personData['first_name'])) {
+                if (! empty($personData['first_name'])) {
                     $person = $church->people()->create($personData);
                     $added[] = $person->id;
                 }
@@ -348,6 +358,7 @@ class OnboardingController extends Controller
                 return $index;
             }
         }
+
         return null;
     }
 
@@ -355,9 +366,9 @@ class OnboardingController extends Controller
     {
         // Check if users array is provided and has data
         $users = $request->input('users', []);
-        $hasValidUsers = collect($users)->filter(fn($u) => !empty($u['email']) && !empty($u['name']))->isNotEmpty();
+        $hasValidUsers = collect($users)->filter(fn ($u) => ! empty($u['email']) && ! empty($u['name']))->isNotEmpty();
 
-        if (!$hasValidUsers) {
+        if (! $hasValidUsers) {
             // Allow completing without data (optional step)
             return ['created_users' => [], 'skipped' => true];
         }
@@ -381,7 +392,7 @@ class OnboardingController extends Controller
             // Find matching ChurchRole for the legacy role name
             // Map legacy 'admin' role to 'administrator' slug
             $roleSlug = $userData['role'] === 'admin' ? 'administrator' : $userData['role'];
-            $churchRole = \App\Models\ChurchRole::where('church_id', $church->id)
+            $churchRole = ChurchRole::where('church_id', $church->id)
                 ->where('slug', $roleSlug)
                 ->first();
 
@@ -396,21 +407,21 @@ class OnboardingController extends Controller
 
             // Create or merge Person record by email/name
             $nameParts = explode(' ', $userData['name'], 2);
-            $person = \App\Models\Person::where('email', $userData['email'])
+            $person = Person::where('email', $userData['email'])
                 ->where('church_id', $church->id)
                 ->first();
 
             // Fallback: try by name
-            if (!$person && ($nameParts[0] ?? '') && ($nameParts[1] ?? '')) {
-                $person = \App\Models\Person::where('church_id', $church->id)
+            if (! $person && ($nameParts[0] ?? '') && ($nameParts[1] ?? '')) {
+                $person = Person::where('church_id', $church->id)
                     ->where('first_name', $nameParts[0])
                     ->where('last_name', $nameParts[1])
                     ->whereNull('user_id')
                     ->first();
             }
 
-            if (!$person) {
-                $person = \App\Models\Person::create([
+            if (! $person) {
+                $person = Person::create([
                     'church_id' => $church->id,
                     'user_id' => $user->id,
                     'first_name' => $nameParts[0],
@@ -427,7 +438,7 @@ class OnboardingController extends Controller
             }
 
             // Create pivot record
-            \Illuminate\Support\Facades\DB::table('church_user')->updateOrInsert(
+            DB::table('church_user')->updateOrInsert(
                 ['user_id' => $user->id, 'church_id' => $church->id],
                 [
                     'church_role_id' => $churchRole?->id,

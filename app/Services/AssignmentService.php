@@ -8,7 +8,6 @@ use App\Models\Event;
 use App\Models\Person;
 use App\Models\Position;
 use App\Models\UnavailableDate;
-use Carbon\Carbon;
 
 /**
  * @deprecated Use SchedulingService instead. This service will be removed in a future version.
@@ -28,7 +27,7 @@ class AssignmentService
                     ->whereJsonContains('ministry_person.position_ids', (int) $position->id);
             })
             ->with(['unavailableDates', 'assignments' => function ($q) use ($eventDate) {
-                $q->whereHas('event', fn($eq) => $eq->whereDate('date', $eventDate));
+                $q->whereHas('event', fn ($eq) => $eq->whereDate('date', $eventDate));
             }])
             ->get();
 
@@ -104,7 +103,7 @@ class AssignmentService
         if ($existingAssignment) {
             return [
                 'type' => 'busy',
-                'reason' => "Служить в " . ($existingAssignment->event->ministry?->name ?? 'іншому служінні'),
+                'reason' => 'Служить в '.($existingAssignment->event->ministry?->name ?? 'іншому служінні'),
             ];
         }
 

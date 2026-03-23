@@ -33,7 +33,7 @@ class SyncExchangeRates extends Command
 
             foreach ($results as $dateStr => $result) {
                 if ($result['success']) {
-                    $rates = collect($result['rates'])->map(fn($r) => number_format($r, 4))->implode(', ');
+                    $rates = collect($result['rates'])->map(fn ($r) => number_format($r, 4))->implode(', ');
                     $this->line("  {$dateStr}: {$rates}");
                     $success++;
                 } else {
@@ -58,12 +58,14 @@ class SyncExchangeRates extends Command
         if ($result['success']) {
             $this->info('Rates synced successfully:');
             foreach ($result['rates'] as $currency => $rate) {
-                $this->line("  {$currency}: " . number_format($rate, 4) . ' UAH');
+                $this->line("  {$currency}: ".number_format($rate, 4).' UAH');
             }
+
             return self::SUCCESS;
         }
 
         $this->error("Failed to sync rates: {$result['error']}");
+
         return self::FAILURE;
     }
 }

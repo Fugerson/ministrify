@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
-use App\Models\Person;
+use App\Models\Church;
 use App\Models\ChurchRole;
+use App\Models\Person;
+use App\Models\User;
+use App\Notifications\ServantsApproved;
+use App\Notifications\ServantsRejected;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -17,7 +21,7 @@ class ServantApprovalController extends Controller
      */
     public function index(Request $request)
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             abort(403, 'Тільки адміністратор може управляти одобреннями.');
         }
 
@@ -27,7 +31,7 @@ class ServantApprovalController extends Controller
             ->whereNull('church_role_id')
             ->where(function ($q) {
                 $q->where('servant_approval_status', 'pending')
-                  ->orWhereHas('churches', fn ($q3) => $q3->where('role_approval_status', 'pending'));
+                    ->orWhereHas('churches', fn ($q3) => $q3->where('role_approval_status', 'pending'));
             })
             ->with(['person', 'requestedChurchRole', 'churchRole'])
             ->orderBy('created_at', 'desc');
@@ -35,9 +39,8 @@ class ServantApprovalController extends Controller
         $pendingUsers = $query->get();
 
         // Group by approval type
-        $servantPending = $pendingUsers->filter(fn($u) => $u->servant_approval_status === 'pending')->values();
-        $churchRolePending = $pendingUsers->filter(fn($u) =>
-            $u->churches()->wherePivot('role_approval_status', 'pending')->exists()
+        $servantPending = $pendingUsers->filter(fn ($u) => $u->servant_approval_status === 'pending')->values();
+        $churchRolePending = $pendingUsers->filter(fn ($u) => $u->churches()->wherePivot('role_approval_status', 'pending')->exists()
         )->values();
 
         $churchRoles = ChurchRole::where('church_id', $church->id)
@@ -76,7 +79,7 @@ class ServantApprovalController extends Controller
      */
     public function pending(Request $request)
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             return response()->json([], 403);
         }
 
@@ -86,7 +89,7 @@ class ServantApprovalController extends Controller
             ->whereNull('church_role_id')
             ->where(function ($q) {
                 $q->where('servant_approval_status', 'pending')
-                  ->orWhereHas('churches', fn ($q3) => $q3->where('role_approval_status', 'pending'));
+                    ->orWhereHas('churches', fn ($q3) => $q3->where('role_approval_status', 'pending'));
             })
             ->with(['requestedChurchRole'])
             ->orderBy('created_at', 'desc')
@@ -115,7 +118,7 @@ class ServantApprovalController extends Controller
      */
     public function approve(Request $request, User $user)
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             return response()->json(['message' => 'Недостатньо прав'], 403);
         }
 
@@ -131,13 +134,13 @@ class ServantApprovalController extends Controller
 
         $roleId = $validated['church_role_id'] ?? $user->requested_church_role_id;
 
-        if (!$roleId) {
+        if (! $roleId) {
             return response()->json(['message' => 'Роль не вибрана'], 400);
         }
 
         // Verify role belongs to this church
         $role = ChurchRole::where('id', $roleId)->where('church_id', $church->id)->first();
-        if (!$role) {
+        if (! $role) {
             return response()->json(['message' => 'Невірна роль'], 400);
         }
 
@@ -172,12 +175,12 @@ class ServantApprovalController extends Controller
             'updated_at' => now(),
         ];
 
-        if ($pivot && !$pivot->person_id) {
+        if ($pivot && ! $pivot->person_id) {
             $person = Person::where('user_id', $user->id)
                 ->where('church_id', $church->id)
                 ->first();
 
-            if (!$person) {
+            if (! $person) {
                 $nameParts = explode(' ', $user->name, 2);
                 $person = Person::create([
                     'church_id' => $church->id,
@@ -217,7 +220,7 @@ class ServantApprovalController extends Controller
 
         // Send notification
         try {
-            $user->notify(new \App\Notifications\ServantsApproved($role->name, $church->name));
+            $user->notify(new ServantsApproved($role->name, $church->name));
         } catch (\Exception $e) {
             Log::error('Failed to send approval notification', [
                 'user_id' => $user->id,
@@ -238,7 +241,7 @@ class ServantApprovalController extends Controller
      */
     public function reject(Request $request, User $user)
     {
-        if (!auth()->user()->isAdmin()) {
+        if (! auth()->user()->isAdmin()) {
             return response()->json(['message' => 'Недостатньо прав'], 403);
         }
 
@@ -260,7 +263,7 @@ class ServantApprovalController extends Controller
         ]);
 
         // Clear pivot role_approval_status
-        \Illuminate\Support\Facades\DB::table('church_user')
+        DB::table('church_user')
             ->where('user_id', $user->id)
             ->where('church_id', $church->id)
             ->update([
@@ -287,7 +290,7 @@ class ServantApprovalController extends Controller
 
         // Send notification
         try {
-            $user->notify(new \App\Notifications\ServantsRejected($requestedRole, $validated['reason'] ?? null));
+            $user->notify(new ServantsRejected($requestedRole, $validated['reason'] ?? null));
         } catch (\Exception $e) {
             Log::error('Failed to send rejection notification', [
                 'user_id' => $user->id,
@@ -308,7 +311,7 @@ class ServantApprovalController extends Controller
      *
      * @throws \RuntimeException if target Person not found or already linked
      */
-    private function linkUserToPerson(User $user, \App\Models\Church $church, int $linkPersonId)
+    private function linkUserToPerson(User $user, Church $church, int $linkPersonId)
     {
         // Find the auto-created Person via pivot
         $pivot = DB::table('church_user')
@@ -326,7 +329,7 @@ class ServantApprovalController extends Controller
                 ->lockForUpdate()
                 ->first();
 
-            if (!$existingPerson) {
+            if (! $existingPerson) {
                 throw new \RuntimeException('Обрана людина не знайдена або вже привʼязана до іншого користувача');
             }
 
@@ -364,7 +367,7 @@ class ServantApprovalController extends Controller
     /**
      * Find potential Person matches for a pending user.
      */
-    private function findPotentialMatches(User $user, $availablePeople): \Illuminate\Support\Collection
+    private function findPotentialMatches(User $user, $availablePeople): Collection
     {
         $nameParts = explode(' ', mb_strtolower(trim($user->name)), 2);
         $firstName = $nameParts[0] ?? '';
@@ -396,7 +399,7 @@ class ServantApprovalController extends Controller
                     return true;
                 }
                 // Only first name match — still suggest
-                if (!$lastName || !$pLast) {
+                if (! $lastName || ! $pLast) {
                     return true;
                 }
             }

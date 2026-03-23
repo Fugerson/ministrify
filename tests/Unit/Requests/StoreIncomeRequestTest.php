@@ -15,6 +15,7 @@ class StoreIncomeRequestTest extends TestCase
     use RefreshDatabase;
 
     private Church $church;
+
     private User $user;
 
     protected function setUp(): void
@@ -27,8 +28,9 @@ class StoreIncomeRequestTest extends TestCase
 
     private function getRules(): array
     {
-        $request = new StoreIncomeRequest();
+        $request = new StoreIncomeRequest;
         $request->setUserResolver(fn () => $this->user);
+
         return $request->rules();
     }
 
@@ -108,7 +110,7 @@ class StoreIncomeRequestTest extends TestCase
 
     public function test_custom_messages(): void
     {
-        $request = new StoreIncomeRequest();
+        $request = new StoreIncomeRequest;
         $messages = $request->messages();
 
         $this->assertArrayHasKey('category_id.required', $messages);

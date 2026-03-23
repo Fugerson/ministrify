@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Event;
 use App\Models\ServicePlanTemplate;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class ServicePlanTemplateController extends Controller
@@ -20,7 +21,7 @@ class ServicePlanTemplateController extends Controller
         $templates = ServicePlanTemplate::where('church_id', $church->id)
             ->orderBy('name')
             ->get()
-            ->map(fn($t) => [
+            ->map(fn ($t) => [
                 'id' => $t->id,
                 'name' => $t->name,
                 'description' => $t->description,
@@ -99,7 +100,7 @@ class ServicePlanTemplateController extends Controller
         }
 
         // Get start time from event or default
-        $startTime = $event->time ?? \Carbon\Carbon::parse('10:00');
+        $startTime = $event->time ?? Carbon::parse('10:00');
 
         $template->applyToEvent($event, $startTime);
 

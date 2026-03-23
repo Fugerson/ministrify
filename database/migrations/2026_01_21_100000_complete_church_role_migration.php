@@ -3,7 +3,6 @@
 use App\Models\ChurchRole;
 use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {

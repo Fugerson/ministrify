@@ -11,6 +11,7 @@ use Illuminate\Support\Str;
 class PaymentService
 {
     protected Church $church;
+
     protected array $settings;
 
     public function __construct(Church $church)
@@ -21,30 +22,30 @@ class PaymentService
 
     public function isLiqPayAvailable(): bool
     {
-        return !empty($this->settings['liqpay_enabled'])
-            && !empty($this->settings['liqpay_public_key'])
-            && !empty($this->settings['liqpay_private_key']);
+        return ! empty($this->settings['liqpay_enabled'])
+            && ! empty($this->settings['liqpay_public_key'])
+            && ! empty($this->settings['liqpay_private_key']);
     }
 
     public function isMonobankAvailable(): bool
     {
-        return !empty($this->settings['monobank_enabled'])
-            && !empty($this->settings['monobank_jar_id']);
+        return ! empty($this->settings['monobank_enabled'])
+            && ! empty($this->settings['monobank_jar_id']);
     }
 
     public function getMonobankJarLink(): ?string
     {
         $jarId = $this->settings['monobank_jar_id'] ?? null;
-        if (!$jarId) {
+        if (! $jarId) {
             return null;
         }
 
-        return 'https://send.monobank.ua/jar/' . $jarId;
+        return 'https://send.monobank.ua/jar/'.$jarId;
     }
 
     public function createLiqPayPayment(array $data): array
     {
-        $orderId = 'donation_' . $this->church->id . '_' . time() . '_' . Str::random(6);
+        $orderId = 'donation_'.$this->church->id.'_'.time().'_'.Str::random(6);
 
         // Create pending donation record
         $donation = OnlineDonation::create([
@@ -70,13 +71,13 @@ class PaymentService
             'action' => 'pay',
             'amount' => $data['amount'],
             'currency' => 'UAH',
-            'description' => 'Пожертва для ' . $this->church->name,
+            'description' => 'Пожертва для '.$this->church->name,
             'order_id' => $orderId,
             'server_url' => route('api.webhooks.liqpay'),
             'result_url' => route('public.donate.success', $this->church->slug),
         ]));
 
-        $signature = base64_encode(sha1($privateKey . $liqpayData . $privateKey, true));
+        $signature = base64_encode(sha1($privateKey.$liqpayData.$privateKey, true));
 
         return [
             'data' => $liqpayData,
@@ -89,7 +90,7 @@ class PaymentService
         return OnlineDonation::create([
             'church_id' => $this->church->id,
             'provider' => OnlineDonation::PROVIDER_MONOBANK,
-            'provider_order_id' => 'mono_' . $this->church->id . '_' . time() . '_' . Str::random(6),
+            'provider_order_id' => 'mono_'.$this->church->id.'_'.time().'_'.Str::random(6),
             'amount' => $data['amount'],
             'currency' => 'UAH',
             'status' => OnlineDonation::STATUS_PENDING,
@@ -104,11 +105,11 @@ class PaymentService
     public function verifyLiqPayCallback(string $data, string $signature): bool
     {
         $privateKey = $this->getLiqPayPrivateKey();
-        if (!$privateKey) {
+        if (! $privateKey) {
             return false;
         }
 
-        $expectedSignature = base64_encode(sha1($privateKey . $data . $privateKey, true));
+        $expectedSignature = base64_encode(sha1($privateKey.$data.$privateKey, true));
 
         return hash_equals($expectedSignature, $signature);
     }
@@ -116,7 +117,7 @@ class PaymentService
     public function processLiqPayCallback(array $decodedData): void
     {
         $orderId = $decodedData['order_id'] ?? null;
-        if (!$orderId) {
+        if (! $orderId) {
             return;
         }
 
@@ -124,8 +125,9 @@ class PaymentService
             ->where('church_id', $this->church->id)
             ->first();
 
-        if (!$donation) {
+        if (! $donation) {
             Log::warning('LiqPay callback: donation not found', ['order_id' => $orderId]);
+
             return;
         }
 
@@ -149,7 +151,7 @@ class PaymentService
     protected function getLiqPayPrivateKey(): ?string
     {
         $encrypted = $this->settings['liqpay_private_key'] ?? null;
-        if (!$encrypted) {
+        if (! $encrypted) {
             return null;
         }
 

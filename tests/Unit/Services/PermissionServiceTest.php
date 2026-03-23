@@ -4,7 +4,6 @@ namespace Tests\Unit\Services;
 
 use App\Models\Church;
 use App\Models\ChurchRole;
-use App\Models\ChurchRolePermission;
 use App\Models\User;
 use App\Services\PermissionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -15,12 +14,13 @@ class PermissionServiceTest extends TestCase
     use RefreshDatabase;
 
     private PermissionService $service;
+
     private Church $church;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new PermissionService();
+        $this->service = new PermissionService;
         $this->church = Church::factory()->create();
     }
 

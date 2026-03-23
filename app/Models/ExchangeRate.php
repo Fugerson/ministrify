@@ -74,7 +74,7 @@ class ExchangeRate extends Model
             $amountInUah = $amount;
         } else {
             $fromRate = static::getRateForDate($from, $date);
-            if (!$fromRate) {
+            if (! $fromRate) {
                 return $amount; // Can't convert without rate
             }
             $amountInUah = $amount * $fromRate;
@@ -86,7 +86,7 @@ class ExchangeRate extends Model
         }
 
         $toRate = static::getRateForDate($to, $date);
-        if (!$toRate) {
+        if (! $toRate) {
             return $amountInUah; // Return UAH if can't convert
         }
 
@@ -129,6 +129,7 @@ class ExchangeRate extends Model
     {
         return Cache::remember('latest_exchange_rate_date', 3600, function () {
             $latest = static::orderByDesc('date')->first();
+
             return $latest?->date?->format('d.m.Y');
         });
     }

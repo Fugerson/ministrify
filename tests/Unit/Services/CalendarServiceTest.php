@@ -15,13 +15,15 @@ class CalendarServiceTest extends TestCase
     use RefreshDatabase;
 
     private CalendarService $service;
+
     private Church $church;
+
     private Ministry $ministry;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new CalendarService();
+        $this->service = new CalendarService;
         $this->church = Church::factory()->create(['name' => 'Test Church']);
         $this->ministry = Ministry::factory()->forChurch($this->church)->create();
     }

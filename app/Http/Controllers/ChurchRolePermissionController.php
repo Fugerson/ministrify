@@ -30,7 +30,7 @@ class ChurchRolePermissionController extends Controller
         // Cannot modify admin role permissions
         if ($churchRole->is_admin_role) {
             return response()->json([
-                'message' => 'Неможливо змінити права адміністратора'
+                'message' => 'Неможливо змінити права адміністратора',
             ], 400);
         }
 

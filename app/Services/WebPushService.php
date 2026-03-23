@@ -6,6 +6,7 @@ use App\Models\PushSubscription;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
 use Minishlink\WebPush\Subscription;
+use Minishlink\WebPush\VAPID;
 use Minishlink\WebPush\WebPush;
 
 class WebPushService
@@ -25,8 +26,9 @@ class WebPushService
         $vapidPrivateKey = config('services.vapid.private_key');
         $vapidSubject = config('services.vapid.subject');
 
-        if (!$vapidPublicKey || !$vapidPrivateKey) {
+        if (! $vapidPublicKey || ! $vapidPrivateKey) {
             Log::warning('VAPID keys not configured');
+
             return null;
         }
 
@@ -45,6 +47,7 @@ class WebPushService
             return $this->webPush;
         } catch (\Exception $e) {
             Log::error('Failed to initialize WebPush', ['error' => $e->getMessage()]);
+
             return null;
         }
     }
@@ -56,7 +59,7 @@ class WebPushService
     {
         $webPush = $this->getWebPush();
 
-        if (!$webPush) {
+        if (! $webPush) {
             return false;
         }
 
@@ -78,6 +81,7 @@ class WebPushService
                     'title' => $payload['title'] ?? 'Ministrify',
                 ]);
                 $subscription->touchLastUsed();
+
                 return true;
             }
 
@@ -131,7 +135,7 @@ class WebPushService
     {
         $webPush = $this->getWebPush();
 
-        if (!$webPush) {
+        if (! $webPush) {
             return 0;
         }
 
@@ -235,7 +239,7 @@ class WebPushService
             'body' => "Подія \"{$eventTitle}\" розпочнеться о {$time}",
             'url' => '/my-schedule',
             'icon' => '/icons/icon-192x192.png',
-            'tag' => 'reminder-' . md5($eventTitle . $time),
+            'tag' => 'reminder-'.md5($eventTitle.$time),
         ]) > 0;
     }
 
@@ -249,7 +253,7 @@ class WebPushService
             'body' => $body,
             'url' => $url ?? '/announcements',
             'icon' => '/icons/icon-192x192.png',
-            'tag' => 'announcement-' . time(),
+            'tag' => 'announcement-'.time(),
         ]);
     }
 
@@ -263,7 +267,7 @@ class WebPushService
             'body' => $body,
             'url' => $url ?? '/dashboard',
             'icon' => '/icons/icon-192x192.png',
-            'tag' => $tag ?? 'custom-' . time(),
+            'tag' => $tag ?? 'custom-'.time(),
         ]) > 0;
     }
 
@@ -273,6 +277,7 @@ class WebPushService
     private function isSubscriptionInvalid(\Exception $e): bool
     {
         $message = $e->getMessage();
+
         return str_contains($message, '410') // Gone
             || str_contains($message, '404') // Not Found
             || str_contains($message, 'unsubscribed')
@@ -292,7 +297,8 @@ class WebPushService
      */
     public static function generateVapidKeys(): array
     {
-        $keys = \Minishlink\WebPush\VAPID::createVapidKeys();
+        $keys = VAPID::createVapidKeys();
+
         return [
             'public_key' => $keys['publicKey'],
             'private_key' => $keys['privateKey'],

@@ -18,21 +18,25 @@ class SecurePassword implements ValidationRule
     {
         if (strlen($value) < 10) {
             $fail('Пароль повинен містити мінімум 10 символів.');
+
             return;
         }
 
-        if (!preg_match('/[A-Z]/', $value)) {
+        if (! preg_match('/[A-Z]/', $value)) {
             $fail('Пароль повинен містити хоча б одну велику літеру.');
+
             return;
         }
 
-        if (!preg_match('/[a-z]/', $value)) {
+        if (! preg_match('/[a-z]/', $value)) {
             $fail('Пароль повинен містити хоча б одну малу літеру.');
+
             return;
         }
 
-        if (!preg_match('/[0-9]/', $value)) {
+        if (! preg_match('/[0-9]/', $value)) {
             $fail('Пароль повинен містити хоча б одну цифру.');
+
             return;
         }
 
@@ -44,6 +48,7 @@ class SecurePassword implements ValidationRule
 
         if (in_array(strtolower($value), $commonPasswords)) {
             $fail('Цей пароль занадто простий. Оберіть інший.');
+
             return;
         }
     }

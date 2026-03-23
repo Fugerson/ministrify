@@ -11,6 +11,7 @@ use Illuminate\Console\Command;
 class SendBirthdayReminders extends Command
 {
     protected $signature = 'app:send-birthday-reminders';
+
     protected $description = 'Send birthday reminders to leaders and church admins';
 
     public function handle(): int
@@ -20,8 +21,9 @@ class SendBirthdayReminders extends Command
 
         $this->info("Checking birthdays for {$today->format('Y-m-d')}");
 
-        if (!config('services.telegram.bot_token')) {
+        if (! config('services.telegram.bot_token')) {
             $this->warn('Telegram bot not configured');
+
             return self::SUCCESS;
         }
 
@@ -33,7 +35,7 @@ class SendBirthdayReminders extends Command
             $settings = $church->settings['notifications'] ?? [];
 
             // Check if birthday notifications are enabled (default: true)
-            if (!($settings['birthday_reminders'] ?? true)) {
+            if (! ($settings['birthday_reminders'] ?? true)) {
                 continue;
             }
 
@@ -66,7 +68,7 @@ class SendBirthdayReminders extends Command
                 $telegram = TelegramService::make();
 
                 foreach ($recipients as $recipient) {
-                    if (!$recipient->telegram_chat_id) {
+                    if (! $recipient->telegram_chat_id) {
                         continue;
                     }
 
@@ -83,6 +85,7 @@ class SendBirthdayReminders extends Command
         }
 
         $this->info("Done! Sent {$sent} birthday reminders.");
+
         return self::SUCCESS;
     }
 
@@ -94,14 +97,14 @@ class SendBirthdayReminders extends Command
             ->whereNotNull('telegram_chat_id')
             ->where(function ($query) use ($church) {
                 $query->whereHas('user', function ($q) use ($church) {
-                        $q->whereIn('users.id', function ($sub) use ($church) {
-                            $sub->select('church_user.user_id')
-                                ->from('church_user')
-                                ->join('church_roles', 'church_user.church_role_id', '=', 'church_roles.id')
-                                ->where('church_user.church_id', $church->id)
-                                ->where('church_roles.is_admin_role', true);
-                        });
-                    })
+                    $q->whereIn('users.id', function ($sub) use ($church) {
+                        $sub->select('church_user.user_id')
+                            ->from('church_user')
+                            ->join('church_roles', 'church_user.church_role_id', '=', 'church_roles.id')
+                            ->where('church_user.church_id', $church->id)
+                            ->where('church_roles.is_admin_role', true);
+                    });
+                })
                     ->orWhereHas('leadingMinistries')
                     ->orWhereHas('leadingGroups');
             })

@@ -13,12 +13,13 @@ class DashboardCacheServiceTest extends TestCase
     use RefreshDatabase;
 
     private DashboardCacheService $service;
+
     private Church $church;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new DashboardCacheService();
+        $this->service = new DashboardCacheService;
         $this->church = Church::factory()->create();
     }
 
@@ -33,6 +34,7 @@ class DashboardCacheServiceTest extends TestCase
         $calls = 0;
         $callback = function () use (&$calls) {
             $calls++;
+
             return 'computed_value';
         };
 

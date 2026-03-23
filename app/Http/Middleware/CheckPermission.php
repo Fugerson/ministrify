@@ -11,19 +11,17 @@ class CheckPermission
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     * @param  string  $module
-     * @param  string  $action
+     * @param  Closure(Request): (Response)  $next
      */
     public function handle(Request $request, Closure $next, string $module, string $action = 'view'): Response
     {
         $user = $request->user();
 
-        if (!$user) {
+        if (! $user) {
             abort(401);
         }
 
-        if (!$user->hasPermission($module, $action)) {
+        if (! $user->hasPermission($module, $action)) {
             if ($request->expectsJson()) {
                 return response()->json(['error' => __('messages.insufficient_permissions')], 403);
             }

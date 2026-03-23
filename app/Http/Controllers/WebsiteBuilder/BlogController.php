@@ -4,8 +4,8 @@ namespace App\Http\Controllers\WebsiteBuilder;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Traits\RequiresChurch;
-use App\Models\BlogPost;
 use App\Models\BlogCategory;
+use App\Models\BlogPost;
 use App\Services\ImageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -22,8 +22,8 @@ class BlogController extends Controller
 
         $posts = $church->blogPosts()
             ->with('category', 'author')
-            ->when($request->status, fn($q, $status) => $q->where('status', $status))
-            ->when($request->category, fn($q, $cat) => $q->where('blog_category_id', $cat))
+            ->when($request->status, fn ($q, $status) => $q->where('status', $status))
+            ->when($request->category, fn ($q, $cat) => $q->where('blog_category_id', $cat))
             ->latest('updated_at')
             ->paginate(20);
 
@@ -77,7 +77,7 @@ class BlogController extends Controller
         $baseSlug = $validated['slug'];
         $counter = 1;
         while ($church->blogPosts()->where('slug', $validated['slug'])->exists()) {
-            $validated['slug'] = $baseSlug . '-' . $counter++;
+            $validated['slug'] = $baseSlug.'-'.$counter++;
         }
 
         $validated['church_id'] = $church->id;
@@ -109,7 +109,7 @@ class BlogController extends Controller
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'slug' => 'nullable|string|max:255|unique:blog_posts,slug,' . $blogPost->id,
+            'slug' => 'nullable|string|max:255|unique:blog_posts,slug,'.$blogPost->id,
             'excerpt' => 'nullable|string|max:500',
             'content' => 'required|string',
             'featured_image' => 'nullable|mimes:jpg,jpeg,png,gif,webp,heic,heif|max:2048',

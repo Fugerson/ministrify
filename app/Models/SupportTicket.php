@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Traits\Auditable;
 
 class SupportTicket extends Model
 {
@@ -74,7 +74,7 @@ class SupportTicket extends Model
 
     public function getCategoryLabelAttribute(): string
     {
-        return match($this->category) {
+        return match ($this->category) {
             'bug' => 'Помилка',
             'question' => 'Питання',
             'feature' => 'Пропозиція',
@@ -85,7 +85,7 @@ class SupportTicket extends Model
 
     public function getCategoryColorAttribute(): string
     {
-        return match($this->category) {
+        return match ($this->category) {
             'bug' => 'red',
             'question' => 'blue',
             'feature' => 'purple',
@@ -96,7 +96,7 @@ class SupportTicket extends Model
 
     public function getPriorityLabelAttribute(): string
     {
-        return match($this->priority) {
+        return match ($this->priority) {
             'low' => 'Низький',
             'normal' => 'Нормальний',
             'high' => 'Високий',
@@ -107,7 +107,7 @@ class SupportTicket extends Model
 
     public function getPriorityColorAttribute(): string
     {
-        return match($this->priority) {
+        return match ($this->priority) {
             'low' => 'gray',
             'normal' => 'blue',
             'high' => 'yellow',
@@ -118,7 +118,7 @@ class SupportTicket extends Model
 
     public function getStatusLabelAttribute(): string
     {
-        return match($this->status) {
+        return match ($this->status) {
             'open' => 'Відкритий',
             'in_progress' => 'В роботі',
             'waiting' => 'Очікує відповіді',
@@ -130,7 +130,7 @@ class SupportTicket extends Model
 
     public function getStatusColorAttribute(): string
     {
-        return match($this->status) {
+        return match ($this->status) {
             'open' => 'blue',
             'in_progress' => 'yellow',
             'waiting' => 'purple',

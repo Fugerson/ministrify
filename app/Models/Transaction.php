@@ -12,20 +12,28 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Transaction extends Model
 {
-    use HasFactory, SoftDeletes, Auditable;
+    use Auditable, HasFactory, SoftDeletes;
 
     // Direction types
     public const DIRECTION_IN = 'in';
+
     public const DIRECTION_OUT = 'out';
 
     // Source types
     public const SOURCE_TITHE = 'tithe';
+
     public const SOURCE_OFFERING = 'offering';
+
     public const SOURCE_DONATION = 'donation';
+
     public const SOURCE_INCOME = 'income';
+
     public const SOURCE_EXPENSE = 'expense';
+
     public const SOURCE_TRANSFER = 'transfer';
+
     public const SOURCE_EXCHANGE = 'exchange';
+
     public const SOURCE_ALLOCATION = 'allocation';
 
     public const SOURCE_TYPES = [
@@ -41,9 +49,13 @@ class Transaction extends Model
 
     // Statuses
     public const STATUS_PENDING = 'pending';
+
     public const STATUS_COMPLETED = 'completed';
+
     public const STATUS_FAILED = 'failed';
+
     public const STATUS_REFUNDED = 'refunded';
+
     public const STATUS_CANCELLED = 'cancelled';
 
     public const STATUSES = [
@@ -56,8 +68,11 @@ class Transaction extends Model
 
     // Payment methods
     public const PAYMENT_CASH = 'cash';
+
     public const PAYMENT_CARD = 'card';
+
     public const PAYMENT_LIQPAY = 'liqpay';
+
     public const PAYMENT_MONOBANK = 'monobank';
 
     public const PAYMENT_METHODS = [
@@ -69,6 +84,7 @@ class Transaction extends Model
 
     // Expense types
     public const EXPENSE_RECURRING = 'recurring';
+
     public const EXPENSE_ONE_TIME = 'one_time';
 
     public const EXPENSE_TYPES = [
@@ -138,7 +154,7 @@ class Transaction extends Model
 
         // Auto-set recorded_by on creation (security: prevent mass assignment)
         static::creating(function (Transaction $transaction) {
-            if (!$transaction->recorded_by && auth()->check()) {
+            if (! $transaction->recorded_by && auth()->check()) {
                 $transaction->recorded_by = auth()->id();
             }
         });
@@ -152,7 +168,7 @@ class Transaction extends Model
         static::deleting(function (Transaction $transaction) {
             if ($transaction->source_type === self::SOURCE_EXCHANGE && $transaction->related_transaction_id) {
                 $related = self::find($transaction->related_transaction_id);
-                if ($related && !$related->trashed()) {
+                if ($related && ! $related->trashed()) {
                     $related->delete();
                 }
             }
@@ -162,7 +178,7 @@ class Transaction extends Model
                 && $transaction->direction === self::DIRECTION_IN
                 && $transaction->ministry_id
             ) {
-                $budget = \App\Models\MinistryBudget::where('ministry_id', $transaction->ministry_id)
+                $budget = MinistryBudget::where('ministry_id', $transaction->ministry_id)
                     ->where('church_id', $transaction->church_id)
                     ->first();
 
@@ -292,8 +308,8 @@ class Transaction extends Model
             'month' => $query->forMonth($now->year, $now->month),
             'quarter' => $query->whereBetween('date', [$now->copy()->startOfQuarter(), $now->copy()->endOfQuarter()]),
             'year' => $query->forYear($now->year),
-            'custom' => $query->when($startDate, fn($q) => $q->where('date', '>=', $startDate))
-                             ->when($endDate, fn($q) => $q->where('date', '<=', $endDate)),
+            'custom' => $query->when($startDate, fn ($q) => $q->where('date', '>=', $startDate))
+                ->when($endDate, fn ($q) => $q->where('date', '<=', $endDate)),
             default => $query,
         };
     }
@@ -390,9 +406,10 @@ class Transaction extends Model
 
     public function getExpenseTypeLabelAttribute(): ?string
     {
-        if (!$this->expense_type) {
+        if (! $this->expense_type) {
             return null;
         }
+
         return self::EXPENSE_TYPES[$this->expense_type] ?? $this->expense_type;
     }
 

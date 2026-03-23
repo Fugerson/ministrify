@@ -26,7 +26,7 @@ class MeetingAttendee extends Model
 
     public function getStatusLabelAttribute(): string
     {
-        return match($this->status) {
+        return match ($this->status) {
             'invited' => 'Запрошено',
             'confirmed' => 'Підтверджено',
             'attended' => 'Був присутній',

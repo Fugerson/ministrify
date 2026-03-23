@@ -3,17 +3,17 @@
 namespace App\Models;
 
 use App\Traits\Auditable;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Models\User;
 
 class Ministry extends Model
 {
-    use HasFactory, SoftDeletes, Auditable;
+    use Auditable, HasFactory, SoftDeletes;
 
     protected static function booted(): void
     {
@@ -29,8 +29,11 @@ class Ministry extends Model
 
     // Visibility options
     public const VISIBILITY_PUBLIC = 'public';      // Everyone can see
+
     public const VISIBILITY_MEMBERS = 'members';    // Only members can see
+
     public const VISIBILITY_LEADERS = 'leaders';    // Only admins and ministry leaders can see
+
     public const VISIBILITY_SPECIFIC = 'specific';  // Only specific people can see
 
     public const VISIBILITY_OPTIONS = [
@@ -172,7 +175,7 @@ class Ministry extends Model
 
     public function getBudgetUsagePercentAttribute(): float
     {
-        if (!$this->monthly_budget || $this->monthly_budget == 0) {
+        if (! $this->monthly_budget || $this->monthly_budget == 0) {
             return 0;
         }
 
@@ -202,16 +205,17 @@ class Ministry extends Model
 
     /**
      * Check if expense can be added within budget
-     * @param float $amount Amount in UAH
-     * @param string|null $date Transaction date (Y-m-d) to check the correct month's budget
+     *
+     * @param  float  $amount  Amount in UAH
+     * @param  string|null  $date  Transaction date (Y-m-d) to check the correct month's budget
      */
     public function canAddExpense(float $amount, ?string $date = null): array
     {
-        if (!$this->monthly_budget || $this->monthly_budget <= 0) {
+        if (! $this->monthly_budget || $this->monthly_budget <= 0) {
             return ['allowed' => true, 'warning' => null];
         }
 
-        $carbonDate = $date ? \Carbon\Carbon::parse($date) : now();
+        $carbonDate = $date ? Carbon::parse($date) : now();
         $year = $carbonDate->year;
         $month = $carbonDate->month;
 
@@ -277,7 +281,7 @@ class Ministry extends Model
 
     public function getHasVisionAttribute(): bool
     {
-        return !empty($this->vision);
+        return ! empty($this->vision);
     }
 
     public function getGoalsProgressAttribute(): int
@@ -286,6 +290,7 @@ class Ministry extends Model
         if ($goals->isEmpty()) {
             return 0;
         }
+
         return (int) round($goals->avg('calculated_progress'));
     }
 
@@ -296,9 +301,10 @@ class Ministry extends Model
 
     public function getPublicUrlAttribute(): string
     {
-        if (!$this->church) {
+        if (! $this->church) {
             return '#';
         }
+
         return route('public.ministry', [$this->church->slug, $this->slug]);
     }
 
@@ -309,7 +315,7 @@ class Ministry extends Model
     {
         $user = $user ?? auth()->user();
 
-        if (!$user) {
+        if (! $user) {
             return false;
         }
 
@@ -341,6 +347,7 @@ class Ministry extends Model
             if ($user->person && $this->leader_id === $user->person->id) {
                 return true;
             }
+
             return false;
         }
 
@@ -367,6 +374,7 @@ class Ministry extends Model
             if ($user->person && $this->members()->where('person_id', $user->person->id)->exists()) {
                 return true;
             }
+
             return false;
         }
 
@@ -380,7 +388,7 @@ class Ministry extends Model
     {
         $user = $user ?? auth()->user();
 
-        if (!$user || !$user->person) {
+        if (! $user || ! $user->person) {
             return false;
         }
 

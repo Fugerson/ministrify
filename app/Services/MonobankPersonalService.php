@@ -4,16 +4,17 @@ namespace App\Services;
 
 use App\Models\Church;
 use App\Models\MonobankTransaction;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Crypt;
-use Carbon\Carbon;
 
 class MonobankPersonalService
 {
     protected const API_BASE = 'https://api.monobank.ua';
 
     protected ?string $token = null;
+
     protected ?Church $church = null;
 
     public function __construct(?Church $church = null)
@@ -33,12 +34,14 @@ class MonobankPersonalService
                 $this->token = null;
             }
         }
+
         return $this;
     }
 
     public function setToken(string $token): self
     {
         $this->token = $token;
+
         return $this;
     }
 
@@ -47,7 +50,7 @@ class MonobankPersonalService
      */
     public function isConfigured(): bool
     {
-        return !empty($this->token);
+        return ! empty($this->token);
     }
 
     /**
@@ -55,14 +58,14 @@ class MonobankPersonalService
      */
     public function getClientInfo(): ?array
     {
-        if (!$this->token) {
+        if (! $this->token) {
             return null;
         }
 
         try {
             $response = Http::withHeaders([
                 'X-Token' => $this->token,
-            ])->get(self::API_BASE . '/personal/client-info');
+            ])->get(self::API_BASE.'/personal/client-info');
 
             if ($response->successful()) {
                 return $response->json();
@@ -75,6 +78,7 @@ class MonobankPersonalService
             return null;
         } catch (\Exception $e) {
             Log::error('Monobank API exception', ['error' => $e->getMessage()]);
+
             return null;
         }
     }
@@ -85,7 +89,7 @@ class MonobankPersonalService
     public function getAccounts(): array
     {
         $info = $this->getClientInfo();
-        if (!$info || !isset($info['accounts'])) {
+        if (! $info || ! isset($info['accounts'])) {
             return [];
         }
 
@@ -109,7 +113,7 @@ class MonobankPersonalService
     public function getUahAccounts(): array
     {
         return collect($this->getAccounts())
-            ->filter(fn($acc) => $acc['currency_code'] == 980)
+            ->filter(fn ($acc) => $acc['currency_code'] == 980)
             ->values()
             ->toArray();
     }
@@ -117,13 +121,13 @@ class MonobankPersonalService
     /**
      * Get statements (transactions) for account
      *
-     * @param string $accountId Account ID or "0" for default
-     * @param int $from Unix timestamp
-     * @param int|null $to Unix timestamp (default: now)
+     * @param  string  $accountId  Account ID or "0" for default
+     * @param  int  $from  Unix timestamp
+     * @param  int|null  $to  Unix timestamp (default: now)
      */
     public function getStatements(string $accountId, int $from, ?int $to = null): ?array
     {
-        if (!$this->token) {
+        if (! $this->token) {
             return null;
         }
 
@@ -138,7 +142,7 @@ class MonobankPersonalService
         try {
             $response = Http::withHeaders([
                 'X-Token' => $this->token,
-            ])->get(self::API_BASE . "/personal/statement/{$accountId}/{$from}/{$to}");
+            ])->get(self::API_BASE."/personal/statement/{$accountId}/{$from}/{$to}");
 
             if ($response->successful()) {
                 return $response->json();
@@ -147,6 +151,7 @@ class MonobankPersonalService
             // Rate limit - need to wait
             if ($response->status() === 429) {
                 Log::warning('Monobank rate limit exceeded');
+
                 return null;
             }
 
@@ -157,6 +162,7 @@ class MonobankPersonalService
             return null;
         } catch (\Exception $e) {
             Log::error('Monobank statements exception', ['error' => $e->getMessage()]);
+
             return null;
         }
     }
@@ -164,16 +170,16 @@ class MonobankPersonalService
     /**
      * Sync transactions for church
      *
-     * @param int $days Number of days to sync (max 31)
+     * @param  int  $days  Number of days to sync (max 31)
      * @return array ['imported' => int, 'skipped' => int, 'error' => string|null]
      */
     public function syncTransactions(int $days = 7): array
     {
-        if (!$this->church) {
+        if (! $this->church) {
             return ['imported' => 0, 'skipped' => 0, 'error' => 'Church not set'];
         }
 
-        if (!$this->isConfigured()) {
+        if (! $this->isConfigured()) {
             return ['imported' => 0, 'skipped' => 0, 'error' => 'Monobank not configured'];
         }
 
@@ -195,6 +201,7 @@ class MonobankPersonalService
 
             if ($exists) {
                 $skipped++;
+
                 continue;
             }
 
@@ -216,7 +223,7 @@ class MonobankPersonalService
         $this->setToken($token);
         $info = $this->getClientInfo();
 
-        if (!$info) {
+        if (! $info) {
             return null;
         }
 
@@ -250,9 +257,11 @@ class MonobankPersonalService
                 'monobank_token' => Crypt::encryptString($token),
                 'monobank_account_id' => $accountId,
             ]);
+
             return true;
         } catch (\Exception $e) {
             Log::error('Failed to save Monobank token', ['error' => $e->getMessage()]);
+
             return false;
         }
     }
@@ -276,14 +285,14 @@ class MonobankPersonalService
      */
     public function setWebhook(string $webhookUrl): bool
     {
-        if (!$this->token) {
+        if (! $this->token) {
             return false;
         }
 
         try {
             $response = Http::withHeaders([
                 'X-Token' => $this->token,
-            ])->post(self::API_BASE . '/personal/webhook', [
+            ])->post(self::API_BASE.'/personal/webhook', [
                 'webHookUrl' => $webhookUrl,
             ]);
 
@@ -298,6 +307,7 @@ class MonobankPersonalService
             return false;
         } catch (\Exception $e) {
             Log::error('Monobank webhook exception', ['error' => $e->getMessage()]);
+
             return false;
         }
     }

@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\SupportTicket;
 use App\Models\SupportMessage;
+use App\Models\SupportTicket;
 use App\Services\ImageService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class SupportController extends Controller
 {
@@ -132,7 +131,7 @@ class SupportController extends Controller
 
     private function uploadAttachments(Request $request, int $ticketId): ?array
     {
-        if (!$request->hasFile('attachments')) {
+        if (! $request->hasFile('attachments')) {
             return null;
         }
 

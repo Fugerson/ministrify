@@ -14,6 +14,7 @@ class EventRegistrationTest extends TestCase
     use RefreshDatabase;
 
     private Church $church;
+
     private Event $event;
 
     protected function setUp(): void

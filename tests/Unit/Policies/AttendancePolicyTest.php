@@ -21,13 +21,14 @@ class AttendancePolicyTest extends TestCase
     use RefreshDatabase;
 
     private AttendancePolicy $policy;
+
     private Church $church;
 
     protected function setUp(): void
     {
         parent::setUp();
         Cache::flush();
-        $this->policy = new AttendancePolicy();
+        $this->policy = new AttendancePolicy;
         $this->church = Church::factory()->create();
     }
 
@@ -39,6 +40,7 @@ class AttendancePolicyTest extends TestCase
             'module' => $module,
             'actions' => [$action],
         ]);
+
         return User::factory()->create([
             'church_id' => $this->church->id,
             'church_role_id' => $role->id,

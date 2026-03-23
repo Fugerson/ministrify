@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Traits\Auditable;
 
 class BoardCard extends Model
 {
@@ -82,7 +82,7 @@ class BoardCard extends Model
 
     public function getLinkedEntityAttribute(): ?object
     {
-        return match($this->entity_type) {
+        return match ($this->entity_type) {
             'event' => $this->event,
             'ministry' => $this->ministry,
             'group' => $this->group,
@@ -132,27 +132,36 @@ class BoardCard extends Model
 
     public function isOverdue(): bool
     {
-        if (!$this->due_date || $this->is_completed) return false;
+        if (! $this->due_date || $this->is_completed) {
+            return false;
+        }
+
         return $this->due_date->isPast();
     }
 
     public function isDueSoon(): bool
     {
-        if (!$this->due_date || $this->is_completed) return false;
+        if (! $this->due_date || $this->is_completed) {
+            return false;
+        }
+
         return $this->due_date->isBetween(now(), now()->addDays(2));
     }
 
     public function getChecklistProgressAttribute(): int
     {
         $total = $this->checklistItems()->count();
-        if ($total === 0) return 0;
+        if ($total === 0) {
+            return 0;
+        }
         $completed = $this->checklistItems()->where('is_completed', true)->count();
+
         return (int) round(($completed / $total) * 100);
     }
 
     public function getPriorityColorAttribute(): string
     {
-        return match($this->priority) {
+        return match ($this->priority) {
             'urgent' => 'red',
             'high' => 'orange',
             'medium' => 'yellow',

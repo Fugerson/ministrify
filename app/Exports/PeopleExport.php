@@ -12,7 +12,9 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 class PeopleExport implements FromCollection, WithHeadings, WithMapping, WithStyles
 {
     protected int $churchId;
+
     protected ?array $ids;
+
     protected array $householdCache = [];
 
     public function __construct(int $churchId, ?array $ids = null)
@@ -43,21 +45,21 @@ class PeopleExport implements FromCollection, WithHeadings, WithMapping, WithSty
 
             // Direct relationships
             foreach ($person->familyRelationships as $rel) {
-                if (!in_array($rel->related_person_id, $familyMemberIds)) {
+                if (! in_array($rel->related_person_id, $familyMemberIds)) {
                     $familyMemberIds[] = $rel->related_person_id;
                 }
             }
 
             // Inverse relationships
             foreach ($person->inverseFamilyRelationships as $rel) {
-                if (!in_array($rel->person_id, $familyMemberIds)) {
+                if (! in_array($rel->person_id, $familyMemberIds)) {
                     $familyMemberIds[] = $rel->person_id;
                 }
             }
 
             if (count($familyMemberIds) > 1) {
                 // Generate household name from last name
-                $householdName = "Сім'я " . $person->last_name;
+                $householdName = "Сім'я ".$person->last_name;
 
                 foreach ($familyMemberIds as $memberId) {
                     $this->householdCache[$memberId] = $householdName;

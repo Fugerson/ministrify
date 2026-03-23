@@ -9,6 +9,7 @@ use App\Models\Ministry;
 use App\Models\MinistryMeeting;
 use App\Models\Person;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class MeetingController extends Controller
 {
@@ -174,7 +175,7 @@ class MeetingController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string|max:2000',
             'duration_minutes' => 'nullable|integer|min:1',
-            'responsible_id' => ['nullable', \Illuminate\Validation\Rule::exists('people', 'id')->where('church_id', $this->getCurrentChurch()->id)],
+            'responsible_id' => ['nullable', Rule::exists('people', 'id')->where('church_id', $this->getCurrentChurch()->id)],
         ]);
 
         $validated['meeting_id'] = $meeting->id;
@@ -193,7 +194,7 @@ class MeetingController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string|max:2000',
             'duration_minutes' => 'nullable|integer|min:1',
-            'responsible_id' => ['nullable', \Illuminate\Validation\Rule::exists('people', 'id')->where('church_id', $this->getCurrentChurch()->id)],
+            'responsible_id' => ['nullable', Rule::exists('people', 'id')->where('church_id', $this->getCurrentChurch()->id)],
         ]);
 
         $item->update($validated);
@@ -204,7 +205,7 @@ class MeetingController extends Controller
     public function toggleAgendaItem(Request $request, MeetingAgendaItem $item)
     {
         $this->authorizeAgendaItem($item);
-        $item->update(['is_completed' => !$item->is_completed]);
+        $item->update(['is_completed' => ! $item->is_completed]);
 
         return $this->successResponse($request, $item->is_completed ? 'Пункт виконано' : 'Пункт не виконано');
     }
@@ -274,7 +275,7 @@ class MeetingController extends Controller
         abort_unless($meeting->ministry_id === $ministry->id, 404);
 
         $validated = $request->validate([
-            'person_id' => ['required', \Illuminate\Validation\Rule::exists('people', 'id')->where('church_id', $this->getCurrentChurch()->id)],
+            'person_id' => ['required', Rule::exists('people', 'id')->where('church_id', $this->getCurrentChurch()->id)],
         ]);
 
         $attendee = MeetingAttendee::updateOrCreate(
@@ -285,12 +286,12 @@ class MeetingController extends Controller
             ['status' => 'invited']
         );
 
-        $person = \App\Models\Person::find($validated['person_id']);
+        $person = Person::find($validated['person_id']);
 
         return $this->successResponse($request, 'Учасника додано', null, [], [
             'id' => $attendee->id,
             'person_name' => $person?->full_name ?? '',
-            'person_initials' => mb_substr($person?->first_name ?? '', 0, 1) . mb_substr($person?->last_name ?? '', 0, 1),
+            'person_initials' => mb_substr($person?->first_name ?? '', 0, 1).mb_substr($person?->last_name ?? '', 0, 1),
         ]);
     }
 
@@ -330,7 +331,7 @@ class MeetingController extends Controller
         if ($ministry->church_id !== $this->getCurrentChurch()->id) {
             abort(403);
         }
-        if (!auth()->user()->canManageMinistry($ministry)) {
+        if (! auth()->user()->canManageMinistry($ministry)) {
             abort(403);
         }
     }

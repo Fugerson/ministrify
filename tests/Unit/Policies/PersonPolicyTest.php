@@ -17,14 +17,16 @@ class PersonPolicyTest extends TestCase
     use RefreshDatabase;
 
     private PersonPolicy $policy;
+
     private Church $church;
+
     private User $admin;
 
     protected function setUp(): void
     {
         parent::setUp();
         Cache::flush();
-        $this->policy = new PersonPolicy();
+        $this->policy = new PersonPolicy;
         [$this->church, $this->admin] = $this->createChurchWithAdmin();
     }
 
@@ -36,6 +38,7 @@ class PersonPolicyTest extends TestCase
             'module' => $module,
             'actions' => [$action],
         ]);
+
         return User::factory()->create([
             'church_id' => $this->church->id,
             'church_role_id' => $role->id,

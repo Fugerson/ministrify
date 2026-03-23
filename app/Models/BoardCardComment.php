@@ -34,6 +34,7 @@ class BoardCardComment extends Model
     public function extractMentions(): array
     {
         preg_match_all('/@(\w+)/', $this->content, $matches);
+
         return $matches[1] ?? [];
     }
 }

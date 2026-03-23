@@ -23,7 +23,7 @@ class LogPageVisit
 
         // Only for authenticated users
         $user = $request->user();
-        if (!$user) {
+        if (! $user) {
             return;
         }
 

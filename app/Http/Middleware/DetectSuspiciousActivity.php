@@ -151,10 +151,10 @@ class DetectSuspiciousActivity
 
     protected function isScanner(string $path): bool
     {
-        $normalizedPath = '/' . ltrim($path, '/');
+        $normalizedPath = '/'.ltrim($path, '/');
 
         foreach ($this->scannerPaths as $scannerPath) {
-            if ($normalizedPath === $scannerPath || str_starts_with($normalizedPath, $scannerPath . '/')) {
+            if ($normalizedPath === $scannerPath || str_starts_with($normalizedPath, $scannerPath.'/')) {
                 return true;
             }
         }
@@ -207,7 +207,7 @@ class DetectSuspiciousActivity
         $cacheKey = "404_count:{$ip}";
         $max404 = config('security.alerts.max_404_per_minute', 10);
 
-        if (!Cache::has($cacheKey)) {
+        if (! Cache::has($cacheKey)) {
             Cache::put($cacheKey, 0, 60);
         }
         $count = Cache::increment($cacheKey);

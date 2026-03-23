@@ -52,6 +52,7 @@ class PushSubscription extends Model
     public function touchLastUsed(): bool
     {
         $this->last_used_at = now();
+
         return $this->save();
     }
 
@@ -61,6 +62,7 @@ class PushSubscription extends Model
     public function deactivate(): bool
     {
         $this->is_active = false;
+
         return $this->save();
     }
 

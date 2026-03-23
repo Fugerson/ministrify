@@ -16,7 +16,7 @@ class Recaptcha implements ValidationRule
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         // Skip in non-production environments
-        if (!app()->isProduction()) {
+        if (! app()->isProduction()) {
             return;
         }
 
@@ -41,19 +41,20 @@ class Recaptcha implements ValidationRule
                     'remoteip' => request()->ip(),
                 ]);
 
-            if (!$response->successful()) {
+            if (! $response->successful()) {
                 return; // API error — let the request through
             }
 
             $result = $response->json();
 
-            if (!($result['success'] ?? false)) {
+            if (! ($result['success'] ?? false)) {
                 Log::channel('security')->info('reCAPTCHA verification failed', [
                     'action' => $this->action,
                     'error_codes' => $result['error-codes'] ?? [],
                     'ip' => request()->ip(),
                 ]);
                 $fail('Перевірку безпеки не пройдено. Спробуйте ще раз.');
+
                 return;
             }
 
@@ -65,6 +66,7 @@ class Recaptcha implements ValidationRule
                     'ip' => request()->ip(),
                 ]);
                 $fail('Перевірку безпеки не пройдено. Спробуйте ще раз.');
+
                 return;
             }
 
@@ -83,7 +85,7 @@ class Recaptcha implements ValidationRule
             }
         } catch (\Exception $e) {
             // Graceful degradation: if Google API is unreachable, let the request through
-            Log::warning('reCAPTCHA API error: ' . $e->getMessage());
+            Log::warning('reCAPTCHA API error: '.$e->getMessage());
         }
     }
 }

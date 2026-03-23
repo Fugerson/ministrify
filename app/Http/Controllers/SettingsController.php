@@ -11,8 +11,9 @@ use App\Services\ImageService;
 use App\Services\NbuExchangeRateService;
 use App\Services\TelegramService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Crypt;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
 class SettingsController extends Controller
@@ -23,6 +24,7 @@ class SettingsController extends Controller
     {
         $this->imageService = $imageService;
     }
+
     public function index()
     {
         $church = $this->getCurrentChurch();
@@ -80,7 +82,7 @@ class SettingsController extends Controller
             }
         });
 
-        $rolesJson = $churchRoles->map(fn($role) => [
+        $rolesJson = $churchRoles->map(fn ($role) => [
             'id' => $role->id,
             'name' => $role->name,
             'slug' => $role->slug,
@@ -102,7 +104,7 @@ class SettingsController extends Controller
 
         // Find potential matches for pending users
         $potentialMatches = [];
-        foreach ($users->filter(fn($u) => !$u->church_role_id) as $u) {
+        foreach ($users->filter(fn ($u) => ! $u->church_role_id) as $u) {
             $matches = $this->findPersonMatches($u, $availablePeople);
             if ($matches->isNotEmpty()) {
                 $potentialMatches[$u->id] = $matches;
@@ -152,7 +154,7 @@ class SettingsController extends Controller
 
     public function testTelegram()
     {
-        if (!config('services.telegram.bot_token')) {
+        if (! config('services.telegram.bot_token')) {
             return $this->errorResponse(request(), 'Telegram бот не налаштовано в системі.');
         }
 
@@ -163,13 +165,14 @@ class SettingsController extends Controller
             return $this->successResponse(request(), "Бот підключено: @{$botInfo['username']}");
         } catch (\Exception $e) {
             \Log::error('Telegram connection error', ['error' => $e->getMessage()]);
+
             return $this->errorResponse(request(), 'Помилка підключення до Telegram.');
         }
     }
 
     public function setupWebhook()
     {
-        if (!config('services.telegram.bot_token')) {
+        if (! config('services.telegram.bot_token')) {
             return $this->errorResponse(request(), 'Telegram бот не налаштовано в системі.');
         }
 
@@ -185,6 +188,7 @@ class SettingsController extends Controller
             }
         } catch (\Exception $e) {
             \Log::error('Telegram webhook error', ['error' => $e->getMessage()]);
+
             return $this->errorResponse(request(), 'Помилка налаштування webhook.');
         }
     }
@@ -193,7 +197,7 @@ class SettingsController extends Controller
     {
         $token = config('services.telegram.bot_token');
 
-        if (!$token) {
+        if (! $token) {
             return response()->json(['connected' => false, 'error' => 'Бот не налаштовано']);
         }
 
@@ -201,7 +205,7 @@ class SettingsController extends Controller
             $telegram = TelegramService::make();
             $botInfo = $telegram->getMe();
 
-            $response = \Illuminate\Support\Facades\Http::get(
+            $response = Http::get(
                 "https://api.telegram.org/bot{$token}/getWebhookInfo"
             );
             $webhookInfo = $response->json()['result'] ?? null;
@@ -215,6 +219,7 @@ class SettingsController extends Controller
             ]);
         } catch (\Exception $e) {
             \Log::error('Telegram status check error', ['error' => $e->getMessage()]);
+
             return response()->json(['connected' => false, 'error' => 'Не вдалося перевірити статус']);
         }
     }
@@ -269,7 +274,7 @@ class SettingsController extends Controller
         $church = $this->getCurrentChurch();
 
         $validated = $request->validate([
-            'slug' => 'required|string|max:50|alpha_dash|unique:churches,slug,' . $church->id,
+            'slug' => 'required|string|max:50|alpha_dash|unique:churches,slug,'.$church->id,
             'public_site_enabled' => 'boolean',
             'public_description' => 'nullable|string|max:1000',
             'public_email' => 'nullable|email|max:255',
@@ -337,7 +342,7 @@ class SettingsController extends Controller
         }
 
         // Validate private key is required when enabling LiqPay
-        if (($validated['liqpay_enabled'] ?? false) && !$privateKey && !($currentSettings['liqpay_private_key'] ?? null)) {
+        if (($validated['liqpay_enabled'] ?? false) && ! $privateKey && ! ($currentSettings['liqpay_private_key'] ?? null)) {
             return back()->withErrors(['liqpay_private_key' => __('validation.required_if', ['attribute' => 'Private Key', 'other' => 'LiqPay', 'value' => 'увімкнено'])]);
         }
 
@@ -485,7 +490,7 @@ class SettingsController extends Controller
 
         // UAH is always required
         $currencies = collect($validated['currencies'])->unique()->values()->toArray();
-        if (!in_array('UAH', $currencies)) {
+        if (! in_array('UAH', $currencies)) {
             array_unshift($currencies, 'UAH');
         }
 
@@ -581,7 +586,7 @@ class SettingsController extends Controller
         return $this->successResponse($request, 'Категорію видалено.');
     }
 
-    private function findPersonMatches($user, $availablePeople): \Illuminate\Support\Collection
+    private function findPersonMatches($user, $availablePeople): Collection
     {
         $nameParts = explode(' ', mb_strtolower(trim($user->name)), 2);
         $firstName = $nameParts[0] ?? '';
@@ -595,19 +600,29 @@ class SettingsController extends Controller
             $pEmail = mb_strtolower($person->email ?? '');
             $pPhone = preg_replace('/\D/', '', $person->phone ?? '');
 
-            if ($email && $pEmail && $email === $pEmail) return true;
+            if ($email && $pEmail && $email === $pEmail) {
+                return true;
+            }
 
             if ($phone && $pPhone && strlen($phone) >= 9 && strlen($pPhone) >= 9) {
-                if (substr($phone, -9) === substr($pPhone, -9)) return true;
+                if (substr($phone, -9) === substr($pPhone, -9)) {
+                    return true;
+                }
             }
 
             if ($firstName && $pFirst && $firstName === $pFirst) {
-                if ($lastName && $pLast && $lastName === $pLast) return true;
-                if (!$lastName || !$pLast) return true;
+                if ($lastName && $pLast && $lastName === $pLast) {
+                    return true;
+                }
+                if (! $lastName || ! $pLast) {
+                    return true;
+                }
             }
 
             if ($firstName && $lastName && $pFirst && $pLast) {
-                if ($firstName === $pLast && $lastName === $pFirst) return true;
+                if ($firstName === $pLast && $lastName === $pFirst) {
+                    return true;
+                }
             }
 
             return false;

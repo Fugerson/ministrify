@@ -14,7 +14,7 @@ class MinistryFactory extends Factory
 
     public function definition(): array
     {
-        $name = fake()->randomElement(['Worship', 'Youth', 'Children', 'Media', 'Hospitality']) . ' Ministry';
+        $name = fake()->randomElement(['Worship', 'Youth', 'Children', 'Media', 'Hospitality']).' Ministry';
 
         return [
             'church_id' => Church::factory(),

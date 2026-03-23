@@ -15,7 +15,9 @@ class MinistryTaskTest extends TestCase
     use RefreshDatabase;
 
     private Church $church;
+
     private Ministry $ministry;
+
     private User $admin;
 
     protected function setUp(): void

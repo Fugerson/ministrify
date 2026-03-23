@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Person;
 use App\Models\PrivatbankTransaction;
 use App\Models\Transaction;
 use App\Models\TransactionCategory;
-use App\Models\Person;
 use App\Services\PrivatbankService;
-use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class PrivatbankSyncController extends Controller
 {
@@ -26,7 +27,7 @@ class PrivatbankSyncController extends Controller
 
         if ($isConnected && $church->privatbank_card_number) {
             $card = $church->privatbank_card_number;
-            $maskedCard = substr($card, 0, 4) . ' **** **** ' . substr($card, -4);
+            $maskedCard = substr($card, 0, 4).' **** **** '.substr($card, -4);
         }
 
         // Build query with filters
@@ -73,8 +74,8 @@ class PrivatbankSyncController extends Controller
             $search = addcslashes($request->search, '%_');
             $query->where(function ($q) use ($search) {
                 $q->where('counterpart_name', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%")
-                  ->orWhere('terminal', 'like', "%{$search}%");
+                    ->orWhere('description', 'like', "%{$search}%")
+                    ->orWhere('terminal', 'like', "%{$search}%");
             });
         }
 
@@ -83,10 +84,10 @@ class PrivatbankSyncController extends Controller
         $sortDir = $request->get('dir', 'desc');
 
         $allowedSorts = ['privat_time', 'amount', 'counterpart_name'];
-        if (!in_array($sortField, $allowedSorts)) {
+        if (! in_array($sortField, $allowedSorts)) {
             $sortField = 'privat_time';
         }
-        if (!in_array($sortDir, ['asc', 'desc'])) {
+        if (! in_array($sortDir, ['asc', 'desc'])) {
             $sortDir = 'desc';
         }
 
@@ -169,7 +170,7 @@ class PrivatbankSyncController extends Controller
         ]);
 
         $church = $this->getCurrentChurch();
-        $service = new PrivatbankService();
+        $service = new PrivatbankService;
 
         // Set credentials for validation
         $service->setCredentials($request->merchant_id, $request->password, $request->card_number);
@@ -177,10 +178,11 @@ class PrivatbankSyncController extends Controller
         // Validate credentials
         $validation = $service->validateCredentials();
 
-        if (!$validation) {
+        if (! $validation) {
             if ($request->wantsJson()) {
                 return response()->json(['success' => false, 'message' => 'Невірні дані або помилка з\'єднання з ПриватБанком', 'errors' => ['merchant_id' => ['Невірні дані або помилка з\'єднання з ПриватБанком']]], 422);
             }
+
             return back()->withErrors(['merchant_id' => 'Невірні дані або помилка з\'єднання з ПриватБанком']);
         }
 
@@ -196,7 +198,7 @@ class PrivatbankSyncController extends Controller
     public function disconnect(Request $request)
     {
         $church = $this->getCurrentChurch();
-        $service = new PrivatbankService();
+        $service = new PrivatbankService;
         $service->disconnect($church);
 
         return $this->successResponse($request, 'ПриватБанк відключено', 'finances.privatbank.index');
@@ -243,7 +245,7 @@ class PrivatbankSyncController extends Controller
         ]);
 
         // Use DB transaction with lock to prevent duplicate imports
-        $transaction = \Illuminate\Support\Facades\DB::transaction(function () use ($church, $privatTransaction, $request) {
+        $transaction = DB::transaction(function () use ($church, $privatTransaction, $request) {
             $privatTransaction = PrivatbankTransaction::where('id', $privatTransaction->id)
                 ->lockForUpdate()
                 ->first();
@@ -275,7 +277,7 @@ class PrivatbankSyncController extends Controller
             return $transaction;
         });
 
-        if (!$transaction) {
+        if (! $transaction) {
             return $this->errorResponse($request, 'Транзакція вже оброблена');
         }
 
@@ -330,7 +332,7 @@ class PrivatbankSyncController extends Controller
         $imported = 0;
 
         foreach ($request->transaction_ids as $id) {
-            \Illuminate\Support\Facades\DB::transaction(function () use ($id, $church, $request, &$imported) {
+            DB::transaction(function () use ($id, $church, $request, &$imported) {
                 $privatTx = PrivatbankTransaction::where('id', $id)
                     ->where('church_id', $church->id)
                     ->where('is_processed', false)
@@ -338,7 +340,9 @@ class PrivatbankSyncController extends Controller
                     ->lockForUpdate()
                     ->first();
 
-                if (!$privatTx) return;
+                if (! $privatTx) {
+                    return;
+                }
 
                 $transaction = Transaction::create([
                     'church_id' => $church->id,
@@ -391,9 +395,10 @@ class PrivatbankSyncController extends Controller
     public function toggleAutoSync(Request $request)
     {
         $church = $this->getCurrentChurch();
-        $church->update(['privatbank_auto_sync' => !$church->privatbank_auto_sync]);
+        $church->update(['privatbank_auto_sync' => ! $church->privatbank_auto_sync]);
 
         $status = $church->privatbank_auto_sync ? 'увімкнено' : 'вимкнено';
+
         return $this->successResponse($request, "Автосинхронізацію {$status}");
     }
 }

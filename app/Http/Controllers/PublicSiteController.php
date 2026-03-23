@@ -4,17 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Models\Church;
 use App\Models\DonationCampaign;
-use App\Models\Transaction;
 use App\Models\Event;
 use App\Models\EventRegistration;
 use App\Models\Group;
 use App\Models\GroupJoinRequest;
 use App\Models\Ministry;
 use App\Models\MinistryJoinRequest;
+use App\Models\Transaction;
 use App\Rules\Honeypot;
 use App\Rules\Recaptcha;
 use App\Services\PaymentService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class PublicSiteController extends Controller
 {
@@ -27,10 +28,10 @@ class PublicSiteController extends Controller
         $isPreview = $request->boolean('preview');
         if ($isPreview) {
             $user = auth()->user();
-            if (!$user || $user->church_id !== $church->id) {
+            if (! $user || $user->church_id !== $church->id) {
                 abort(404);
             }
-        } elseif (!$church->public_site_enabled) {
+        } elseif (! $church->public_site_enabled) {
             abort(404);
         }
 
@@ -93,7 +94,7 @@ class PublicSiteController extends Controller
             ->where('public_site_enabled', true)
             ->firstOrFail();
 
-        if ($event->church_id !== $church->id || !$event->is_public) {
+        if ($event->church_id !== $church->id || ! $event->is_public) {
             abort(404);
         }
 
@@ -109,7 +110,7 @@ class PublicSiteController extends Controller
             ->where('public_site_enabled', true)
             ->firstOrFail();
 
-        if ($event->church_id !== $church->id || !$event->is_public || !$event->canAcceptRegistrations()) {
+        if ($event->church_id !== $church->id || ! $event->is_public || ! $event->canAcceptRegistrations()) {
             abort(404);
         }
 
@@ -305,7 +306,7 @@ class PublicSiteController extends Controller
             'donor_email' => 'nullable|email|max:255',
             'donor_phone' => 'nullable|string|max:20',
             'campaign_id' => ['nullable', 'exists:donation_campaigns,id', function ($attr, $value, $fail) use ($church) {
-                if ($value && \App\Models\DonationCampaign::where('id', $value)->where('church_id', $church->id)->doesntExist()) {
+                if ($value && DonationCampaign::where('id', $value)->where('church_id', $church->id)->doesntExist()) {
                     $fail(__('messages.campaign_not_belongs_to_church'));
                 }
             }],
@@ -317,7 +318,7 @@ class PublicSiteController extends Controller
         $paymentService = new PaymentService($church);
 
         if ($validated['payment_method'] === 'liqpay') {
-            if (!$paymentService->isLiqPayAvailable()) {
+            if (! $paymentService->isLiqPayAvailable()) {
                 return back()->with('error', __('messages.liqpay_unavailable'));
             }
 
@@ -331,17 +332,18 @@ class PublicSiteController extends Controller
                     'signature' => $paymentData['signature'],
                 ]);
             } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::error('LiqPay payment creation failed', [
+                Log::error('LiqPay payment creation failed', [
                     'church_id' => $church->id,
                     'error' => $e->getMessage(),
                     'trace' => $e->getTraceAsString(),
                 ]);
+
                 return back()->with('error', __('messages.payment_creation_error'));
             }
         }
 
         if ($validated['payment_method'] === 'monobank') {
-            if (!$paymentService->isMonobankAvailable()) {
+            if (! $paymentService->isMonobankAvailable()) {
                 return back()->with('error', __('messages.monobank_unavailable'));
             }
 
@@ -356,7 +358,7 @@ class PublicSiteController extends Controller
             $parsedUrl = parse_url($jarLink);
             $host = $parsedUrl['host'] ?? '';
 
-            if (!in_array($host, $allowedDomains)) {
+            if (! in_array($host, $allowedDomains)) {
                 return back()->with('error', __('messages.invalid_monobank_link'));
             }
 
@@ -382,7 +384,7 @@ class PublicSiteController extends Controller
         $data = $request->input('data');
         $signature = $request->input('signature');
 
-        if (!$data || !$signature) {
+        if (! $data || ! $signature) {
             return response()->json(['status' => 'error'], 400);
         }
 
@@ -390,13 +392,13 @@ class PublicSiteController extends Controller
         $decodedData = json_decode(base64_decode($data), true);
         $orderId = $decodedData['order_id'] ?? null;
 
-        if (!$orderId) {
+        if (! $orderId) {
             return response()->json(['status' => 'error'], 400);
         }
 
         // Find transaction and church
         $transaction = Transaction::where('order_id', $orderId)->first();
-        if (!$transaction) {
+        if (! $transaction) {
             return response()->json(['status' => 'error'], 404);
         }
 
@@ -404,7 +406,7 @@ class PublicSiteController extends Controller
         $paymentService = new PaymentService($church);
 
         // Verify signature
-        if (!$paymentService->verifyLiqPayCallback($data, $signature)) {
+        if (! $paymentService->verifyLiqPayCallback($data, $signature)) {
             return response()->json(['status' => 'error'], 403);
         }
 
@@ -423,5 +425,4 @@ class PublicSiteController extends Controller
 
         return view('public.contact', compact('church'));
     }
-
 }

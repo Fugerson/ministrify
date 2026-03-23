@@ -74,7 +74,7 @@ class ChurchBudget extends Model
         $uncategorized = (float) (Transaction::where('church_id', $this->church_id)
             ->where('direction', Transaction::DIRECTION_OUT)
             ->whereNull('ministry_id')
-            ->when(!empty($itemCategoryIds), fn ($q) => $q->whereNotIn('category_id', $itemCategoryIds))
+            ->when(! empty($itemCategoryIds), fn ($q) => $q->whereNotIn('category_id', $itemCategoryIds))
             ->whereNotIn('source_type', [Transaction::SOURCE_ALLOCATION, Transaction::SOURCE_EXCHANGE])
             ->completed()
             ->whereYear('date', $this->year)
@@ -91,6 +91,7 @@ class ChurchBudget extends Model
         for ($m = 1; $m <= 12; $m++) {
             $total += $this->getActualSpendingForMonth($m);
         }
+
         return $total;
     }
 
@@ -102,7 +103,7 @@ class ChurchBudget extends Model
         }
 
         $budget = new static([
-            'name' => __('app.budget') . ' ' . $year,
+            'name' => __('app.budget').' '.$year,
             'status' => 'active',
             'year' => $year,
         ]);

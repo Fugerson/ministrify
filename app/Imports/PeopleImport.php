@@ -2,22 +2,25 @@
 
 namespace App\Imports;
 
+use App\Models\FamilyRelationship;
+use App\Models\Ministry;
 use App\Models\Person;
 use App\Models\Tag;
-use App\Models\Ministry;
-use App\Models\FamilyRelationship;
+use Carbon\Carbon;
 use Maatwebsite\Excel\Concerns\ToModel;
+use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
-use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Events\AfterImport;
-use Carbon\Carbon;
 
-class PeopleImport implements ToModel, WithHeadingRow, WithValidation, WithEvents
+class PeopleImport implements ToModel, WithEvents, WithHeadingRow, WithValidation
 {
     protected int $churchId;
+
     protected array $tagCache = [];
+
     protected array $ministryCache = [];
+
     protected array $households = []; // Track household -> person_ids
 
     public function __construct(int $churchId)
@@ -40,7 +43,7 @@ class PeopleImport implements ToModel, WithHeadingRow, WithValidation, WithEvent
     public function registerEvents(): array
     {
         return [
-            AfterImport::class => function(AfterImport $event) {
+            AfterImport::class => function (AfterImport $event) {
                 $this->createFamilyRelationships();
             },
         ];
@@ -65,7 +68,7 @@ class PeopleImport implements ToModel, WithHeadingRow, WithValidation, WithEvent
             'birth_date' => $this->parseDate($row['data_narodzhennia'] ?? $row['birth_date'] ?? null),
             'joined_date' => $this->parseDate($row['v_tserkvi_z'] ?? $row['joined_date'] ?? null),
             'notes' => $row['notatky'] ?? $row['notes'] ?? null,
-        ], fn($v) => $v !== null && $v !== '');
+        ], fn ($v) => $v !== null && $v !== '');
 
         $person = Person::updateOrCreate(
             [
@@ -78,34 +81,34 @@ class PeopleImport implements ToModel, WithHeadingRow, WithValidation, WithEvent
 
         // Track household for family relationships
         $householdName = $row['household_name'] ?? $row['household'] ?? $row['simia'] ?? $row["sim'ia"] ?? $row['rodyna'] ?? null;
-        if (!empty($householdName)) {
+        if (! empty($householdName)) {
             $householdName = trim($householdName);
-            if (!isset($this->households[$householdName])) {
+            if (! isset($this->households[$householdName])) {
                 $this->households[$householdName] = [];
             }
             $this->households[$householdName][] = $person->id;
         }
 
         // Sync tags
-        if (!empty($row['tehy']) || !empty($row['tags'])) {
+        if (! empty($row['tehy']) || ! empty($row['tags'])) {
             $tagNames = array_map('trim', explode(',', $row['tehy'] ?? $row['tags'] ?? ''));
             $tagIds = [];
             foreach ($tagNames as $tagName) {
-                if (!empty($tagName) && isset($this->tagCache[$tagName])) {
+                if (! empty($tagName) && isset($this->tagCache[$tagName])) {
                     $tagIds[] = $this->tagCache[$tagName];
                 }
             }
-            if (!empty($tagIds)) {
+            if (! empty($tagIds)) {
                 $person->tags()->syncWithoutDetaching($tagIds);
             }
         }
 
         // Sync ministries
-        if (!empty($row['sluzhinnia']) || !empty($row['ministries'])) {
+        if (! empty($row['sluzhinnia']) || ! empty($row['ministries'])) {
             $ministryNames = array_map('trim', explode(',', $row['sluzhinnia'] ?? $row['ministries'] ?? ''));
             $ministryIds = [];
             foreach ($ministryNames as $ministryName) {
-                if (!empty($ministryName) && isset($this->ministryCache[$ministryName])) {
+                if (! empty($ministryName) && isset($this->ministryCache[$ministryName])) {
                     $ministryIds[] = $this->ministryCache[$ministryName];
                 }
             }
@@ -135,15 +138,15 @@ class PeopleImport implements ToModel, WithHeadingRow, WithValidation, WithEvent
                         ->where(function ($query) use ($personIds, $i, $j) {
                             $query->where(function ($q) use ($personIds, $i, $j) {
                                 $q->where('person_id', $personIds[$i])
-                                  ->where('related_person_id', $personIds[$j]);
+                                    ->where('related_person_id', $personIds[$j]);
                             })->orWhere(function ($q) use ($personIds, $i, $j) {
                                 $q->where('person_id', $personIds[$j])
-                                  ->where('related_person_id', $personIds[$i]);
+                                    ->where('related_person_id', $personIds[$i]);
                             });
                         })
                         ->exists();
 
-                    if (!$exists) {
+                    if (! $exists) {
                         FamilyRelationship::create([
                             'church_id' => $this->churchId,
                             'person_id' => $personIds[$i],
@@ -166,6 +169,7 @@ class PeopleImport implements ToModel, WithHeadingRow, WithValidation, WithEvent
             if (preg_match('/^\d{2}\.\d{2}\.\d{4}$/', $value)) {
                 return Carbon::createFromFormat('d.m.Y', $value);
             }
+
             return Carbon::parse($value);
         } catch (\Exception $e) {
             return null;

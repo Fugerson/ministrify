@@ -10,8 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @deprecated Use Transaction model with source_type = 'donation' instead.
  * This model is kept for backward compatibility with existing data.
  * All new donations should use the Transaction model.
- *
- * @see \App\Models\Transaction
+ * @see Transaction
  */
 class Donation extends Model
 {
@@ -83,7 +82,7 @@ class Donation extends Model
 
     public function getFormattedAmountAttribute(): string
     {
-        return number_format($this->amount, 2, ',', ' ') . ' ' . $this->currency;
+        return number_format($this->amount, 2, ',', ' ').' '.$this->currency;
     }
 
     public function getStatusColorAttribute(): string

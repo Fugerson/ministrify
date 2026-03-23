@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Models\Church;
 use App\Models\Person;
 use App\Models\TelegramMessage;
+use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -15,7 +16,7 @@ class EnsureChurchContext
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (!auth()->check()) {
+        if (! auth()->check()) {
             return redirect()->route('login');
         }
 
@@ -24,8 +25,9 @@ class EnsureChurchContext
         // Check if super admin is impersonating a church
         if ($user->isSuperAdmin() && session('impersonate_church_id')) {
             $church = Church::find(session('impersonate_church_id'));
-            if (!$church) {
+            if (! $church) {
                 session()->forget('impersonate_church_id');
+
                 return redirect()->route('system.index')
                     ->with('error', __('messages.church_not_found'));
             }
@@ -33,7 +35,7 @@ class EnsureChurchContext
             $church = $user->church;
 
             // Auto-switch: if church_id is null but user has pivot records, switch to first church
-            if (!$church) {
+            if (! $church) {
                 $firstPivot = DB::table('church_user')
                     ->where('user_id', $user->id)
                     ->orderBy('joined_at')
@@ -47,7 +49,7 @@ class EnsureChurchContext
             }
         }
 
-        if (!$church) {
+        if (! $church) {
             // Super admins without a church can still access if not impersonating
             if ($user->isSuperAdmin()) {
                 return redirect()->route('system.index')
@@ -55,6 +57,7 @@ class EnsureChurchContext
             }
 
             auth()->logout();
+
             return redirect()->route('login')
                 ->withErrors(['email' => __('messages.account_not_linked_to_church')]);
         }
@@ -65,7 +68,7 @@ class EnsureChurchContext
             ->first();
 
         // Fallback: resolve via pivot's person_id and auto-link
-        if (!$person) {
+        if (! $person) {
             $pivot = DB::table('church_user')
                 ->where('user_id', $user->id)
                 ->where('church_id', $church->id)
@@ -73,17 +76,17 @@ class EnsureChurchContext
 
             if ($pivot?->person_id) {
                 $person = Person::find($pivot->person_id);
-                if ($person && !$person->user_id) {
+                if ($person && ! $person->user_id) {
                     $person->update(['user_id' => $user->id]);
                 }
             }
 
             // Still no person? Try by email and link
-            if (!$person) {
+            if (! $person) {
                 $person = Person::where('church_id', $church->id)
                     ->where('email', $user->email)
                     ->first();
-                if ($person && !$person->user_id) {
+                if ($person && ! $person->user_id) {
                     $person->update(['user_id' => $user->id]);
                 }
                 // Update pivot to point to correct person
@@ -126,11 +129,11 @@ class EnsureChurchContext
             $pendingApprovalsCount = Cache::remember(
                 "church:{$church->id}:pending_approvals",
                 120,
-                fn () => \App\Models\User::where('church_id', $church->id)
+                fn () => User::where('church_id', $church->id)
                     ->whereNull('church_role_id')
                     ->where(function ($q) {
                         $q->where('servant_approval_status', 'pending')
-                          ->orWhereHas('churches', fn ($q3) => $q3->where('role_approval_status', 'pending'));
+                            ->orWhereHas('churches', fn ($q3) => $q3->where('role_approval_status', 'pending'));
                     })
                     ->count()
             );

@@ -8,6 +8,7 @@ use Illuminate\Console\Command;
 class GenerateVapidKeys extends Command
 {
     protected $signature = 'vapid:generate';
+
     protected $description = 'Generate VAPID keys for Web Push notifications';
 
     public function handle(): int
@@ -27,7 +28,8 @@ class GenerateVapidKeys extends Command
 
             return Command::SUCCESS;
         } catch (\Exception $e) {
-            $this->error('Failed to generate VAPID keys: ' . $e->getMessage());
+            $this->error('Failed to generate VAPID keys: '.$e->getMessage());
+
             return Command::FAILURE;
         }
     }

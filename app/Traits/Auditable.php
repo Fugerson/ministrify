@@ -24,7 +24,7 @@ trait Auditable
             $ignoredFields = ['remember_token', 'visible_sections', 'updated_at'];
             $meaningfulDirty = array_diff_key($dirty, array_flip($ignoredFields));
 
-            if (!empty($meaningfulDirty)) {
+            if (! empty($meaningfulDirty)) {
                 $old = array_intersect_key($model->getOriginal(), $dirty);
                 $model->logAudit('updated', $old, $dirty);
             }
@@ -49,7 +49,7 @@ trait Auditable
     protected function logAudit(string $action, ?array $oldValues, ?array $newValues): void
     {
         // Skip if no auth user (during seeding, etc.)
-        if (!auth()->check()) {
+        if (! auth()->check()) {
             return;
         }
 
@@ -64,7 +64,7 @@ trait Auditable
         $churchId = $this->church_id ?? $user->church_id ?? null;
 
         // Skip logging if no church context
-        if (!$churchId) {
+        if (! $churchId) {
             return;
         }
 
@@ -93,7 +93,7 @@ trait Auditable
      */
     protected function filterSensitive(?array $data, array $sensitiveFields): ?array
     {
-        if (!$data) {
+        if (! $data) {
             return null;
         }
 
@@ -147,7 +147,7 @@ trait Auditable
      */
     public function logCustomAction(string $action, ?string $notes = null): void
     {
-        if (!auth()->check()) {
+        if (! auth()->check()) {
             return;
         }
 
@@ -160,7 +160,7 @@ trait Auditable
 
         $churchId = $this->church_id ?? $user->church_id ?? null;
 
-        if (!$churchId) {
+        if (! $churchId) {
             return;
         }
 

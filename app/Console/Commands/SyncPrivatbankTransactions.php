@@ -22,6 +22,7 @@ class SyncPrivatbankTransactions extends Command
 
         if ($churches->isEmpty()) {
             $this->info('No churches with PrivatBank auto-sync enabled');
+
             return self::SUCCESS;
         }
 
@@ -38,8 +39,9 @@ class SyncPrivatbankTransactions extends Command
             try {
                 $service = new PrivatbankService($church);
 
-                if (!$service->isConfigured()) {
-                    $this->warn("  Credentials not configured, skipping");
+                if (! $service->isConfigured()) {
+                    $this->warn('  Credentials not configured, skipping');
+
                     continue;
                 }
 

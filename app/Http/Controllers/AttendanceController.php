@@ -9,14 +9,13 @@ use App\Models\Person;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Gate;
 
 class AttendanceController extends Controller
 {
     protected function checkAttendanceEnabled(): void
     {
         $church = $this->getCurrentChurch();
-        if (!$church->attendance_enabled) {
+        if (! $church->attendance_enabled) {
             abort(403, 'Функцію відвідуваності вимкнено для вашої церкви.');
         }
     }
@@ -78,7 +77,7 @@ class AttendanceController extends Controller
         $church = $this->getCurrentChurch();
 
         // Check if event belongs to church
-        if (!empty($validated['event_id'])) {
+        if (! empty($validated['event_id'])) {
             Event::where('church_id', $church->id)->findOrFail($validated['event_id']);
         }
 
@@ -96,7 +95,7 @@ class AttendanceController extends Controller
         ]);
 
         // Create attendance records
-        if (!empty($validated['present'])) {
+        if (! empty($validated['present'])) {
             // Validate all person IDs belong to this church
             $validPersonIds = Person::where('church_id', $church->id)
                 ->whereIn('id', $validated['present'])
@@ -171,7 +170,7 @@ class AttendanceController extends Controller
 
             $attendance->records()->delete();
 
-            if (!empty($validated['present'])) {
+            if (! empty($validated['present'])) {
                 $church = $this->getCurrentChurch();
                 $validPersonIds = Person::where('church_id', $church->id)
                     ->whereIn('id', $validated['present'])
@@ -255,10 +254,10 @@ class AttendanceController extends Controller
         $threeWeeksAgo = now()->subWeeks(3);
         $needAttention = Person::where('church_id', $church->id)
             ->whereNotIn('membership_status', [Person::STATUS_GUEST])
-            ->whereHas('attendanceRecords', fn($q) => $q->where('present', true))
+            ->whereHas('attendanceRecords', fn ($q) => $q->where('present', true))
             ->whereDoesntHave('attendanceRecords', function ($q) use ($threeWeeksAgo) {
-                $q->whereHas('attendance', fn($aq) => $aq->where('date', '>=', $threeWeeksAgo))
-                  ->where('present', true);
+                $q->whereHas('attendance', fn ($aq) => $aq->where('date', '>=', $threeWeeksAgo))
+                    ->where('present', true);
             })
             ->orderBy('last_name')
             ->get();

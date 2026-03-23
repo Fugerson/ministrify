@@ -12,6 +12,7 @@ class AccessGranted extends Notification implements ShouldQueue
     use Queueable;
 
     public string $roleName;
+
     public string $churchName;
 
     public function __construct(string $roleName, string $churchName)

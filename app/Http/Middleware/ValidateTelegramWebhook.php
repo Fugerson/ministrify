@@ -28,15 +28,16 @@ class ValidateTelegramWebhook
         }
 
         // Validate request structure
-        if (!$this->hasValidStructure($request)) {
+        if (! $this->hasValidStructure($request)) {
             return response()->json(['error' => 'Invalid request structure'], 400);
         }
 
         // Validate IP address (Telegram servers only)
-        if (!$this->isFromTelegram($request)) {
+        if (! $this->isFromTelegram($request)) {
             logger()->warning('Telegram webhook request from non-Telegram IP', [
                 'ip' => $request->ip(),
             ]);
+
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
@@ -51,13 +52,13 @@ class ValidateTelegramWebhook
         $data = $request->all();
 
         // Must have update_id
-        if (!isset($data['update_id'])) {
+        if (! isset($data['update_id'])) {
             return false;
         }
 
         // Must have one of: message, callback_query, inline_query, etc.
         $validTypes = ['message', 'callback_query', 'inline_query', 'chosen_inline_result',
-                       'channel_post', 'edited_message', 'edited_channel_post'];
+            'channel_post', 'edited_message', 'edited_channel_post'];
 
         foreach ($validTypes as $type) {
             if (isset($data[$type])) {

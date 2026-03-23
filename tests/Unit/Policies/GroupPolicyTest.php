@@ -18,13 +18,14 @@ class GroupPolicyTest extends TestCase
     use RefreshDatabase;
 
     private GroupPolicy $policy;
+
     private Church $church;
 
     protected function setUp(): void
     {
         parent::setUp();
         Cache::flush();
-        $this->policy = new GroupPolicy();
+        $this->policy = new GroupPolicy;
         $this->church = Church::factory()->create();
     }
 
@@ -36,6 +37,7 @@ class GroupPolicyTest extends TestCase
             'module' => $module,
             'actions' => [$action],
         ]);
+
         return User::factory()->create([
             'church_id' => $this->church->id,
             'church_role_id' => $role->id,

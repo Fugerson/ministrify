@@ -31,7 +31,7 @@ return new class extends Migration
                 'communion',
                 'child_blessing',
                 'special',
-                'other'
+                'other',
             ])->default('other');
             $table->time('start_time')->nullable();
             $table->time('end_time')->nullable();

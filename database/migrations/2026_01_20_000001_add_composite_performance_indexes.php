@@ -13,10 +13,12 @@ return new class extends Migration
     {
         $driver = Schema::getConnection()->getDriverName();
         if ($driver === 'sqlite') {
-            $indexes = \DB::select("SELECT name FROM sqlite_master WHERE type='index' AND name=?", [$indexName]);
+            $indexes = DB::select("SELECT name FROM sqlite_master WHERE type='index' AND name=?", [$indexName]);
+
             return count($indexes) > 0;
         }
-        $indexes = \DB::select("SHOW INDEX FROM {$table} WHERE Key_name = ?", [$indexName]);
+        $indexes = DB::select("SHOW INDEX FROM {$table} WHERE Key_name = ?", [$indexName]);
+
         return count($indexes) > 0;
     }
 
@@ -27,58 +29,58 @@ return new class extends Migration
     {
         // Audit logs - church + date composite for filtering
         Schema::table('audit_logs', function (Blueprint $table) {
-            if (!$this->indexExists('audit_logs', 'audit_logs_church_id_created_at_index')) {
+            if (! $this->indexExists('audit_logs', 'audit_logs_church_id_created_at_index')) {
                 $table->index(['church_id', 'created_at'], 'audit_logs_church_id_created_at_index');
             }
         });
 
         // Ministry-person pivot - composite for efficient joins
         Schema::table('ministry_person', function (Blueprint $table) {
-            if (!$this->indexExists('ministry_person', 'ministry_person_person_ministry_index')) {
+            if (! $this->indexExists('ministry_person', 'ministry_person_person_ministry_index')) {
                 $table->index(['person_id', 'ministry_id'], 'ministry_person_person_ministry_index');
             }
-            if (!$this->indexExists('ministry_person', 'ministry_person_created_at_index')) {
+            if (! $this->indexExists('ministry_person', 'ministry_person_created_at_index')) {
                 $table->index('created_at', 'ministry_person_created_at_index');
             }
         });
 
         // Group-person pivot - composite for efficient joins
         Schema::table('group_person', function (Blueprint $table) {
-            if (!$this->indexExists('group_person', 'group_person_person_group_index')) {
+            if (! $this->indexExists('group_person', 'group_person_person_group_index')) {
                 $table->index(['person_id', 'group_id'], 'group_person_person_group_index');
             }
         });
 
         // People - church + date composite for dashboard queries
         Schema::table('people', function (Blueprint $table) {
-            if (!$this->indexExists('people', 'people_church_id_created_at_index')) {
+            if (! $this->indexExists('people', 'people_church_id_created_at_index')) {
                 $table->index(['church_id', 'created_at'], 'people_church_id_created_at_index');
             }
-            if (!$this->indexExists('people', 'people_church_id_joined_date_index')) {
+            if (! $this->indexExists('people', 'people_church_id_joined_date_index')) {
                 $table->index(['church_id', 'joined_date'], 'people_church_id_joined_date_index');
             }
         });
 
         // Transactions - church + date composite for financial queries
         Schema::table('transactions', function (Blueprint $table) {
-            if (!$this->indexExists('transactions', 'transactions_church_id_date_index')) {
+            if (! $this->indexExists('transactions', 'transactions_church_id_date_index')) {
                 $table->index(['church_id', 'date'], 'transactions_church_id_date_index');
             }
-            if (!$this->indexExists('transactions', 'transactions_church_id_direction_date_index')) {
+            if (! $this->indexExists('transactions', 'transactions_church_id_direction_date_index')) {
                 $table->index(['church_id', 'direction', 'date'], 'transactions_church_id_direction_date_index');
             }
         });
 
         // Events - church + date composite for calendar queries
         Schema::table('events', function (Blueprint $table) {
-            if (!$this->indexExists('events', 'events_church_id_date_index')) {
+            if (! $this->indexExists('events', 'events_church_id_date_index')) {
                 $table->index(['church_id', 'date'], 'events_church_id_date_index');
             }
         });
 
         // Attendances - church + date composite
         Schema::table('attendances', function (Blueprint $table) {
-            if (!$this->indexExists('attendances', 'attendances_church_id_date_index')) {
+            if (! $this->indexExists('attendances', 'attendances_church_id_date_index')) {
                 $table->index(['church_id', 'date'], 'attendances_church_id_date_index');
             }
         });

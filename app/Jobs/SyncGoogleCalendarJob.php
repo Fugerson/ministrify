@@ -17,11 +17,15 @@ class SyncGoogleCalendarJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public int $tries = 3;
+
     public int $backoff = 60;
 
     protected int $userId;
+
     protected int $churchId;
+
     protected string $calendarId;
+
     protected ?int $ministryId;
 
     public function __construct(int $userId, int $churchId, string $calendarId, ?int $ministryId = null)
@@ -37,11 +41,12 @@ class SyncGoogleCalendarJob implements ShouldQueue
         $user = User::find($this->userId);
         $church = Church::find($this->churchId);
 
-        if (!$user || !$church) {
+        if (! $user || ! $church) {
             Log::warning('SyncGoogleCalendarJob: User or Church not found', [
                 'user_id' => $this->userId,
                 'church_id' => $this->churchId,
             ]);
+
             return;
         }
 

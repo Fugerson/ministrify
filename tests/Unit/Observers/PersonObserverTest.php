@@ -16,6 +16,7 @@ class PersonObserverTest extends TestCase
     use RefreshDatabase;
 
     private Church $church;
+
     private $cacheMock;
 
     protected function setUp(): void
@@ -41,7 +42,7 @@ class PersonObserverTest extends TestCase
         $person->save();
 
         // Call observer manually since we want to test with our mock
-        Person::withoutEvents(function () use ($observer, $person) {
+        Person::withoutEvents(function () {
             // Re-create to test observer logic
         });
 

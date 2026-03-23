@@ -24,6 +24,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class DashboardController extends Controller
 {
@@ -52,10 +53,10 @@ class DashboardController extends Controller
         $viewData = $this->loadWidgetData($church, $user, $isAdmin, $enabledWidgets);
 
         $colClasses = [
-            3  => 'md:col-span-3',
-            4  => 'md:col-span-4',
-            6  => 'md:col-span-6',
-            8  => 'md:col-span-8',
+            3 => 'md:col-span-3',
+            4 => 'md:col-span-4',
+            6 => 'md:col-span-6',
+            8 => 'md:col-span-8',
             12 => 'md:col-span-12',
         ];
 
@@ -74,7 +75,7 @@ class DashboardController extends Controller
         $layout = $church->getSetting('dashboard_layout');
         $widgetRegistry = config('dashboard_widgets.widgets', []);
 
-        if (!$layout || !isset($layout['widgets'])) {
+        if (! $layout || ! isset($layout['widgets'])) {
             $layout = $this->getDefaultLayout();
         }
 
@@ -82,7 +83,7 @@ class DashboardController extends Controller
         $maxOrder = collect($layout['widgets'])->max('order') ?? -1;
 
         foreach ($widgetRegistry as $id => $config) {
-            if (!in_array($id, $savedIds)) {
+            if (! in_array($id, $savedIds)) {
                 $maxOrder++;
                 $layout['widgets'][] = [
                     'id' => $id,
@@ -94,13 +95,13 @@ class DashboardController extends Controller
         }
 
         $layout['widgets'] = collect($layout['widgets'])
-            ->filter(fn($w) => isset($widgetRegistry[$w['id']]))
+            ->filter(fn ($w) => isset($widgetRegistry[$w['id']]))
             ->values()
             ->toArray();
 
-        if (!$isAdmin) {
+        if (! $isAdmin) {
             $layout['widgets'] = collect($layout['widgets'])
-                ->filter(fn($w) => !($widgetRegistry[$w['id']]['admin_only'] ?? false))
+                ->filter(fn ($w) => ! ($widgetRegistry[$w['id']]['admin_only'] ?? false))
                 ->values()
                 ->toArray();
         }
@@ -112,12 +113,13 @@ class DashboardController extends Controller
                 if ($requiredPermission) {
                     return $user->canView($requiredPermission);
                 }
+
                 return true;
             })
             ->values()
             ->toArray();
 
-        usort($layout['widgets'], fn($a, $b) => ($a['order'] ?? 0) <=> ($b['order'] ?? 0));
+        usort($layout['widgets'], fn ($a, $b) => ($a['order'] ?? 0) <=> ($b['order'] ?? 0));
 
         return $layout;
     }
@@ -181,7 +183,7 @@ class DashboardController extends Controller
 
         // Stats needed by stats_grid and financial_summary
         $needsStats = array_intersect($enabledWidgets, ['stats_grid', 'financial_summary']);
-        if (!empty($needsStats)) {
+        if (! empty($needsStats)) {
             $data['stats'] = $this->loadCachedStats($church);
         }
 
@@ -336,7 +338,7 @@ class DashboardController extends Controller
             $leadersCount = (clone $peopleQuery)
                 ->where(function ($q) {
                     $q->whereHas('leadingMinistries')
-                      ->orWhereHas('leadingGroups');
+                        ->orWhereHas('leadingGroups');
                 })->count();
             $volunteersCount = (clone $peopleQuery)->whereHas('ministries')->count();
             $newThisMonth = (clone $peopleQuery)
@@ -349,13 +351,13 @@ class DashboardController extends Controller
                 ->whereNull('deleted_at')
                 ->where('membership_status', '!=', Person::STATUS_GUEST)
                 ->whereNotNull('birth_date')
-                ->selectRaw("
+                ->selectRaw('
                     SUM(CASE WHEN TIMESTAMPDIFF(YEAR, birth_date, ?) <= 12 THEN 1 ELSE 0 END) as children,
                     SUM(CASE WHEN TIMESTAMPDIFF(YEAR, birth_date, ?) BETWEEN 13 AND 17 THEN 1 ELSE 0 END) as teens,
                     SUM(CASE WHEN TIMESTAMPDIFF(YEAR, birth_date, ?) BETWEEN 18 AND 35 THEN 1 ELSE 0 END) as youth,
                     SUM(CASE WHEN TIMESTAMPDIFF(YEAR, birth_date, ?) BETWEEN 36 AND 59 THEN 1 ELSE 0 END) as adults,
                     SUM(CASE WHEN TIMESTAMPDIFF(YEAR, birth_date, ?) >= 60 THEN 1 ELSE 0 END) as seniors
-                ", [$today, $today, $today, $today, $today])
+                ', [$today, $today, $today, $today, $today])
                 ->first();
 
             $ageStats = [
@@ -383,7 +385,7 @@ class DashboardController extends Controller
                 ->whereIn('ministry_id', $ministryIds)
                 ->distinct('person_id')->count('person_id');
             $ministriesWithEvents = $church->ministries()
-                ->whereHas('events', fn($q) => $q->where('date', '>=', now()))->count();
+                ->whereHas('events', fn ($q) => $q->where('date', '>=', now()))->count();
 
             $groupStatsRaw = DB::table('groups')
                 ->where('church_id', $church->id)
@@ -418,10 +420,10 @@ class DashboardController extends Controller
                 ->whereNull('deleted_at')
                 ->whereMonth('date', now()->month)
                 ->whereYear('date', now()->year)
-                ->selectRaw("
+                ->selectRaw('
                     COUNT(*) as total,
                     SUM(CASE WHEN date >= ? THEN 1 ELSE 0 END) as upcoming
-                ", [now()->toDateString()])
+                ', [now()->toDateString()])
                 ->first();
 
             $eventsThisMonth = (int) ($eventStatsRaw->total ?? 0);
@@ -458,7 +460,7 @@ class DashboardController extends Controller
             ->whereNotNull('birth_date')
             ->whereMonth('birth_date', now()->month)
             ->get()
-            ->sortBy(fn($p) => $p->birth_date->day);
+            ->sortBy(fn ($p) => $p->birth_date->day);
     }
 
     private function loadUpcomingEvents($church)
@@ -487,7 +489,7 @@ class DashboardController extends Controller
         $attendanceData = [];
         for ($i = 3; $i >= 0; $i--) {
             $date = now()->subWeeks($i)->startOfWeek(Carbon::MONDAY);
-            $weekKey = $date->format('o') . str_pad($date->format('W'), 2, '0', STR_PAD_LEFT);
+            $weekKey = $date->format('o').str_pad($date->format('W'), 2, '0', STR_PAD_LEFT);
             $attendanceData[] = [
                 'date' => $date->format('d.m'),
                 'count' => $attendanceRaw[$weekKey]->total ?? 0,
@@ -499,16 +501,16 @@ class DashboardController extends Controller
 
     private function loadPendingAssignments($user)
     {
-        if (!$user->person) {
+        if (! $user->person) {
             return collect();
         }
 
         return $user->person->assignments()
             ->where('status', 'pending')
             ->with(['event.ministry', 'position'])
-            ->whereHas('event', fn($q) => $q->where('date', '>=', now()))
+            ->whereHas('event', fn ($q) => $q->where('date', '>=', now()))
             ->orderBy(
-                \App\Models\Event::select('date')
+                Event::select('date')
                     ->whereColumn('events.id', 'assignments.event_id')
                     ->limit(1)
             )
@@ -523,10 +525,10 @@ class DashboardController extends Controller
 
             $query = Person::where('church_id', $church->id)
                 ->whereIn('membership_status', [Person::STATUS_MEMBER, Person::STATUS_SERVANT, Person::STATUS_LEADER, Person::STATUS_ACTIVE])
-                ->whereHas('attendanceRecords', fn($q) => $q->where('present', true))
+                ->whereHas('attendanceRecords', fn ($q) => $q->where('present', true))
                 ->whereDoesntHave('attendanceRecords', function ($q) use ($threeWeeksAgo) {
-                    $q->whereHas('attendance', fn($aq) => $aq->where('date', '>=', $threeWeeksAgo))
-                      ->where('present', true);
+                    $q->whereHas('attendance', fn ($aq) => $aq->where('date', '>=', $threeWeeksAgo))
+                        ->where('present', true);
                 });
 
             $totalCount = $query->count();
@@ -543,7 +545,7 @@ class DashboardController extends Controller
             ->whereNotNull('monthly_budget')
             ->where('monthly_budget', '>', 0)
             ->get()
-            ->map(fn($m) => [
+            ->map(fn ($m) => [
                 'name' => $m->name,
                 'icon' => $m->icon ?? '⛪',
                 'color' => $m->color,
@@ -560,27 +562,27 @@ class DashboardController extends Controller
             ->where('is_archived', false)
             ->first();
 
-        if (!$taskTracker) {
+        if (! $taskTracker) {
             return collect();
         }
 
         return BoardCard::whereHas('column', function ($q) use ($taskTracker) {
             $q->where('board_id', $taskTracker->id);
         })
-        ->where('is_completed', false)
-        ->where(function ($q) {
-            $q->where('priority', 'urgent')
-              ->orWhere('priority', 'high')
-              ->orWhere(function ($dq) {
-                  $dq->whereNotNull('due_date')
-                     ->where('due_date', '<=', now()->addDays(2));
-              });
-        })
-        ->with(['column', 'assignee'])
-        ->orderByRaw("CASE WHEN priority = 'urgent' THEN 0 WHEN priority = 'high' THEN 1 ELSE 2 END")
-        ->orderBy('due_date')
-        ->limit(5)
-        ->get();
+            ->where('is_completed', false)
+            ->where(function ($q) {
+                $q->where('priority', 'urgent')
+                    ->orWhere('priority', 'high')
+                    ->orWhere(function ($dq) {
+                        $dq->whereNotNull('due_date')
+                            ->where('due_date', '<=', now()->addDays(2));
+                    });
+            })
+            ->with(['column', 'assignee'])
+            ->orderByRaw("CASE WHEN priority = 'urgent' THEN 0 WHEN priority = 'high' THEN 1 ELSE 2 END")
+            ->orderBy('due_date')
+            ->limit(5)
+            ->get();
     }
 
     private function loadFinancialData($church, array &$data): void
@@ -596,12 +598,12 @@ class DashboardController extends Controller
             ->orderBy('month')
             ->get();
 
-        $financialGrouped = $financialRaw->groupBy(fn($item) => $item->year . '-' . $item->month);
+        $financialGrouped = $financialRaw->groupBy(fn ($item) => $item->year.'-'.$item->month);
 
         $financialData = [];
         for ($i = 5; $i >= 0; $i--) {
             $month = now()->subMonths($i);
-            $key = $month->year . '-' . $month->month;
+            $key = $month->year.'-'.$month->month;
             $monthData = $financialGrouped[$key] ?? collect();
 
             $financialData[] = [
@@ -613,7 +615,7 @@ class DashboardController extends Controller
 
         $data['financialData'] = $financialData;
 
-        $currentKey = now()->year . '-' . now()->month;
+        $currentKey = now()->year.'-'.now()->month;
         $currentMonthData = $financialGrouped[$currentKey] ?? collect();
         $data['stats']['income_this_month'] = $currentMonthData->where('direction', 'in')->sum('total');
     }
@@ -635,7 +637,7 @@ class DashboardController extends Controller
             ->groupBy('transactions.category_id', 'transaction_categories.name')
             ->orderByDesc('total_amount')
             ->get()
-            ->map(fn($row) => [
+            ->map(fn ($row) => [
                 'name' => $row->category_name ?? 'Без категорії',
                 'amount' => $row->total_amount,
                 'count' => $row->transaction_count,
@@ -654,12 +656,12 @@ class DashboardController extends Controller
                 ->orderBy('year')
                 ->orderBy('month')
                 ->get()
-                ->keyBy(fn($item) => $item->year . '-' . $item->month);
+                ->keyBy(fn ($item) => $item->year.'-'.$item->month);
 
             $growthData = [];
             for ($i = 5; $i >= 0; $i--) {
                 $month = now()->subMonths($i);
-                $key = $month->year . '-' . $month->month;
+                $key = $month->year.'-'.$month->month;
                 $growthData[] = [
                     'month' => $month->translatedFormat('M'),
                     'count' => $growthRaw[$key]->count ?? 0,
@@ -689,7 +691,7 @@ class DashboardController extends Controller
             ->where('is_published', true)
             ->where(function ($q) {
                 $q->whereNull('expires_at')
-                  ->orWhere('expires_at', '>', now());
+                    ->orWhere('expires_at', '>', now());
             })
             ->with('author')
             ->orderByDesc('is_pinned')
@@ -747,13 +749,13 @@ class DashboardController extends Controller
                 ->where('church_id', $church->id)
                 ->whereNull('deleted_at')
                 ->whereNotNull('birth_date')
-                ->selectRaw("
+                ->selectRaw('
                     SUM(CASE WHEN TIMESTAMPDIFF(YEAR, birth_date, ?) <= 12 THEN 1 ELSE 0 END) as children,
                     SUM(CASE WHEN TIMESTAMPDIFF(YEAR, birth_date, ?) BETWEEN 13 AND 17 THEN 1 ELSE 0 END) as teens,
                     SUM(CASE WHEN TIMESTAMPDIFF(YEAR, birth_date, ?) BETWEEN 18 AND 35 THEN 1 ELSE 0 END) as youth,
                     SUM(CASE WHEN TIMESTAMPDIFF(YEAR, birth_date, ?) BETWEEN 36 AND 59 THEN 1 ELSE 0 END) as adults,
                     SUM(CASE WHEN TIMESTAMPDIFF(YEAR, birth_date, ?) >= 60 THEN 1 ELSE 0 END) as seniors
-                ", [$today, $today, $today, $today, $today])
+                ', [$today, $today, $today, $today, $today])
                 ->first();
 
             return [
@@ -815,15 +817,18 @@ class DashboardController extends Controller
                 $groupAttendance = $attendanceData->get($group->id, collect());
 
                 $lastAttendance = $groupAttendance->first();
-                $avgAttendance = $groupAttendance->avg(fn($a) => $a->total_count ?? $a->members_present ?? 0) ?? 0;
-                $recentCounts = $groupAttendance->take(4)->map(fn($a) => $a->total_count ?? $a->members_present ?? 0)->reverse()->values()->toArray();
+                $avgAttendance = $groupAttendance->avg(fn ($a) => $a->total_count ?? $a->members_present ?? 0) ?? 0;
+                $recentCounts = $groupAttendance->take(4)->map(fn ($a) => $a->total_count ?? $a->members_present ?? 0)->reverse()->values()->toArray();
 
                 $trend = 'stable';
                 if (count($recentCounts) >= 2) {
                     $last = end($recentCounts);
                     $prev = $recentCounts[count($recentCounts) - 2];
-                    if ($last > $prev) $trend = 'up';
-                    elseif ($last < $prev) $trend = 'down';
+                    if ($last > $prev) {
+                        $trend = 'up';
+                    } elseif ($last < $prev) {
+                        $trend = 'down';
+                    }
                 }
 
                 return [
@@ -837,8 +842,8 @@ class DashboardController extends Controller
                     'leader_name' => $group->leader?->full_name,
                 ];
             })
-            ->sortByDesc('avg_attendance')
-            ->values();
+                ->sortByDesc('avg_attendance')
+                ->values();
         });
     }
 
@@ -851,15 +856,15 @@ class DashboardController extends Controller
                 ->incoming()
                 ->completed()
                 ->where('date', '>=', $sixMonthsAgo)
-                ->selectRaw("YEAR(date) as year, MONTH(date) as month, source_type, SUM(COALESCE(amount_uah, amount)) as total")
+                ->selectRaw('YEAR(date) as year, MONTH(date) as month, source_type, SUM(COALESCE(amount_uah, amount)) as total')
                 ->groupBy('year', 'month', 'source_type')
                 ->get()
-                ->groupBy(fn($item) => $item->year . '-' . $item->month);
+                ->groupBy(fn ($item) => $item->year.'-'.$item->month);
 
             $trends = [];
             for ($i = 5; $i >= 0; $i--) {
                 $month = now()->subMonths($i);
-                $key = $month->year . '-' . $month->month;
+                $key = $month->year.'-'.$month->month;
                 $monthData = $raw[$key] ?? collect();
 
                 $tithes = $monthData->where('source_type', 'tithe')->sum('total');
@@ -893,7 +898,7 @@ class DashboardController extends Controller
         $shepherdList = Person::where('church_id', $church->id)
             ->where('is_shepherd', true)
             ->get()
-            ->map(fn($shepherd) => [
+            ->map(fn ($shepherd) => [
                 'id' => $shepherd->id,
                 'full_name' => $shepherd->full_name,
                 'first_name' => $shepherd->first_name,
@@ -935,13 +940,13 @@ class DashboardController extends Controller
     {
         return Assignment::whereHas('event', function ($q) use ($church) {
             $q->where('church_id', $church->id)
-              ->where('date', '>=', now())
-              ->where('date', '<=', now()->addDays(7));
+                ->where('date', '>=', now())
+                ->where('date', '<=', now()->addDays(7));
         })
-        ->whereIn('status', ['confirmed', 'pending'])
-        ->with(['event.ministry', 'position', 'person'])
-        ->get()
-        ->sortBy('event.date');
+            ->whereIn('status', ['confirmed', 'pending'])
+            ->with(['event.ministry', 'position', 'person'])
+            ->get()
+            ->sortBy('event.date');
     }
 
     private function loadRecentActivity($church)
@@ -951,10 +956,10 @@ class DashboardController extends Controller
             ->orderByDesc('created_at')
             ->limit(10)
             ->get()
-            ->map(fn($log) => [
+            ->map(fn ($log) => [
                 'type' => $log->action ?? 'updated',
                 'model_type' => class_basename($log->auditable_type ?? ''),
-                'description' => $log->description ?? ($log->action . ' ' . class_basename($log->auditable_type ?? '')),
+                'description' => $log->description ?? ($log->action.' '.class_basename($log->auditable_type ?? '')),
                 'user_name' => $log->user?->name ?? 'Система',
                 'created_at' => $log->created_at,
             ]);
@@ -1009,7 +1014,7 @@ class DashboardController extends Controller
     {
         $totalPeople = Person::where('church_id', $church->id)->where('membership_status', '!=', Person::STATUS_GUEST)->count();
 
-        $totalRelationships = FamilyRelationship::whereHas('person', fn($q) => $q->where('church_id', $church->id))
+        $totalRelationships = FamilyRelationship::whereHas('person', fn ($q) => $q->where('church_id', $church->id))
             ->count();
 
         $peopleWithFamily = DB::table('family_relationships')
@@ -1021,27 +1026,27 @@ class DashboardController extends Controller
 
         // Spouse relationships are stored one-way (A→B only, no reverse B→A)
         $marriedCouples = FamilyRelationship::where('relationship_type', 'spouse')
-            ->whereHas('person', fn($q) => $q->where('church_id', $church->id))
-            ->whereHas('relatedPerson', fn($q) => $q->where('church_id', $church->id))
+            ->whereHas('person', fn ($q) => $q->where('church_id', $church->id))
+            ->whereHas('relatedPerson', fn ($q) => $q->where('church_id', $church->id))
             ->count();
 
         $childrenCount = FamilyRelationship::where('relationship_type', 'child')
-            ->whereHas('person', fn($q) => $q->where('church_id', $church->id))
+            ->whereHas('person', fn ($q) => $q->where('church_id', $church->id))
             ->distinct('person_id')
             ->count('person_id');
 
         // Count unique parents (people who have children in the church)
         $uniqueParents = FamilyRelationship::where('relationship_type', 'parent')
-            ->whereHas('person', fn($q) => $q->where('church_id', $church->id))
+            ->whereHas('person', fn ($q) => $q->where('church_id', $church->id))
             ->distinct('person_id')
             ->count('person_id');
 
         // Single parents = parents who are not in a spouse relationship (check both directions)
         $parentsWithSpouse = FamilyRelationship::where('relationship_type', 'parent')
-            ->whereHas('person', fn($q) => $q->where('church_id', $church->id)
-                ->where(fn($q2) => $q2
-                    ->whereHas('familyRelationships', fn($r) => $r->where('relationship_type', 'spouse'))
-                    ->orWhereHas('inverseFamilyRelationships', fn($r) => $r->where('relationship_type', 'spouse'))
+            ->whereHas('person', fn ($q) => $q->where('church_id', $church->id)
+                ->where(fn ($q2) => $q2
+                    ->whereHas('familyRelationships', fn ($r) => $r->where('relationship_type', 'spouse'))
+                    ->orWhereHas('inverseFamilyRelationships', fn ($r) => $r->where('relationship_type', 'spouse'))
                 ))
             ->distinct('person_id')
             ->count('person_id');
@@ -1069,7 +1074,7 @@ class DashboardController extends Controller
         return Event::where('church_id', $church->id)
             ->whereBetween('date', [$start, $end])
             ->pluck('date')
-            ->map(fn($d) => Carbon::parse($d)->format('Y-m-d'))
+            ->map(fn ($d) => Carbon::parse($d)->format('Y-m-d'))
             ->unique()
             ->values()
             ->toArray();
@@ -1146,28 +1151,28 @@ class DashboardController extends Controller
             ->groupBy('attendable_id');
 
         return $groups->map(function ($group) use ($attendanceData) {
-                $groupAttendance = $attendanceData->get($group->id, collect());
+            $groupAttendance = $attendanceData->get($group->id, collect());
 
-                $avgAttendance = $groupAttendance->avg(fn($a) => $a->total_count ?? $a->members_present ?? 0) ?? 0;
-                $attendanceRate = $group->members_count > 0
-                    ? round($avgAttendance / $group->members_count * 100)
-                    : 0;
+            $avgAttendance = $groupAttendance->avg(fn ($a) => $a->total_count ?? $a->members_present ?? 0) ?? 0;
+            $attendanceRate = $group->members_count > 0
+                ? round($avgAttendance / $group->members_count * 100)
+                : 0;
 
-                $last4 = $groupAttendance->sortBy('date')->take(-4)->map(fn($a) => $a->total_count ?? $a->members_present ?? 0)->toArray();
-                while (count($last4) < 4) {
-                    array_unshift($last4, 0);
-                }
+            $last4 = $groupAttendance->sortBy('date')->take(-4)->map(fn ($a) => $a->total_count ?? $a->members_present ?? 0)->toArray();
+            while (count($last4) < 4) {
+                array_unshift($last4, 0);
+            }
 
-                return [
-                    'name' => $group->name,
-                    'color' => $group->color ?? '#3b82f6',
-                    'avg_attendance' => round($avgAttendance),
-                    'members_count' => $group->members_count,
-                    'attendance_rate' => min($attendanceRate, 100),
-                    'last_4_weeks' => $last4,
-                ];
-            })
-            ->filter(fn($g) => $g['members_count'] > 0)
+            return [
+                'name' => $group->name,
+                'color' => $group->color ?? '#3b82f6',
+                'avg_attendance' => round($avgAttendance),
+                'members_count' => $group->members_count,
+                'attendance_rate' => min($attendanceRate, 100),
+                'last_4_weeks' => $last4,
+            ];
+        })
+            ->filter(fn ($g) => $g['members_count'] > 0)
             ->sortByDesc('attendance_rate')
             ->values();
     }
@@ -1179,7 +1184,7 @@ class DashboardController extends Controller
         $church = $this->getCurrentChurch();
         $user = auth()->user();
 
-        if (!$user->isAdmin()) {
+        if (! $user->isAdmin()) {
             abort(403);
         }
 
@@ -1187,15 +1192,15 @@ class DashboardController extends Controller
             'widgets' => 'required|array',
             'widgets.*.id' => 'required|string',
             'widgets.*.order' => 'required|integer|min:0',
-            'widgets.*.cols' => 'required|integer|in:' . implode(',', self::ALLOWED_COLS),
+            'widgets.*.cols' => 'required|integer|in:'.implode(',', self::ALLOWED_COLS),
             'widgets.*.enabled' => 'required|boolean',
         ]);
 
         $widgetRegistry = config('dashboard_widgets.widgets', []);
 
         $widgets = collect($validated['widgets'])
-            ->filter(fn($w) => isset($widgetRegistry[$w['id']]))
-            ->map(fn($w) => [
+            ->filter(fn ($w) => isset($widgetRegistry[$w['id']]))
+            ->map(fn ($w) => [
                 'id' => $w['id'],
                 'order' => (int) $w['order'],
                 'cols' => (int) $w['cols'],
@@ -1219,7 +1224,7 @@ class DashboardController extends Controller
 
     public function birthdays(Request $request)
     {
-        if (!auth()->user()->canView('people')) {
+        if (! auth()->user()->canView('people')) {
             return response()->json(['count' => 0, 'people' => []]);
         }
 
@@ -1233,15 +1238,15 @@ class DashboardController extends Controller
             ->whereNotNull('birth_date')
             ->whereMonth('birth_date', $month)
             ->get()
-            ->sortBy(fn($p) => $p->birth_date->day)
+            ->sortBy(fn ($p) => $p->birth_date->day)
             ->values()
-            ->map(fn($p) => [
+            ->map(fn ($p) => [
                 'id' => $p->id,
                 'name' => $p->full_name,
                 'initial' => mb_substr($p->first_name, 0, 1),
                 'day' => $p->birth_date->format('d'),
                 'month_short' => $p->birth_date->translatedFormat('M'),
-                'photo' => $p->photo ? \Illuminate\Support\Facades\Storage::url($p->photo) : null,
+                'photo' => $p->photo ? Storage::url($p->photo) : null,
                 'url' => route('people.show', $p),
                 'is_today' => $p->birth_date->day === $today->day && $month === $today->month,
             ]);
@@ -1263,19 +1268,19 @@ class DashboardController extends Controller
                 $data = $this->getAttendanceChartData($church);
                 break;
             case 'growth':
-                if (!$user->canView('people')) {
+                if (! $user->canView('people')) {
                     abort(403, 'Немає доступу до даних росту');
                 }
                 $data = $this->getGrowthChartData($church);
                 break;
             case 'financial':
-                if (!$user->canView('finances')) {
+                if (! $user->canView('finances')) {
                     abort(403, 'Немає доступу до фінансових даних');
                 }
                 $data = $this->getFinancialChartData($church);
                 break;
             case 'ministries':
-                if (!$user->canView('ministries')) {
+                if (! $user->canView('ministries')) {
                     abort(403, 'Немає доступу до даних служінь');
                 }
                 $data = $this->getMinistriesChartData($church);
@@ -1301,7 +1306,7 @@ class DashboardController extends Controller
         $events = Event::where('church_id', $church->id)
             ->whereBetween('date', [$start, $end])
             ->pluck('date')
-            ->map(fn($d) => Carbon::parse($d)->format('Y-m-d'))
+            ->map(fn ($d) => Carbon::parse($d)->format('Y-m-d'))
             ->unique()
             ->values();
 
@@ -1316,17 +1321,18 @@ class DashboardController extends Controller
             ->selectRaw('YEAR(date) as year, MONTH(date) as month, AVG(COALESCE(total_count, members_present)) as avg_count')
             ->groupBy('year', 'month')
             ->get()
-            ->keyBy(fn($item) => $item->year . '-' . $item->month);
+            ->keyBy(fn ($item) => $item->year.'-'.$item->month);
 
         $data = [];
         for ($i = 11; $i >= 0; $i--) {
             $month = now()->subMonths($i);
-            $key = $month->year . '-' . $month->month;
+            $key = $month->year.'-'.$month->month;
             $data[] = [
                 'label' => $month->translatedFormat('M'),
                 'value' => round($attendanceRaw[$key]->avg_count ?? 0),
             ];
         }
+
         return $data;
     }
 
@@ -1345,12 +1351,12 @@ class DashboardController extends Controller
             ->selectRaw('YEAR(COALESCE(joined_date, first_visit_date, created_at)) as year, MONTH(COALESCE(joined_date, first_visit_date, created_at)) as month, COUNT(*) as count')
             ->groupBy('year', 'month')
             ->get()
-            ->keyBy(fn($item) => $item->year . '-' . $item->month);
+            ->keyBy(fn ($item) => $item->year.'-'.$item->month);
 
         $data = [];
         for ($i = 11; $i >= 0; $i--) {
             $month = now()->subMonths($i);
-            $key = $month->year . '-' . $month->month;
+            $key = $month->year.'-'.$month->month;
             $joined = $growthRaw[$key]->count ?? 0;
 
             $cumulative += $joined;
@@ -1361,6 +1367,7 @@ class DashboardController extends Controller
                 'new' => $joined,
             ];
         }
+
         return $data;
     }
 
@@ -1374,12 +1381,12 @@ class DashboardController extends Controller
             ->selectRaw('YEAR(date) as year, MONTH(date) as month, direction, SUM(COALESCE(amount_uah, amount)) as total')
             ->groupBy('year', 'month', 'direction')
             ->get()
-            ->groupBy(fn($item) => $item->year . '-' . $item->month);
+            ->groupBy(fn ($item) => $item->year.'-'.$item->month);
 
         $data = [];
         for ($i = 11; $i >= 0; $i--) {
             $month = now()->subMonths($i);
-            $key = $month->year . '-' . $month->month;
+            $key = $month->year.'-'.$month->month;
             $monthData = $financialRaw[$key] ?? collect();
 
             $income = $monthData->where('direction', 'in')->sum('total');
@@ -1392,6 +1399,7 @@ class DashboardController extends Controller
                 'balance' => $income - $expenses,
             ];
         }
+
         return $data;
     }
 
@@ -1402,7 +1410,7 @@ class DashboardController extends Controller
             ->orderByDesc('members_count')
             ->limit(10)
             ->get()
-            ->map(fn($m) => [
+            ->map(fn ($m) => [
                 'label' => $m->name,
                 'value' => $m->members_count,
                 'color' => $m->color ?? '#3b82f6',

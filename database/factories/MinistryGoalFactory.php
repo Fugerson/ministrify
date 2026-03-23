@@ -5,7 +5,6 @@ namespace Database\Factories;
 use App\Models\Church;
 use App\Models\Ministry;
 use App\Models\MinistryGoal;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class MinistryGoalFactory extends Factory

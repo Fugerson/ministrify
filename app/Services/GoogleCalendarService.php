@@ -5,20 +5,26 @@ namespace App\Services;
 use App\Models\Church;
 use App\Models\Event;
 use App\Models\User;
+use Carbon\Carbon;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Cache;
-use Carbon\Carbon;
 
 class GoogleCalendarService
 {
     protected const TOKEN_URL = 'https://oauth2.googleapis.com/token';
+
     protected const CALENDAR_API_URL = 'https://www.googleapis.com/calendar/v3';
+
     protected const AUTH_URL = 'https://accounts.google.com/o/oauth2/v2/auth';
+
     protected const SCOPES = 'https://www.googleapis.com/auth/calendar';
 
     protected ?string $clientId;
+
     protected ?string $clientSecret;
+
     protected ?string $redirectUri;
 
     public function __construct()
@@ -33,7 +39,7 @@ class GoogleCalendarService
      */
     public function isConfigured(): bool
     {
-        return !empty($this->clientId) && !empty($this->clientSecret);
+        return ! empty($this->clientId) && ! empty($this->clientSecret);
     }
 
     /**
@@ -51,7 +57,7 @@ class GoogleCalendarService
             'state' => $state,
         ]);
 
-        return self::AUTH_URL . '?' . $params;
+        return self::AUTH_URL.'?'.$params;
     }
 
     /**
@@ -115,7 +121,7 @@ class GoogleCalendarService
         $settings = $user->settings ?? [];
         $googleCalendar = $settings['google_calendar'] ?? null;
 
-        if (!$googleCalendar || empty($googleCalendar['access_token'])) {
+        if (! $googleCalendar || empty($googleCalendar['access_token'])) {
             return null;
         }
 
@@ -124,6 +130,7 @@ class GoogleCalendarService
         if (time() >= $expiresAt - 60) { // Refresh 1 minute before expiry
             if (empty($googleCalendar['refresh_token'])) {
                 Log::warning('Google token expired and no refresh_token available', ['user_id' => $user->id]);
+
                 return null;
             }
 
@@ -145,7 +152,7 @@ class GoogleCalendarService
                     }
 
                     $newToken = $this->refreshToken($googleCalendar['refresh_token']);
-                    if (!$newToken) {
+                    if (! $newToken) {
                         return null;
                     }
 
@@ -163,6 +170,7 @@ class GoogleCalendarService
                     $user->refresh();
                     $settings = $user->settings ?? [];
                     $googleCalendar = $settings['google_calendar'] ?? null;
+
                     return $googleCalendar['access_token'] ?? null;
                 }
             } finally {
@@ -180,7 +188,7 @@ class GoogleCalendarService
     {
         try {
             $response = Http::withToken($accessToken)
-                ->get(self::CALENDAR_API_URL . '/users/me/calendarList');
+                ->get(self::CALENDAR_API_URL.'/users/me/calendarList');
 
             if ($response->successful()) {
                 return $response->json()['items'] ?? [];
@@ -201,7 +209,7 @@ class GoogleCalendarService
 
         try {
             $response = Http::withToken($accessToken)
-                ->post(self::CALENDAR_API_URL . "/calendars/{$calendarId}/events", $googleEvent);
+                ->post(self::CALENDAR_API_URL."/calendars/{$calendarId}/events", $googleEvent);
 
             if ($response->successful()) {
                 return $response->json();
@@ -224,7 +232,7 @@ class GoogleCalendarService
 
         try {
             $response = Http::withToken($accessToken)
-                ->put(self::CALENDAR_API_URL . "/calendars/{$calendarId}/events/{$googleEventId}", $googleEvent);
+                ->put(self::CALENDAR_API_URL."/calendars/{$calendarId}/events/{$googleEventId}", $googleEvent);
 
             if ($response->successful()) {
                 return $response->json();
@@ -243,7 +251,7 @@ class GoogleCalendarService
     {
         try {
             $response = Http::withToken($accessToken)
-                ->delete(self::CALENDAR_API_URL . "/calendars/{$calendarId}/events/{$googleEventId}");
+                ->delete(self::CALENDAR_API_URL."/calendars/{$calendarId}/events/{$googleEventId}");
 
             return $response->successful() || $response->status() === 404;
         } catch (\Exception $e) {
@@ -259,7 +267,7 @@ class GoogleCalendarService
     public function syncChurchEvents(User $user, Church $church, string $calendarId): array
     {
         $accessToken = $this->getValidToken($user);
-        if (!$accessToken) {
+        if (! $accessToken) {
             return ['success' => false, 'error' => 'No valid access token'];
         }
 
@@ -323,7 +331,7 @@ class GoogleCalendarService
         ];
 
         // Determine if this is an all-day event (no time specified)
-        $isAllDay = !$event->time;
+        $isAllDay = ! $event->time;
 
         if ($isAllDay) {
             // All-day event - use date format
@@ -394,13 +402,13 @@ class GoogleCalendarService
         }
 
         if ($event->notes) {
-            $lines[] = "";
+            $lines[] = '';
             $lines[] = $event->notes;
         }
 
-        $lines[] = "";
-        $lines[] = "---";
-        $lines[] = "Створено в Ministrify";
+        $lines[] = '';
+        $lines[] = '---';
+        $lines[] = 'Створено в Ministrify';
 
         return implode("\n", $lines);
     }
@@ -424,6 +432,7 @@ class GoogleCalendarService
         ];
 
         $hexColor = strtolower($hexColor);
+
         return $colorMap[$hexColor] ?? '9';
     }
 
@@ -452,7 +461,7 @@ class GoogleCalendarService
 
         try {
             $response = Http::withToken($accessToken)
-                ->get(self::CALENDAR_API_URL . "/calendars/{$calendarId}/events", $params);
+                ->get(self::CALENDAR_API_URL."/calendars/{$calendarId}/events", $params);
 
             if ($response->successful()) {
                 return $response->json()['items'] ?? [];
@@ -473,7 +482,7 @@ class GoogleCalendarService
     {
         try {
             $response = Http::withToken($accessToken)
-                ->get(self::CALENDAR_API_URL . "/calendars/{$calendarId}/events/{$eventId}");
+                ->get(self::CALENDAR_API_URL."/calendars/{$calendarId}/events/{$eventId}");
 
             if ($response->successful()) {
                 return $response->json();
@@ -493,10 +502,11 @@ class GoogleCalendarService
     {
         try {
             $response = Http::withToken($accessToken)
-                ->get(self::CALENDAR_API_URL . "/calendars/{$calendarId}/events/{$eventId}");
+                ->get(self::CALENDAR_API_URL."/calendars/{$calendarId}/events/{$eventId}");
 
             if ($response->successful()) {
                 $data = $response->json();
+
                 return ($data['status'] ?? '') === 'cancelled' ? 'cancelled' : 'exists';
             }
 
@@ -508,9 +518,11 @@ class GoogleCalendarService
                 'event_id' => $eventId,
                 'status' => $response->status(),
             ]);
+
             return 'error';
         } catch (\Exception $e) {
             Log::error('checkGoogleEventStatus: exception', ['event_id' => $eventId, 'error' => $e->getMessage()]);
+
             return 'error';
         }
     }
@@ -521,7 +533,7 @@ class GoogleCalendarService
     public function importFromGoogle(User $user, Church $church, string $calendarId, ?int $ministryId = null): array
     {
         $accessToken = $this->getValidToken($user);
-        if (!$accessToken) {
+        if (! $accessToken) {
             return ['success' => false, 'error' => 'No valid access token'];
         }
 
@@ -560,7 +572,7 @@ class GoogleCalendarService
 
         // Parse event data
         $eventData = $this->parseGoogleEvent($googleEvent);
-        if (!$eventData) {
+        if (! $eventData) {
             return 'skipped';
         }
 
@@ -606,6 +618,7 @@ class GoogleCalendarService
                     'google_sync_status' => 'synced',
                 ]);
             });
+
             return 'updated';
         }
 
@@ -630,7 +643,7 @@ class GoogleCalendarService
     protected function parseGoogleEvent(array $googleEvent): ?array
     {
         $summary = $googleEvent['summary'] ?? null;
-        if (!$summary) {
+        if (! $summary) {
             return null;
         }
 
@@ -688,7 +701,7 @@ class GoogleCalendarService
     public function fullSync(User $user, Church $church, string $calendarId, ?int $ministryId = null): array
     {
         $accessToken = $this->getValidToken($user);
-        if (!$accessToken) {
+        if (! $accessToken) {
             return ['success' => false, 'error' => 'No valid access token'];
         }
 
@@ -702,10 +715,10 @@ class GoogleCalendarService
         $localEvents = Event::where('church_id', $church->id)
             ->where('date', '>=', now()->subMonth())
             ->where('date', '<=', now()->addMonths(6))
-            ->when($ministryId, fn($q) => $q->where('ministry_id', $ministryId))
+            ->when($ministryId, fn ($q) => $q->where('ministry_id', $ministryId))
             ->get();
 
-        Log::info('fullSync: pushing ' . $localEvents->count() . ' events to Google', [
+        Log::info('fullSync: pushing '.$localEvents->count().' events to Google', [
             'church_id' => $church->id,
             'calendar_id' => $calendarId,
             'ministry_id' => $ministryId,
@@ -718,7 +731,7 @@ class GoogleCalendarService
                 $results['to_google'][$result] = ($results['to_google'][$result] ?? 0) + 1;
             } catch (\Exception $e) {
                 Log::error('fullSync push error', ['event_id' => $event->id, 'error' => $e->getMessage()]);
-                $results['errors'][] = "Push {$event->id}: " . $e->getMessage();
+                $results['errors'][] = "Push {$event->id}: ".$e->getMessage();
                 $results['to_google']['failed']++;
             }
             usleep(100000); // 100ms
@@ -744,7 +757,7 @@ class GoogleCalendarService
                 $result = $this->importSingleEvent($church, $googleEvent, $calendarId, $ministryId);
                 $results['from_google'][$result]++;
             } catch (\Exception $e) {
-                $results['errors'][] = "Pull {$googleEvent['id']}: " . $e->getMessage();
+                $results['errors'][] = "Pull {$googleEvent['id']}: ".$e->getMessage();
             }
             usleep(50000); // 50ms
         }
@@ -775,6 +788,7 @@ class GoogleCalendarService
                         'google_sync_status' => 'synced',
                     ]);
                 });
+
                 return 'updated';
             }
 
@@ -796,6 +810,7 @@ class GoogleCalendarService
                     'google_sync_status' => 'synced',
                 ]);
             });
+
             return 'created';
         }
 
@@ -810,7 +825,7 @@ class GoogleCalendarService
         $syncedEvents = Event::where('church_id', $church->id)
             ->whereNotNull('google_event_id')
             ->where('google_calendar_id', $calendarId)
-            ->when($ministryId, fn($q) => $q->where('ministry_id', $ministryId))
+            ->when($ministryId, fn ($q) => $q->where('ministry_id', $ministryId))
             ->get();
 
         foreach ($syncedEvents as $event) {
@@ -860,12 +875,12 @@ class GoogleCalendarService
      */
     public function deleteAndUnlink(User $user, Event $event): bool
     {
-        if (!$event->google_event_id || !$event->google_calendar_id) {
+        if (! $event->google_event_id || ! $event->google_calendar_id) {
             return true;
         }
 
         $accessToken = $this->getValidToken($user);
-        if (!$accessToken) {
+        if (! $accessToken) {
             return false;
         }
 
@@ -885,7 +900,7 @@ class GoogleCalendarService
     public function previewImport(User $user, Church $church, string $calendarId, ?int $ministryId = null): array
     {
         $accessToken = $this->getValidToken($user);
-        if (!$accessToken) {
+        if (! $accessToken) {
             return ['success' => false, 'error' => 'No valid access token'];
         }
 
@@ -910,7 +925,7 @@ class GoogleCalendarService
             }
 
             $eventData = $this->parseGoogleEvent($googleEvent);
-            if (!$eventData) {
+            if (! $eventData) {
                 continue;
             }
 
@@ -939,6 +954,7 @@ class GoogleCalendarService
                         'end_time' => $linkedEvent->end_time?->format('H:i'),
                     ],
                 ];
+
                 continue;
             }
 
@@ -956,7 +972,7 @@ class GoogleCalendarService
                         'end_time' => $eventData['end_time'],
                         'location' => $eventData['location'],
                     ],
-                    'conflicting_events' => $conflicts->map(fn($e) => [
+                    'conflicting_events' => $conflicts->map(fn ($e) => [
                         'id' => $e->id,
                         'title' => $e->title,
                         'date' => $e->date->format('Y-m-d'),
@@ -995,7 +1011,7 @@ class GoogleCalendarService
     /**
      * Find events that conflict (overlap in time) with the given event data
      */
-    protected function findConflictingEvents(Church $church, array $eventData, ?int $ministryId): \Illuminate\Support\Collection
+    protected function findConflictingEvents(Church $church, array $eventData, ?int $ministryId): Collection
     {
         $date = Carbon::parse($eventData['date']);
         $endDate = $eventData['end_date'] ? Carbon::parse($eventData['end_date']) : $date;
@@ -1035,7 +1051,7 @@ class GoogleCalendarService
         array $resolutions
     ): array {
         $accessToken = $this->getValidToken($user);
-        if (!$accessToken) {
+        if (! $accessToken) {
             return ['success' => false, 'error' => 'No valid access token'];
         }
 
@@ -1055,7 +1071,7 @@ class GoogleCalendarService
             $googleId = $googleEvent['id'];
             $resolution = $resolutionMap->get($googleId);
 
-            if (!$resolution) {
+            if (! $resolution) {
                 continue; // Not in resolution list, skip
             }
 
@@ -1063,23 +1079,26 @@ class GoogleCalendarService
 
             if ($action === 'skip') {
                 $results['skipped']++;
+
                 continue;
             }
 
             // Skip cancelled events
             if (($googleEvent['status'] ?? '') === 'cancelled') {
                 $results['skipped']++;
+
                 continue;
             }
 
             $eventData = $this->parseGoogleEvent($googleEvent);
-            if (!$eventData) {
+            if (! $eventData) {
                 $results['skipped']++;
+
                 continue;
             }
 
             try {
-                if ($action === 'replace' && !empty($resolution['local_event_id'])) {
+                if ($action === 'replace' && ! empty($resolution['local_event_id'])) {
                     // Replace: update existing local event and link to Google
                     $localEvent = Event::where('church_id', $church->id)
                         ->find($resolution['local_event_id']);
@@ -1105,7 +1124,7 @@ class GoogleCalendarService
                     $results['imported']++;
                 }
             } catch (\Exception $e) {
-                $results['errors'][] = "Event {$googleId}: " . $e->getMessage();
+                $results['errors'][] = "Event {$googleId}: ".$e->getMessage();
             }
 
             usleep(50000); // 50ms rate limiting

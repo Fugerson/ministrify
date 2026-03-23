@@ -12,6 +12,7 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 class VolunteersExport implements FromCollection, WithHeadings, WithMapping, WithStyles
 {
     protected int $churchId;
+
     protected int $year;
 
     public function __construct(int $churchId, int $year)
@@ -24,8 +25,8 @@ class VolunteersExport implements FromCollection, WithHeadings, WithMapping, Wit
     {
         return Person::where('church_id', $this->churchId)
             ->whereHas('ministries')
-            ->withCount(['assignments' => fn($q) => $q->whereHas('event', fn($e) => $e->whereYear('date', $this->year))])
-            ->with(['ministries', 'assignments' => fn($q) => $q->whereHas('event', fn($e) => $e->whereYear('date', $this->year))->with('event')])
+            ->withCount(['assignments' => fn ($q) => $q->whereHas('event', fn ($e) => $e->whereYear('date', $this->year))])
+            ->with(['ministries', 'assignments' => fn ($q) => $q->whereHas('event', fn ($e) => $e->whereYear('date', $this->year))->with('event')])
             ->orderByDesc('assignments_count')
             ->get();
     }
@@ -38,7 +39,7 @@ class VolunteersExport implements FromCollection, WithHeadings, WithMapping, Wit
             'Телефон',
             'Email',
             'Служіння',
-            'Призначень за ' . $this->year,
+            'Призначень за '.$this->year,
             'Останнє служіння',
         ];
     }
@@ -46,7 +47,7 @@ class VolunteersExport implements FromCollection, WithHeadings, WithMapping, Wit
     public function map($person): array
     {
         $lastAssignment = $person->assignments
-            ->sortByDesc(fn($a) => $a->event?->date)
+            ->sortByDesc(fn ($a) => $a->event?->date)
             ->first();
 
         return [

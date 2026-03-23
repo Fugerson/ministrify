@@ -32,9 +32,9 @@ return new class extends Migration
         });
 
         // Set amount_uah for existing UAH transactions
-        \DB::table('transactions')
+        DB::table('transactions')
             ->where('currency', 'UAH')
-            ->update(['amount_uah' => \DB::raw('amount')]);
+            ->update(['amount_uah' => DB::raw('amount')]);
     }
 
     public function down(): void

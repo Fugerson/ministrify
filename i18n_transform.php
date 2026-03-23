@@ -5,8 +5,7 @@
  * i18n transformation script for Blade files.
  * Wraps Ukrainian UI strings in __() translation helper.
  */
-
-$basePath = __DIR__ . '/resources/views';
+$basePath = __DIR__.'/resources/views';
 
 $files = [
     // Ministries
@@ -52,25 +51,29 @@ $files = [
 // We need to match sequences containing Cyrillic characters
 $cyrillicPattern = '/[\x{0400}-\x{04FF}]/u';
 
-function hasCyrillic($str) {
+function hasCyrillic($str)
+{
     return preg_match('/[\x{0400}-\x{04FF}]/u', $str);
 }
 
-function isAlreadyWrapped($content, $pos, $text) {
+function isAlreadyWrapped($content, $pos, $text)
+{
     // Check if the text is already wrapped in __()
     $before = substr($content, max(0, $pos - 10), 10);
     if (preg_match("/__\(\s*['\"]$/", $before)) {
         return true;
     }
+
     return false;
 }
 
 $totalChanges = 0;
 
 foreach ($files as $relPath) {
-    $filePath = $basePath . '/' . $relPath;
-    if (!file_exists($filePath)) {
+    $filePath = $basePath.'/'.$relPath;
+    if (! file_exists($filePath)) {
         echo "SKIP: $relPath (not found)\n";
+
         continue;
     }
 
@@ -81,8 +84,9 @@ foreach ($files as $relPath) {
     // 1. @section('title', 'Ukrainian Text') -> @section('title', __('Ukrainian Text'))
     $content = preg_replace_callback(
         "/@section\('title',\s*'([^']*[\x{0400}-\x{04FF}][^']*)'\)/u",
-        function($m) use (&$changes) {
+        function ($m) use (&$changes) {
             $changes++;
+
             return "@section('title', __('".addcslashes($m[1], "'")."'))";
         },
         $content
@@ -91,8 +95,9 @@ foreach ($files as $relPath) {
     // Also handle double-quoted title sections
     $content = preg_replace_callback(
         '/@section\("title",\s*"([^"]*[\x{0400}-\x{04FF}][^"]*)"\)/u',
-        function($m) use (&$changes) {
+        function ($m) use (&$changes) {
             $changes++;
+
             return "@section('title', __('".str_replace("'", "\\'", $m[1])."'))";
         },
         $content
@@ -102,13 +107,14 @@ foreach ($files as $relPath) {
     // But NOT if already wrapped
     $content = preg_replace_callback(
         '/placeholder="([^"]*[\x{0400}-\x{04FF}][^"]*)"/u',
-        function($m) use (&$changes) {
+        function ($m) use (&$changes) {
             // Skip if already wrapped
-            if (strpos($m[1], "__(") !== false || strpos($m[1], "{{") !== false) {
+            if (strpos($m[1], '__(') !== false || strpos($m[1], '{{') !== false) {
                 return $m[0];
             }
             $changes++;
-            return 'placeholder="{{ __(\'' . str_replace("'", "\\'", $m[1]) . '\') }}"';
+
+            return 'placeholder="{{ __(\''.str_replace("'", "\\'", $m[1]).'\') }}"';
         },
         $content
     );
@@ -116,12 +122,13 @@ foreach ($files as $relPath) {
     // 3. title="Ukrainian Text" -> title="{{ __('Ukrainian Text') }}"
     $content = preg_replace_callback(
         '/title="([^"]*[\x{0400}-\x{04FF}][^"]*)"/u',
-        function($m) use (&$changes) {
-            if (strpos($m[1], "__(") !== false || strpos($m[1], "{{") !== false) {
+        function ($m) use (&$changes) {
+            if (strpos($m[1], '__(') !== false || strpos($m[1], '{{') !== false) {
                 return $m[0];
             }
             $changes++;
-            return 'title="{{ __(\'' . str_replace("'", "\\'", $m[1]) . '\') }}"';
+
+            return 'title="{{ __(\''.str_replace("'", "\\'", $m[1]).'\') }}"';
         },
         $content
     );
@@ -137,6 +144,7 @@ foreach ($files as $relPath) {
         // Skip lines that are pure PHP, comments, or Blade directives
         if (preg_match('/^\s*(@php|@endphp|@csrf|@method|@include|@extends|@push|@endpush|@if|@else|@endif|@foreach|@endforeach|@forelse|@empty|@endforelse|@can|@endcan|@error|@enderror|@for|@endfor|@while|@endwhile|@switch|@case|@break|@default|@endswitch|@section|@endsection|@yield|@stack|@prepend|@slot|@endslot|@component|@endcomponent|@php|<script|<\/script|\/\/|\/\*|\*\/|\*|{!!)/', $line)) {
             $processedLines[] = $line;
+
             continue;
         }
 
@@ -144,13 +152,14 @@ foreach ($files as $relPath) {
         // Skip lines that are only whitespace
         if (trim($line) === '') {
             $processedLines[] = $line;
+
             continue;
         }
 
         // Process Ukrainian text between HTML tags: >Ukrainian text<
         $line = preg_replace_callback(
             '/>(\s*)([\x{0400}-\x{04FF}][\x{0400}-\x{04FF}\s\p{P}0-9a-zA-Z()«»:*!?.,;\/\-+=%]+?)(\s*)</u',
-            function($m) use (&$changes) {
+            function ($m) use (&$changes) {
                 $text = $m[2];
                 // Skip if already wrapped
                 if (strpos($text, '{{') !== false || strpos($text, '__(') !== false) {
@@ -161,7 +170,7 @@ foreach ($files as $relPath) {
                     return $m[0];
                 }
                 // Skip pure numbers or symbols
-                if (!preg_match('/[\x{0400}-\x{04FF}]/u', $text)) {
+                if (! preg_match('/[\x{0400}-\x{04FF}]/u', $text)) {
                     return $m[0];
                 }
                 $trimmed = trim($text);
@@ -169,7 +178,8 @@ foreach ($files as $relPath) {
                     return $m[0];
                 }
                 $changes++;
-                return '>' . $m[1] . "{{ __('".str_replace("'", "\\'", $trimmed)."') }}" . $m[3] . '<';
+
+                return '>'.$m[1]."{{ __('".str_replace("'", "\\'", $trimmed)."') }}".$m[3].'<';
             },
             $line
         );
@@ -182,9 +192,12 @@ foreach ($files as $relPath) {
     // 5. Handle 'confirm(...)' JS calls with Ukrainian text
     $content = preg_replace_callback(
         "/confirm\('([^']*[\x{0400}-\x{04FF}][^']*)'\)/u",
-        function($m) use (&$changes) {
-            if (strpos($m[1], '__(') !== false) return $m[0];
+        function ($m) use (&$changes) {
+            if (strpos($m[1], '__(') !== false) {
+                return $m[0];
+            }
             $changes++;
+
             return "confirm('{{ __(\\'".str_replace("'", "\\\\'", $m[1])."\\') }}')";
         },
         $content
@@ -193,9 +206,12 @@ foreach ($files as $relPath) {
     // Handle confirm("...") with double quotes
     $content = preg_replace_callback(
         '/confirm\("([^"]*[\x{0400}-\x{04FF}][^"]*)"\)/u',
-        function($m) use (&$changes) {
-            if (strpos($m[1], '__(') !== false) return $m[0];
+        function ($m) use (&$changes) {
+            if (strpos($m[1], '__(') !== false) {
+                return $m[0];
+            }
             $changes++;
+
             return "confirm('{{ __(\"".str_replace('"', '\\"', $m[1])."\") }}')";
         },
         $content
@@ -204,9 +220,12 @@ foreach ($files as $relPath) {
     // 6. Handle alert() calls with Ukrainian text
     $content = preg_replace_callback(
         "/alert\('([^']*[\x{0400}-\x{04FF}][^']*)'\)/u",
-        function($m) use (&$changes) {
-            if (strpos($m[1], '__(') !== false) return $m[0];
+        function ($m) use (&$changes) {
+            if (strpos($m[1], '__(') !== false) {
+                return $m[0];
+            }
             $changes++;
+
             return "alert('{{ __(\\'".str_replace("'", "\\\\'", $m[1])."\\') }}')";
         },
         $content
@@ -215,9 +234,12 @@ foreach ($files as $relPath) {
     // 7. Handle showToast calls with Ukrainian text
     $content = preg_replace_callback(
         "/showToast\('([^']*)',\s*'([^']*[\x{0400}-\x{04FF}][^']*)'\)/u",
-        function($m) use (&$changes) {
-            if (strpos($m[2], '__(') !== false) return $m[0];
+        function ($m) use (&$changes) {
+            if (strpos($m[2], '__(') !== false) {
+                return $m[0];
+            }
             $changes++;
+
             return "showToast('".$m[1]."', '{{ __(\\'".$m[2]."\\') }}')";
         },
         $content
@@ -226,9 +248,12 @@ foreach ($files as $relPath) {
     // 8. Handle PHP array values with Ukrainian text like 'label' => 'Ukrainian Text'
     $content = preg_replace_callback(
         "/'label'\s*=>\s*'([^']*[\x{0400}-\x{04FF}][^']*)'/u",
-        function($m) use (&$changes) {
-            if (strpos($m[1], '__(') !== false) return $m[0];
+        function ($m) use (&$changes) {
+            if (strpos($m[1], '__(') !== false) {
+                return $m[0];
+            }
             $changes++;
+
             return "'label' => __('".str_replace("'", "\\'", $m[1])."')";
         },
         $content
@@ -237,10 +262,13 @@ foreach ($files as $relPath) {
     // 9. Handle match() expressions with Ukrainian values: 'key' => 'Ukrainian',
     $content = preg_replace_callback(
         "/=>\s*'([^']*[\x{0400}-\x{04FF}][^']*)',$/mu",
-        function($m) use (&$changes) {
-            if (strpos($m[1], '__(') !== false) return $m[0];
+        function ($m) use (&$changes) {
+            if (strpos($m[1], '__(') !== false) {
+                return $m[0];
+            }
             // Skip if this is inside a match() or PHP array context and the key is a PHP variable
             $changes++;
+
             return "=> __('".str_replace("'", "\\'", $m[1])."'),";
         },
         $content
@@ -249,7 +277,7 @@ foreach ($files as $relPath) {
     // 10. Handle x-text with Ukrainian strings: x-text="condition ? 'Ukrainian' : 'Ukrainian'"
     $content = preg_replace_callback(
         "/x-text=\"([^\"]*?)'/u",
-        function($m) use (&$changes) {
+        function ($m) use (&$changes) {
             // This is tricky - just leave for manual review
             return $m[0];
         },
@@ -259,10 +287,13 @@ foreach ($files as $relPath) {
     // 11. Handle null-text="Ukrainian" and similar component attributes
     $content = preg_replace_callback(
         '/null-text="([^"]*[\x{0400}-\x{04FF}][^"]*)"/u',
-        function($m) use (&$changes) {
-            if (strpos($m[1], '__(') !== false) return $m[0];
+        function ($m) use (&$changes) {
+            if (strpos($m[1], '__(') !== false) {
+                return $m[0];
+            }
             $changes++;
-            return 'null-text="{{ __(\'' . str_replace("'", "\\'", $m[1]) . '\') }}"';
+
+            return 'null-text="{{ __(\''.str_replace("'", "\\'", $m[1]).'\') }}"';
         },
         $content
     );
@@ -270,10 +301,13 @@ foreach ($files as $relPath) {
     // 12. Handle nullText="Ukrainian"
     $content = preg_replace_callback(
         '/nullText="([^"]*[\x{0400}-\x{04FF}][^"]*)"/u',
-        function($m) use (&$changes) {
-            if (strpos($m[1], '__(') !== false) return $m[0];
+        function ($m) use (&$changes) {
+            if (strpos($m[1], '__(') !== false) {
+                return $m[0];
+            }
             $changes++;
-            return 'nullText="{{ __(\'' . str_replace("'", "\\'", $m[1]) . '\') }}"';
+
+            return 'nullText="{{ __(\''.str_replace("'", "\\'", $m[1]).'\') }}"';
         },
         $content
     );
@@ -281,10 +315,13 @@ foreach ($files as $relPath) {
     // 13. Handle button-text="Ukrainian"
     $content = preg_replace_callback(
         '/button-text="([^"]*[\x{0400}-\x{04FF}][^"]*)"/u',
-        function($m) use (&$changes) {
-            if (strpos($m[1], '__(') !== false) return $m[0];
+        function ($m) use (&$changes) {
+            if (strpos($m[1], '__(') !== false) {
+                return $m[0];
+            }
             $changes++;
-            return 'button-text="{{ __(\'' . str_replace("'", "\\'", $m[1]) . '\') }}"';
+
+            return 'button-text="{{ __(\''.str_replace("'", "\\'", $m[1]).'\') }}"';
         },
         $content
     );
@@ -292,10 +329,13 @@ foreach ($files as $relPath) {
     // 14. Handle message="Ukrainian" (component attribute)
     $content = preg_replace_callback(
         '/\bmessage="([^"]*[\x{0400}-\x{04FF}][^"]*)"/u',
-        function($m) use (&$changes) {
-            if (strpos($m[1], '__(') !== false) return $m[0];
+        function ($m) use (&$changes) {
+            if (strpos($m[1], '__(') !== false) {
+                return $m[0];
+            }
             $changes++;
-            return 'message="{{ __(\'' . str_replace("'", "\\'", $m[1]) . '\') }}"';
+
+            return 'message="{{ __(\''.str_replace("'", "\\'", $m[1]).'\') }}"';
         },
         $content
     );

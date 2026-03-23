@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Event;
 use App\Models\Person;
 use App\Models\ServicePlanItem;
+use App\Models\TelegramMessage;
 use App\Rules\BelongsToChurch;
 use App\Services\TelegramService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -22,7 +24,7 @@ class ServicePlanController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string|max:2000',
-            'type' => 'nullable|string|in:' . implode(',', array_keys(ServicePlanItem::typeLabels())),
+            'type' => 'nullable|string|in:'.implode(',', array_keys(ServicePlanItem::typeLabels())),
             'start_time' => 'nullable|date_format:H:i',
             'end_time' => 'nullable|date_format:H:i',
             'responsible_id' => ['nullable', 'exists:people,id', new BelongsToChurch(Person::class)],
@@ -64,7 +66,7 @@ class ServicePlanController extends Controller
         $validated = $request->validate([
             'title' => 'sometimes|string|max:255',
             'description' => 'nullable|string|max:2000',
-            'type' => 'nullable|string|in:' . implode(',', array_keys(ServicePlanItem::typeLabels())),
+            'type' => 'nullable|string|in:'.implode(',', array_keys(ServicePlanItem::typeLabels())),
             'start_time' => 'nullable|date_format:H:i',
             'end_time' => 'nullable|date_format:H:i',
             'responsible_id' => ['nullable', 'exists:people,id', new BelongsToChurch(Person::class)],
@@ -83,20 +85,22 @@ class ServicePlanController extends Controller
         }
 
         // When start_time changes, shift end_time to preserve duration
-        if (array_key_exists('start_time', $validated) && !array_key_exists('end_time', $validated)) {
+        if (array_key_exists('start_time', $validated) && ! array_key_exists('end_time', $validated)) {
             $newStart = $validated['start_time'];
             $oldStart = $item->getRawOriginal('start_time'); // e.g. "10:30:00"
             $oldEnd = $item->getRawOriginal('end_time');
 
             if ($newStart && $oldStart && $oldEnd) {
-                $oldStartCarbon = \Carbon\Carbon::parse($oldStart);
-                $oldEndCarbon = \Carbon\Carbon::parse($oldEnd);
+                $oldStartCarbon = Carbon::parse($oldStart);
+                $oldEndCarbon = Carbon::parse($oldEnd);
                 $durationMinutes = $oldStartCarbon->diffInMinutes($oldEndCarbon, false);
-                if ($durationMinutes <= 0) $durationMinutes = 5; // fallback
-                $validated['end_time'] = \Carbon\Carbon::parse($newStart)->addMinutes($durationMinutes)->format('H:i');
-            } elseif ($newStart && !$oldEnd) {
+                if ($durationMinutes <= 0) {
+                    $durationMinutes = 5;
+                } // fallback
+                $validated['end_time'] = Carbon::parse($newStart)->addMinutes($durationMinutes)->format('H:i');
+            } elseif ($newStart && ! $oldEnd) {
                 // No end_time existed — set default 5 min
-                $validated['end_time'] = \Carbon\Carbon::parse($newStart)->addMinutes(5)->format('H:i');
+                $validated['end_time'] = Carbon::parse($newStart)->addMinutes(5)->format('H:i');
             }
         }
 
@@ -175,7 +179,7 @@ class ServicePlanController extends Controller
         }
 
         // Verify source is a service with plan
-        if (!$source->is_service || !$source->planItems()->exists()) {
+        if (! $source->is_service || ! $source->planItems()->exists()) {
             return back()->with('error', __('messages.source_has_no_plan'));
         }
 
@@ -207,7 +211,7 @@ class ServicePlanController extends Controller
         $this->authorize('managePlan', $event);
 
         $validated = $request->validate([
-            'type' => 'required|string|in:' . implode(',', array_keys(ServicePlanItem::typeLabels())),
+            'type' => 'required|string|in:'.implode(',', array_keys(ServicePlanItem::typeLabels())),
         ]);
 
         $typeLabels = ServicePlanItem::typeLabels();
@@ -219,11 +223,11 @@ class ServicePlanController extends Controller
         // Get last item's end time for consecutive scheduling
         $lastItem = $event->planItems()->orderByDesc('sort_order')->first();
         if ($lastItem && $lastItem->end_time) {
-            $startTime = \Carbon\Carbon::parse($lastItem->end_time)->format('H:i');
+            $startTime = Carbon::parse($lastItem->end_time)->format('H:i');
         }
 
         $duration = ServicePlanItem::getDefaultDuration($validated['type']);
-        $endTime = \Carbon\Carbon::parse($startTime)->addMinutes($duration)->format('H:i');
+        $endTime = Carbon::parse($startTime)->addMinutes($duration)->format('H:i');
 
         $maxOrder = $event->planItems()->max('sort_order') ?? 0;
 
@@ -297,8 +301,8 @@ class ServicePlanController extends Controller
         return response()->json([
             'type' => $item->type ?? '',
             'title' => $item->title,
-            'start_time' => $item->start_time ? \Carbon\Carbon::parse($item->start_time)->format('H:i') : '',
-            'end_time' => $item->end_time ? \Carbon\Carbon::parse($item->end_time)->format('H:i') : '',
+            'start_time' => $item->start_time ? Carbon::parse($item->start_time)->format('H:i') : '',
+            'end_time' => $item->end_time ? Carbon::parse($item->end_time)->format('H:i') : '',
             'responsible_id' => $item->responsible_id ?? '',
             'responsible_names' => $item->responsible_names ?? '',
             'description' => $item->description ?? '',
@@ -352,7 +356,7 @@ class ServicePlanController extends Controller
 
         $items = $templates[$validated['template']];
         $startTime = $event->time ? $event->time->format('H:i') : '10:00';
-        $currentTime = \Carbon\Carbon::parse($startTime);
+        $currentTime = Carbon::parse($startTime);
         $maxOrder = $event->planItems()->max('sort_order') ?? 0;
 
         foreach ($items as $index => $item) {
@@ -386,7 +390,7 @@ class ServicePlanController extends Controller
 
         $validated = $request->validate([
             'types' => 'required|array|min:1',
-            'types.*' => 'string|in:' . implode(',', array_keys(ServicePlanItem::typeLabels())),
+            'types.*' => 'string|in:'.implode(',', array_keys(ServicePlanItem::typeLabels())),
         ]);
 
         $typeLabels = ServicePlanItem::typeLabels();
@@ -395,10 +399,10 @@ class ServicePlanController extends Controller
         $startTime = $event->time ? $event->time->format('H:i') : '10:00';
 
         if ($lastItem && $lastItem->end_time) {
-            $startTime = \Carbon\Carbon::parse($lastItem->end_time)->format('H:i');
+            $startTime = Carbon::parse($lastItem->end_time)->format('H:i');
         }
 
-        $currentTime = \Carbon\Carbon::parse($startTime);
+        $currentTime = Carbon::parse($startTime);
         $maxOrder = $event->planItems()->max('sort_order') ?? 0;
 
         foreach ($validated['types'] as $index => $type) {
@@ -458,12 +462,14 @@ class ServicePlanController extends Controller
         $lastItem = $event->planItems()->orderByDesc('sort_order')->first();
         $defaultStartTime = $event->time ? $event->time->format('H:i') : '10:00';
         if ($lastItem && $lastItem->end_time) {
-            $defaultStartTime = \Carbon\Carbon::parse($lastItem->end_time)->format('H:i');
+            $defaultStartTime = Carbon::parse($lastItem->end_time)->format('H:i');
         }
 
         foreach ($lines as $line) {
             $line = trim($line);
-            if (empty($line)) continue;
+            if (empty($line)) {
+                continue;
+            }
 
             // Parse line format: [HH:MM] Title [(XX хв)] [- Responsible]
             $startTime = null;
@@ -480,7 +486,7 @@ class ServicePlanController extends Controller
 
             // Extract duration: "... (30 хв)" or "... (30хв)"
             if (preg_match('/\((\d+)\s*хв\.?\)/', $title, $matches)) {
-                $duration = (int)$matches[1];
+                $duration = (int) $matches[1];
                 $title = trim(preg_replace('/\(\d+\s*хв\.?\)/', '', $title));
             }
 
@@ -498,7 +504,7 @@ class ServicePlanController extends Controller
                     break;
                 }
             }
-            if (!$detectedType) {
+            if (! $detectedType) {
                 foreach ($typeMap as $label => $type) {
                     if (mb_strpos($lowerTitle, mb_strtolower($label)) !== false) {
                         $detectedType = $type;
@@ -509,10 +515,10 @@ class ServicePlanController extends Controller
 
             // Calculate times — always ensure end_time so next item chains correctly
             $itemStartTime = $startTime ?: $defaultStartTime;
-            if (!$duration) {
+            if (! $duration) {
                 $duration = $detectedType ? ServicePlanItem::getDefaultDuration($detectedType) : 5;
             }
-            $itemEndTime = \Carbon\Carbon::parse($itemStartTime)->addMinutes($duration)->format('H:i');
+            $itemEndTime = Carbon::parse($itemStartTime)->addMinutes($duration)->format('H:i');
             $defaultStartTime = $itemEndTime; // Next item starts after this one
 
             $maxOrder++;
@@ -550,7 +556,7 @@ class ServicePlanController extends Controller
         // Get person - either from request (specific person) or fallback to responsible_id
         $personId = $request->input('person_id') ?? $item->responsible_id;
 
-        if (!$personId) {
+        if (! $personId) {
             return response()->json([
                 'success' => false,
                 'message' => __('messages.no_responsible_person'),
@@ -561,14 +567,14 @@ class ServicePlanController extends Controller
             ->where('church_id', $event->church_id)
             ->first();
 
-        if (!$person) {
+        if (! $person) {
             return response()->json([
                 'success' => false,
                 'message' => __('messages.person_not_found'),
             ], 422);
         }
 
-        if (!$person->telegram_chat_id) {
+        if (! $person->telegram_chat_id) {
             return response()->json([
                 'success' => false,
                 'message' => __('messages.person_no_telegram'),
@@ -586,14 +592,14 @@ class ServicePlanController extends Controller
         }
 
         $church = $event->church;
-        if (!$church?->isNotificationEnabled('notify_on_plan_request')) {
+        if (! $church?->isNotificationEnabled('notify_on_plan_request')) {
             return response()->json([
                 'success' => false,
                 'message' => __('messages.plan_notifications_disabled'),
             ], 422);
         }
 
-        if (!config('services.telegram.bot_token')) {
+        if (! config('services.telegram.bot_token')) {
             return response()->json([
                 'success' => false,
                 'message' => __('messages.telegram_bot_not_configured'),
@@ -609,12 +615,12 @@ class ServicePlanController extends Controller
             ], 500);
         }
 
-        $timeStr = $item->start_time ? \Carbon\Carbon::parse($item->start_time)->format('H:i') : __('messages.time_to_be_confirmed');
+        $timeStr = $item->start_time ? Carbon::parse($item->start_time)->format('H:i') : __('messages.time_to_be_confirmed');
         $message = "📋 <b>Запит на участь</b>\n\n"
-            . "🏛 {$event->title}\n"
-            . "📅 {$event->date->format('d.m.Y')} ({$this->getDayName($event->date)})\n"
-            . "⏰ {$timeStr}\n"
-            . "📝 {$item->title}";
+            ."🏛 {$event->title}\n"
+            ."📅 {$event->date->format('d.m.Y')} ({$this->getDayName($event->date)})\n"
+            ."⏰ {$timeStr}\n"
+            ."📝 {$item->title}";
 
         // Add notes/description if available
         if ($item->notes) {
@@ -624,9 +630,9 @@ class ServicePlanController extends Controller
         // Add other responsible people
         if ($item->responsible_names) {
             $allNames = array_map('trim', explode(',', $item->responsible_names));
-            $otherNames = array_filter($allNames, fn($n) => $n !== $person->full_name);
+            $otherNames = array_filter($allNames, fn ($n) => $n !== $person->full_name);
             if (count($otherNames) > 0) {
-                $message .= "\n👥 Разом з: " . implode(', ', $otherNames);
+                $message .= "\n👥 Разом з: ".implode(', ', $otherNames);
             }
         }
 
@@ -644,7 +650,7 @@ class ServicePlanController extends Controller
 
         if ($sent) {
             // Save to telegram_messages for tracking
-            \App\Models\TelegramMessage::create([
+            TelegramMessage::create([
                 'church_id' => $event->church_id,
                 'person_id' => $personId,
                 'direction' => 'outgoing',
@@ -678,6 +684,7 @@ class ServicePlanController extends Controller
     private function getDayName(\DateTime $date): string
     {
         $days = ['Неділя', 'Понеділок', 'Вівторок', 'Середа', 'Четвер', 'П\'ятниця', 'Субота'];
+
         return $days[$date->format('w')];
     }
 }

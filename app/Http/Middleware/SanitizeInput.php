@@ -26,7 +26,7 @@ class SanitizeInput
         $input = $request->all();
 
         array_walk_recursive($input, function (&$value, $key) {
-            if (is_string($value) && !in_array($key, $this->except, true)) {
+            if (is_string($value) && ! in_array($key, $this->except, true)) {
                 // Remove null bytes
                 $value = str_replace("\0", '', $value);
 

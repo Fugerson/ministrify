@@ -3,19 +3,21 @@
 namespace App\Services;
 
 use App\Models\Assignment;
+use App\Models\EventResponsibility;
 use App\Models\Person;
 use Illuminate\Support\Facades\Http;
 
 class TelegramService
 {
     private string $token;
+
     private string $baseUrl;
 
     public function __construct(?string $token = null)
     {
         $this->token = $token ?? config('services.telegram.bot_token');
 
-        if (!$this->token) {
+        if (! $this->token) {
             throw new \RuntimeException('Telegram bot token not configured');
         }
 
@@ -27,20 +29,20 @@ class TelegramService
      */
     public static function make(): self
     {
-        return new self();
+        return new self;
     }
 
     public function getMe(): array
     {
         $response = Http::get("{$this->baseUrl}/getMe");
 
-        if (!$response->ok()) {
+        if (! $response->ok()) {
             throw new \Exception('Failed to connect to Telegram API');
         }
 
         $data = $response->json();
 
-        if (!$data['ok']) {
+        if (! $data['ok']) {
             throw new \Exception($data['description'] ?? 'Unknown error');
         }
 
@@ -74,7 +76,7 @@ class TelegramService
 
         $success = $response->ok() && ($response->json()['ok'] ?? false);
 
-        if (!$success) {
+        if (! $success) {
             \Log::warning('TelegramService: Failed to send message', [
                 'chat_id' => $chatId,
                 'status' => $response->status(),
@@ -91,16 +93,16 @@ class TelegramService
         $event = $assignment->event;
         $position = $assignment->position;
 
-        if (!$person?->telegram_chat_id || !$event || !$position || !$event->ministry) {
+        if (! $person?->telegram_chat_id || ! $event || ! $position || ! $event->ministry) {
             return false;
         }
 
         $timeStr = $event->time ? $event->time->format('H:i') : 'весь день';
         $message = "🔔 <b>Нове призначення!</b>\n\n"
-            . "📅 {$event->date->format('d.m.Y')} ({$this->getDayName($event->date)}), {$timeStr}\n"
-            . "⛪ Служіння: {$event->ministry->name}\n"
-            . "🎯 Позиція: {$position->name}\n\n"
-            . "Ви можете підтвердити або відхилити участь:";
+            ."📅 {$event->date->format('d.m.Y')} ({$this->getDayName($event->date)}), {$timeStr}\n"
+            ."⛪ Служіння: {$event->ministry->name}\n"
+            ."🎯 Позиція: {$position->name}\n\n"
+            .'Ви можете підтвердити або відхилити участь:';
 
         $keyboard = [
             [
@@ -112,12 +114,12 @@ class TelegramService
         return $this->sendMessage($person->telegram_chat_id, $message, $keyboard);
     }
 
-    public function sendResponsibilityReminder(\App\Models\EventResponsibility $responsibility): bool
+    public function sendResponsibilityReminder(EventResponsibility $responsibility): bool
     {
         $person = $responsibility->person;
         $event = $responsibility->event;
 
-        if (!$person?->telegram_chat_id || !$event || !$event->ministry) {
+        if (! $person?->telegram_chat_id || ! $event || ! $event->ministry) {
             return false;
         }
 
@@ -127,11 +129,11 @@ class TelegramService
         $timeStr = $event->time ? $event->time->format('H:i') : 'весь день';
         $ministryName = $event->ministry?->name ?? 'Служіння';
         $message = "{$prefix}\n\n"
-            . ($isToday ? "Сьогодні" : "Завтра") . " ти служиш:\n"
-            . "📅 {$event->date->format('d.m.Y')}, {$timeStr}\n"
-            . "⛪ {$ministryName}\n"
-            . "🎯 {$responsibility->name}\n\n"
-            . "Не забудь! 🙏";
+            .($isToday ? 'Сьогодні' : 'Завтра')." ти служиш:\n"
+            ."📅 {$event->date->format('d.m.Y')}, {$timeStr}\n"
+            ."⛪ {$ministryName}\n"
+            ."🎯 {$responsibility->name}\n\n"
+            .'Не забудь! 🙏';
 
         return $this->sendMessage($person->telegram_chat_id, $message);
     }
@@ -142,17 +144,17 @@ class TelegramService
         $event = $assignment->event;
         $position = $assignment->position;
 
-        if (!$leader->telegram_chat_id || !$person || !$event || !$position || !$event->ministry) {
+        if (! $leader->telegram_chat_id || ! $person || ! $event || ! $position || ! $event->ministry) {
             return false;
         }
 
         $timeStr = $event->time ? $event->time->format('H:i') : 'весь день';
         $message = "⚠️ <b>Відмова від служіння</b>\n\n"
-            . "{$person->full_name} відхилив(ла) участь:\n"
-            . "📅 {$event->date->format('d.m.Y')}, {$timeStr}\n"
-            . "⛪ {$event->ministry->name}\n"
-            . "🎯 {$position->name}\n\n"
-            . "Потрібно знайти заміну.";
+            ."{$person->full_name} відхилив(ла) участь:\n"
+            ."📅 {$event->date->format('d.m.Y')}, {$timeStr}\n"
+            ."⛪ {$event->ministry->name}\n"
+            ."🎯 {$position->name}\n\n"
+            .'Потрібно знайти заміну.';
 
         return $this->sendMessage($leader->telegram_chat_id, $message);
     }
@@ -161,19 +163,19 @@ class TelegramService
     {
         $assignments = $person->assignments()
             ->with(['event.ministry', 'position'])
-            ->whereHas('event', fn($q) => $q->where('date', '>=', now())->where('date', '<=', now()->endOfMonth()))
+            ->whereHas('event', fn ($q) => $q->where('date', '>=', now())->where('date', '<=', now()->endOfMonth()))
             ->get()
-            ->sortBy(fn($a) => $a->event->date);
+            ->sortBy(fn ($a) => $a->event->date);
 
         if ($assignments->isEmpty()) {
-            return "📅 У тебе немає запланованих служінь на цей місяць.";
+            return '📅 У тебе немає запланованих служінь на цей місяць.';
         }
 
-        $message = "📅 <b>Твій розклад на " . now()->translatedFormat('F') . ":</b>\n\n";
+        $message = '📅 <b>Твій розклад на '.now()->translatedFormat('F').":</b>\n\n";
 
         foreach ($assignments as $assignment) {
             $event = $assignment->event;
-            if (!$event || !$event->ministry || !$assignment->position) {
+            if (! $event || ! $event->ministry || ! $assignment->position) {
                 continue;
             }
 
@@ -185,7 +187,7 @@ class TelegramService
             };
 
             $message .= "{$event->date->format('d.m')} ({$this->getShortDayName($event->date)}) — "
-                . ($event->ministry?->name ?? 'Служіння') . ", " . ($assignment->position?->name ?? '') . " {$status}\n";
+                .($event->ministry?->name ?? 'Служіння').', '.($assignment->position?->name ?? '')." {$status}\n";
         }
 
         $message .= "\n✅ — підтверджено\n⏳ — очікує підтвердження";
@@ -197,33 +199,36 @@ class TelegramService
     {
         $assignment = $person->assignments()
             ->with(['event.ministry', 'position'])
-            ->whereHas('event', fn($q) => $q->where('date', '>=', now()))
+            ->whereHas('event', fn ($q) => $q->where('date', '>=', now()))
             ->where('status', '!=', 'declined')
             ->first();
 
-        if (!$assignment || !$assignment->event || !$assignment->position || !$assignment->event->ministry) {
-            return "У тебе немає запланованих служінь.";
+        if (! $assignment || ! $assignment->event || ! $assignment->position || ! $assignment->event->ministry) {
+            return 'У тебе немає запланованих служінь.';
         }
 
         $event = $assignment->event;
 
         $timeStr = $event->time ? $event->time->format('H:i') : 'весь день';
+
         return "📅 <b>Наступне служіння:</b>\n\n"
-            . "📆 {$event->date->format('d.m.Y')} ({$this->getDayName($event->date)})\n"
-            . "🕐 {$timeStr}\n"
-            . "⛪ " . ($event->ministry?->name ?? 'Служіння') . "\n"
-            . "🎯 " . ($assignment->position?->name ?? '');
+            ."📆 {$event->date->format('d.m.Y')} ({$this->getDayName($event->date)})\n"
+            ."🕐 {$timeStr}\n"
+            .'⛪ '.($event->ministry?->name ?? 'Служіння')."\n"
+            .'🎯 '.($assignment->position?->name ?? '');
     }
 
     private function getDayName(\DateTime $date): string
     {
         $days = ['Неділя', 'Понеділок', 'Вівторок', 'Середа', 'Четвер', 'П\'ятниця', 'Субота'];
+
         return $days[$date->format('w')];
     }
 
     private function getShortDayName(\DateTime $date): string
     {
         $days = ['Нд', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+
         return $days[$date->format('w')];
     }
 }

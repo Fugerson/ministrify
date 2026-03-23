@@ -5,20 +5,21 @@ namespace App\Models;
 use App\Notifications\ResetPassword;
 use App\Notifications\VerifyEmail;
 use App\Traits\Auditable;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\DB;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasApiTokens, HasFactory, Notifiable, Auditable, SoftDeletes;
+    use Auditable, HasApiTokens, HasFactory, Notifiable, SoftDeletes;
 
     protected $fillable = [
         'church_id',
@@ -115,12 +116,12 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function switchToChurch(int $churchId): bool
     {
-        $pivot = \Illuminate\Support\Facades\DB::table('church_user')
+        $pivot = DB::table('church_user')
             ->where('user_id', $this->id)
             ->where('church_id', $churchId)
             ->first();
 
-        if (!$pivot) {
+        if (! $pivot) {
             return false;
         }
 
@@ -143,7 +144,7 @@ class User extends Authenticatable implements MustVerifyEmail
             ->where('church_id', $churchId)
             ->first();
 
-        if (!$person) {
+        if (! $person) {
             // Try to find existing Person by email (may have been added manually before)
             $person = Person::where('church_id', $churchId)
                 ->where('email', $this->email)
@@ -151,7 +152,7 @@ class User extends Authenticatable implements MustVerifyEmail
                 ->first();
 
             // Fallback: try to find by first_name + last_name
-            if (!$person) {
+            if (! $person) {
                 $nameParts = explode(' ', $this->name, 2);
                 $firstName = $nameParts[0];
                 $lastName = $nameParts[1] ?? '';
@@ -165,7 +166,7 @@ class User extends Authenticatable implements MustVerifyEmail
             }
 
             // Fallback: try to find by phone number
-            if (!$person && $phone) {
+            if (! $person && $phone) {
                 $person = Person::findByPhoneInChurch($phone, $churchId);
             }
 
@@ -185,7 +186,7 @@ class User extends Authenticatable implements MustVerifyEmail
         }
 
         // Create pivot if not exists, otherwise update person_id
-        $existingPivot = \Illuminate\Support\Facades\DB::table('church_user')
+        $existingPivot = DB::table('church_user')
             ->where('user_id', $this->id)
             ->where('church_id', $churchId)
             ->first();
@@ -193,15 +194,16 @@ class User extends Authenticatable implements MustVerifyEmail
         if ($existingPivot) {
             // Ensure pivot points to the correct person
             if ($existingPivot->person_id !== $person->id) {
-                \Illuminate\Support\Facades\DB::table('church_user')
+                DB::table('church_user')
                     ->where('user_id', $this->id)
                     ->where('church_id', $churchId)
                     ->update(['person_id' => $person->id, 'updated_at' => now()]);
             }
+
             return;
         }
 
-        \Illuminate\Support\Facades\DB::table('church_user')->insert([
+        DB::table('church_user')->insert([
             'user_id' => $this->id,
             'church_id' => $churchId,
             'church_role_id' => $roleId,
@@ -225,19 +227,21 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function isLeader(): bool
     {
-        if (!$this->churchRole) {
+        if (! $this->churchRole) {
             return false;
         }
+
         return $this->churchRole->slug === 'leader';
     }
 
     public function isVolunteer(): bool
     {
         // User is volunteer if they have a role that's not admin and not leader
-        if (!$this->churchRole) {
+        if (! $this->churchRole) {
             return false;
         }
-        return !$this->isAdmin() && !$this->isLeader();
+
+        return ! $this->isAdmin() && ! $this->isLeader();
     }
 
     /**
@@ -246,7 +250,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function hasRole(string|array $roles): bool
     {
-        if (!$this->churchRole) {
+        if (! $this->churchRole) {
             return false;
         }
 
@@ -291,7 +295,7 @@ class User extends Authenticatable implements MustVerifyEmail
             return true;
         }
 
-        if (!$this->church_id) {
+        if (! $this->church_id) {
             return false;
         }
 
@@ -316,7 +320,6 @@ class User extends Authenticatable implements MustVerifyEmail
 
         return false;
     }
-
 
     /**
      * Check if user can view module
@@ -446,7 +449,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function needsOnboarding(): bool
     {
-        return $this->isAdmin() && !$this->isSuperAdmin() && !$this->onboarding_completed;
+        return $this->isAdmin() && ! $this->isSuperAdmin() && ! $this->onboarding_completed;
     }
 
     public function startOnboarding(): void
@@ -473,24 +476,27 @@ class User extends Authenticatable implements MustVerifyEmail
     private function getValidOnboardingState(): array
     {
         $state = $this->onboarding_state;
-        if (!is_array($state)) {
+        if (! is_array($state)) {
             return ['current_step' => 'welcome', 'steps' => [], 'dismissed_hints' => []];
         }
-        if (!isset($state['steps']) || !is_array($state['steps'])) {
+        if (! isset($state['steps']) || ! is_array($state['steps'])) {
             $state['steps'] = [];
         }
+
         return $state;
     }
 
     public function getOnboardingStep(string $step): ?array
     {
         $state = $this->getValidOnboardingState();
+
         return $state['steps'][$step] ?? null;
     }
 
     public function getCurrentOnboardingStep(): string
     {
         $state = $this->getValidOnboardingState();
+
         return $state['current_step'] ?? 'welcome';
     }
 
@@ -517,7 +523,7 @@ class User extends Authenticatable implements MustVerifyEmail
     public function skipOnboardingStep(string $step): void
     {
         $stepConfig = self::ONBOARDING_STEPS[$step] ?? null;
-        if (!$stepConfig || $stepConfig['required']) {
+        if (! $stepConfig || $stepConfig['required']) {
             return; // Cannot skip required steps
         }
 
@@ -583,7 +589,7 @@ class User extends Authenticatable implements MustVerifyEmail
         $state = $this->getValidOnboardingState();
         $hints = $state['dismissed_hints'] ?? [];
 
-        if (!in_array($hint, $hints)) {
+        if (! in_array($hint, $hints)) {
             $hints[] = $hint;
             $state['dismissed_hints'] = $hints;
             $this->update(['onboarding_state' => $state]);
@@ -594,6 +600,7 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         $state = $this->getValidOnboardingState();
         $hints = $state['dismissed_hints'] ?? [];
+
         return in_array($hint, $hints);
     }
 
@@ -604,6 +611,6 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function sendEmailVerificationNotification(): void
     {
-        $this->notify(new VerifyEmail());
+        $this->notify(new VerifyEmail);
     }
 }

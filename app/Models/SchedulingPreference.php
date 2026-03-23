@@ -69,6 +69,7 @@ class SchedulingPreference extends Model
     public function getMaxForMinistry($ministryId): ?int
     {
         $pref = $this->ministryPreferences()->where('ministry_id', $ministryId)->first();
+
         return $pref?->max_times_per_month ?? $this->max_times_per_month;
     }
 
@@ -78,6 +79,7 @@ class SchedulingPreference extends Model
     public function getPreferredForMinistry($ministryId): ?int
     {
         $pref = $this->ministryPreferences()->where('ministry_id', $ministryId)->first();
+
         return $pref?->preferred_times_per_month ?? $this->preferred_times_per_month;
     }
 
@@ -87,6 +89,7 @@ class SchedulingPreference extends Model
     public function getMaxForPosition($positionId): ?int
     {
         $pref = $this->positionPreferences()->where('position_id', $positionId)->first();
+
         return $pref?->max_times_per_month ?? $this->max_times_per_month;
     }
 
@@ -95,7 +98,7 @@ class SchedulingPreference extends Model
      */
     public function hasHouseholdConflict($eventId, $assignedPersonIds): bool
     {
-        if ($this->household_preference === 'none' || !$this->prefer_with_person_id) {
+        if ($this->household_preference === 'none' || ! $this->prefer_with_person_id) {
             return false;
         }
 
@@ -103,7 +106,7 @@ class SchedulingPreference extends Model
 
         if ($this->household_preference === 'together') {
             // Wants to serve together but partner not assigned
-            return !$partnerAssigned;
+            return ! $partnerAssigned;
         }
 
         if ($this->household_preference === 'separate') {

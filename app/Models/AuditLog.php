@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -42,77 +43,77 @@ class AuditLog extends Model
      */
     private const ALLOWED_MODEL_TYPES = [
         // Core models
-        \App\Models\Person::class,
-        \App\Models\User::class,
-        \App\Models\Event::class,
-        \App\Models\Ministry::class,
-        \App\Models\Group::class,
-        \App\Models\Transaction::class,
-        \App\Models\Church::class,
-        \App\Models\Attendance::class,
-        \App\Models\Assignment::class,
-        \App\Models\ChurchRole::class,
-        \App\Models\ChurchRolePermission::class,
+        Person::class,
+        User::class,
+        Event::class,
+        Ministry::class,
+        Group::class,
+        Transaction::class,
+        Church::class,
+        Attendance::class,
+        Assignment::class,
+        ChurchRole::class,
+        ChurchRolePermission::class,
         // Board
-        \App\Models\Board::class,
-        \App\Models\BoardCard::class,
-        \App\Models\BoardColumn::class,
-        \App\Models\BoardEpic::class,
+        Board::class,
+        BoardCard::class,
+        BoardColumn::class,
+        BoardEpic::class,
         // Songs & Worship
-        \App\Models\Song::class,
-        \App\Models\Sermon::class,
-        \App\Models\SermonSeries::class,
-        \App\Models\WorshipRole::class,
-        \App\Models\EventSong::class,
+        Song::class,
+        Sermon::class,
+        SermonSeries::class,
+        WorshipRole::class,
+        EventSong::class,
         // Communication & Content
-        \App\Models\PrayerRequest::class,
-        \App\Models\Announcement::class,
-        \App\Models\BlogPost::class,
-        \App\Models\BlogCategory::class,
-        \App\Models\Testimonial::class,
-        \App\Models\Faq::class,
-        \App\Models\MessageTemplate::class,
-        \App\Models\PersonCommunication::class,
+        PrayerRequest::class,
+        Announcement::class,
+        BlogPost::class,
+        BlogCategory::class,
+        Testimonial::class,
+        Faq::class,
+        MessageTemplate::class,
+        PersonCommunication::class,
         // Finance
-        \App\Models\TransactionCategory::class,
-        \App\Models\TransactionAttachment::class,
-        \App\Models\IncomeCategory::class,
-        \App\Models\ExpenseCategory::class,
-        \App\Models\DonationCampaign::class,
-        \App\Models\OnlineDonation::class,
-        \App\Models\ChurchBudget::class,
-        \App\Models\ChurchBudgetItem::class,
-        \App\Models\MinistryBudget::class,
+        TransactionCategory::class,
+        TransactionAttachment::class,
+        IncomeCategory::class,
+        ExpenseCategory::class,
+        DonationCampaign::class,
+        OnlineDonation::class,
+        ChurchBudget::class,
+        ChurchBudgetItem::class,
+        MinistryBudget::class,
         // Ministry
-        \App\Models\MinistryTask::class,
-        \App\Models\MinistryGoal::class,
-        \App\Models\MinistryMeeting::class,
-        \App\Models\MinistryRole::class,
-        \App\Models\MinistryType::class,
-        \App\Models\Position::class,
+        MinistryTask::class,
+        MinistryGoal::class,
+        MinistryMeeting::class,
+        MinistryRole::class,
+        MinistryType::class,
+        Position::class,
         // Events & Scheduling
-        \App\Models\EventRegistration::class,
-        \App\Models\EventChecklist::class,
-        \App\Models\EventChecklistItem::class,
-        \App\Models\EventTaskTemplate::class,
-        \App\Models\ServicePlanItem::class,
-        \App\Models\ServicePlanTemplate::class,
-        \App\Models\BlockoutDate::class,
-        \App\Models\ChecklistTemplate::class,
+        EventRegistration::class,
+        EventChecklist::class,
+        EventChecklistItem::class,
+        EventTaskTemplate::class,
+        ServicePlanItem::class,
+        ServicePlanTemplate::class,
+        BlockoutDate::class,
+        ChecklistTemplate::class,
         // Groups & Attendance
-        \App\Models\GroupGuest::class,
-        \App\Models\GroupAttendance::class,
-        \App\Models\AttendanceRecord::class,
+        GroupGuest::class,
+        GroupAttendance::class,
+        AttendanceRecord::class,
         // People & Relationships
-        \App\Models\FamilyRelationship::class,
-        \App\Models\StaffMember::class,
-        \App\Models\Tag::class,
+        FamilyRelationship::class,
+        StaffMember::class,
+        Tag::class,
         // Media & Resources
-        \App\Models\Gallery::class,
-        \App\Models\GalleryPhoto::class,
+        Gallery::class,
+        GalleryPhoto::class,
         \App\Models\Resource::class,
         // Support
-        \App\Models\SupportTicket::class,
+        SupportTicket::class,
     ];
 
     /**
@@ -122,15 +123,18 @@ class AuditLog extends Model
     {
         if ($this->model_type && $this->model_id) {
             // Security: validate model_type against whitelist before instantiation
-            if (!in_array($this->model_type, self::ALLOWED_MODEL_TYPES, true)) {
+            if (! in_array($this->model_type, self::ALLOWED_MODEL_TYPES, true)) {
                 \Log::warning('AuditLog: Attempted to access invalid model type', [
                     'model_type' => $this->model_type,
                     'model_id' => $this->model_id,
                 ]);
+
                 return null;
             }
+
             return $this->model_type::find($this->model_id);
         }
+
         return null;
     }
 
@@ -139,7 +143,7 @@ class AuditLog extends Model
      */
     public function getActionLabelAttribute(): string
     {
-        return match($this->action) {
+        return match ($this->action) {
             'created' => __('app.audit_action_created'),
             'updated' => __('app.audit_action_updated'),
             'deleted' => __('app.audit_action_deleted'),
@@ -245,7 +249,7 @@ class AuditLog extends Model
      */
     public function getModelLabelAttribute(): string
     {
-        return match($this->model_type) {
+        return match ($this->model_type) {
             'App\\Models\\Person' => 'Член церкви',
             'App\\Models\\User' => 'Користувач',
             'App\\Models\\Event' => 'Подія',
@@ -321,7 +325,7 @@ class AuditLog extends Model
      */
     public function getActionIconAttribute(): string
     {
-        return match($this->action) {
+        return match ($this->action) {
             'created' => 'M12 4v16m8-8H4',
             'updated' => 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z',
             'deleted' => 'M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16',
@@ -337,7 +341,7 @@ class AuditLog extends Model
      */
     public function getActionColorAttribute(): string
     {
-        return match($this->action) {
+        return match ($this->action) {
             'created', 'account_created', 'member_added', 'telegram_linked', 'registered', 'joined_church', 'servant_approved' => 'green',
             'updated', 'settings_updated', 'positions_updated', 'visibility_updated', 'quick_edit_saved' => 'blue',
             'deleted', 'member_removed', 'telegram_unlinked', 'bulk_deleted', 'photo_deleted', 'receipt_deleted', 'servant_rejected' => 'red',
@@ -629,7 +633,7 @@ class AuditLog extends Model
         // Date fields
         if (str_contains($field, '_date') || str_contains($field, '_at') || $field === 'date') {
             try {
-                return \Carbon\Carbon::parse($value)->format('d.m.Y');
+                return Carbon::parse($value)->format('d.m.Y');
             } catch (\Exception $e) {
                 return $value;
             }
@@ -638,7 +642,7 @@ class AuditLog extends Model
         // Time fields
         if (str_contains($field, '_time') || $field === 'time') {
             try {
-                return \Carbon\Carbon::parse($value)->format('H:i');
+                return Carbon::parse($value)->format('H:i');
             } catch (\Exception $e) {
                 return $value;
             }
@@ -647,12 +651,13 @@ class AuditLog extends Model
         // Position/Order fields - show as ordinal number
         if (in_array($field, ['position', 'order', 'sort_order'])) {
             $pos = (int) $value + 1; // Convert 0-indexed to 1-indexed for display
+
             return "№{$pos}";
         }
 
         // Gender
         if ($field === 'gender') {
-            return match($value) {
+            return match ($value) {
                 'male' => 'Чоловік',
                 'female' => 'Жінка',
                 default => $value,
@@ -661,7 +666,7 @@ class AuditLog extends Model
 
         // Status fields
         if ($field === 'status' || $field === 'membership_status') {
-            return match($value) {
+            return match ($value) {
                 'guest' => 'Гість',
                 'newcomer' => 'Новачок',
                 'member' => 'Член церкви',
@@ -687,7 +692,7 @@ class AuditLog extends Model
 
         // Marital status
         if ($field === 'marital_status') {
-            return match($value) {
+            return match ($value) {
                 'single' => 'Неодружений/а',
                 'married' => 'Одружений/а',
                 'divorced' => 'Розлучений/а',
@@ -698,7 +703,7 @@ class AuditLog extends Model
 
         // Role
         if ($field === 'role') {
-            return match($value) {
+            return match ($value) {
                 'admin' => 'Адміністратор',
                 'leader' => 'Лідер',
                 'volunteer' => 'Волонтер',
@@ -710,6 +715,7 @@ class AuditLog extends Model
         // Church role ID - look up role name
         if ($field === 'church_role_id') {
             $role = ChurchRole::find($value);
+
             return $role ? $role->name : "#{$value}";
         }
 
@@ -742,20 +748,29 @@ class AuditLog extends Model
                 $related = $fkMap[$field]::find($value);
                 if ($related) {
                     // Use common name fields
-                    if (isset($related->name)) return $related->name;
-                    if (isset($related->title)) return $related->title;
-                    if (isset($related->first_name)) return trim(($related->first_name ?? '') . ' ' . ($related->last_name ?? ''));
-                    if (isset($related->email)) return $related->email;
+                    if (isset($related->name)) {
+                        return $related->name;
+                    }
+                    if (isset($related->title)) {
+                        return $related->title;
+                    }
+                    if (isset($related->first_name)) {
+                        return trim(($related->first_name ?? '').' '.($related->last_name ?? ''));
+                    }
+                    if (isset($related->email)) {
+                        return $related->email;
+                    }
                 }
             } catch (\Exception $e) {
                 // Silently fall through to show ID
             }
+
             return "#{$value}";
         }
 
         // Priority
         if ($field === 'priority') {
-            return match($value) {
+            return match ($value) {
                 'low' => 'Низький',
                 'medium' => 'Середній',
                 'high' => 'Високий',
@@ -766,7 +781,7 @@ class AuditLog extends Model
 
         // Payment method
         if ($field === 'payment_method') {
-            return match($value) {
+            return match ($value) {
                 'cash' => 'Готівка',
                 'card' => 'Картка',
                 'bank_transfer' => 'Переказ',
@@ -777,7 +792,7 @@ class AuditLog extends Model
 
         // Service type
         if ($field === 'service_type') {
-            return match($value) {
+            return match ($value) {
                 'sunday' => 'Недільне',
                 'midweek' => 'Середа',
                 'prayer' => 'Молитовне',
@@ -789,7 +804,7 @@ class AuditLog extends Model
 
         // Visibility
         if ($field === 'visibility') {
-            return match($value) {
+            return match ($value) {
                 'public' => 'Публічний',
                 'members' => 'Тільки учасники',
                 'leaders' => 'Тільки лідери',
@@ -801,7 +816,7 @@ class AuditLog extends Model
 
         // Direction (transaction)
         if ($field === 'direction') {
-            return match($value) {
+            return match ($value) {
                 'income' => 'Надходження',
                 'expense' => 'Витрата',
                 default => $value,
@@ -810,7 +825,7 @@ class AuditLog extends Model
 
         // Event type
         if ($field === 'event_type') {
-            return match($value) {
+            return match ($value) {
                 'service' => 'Богослужіння',
                 'meeting' => 'Зустріч',
                 'rehearsal' => 'Репетиція',
@@ -822,7 +837,7 @@ class AuditLog extends Model
 
         // Google sync status
         if ($field === 'google_sync_status') {
-            return match($value) {
+            return match ($value) {
                 'synced' => 'Синхронізовано',
                 'pending' => 'Очікує',
                 'failed' => 'Помилка',
@@ -832,7 +847,7 @@ class AuditLog extends Model
 
         // Transaction type
         if ($field === 'type') {
-            return match($value) {
+            return match ($value) {
                 'income' => 'Надходження',
                 'expense' => 'Витрата',
                 default => $value,
@@ -841,7 +856,7 @@ class AuditLog extends Model
 
         // Amount (money)
         if (in_array($field, ['amount', 'planned_amount', 'actual_amount', 'initial_balance', 'amount_uah', 'monthly_budget'])) {
-            return number_format((float)$value, 2, '.', ' ') . ' ₴';
+            return number_format((float) $value, 2, '.', ' ').' ₴';
         }
 
         // Arrays/JSON
@@ -857,7 +872,7 @@ class AuditLog extends Model
      */
     public function getChangesSummaryAttribute(): array
     {
-        if (!$this->old_values && !$this->new_values) {
+        if (! $this->old_values && ! $this->new_values) {
             return [];
         }
 
@@ -878,7 +893,9 @@ class AuditLog extends Model
         // Collect raw changes first
         $rawChanges = [];
         foreach ($new as $key => $value) {
-            if (in_array($key, $skip)) continue;
+            if (in_array($key, $skip)) {
+                continue;
+            }
 
             $oldValue = $old[$key] ?? null;
             if ($oldValue !== $value) {
@@ -891,9 +908,10 @@ class AuditLog extends Model
 
         // BoardCard: only position changed = card was reordered
         if ($modelClass === 'BoardCard' && count($rawChanges) === 1 && isset($rawChanges['position'])) {
-            $oldPos = (int)$rawChanges['position']['old'];
-            $newPos = (int)$rawChanges['position']['new'];
+            $oldPos = (int) $rawChanges['position']['old'];
+            $newPos = (int) $rawChanges['position']['new'];
             $direction = $newPos < $oldPos ? 'вгору' : 'вниз';
+
             return [[
                 'field' => 'Дія',
                 'old' => null,
@@ -943,8 +961,12 @@ class AuditLog extends Model
             $new = $change['new'] ?? '—';
 
             // Truncate long values
-            if (mb_strlen($old) > 20) $old = mb_substr($old, 0, 17) . '...';
-            if (mb_strlen($new) > 20) $new = mb_substr($new, 0, 17) . '...';
+            if (mb_strlen($old) > 20) {
+                $old = mb_substr($old, 0, 17).'...';
+            }
+            if (mb_strlen($new) > 20) {
+                $new = mb_substr($new, 0, 17).'...';
+            }
 
             $parts[] = "{$change['field']}: {$old} → {$new}";
         }
@@ -952,7 +974,7 @@ class AuditLog extends Model
         $result = implode('; ', $parts);
 
         if (count($changes) > $maxChanges) {
-            $result .= ' (+' . (count($changes) - $maxChanges) . ')';
+            $result .= ' (+'.(count($changes) - $maxChanges).')';
         }
 
         return $result;
@@ -989,7 +1011,7 @@ class AuditLog extends Model
     {
         $ua = strtolower($this->user_agent ?? '');
 
-        if (!$ua) {
+        if (! $ua) {
             return 'unknown';
         }
 
@@ -1009,7 +1031,7 @@ class AuditLog extends Model
      */
     public function getDeviceIconAttribute(): string
     {
-        return match($this->device_type) {
+        return match ($this->device_type) {
             'mobile' => 'M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z',
             'tablet' => 'M12 18h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z',
             default => 'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z',
@@ -1021,7 +1043,7 @@ class AuditLog extends Model
      */
     public function getDeviceLabelAttribute(): string
     {
-        return match($this->device_type) {
+        return match ($this->device_type) {
             'mobile' => __('app.device_mobile'),
             'tablet' => __('app.device_tablet'),
             'desktop' => __('app.device_desktop'),
@@ -1036,11 +1058,21 @@ class AuditLog extends Model
     {
         $ua = $this->user_agent ?? '';
 
-        if (preg_match('/Edg\//i', $ua)) return 'Edge';
-        if (preg_match('/OPR\//i', $ua)) return 'Opera';
-        if (preg_match('/Chrome\//i', $ua)) return 'Chrome';
-        if (preg_match('/Safari\//i', $ua) && !preg_match('/Chrome/i', $ua)) return 'Safari';
-        if (preg_match('/Firefox\//i', $ua)) return 'Firefox';
+        if (preg_match('/Edg\//i', $ua)) {
+            return 'Edge';
+        }
+        if (preg_match('/OPR\//i', $ua)) {
+            return 'Opera';
+        }
+        if (preg_match('/Chrome\//i', $ua)) {
+            return 'Chrome';
+        }
+        if (preg_match('/Safari\//i', $ua) && ! preg_match('/Chrome/i', $ua)) {
+            return 'Safari';
+        }
+        if (preg_match('/Firefox\//i', $ua)) {
+            return 'Firefox';
+        }
 
         return 'Other';
     }

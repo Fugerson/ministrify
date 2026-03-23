@@ -3,9 +3,10 @@
 namespace App\Models;
 
 use App\Traits\Auditable;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -15,7 +16,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Event extends Model
 {
-    use HasFactory, SoftDeletes, Auditable;
+    use Auditable, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'church_id',
@@ -69,8 +70,11 @@ class Event extends Model
 
     // Service types
     const SERVICE_SUNDAY = 'sunday_service';
+
     const SERVICE_YOUTH = 'youth_meeting';
+
     const SERVICE_PRAYER = 'prayer_meeting';
+
     const SERVICE_SPECIAL = 'special_service';
 
     public static function serviceTypeLabels(): array
@@ -190,9 +194,10 @@ class Event extends Model
 
     public function getServiceTypeLabelAttribute(): ?string
     {
-        if (!$this->service_type) {
+        if (! $this->service_type) {
             return null;
         }
+
         return self::serviceTypeLabels()[$this->service_type] ?? $this->service_type;
     }
 
@@ -210,10 +215,10 @@ class Event extends Model
             $startTime = $item->start_time;
             $endTime = $item->end_time;
 
-            if (!$startTime || !$endTime) {
+            if (! $startTime || ! $endTime) {
                 $startTime = $defaultStart;
                 $duration = $item->type ? ServicePlanItem::getDefaultDuration($item->type) : 5;
-                $endTime = \Carbon\Carbon::parse($startTime)->addMinutes($duration)->format('H:i');
+                $endTime = Carbon::parse($startTime)->addMinutes($duration)->format('H:i');
             }
 
             $this->planItems()->create([
@@ -228,7 +233,7 @@ class Event extends Model
             ]);
 
             // Advance default start for next item
-            $defaultStart = \Carbon\Carbon::parse($endTime instanceof \Carbon\Carbon ? $endTime->format('H:i') : $endTime)->format('H:i');
+            $defaultStart = Carbon::parse($endTime instanceof Carbon ? $endTime->format('H:i') : $endTime)->format('H:i');
         }
     }
 
@@ -241,15 +246,16 @@ class Event extends Model
 
     public function getRemainingSpacesAttribute(): ?int
     {
-        if (!$this->registration_limit) {
+        if (! $this->registration_limit) {
             return null;
         }
+
         return max(0, $this->registration_limit - $this->confirmed_registrations_count);
     }
 
     public function canAcceptRegistrations(): bool
     {
-        if (!$this->allow_registration) {
+        if (! $this->allow_registration) {
             return false;
         }
 
@@ -279,10 +285,10 @@ class Event extends Model
         return $this->ministry?->positions()->count() ?? 0;
     }
 
-    public function getUnfilledPositionsAttribute(): \Illuminate\Database\Eloquent\Collection
+    public function getUnfilledPositionsAttribute(): Collection
     {
-        if (!$this->ministry) {
-            return new \Illuminate\Database\Eloquent\Collection();
+        if (! $this->ministry) {
+            return new Collection;
         }
 
         $filledPositionIds = $this->assignments()->whereIn('status', ['confirmed', 'attended'])->pluck('position_id')->toArray();
@@ -309,17 +315,17 @@ class Event extends Model
 
     public function getDateTimeAttribute(): ?\DateTime
     {
-        if (!$this->date) {
+        if (! $this->date) {
             return null;
         }
 
-        if (!$this->time) {
+        if (! $this->time) {
             return \DateTime::createFromFormat('Y-m-d', $this->date->format('Y-m-d'));
         }
 
         return \DateTime::createFromFormat(
             'Y-m-d H:i',
-            $this->date->format('Y-m-d') . ' ' . $this->time->format('H:i')
+            $this->date->format('Y-m-d').' '.$this->time->format('H:i')
         );
     }
 
@@ -340,7 +346,7 @@ class Event extends Model
     {
         return $query->whereBetween('date', [
             $startOfWeek,
-            $startOfWeek->copy()->endOfWeek()
+            $startOfWeek->copy()->endOfWeek(),
         ]);
     }
 
@@ -365,6 +371,7 @@ class Event extends Model
     {
         $token = bin2hex(random_bytes(16));
         $this->update(['checkin_token' => $token]);
+
         return $token;
     }
 
@@ -373,9 +380,10 @@ class Event extends Model
      */
     public function getOrCreateCheckinToken(): string
     {
-        if (!$this->checkin_token) {
+        if (! $this->checkin_token) {
             return $this->generateCheckinToken();
         }
+
         return $this->checkin_token;
     }
 
@@ -385,6 +393,7 @@ class Event extends Model
     public function getCheckinUrlAttribute(): string
     {
         $token = $this->getOrCreateCheckinToken();
+
         return url("/checkin/{$token}");
     }
 
@@ -393,7 +402,7 @@ class Event extends Model
      */
     public function canQrCheckin(): bool
     {
-        if (!$this->qr_checkin_enabled) {
+        if (! $this->qr_checkin_enabled) {
             return false;
         }
 
@@ -417,7 +426,7 @@ class Event extends Model
      */
     public function hasReminders(): bool
     {
-        return !empty($this->reminder_settings);
+        return ! empty($this->reminder_settings);
     }
 
     /**
@@ -433,7 +442,7 @@ class Event extends Model
      */
     public function shouldSendReminder(string $type, int $value): bool
     {
-        if (!$this->hasReminders()) {
+        if (! $this->hasReminders()) {
             return false;
         }
 

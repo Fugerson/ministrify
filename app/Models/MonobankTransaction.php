@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Str;
 
 class MonobankTransaction extends Model
 {
@@ -60,6 +62,7 @@ class MonobankTransaction extends Model
     {
         $amount = number_format($this->amount_uah, 2, ',', ' ');
         $sign = $this->is_income ? '+' : '-';
+
         return "{$sign}{$amount} ₴";
     }
 
@@ -82,16 +85,17 @@ class MonobankTransaction extends Model
         if ($this->description) {
             return $this->description;
         }
+
         return __('app.unknown_sender');
     }
 
     public function getMaskedIbanAttribute(): ?string
     {
-        if (!$this->counterpart_iban) {
+        if (! $this->counterpart_iban) {
             return null;
         }
 
-        return \Illuminate\Support\Str::mask($this->counterpart_iban, '*', 10, -4);
+        return Str::mask($this->counterpart_iban, '*', 10, -4);
     }
 
     public function church(): BelongsTo
@@ -148,7 +152,9 @@ class MonobankTransaction extends Model
      */
     public static function getMccCategoryKey(?int $mcc): ?string
     {
-        if (!$mcc) return null;
+        if (! $mcc) {
+            return null;
+        }
 
         return match (true) {
             // Utilities - комунальні
@@ -190,9 +196,12 @@ class MonobankTransaction extends Model
      */
     public static function getMccCategoryName(?int $mcc): ?string
     {
-        if (!$mcc) return null;
+        if (! $mcc) {
+            return null;
+        }
 
         $key = self::getMccCategoryKey($mcc);
+
         return self::getMccCategories()[$key] ?? __('app.mcc_other');
     }
 
@@ -225,6 +234,7 @@ class MonobankTransaction extends Model
         if (empty($mccCodes)) {
             return $query->whereNotIn('mcc', self::getAllKnownMccCodes());
         }
+
         return $query->whereIn('mcc', $mccCodes);
     }
 
@@ -257,6 +267,7 @@ class MonobankTransaction extends Model
         foreach (['utilities', 'groceries', 'restaurants', 'fuel', 'transport', 'healthcare', 'education', 'entertainment', 'shopping', 'transfers'] as $cat) {
             $all = array_merge($all, self::getMccCodesForCategory($cat));
         }
+
         return $all;
     }
 
@@ -274,7 +285,7 @@ class MonobankTransaction extends Model
                 'cashback_amount' => $data['cashbackAmount'] ?? 0,
                 'commission_rate' => $data['commissionRate'] ?? 0,
                 'currency_code' => $data['currencyCode'] ?? '980',
-                'mono_time' => \Carbon\Carbon::createFromTimestamp($data['time']),
+                'mono_time' => Carbon::createFromTimestamp($data['time']),
                 'description' => $data['description'] ?? null,
                 'comment' => $data['comment'] ?? null,
                 'mcc' => $data['mcc'] ?? null,

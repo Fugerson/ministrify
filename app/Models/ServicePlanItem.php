@@ -2,34 +2,47 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Traits\Auditable;
 
 class ServicePlanItem extends Model
 {
-    use HasFactory, SoftDeletes, Auditable;
+    use Auditable, HasFactory, SoftDeletes;
 
     // Item types
     const TYPE_WORSHIP = 'worship';
+
     const TYPE_SERMON = 'sermon';
+
     const TYPE_ANNOUNCEMENT = 'announcement';
+
     const TYPE_PRAYER = 'prayer';
+
     const TYPE_OFFERING = 'offering';
+
     const TYPE_TESTIMONY = 'testimony';
+
     const TYPE_BAPTISM = 'baptism';
+
     const TYPE_COMMUNION = 'communion';
+
     const TYPE_CHILD_BLESSING = 'child_blessing';
+
     const TYPE_SPECIAL = 'special';
+
     const TYPE_OTHER = 'other';
 
     // Statuses
     const STATUS_PLANNED = 'planned';
+
     const STATUS_CONFIRMED = 'confirmed';
+
     const STATUS_DECLINED = 'declined';
+
     const STATUS_COMPLETED = 'completed';
 
     // Default durations in minutes by type
@@ -103,9 +116,9 @@ class ServicePlanItem extends Model
     {
         $statuses = $this->responsible_statuses ?? [];
         $total = count($statuses);
-        $confirmed = count(array_filter($statuses, fn($s) => $s === 'confirmed'));
-        $declined = count(array_filter($statuses, fn($s) => $s === 'declined'));
-        $pending = count(array_filter($statuses, fn($s) => $s === 'pending'));
+        $confirmed = count(array_filter($statuses, fn ($s) => $s === 'confirmed'));
+        $declined = count(array_filter($statuses, fn ($s) => $s === 'declined'));
+        $pending = count(array_filter($statuses, fn ($s) => $s === 'pending'));
 
         return [
             'total' => $total,
@@ -209,9 +222,10 @@ class ServicePlanItem extends Model
 
     public function getTypeLabelAttribute(): ?string
     {
-        if (!$this->type) {
+        if (! $this->type) {
             return null;
         }
+
         return self::typeLabels()[$this->type] ?? $this->type;
     }
 
@@ -247,7 +261,7 @@ class ServicePlanItem extends Model
 
     public function getDurationMinutesAttribute(): ?int
     {
-        if (!$this->start_time || !$this->end_time) {
+        if (! $this->start_time || ! $this->end_time) {
             return null;
         }
 
@@ -259,13 +273,13 @@ class ServicePlanItem extends Model
 
     public function getFormattedTimeRangeAttribute(): ?string
     {
-        if (!$this->start_time) {
+        if (! $this->start_time) {
             return null;
         }
 
         $start = Carbon::parse($this->start_time)->format('H:i');
 
-        if (!$this->end_time) {
+        if (! $this->end_time) {
             return $start;
         }
 
@@ -278,7 +292,7 @@ class ServicePlanItem extends Model
     {
         $minutes = $this->duration_minutes;
 
-        if (!$minutes) {
+        if (! $minutes) {
             return null;
         }
 

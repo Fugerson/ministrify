@@ -23,7 +23,7 @@ class MeetingMaterial extends Model
 
     public function getTypeIconAttribute(): string
     {
-        return match($this->type) {
+        return match ($this->type) {
             'link' => '🔗',
             'file' => '📄',
             'note' => '📝',
@@ -36,7 +36,7 @@ class MeetingMaterial extends Model
 
     public function getTypeLabelAttribute(): string
     {
-        return match($this->type) {
+        return match ($this->type) {
             'link' => 'Посилання',
             'file' => 'Файл',
             'note' => 'Нотатка',

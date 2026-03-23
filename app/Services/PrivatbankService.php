@@ -4,18 +4,21 @@ namespace App\Services;
 
 use App\Models\Church;
 use App\Models\PrivatbankTransaction;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Crypt;
-use Carbon\Carbon;
 
 class PrivatbankService
 {
     protected const API_URL = 'https://api.privatbank.ua/p24api/rest_fiz';
 
     protected ?string $merchantId = null;
+
     protected ?string $password = null;
+
     protected ?string $cardNumber = null;
+
     protected ?Church $church = null;
 
     public function __construct(?Church $church = null)
@@ -65,6 +68,7 @@ class PrivatbankService
         $this->merchantId = $merchantId;
         $this->password = $password;
         $this->cardNumber = $cardNumber;
+
         return $this;
     }
 
@@ -73,7 +77,7 @@ class PrivatbankService
      */
     public function isConfigured(): bool
     {
-        return !empty($this->merchantId) && !empty($this->password) && !empty($this->cardNumber);
+        return ! empty($this->merchantId) && ! empty($this->password) && ! empty($this->cardNumber);
     }
 
     /**
@@ -82,7 +86,8 @@ class PrivatbankService
      */
     protected function generateSignature(string $dataXml): string
     {
-        $data = $dataXml . $this->password;
+        $data = $dataXml.$this->password;
+
         return sha1(md5($data));
     }
 
@@ -91,24 +96,24 @@ class PrivatbankService
      */
     protected function buildStatementsRequest(string $startDate, string $endDate): string
     {
-        $dataXml = '<oper>cmt</oper>' .
-            '<wait>0</wait>' .
-            '<test>0</test>' .
-            '<payment id="">' .
-            '<prop name="sd" value="' . $startDate . '" />' .
-            '<prop name="ed" value="' . $endDate . '" />' .
-            '<prop name="card" value="' . $this->cardNumber . '" />' .
+        $dataXml = '<oper>cmt</oper>'.
+            '<wait>0</wait>'.
+            '<test>0</test>'.
+            '<payment id="">'.
+            '<prop name="sd" value="'.$startDate.'" />'.
+            '<prop name="ed" value="'.$endDate.'" />'.
+            '<prop name="card" value="'.$this->cardNumber.'" />'.
             '</payment>';
 
         $signature = $this->generateSignature($dataXml);
 
-        return '<?xml version="1.0" encoding="UTF-8"?>' .
-            '<request version="1.0">' .
-            '<merchant>' .
-            '<id>' . $this->merchantId . '</id>' .
-            '<signature>' . $signature . '</signature>' .
-            '</merchant>' .
-            '<data>' . $dataXml . '</data>' .
+        return '<?xml version="1.0" encoding="UTF-8"?>'.
+            '<request version="1.0">'.
+            '<merchant>'.
+            '<id>'.$this->merchantId.'</id>'.
+            '<signature>'.$signature.'</signature>'.
+            '</merchant>'.
+            '<data>'.$dataXml.'</data>'.
             '</request>';
     }
 
@@ -117,36 +122,32 @@ class PrivatbankService
      */
     protected function buildBalanceRequest(): string
     {
-        $dataXml = '<oper>cmt</oper>' .
-            '<wait>0</wait>' .
-            '<test>0</test>' .
-            '<payment id="">' .
-            '<prop name="cardnum" value="' . $this->cardNumber . '" />' .
-            '<prop name="country" value="UA" />' .
+        $dataXml = '<oper>cmt</oper>'.
+            '<wait>0</wait>'.
+            '<test>0</test>'.
+            '<payment id="">'.
+            '<prop name="cardnum" value="'.$this->cardNumber.'" />'.
+            '<prop name="country" value="UA" />'.
             '</payment>';
 
         $signature = $this->generateSignature($dataXml);
 
-        return '<?xml version="1.0" encoding="UTF-8"?>' .
-            '<request version="1.0">' .
-            '<merchant>' .
-            '<id>' . $this->merchantId . '</id>' .
-            '<signature>' . $signature . '</signature>' .
-            '</merchant>' .
-            '<data>' . $dataXml . '</data>' .
+        return '<?xml version="1.0" encoding="UTF-8"?>'.
+            '<request version="1.0">'.
+            '<merchant>'.
+            '<id>'.$this->merchantId.'</id>'.
+            '<signature>'.$signature.'</signature>'.
+            '</merchant>'.
+            '<data>'.$dataXml.'</data>'.
             '</request>';
     }
 
     /**
      * Get statements (transactions) for card
-     *
-     * @param Carbon $startDate
-     * @param Carbon $endDate
-     * @return array|null
      */
     public function getStatements(Carbon $startDate, Carbon $endDate): ?array
     {
-        if (!$this->isConfigured()) {
+        if (! $this->isConfigured()) {
             return null;
         }
 
@@ -161,16 +162,18 @@ class PrivatbankService
             ])->withBody($xml, 'application/xml')
                 ->post(self::API_URL);
 
-            if (!$response->successful()) {
+            if (! $response->successful()) {
                 Log::warning('PrivatBank API error', [
                     'status' => $response->status(),
                 ]);
+
                 return null;
             }
 
             return $this->parseStatementsResponse($response->body());
         } catch (\Exception $e) {
             Log::error('PrivatBank API exception', ['error' => $e->getMessage()]);
+
             return null;
         }
     }
@@ -183,8 +186,9 @@ class PrivatbankService
         try {
             $xml = simplexml_load_string($xmlBody);
 
-            if (!$xml) {
+            if (! $xml) {
                 Log::warning('PrivatBank: Failed to parse XML response');
+
                 return null;
             }
 
@@ -193,6 +197,7 @@ class PrivatbankService
                 Log::warning('PrivatBank API error', [
                     'message' => (string) $xml->data->error['message'],
                 ]);
+
                 return null;
             }
 
@@ -218,6 +223,7 @@ class PrivatbankService
             return $statements;
         } catch (\Exception $e) {
             Log::error('PrivatBank: Error parsing response', ['error' => $e->getMessage()]);
+
             return null;
         }
     }
@@ -227,7 +233,7 @@ class PrivatbankService
      */
     public function getBalance(): ?array
     {
-        if (!$this->isConfigured()) {
+        if (! $this->isConfigured()) {
             return null;
         }
 
@@ -239,16 +245,18 @@ class PrivatbankService
             ])->withBody($xml, 'application/xml')
                 ->post('https://api.privatbank.ua/p24api/balance');
 
-            if (!$response->successful()) {
+            if (! $response->successful()) {
                 Log::warning('PrivatBank balance API error', [
                     'status' => $response->status(),
                 ]);
+
                 return null;
             }
 
             return $this->parseBalanceResponse($response->body());
         } catch (\Exception $e) {
             Log::error('PrivatBank balance API exception', ['error' => $e->getMessage()]);
+
             return null;
         }
     }
@@ -261,12 +269,13 @@ class PrivatbankService
         try {
             $xml = simplexml_load_string($xmlBody);
 
-            if (!$xml || isset($xml->data->error)) {
+            if (! $xml || isset($xml->data->error)) {
                 return null;
             }
 
             if (isset($xml->data->info->cardbalance)) {
                 $balance = $xml->data->info->cardbalance;
+
                 return [
                     'balance' => (string) ($balance->av_balance ?? '0'),
                     'balance_date' => (string) ($balance->bal_date ?? ''),
@@ -277,6 +286,7 @@ class PrivatbankService
             return null;
         } catch (\Exception $e) {
             Log::error('PrivatBank: Error parsing balance response', ['error' => $e->getMessage()]);
+
             return null;
         }
     }
@@ -284,16 +294,16 @@ class PrivatbankService
     /**
      * Sync transactions for church
      *
-     * @param int $days Number of days to sync (max 90 for PrivatBank)
+     * @param  int  $days  Number of days to sync (max 90 for PrivatBank)
      * @return array ['imported' => int, 'skipped' => int, 'error' => string|null]
      */
     public function syncTransactions(int $days = 7): array
     {
-        if (!$this->church) {
+        if (! $this->church) {
             return ['imported' => 0, 'skipped' => 0, 'error' => 'Church not set'];
         }
 
-        if (!$this->isConfigured()) {
+        if (! $this->isConfigured()) {
             return ['imported' => 0, 'skipped' => 0, 'error' => 'PrivatBank not configured'];
         }
 
@@ -318,6 +328,7 @@ class PrivatbankService
 
             if ($exists) {
                 $skipped++;
+
                 continue;
             }
 
@@ -336,7 +347,7 @@ class PrivatbankService
      */
     public function validateCredentials(): ?array
     {
-        if (!$this->isConfigured()) {
+        if (! $this->isConfigured()) {
             return null;
         }
 
@@ -348,7 +359,7 @@ class PrivatbankService
         }
 
         return [
-            'card' => substr($this->cardNumber, 0, 4) . ' **** **** ' . substr($this->cardNumber, -4),
+            'card' => substr($this->cardNumber, 0, 4).' **** **** '.substr($this->cardNumber, -4),
             'transactions_count' => count($statements),
         ];
     }
@@ -364,9 +375,11 @@ class PrivatbankService
                 'privatbank_password' => Crypt::encryptString($password),
                 'privatbank_card_number' => Crypt::encryptString($cardNumber),
             ]);
+
             return true;
         } catch (\Exception $e) {
             Log::error('Failed to save PrivatBank credentials', ['error' => $e->getMessage()]);
+
             return false;
         }
     }

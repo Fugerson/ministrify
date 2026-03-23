@@ -1,9 +1,9 @@
 <?php
+
 /**
  * Generate PWA icons
  * Run: php generate-icons.php
  */
-
 $sizes = [72, 96, 128, 144, 152, 192, 384, 512];
 
 foreach ($sizes as $size) {
@@ -45,7 +45,7 @@ foreach ($sizes as $size) {
     );
 
     // Save
-    $filename = __DIR__ . "/icon-{$size}x{$size}.png";
+    $filename = __DIR__."/icon-{$size}x{$size}.png";
     imagepng($image, $filename);
     imagedestroy($image);
 

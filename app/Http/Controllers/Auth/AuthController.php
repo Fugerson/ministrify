@@ -4,14 +4,15 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
+use App\Models\User;
 use App\Rules\SecurePassword;
+use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Password;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
-use Illuminate\Auth\Events\PasswordReset;
 
 class AuthController extends Controller
 {
@@ -28,7 +29,7 @@ class AuthController extends Controller
         ]);
 
         // First check credentials without logging in (including soft-deleted users)
-        $user = \App\Models\User::withTrashed()->where('email', $credentials['email'])->first();
+        $user = User::withTrashed()->where('email', $credentials['email'])->first();
 
         if ($user && Hash::check($credentials['password'], $user->password)) {
             // Block soft-deleted users — admin deleted them for a reason
@@ -94,7 +95,7 @@ class AuthController extends Controller
                 str_contains($intendedUrl, '/api/');
 
             // Don't redirect non-super-admins to system-admin
-            if (!$user->isSuperAdmin() && str_contains($intendedUrl, 'system-admin')) {
+            if (! $user->isSuperAdmin() && str_contains($intendedUrl, 'system-admin')) {
                 $shouldClearIntended = true;
             }
 
@@ -219,28 +220,29 @@ class AuthController extends Controller
      */
     public function verifyEmail(Request $request)
     {
-        $user = \App\Models\User::findOrFail($request->route('id'));
+        $user = User::findOrFail($request->route('id'));
 
-        if (!hash_equals(sha1($user->getEmailForVerification()), (string) $request->route('hash'))) {
+        if (! hash_equals(sha1($user->getEmailForVerification()), (string) $request->route('hash'))) {
             return redirect()->route('login')->with('error', 'Невірне посилання для верифікації.');
         }
 
         if ($user->hasVerifiedEmail()) {
             // Auto-login and redirect (skip if 2FA enabled)
-            if (!Auth::check()) {
+            if (! Auth::check()) {
                 if ($user->two_factor_confirmed_at) {
                     return redirect()->route('login')->with('success', 'Email вже підтверджено. Увійдіть у свій акаунт.');
                 }
                 Auth::login($user);
                 $request->session()->regenerate();
             }
+
             return redirect()->route('dashboard')->with('success', 'Email вже підтверджено.');
         }
 
         $user->markEmailAsVerified();
 
         // Auto-login after verification (skip if 2FA enabled)
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             if ($user->two_factor_confirmed_at) {
                 return redirect()->route('login')->with('success', 'Email підтверджено! Увійдіть у свій акаунт.');
             }

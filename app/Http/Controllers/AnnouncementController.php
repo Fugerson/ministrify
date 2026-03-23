@@ -12,7 +12,7 @@ class AnnouncementController extends Controller
      */
     public function index()
     {
-        if (!auth()->user()->canView('announcements')) {
+        if (! auth()->user()->canView('announcements')) {
             return redirect()->route('dashboard')->with('error', __('У вас немає доступу до цього розділу. Зверніться до адміністратора церкви для отримання потрібних прав.'));
         }
 
@@ -37,7 +37,7 @@ class AnnouncementController extends Controller
     public function show(Announcement $announcement)
     {
         $this->authorizeChurch($announcement);
-        if (!auth()->user()->canView('announcements')) {
+        if (! auth()->user()->canView('announcements')) {
             abort(403);
         }
 
@@ -52,7 +52,7 @@ class AnnouncementController extends Controller
      */
     public function create()
     {
-        if (!auth()->user()->canCreate('announcements')) {
+        if (! auth()->user()->canCreate('announcements')) {
             abort(403);
         }
 
@@ -64,7 +64,7 @@ class AnnouncementController extends Controller
      */
     public function store(Request $request)
     {
-        if (!auth()->user()->canCreate('announcements')) {
+        if (! auth()->user()->canCreate('announcements')) {
             abort(403);
         }
 
@@ -163,7 +163,7 @@ class AnnouncementController extends Controller
             default => false,
         };
 
-        if (!$hasPermission) {
+        if (! $hasPermission) {
             abort(403, 'Тільки автор або користувач з відповідними правами може керувати цим оголошенням.');
         }
     }
@@ -175,7 +175,7 @@ class AnnouncementController extends Controller
 
         $unreadAnnouncements = Announcement::forChurch($church->id)
             ->published()
-            ->whereDoesntHave('readByUsers', fn($q) => $q->where('user_id', $user->id))
+            ->whereDoesntHave('readByUsers', fn ($q) => $q->where('user_id', $user->id))
             ->get();
 
         foreach ($unreadAnnouncements as $announcement) {
@@ -190,7 +190,7 @@ class AnnouncementController extends Controller
         $this->authorizeChurch($announcement);
         $this->authorizeAuthorOrPermission($announcement, 'edit');
 
-        $announcement->update(['is_pinned' => !$announcement->is_pinned]);
+        $announcement->update(['is_pinned' => ! $announcement->is_pinned]);
 
         return $this->successResponse($request, $announcement->is_pinned ? 'Оголошення закріплено' : 'Оголошення відкріплено');
     }

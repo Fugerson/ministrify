@@ -3,12 +3,15 @@
 namespace Tests\Feature;
 
 use App\Models\Church;
+use App\Models\ChurchRolePermission;
 use App\Models\Ministry;
 use App\Models\Person;
 use App\Models\Transaction;
 use App\Models\TransactionCategory;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class ExpenseControllerTest extends TestCase
@@ -16,8 +19,11 @@ class ExpenseControllerTest extends TestCase
     use RefreshDatabase;
 
     private Church $church;
+
     private User $admin;
+
     private Ministry $ministry;
+
     private TransactionCategory $category;
 
     protected function setUp(): void
@@ -120,17 +126,17 @@ class ExpenseControllerTest extends TestCase
             'email_verified_at' => now(),
         ]);
         // Ensure church_user pivot and finances permission
-        if (!\Illuminate\Support\Facades\DB::table('church_user')->where('user_id', $leader->id)->where('church_id', $this->church->id)->exists()) {
+        if (! DB::table('church_user')->where('user_id', $leader->id)->where('church_id', $this->church->id)->exists()) {
             $leader->churches()->attach($this->church->id, [
                 'church_role_id' => $leader->church_role_id,
             ]);
         }
         // Grant finances permission to leader role
-        \App\Models\ChurchRolePermission::updateOrCreate(
+        ChurchRolePermission::updateOrCreate(
             ['church_role_id' => $leader->church_role_id, 'module' => 'finances'],
             ['actions' => ['view', 'create', 'edit', 'delete']]
         );
-        \Illuminate\Support\Facades\Cache::flush();
+        Cache::flush();
         $leader->refresh();
         $leaderPerson = Person::factory()->forChurch($this->church)->create([
             'user_id' => $leader->id,

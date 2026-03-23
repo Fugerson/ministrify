@@ -16,9 +16,13 @@ class AssignmentTest extends TestCase
     use RefreshDatabase;
 
     private Church $church;
+
     private Ministry $ministry;
+
     private Event $event;
+
     private Position $position;
+
     private Person $person;
 
     protected function setUp(): void

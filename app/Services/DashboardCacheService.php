@@ -37,7 +37,7 @@ class DashboardCacheService
         'songs' => 14400,          // 4 hours - popular songs
         'family' => 43200,         // 12 hours - family stats
         'calendar' => 7200,        // 2 hours - calendar events
-        'online_donations' => 7200,// 2 hours - online donations
+        'online_donations' => 7200, // 2 hours - online donations
         'group_compare' => 7200,   // 2 hours - group attendance compare
     ];
 
@@ -142,6 +142,7 @@ class DashboardCacheService
         foreach (array_keys(self::CACHE_TTLS) as $type) {
             $keys[$type] = $this->getCacheKey($type, $churchId);
         }
+
         return $keys;
     }
 }

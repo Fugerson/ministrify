@@ -2,19 +2,21 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
+use Illuminate\Contracts\Encryption\DecryptException;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Crypt;
-use App\Traits\Auditable;
+use Illuminate\Support\Str;
 
 class Church extends Model
 {
-    use HasFactory, SoftDeletes, Auditable;
+    use Auditable, HasFactory, SoftDeletes;
 
     protected static function booted(): void
     {
@@ -98,9 +100,10 @@ class Church extends Model
     {
         $plan = $this->plan ?? 'free';
         $config = config("plans.plans.{$plan}");
-        if (!$config) {
+        if (! $config) {
             $config = config('plans.plans.free');
         }
+
         // Ultimate fallback — if config/plans.php is not loaded
         return $config ?? [
             'limits' => ['people' => -1, 'users' => -1, 'ministries' => -1, 'groups' => -1, 'events_per_month' => -1, 'storage_mb' => 5000],
@@ -130,6 +133,7 @@ class Church extends Model
             // Token was encrypted with different key, clear it
             $this->attributes['telegram_bot_token'] = null;
             $this->saveQuietly();
+
             return null;
         }
     }
@@ -156,6 +160,7 @@ class Church extends Model
         } catch (DecryptException $e) {
             $this->attributes['monobank_token'] = null;
             $this->saveQuietly();
+
             return null;
         }
     }
@@ -182,6 +187,7 @@ class Church extends Model
         } catch (DecryptException $e) {
             $this->attributes['privatbank_password'] = null;
             $this->saveQuietly();
+
             return null;
         }
     }
@@ -366,7 +372,7 @@ class Church extends Model
      * Get cached ministries (TTL 600s / 10 min).
      * Call Church::clearMinistriesCache($churchId) on ministry CRUD.
      */
-    public function getCachedMinistries(): \Illuminate\Database\Eloquent\Collection
+    public function getCachedMinistries(): Collection
     {
         return Cache::remember(
             "church:{$this->id}:ministries",
@@ -421,6 +427,7 @@ class Church extends Model
     public function getThemeColorsAttribute(): array
     {
         $color = $this->primary_color ?? '#3b82f6';
+
         return $this->buildColorPalette($color);
     }
 
@@ -430,6 +437,7 @@ class Church extends Model
     public function getSiteThemeColorsAttribute(): array
     {
         $color = $this->site_colors['primary'] ?? $this->primary_color ?? '#3b82f6';
+
         return $this->buildColorPalette($color);
     }
 
@@ -492,10 +500,11 @@ class Church extends Model
      */
     public function getCalendarToken(): string
     {
-        if (!$this->calendar_token) {
-            $this->calendar_token = \Illuminate\Support\Str::random(32);
+        if (! $this->calendar_token) {
+            $this->calendar_token = Str::random(32);
             $this->save();
         }
+
         return $this->calendar_token;
     }
 
@@ -512,8 +521,9 @@ class Church extends Model
      */
     public function regenerateCalendarToken(): string
     {
-        $this->calendar_token = \Illuminate\Support\Str::random(32);
+        $this->calendar_token = Str::random(32);
         $this->save();
+
         return $this->calendar_token;
     }
 
@@ -675,8 +685,9 @@ class Church extends Model
     public function getEnabledSectionsAttribute(): array
     {
         $sections = $this->getPublicSiteSetting('sections', $this->getDefaultSections());
+
         return collect($sections)
-            ->filter(fn($s) => $s['enabled'] ?? false)
+            ->filter(fn ($s) => $s['enabled'] ?? false)
             ->sortBy('order')
             ->values()
             ->all();
@@ -761,7 +772,9 @@ class Church extends Model
     public function getCustomCssAttribute(): ?string
     {
         $css = $this->getPublicSiteSetting('custom_css');
-        if (!$css) return null;
+        if (! $css) {
+            return null;
+        }
 
         // Comprehensive CSS sanitization to prevent XSS attacks
         $dangerousPatterns = [

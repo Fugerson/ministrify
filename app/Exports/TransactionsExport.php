@@ -4,16 +4,17 @@ namespace App\Exports;
 
 use App\Models\Transaction;
 use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
-use Maatwebsite\Excel\Concerns\WithColumnFormatting;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class TransactionsExport implements FromCollection, WithHeadings, WithMapping, WithStyles, WithColumnFormatting
+class TransactionsExport implements FromCollection, WithColumnFormatting, WithHeadings, WithMapping, WithStyles
 {
     protected int $churchId;
+
     protected int $year;
 
     public function __construct(int $churchId, int $year)

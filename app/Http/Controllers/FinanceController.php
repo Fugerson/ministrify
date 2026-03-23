@@ -3,18 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\CurrencyHelper;
-use App\Models\AuditLog;
+use App\Models\BudgetItem;
 use App\Models\Church;
+use App\Models\ChurchBudget;
+use App\Models\ChurchBudgetItem;
 use App\Models\DonationCampaign;
 use App\Models\ExchangeRate;
 use App\Models\Ministry;
 use App\Models\MinistryBudget;
 use App\Models\Person;
 use App\Models\Transaction;
-use App\Models\TransactionAttachment;
-use App\Models\BudgetItem;
-use App\Models\ChurchBudget;
-use App\Models\ChurchBudgetItem;
 use App\Models\TransactionCategory;
 use App\Rules\BelongsToChurch;
 use App\Services\ImageService;
@@ -28,7 +26,7 @@ class FinanceController extends Controller
     {
         $this->checkPlanFeature('finances');
 
-        if (!auth()->user()->canView('finances')) {
+        if (! auth()->user()->canView('finances')) {
             return $this->errorResponse($request, __('messages.no_access_to_section'));
         }
 
@@ -49,7 +47,7 @@ class FinanceController extends Controller
         if ($month) {
             $incomeQuery->forMonth($year, $month);
             $expenseQuery->forMonth($year, $month);
-            $periodLabel = $this->getMonthName($month) . ' ' . $year;
+            $periodLabel = $this->getMonthName($month).' '.$year;
         } else {
             $incomeQuery->forYear($year);
             $expenseQuery->forYear($year);
@@ -206,7 +204,7 @@ class FinanceController extends Controller
             ->orderByDesc('total_amount')
             ->get();
 
-        $incomeByCategory = $incomeByCategoryRaw->filter(fn($c) => $c->total_amount > 0);
+        $incomeByCategory = $incomeByCategoryRaw->filter(fn ($c) => $c->total_amount > 0);
 
         // Expense by category - optimized single query with JOIN
         $expenseByCategoryRaw = TransactionCategory::where('transaction_categories.church_id', $church->id)
@@ -229,7 +227,7 @@ class FinanceController extends Controller
             ->orderByDesc('total_amount')
             ->get();
 
-        $expenseByCategory = $expenseByCategoryRaw->filter(fn($c) => $c->total_amount > 0);
+        $expenseByCategory = $expenseByCategoryRaw->filter(fn ($c) => $c->total_amount > 0);
 
         // Expense by ministry - optimized single query with JOIN
         $expenseByMinistryRaw = Ministry::where('ministries.church_id', $church->id)
@@ -252,7 +250,7 @@ class FinanceController extends Controller
             ->orderByDesc('total_expense')
             ->get();
 
-        $expenseByMinistry = $expenseByMinistryRaw->filter(fn($m) => $m->total_expense > 0);
+        $expenseByMinistry = $expenseByMinistryRaw->filter(fn ($m) => $m->total_expense > 0);
 
         // Year comparison
         $yearComparison = $this->getYearComparison($church->id, $year);
@@ -284,7 +282,7 @@ class FinanceController extends Controller
             ->groupBy('payment_method')
             ->orderByDesc('total')
             ->get()
-            ->map(fn($pm) => [
+            ->map(fn ($pm) => [
                 'method' => $pm->payment_method,
                 'label' => Transaction::PAYMENT_METHODS[$pm->payment_method] ?? $pm->payment_method ?? __('messages.other'),
                 'count' => $pm->count,
@@ -313,7 +311,7 @@ class FinanceController extends Controller
      */
     public function journalExport(Request $request)
     {
-        if (!auth()->user()->canView('finances')) {
+        if (! auth()->user()->canView('finances')) {
             abort(403, __('messages.no_access_to_finance_data'));
         }
 
@@ -347,7 +345,7 @@ class FinanceController extends Controller
             'count' => $transactions->count(),
         ]);
 
-        $filename = 'journal_' . $dates['start']->format('Y-m-d') . '_' . $dates['end']->format('Y-m-d') . '.csv';
+        $filename = 'journal_'.$dates['start']->format('Y-m-d').'_'.$dates['end']->format('Y-m-d').'.csv';
 
         $headers = [
             'Content-Type' => 'text/csv; charset=UTF-8',
@@ -357,7 +355,7 @@ class FinanceController extends Controller
         $callback = function () use ($transactions) {
             $file = fopen('php://output', 'w');
             // BOM for UTF-8
-            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
 
             fputcsv($file, [__('messages.csv_date'), __('messages.csv_type'), __('messages.csv_category'), __('messages.csv_team'), __('messages.csv_description'), __('messages.csv_person'), __('messages.csv_amount'), __('messages.csv_currency'), __('messages.csv_payment_method')], ';');
 
@@ -368,8 +366,8 @@ class FinanceController extends Controller
                     $t->category?->name ?? '-',
                     $t->ministry?->name ?? '-',
                     $t->description,
-                    $t->person ? $t->person->first_name . ' ' . $t->person->last_name : '-',
-                    ($t->direction === 'in' ? '+' : '-') . number_format($t->amount, 2, ',', ''),
+                    $t->person ? $t->person->first_name.' '.$t->person->last_name : '-',
+                    ($t->direction === 'in' ? '+' : '-').number_format($t->amount, 2, ',', ''),
                     $t->currency ?? 'UAH',
                     Transaction::PAYMENT_METHODS[$t->payment_method] ?? $t->payment_method ?? '-',
                 ], ';');
@@ -386,7 +384,7 @@ class FinanceController extends Controller
      */
     public function transactions(Request $request)
     {
-        if (!auth()->user()->canView('finances')) {
+        if (! auth()->user()->canView('finances')) {
             return $this->errorResponse($request, __('messages.no_access_to_section'));
         }
 
@@ -517,7 +515,7 @@ class FinanceController extends Controller
 
     public function createIncome(Request $request)
     {
-        if (!auth()->user()->canCreate('finances')) {
+        if (! auth()->user()->canCreate('finances')) {
             return $this->errorResponse($request, __('messages.no_permission_create'));
         }
 
@@ -534,7 +532,7 @@ class FinanceController extends Controller
 
     public function storeIncome(Request $request)
     {
-        if (!auth()->user()->canCreate('finances')) {
+        if (! auth()->user()->canCreate('finances')) {
             return $this->errorResponse($request, __('messages.no_permission_create'), 403);
         }
 
@@ -555,7 +553,7 @@ class FinanceController extends Controller
 
         // Resolve category: existing ID or create from custom name
         $categoryId = $validated['category_id'] ?? null;
-        if (!$categoryId && !empty($validated['category_name'])) {
+        if (! $categoryId && ! empty($validated['category_name'])) {
             $cat = TransactionCategory::firstOrCreate([
                 'church_id' => $church->id,
                 'name' => trim($validated['category_name']),
@@ -566,7 +564,7 @@ class FinanceController extends Controller
             $categoryId = $cat->id;
         }
 
-        if (!$categoryId) {
+        if (! $categoryId) {
             return $this->errorResponse($request, __('messages.select_or_enter_category'), 422);
         }
 
@@ -609,7 +607,7 @@ class FinanceController extends Controller
     {
         $this->authorizeChurch($transaction);
 
-        if (!auth()->user()->canEdit('finances')) {
+        if (! auth()->user()->canEdit('finances')) {
             return $this->errorResponse($request, __('messages.no_permission_edit'), 403);
         }
 
@@ -638,7 +636,7 @@ class FinanceController extends Controller
     {
         $this->authorizeChurch($transaction);
 
-        if (!auth()->user()->canEdit('finances')) {
+        if (! auth()->user()->canEdit('finances')) {
             return $this->errorResponse($request, __('messages.no_permission_edit'), 403);
         }
 
@@ -658,7 +656,7 @@ class FinanceController extends Controller
         // Resolve category: existing ID or create from custom name
         $church = $this->getCurrentChurch();
         $categoryId = $validated['category_id'] ?? null;
-        if (!$categoryId && !empty($validated['category_name'])) {
+        if (! $categoryId && ! empty($validated['category_name'])) {
             $cat = TransactionCategory::firstOrCreate([
                 'church_id' => $church->id,
                 'name' => trim($validated['category_name']),
@@ -669,7 +667,7 @@ class FinanceController extends Controller
             $categoryId = $cat->id;
         }
 
-        if (!$categoryId) {
+        if (! $categoryId) {
             return $this->errorResponse($request, __('messages.select_or_enter_category'), 422);
         }
 
@@ -704,7 +702,7 @@ class FinanceController extends Controller
     {
         $this->authorizeChurch($transaction);
 
-        if (!auth()->user()->canDelete('finances')) {
+        if (! auth()->user()->canDelete('finances')) {
             return $this->errorResponse($request, __('messages.no_permission_delete'), 403);
         }
 
@@ -715,7 +713,7 @@ class FinanceController extends Controller
 
     public function createExpense(Request $request)
     {
-        if (!auth()->user()->canCreate('finances')) {
+        if (! auth()->user()->canCreate('finances')) {
             return $this->errorResponse($request, __('messages.no_permission_create'));
         }
 
@@ -734,7 +732,7 @@ class FinanceController extends Controller
 
     public function storeExpense(Request $request)
     {
-        if (!auth()->user()->canCreate('finances')) {
+        if (! auth()->user()->canCreate('finances')) {
             return $this->errorResponse($request, __('messages.no_permission_create'), 403);
         }
 
@@ -757,7 +755,7 @@ class FinanceController extends Controller
         $church = $this->getCurrentChurch();
 
         // Resolve category: existing ID or create from custom name
-        if (empty($validated['category_id']) && !empty($validated['category_name'])) {
+        if (empty($validated['category_id']) && ! empty($validated['category_name'])) {
             $cat = TransactionCategory::firstOrCreate([
                 'church_id' => $church->id,
                 'name' => trim($validated['category_name']),
@@ -770,7 +768,7 @@ class FinanceController extends Controller
 
         // Check ministry budget limits
         $budgetWarning = null;
-        if (!empty($validated['ministry_id'])) {
+        if (! empty($validated['ministry_id'])) {
             $ministry = Ministry::find($validated['ministry_id']);
             if ($ministry) {
                 $expenseAmountUah = (float) $validated['amount'];
@@ -780,7 +778,7 @@ class FinanceController extends Controller
                 }
                 $budgetCheck = $ministry->canAddExpense($expenseAmountUah, $validated['date'] ?? null);
 
-                if (!$budgetCheck['allowed'] && !$request->boolean('force_over_budget')) {
+                if (! $budgetCheck['allowed'] && ! $request->boolean('force_over_budget')) {
                     if ($request->wantsJson()) {
                         return response()->json([
                             'success' => false,
@@ -789,6 +787,7 @@ class FinanceController extends Controller
                             'ministry_id' => $ministry->id,
                         ], 422);
                     }
+
                     return back()
                         ->with('error', $budgetCheck['message'])
                         ->with('budget_exceeded', true)
@@ -837,11 +836,11 @@ class FinanceController extends Controller
 
         $message = __('messages.expense_added');
         if ($budgetWarning) {
-            $message .= ' ' . $budgetWarning;
+            $message .= ' '.$budgetWarning;
         }
 
         // Determine redirect target
-        $redirectToMinistry = !empty($validated['ministry_id']) && $request->input('redirect_to') === 'ministry';
+        $redirectToMinistry = ! empty($validated['ministry_id']) && $request->input('redirect_to') === 'ministry';
         $routeName = $redirectToMinistry ? 'ministries.show' : 'finances.transactions';
         $routeParams = $redirectToMinistry ? ['ministry' => $validated['ministry_id'], 'tab' => 'expenses'] : ['filter' => 'expense'];
 
@@ -855,7 +854,7 @@ class FinanceController extends Controller
     {
         $this->authorizeChurch($transaction);
 
-        if (!auth()->user()->canEdit('finances')) {
+        if (! auth()->user()->canEdit('finances')) {
             return $this->errorResponse($request, __('messages.no_permission_edit'), 403);
         }
 
@@ -888,7 +887,7 @@ class FinanceController extends Controller
     {
         $this->authorizeChurch($transaction);
 
-        if (!auth()->user()->canEdit('finances')) {
+        if (! auth()->user()->canEdit('finances')) {
             return $this->errorResponse($request, __('messages.no_permission_edit'), 403);
         }
 
@@ -912,7 +911,7 @@ class FinanceController extends Controller
 
         // Resolve category: existing ID or create from custom name
         $church = $this->getCurrentChurch();
-        if (empty($validated['category_id']) && !empty($validated['category_name'])) {
+        if (empty($validated['category_id']) && ! empty($validated['category_name'])) {
             $cat = TransactionCategory::firstOrCreate([
                 'church_id' => $church->id,
                 'name' => trim($validated['category_name']),
@@ -947,7 +946,7 @@ class FinanceController extends Controller
                 if ($checkAmount > 0) {
                     $budgetCheck = $ministry->canAddExpense($checkAmount, $validated['date'] ?? null);
 
-                    if (!$budgetCheck['allowed'] && !$request->boolean('force_over_budget')) {
+                    if (! $budgetCheck['allowed'] && ! $request->boolean('force_over_budget')) {
                         if ($request->wantsJson()) {
                             return response()->json([
                                 'success' => false,
@@ -955,6 +954,7 @@ class FinanceController extends Controller
                                 'budget_exceeded' => true,
                             ], 422);
                         }
+
                         return back()
                             ->with('error', $budgetCheck['message'])
                             ->with('budget_exceeded', true)
@@ -971,7 +971,7 @@ class FinanceController extends Controller
         $transaction->update($validated);
 
         // Delete marked attachments
-        if (!empty($validated['delete_attachments'])) {
+        if (! empty($validated['delete_attachments'])) {
             $transaction->attachments()
                 ->whereIn('id', $validated['delete_attachments'])
                 ->get()
@@ -997,7 +997,7 @@ class FinanceController extends Controller
 
         $message = __('messages.expense_updated');
         if ($budgetWarning) {
-            $message .= ' ' . $budgetWarning;
+            $message .= ' '.$budgetWarning;
         }
 
         // Determine redirect target
@@ -1015,7 +1015,7 @@ class FinanceController extends Controller
     {
         $this->authorizeChurch($transaction);
 
-        if (!auth()->user()->canDelete('finances')) {
+        if (! auth()->user()->canDelete('finances')) {
             return $this->errorResponse($request, __('messages.no_permission_delete'), 403);
         }
         $ministryId = $transaction->ministry_id;
@@ -1032,7 +1032,7 @@ class FinanceController extends Controller
     // Currency Exchange
     public function createExchange(Request $request)
     {
-        if (!auth()->user()->canCreate('finances')) {
+        if (! auth()->user()->canCreate('finances')) {
             return $this->errorResponse($request, __('messages.no_permission_create'));
         }
 
@@ -1045,7 +1045,7 @@ class FinanceController extends Controller
 
     public function storeExchange(Request $request)
     {
-        if (!auth()->user()->canCreate('finances')) {
+        if (! auth()->user()->canCreate('finances')) {
             abort(403, __('messages.no_permission_create'));
         }
 
@@ -1106,7 +1106,7 @@ class FinanceController extends Controller
 
     public function storeCategory(Request $request)
     {
-        if (!auth()->user()->canCreate('finances')) {
+        if (! auth()->user()->canCreate('finances')) {
             abort(403, __('messages.no_permission_create_categories'));
         }
 
@@ -1134,7 +1134,7 @@ class FinanceController extends Controller
 
     public function updateCategory(Request $request, TransactionCategory $category)
     {
-        if (!auth()->user()->canEdit('finances')) {
+        if (! auth()->user()->canEdit('finances')) {
             abort(403, __('messages.no_permission_edit_categories'));
         }
 
@@ -1158,7 +1158,7 @@ class FinanceController extends Controller
 
     public function destroyCategory(Request $request, TransactionCategory $category)
     {
-        if (!auth()->user()->canDelete('finances')) {
+        if (! auth()->user()->canDelete('finances')) {
             abort(403, __('messages.no_permission_delete_categories'));
         }
 
@@ -1178,7 +1178,7 @@ class FinanceController extends Controller
     // Team Budgets
     public function budgets(Request $request)
     {
-        if (!auth()->user()->canView('finances')) {
+        if (! auth()->user()->canView('finances')) {
             return $this->errorResponse($request, __('messages.no_access_to_section'));
         }
 
@@ -1236,7 +1236,7 @@ class FinanceController extends Controller
             ->groupBy('ministry_id')
             ->pluck('total', 'ministry_id');
 
-        $ministries = $ministries->map(function ($ministry) use ($year, $month, $spendingByMinistry, $spendingByBudgetItem, $spendingByCategoryUnlinked, $allocationsByMinistry) {
+        $ministries = $ministries->map(function ($ministry) use ($spendingByMinistry, $spendingByBudgetItem, $spendingByCategoryUnlinked, $allocationsByMinistry) {
             $budget = $ministry->budgets->first();
             $spent = $spendingByMinistry[$ministry->id] ?? 0;
             $allocated = (float) ($allocationsByMinistry[$ministry->id] ?? ($budget?->allocated_budget ?? 0));
@@ -1287,7 +1287,7 @@ class FinanceController extends Controller
                     : 0,
                 'items' => $items,
                 'unmatched_spent' => max(0, $unmatchedSpent),
-                'has_items' => !empty($items),
+                'has_items' => ! empty($items),
             ];
         });
 
@@ -1301,7 +1301,7 @@ class FinanceController extends Controller
         // Get recent expenses without receipts (categories with receipt_required)
         $expensesMissingReceipts = Transaction::where('church_id', $church->id)
             ->where('direction', Transaction::DIRECTION_OUT)
-            ->whereHas('category', fn($q) => $q->where('receipt_required', true))
+            ->whereHas('category', fn ($q) => $q->where('receipt_required', true))
             ->whereDoesntHave('attachments')
             ->forMonth($year, $month)
             ->with(['ministry', 'category'])
@@ -1322,7 +1322,7 @@ class FinanceController extends Controller
             // Batch query: actual spending by category_id for this month (eliminates N+1)
             $categoryIds = $churchBudget->items->pluck('category_id')->filter()->unique()->values()->all();
             $actualByCategory = [];
-            if (!empty($categoryIds)) {
+            if (! empty($categoryIds)) {
                 $actualByCategory = Transaction::where('church_id', $church->id)
                     ->where('direction', Transaction::DIRECTION_OUT)
                     ->whereIn('category_id', $categoryIds)
@@ -1429,7 +1429,7 @@ class FinanceController extends Controller
     private function getBudgetTrendData($church, int $currentYear, int $currentMonth): array
     {
         $months = [];
-        $date = \Carbon\Carbon::create($currentYear, $currentMonth, 1);
+        $date = Carbon::create($currentYear, $currentMonth, 1);
 
         for ($i = 5; $i >= 0; $i--) {
             $d = $date->copy()->subMonths($i);
@@ -1466,7 +1466,7 @@ class FinanceController extends Controller
             }
 
             $months[] = [
-                'label' => __('messages.month_short_' . $m),
+                'label' => __('messages.month_short_'.$m),
                 'year' => $y,
                 'month' => $m,
                 'planned' => round($churchPlanned + $ministryPlanned),
@@ -1482,7 +1482,7 @@ class FinanceController extends Controller
      */
     public function copyAllBudgets(Request $request)
     {
-        if (!auth()->user()->canEdit('finances')) {
+        if (! auth()->user()->canEdit('finances')) {
             abort(403);
         }
 
@@ -1518,10 +1518,11 @@ class FinanceController extends Controller
 
             if ($target && $target->items()->count() > 0) {
                 $skipped++;
+
                 continue;
             }
 
-            if (!$target) {
+            if (! $target) {
                 $target = MinistryBudget::create([
                     'church_id' => $church->id,
                     'ministry_id' => $source->ministry_id,
@@ -1552,10 +1553,10 @@ class FinanceController extends Controller
             $copied++;
         }
 
-        $monthName = __('messages.month_short_' . $validated['to_month']);
+        $monthName = __('messages.month_short_'.$validated['to_month']);
         $msg = __('messages.budgets_copied', ['copied' => $copied, 'month' => $monthName, 'year' => $validated['to_year']]);
         if ($skipped > 0) {
-            $msg .= ' ' . __('messages.budgets_skipped', ['skipped' => $skipped]);
+            $msg .= ' '.__('messages.budgets_skipped', ['skipped' => $skipped]);
         }
 
         return response()->json(['success' => true, 'message' => $msg]);
@@ -1563,7 +1564,7 @@ class FinanceController extends Controller
 
     public function updateBudget(Request $request, Ministry $ministry)
     {
-        if (!auth()->user()->canEdit('finances')) {
+        if (! auth()->user()->canEdit('finances')) {
             abort(403, __('messages.no_permission_edit_budgets'));
         }
 
@@ -1615,7 +1616,7 @@ class FinanceController extends Controller
 
     public function allocateBudget(Request $request, Ministry $ministry)
     {
-        if (!auth()->user()->canEdit('finances')) {
+        if (! auth()->user()->canEdit('finances')) {
             abort(403, __('messages.no_permission_allocate_budget'));
         }
 
@@ -1693,6 +1694,7 @@ class FinanceController extends Controller
             return $this->successResponse($request, __('messages.budget_allocated', ['amount' => number_format($validated['amount'], 0, ',', ' '), 'currency' => $validated['currency'], 'name' => $ministry->name]));
         } catch (\Throwable $e) {
             DB::rollBack();
+
             return response()->json(['success' => false, 'message' => __('messages.budget_allocation_error', ['error' => $e->getMessage()])], 500);
         }
     }
@@ -1700,7 +1702,7 @@ class FinanceController extends Controller
     // Budget Items CRUD
     public function storeBudgetItem(Request $request, MinistryBudget $ministryBudget)
     {
-        if (!auth()->user()->canEdit('finances')) {
+        if (! auth()->user()->canEdit('finances')) {
             abort(403);
         }
 
@@ -1722,7 +1724,7 @@ class FinanceController extends Controller
 
         // Resolve category: existing ID or create from custom name
         $categoryId = $validated['category_id'] ?? null;
-        if (!$categoryId && !empty($validated['category_name'])) {
+        if (! $categoryId && ! empty($validated['category_name'])) {
             $cat = TransactionCategory::firstOrCreate([
                 'church_id' => $church->id,
                 'name' => trim($validated['category_name']),
@@ -1759,7 +1761,7 @@ class FinanceController extends Controller
             'sort_order' => $maxSort + 1,
         ]);
 
-        if (!empty($validated['person_ids'])) {
+        if (! empty($validated['person_ids'])) {
             $item->responsiblePeople()->attach($validated['person_ids']);
         }
 
@@ -1772,7 +1774,7 @@ class FinanceController extends Controller
 
     public function updateBudgetItem(Request $request, BudgetItem $budgetItem)
     {
-        if (!auth()->user()->canEdit('finances')) {
+        if (! auth()->user()->canEdit('finances')) {
             abort(403);
         }
 
@@ -1794,7 +1796,7 @@ class FinanceController extends Controller
 
         // Resolve category: existing ID or create from custom name
         $categoryId = $validated['category_id'] ?? null;
-        if (!$categoryId && !empty($validated['category_name'])) {
+        if (! $categoryId && ! empty($validated['category_name'])) {
             $cat = TransactionCategory::firstOrCreate([
                 'church_id' => $church->id,
                 'name' => trim($validated['category_name']),
@@ -1838,7 +1840,7 @@ class FinanceController extends Controller
 
     public function destroyBudgetItem(Request $request, BudgetItem $budgetItem)
     {
-        if (!auth()->user()->canEdit('finances')) {
+        if (! auth()->user()->canEdit('finances')) {
             abort(403);
         }
 
@@ -1860,7 +1862,7 @@ class FinanceController extends Controller
 
     public function budgetItemTransactions(Request $request, BudgetItem $budgetItem)
     {
-        if (!auth()->user()->canView('finances')) {
+        if (! auth()->user()->canView('finances')) {
             abort(403);
         }
 
@@ -1881,7 +1883,7 @@ class FinanceController extends Controller
                     'amount' => (float) ($t->amount_uah ?? $t->amount),
                     'currency' => $t->currency,
                     'category' => $t->category?->name,
-                    'attachments' => $t->attachments->map(fn($a) => [
+                    'attachments' => $t->attachments->map(fn ($a) => [
                         'id' => $a->id,
                         'name' => $a->original_name,
                         'url' => $a->url,
@@ -1895,7 +1897,7 @@ class FinanceController extends Controller
     // Analytics API
     public function chartData(Request $request)
     {
-        if (!auth()->user()->canView('finances')) {
+        if (! auth()->user()->canView('finances')) {
             abort(403, __('messages.no_access_to_finance_data'));
         }
 
@@ -1955,6 +1957,7 @@ class FinanceController extends Controller
                 'balance' => $income - $expense,
             ];
         }
+
         return $months;
     }
 
@@ -1986,6 +1989,7 @@ class FinanceController extends Controller
                 'balance' => $income - $expense,
             ];
         }
+
         return $days;
     }
 
@@ -2019,6 +2023,7 @@ class FinanceController extends Controller
                 'balance' => $income - $expense,
             ];
         }
+
         return $months;
     }
 
@@ -2053,6 +2058,7 @@ class FinanceController extends Controller
                 'balance' => $income - $expense,
             ];
         }
+
         return $years;
     }
 
@@ -2081,7 +2087,7 @@ class FinanceController extends Controller
 
     private function getMonthName(int $month): string
     {
-        return __('messages.month_short_' . $month);
+        return __('messages.month_short_'.$month);
     }
 
     /**
@@ -2102,7 +2108,7 @@ class FinanceController extends Controller
             ->where('direction', Transaction::DIRECTION_IN)
             ->where('status', Transaction::STATUS_COMPLETED)
             ->whereNotIn('source_type', [Transaction::SOURCE_EXCHANGE, Transaction::SOURCE_ALLOCATION])
-            ->selectRaw("
+            ->selectRaw('
                 SUM(CASE WHEN date >= ? THEN COALESCE(amount_uah, amount) ELSE 0 END) as this_week_income,
                 SUM(CASE WHEN date >= ? AND date <= ? THEN COALESCE(amount_uah, amount) ELSE 0 END) as last_week_income,
                 SUM(CASE WHEN date >= ? THEN COALESCE(amount_uah, amount) ELSE 0 END) as this_month_total,
@@ -2111,7 +2117,7 @@ class FinanceController extends Controller
                 COUNT(CASE WHEN date >= ? AND date <= ? THEN 1 END) as last_month_count,
                 COUNT(DISTINCT CASE WHEN date >= ? AND person_id IS NOT NULL THEN person_id END) as this_month_donors,
                 COUNT(DISTINCT CASE WHEN date >= ? AND date <= ? AND person_id IS NOT NULL THEN person_id END) as last_month_donors
-            ", [
+            ', [
                 $thisWeekStart, // this_week_income
                 $lastWeekStart, $lastWeekEnd, // last_week_income
                 $thisMonthStart, // this_month_total
@@ -2175,15 +2181,15 @@ class FinanceController extends Controller
      */
     public function cards(Request $request)
     {
-        if (!auth()->user()->canView('finances')) {
+        if (! auth()->user()->canView('finances')) {
             return $this->errorResponse($request, __('messages.no_access_to_section'));
         }
 
         $church = $this->getCurrentChurch();
 
         // Check connection status for both banks
-        $monobankConnected = !empty($church->monobank_token);
-        $privatbankConnected = !empty($church->privatbank_merchant_id);
+        $monobankConnected = ! empty($church->monobank_token);
+        $privatbankConnected = ! empty($church->privatbank_merchant_id);
 
         return view('finances.cards.index', compact('church', 'monobankConnected', 'privatbankConnected'));
     }
@@ -2194,7 +2200,7 @@ class FinanceController extends Controller
 
     public function storeChurchBudget(Request $request)
     {
-        if (!auth()->user()->canEdit('finances')) {
+        if (! auth()->user()->canEdit('finances')) {
             abort(403);
         }
 
@@ -2215,7 +2221,7 @@ class FinanceController extends Controller
         }
 
         $budget = new ChurchBudget([
-            'name' => $validated['name'] ?? (__('app.budget') . ' ' . $validated['year']),
+            'name' => $validated['name'] ?? (__('app.budget').' '.$validated['year']),
             'year' => $validated['year'],
             'notes' => $validated['notes'] ?? null,
             'status' => 'active',
@@ -2228,7 +2234,7 @@ class FinanceController extends Controller
 
     public function updateChurchBudget(Request $request, ChurchBudget $churchBudget)
     {
-        if (!auth()->user()->canEdit('finances')) {
+        if (! auth()->user()->canEdit('finances')) {
             abort(403);
         }
 
@@ -2260,7 +2266,7 @@ class FinanceController extends Controller
 
     public function storeChurchBudgetItem(Request $request, ChurchBudget $churchBudget)
     {
-        if (!auth()->user()->canEdit('finances')) {
+        if (! auth()->user()->canEdit('finances')) {
             abort(403);
         }
 
@@ -2282,7 +2288,7 @@ class FinanceController extends Controller
         ]);
 
         // Build amounts JSON
-        if (!empty($validated['amounts_custom'])) {
+        if (! empty($validated['amounts_custom'])) {
             $amounts = [];
             foreach ($validated['amounts_custom'] as $m => $val) {
                 $m = (int) $m;
@@ -2300,11 +2306,11 @@ class FinanceController extends Controller
         }
 
         // Verify category belongs to this church
-        if (!empty($validated['category_id'])) {
+        if (! empty($validated['category_id'])) {
             $cat = TransactionCategory::where('id', $validated['category_id'])
                 ->where('church_id', $church->id)
                 ->first();
-            if (!$cat) {
+            if (! $cat) {
                 abort(404);
             }
         }
@@ -2328,7 +2334,7 @@ class FinanceController extends Controller
 
     public function updateChurchBudgetItem(Request $request, ChurchBudgetItem $item)
     {
-        if (!auth()->user()->canEdit('finances')) {
+        if (! auth()->user()->canEdit('finances')) {
             abort(403);
         }
 
@@ -2350,7 +2356,7 @@ class FinanceController extends Controller
         ]);
 
         // Build amounts JSON
-        if (!empty($validated['amounts_custom'])) {
+        if (! empty($validated['amounts_custom'])) {
             // Custom per-month amounts — only allow keys 1-12
             $amounts = [];
             foreach ($validated['amounts_custom'] as $m => $val) {
@@ -2369,11 +2375,11 @@ class FinanceController extends Controller
         }
 
         // Verify category belongs to this church
-        if (!empty($validated['category_id'])) {
+        if (! empty($validated['category_id'])) {
             $cat = TransactionCategory::where('id', $validated['category_id'])
                 ->where('church_id', $church->id)
                 ->first();
-            if (!$cat) {
+            if (! $cat) {
                 abort(404);
             }
         }
@@ -2391,7 +2397,7 @@ class FinanceController extends Controller
 
     public function destroyChurchBudgetItem(Request $request, ChurchBudgetItem $item)
     {
-        if (!auth()->user()->canEdit('finances')) {
+        if (! auth()->user()->canEdit('finances')) {
             abort(403);
         }
 
@@ -2407,7 +2413,7 @@ class FinanceController extends Controller
 
     public function churchBudgetItemTransactions(Request $request, ChurchBudgetItem $item)
     {
-        if (!auth()->user()->canView('finances')) {
+        if (! auth()->user()->canView('finances')) {
             abort(403);
         }
 

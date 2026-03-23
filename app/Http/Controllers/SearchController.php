@@ -7,6 +7,7 @@ use App\Models\Event;
 use App\Models\Group;
 use App\Models\Ministry;
 use App\Models\Person;
+use App\Services\SecurityAlertService;
 use Illuminate\Http\Request;
 
 class SearchController extends Controller
@@ -30,9 +31,9 @@ class SearchController extends Controller
                 ->where('membership_status', '!=', Person::STATUS_GUEST)
                 ->where(function ($q) use ($search) {
                     $q->where('first_name', 'like', "%{$search}%")
-                      ->orWhere('last_name', 'like', "%{$search}%")
-                      ->orWhere('phone', 'like', "%{$search}%")
-                      ->orWhere('email', 'like', "%{$search}%");
+                        ->orWhere('last_name', 'like', "%{$search}%")
+                        ->orWhere('phone', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
                 })
                 ->limit(5)
                 ->get();
@@ -180,13 +181,14 @@ class SearchController extends Controller
             // +380501234567 → +380***4567
             $len = strlen($phone);
             if ($len > 4) {
-                return substr($phone, 0, max(3, $len - 7)) . '***' . substr($phone, -4);
+                return substr($phone, 0, max(3, $len - 7)).'***'.substr($phone, -4);
             }
+
             return '***';
         }
 
         if ($email) {
-            return \App\Services\SecurityAlertService::maskEmail($email);
+            return SecurityAlertService::maskEmail($email);
         }
 
         return '';

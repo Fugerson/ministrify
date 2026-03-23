@@ -71,9 +71,9 @@ class MinistryTypeController extends Controller
         ]);
 
         // Ensure type belongs to same church if specified
-        if (!empty($validated['type_id'])) {
+        if (! empty($validated['type_id'])) {
             $type = MinistryType::find($validated['type_id']);
-            if (!$type || $type->church_id !== $this->getCurrentChurch()->id) {
+            if (! $type || $type->church_id !== $this->getCurrentChurch()->id) {
                 abort(404);
             }
         }

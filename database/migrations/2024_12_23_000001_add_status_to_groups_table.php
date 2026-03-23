@@ -14,7 +14,7 @@ return new class extends Migration
         });
 
         // Migrate existing data: if is_active = false, set status to 'paused'
-        \DB::table('groups')->where('is_active', false)->update(['status' => 'paused']);
+        DB::table('groups')->where('is_active', false)->update(['status' => 'paused']);
     }
 
     public function down(): void

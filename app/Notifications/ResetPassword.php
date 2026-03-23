@@ -12,6 +12,7 @@ class ResetPassword extends Notification implements ShouldQueue
     use Queueable;
 
     public string $token;
+
     public bool $isInvite;
 
     public function __construct(string $token, bool $isInvite = false)
@@ -36,7 +37,7 @@ class ResetPassword extends Notification implements ShouldQueue
         $hasSetPassword = $notifiable->password_set_at !== null;
 
         // If explicitly marked as invite OR user never set password - it's an invitation
-        $isInvitation = $this->isInvite || !$hasSetPassword;
+        $isInvitation = $this->isInvite || ! $hasSetPassword;
 
         if ($isInvitation) {
             return (new MailMessage)

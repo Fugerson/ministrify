@@ -12,20 +12,23 @@ use App\Models\Person;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Collection;
 
 class FinancesDemoSeeder extends Seeder
 {
     public function run(): void
     {
         $church = Church::first();
-        if (!$church) {
+        if (! $church) {
             $this->command->info('No church found. Please run main seeder first.');
+
             return;
         }
 
         $admin = User::where('church_id', $church->id)->where('role', 'admin')->first();
-        if (!$admin) {
+        if (! $admin) {
             $this->command->info('No admin user found.');
+
             return;
         }
 
@@ -48,7 +51,7 @@ class FinancesDemoSeeder extends Seeder
         $startDate = now()->subMonths(11)->startOfMonth();
         $endDate = now();
 
-        $this->command->info('Generating financial data from ' . $startDate->format('Y-m') . ' to ' . $endDate->format('Y-m'));
+        $this->command->info('Generating financial data from '.$startDate->format('Y-m').' to '.$endDate->format('Y-m'));
 
         $currentDate = $startDate->copy();
         while ($currentDate <= $endDate) {
@@ -88,7 +91,7 @@ class FinancesDemoSeeder extends Seeder
         return $result;
     }
 
-    private function createExpenseCategories(Church $church): \Illuminate\Support\Collection
+    private function createExpenseCategories(Church $church): Collection
     {
         $categories = [
             'Оренда приміщення',
@@ -194,12 +197,15 @@ class FinancesDemoSeeder extends Seeder
                 return $methods[$i];
             }
         }
+
         return 'cash';
     }
 
     private function randomIncomeDescription($category): ?string
     {
-        if (rand(1, 5) > 2) return null; // 60% no description
+        if (rand(1, 5) > 2) {
+            return null;
+        } // 60% no description
 
         $descriptions = [
             'Недільне служіння',
@@ -226,6 +232,7 @@ class FinancesDemoSeeder extends Seeder
         ];
 
         $options = $descriptions[$category] ?? $descriptions['Інше'];
+
         return $options[array_rand($options)];
     }
 }

@@ -6,7 +6,6 @@ use App\Http\Controllers\Traits\RequiresChurch;
 use App\Models\PrivateMessage;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class PrivateMessageController extends Controller
 {
@@ -38,7 +37,7 @@ class PrivateMessageController extends Controller
         $church = $this->getChurchOrFail();
 
         // Make sure target user belongs to the same church (via pivot)
-        if (!$user->belongsToChurch($church->id)) {
+        if (! $user->belongsToChurch($church->id)) {
             abort(404);
         }
 
@@ -89,7 +88,7 @@ class PrivateMessageController extends Controller
 
         // Check if broadcast to all
         if ($request->input('recipient_id') === 'all') {
-            if (!$currentUser->canCreate('announcements')) {
+            if (! $currentUser->canCreate('announcements')) {
                 abort(403, 'У вас немає прав для масових повідомлень');
             }
 
@@ -110,7 +109,7 @@ class PrivateMessageController extends Controller
                 ]);
             }
 
-                return $this->successResponse($request, 'Повідомлення надіслано ' . $recipients->count() . ' користувачам', 'pm.index');
+            return $this->successResponse($request, 'Повідомлення надіслано '.$recipients->count().' користувачам', 'pm.index');
         }
 
         $validated = $request->validate([
@@ -120,7 +119,7 @@ class PrivateMessageController extends Controller
 
         // Verify recipient belongs to the same church (via pivot)
         $recipient = User::findOrFail($validated['recipient_id']);
-        if (!$recipient->belongsToChurch($church->id)) {
+        if (! $recipient->belongsToChurch($church->id)) {
             abort(403);
         }
 
@@ -154,7 +153,7 @@ class PrivateMessageController extends Controller
         $currentUser = auth()->user();
         $church = $this->getChurchOrFail();
 
-        if (!$user->belongsToChurch($church->id)) {
+        if (! $user->belongsToChurch($church->id)) {
             abort(404);
         }
 

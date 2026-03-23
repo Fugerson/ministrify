@@ -43,22 +43,24 @@ class AuthServiceProvider extends ServiceProvider
 
         // Ministry management (leader + admin only)
         Gate::define('manage-ministry', function (User $user, ?Ministry $ministry = null) {
-            if (!$ministry) {
+            if (! $ministry) {
                 return false;
             }
+
             return $user->canManageMinistry($ministry);
         });
 
         // Ministry contribution (any member)
         Gate::define('contribute-ministry', function (User $user, ?Ministry $ministry = null) {
-            if (!$ministry) {
+            if (! $ministry) {
                 return false;
             }
+
             return $user->canContributeToMinistry($ministry);
         });
 
         Gate::define('view-ministry', function (User $user, ?Ministry $ministry = null) {
-            if (!$ministry) {
+            if (! $ministry) {
                 return false;
             }
             // All users with view permission can see ministries in their church
@@ -80,12 +82,13 @@ class AuthServiceProvider extends ServiceProvider
 
         // Person management
         Gate::define('manage-person', function (User $user, ?Person $person = null) {
-            if (!$person) {
+            if (! $person) {
                 return false;
             }
             // Leaders can manage people in their ministries
             if ($user->isLeader() && $user->person) {
                 $leaderMinistryIds = $user->person->leadingMinistries()->pluck('id')->toArray();
+
                 return $person->ministries()->whereIn('ministry_id', $leaderMinistryIds)->exists();
             }
 
@@ -94,9 +97,10 @@ class AuthServiceProvider extends ServiceProvider
 
         // Volunteer self-management
         Gate::define('manage-own-profile', function (User $user, ?Person $person = null) {
-            if (!$person) {
+            if (! $person) {
                 return false;
             }
+
             return $user->person && $user->person->id === $person->id;
         });
     }

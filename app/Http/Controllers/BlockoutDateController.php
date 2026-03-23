@@ -17,14 +17,14 @@ class BlockoutDateController extends Controller
     {
         $person = auth()->user()->person;
 
-        if (!$person) {
+        if (! $person) {
             return $this->errorResponse($request, 'Профіль не знайдено');
         }
 
         $blockouts = $person->blockoutDates()
             ->orderBy('start_date')
             ->get()
-            ->groupBy(fn($b) => $b->status);
+            ->groupBy(fn ($b) => $b->status);
 
         $ministries = $person->ministries;
 
@@ -38,7 +38,7 @@ class BlockoutDateController extends Controller
     {
         $person = auth()->user()->person;
 
-        if (!$person) {
+        if (! $person) {
             return $this->errorResponse($request, 'Профіль не знайдено');
         }
 
@@ -54,7 +54,7 @@ class BlockoutDateController extends Controller
     {
         $person = auth()->user()->person;
 
-        if (!$person) {
+        if (! $person) {
             return $this->errorResponse($request, 'Профіль не знайдено');
         }
 
@@ -90,7 +90,7 @@ class BlockoutDateController extends Controller
         ]);
 
         // Attach specific ministries if not applies_to_all
-        if (!($validated['applies_to_all'] ?? true) && !empty($validated['ministry_ids'])) {
+        if (! ($validated['applies_to_all'] ?? true) && ! empty($validated['ministry_ids'])) {
             $blockout->ministries()->sync($validated['ministry_ids']);
         }
 
@@ -107,7 +107,7 @@ class BlockoutDateController extends Controller
     {
         $person = auth()->user()->person;
 
-        if (!$person || $blockout->person_id !== $person->id) {
+        if (! $person || $blockout->person_id !== $person->id) {
             abort(404);
         }
 
@@ -123,7 +123,7 @@ class BlockoutDateController extends Controller
     {
         $person = auth()->user()->person;
 
-        if (!$person || $blockout->person_id !== $person->id) {
+        if (! $person || $blockout->person_id !== $person->id) {
             abort(404);
         }
 
@@ -156,7 +156,7 @@ class BlockoutDateController extends Controller
         ]);
 
         // Update ministries
-        if (!($validated['applies_to_all'] ?? true) && !empty($validated['ministry_ids'])) {
+        if (! ($validated['applies_to_all'] ?? true) && ! empty($validated['ministry_ids'])) {
             $blockout->ministries()->sync($validated['ministry_ids']);
         } else {
             $blockout->ministries()->detach();
@@ -172,7 +172,7 @@ class BlockoutDateController extends Controller
     {
         $person = auth()->user()->person;
 
-        if (!$person || $blockout->person_id !== $person->id) {
+        if (! $person || $blockout->person_id !== $person->id) {
             abort(404);
         }
 
@@ -188,7 +188,7 @@ class BlockoutDateController extends Controller
     {
         $person = auth()->user()->person;
 
-        if (!$person || $blockout->person_id !== $person->id) {
+        if (! $person || $blockout->person_id !== $person->id) {
             abort(404);
         }
 
@@ -204,7 +204,7 @@ class BlockoutDateController extends Controller
     {
         $person = auth()->user()->person;
 
-        if (!$person) {
+        if (! $person) {
             return response()->json(['error' => 'Профіль не знайдено'], 404);
         }
 
@@ -239,7 +239,7 @@ class BlockoutDateController extends Controller
     {
         $person = auth()->user()->person;
 
-        if (!$person) {
+        if (! $person) {
             return response()->json([]);
         }
 
@@ -283,20 +283,20 @@ class BlockoutDateController extends Controller
             ->whereHas('event', function ($q) use ($blockout) {
                 $q->whereBetween('date', [$blockout->start_date, $blockout->end_date]);
 
-                if (!$blockout->applies_to_all) {
+                if (! $blockout->applies_to_all) {
                     $ministryIds = $blockout->ministries->pluck('id');
                     $q->whereIn('ministry_id', $ministryIds);
                 }
             })
             ->with('event')
             ->get()
-            ->filter(fn($a) => $a->event && $blockout->coversDateTime($a->event->date, $a->event->time));
+            ->filter(fn ($a) => $a->event && $blockout->coversDateTime($a->event->date, $a->event->time));
 
         // Auto-decline these assignments
         foreach ($conflicting as $assignment) {
             $assignment->update([
                 'status' => 'declined',
-                'declined_reason' => 'Автоматично відхилено через blockout: ' . $blockout->reason_label,
+                'declined_reason' => 'Автоматично відхилено через blockout: '.$blockout->reason_label,
                 'responded_at' => now(),
             ]);
         }
@@ -333,7 +333,7 @@ class BlockoutDateController extends Controller
         if ($ministryId = $request->get('ministry_id')) {
             $query->where(function ($q) use ($ministryId) {
                 $q->where('applies_to_all', true)
-                  ->orWhereHas('ministries', fn($m) => $m->where('ministries.id', $ministryId));
+                    ->orWhereHas('ministries', fn ($m) => $m->where('ministries.id', $ministryId));
             });
         }
 

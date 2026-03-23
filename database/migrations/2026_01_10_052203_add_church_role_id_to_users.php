@@ -11,7 +11,7 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->foreignId('church_role_id')->nullable()->after('role')
-                  ->constrained('church_roles')->nullOnDelete();
+                ->constrained('church_roles')->nullOnDelete();
         });
     }
 

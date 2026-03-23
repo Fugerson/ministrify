@@ -2,8 +2,8 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -35,10 +35,10 @@ return new class extends Migration
 
         // Add extra fields to attendance_records
         Schema::table('attendance_records', function (Blueprint $table) {
-            if (!Schema::hasColumn('attendance_records', 'checked_in_at')) {
+            if (! Schema::hasColumn('attendance_records', 'checked_in_at')) {
                 $table->time('checked_in_at')->nullable()->after('present');
             }
-            if (!Schema::hasColumn('attendance_records', 'notes')) {
+            if (! Schema::hasColumn('attendance_records', 'notes')) {
                 $table->text('notes')->nullable()->after('checked_in_at');
             }
         });
@@ -96,17 +96,17 @@ return new class extends Migration
 
         Schema::table('people', function (Blueprint $table) {
             // Membership status: guest -> newcomer -> member -> active
-            if (!Schema::hasColumn('people', 'membership_status')) {
+            if (! Schema::hasColumn('people', 'membership_status')) {
                 $table->string('membership_status')->default('member')->after('church_role');
             }
 
             // Baptism date
-            if (!Schema::hasColumn('people', 'baptism_date')) {
+            if (! Schema::hasColumn('people', 'baptism_date')) {
                 $table->date('baptism_date')->nullable()->after('joined_date');
             }
 
             // First visit date
-            if (!Schema::hasColumn('people', 'first_visit_date')) {
+            if (! Schema::hasColumn('people', 'first_visit_date')) {
                 $table->date('first_visit_date')->nullable()->after('joined_date');
             }
         });
@@ -352,7 +352,7 @@ return new class extends Migration
 
         // Add template reference to events
         Schema::table('events', function (Blueprint $table) {
-            if (!Schema::hasColumn('events', 'task_template_id')) {
+            if (! Schema::hasColumn('events', 'task_template_id')) {
                 $table->foreignId('task_template_id')->nullable()->after('ministry_id')
                     ->constrained('event_task_templates')->nullOnDelete();
             }
@@ -381,7 +381,7 @@ return new class extends Migration
             $table->dropIndex(['type']);
             $table->dropColumn([
                 'attendable_type', 'attendable_id', 'type',
-                'time', 'location', 'members_present', 'guests_count', 'recorded_by'
+                'time', 'location', 'members_present', 'guests_count', 'recorded_by',
             ]);
         });
 

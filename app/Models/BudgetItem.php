@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -10,7 +11,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class BudgetItem extends Model
 {
     public const FREQUENCY_ONE_TIME = 'one_time';
+
     public const FREQUENCY_WEEKLY = 'weekly';
+
     public const FREQUENCY_MONTHLY = 'monthly';
 
     protected $fillable = [
@@ -73,9 +76,11 @@ class BudgetItem extends Model
         if ($this->frequency === self::FREQUENCY_WEEKLY) {
             $budget = $this->ministryBudget;
             if ($budget) {
-                $weeksInMonth = (int) ceil(\Carbon\Carbon::create($budget->year, $budget->month, 1)->daysInMonth / 7);
+                $weeksInMonth = (int) ceil(Carbon::create($budget->year, $budget->month, 1)->daysInMonth / 7);
+
                 return (float) $this->planned_amount * $weeksInMonth;
             }
+
             return (float) $this->planned_amount * 4;
         }
 

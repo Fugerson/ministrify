@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\Response;
 class ThrottleLogin
 {
     protected RateLimiter $limiter;
+
     protected SecurityAlertService $alertService;
 
     public function __construct(RateLimiter $limiter, SecurityAlertService $alertService)
@@ -60,7 +61,7 @@ class ThrottleLogin
         if ($response->getStatusCode() === 422 ||
             ($response->getStatusCode() === 302 && session()->has('errors'))) {
             $this->limiter->hit($key, $decayMinutes * 60);
-        } elseif ($response->getStatusCode() === 200 || ($response->getStatusCode() === 302 && !session()->has('errors'))) {
+        } elseif ($response->getStatusCode() === 200 || ($response->getStatusCode() === 302 && ! session()->has('errors'))) {
             // Successful login - clear attempts
             $this->limiter->clear($key);
         }
@@ -74,6 +75,7 @@ class ThrottleLogin
     protected function resolveRequestSignature(Request $request): string
     {
         $email = strtolower($request->input('email', ''));
-        return 'login:' . sha1($request->ip() . '|' . $email);
+
+        return 'login:'.sha1($request->ip().'|'.$email);
     }
 }

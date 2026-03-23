@@ -17,6 +17,7 @@ class EventObserverTest extends TestCase
     use RefreshDatabase;
 
     private Church $church;
+
     private Ministry $ministry;
 
     protected function setUp(): void
@@ -46,7 +47,7 @@ class EventObserverTest extends TestCase
         });
 
         // Now trigger the observer manually with only google fields changed
-        $observer = new EventObserver();
+        $observer = new EventObserver;
         $event->refresh();
 
         // The observer's updated method should return early
@@ -67,7 +68,7 @@ class EventObserverTest extends TestCase
             'google_calendar_id' => null,
         ]);
 
-        $observer = new EventObserver();
+        $observer = new EventObserver;
         $observer->deleted($event);
 
         // No exception means success — deleteEvent was never called
@@ -87,7 +88,7 @@ class EventObserverTest extends TestCase
         ]);
 
         // No user with Google Calendar settings exists
-        $observer = new EventObserver();
+        $observer = new EventObserver;
         $observer->deleted($event);
 
         $this->assertTrue(true);
@@ -104,7 +105,7 @@ class EventObserverTest extends TestCase
             'date' => now(),
         ]);
 
-        $observer = new EventObserver();
+        $observer = new EventObserver;
         $observer->created($event);
 
         $this->assertTrue(true);
@@ -120,7 +121,7 @@ class EventObserverTest extends TestCase
         ]);
 
         // Verify that updated_at is in the ignored fields list
-        $observer = new EventObserver();
+        $observer = new EventObserver;
 
         // Simulate changes to only updated_at
         // The observer should skip because updated_at is in ignoredFields

@@ -2,14 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Traits\Auditable;
 
 class DonationCampaign extends Model
 {
-    use HasFactory, Auditable;
+    use Auditable, HasFactory;
 
     protected $fillable = [
         'church_id',
@@ -65,7 +65,7 @@ class DonationCampaign extends Model
 
     public function getProgressPercentAttribute(): int
     {
-        if (!$this->goal_amount || $this->goal_amount == 0) {
+        if (! $this->goal_amount || $this->goal_amount == 0) {
             return 0;
         }
 
@@ -79,7 +79,7 @@ class DonationCampaign extends Model
 
     public function getDaysRemainingAttribute(): ?int
     {
-        if (!$this->end_date) {
+        if (! $this->end_date) {
             return null;
         }
 

@@ -5,12 +5,16 @@ namespace App\Http\Controllers;
 use App\Models\Assignment;
 use App\Models\Attendance;
 use App\Models\AttendanceRecord;
-use App\Models\AuditLog;
 use App\Models\Board;
+use App\Models\ChecklistTemplate;
 use App\Models\Event;
+use App\Models\EventCellNote;
 use App\Models\EventMinistryTeam;
 use App\Models\Ministry;
 use App\Models\MinistryMeeting;
+use App\Models\Person;
+use App\Models\Song;
+use App\Models\User;
 use App\Rules\BelongsToChurch;
 use App\Services\CalendarService;
 use App\Services\GoogleCalendarService;
@@ -22,7 +26,7 @@ class EventController extends Controller
 {
     public function index(Request $request)
     {
-        if (!auth()->user()->canView('events')) {
+        if (! auth()->user()->canView('events')) {
             return $this->errorResponse($request, __('У вас немає доступу до цього розділу. Зверніться до адміністратора церкви для отримання потрібних прав.'));
         }
 
@@ -51,7 +55,7 @@ class EventController extends Controller
 
     public function schedule(Request $request)
     {
-        if (!auth()->user()->canView('events')) {
+        if (! auth()->user()->canView('events')) {
             return $this->errorResponse($request, __('У вас немає доступу до цього розділу. Зверніться до адміністратора церкви для отримання потрібних прав.'));
         }
 
@@ -96,10 +100,10 @@ class EventController extends Controller
                 // Events starting in range
                 $q->whereBetween('date', [$queryStart, $queryEnd])
                     // OR events that started before but end in/after range
-                    ->orWhere(function ($q2) use ($queryStart, $queryEnd) {
+                    ->orWhere(function ($q2) use ($queryStart) {
                         $q2->where('date', '<', $queryStart)
-                           ->whereNotNull('end_date')
-                           ->where('end_date', '>=', $queryStart);
+                            ->whereNotNull('end_date')
+                            ->where('end_date', '>=', $queryStart);
                     });
             })
             ->with(['ministry', 'responsibilities.person'])
@@ -108,7 +112,7 @@ class EventController extends Controller
             ->get();
 
         // Get ministry meetings for the same period
-        $meetings = MinistryMeeting::whereHas('ministry', fn($q) => $q->where('church_id', $church->id))
+        $meetings = MinistryMeeting::whereHas('ministry', fn ($q) => $q->where('church_id', $church->id))
             ->whereBetween('date', [$queryStart, $queryEnd])
             ->with('ministry')
             ->orderBy('date')
@@ -131,9 +135,9 @@ class EventController extends Controller
             while ($currentDate <= $displayEnd) {
                 $isFirstDay = $currentDate->isSameDay($eventStart);
                 $isLastDay = $currentDate->isSameDay($eventEnd);
-                $isMultiDay = !$eventStart->isSameDay($eventEnd);
+                $isMultiDay = ! $eventStart->isSameDay($eventEnd);
 
-                $calendarItems->push((object)[
+                $calendarItems->push((object) [
                     'type' => 'event',
                     'id' => $event->id,
                     'title' => $event->title,
@@ -153,7 +157,7 @@ class EventController extends Controller
         }
 
         foreach ($meetings as $meeting) {
-            $calendarItems->push((object)[
+            $calendarItems->push((object) [
                 'type' => 'meeting',
                 'id' => $meeting->id,
                 'title' => $meeting->title,
@@ -166,7 +170,7 @@ class EventController extends Controller
         }
 
         // Group by date
-        $events = $calendarItems->groupBy(fn($item) => Carbon::parse($item->date)->format('Y-m-d'));
+        $events = $calendarItems->groupBy(fn ($item) => Carbon::parse($item->date)->format('Y-m-d'));
 
         // Get upcoming events from next month (first 7 days) for month view
         $upcomingNextMonth = collect();
@@ -182,7 +186,7 @@ class EventController extends Controller
                 ->get();
 
             foreach ($upcomingEvents as $event) {
-                $upcomingNextMonth->push((object)[
+                $upcomingNextMonth->push((object) [
                     'type' => 'event',
                     'id' => $event->id,
                     'title' => $event->title,
@@ -205,7 +209,7 @@ class EventController extends Controller
 
         // Google Calendar OAuth status
         $googleSettings = auth()->user()->settings['google_calendar'] ?? null;
-        $isGoogleConnected = !empty($googleSettings['access_token']);
+        $isGoogleConnected = ! empty($googleSettings['access_token']);
         $lastSyncedAt = $googleSettings['last_synced_at'] ?? null;
 
         // Service types for matrix tab
@@ -233,7 +237,7 @@ class EventController extends Controller
         $query = Ministry::where('church_id', $church->id);
 
         // Non-admins without global edit permission see only their own ministries
-        if (!$user->canEdit('events')) {
+        if (! $user->canEdit('events')) {
             $query->where('leader_id', $user->person?->id ?? 0);
         }
 
@@ -285,7 +289,7 @@ class EventController extends Controller
         $validated['track_attendance'] = $request->boolean('track_attendance');
 
         // Process reminder settings
-        if (!empty($validated['reminders'])) {
+        if (! empty($validated['reminders'])) {
             $validated['reminder_settings'] = array_values(array_map(function ($reminder) {
                 return [
                     'type' => $reminder['type'],
@@ -301,7 +305,7 @@ class EventController extends Controller
         $church = $this->getCurrentChurch();
 
         // If ministry selected, authorize
-        if (!empty($validated['ministry_id'])) {
+        if (! empty($validated['ministry_id'])) {
             $ministry = Ministry::where('church_id', $church->id)->findOrFail($validated['ministry_id']);
             Gate::authorize('contribute-ministry', $ministry);
         }
@@ -318,7 +322,7 @@ class EventController extends Controller
         $event = Event::create($validated);
 
         // Handle recurring events
-        if (!empty($validated['recurrence_rule'])) {
+        if (! empty($validated['recurrence_rule'])) {
             $this->generateRecurringEvents(
                 $event,
                 $validated['recurrence_rule'],
@@ -376,7 +380,7 @@ class EventController extends Controller
         }
 
         // Get checklist templates
-        $checklistTemplates = \App\Models\ChecklistTemplate::where('church_id', $church->id)
+        $checklistTemplates = ChecklistTemplate::where('church_id', $church->id)
             ->with('items')
             ->get();
 
@@ -386,7 +390,7 @@ class EventController extends Controller
             ->get();
 
         // Get all church members for attendance tracking and plan item assignment
-        $allPeople = \App\Models\Person::where('church_id', $church->id)
+        $allPeople = Person::where('church_id', $church->id)
             ->orderBy('first_name')
             ->orderBy('last_name')
             ->get();
@@ -394,7 +398,7 @@ class EventController extends Controller
         // Get ministries for inline editing (same filter as create)
         $ministryQuery = Ministry::where('church_id', $church->id);
         $user = auth()->user();
-        if (!$user->canEdit('events')) {
+        if (! $user->canEdit('events')) {
             $ministryQuery->where('leader_id', $user->person?->id ?? 0);
         }
         $ministries = $ministryQuery->get();
@@ -438,11 +442,11 @@ class EventController extends Controller
                 ->whereIn('ministries.id', $linkedMinistryIds)
                 ->with('ministryRoles')
                 ->get()
-                ->map(fn($m) => [
+                ->map(fn ($m) => [
                     'id' => $m->id,
                     'name' => $m->name,
                     'color' => $m->color,
-                    'roles' => $m->ministryRoles->map(fn($r) => [
+                    'roles' => $m->ministryRoles->map(fn ($r) => [
                         'id' => $r->id,
                         'name' => $r->name,
                     ])->values(),
@@ -451,11 +455,21 @@ class EventController extends Controller
 
         // Determine which sections have data (always visible regardless of settings)
         $sectionsWithData = [];
-        if ($event->planItems->count() > 0) $sectionsWithData[] = 'plan';
-        if ($linkedMinistries->count() > 0 || $event->ministryTeams->count() > 0) $sectionsWithData[] = 'team';
-        if ($event->attendance && $event->attendance->records->count() > 0) $sectionsWithData[] = 'attendance';
-        if ($event->checklist && $event->checklist->items->count() > 0) $sectionsWithData[] = 'checklist';
-        if ($event->reminder_settings && count($event->reminder_settings) > 0) $sectionsWithData[] = 'reminders';
+        if ($event->planItems->count() > 0) {
+            $sectionsWithData[] = 'plan';
+        }
+        if ($linkedMinistries->count() > 0 || $event->ministryTeams->count() > 0) {
+            $sectionsWithData[] = 'team';
+        }
+        if ($event->attendance && $event->attendance->records->count() > 0) {
+            $sectionsWithData[] = 'attendance';
+        }
+        if ($event->checklist && $event->checklist->items->count() > 0) {
+            $sectionsWithData[] = 'checklist';
+        }
+        if ($event->reminder_settings && count($event->reminder_settings) > 0) {
+            $sectionsWithData[] = 'reminders';
+        }
         // tasks: checked client-side via linked-cards component
 
         return view('schedule.show', compact('event', 'availablePeople', 'volunteerBlockouts', 'checklistTemplates', 'boards', 'allPeople', 'ministries', 'songsForAutocomplete', 'canEdit', 'currentPerson', 'myMinistriesForSignup', 'linkedMinistries', 'availableMinistriesToLink', 'sectionsWithData'));
@@ -470,7 +484,7 @@ class EventController extends Controller
         $user = auth()->user();
 
         $ministryQuery = Ministry::where('church_id', $church->id);
-        if (!$user->canEdit('events')) {
+        if (! $user->canEdit('events')) {
             $ministryQuery->where('leader_id', $user->person?->id ?? 0);
         }
         $ministries = $ministryQuery->get();
@@ -528,8 +542,8 @@ class EventController extends Controller
                 // User chose "don't sync" — if event was synced, delete from Google first
                 if ($event->google_event_id && $event->google_calendar_id) {
                     try {
-                        $gcService = app(\App\Services\GoogleCalendarService::class);
-                        $user = \App\Models\User::whereHas('churches', fn ($q) => $q->where('churches.id', $event->church_id))
+                        $gcService = app(GoogleCalendarService::class);
+                        $user = User::whereHas('churches', fn ($q) => $q->where('churches.id', $event->church_id))
                             ->whereNotNull('settings->google_calendar->access_token')
                             ->first();
                         if ($user) {
@@ -554,7 +568,7 @@ class EventController extends Controller
 
         // Process reminder settings
         if ($request->has('reminders')) {
-            if (!empty($validated['reminders'])) {
+            if (! empty($validated['reminders'])) {
                 $validated['reminder_settings'] = array_values(array_map(function ($reminder) {
                     return [
                         'type' => $reminder['type'],
@@ -603,7 +617,7 @@ class EventController extends Controller
             $parentId = $event->parent_event_id ?? $event->id;
 
             $seriesEvents = Event::where('church_id', $event->church_id)
-                ->where(fn($q) => $q->where('parent_event_id', $parentId)->orWhere('id', $parentId))
+                ->where(fn ($q) => $q->where('parent_event_id', $parentId)->orWhere('id', $parentId))
                 ->get();
 
             foreach ($seriesEvents as $seriesEvent) {
@@ -629,17 +643,17 @@ class EventController extends Controller
     {
         $this->authorizeChurch($event);
 
-        if (!auth()->user()->canEdit('attendance') && !auth()->user()->canEdit('events')) {
+        if (! auth()->user()->canEdit('attendance') && ! auth()->user()->canEdit('events')) {
             abort(403);
         }
 
-        if (!$event->track_attendance) {
+        if (! $event->track_attendance) {
             abort(404);
         }
 
         $validated = $request->validate([
             'present' => 'nullable|array',
-            'present.*' => ['integer', new BelongsToChurch(\App\Models\Person::class)],
+            'present.*' => ['integer', new BelongsToChurch(Person::class)],
             'guests_count' => 'nullable|integer|min:0',
         ]);
 
@@ -712,21 +726,21 @@ class EventController extends Controller
     {
         $user = auth()->user();
 
-        if (!$user->person) {
+        if (! $user->person) {
             return redirect()->route('dashboard')->with('error', __('app.profile_not_found'));
         }
 
         $responsibilities = $user->person->responsibilities()
             ->with(['event.ministry'])
-            ->whereHas('event', fn($q) => $q->where('date', '>=', now()->startOfDay()))
+            ->whereHas('event', fn ($q) => $q->where('date', '>=', now()->startOfDay()))
             ->get()
-            ->sortBy(fn($r) => $r->event->date);
+            ->sortBy(fn ($r) => $r->event->date);
 
         $assignments = $user->person->assignments()
             ->with(['event.ministry', 'position'])
-            ->whereHas('event', fn($q) => $q->where('date', '>=', now()->startOfDay()))
+            ->whereHas('event', fn ($q) => $q->where('date', '>=', now()->startOfDay()))
             ->get()
-            ->sortBy(fn($a) => $a->event->date);
+            ->sortBy(fn ($a) => $a->event->date);
 
         return view('schedule.my-schedule', compact('responsibilities', 'assignments'));
     }
@@ -841,11 +855,11 @@ class EventController extends Controller
 
         $icalContent = $calendarService->exportToIcal($church, $ministryId, $startDate, $endDate);
 
-        $filename = 'calendar-' . $church->slug . '-' . now()->format('Y-m-d') . '.ics';
+        $filename = 'calendar-'.$church->slug.'-'.now()->format('Y-m-d').'.ics';
 
         return response($icalContent)
             ->header('Content-Type', 'text/calendar; charset=utf-8')
-            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
+            ->header('Content-Disposition', 'attachment; filename="'.$filename.'"');
     }
 
     /**
@@ -853,7 +867,7 @@ class EventController extends Controller
      */
     public function importForm()
     {
-        if (!auth()->user()->canCreate('events')) {
+        if (! auth()->user()->canCreate('events')) {
             abort(403);
         }
         $church = $this->getCurrentChurch();
@@ -924,7 +938,7 @@ class EventController extends Controller
      */
     public function matrixData(Request $request)
     {
-        if (!auth()->user()->canView('events')) {
+        if (! auth()->user()->canView('events')) {
             abort(403);
         }
 
@@ -951,11 +965,11 @@ class EventController extends Controller
             ->orderBy('time')
             ->get();
 
-        $events = $rawEvents->map(fn($e) => [
+        $events = $rawEvents->map(fn ($e) => [
             'id' => $e->id,
             'title' => $e->title,
             'date' => $e->date->format('Y-m-d'),
-            'dateLabel' => $e->date->format('j') . ' ' . $monthNames[$e->date->month],
+            'dateLabel' => $e->date->format('j').' '.$monthNames[$e->date->month],
             'dayOfWeek' => mb_substr($e->date->translatedFormat('D'), 0, 2),
             'time' => $e->time?->format('H:i') ?? '',
             'ministryId' => $e->ministry_id,
@@ -985,7 +999,7 @@ class EventController extends Controller
                 $roles = $ministry->ministryRoles()
                     ->orderBy('sort_order')
                     ->get()
-                    ->map(fn($r) => [
+                    ->map(fn ($r) => [
                         'id' => $r->id,
                         'name' => $r->name,
                         'icon' => $r->icon,
@@ -996,7 +1010,7 @@ class EventController extends Controller
                 $roles = $ministry->positions()
                     ->orderBy('sort_order')
                     ->get()
-                    ->map(fn($p) => [
+                    ->map(fn ($p) => [
                         'id' => $p->id,
                         'name' => $p->name,
                         'icon' => null,
@@ -1021,7 +1035,7 @@ class EventController extends Controller
             $mKey = (string) $ministry->id;
             $grid[$mKey] = [];
             foreach ($roles as $role) {
-                $rKey = $role['type'] . '_' . $role['id'];
+                $rKey = $role['type'].'_'.$role['id'];
                 $grid[$mKey][$rKey] = [];
             }
 
@@ -1029,10 +1043,10 @@ class EventController extends Controller
             $members[$mKey] = $ministry->members()
                 ->orderBy('last_name')
                 ->get()
-                ->map(fn($m) => [
+                ->map(fn ($m) => [
                     'id' => $m->id,
                     'name' => $m->full_name,
-                    'short_name' => $m->first_name . ' ' . mb_substr($m->last_name ?? '', 0, 1) . '.',
+                    'short_name' => $m->first_name.' '.mb_substr($m->last_name ?? '', 0, 1).'.',
                     'has_telegram' => (bool) $m->telegram_chat_id,
                 ])->values()->toArray();
         }
@@ -1048,16 +1062,16 @@ class EventController extends Controller
             $seen = [];
             foreach ($teamEntries as $entry) {
                 $mKey = (string) $entry->ministry_id;
-                $rKey = 'ministry_role_' . $entry->ministry_role_id;
+                $rKey = 'ministry_role_'.$entry->ministry_role_id;
                 $eKey = (string) $entry->event_id;
-                $dedup = $mKey . '-' . $rKey . '-' . $eKey . '-' . $entry->person_id;
+                $dedup = $mKey.'-'.$rKey.'-'.$eKey.'-'.$entry->person_id;
 
-                if (isset($seen[$dedup]) || !isset($grid[$mKey][$rKey])) {
+                if (isset($seen[$dedup]) || ! isset($grid[$mKey][$rKey])) {
                     continue;
                 }
                 $seen[$dedup] = true;
 
-                if (!isset($grid[$mKey][$rKey][$eKey])) {
+                if (! isset($grid[$mKey][$rKey][$eKey])) {
                     $grid[$mKey][$rKey][$eKey] = [];
                 }
 
@@ -1066,7 +1080,7 @@ class EventController extends Controller
                     'id' => $entry->id,
                     'person_id' => $entry->person_id,
                     'person_name' => $person
-                        ? $person->first_name . ' ' . mb_substr($person->last_name ?? '', 0, 1) . '.'
+                        ? $person->first_name.' '.mb_substr($person->last_name ?? '', 0, 1).'.'
                         : '?',
                     'status' => $entry->status,
                     'has_telegram' => (bool) $person?->telegram_chat_id,
@@ -1077,31 +1091,33 @@ class EventController extends Controller
 
             // 4b. Load Assignment entries (position-based)
             $positionMinistryIds = collect($ministriesData)
-                ->filter(fn($m) => collect($m['roles'])->contains('type', 'position'))
+                ->filter(fn ($m) => collect($m['roles'])->contains('type', 'position'))
                 ->pluck('id')
                 ->toArray();
 
-            if (!empty($positionMinistryIds)) {
+            if (! empty($positionMinistryIds)) {
                 $assignments = Assignment::whereIn('event_id', $eventIds)
-                    ->whereHas('position', fn($q) => $q->whereIn('ministry_id', $positionMinistryIds))
+                    ->whereHas('position', fn ($q) => $q->whereIn('ministry_id', $positionMinistryIds))
                     ->with(['person', 'position'])
                     ->get();
 
                 foreach ($assignments as $assignment) {
                     $position = $assignment->position;
-                    if (!$position) continue;
+                    if (! $position) {
+                        continue;
+                    }
 
                     $mKey = (string) $position->ministry_id;
-                    $rKey = 'position_' . $position->id;
+                    $rKey = 'position_'.$position->id;
                     $eKey = (string) $assignment->event_id;
-                    $dedup = $mKey . '-' . $rKey . '-' . $eKey . '-' . $assignment->person_id;
+                    $dedup = $mKey.'-'.$rKey.'-'.$eKey.'-'.$assignment->person_id;
 
-                    if (isset($seen[$dedup]) || !isset($grid[$mKey][$rKey])) {
+                    if (isset($seen[$dedup]) || ! isset($grid[$mKey][$rKey])) {
                         continue;
                     }
                     $seen[$dedup] = true;
 
-                    if (!isset($grid[$mKey][$rKey][$eKey])) {
+                    if (! isset($grid[$mKey][$rKey][$eKey])) {
                         $grid[$mKey][$rKey][$eKey] = [];
                     }
 
@@ -1110,7 +1126,7 @@ class EventController extends Controller
                         'id' => $assignment->id,
                         'person_id' => $assignment->person_id,
                         'person_name' => $person
-                            ? $person->first_name . ' ' . mb_substr($person->last_name ?? '', 0, 1) . '.'
+                            ? $person->first_name.' '.mb_substr($person->last_name ?? '', 0, 1).'.'
                             : '?',
                         'status' => $assignment->status,
                         'has_telegram' => (bool) $person?->telegram_chat_id,
@@ -1122,11 +1138,11 @@ class EventController extends Controller
         }
 
         // Load cell notes (independent of person assignments)
-        $cellNotes = \App\Models\EventCellNote::where('church_id', $church->id)
+        $cellNotes = EventCellNote::where('church_id', $church->id)
             ->whereIn('event_id', $eventIds)
             ->get()
-            ->groupBy(fn($n) => $n->event_id . '_' . $n->role_type . '_' . $n->role_id)
-            ->map(fn($group) => $group->first()->notes)
+            ->groupBy(fn ($n) => $n->event_id.'_'.$n->role_type.'_'.$n->role_id)
+            ->map(fn ($group) => $group->first()->notes)
             ->toArray();
 
         // Load songs for worship ministries
@@ -1145,7 +1161,9 @@ class EventController extends Controller
 
             foreach ($songRows as $row) {
                 $eKey = (string) $row->event_id;
-                if (!isset($eventSongs[$eKey])) $eventSongs[$eKey] = [];
+                if (! isset($eventSongs[$eKey])) {
+                    $eventSongs[$eKey] = [];
+                }
                 $eventSongs[$eKey][] = [
                     'id' => $row->id,
                     'song_id' => $row->song_id,
@@ -1156,10 +1174,10 @@ class EventController extends Controller
             }
 
             // All available songs for the church
-            $availableSongs = \App\Models\Song::where('church_id', $church->id)
+            $availableSongs = Song::where('church_id', $church->id)
                 ->orderBy('title')
                 ->get(['id', 'title', 'key'])
-                ->map(fn($s) => ['id' => $s->id, 'title' => $s->title, 'key' => $s->key])
+                ->map(fn ($s) => ['id' => $s->id, 'title' => $s->title, 'key' => $s->key])
                 ->values()
                 ->toArray();
         }
@@ -1182,7 +1200,9 @@ class EventController extends Controller
             foreach ($pivotRows as $row) {
                 $eKey = (string) $row->event_id;
                 $mKey = (string) $row->ministry_id;
-                if (!isset($visibleRolesMap[$eKey])) $visibleRolesMap[$eKey] = [];
+                if (! isset($visibleRolesMap[$eKey])) {
+                    $visibleRolesMap[$eKey] = [];
+                }
                 $visibleRolesMap[$eKey][$mKey] = json_decode($row->visible_roles, true) ?: [];
             }
         }
@@ -1208,7 +1228,7 @@ class EventController extends Controller
         $notes = trim($validated['notes'] ?? '') ?: null;
 
         if ($notes) {
-            \App\Models\EventCellNote::updateOrCreate(
+            EventCellNote::updateOrCreate(
                 [
                     'event_id' => $event->id,
                     'role_type' => $validated['role_type'],
@@ -1220,7 +1240,7 @@ class EventController extends Controller
                 ]
             );
         } else {
-            \App\Models\EventCellNote::where('event_id', $event->id)
+            EventCellNote::where('event_id', $event->id)
                 ->where('role_type', $validated['role_type'])
                 ->where('role_id', $validated['role_id'])
                 ->delete();
@@ -1236,5 +1256,4 @@ class EventController extends Controller
     {
         return redirect()->route('schedule', ['tab' => 'planning']);
     }
-
 }

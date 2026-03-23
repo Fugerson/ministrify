@@ -42,7 +42,7 @@ class AdminTask extends Model
 
     public function getTypeLabelAttribute(): string
     {
-        return match($this->type) {
+        return match ($this->type) {
             'bug' => 'Баг',
             'feature' => 'Фіча',
             'improvement' => 'Покращення',
@@ -53,7 +53,7 @@ class AdminTask extends Model
 
     public function getTypeColorAttribute(): string
     {
-        return match($this->type) {
+        return match ($this->type) {
             'bug' => 'red',
             'feature' => 'green',
             'improvement' => 'blue',
@@ -64,7 +64,7 @@ class AdminTask extends Model
 
     public function getPriorityLabelAttribute(): string
     {
-        return match($this->priority) {
+        return match ($this->priority) {
             'low' => 'Низький',
             'normal' => 'Нормальний',
             'high' => 'Високий',
@@ -75,7 +75,7 @@ class AdminTask extends Model
 
     public function getPriorityColorAttribute(): string
     {
-        return match($this->priority) {
+        return match ($this->priority) {
             'low' => 'gray',
             'normal' => 'blue',
             'high' => 'yellow',
@@ -86,7 +86,7 @@ class AdminTask extends Model
 
     public function getStatusLabelAttribute(): string
     {
-        return match($this->status) {
+        return match ($this->status) {
             'backlog' => 'Беклог',
             'todo' => 'До виконання',
             'in_progress' => 'В роботі',
@@ -98,7 +98,7 @@ class AdminTask extends Model
 
     public function getStatusColorAttribute(): string
     {
-        return match($this->status) {
+        return match ($this->status) {
             'backlog' => 'gray',
             'todo' => 'blue',
             'in_progress' => 'yellow',

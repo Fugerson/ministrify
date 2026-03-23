@@ -3,16 +3,19 @@
 namespace App\Models;
 
 use App\Traits\Auditable;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Collection;
 
 class Person extends Model
 {
-    use HasFactory, SoftDeletes, Auditable;
+    use Auditable, HasFactory, SoftDeletes;
 
     /**
      * Cached computed attributes to prevent N+1 queries
@@ -23,9 +26,13 @@ class Person extends Model
 
     // Church roles
     public const ROLE_MEMBER = 'member';
+
     public const ROLE_SERVANT = 'servant';
+
     public const ROLE_DEACON = 'deacon';
+
     public const ROLE_PRESBYTER = 'presbyter';
+
     public const ROLE_PASTOR = 'pastor';
 
     public const CHURCH_ROLES = [
@@ -38,10 +45,15 @@ class Person extends Model
 
     // Membership statuses (journey from guest to church leadership)
     public const STATUS_GUEST = 'guest';
+
     public const STATUS_NEWCOMER = 'newcomer';
+
     public const STATUS_MEMBER = 'member';
+
     public const STATUS_SERVANT = 'servant';
+
     public const STATUS_LEADER = 'leader';
+
     public const STATUS_ACTIVE = 'leadership'; // renamed: was 'active', now 'leadership'
 
     public const MEMBERSHIP_STATUSES = [
@@ -55,6 +67,7 @@ class Person extends Model
 
     // Gender
     public const GENDER_MALE = 'male';
+
     public const GENDER_FEMALE = 'female';
 
     public const GENDERS = [
@@ -72,8 +85,11 @@ class Person extends Model
 
     // Marital status
     public const MARITAL_SINGLE = 'single';
+
     public const MARITAL_MARRIED = 'married';
+
     public const MARITAL_WIDOWED = 'widowed';
+
     public const MARITAL_DIVORCED = 'divorced';
 
     public const MARITAL_STATUSES = [
@@ -95,9 +111,13 @@ class Person extends Model
 
     // Age categories
     public const AGE_CHILD = 'child';        // 0-12
+
     public const AGE_TEEN = 'teen';          // 13-17
+
     public const AGE_YOUTH = 'youth';        // 18-35
+
     public const AGE_ADULT = 'adult';        // 36-59
+
     public const AGE_SENIOR = 'senior';      // 60+
 
     public const AGE_CATEGORIES = [
@@ -157,7 +177,7 @@ class Person extends Model
      */
     public static function normalizePhone(?string $phone): ?string
     {
-        if (!$phone) {
+        if (! $phone) {
             return null;
         }
 
@@ -165,7 +185,7 @@ class Person extends Model
 
         // Ukrainian: 380XXXXXXXXX (12 digits) → 0XXXXXXXXX
         if (strlen($digits) === 12 && str_starts_with($digits, '380')) {
-            return '0' . substr($digits, 3);
+            return '0'.substr($digits, 3);
         }
 
         // Local: 0XXXXXXXXX (10 digits) — already normalized
@@ -175,7 +195,7 @@ class Person extends Model
 
         // 9 digits without leading 0 → add it
         if (strlen($digits) === 9) {
-            return '0' . $digits;
+            return '0'.$digits;
         }
 
         return $digits;
@@ -183,11 +203,12 @@ class Person extends Model
 
     /**
      * Find a Person in a church by phone number (handles format differences).
-     * @param bool $unlinkedOnly If true, only find persons without user_id (for join/merge flows)
+     *
+     * @param  bool  $unlinkedOnly  If true, only find persons without user_id (for join/merge flows)
      */
     public static function findByPhoneInChurch(?string $phone, int $churchId, bool $unlinkedOnly = true): ?self
     {
-        if (!$phone) {
+        if (! $phone) {
             return null;
         }
 
@@ -206,16 +227,17 @@ class Person extends Model
             if ($unlinkedOnly) {
                 $q->whereNull('user_id');
             }
+
             return $q->first();
         }
 
         // Search all possible formats of this Ukrainian phone number
         $q = self::where('church_id', $churchId)
             ->where(function ($query) use ($core) {
-                $query->where('phone', '0' . $core)
-                      ->orWhere('phone', '+380' . $core)
-                      ->orWhere('phone', '380' . $core)
-                      ->orWhere('phone', $core);
+                $query->where('phone', '0'.$core)
+                    ->orWhere('phone', '+380'.$core)
+                    ->orWhere('phone', '380'.$core)
+                    ->orWhere('phone', $core);
             });
 
         if ($unlinkedOnly) {
@@ -335,7 +357,7 @@ class Person extends Model
 
         $records = $this->attendanceRecords()
             ->with('attendance')
-            ->whereHas('attendance', fn($q) => $q->where('date', '>=', now()->subMonths(3)))
+            ->whereHas('attendance', fn ($q) => $q->where('date', '>=', now()->subMonths(3)))
             ->get();
 
         $total = $records->count();
@@ -353,7 +375,7 @@ class Person extends Model
      * Get last attended date (memoized to prevent N+1)
      * WARNING: For collections, use Person::loadAttendanceStats($people) instead
      */
-    public function getLastAttendedAttribute(): ?\Carbon\Carbon
+    public function getLastAttendedAttribute(): ?Carbon
     {
         if (array_key_exists('last_attended', $this->computedCache)) {
             return $this->computedCache['last_attended'];
@@ -363,16 +385,18 @@ class Person extends Model
             ->where('present', true)
             ->with('attendance')
             ->get()
-            ->sortByDesc(fn($r) => $r->attendance?->date)
+            ->sortByDesc(fn ($r) => $r->attendance?->date)
             ->first()?->attendance?->date;
     }
 
     /**
      * Batch load attendance stats for a collection of people (prevents N+1)
      */
-    public static function loadAttendanceStats(\Illuminate\Support\Collection $people): void
+    public static function loadAttendanceStats(Collection $people): void
     {
-        if ($people->isEmpty()) return;
+        if ($people->isEmpty()) {
+            return;
+        }
 
         $personIds = $people->pluck('id');
         $threeMonthsAgo = now()->subMonths(3);
@@ -402,26 +426,27 @@ class Person extends Model
             ];
 
             $person->computedCache['last_attended'] = $stat->last_attended
-                ? \Carbon\Carbon::parse($stat->last_attended)
+                ? Carbon::parse($stat->last_attended)
                 : null;
         }
     }
 
     public function getMembershipDurationAttribute(): string
     {
-        if (!$this->joined_date) {
+        if (! $this->joined_date) {
             return 'Невідомо';
         }
 
         $diff = $this->joined_date->diff(now());
 
         if ($diff->y > 0) {
-            return $diff->y . ' ' . trans_choice(__('app.plural_year'), $diff->y);
+            return $diff->y.' '.trans_choice(__('app.plural_year'), $diff->y);
         }
         if ($diff->m > 0) {
-            return $diff->m . ' ' . trans_choice(__('app.plural_month'), $diff->m);
+            return $diff->m.' '.trans_choice(__('app.plural_month'), $diff->m);
         }
-        return $diff->d . ' ' . trans_choice(__('app.plural_day'), $diff->d);
+
+        return $diff->d.' '.trans_choice(__('app.plural_day'), $diff->d);
     }
 
     public function getFullNameAttribute(): string
@@ -431,7 +456,7 @@ class Person extends Model
 
     public function isAvailableOn(\DateTime $date): bool
     {
-        return !$this->unavailableDates()
+        return ! $this->unavailableDates()
             ->where('date_from', '<=', $date)
             ->where('date_to', '>=', $date)
             ->exists();
@@ -441,7 +466,7 @@ class Person extends Model
     {
         $pivot = $this->ministries()->where('ministry_id', $ministry->id)->first()?->pivot;
 
-        if (!$pivot || !$pivot->position_ids) {
+        if (! $pivot || ! $pivot->position_ids) {
             return false;
         }
 
@@ -455,22 +480,23 @@ class Person extends Model
     public function scopeSearch($query, string $search)
     {
         $search = addcslashes($search, '%_');
+
         return $query->where(function ($q) use ($search) {
             $q->where('first_name', 'like', "%{$search}%")
-              ->orWhere('last_name', 'like', "%{$search}%")
-              ->orWhere('email', 'like', "%{$search}%")
-              ->orWhere('phone', 'like', "%{$search}%");
+                ->orWhere('last_name', 'like', "%{$search}%")
+                ->orWhere('email', 'like', "%{$search}%")
+                ->orWhere('phone', 'like', "%{$search}%");
         });
     }
 
     public function scopeWithTag($query, int $tagId)
     {
-        return $query->whereHas('tags', fn($q) => $q->where('tags.id', $tagId));
+        return $query->whereHas('tags', fn ($q) => $q->where('tags.id', $tagId));
     }
 
     public function scopeInMinistry($query, int $ministryId)
     {
-        return $query->whereHas('ministries', fn($q) => $q->where('ministries.id', $ministryId));
+        return $query->whereHas('ministries', fn ($q) => $q->where('ministries.id', $ministryId));
     }
 
     /**
@@ -478,11 +504,12 @@ class Person extends Model
      */
     public function scopeAgeCategory($query, string $category)
     {
-        if (!isset(self::AGE_CATEGORIES[$category])) {
+        if (! isset(self::AGE_CATEGORIES[$category])) {
             return $query;
         }
 
         $config = self::AGE_CATEGORIES[$category];
+
         return $query->whereNotNull('birth_date')
             ->whereRaw('TIMESTAMPDIFF(YEAR, birth_date, CURDATE()) >= ?', [$config['min']])
             ->whereRaw('TIMESTAMPDIFF(YEAR, birth_date, CURDATE()) <= ?', [$config['max']]);
@@ -529,9 +556,10 @@ class Person extends Model
 
     public function getAgeAttribute(): ?int
     {
-        if (!$this->birth_date) {
+        if (! $this->birth_date) {
             return null;
         }
+
         return $this->birth_date->age;
     }
 
@@ -547,12 +575,14 @@ class Person extends Model
                 return $key;
             }
         }
+
         return null;
     }
 
     public function getAgeCategoryLabelAttribute(): ?string
     {
         $category = $this->age_category;
+
         return $category ? self::AGE_CATEGORIES[$category]['label'] : null;
     }
 
@@ -601,17 +631,19 @@ class Person extends Model
 
     public function getAnniversaryYearsAttribute(): ?int
     {
-        if (!$this->anniversary) {
+        if (! $this->anniversary) {
             return null;
         }
+
         return $this->anniversary->diffInYears(now());
     }
 
     public function getDaysSinceFirstVisitAttribute(): ?int
     {
-        if (!$this->first_visit_date) {
+        if (! $this->first_visit_date) {
             return null;
         }
+
         return $this->first_visit_date->diffInDays(now());
     }
 
@@ -728,7 +760,7 @@ class Person extends Model
      * Get all family members (combined from both sides)
      * Memoized to prevent N+1 queries
      */
-    public function getFamilyMembersAttribute(): \Illuminate\Support\Collection
+    public function getFamilyMembersAttribute(): Collection
     {
         if (isset($this->computedCache['family_members'])) {
             return $this->computedCache['family_members'];
@@ -758,7 +790,7 @@ class Person extends Model
                 ];
             });
 
-        return $this->computedCache['family_members'] = $directRelations->concat($inverseRelations)->filter(fn($item) => $item->person !== null)->unique(fn($item) => $item->person->id);
+        return $this->computedCache['family_members'] = $directRelations->concat($inverseRelations)->filter(fn ($item) => $item->person !== null)->unique(fn ($item) => $item->person->id);
     }
 
     /**
@@ -790,7 +822,7 @@ class Person extends Model
     /**
      * Get children (memoized)
      */
-    public function getChildrenAttribute(): \Illuminate\Support\Collection
+    public function getChildrenAttribute(): Collection
     {
         if (isset($this->computedCache['children'])) {
             return $this->computedCache['children'];
@@ -814,7 +846,7 @@ class Person extends Model
     /**
      * Get parents (memoized)
      */
-    public function getParentsAttribute(): \Illuminate\Support\Collection
+    public function getParentsAttribute(): Collection
     {
         if (isset($this->computedCache['parents'])) {
             return $this->computedCache['parents'];
@@ -838,7 +870,7 @@ class Person extends Model
     /**
      * Get siblings (memoized)
      */
-    public function getSiblingsAttribute(): \Illuminate\Support\Collection
+    public function getSiblingsAttribute(): Collection
     {
         if (isset($this->computedCache['siblings'])) {
             return $this->computedCache['siblings'];
@@ -879,7 +911,7 @@ class Person extends Model
         return $this->hasMany(BlockoutDate::class)->active()->upcoming();
     }
 
-    public function schedulingPreference(): \Illuminate\Database\Eloquent\Relations\HasOne
+    public function schedulingPreference(): HasOne
     {
         return $this->hasOne(SchedulingPreference::class);
     }
@@ -919,18 +951,26 @@ class Person extends Model
      */
     public function getLastScheduledLabelAttribute(): string
     {
-        if (!$this->last_scheduled_at) {
+        if (! $this->last_scheduled_at) {
             return 'Ніколи';
         }
 
         $weeks = $this->last_scheduled_at->diffInWeeks(now());
 
-        if ($weeks === 0) return 'Цього тижня';
-        if ($weeks === 1) return '1 тиж. тому';
-        if ($weeks < 4) return "+{$weeks}т";
+        if ($weeks === 0) {
+            return 'Цього тижня';
+        }
+        if ($weeks === 1) {
+            return '1 тиж. тому';
+        }
+        if ($weeks < 4) {
+            return "+{$weeks}т";
+        }
 
         $months = $this->last_scheduled_at->diffInMonths(now());
-        if ($months < 12) return "+{$months}м";
+        if ($months < 12) {
+            return "+{$months}м";
+        }
 
         return $this->last_scheduled_at->format('d.m.Y');
     }

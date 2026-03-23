@@ -20,6 +20,7 @@ trait RespondsWithJson
             if ($redirectRoute) {
                 $response['redirect_url'] = route($redirectRoute, $routeParams);
             }
+
             return response()->json($response);
         }
 

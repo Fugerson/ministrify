@@ -29,6 +29,7 @@ class GalleryController extends Controller
     public function create()
     {
         $church = $this->getChurchOrFail();
+
         return view('website-builder.gallery.create', compact('church'));
     }
 
