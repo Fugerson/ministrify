@@ -123,12 +123,20 @@ class PrivateMessageController extends Controller
             abort(403);
         }
 
-        PrivateMessage::create([
+        $pm = PrivateMessage::create([
             'church_id' => $church->id,
             'sender_id' => $currentUser->id,
             'recipient_id' => $validated['recipient_id'],
             'message' => $validated['message'],
         ]);
+
+        broadcast(new \App\Events\NewPrivateMessage(
+            recipientId: (int) $validated['recipient_id'],
+            messageId: $pm->id,
+            senderName: $currentUser->name,
+            contentPreview: \Illuminate\Support\Str::limit($validated['message'], 100),
+            createdAt: $pm->created_at->toIso8601String(),
+        ))->toOthers();
 
         return $this->successResponse($request, 'Повідомлення надіслано', 'pm.show', [$recipient]);
     }

@@ -955,6 +955,23 @@
         gtag('config', '{{ config('services.google_analytics.id') }}');
     </script>
     @endif
+
+    {{-- Laravel Echo for real-time WebSocket updates --}}
+    @auth
+    <script src="https://cdn.jsdelivr.net/npm/pusher-js@8/dist/web/pusher.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/laravel-echo@1/dist/echo.iife.js"></script>
+    <script>
+        window.Echo = new Echo({
+            broadcaster: 'reverb',
+            key: '{{ config("reverb.apps.0.key") }}',
+            wsHost: window.location.hostname,
+            wsPort: {{ config("reverb.apps.0.options.port", 8080) }},
+            wssPort: 443,
+            forceTLS: window.location.protocol === 'https:',
+            enabledTransports: ['ws', 'wss'],
+        });
+    </script>
+    @endauth
 </head>
 <body class="font-sans antialiased bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
 

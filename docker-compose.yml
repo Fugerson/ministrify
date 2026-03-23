@@ -60,6 +60,24 @@ services:
     networks:
       - ministrify
 
+  reverb:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ministrify_reverb
+    restart: unless-stopped
+    working_dir: /var/www/html
+    command: php artisan reverb:start --host=0.0.0.0 --port=8080
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/var/www/html
+    networks:
+      - ministrify
+    depends_on:
+      - app
+      - redis
+
   queue:
     build:
       context: .

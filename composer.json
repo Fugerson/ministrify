@@ -11,6 +11,7 @@
         "laravel/framework": "^11.0",
         "laravel/horizon": "^5.45",
         "laravel/pulse": "^1.7",
+        "laravel/reverb": "^1.8",
         "laravel/sanctum": "^4.0",
         "laravel/socialite": "^5.0",
         "laravel/tinker": "^2.8",

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\ResponsibilityStatusChanged;
 use App\Models\Event;
 use App\Models\EventResponsibility;
 use App\Models\Person;
@@ -111,12 +112,16 @@ class EventResponsibilityController extends Controller
             && $responsibility->event && $responsibility->event->church_id === $church->id) {
             $responsibility->confirm();
 
+            $this->broadcastStatusChange($responsibility, 'confirmed');
+
             return $this->successResponse($request, 'Ви підтвердили участь.');
         }
 
         // Or admin
         $this->authorizeChurch($responsibility->event);
         $responsibility->confirm();
+
+        $this->broadcastStatusChange($responsibility, 'confirmed');
 
         return $this->successResponse($request, 'Підтверджено.');
     }
@@ -131,12 +136,16 @@ class EventResponsibilityController extends Controller
             && $responsibility->event && $responsibility->event->church_id === $church->id) {
             $responsibility->decline();
 
+            $this->broadcastStatusChange($responsibility, 'declined');
+
             return $this->successResponse($request, 'Ви відхилили участь.');
         }
 
         // Or admin
         $this->authorizeChurch($responsibility->event);
         $responsibility->decline();
+
+        $this->broadcastStatusChange($responsibility, 'declined');
 
         return $this->successResponse($request, 'Відхилено.');
     }
@@ -223,6 +232,21 @@ class EventResponsibilityController extends Controller
             'team_members' => $teamMembers,
             'server_time' => now()->toIso8601String(),
         ]);
+    }
+
+    private function broadcastStatusChange(EventResponsibility $responsibility, string $status): void
+    {
+        if (! $responsibility->event) {
+            return;
+        }
+
+        broadcast(new ResponsibilityStatusChanged(
+            eventId: $responsibility->event_id,
+            responsibilityId: $responsibility->id,
+            personName: $responsibility->person?->full_name ?? '',
+            status: $status,
+            updatedBy: auth()->user()?->name,
+        ))->toOthers();
     }
 
     private function sendNotification(EventResponsibility $responsibility): void
