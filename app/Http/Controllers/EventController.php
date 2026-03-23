@@ -94,27 +94,34 @@ class EventController extends Controller
         $queryStart = $gridStart ?? $startDate;
         $queryEnd = $gridEnd ?? $endDate;
 
-        // Include events that span into this date range (multi-day events)
-        $events = Event::where('church_id', $church->id)
-            ->where(function ($q) use ($queryStart, $queryEnd) {
-                // Events starting in range
-                $q->whereBetween('date', [$queryStart, $queryEnd])
-                    // OR events that started before but end in/after range
+        // Extend query range to include upcoming next month events in one query
+        $extendedEnd = ($view === 'month')
+            ? $queryEnd->copy()->addDays(7)
+            : $queryEnd;
+
+        // Single query for all events in range (including upcoming)
+        $allEvents = Event::where('church_id', $church->id)
+            ->where(function ($q) use ($queryStart, $extendedEnd) {
+                $q->whereBetween('date', [$queryStart, $extendedEnd])
                     ->orWhere(function ($q2) use ($queryStart) {
                         $q2->where('date', '<', $queryStart)
                             ->whereNotNull('end_date')
                             ->where('end_date', '>=', $queryStart);
                     });
             })
-            ->with(['ministry', 'responsibilities.person'])
+            ->with(['ministry:id,name,color', 'responsibilities.person:id,first_name,last_name'])
             ->orderBy('date')
             ->orderBy('time')
             ->get();
 
+        // Split into main events and upcoming
+        $events = $allEvents->filter(fn ($e) => $e->date <= $queryEnd || ($e->end_date && $e->end_date >= $queryStart));
+
         // Get ministry meetings for the same period
-        $meetings = MinistryMeeting::whereHas('ministry', fn ($q) => $q->where('church_id', $church->id))
+        $ministryIds = $church->ministries()->pluck('id');
+        $meetings = MinistryMeeting::whereIn('ministry_id', $ministryIds)
             ->whereBetween('date', [$queryStart, $queryEnd])
-            ->with('ministry')
+            ->with('ministry:id,name,color')
             ->orderBy('date')
             ->orderBy('start_time')
             ->get();
@@ -178,12 +185,9 @@ class EventController extends Controller
             $nextMonthStart = $endDate->copy()->addDay()->startOfDay();
             $nextMonthEnd = $nextMonthStart->copy()->addDays(6)->endOfDay();
 
-            $upcomingEvents = Event::where('church_id', $church->id)
-                ->whereBetween('date', [$nextMonthStart, $nextMonthEnd])
-                ->with(['ministry', 'responsibilities.person'])
-                ->orderBy('date')
-                ->orderBy('time')
-                ->get();
+            $upcomingEvents = $allEvents->filter(
+                fn ($e) => $e->date >= $nextMonthStart && $e->date <= $nextMonthEnd
+            );
 
             foreach ($upcomingEvents as $event) {
                 $upcomingNextMonth->push((object) [
@@ -201,7 +205,7 @@ class EventController extends Controller
             }
         }
 
-        $ministries = $church->ministries;
+        $ministries = $church->ministries()->select('id', 'name', 'color')->get();
 
         // Calculate next month for display
         $nextMonth = $month == 12 ? 1 : $month + 1;
