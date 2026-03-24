@@ -17,25 +17,23 @@ class SongController extends Controller
         abort_unless(auth()->user()->canView('ministries'), 403);
         $church = $this->getCurrentChurch();
 
-        // Load all songs for client-side filtering
+        // Load all songs for client-side filtering (exclude heavy text fields)
         $songs = Song::where('church_id', $church->id)
+            ->select(['id', 'church_id', 'title', 'artist', 'key', 'bpm', 'tags', 'ccli_number', 'youtube_url', 'spotify_url', 'notes', 'resource_links', 'times_used', 'last_used_at', 'created_at', 'created_by'])
             ->orderBy('title')
             ->get();
 
-        // Get all unique tags for filter
-        $allTags = Song::where('church_id', $church->id)
-            ->whereNotNull('tags')
-            ->pluck('tags')
+        // Get all unique tags for filter (from already loaded songs, no extra query)
+        $allTags = $songs->pluck('tags')
+            ->filter()
             ->flatten()
             ->unique()
             ->sort()
             ->values();
 
-        // Get all unique artists for filter
-        $allArtists = Song::where('church_id', $church->id)
-            ->whereNotNull('artist')
-            ->where('artist', '!=', '')
-            ->pluck('artist')
+        // Get all unique artists for filter (from already loaded songs, no extra query)
+        $allArtists = $songs->pluck('artist')
+            ->filter()
             ->unique()
             ->sort()
             ->values();

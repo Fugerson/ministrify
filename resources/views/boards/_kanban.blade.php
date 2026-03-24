@@ -1427,6 +1427,7 @@ function churchBoard() {
         },
 
         async deleteCommentAttachment(comment, attIndex) {
+            if (!await confirmDialog(@js(__('messages.confirm_delete_attachment')))) return;
             try {
                 const response = await fetch(`/boards/comments/${comment.id}/attachments/${attIndex}`, {
                     method: 'DELETE',
@@ -1487,6 +1488,7 @@ function churchBoard() {
         },
 
         async deleteChecklistItem(item) {
+            if (!await confirmDialog(@js(__('messages.confirm_delete_checklist_item')))) return;
             const cardId = this.cardPanel.data.card.id;
             try {
                 await fetch(`/boards/cards/checklist/${item.id}`, {
@@ -1642,6 +1644,7 @@ function churchBoard() {
         },
 
         async removeRelatedCard(related) {
+            if (!await confirmDialog(@js(__('messages.confirm_remove_related_card')))) return;
             const cardId = this.cardPanel.data.card.id;
             try {
                 await fetch(`/boards/cards/${cardId}/related/${related.id}`, {

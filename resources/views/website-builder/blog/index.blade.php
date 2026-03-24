@@ -109,10 +109,14 @@
                     @if(auth()->user()->canEdit('website'))
                     <div class="flex gap-1">
                         @if($post->status === 'draft')
-                            <button type="button" @click="ajaxAction('{{ route('website-builder.blog.publish', $post) }}', 'POST').then(() => setTimeout(() => Livewire.navigate(window.location.href), 600))" class="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors" title="Опублікувати">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <button type="button" x-data="{ loading: false }"
+                                    @click="if(loading) return; loading = true; ajaxAction('{{ route('website-builder.blog.publish', $post) }}', 'POST').then(() => setTimeout(() => Livewire.navigate(window.location.href), 600)).catch(() => loading = false)"
+                                    :disabled="loading"
+                                    class="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors disabled:opacity-50" title="{{ __('app.ann_publish') }}">
+                                <svg x-show="!loading" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                 </svg>
+                                <svg x-show="loading" x-cloak class="animate-spin w-5 h-5" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                             </button>
                         @endif
                         <a href="{{ route('website-builder.blog.edit', $post) }}" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">

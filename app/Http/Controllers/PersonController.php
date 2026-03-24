@@ -20,6 +20,7 @@ use App\Services\ImageService;
 use App\Services\PersonMergeService;
 use App\Services\TelegramService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Password;
@@ -52,77 +53,79 @@ class PersonController extends Controller
         $ministries = $church->ministries()->with('positions')->get();
         $churchRoles = ChurchRole::where('church_id', $church->id)->orderBy('sort_order')->get();
 
-        // Calculate statistics using database aggregation (optimized)
-        $today = now();
-        $statsQuery = Person::where('church_id', $church->id)->where('membership_status', '!=', Person::STATUS_GUEST);
+        // Calculate statistics using database aggregation (cached 1 hour)
+        $stats = Cache::remember('people_stats_' . $church->id, 3600, function () use ($church, $churchRoles, $ministries) {
+            $today = now();
+            $statsQuery = Person::where('church_id', $church->id)->where('membership_status', '!=', Person::STATUS_GUEST);
 
-        // Total count (excludes guests — they belong to groups, not church members list)
-        $totalCount = (clone $statsQuery)->count();
+            // Total count (excludes guests — they belong to groups, not church members list)
+            $totalCount = (clone $statsQuery)->count();
 
-        // Age statistics - calculated at DB level
-        $ageStats = [];
-        foreach (Person::AGE_CATEGORIES as $key => $category) {
-            $count = (clone $statsQuery)->whereNotNull('birth_date')
-                ->whereRaw('TIMESTAMPDIFF(YEAR, birth_date, ?) >= ?', [$today, $category['min']])
-                ->whereRaw('TIMESTAMPDIFF(YEAR, birth_date, ?) <= ?', [$today, $category['max']])
-                ->count();
-            $ageStats[$key] = [
-                'label' => $category['label'],
-                'count' => $count,
-                'color' => $category['color'],
-            ];
-        }
-        $ageStats['unknown'] = [
-            'label' => __('messages.unknown'),
-            'count' => (clone $statsQuery)->whereNull('birth_date')->count(),
-            'color' => '#9ca3af',
-        ];
-
-        // Church role statistics - single query with groupBy
-        $roleCountsRaw = Person::where('church_id', $church->id)
-            ->selectRaw('church_role_id, COUNT(*) as count')
-            ->groupBy('church_role_id')
-            ->pluck('count', 'church_role_id');
-
-        $roleStats = [];
-        foreach ($churchRoles as $role) {
-            $roleStats[$role->id] = [
-                'label' => $role->name,
-                'count' => $roleCountsRaw[$role->id] ?? 0,
-                'color' => $role->color,
-            ];
-        }
-        // Count those without role
-        $noRoleCount = $roleCountsRaw[null] ?? $roleCountsRaw[''] ?? 0;
-        if ($noRoleCount > 0) {
-            $roleStats['none'] = [
-                'label' => __('messages.not_specified'),
-                'count' => $noRoleCount,
+            // Age statistics - calculated at DB level
+            $ageStats = [];
+            foreach (Person::AGE_CATEGORIES as $key => $category) {
+                $count = (clone $statsQuery)->whereNotNull('birth_date')
+                    ->whereRaw('TIMESTAMPDIFF(YEAR, birth_date, ?) >= ?', [$today, $category['min']])
+                    ->whereRaw('TIMESTAMPDIFF(YEAR, birth_date, ?) <= ?', [$today, $category['max']])
+                    ->count();
+                $ageStats[$key] = [
+                    'label' => $category['label'],
+                    'count' => $count,
+                    'color' => $category['color'],
+                ];
+            }
+            $ageStats['unknown'] = [
+                'label' => __('messages.unknown'),
+                'count' => (clone $statsQuery)->whereNull('birth_date')->count(),
                 'color' => '#9ca3af',
             ];
-        }
 
-        // Ministry stats - single query
-        $servingCount = \DB::table('ministry_person')
-            ->join('people', 'ministry_person.person_id', '=', 'people.id')
-            ->whereNull('people.deleted_at')
-            ->whereIn('ministry_id', $ministries->pluck('id'))
-            ->distinct('person_id')
-            ->count('person_id');
+            // Church role statistics - single query with groupBy
+            $roleCountsRaw = Person::where('church_id', $church->id)
+                ->selectRaw('church_role_id, COUNT(*) as count')
+                ->groupBy('church_role_id')
+                ->pluck('count', 'church_role_id');
 
-        // New this month - single query
-        $newThisMonth = (clone $statsQuery)
-            ->whereRaw('MONTH(COALESCE(first_visit_date, people.created_at)) = ?', [$today->month])
-            ->whereRaw('YEAR(COALESCE(first_visit_date, people.created_at)) = ?', [$today->year])
-            ->count();
+            $roleStats = [];
+            foreach ($churchRoles as $role) {
+                $roleStats[$role->id] = [
+                    'label' => $role->name,
+                    'count' => $roleCountsRaw[$role->id] ?? 0,
+                    'color' => $role->color,
+                ];
+            }
+            // Count those without role
+            $noRoleCount = $roleCountsRaw[null] ?? $roleCountsRaw[''] ?? 0;
+            if ($noRoleCount > 0) {
+                $roleStats['none'] = [
+                    'label' => __('messages.not_specified'),
+                    'count' => $noRoleCount,
+                    'color' => '#9ca3af',
+                ];
+            }
 
-        $stats = [
-            'total' => $totalCount,
-            'age' => $ageStats,
-            'roles' => $roleStats,
-            'serving' => $servingCount,
-            'new_this_month' => $newThisMonth,
-        ];
+            // Ministry stats - single query
+            $servingCount = \DB::table('ministry_person')
+                ->join('people', 'ministry_person.person_id', '=', 'people.id')
+                ->whereNull('people.deleted_at')
+                ->whereIn('ministry_id', $ministries->pluck('id'))
+                ->distinct('person_id')
+                ->count('person_id');
+
+            // New this month - single query
+            $newThisMonth = (clone $statsQuery)
+                ->whereRaw('MONTH(COALESCE(first_visit_date, people.created_at)) = ?', [$today->month])
+                ->whereRaw('YEAR(COALESCE(first_visit_date, people.created_at)) = ?', [$today->year])
+                ->count();
+
+            return [
+                'total' => $totalCount,
+                'age' => $ageStats,
+                'roles' => $roleStats,
+                'serving' => $servingCount,
+                'new_this_month' => $newThisMonth,
+            ];
+        });
 
         // Get shepherds list if feature is enabled
         $shepherds = collect();
@@ -470,6 +473,8 @@ class PersonController extends Controller
             }
         }
 
+        Cache::forget('people_stats_' . $person->church_id);
+
         broadcast(new PersonUpdated(
             churchId: $person->church_id,
             personId: $person->id,
@@ -766,6 +771,8 @@ class PersonController extends Controller
             }
         }
 
+        Cache::forget('people_stats_' . $person->church_id);
+
         broadcast(new PersonUpdated(
             churchId: $person->church_id,
             personId: $person->id,
@@ -789,6 +796,8 @@ class PersonController extends Controller
         $personId = $person->id;
 
         $person->delete();
+
+        Cache::forget('people_stats_' . $churchId);
 
         broadcast(new PersonUpdated(
             churchId: $churchId,

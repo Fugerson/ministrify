@@ -667,6 +667,7 @@ function matrixView() {
         },
 
         async removePerson(person) {
+            if (!await confirmDialog(@js(__('messages.confirm_remove_team_member')))) return;
             const { ministry, role, event } = this.dropdown;
             if (!ministry || !role || !event || this.busy) return;
             this.busy = true;

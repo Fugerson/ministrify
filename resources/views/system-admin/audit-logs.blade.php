@@ -189,15 +189,15 @@
                             {{ $log->model_name }}
                         </span>
 
-                        <!-- Church -->
+                        <!-- Church (hidden on mobile) -->
                         @if($log->church)
-                        <a href="{{ route('system.churches.show', $log->church) }}" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline bg-indigo-50 dark:bg-indigo-900/30 px-2 py-0.5 rounded">
+                        <a href="{{ route('system.churches.show', $log->church) }}" class="hidden md:inline-flex text-xs text-indigo-600 dark:text-indigo-400 hover:underline bg-indigo-50 dark:bg-indigo-900/30 px-2 py-0.5 rounded">
                             {{ $log->church->name }}
                         </a>
                         @endif
 
-                        <!-- Device & IP -->
-                        <span class="flex items-center gap-2 ml-auto">
+                        <!-- Device & IP (hidden on mobile) -->
+                        <span class="hidden md:flex items-center gap-2 ml-auto">
                             <span class="inline-flex items-center gap-1 text-[10px] text-gray-400 dark:text-gray-500" title="{{ $log->user_agent }}">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $log->device_icon }}"/></svg>
                                 {{ $log->device_label }}

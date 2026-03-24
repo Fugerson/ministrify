@@ -3,12 +3,19 @@
 @section('title', __('app.rotation_title'))
 
 @section('content')
-<div class="space-y-6">
+<div x-data="{ search: '' }" class="space-y-6">
     <!-- Header -->
     <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
             <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('app.rotation_title') }}</h1>
             <p class="text-gray-500 dark:text-gray-400 mt-1">{{ __('app.rotation_subtitle') }}</p>
+        </div>
+        <div class="relative">
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+            <input type="text" x-model="search" placeholder="{{ __('app.search') }}..."
+                   class="pl-10 pr-4 py-2 w-full sm:w-64 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
         </div>
     </div>
 
@@ -46,7 +53,8 @@
     <!-- Ministries Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         @forelse($ministries as $ministry)
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div x-show="!search || {{ Js::from(mb_strtolower($ministry->name)) }}.includes(search.toLowerCase())"
+             class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
             <div class="p-5">
                 <div class="flex items-center gap-3 mb-4">
                     <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background-color: {{ $ministry->color ?? '#3b82f6' }}30;">

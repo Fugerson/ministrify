@@ -300,6 +300,7 @@ function checklistManager(eventId, hasChecklistInitial) {
         },
 
         async deleteItem(item) {
+            if (!await confirmDialog(@js(__('messages.confirm_delete_checklist_item')))) return;
             try {
                 const response = await fetch(`/checklists/items/${item.id}`, {
                     method: 'DELETE',

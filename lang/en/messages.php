@@ -232,6 +232,9 @@ return [
     'confirm_auto_assign' => 'Run auto-assignment for all events for 4 weeks?',
     'confirm_unsubscribe' => 'Unsubscribe from this role?',
     'confirm_delete_project' => 'Delete project ":name"? All tasks will be deleted.',
+    'confirm_delete_checklist_item' => 'Delete this checklist item?',
+    'confirm_delete_attachment' => 'Delete this attachment?',
+    'confirm_remove_related_card' => 'Remove related card?',
     'saving' => 'Saving...',
 
     // Other

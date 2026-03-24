@@ -1294,6 +1294,7 @@ function servicePlanningMatrix() {
         },
 
         async selfUnsubscribe(person) {
+            if (!await confirmDialog(@js(__('messages.confirm_unsubscribe')))) return;
             const { ministry, role, event } = this.dropdown;
             if (!ministry || !event || this.busy) return;
             this.busy = true;
@@ -1457,6 +1458,7 @@ function servicePlanningMatrix() {
         },
 
         async removePerson(person) {
+            if (!await confirmDialog(@js(__('messages.confirm_remove_team_member')))) return;
             const { ministry, role, event } = this.dropdown;
             if (!ministry || !role || !event || this.busy) return;
             this.busy = true;
@@ -1578,6 +1580,7 @@ function servicePlanningMatrix() {
         },
 
         async removeSongFromEvent(song) {
+            if (!await confirmDialog(@js(__('messages.confirm_remove_song')))) return;
             const event = this.songDropdown.event;
             if (!event || this.busy) return;
             this.busy = true;

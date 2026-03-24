@@ -882,6 +882,7 @@
                                 },
 
                                 async removeSong(songId) {
+                                    if (!await confirmDialog(@js(__('messages.confirm_remove_song')))) return;
                                     try {
                                         const response = await fetch(this.modalRoutes.addSong.replace('/songs', '/songs/' + songId), {
                                             method: 'DELETE',
@@ -1003,6 +1004,7 @@
                                 },
 
                                 async removeTeamMember(memberId) {
+                                    if (!await confirmDialog(@js(__('messages.confirm_remove_team_member')))) return;
                                     try {
                                         const response = await fetch(this.modalRoutes.addTeam.replace('/worship-team', '/worship-team/' + memberId), {
                                             method: 'DELETE',
@@ -1270,6 +1272,7 @@
                                 },
 
                                 async gridRemove(eventId, memberId, roleId) {
+                                    if (!await confirmDialog(@js(__('messages.confirm_remove_team_member')))) return;
                                     try {
                                         const response = await fetch('/events/' + eventId + '/ministry-team/' + memberId, {
                                             method: 'DELETE',

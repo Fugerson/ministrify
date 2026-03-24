@@ -231,6 +231,9 @@ return [
     'confirm_auto_assign' => 'Запустити авто-розподіл для всіх подій на 4 тижні?',
     'confirm_unsubscribe' => 'Відписатися від цієї ролі?',
     'confirm_delete_project' => 'Видалити проєкт ":name"? Всі завдання будуть видалені.',
+    'confirm_delete_checklist_item' => 'Видалити цей пункт чеклісту?',
+    'confirm_delete_attachment' => 'Видалити цей файл?',
+    'confirm_remove_related_card' => 'Прибрати пов\'язану картку?',
     'saving' => 'Збереження...',
 
     // Other

@@ -20,6 +20,7 @@ use App\Rules\BelongsToChurch;
 use App\Services\ImageService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class FinanceController extends Controller
@@ -65,92 +66,116 @@ class FinanceController extends Controller
             ->value('total') ?? 0;
         $periodBalance = $totalIncome - $totalExpense;
 
-        // Overall balance (includes initial balance) - all in UAH
-        $initialBalanceDate = $church->initial_balance_date;
-
-        // Calculate initial balance total in UAH (including foreign currencies at current rate)
-        $allInitialBalances = $church->getAllInitialBalances();
-        $initialBalance = 0;
-        foreach ($allInitialBalances as $currency => $amount) {
-            if ($currency === 'UAH') {
-                $initialBalance += $amount;
-            } else {
-                $initialBalance += ExchangeRate::toUah($amount, $currency, $initialBalanceDate);
+        // Overall balance (includes initial balance) - all in UAH (cached 5 min)
+        $allTimeTotals = Cache::remember('finance_alltime_' . $church->id, 300, function () use ($church, $excludeTypes) {
+            $initialBalanceDate = $church->initial_balance_date;
+            $allInitialBalances = $church->getAllInitialBalances();
+            $initialBalance = 0;
+            foreach ($allInitialBalances as $currency => $amount) {
+                if ($currency === 'UAH') {
+                    $initialBalance += $amount;
+                } else {
+                    $initialBalance += ExchangeRate::toUah($amount, $currency, $initialBalanceDate);
+                }
             }
-        }
-        $allTimeIncome = Transaction::where('church_id', $church->id)->incoming()->completed()
-            ->whereNotIn('source_type', $excludeTypes)
-            ->selectRaw('COALESCE(SUM(COALESCE(amount_uah, amount)), 0) as total')
-            ->value('total') ?? 0;
-        $allTimeExpense = Transaction::where('church_id', $church->id)->outgoing()->completed()
-            ->whereNotIn('source_type', $excludeTypes)
-            ->selectRaw('COALESCE(SUM(COALESCE(amount_uah, amount)), 0) as total')
-            ->value('total') ?? 0;
+            $allTimeIncome = Transaction::where('church_id', $church->id)->incoming()->completed()
+                ->whereNotIn('source_type', $excludeTypes)
+                ->selectRaw('COALESCE(SUM(COALESCE(amount_uah, amount)), 0) as total')
+                ->value('total') ?? 0;
+            $allTimeExpense = Transaction::where('church_id', $church->id)->outgoing()->completed()
+                ->whereNotIn('source_type', $excludeTypes)
+                ->selectRaw('COALESCE(SUM(COALESCE(amount_uah, amount)), 0) as total')
+                ->value('total') ?? 0;
+
+            // Calculate "committed to teams" — unspent allocation balances per ministry
+            $allocationsByMinistryAll = Transaction::where('church_id', $church->id)
+                ->where('direction', Transaction::DIRECTION_IN)
+                ->where('source_type', Transaction::SOURCE_ALLOCATION)
+                ->completed()
+                ->whereNotNull('ministry_id')
+                ->selectRaw('ministry_id, SUM(COALESCE(amount_uah, amount)) as total')
+                ->groupBy('ministry_id')
+                ->pluck('total', 'ministry_id');
+
+            $spentByMinistryAll = Transaction::where('church_id', $church->id)
+                ->where('direction', Transaction::DIRECTION_OUT)
+                ->whereNotIn('source_type', $excludeTypes)
+                ->completed()
+                ->whereNotNull('ministry_id')
+                ->selectRaw('ministry_id, SUM(COALESCE(amount_uah, amount)) as total')
+                ->groupBy('ministry_id')
+                ->pluck('total', 'ministry_id');
+
+            $committedToTeams = 0;
+            foreach ($allocationsByMinistryAll as $ministryId => $allocated) {
+                $spent = $spentByMinistryAll[$ministryId] ?? 0;
+                $unspent = max(0, (float) $allocated - (float) $spent);
+                $committedToTeams += $unspent;
+            }
+
+            return [
+                'initialBalance' => $initialBalance,
+                'initialBalanceDate' => $initialBalanceDate,
+                'allTimeIncome' => $allTimeIncome,
+                'allTimeExpense' => $allTimeExpense,
+                'committedToTeams' => $committedToTeams,
+            ];
+        });
+
+        $initialBalance = $allTimeTotals['initialBalance'];
+        $initialBalanceDate = $allTimeTotals['initialBalanceDate'];
+        $allTimeIncome = $allTimeTotals['allTimeIncome'];
+        $allTimeExpense = $allTimeTotals['allTimeExpense'];
+        $committedToTeams = $allTimeTotals['committedToTeams'];
         $currentBalance = $initialBalance + $allTimeIncome - $allTimeExpense;
-
-        // Calculate "committed to teams" — unspent allocation balances per ministry
-        $allocationsByMinistryAll = Transaction::where('church_id', $church->id)
-            ->where('direction', Transaction::DIRECTION_IN)
-            ->where('source_type', Transaction::SOURCE_ALLOCATION)
-            ->completed()
-            ->whereNotNull('ministry_id')
-            ->selectRaw('ministry_id, SUM(COALESCE(amount_uah, amount)) as total')
-            ->groupBy('ministry_id')
-            ->pluck('total', 'ministry_id');
-
-        $spentByMinistryAll = Transaction::where('church_id', $church->id)
-            ->where('direction', Transaction::DIRECTION_OUT)
-            ->whereNotIn('source_type', $excludeTypes)
-            ->completed()
-            ->whereNotNull('ministry_id')
-            ->selectRaw('ministry_id, SUM(COALESCE(amount_uah, amount)) as total')
-            ->groupBy('ministry_id')
-            ->pluck('total', 'ministry_id');
-
-        $committedToTeams = 0;
-        foreach ($allocationsByMinistryAll as $ministryId => $allocated) {
-            $spent = $spentByMinistryAll[$ministryId] ?? 0;
-            $unspent = max(0, (float) $allocated - (float) $spent);
-            $committedToTeams += $unspent;
-        }
         $availableBalance = $currentBalance - $committedToTeams;
 
-        // Calculate balances per currency (all time)
-        // INCLUDE exchange transactions (they track real currency movement EUR→UAH)
-        // EXCLUDE only allocation (internal budget transfers, not real money movement)
+        // Calculate balances per currency (all time, cached 5 min)
         $currencyExcludeTypes = [Transaction::SOURCE_ALLOCATION];
-        $allTimeIncomeByCurrency = Transaction::where('church_id', $church->id)
-            ->incoming()->completed()
-            ->whereNotIn('source_type', $currencyExcludeTypes)
-            ->selectRaw('COALESCE(currency, "UAH") as currency, SUM(amount) as total')
-            ->groupBy('currency')
-            ->pluck('total', 'currency')
-            ->toArray();
+        $currencyTotals = Cache::remember('finance_currency_' . $church->id, 300, function () use ($church, $currencyExcludeTypes) {
+            $allTimeIncomeByCurrency = Transaction::where('church_id', $church->id)
+                ->incoming()->completed()
+                ->whereNotIn('source_type', $currencyExcludeTypes)
+                ->selectRaw('COALESCE(currency, "UAH") as currency, SUM(amount) as total')
+                ->groupBy('currency')
+                ->pluck('total', 'currency')
+                ->toArray();
 
-        $allTimeExpenseByCurrency = Transaction::where('church_id', $church->id)
-            ->outgoing()->completed()
-            ->whereNotIn('source_type', $currencyExcludeTypes)
-            ->selectRaw('COALESCE(currency, "UAH") as currency, SUM(amount) as total')
-            ->groupBy('currency')
-            ->pluck('total', 'currency')
-            ->toArray();
+            $allTimeExpenseByCurrency = Transaction::where('church_id', $church->id)
+                ->outgoing()->completed()
+                ->whereNotIn('source_type', $currencyExcludeTypes)
+                ->selectRaw('COALESCE(currency, "UAH") as currency, SUM(amount) as total')
+                ->groupBy('currency')
+                ->pluck('total', 'currency')
+                ->toArray();
 
-        // Get initial balances per currency
-        $initialBalances = $church->getAllInitialBalances();
+            $initialBalances = $church->getAllInitialBalances();
 
-        // Calculate balance per currency
-        $balancesByCurrency = [];
-        $allCurrencies = array_unique(array_merge(
-            array_keys($allTimeIncomeByCurrency),
-            array_keys($allTimeExpenseByCurrency),
-            array_keys($initialBalances)
-        ));
-        foreach ($allCurrencies as $curr) {
-            $initialBal = $initialBalances[$curr] ?? 0;
-            $income = $allTimeIncomeByCurrency[$curr] ?? 0;
-            $expense = $allTimeExpenseByCurrency[$curr] ?? 0;
-            $balancesByCurrency[$curr] = $initialBal + $income - $expense;
-        }
+            $balancesByCurrency = [];
+            $allCurrencies = array_unique(array_merge(
+                array_keys($allTimeIncomeByCurrency),
+                array_keys($allTimeExpenseByCurrency),
+                array_keys($initialBalances)
+            ));
+            foreach ($allCurrencies as $curr) {
+                $initialBal = $initialBalances[$curr] ?? 0;
+                $income = $allTimeIncomeByCurrency[$curr] ?? 0;
+                $expense = $allTimeExpenseByCurrency[$curr] ?? 0;
+                $balancesByCurrency[$curr] = $initialBal + $income - $expense;
+            }
+
+            return [
+                'allTimeIncomeByCurrency' => $allTimeIncomeByCurrency,
+                'allTimeExpenseByCurrency' => $allTimeExpenseByCurrency,
+                'initialBalances' => $initialBalances,
+                'balancesByCurrency' => $balancesByCurrency,
+            ];
+        });
+
+        $allTimeIncomeByCurrency = $currencyTotals['allTimeIncomeByCurrency'];
+        $allTimeExpenseByCurrency = $currencyTotals['allTimeExpenseByCurrency'];
+        $initialBalances = $currencyTotals['initialBalances'];
+        $balancesByCurrency = $currencyTotals['balancesByCurrency'];
 
         // Get balances by currency for the period (include exchange for proper currency tracking)
         $incomeQueryForCurrency = Transaction::where('church_id', $church->id)->incoming()->completed()
@@ -600,6 +625,8 @@ class FinanceController extends Controller
             'recorded_by' => auth()->id(),
         ]);
 
+        $this->clearFinanceCache($church->id);
+
         broadcast(new TransactionCreated(
             churchId: $church->id,
             type: 'income',
@@ -706,6 +733,8 @@ class FinanceController extends Controller
 
         $transaction->update($validated);
 
+        $this->clearFinanceCache($transaction->church_id);
+
         broadcast(new ChurchDataUpdated($transaction->church_id, 'finances', 'updated'))->toOthers();
         broadcast(new ChurchDataUpdated($transaction->church_id, 'dashboard', 'updated'))->toOthers();
 
@@ -723,6 +752,8 @@ class FinanceController extends Controller
         }
 
         $transaction->delete();
+
+        $this->clearFinanceCache($transaction->church_id);
 
         broadcast(new ChurchDataUpdated($transaction->church_id, 'finances', 'deleted'))->toOthers();
         broadcast(new ChurchDataUpdated($transaction->church_id, 'dashboard', 'updated'))->toOthers();
@@ -857,6 +888,8 @@ class FinanceController extends Controller
         if ($budgetWarning) {
             $message .= ' '.$budgetWarning;
         }
+
+        $this->clearFinanceCache($church->id);
 
         broadcast(new TransactionCreated(
             churchId: $church->id,
@@ -1035,6 +1068,8 @@ class FinanceController extends Controller
         $routeName = $redirectToMinistry ? 'ministries.show' : 'finances.transactions';
         $routeParams = $redirectToMinistry ? ['ministry' => $request->input('redirect_ministry_id'), 'tab' => 'expenses'] : ['filter' => 'expense'];
 
+        $this->clearFinanceCache($transaction->church_id);
+
         broadcast(new ChurchDataUpdated($transaction->church_id, 'finances', 'updated'))->toOthers();
         broadcast(new ChurchDataUpdated($transaction->church_id, 'dashboard', 'updated'))->toOthers();
 
@@ -1054,6 +1089,8 @@ class FinanceController extends Controller
         $ministryId = $transaction->ministry_id;
         $churchId = $transaction->church_id;
         $transaction->delete();
+
+        $this->clearFinanceCache($churchId);
 
         broadcast(new ChurchDataUpdated($churchId, 'finances', 'deleted'))->toOthers();
         broadcast(new ChurchDataUpdated($churchId, 'dashboard', 'updated'))->toOthers();
@@ -1131,6 +1168,8 @@ class FinanceController extends Controller
             // Link back
             $outTransaction->update(['related_transaction_id' => $inTransaction->id]);
         });
+
+        $this->clearFinanceCache($church->id);
 
         broadcast(new ChurchDataUpdated($church->id, 'finances', 'exchange'))->toOthers();
         broadcast(new ChurchDataUpdated($church->id, 'dashboard', 'updated'))->toOthers();
@@ -2100,6 +2139,15 @@ class FinanceController extends Controller
         }
 
         return $years;
+    }
+
+    /**
+     * Clear cached finance dashboard data for a church.
+     */
+    private function clearFinanceCache(int $churchId): void
+    {
+        Cache::forget('finance_alltime_' . $churchId);
+        Cache::forget('finance_currency_' . $churchId);
     }
 
     private function getYearComparison(int $churchId, int $year): array

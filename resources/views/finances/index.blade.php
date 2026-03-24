@@ -12,13 +12,13 @@
         <div class="flex flex-wrap items-center justify-between gap-4">
             <div class="flex items-center space-x-2">
                 <select x-model="selectedYear" @change="updatePeriod()"
-                        class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                        class="px-3 py-2 min-h-[44px] border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
                     @for($y = now()->year; $y >= now()->year - 5; $y--)
                         <option value="{{ $y }}" {{ $year == $y ? 'selected' : '' }}>{{ $y }}</option>
                     @endfor
                 </select>
                 <select x-model="selectedMonth" @change="updatePeriod()"
-                        class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
+                        class="px-3 py-2 min-h-[44px] border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500">
                     <option value="" {{ empty($month) ? 'selected' : '' }}>{{ __('app.all_year') }}</option>
                     <option value="1" {{ $month == 1 ? 'selected' : '' }}>{{ __('app.january') }}</option>
                     <option value="2" {{ $month == 2 ? 'selected' : '' }}>{{ __('app.february') }}</option>
@@ -37,7 +37,7 @@
             <!-- Link to transactions -->
             @if(auth()->user()->canCreate('finances'))
             <a href="{{ route('finances.transactions') }}"
-               class="inline-flex items-center px-3 sm:px-4 py-2 text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 transition-colors whitespace-nowrap">
+               class="inline-flex items-center px-3 sm:px-4 py-2 min-h-[44px] text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 transition-colors whitespace-nowrap">
                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
@@ -240,13 +240,13 @@
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white" x-text="chartTitle">{{ __('app.chart_dynamics', ['year' => $year]) }}</h3>
             <div class="flex rounded-lg bg-gray-100 dark:bg-gray-700 p-0.5 overflow-x-auto">
                 <button @click="switchChartPeriod('month')" :class="chartPeriod === 'month' ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'"
-                    class="px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium rounded-md transition-all whitespace-nowrap flex-shrink-0">{{ __('app.period_month') }}</button>
+                    class="px-2 sm:px-3 py-2 min-h-[44px] text-xs sm:text-sm font-medium rounded-md transition-all whitespace-nowrap flex-shrink-0">{{ __('app.period_month') }}</button>
                 <button @click="switchChartPeriod('quarter')" :class="chartPeriod === 'quarter' ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'"
-                    class="px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium rounded-md transition-all whitespace-nowrap flex-shrink-0">{{ __('app.period_quarter') }}</button>
+                    class="px-2 sm:px-3 py-2 min-h-[44px] text-xs sm:text-sm font-medium rounded-md transition-all whitespace-nowrap flex-shrink-0">{{ __('app.period_quarter') }}</button>
                 <button @click="switchChartPeriod('year')" :class="chartPeriod === 'year' ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'"
-                    class="px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium rounded-md transition-all whitespace-nowrap flex-shrink-0">{{ __('app.period_year') }}</button>
+                    class="px-2 sm:px-3 py-2 min-h-[44px] text-xs sm:text-sm font-medium rounded-md transition-all whitespace-nowrap flex-shrink-0">{{ __('app.period_year') }}</button>
                 <button @click="switchChartPeriod('all')" :class="chartPeriod === 'all' ? 'bg-white dark:bg-gray-600 shadow-sm text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'"
-                    class="px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium rounded-md transition-all whitespace-nowrap flex-shrink-0">{{ __('app.period_all_time') }}</button>
+                    class="px-2 sm:px-3 py-2 min-h-[44px] text-xs sm:text-sm font-medium rounded-md transition-all whitespace-nowrap flex-shrink-0">{{ __('app.period_all_time') }}</button>
             </div>
         </div>
         <div class="h-64 relative">

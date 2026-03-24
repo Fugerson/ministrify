@@ -57,11 +57,10 @@ class RotationController extends Controller
             ->orderBy('date')
             ->get();
 
-        // Get members (positions are stored in pivot table)
-        $members = $ministry->members()->get();
-
-        // Get all positions for this ministry for display
-        $positions = $ministry->positions()->get()->keyBy('id');
+        // Eager load members and positions in fewer queries
+        $ministry->load(['members', 'positions']);
+        $members = $ministry->members;
+        $positions = $ministry->positions->keyBy('id');
 
         // Get rotation report for last 3 months
         $rotationService = new RotationService($church);
@@ -211,11 +210,12 @@ class RotationController extends Controller
         $rotationService = new RotationService($church);
 
         // Get candidates for each position
+        $event->load(['ministry.positions', 'assignments']);
         $ministry = $event->ministry;
         if (! $ministry) {
             return response()->json(['preview' => [], 'message' => 'Подія без служіння']);
         }
-        $positions = $ministry->positions()->get();
+        $positions = $ministry->positions;
 
         $preview = [];
 

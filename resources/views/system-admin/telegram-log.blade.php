@@ -79,10 +79,10 @@
                 <input type="date" x-model="filters.to" @change="applyFiltersNow()"
                        class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
             </div>
-            <button @click="applyFiltersNow()" class="px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+            <button @click="applyFiltersNow()" class="px-4 py-2 min-h-[44px] text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
                 Filter
             </button>
-            <button @click="resetFilters()" x-show="Object.values(filters).some(v => v)" class="px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+            <button @click="resetFilters()" x-show="Object.values(filters).some(v => v)" class="px-4 py-2 min-h-[44px] text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
                 Clear
             </button>
         </div>
@@ -122,9 +122,9 @@
                     <tr>
                         <th class="px-4 py-3 text-left">Time</th>
                         <th class="px-4 py-3 text-left">Direction</th>
-                        <th class="px-4 py-3 text-left">Church</th>
+                        <th class="px-4 py-3 text-left hidden md:table-cell">Church</th>
                         <th class="px-4 py-3 text-left">Person</th>
-                        <th class="px-4 py-3 text-left">Message</th>
+                        <th class="px-4 py-3 text-left hidden sm:table-cell">Message</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -146,13 +146,13 @@
                                 </span>
                             @endif
                         </td>
-                        <td class="px-4 py-3 whitespace-nowrap text-gray-700 dark:text-gray-300">
+                        <td class="px-4 py-3 whitespace-nowrap text-gray-700 dark:text-gray-300 hidden md:table-cell">
                             {{ $msg->church?->name ?? '—' }}
                         </td>
                         <td class="px-4 py-3 whitespace-nowrap">
                             <span class="text-gray-900 dark:text-white font-medium">{{ $msg->person?->full_name ?? '—' }}</span>
                         </td>
-                        <td class="px-4 py-3">
+                        <td class="px-4 py-3 hidden sm:table-cell">
                             <div class="max-w-md text-gray-700 dark:text-gray-300 whitespace-pre-line text-xs leading-relaxed" x-data="{ expanded: false }">
                                 <div :class="expanded ? '' : 'line-clamp-3'">{{ $msg->message }}</div>
                                 @if(mb_strlen($msg->message) > 200)

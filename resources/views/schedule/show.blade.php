@@ -161,7 +161,7 @@
                     ? \App\Models\Event::where('parent_event_id', $event->parent_event_id)->count() + 1
                     : $event->childEvents()->count() + 1;
             @endphp
-            <div x-data="{ showDeleteModal: false }" class="inline-flex">
+            <div x-data="{ showDeleteModal: false, deleting: false }" class="inline-flex">
                 <button type="button" @click="showDeleteModal = true" title="{{ __('app.schedule_delete_event') }}"
                         class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 rounded-lg transition-colors">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -190,13 +190,15 @@
                                 @if($hasRelatedEvents)
                                     <p class="mt-2 text-sm text-gray-500 dark:text-gray-400 text-center">{{ __('app.schedule_series_part', ['count' => $relatedCount]) }}</p>
                                     <div class="mt-6 space-y-3">
-                                        <button type="button" @click="ajaxAction('{{ route('events.destroy', $event) }}', 'DELETE', { delete_series: 0 }).then(() => setTimeout(() => Livewire.navigate('{{ route('schedule') }}'), 600))"
-                                                class="w-full px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors text-left">
+                                        <button type="button" :disabled="deleting"
+                                                @click="if(deleting) return; deleting = true; ajaxAction('{{ route('events.destroy', $event) }}', 'DELETE', { delete_series: 0 }).then(() => setTimeout(() => Livewire.navigate('{{ route('schedule') }}'), 600)).catch(() => deleting = false)"
+                                                class="w-full px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors text-left disabled:opacity-50">
                                             <div class="font-medium">{{ __('app.schedule_only_this') }}</div>
                                             <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ __('app.schedule_others_remain') }}</div>
                                         </button>
-                                        <button type="button" @click="ajaxAction('{{ route('events.destroy', $event) }}', 'DELETE', { delete_series: 1 }).then(() => setTimeout(() => Livewire.navigate('{{ route('schedule') }}'), 600))"
-                                                class="w-full px-4 py-3 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors text-left">
+                                        <button type="button" :disabled="deleting"
+                                                @click="if(deleting) return; deleting = true; ajaxAction('{{ route('events.destroy', $event) }}', 'DELETE', { delete_series: 1 }).then(() => setTimeout(() => Livewire.navigate('{{ route('schedule') }}'), 600)).catch(() => deleting = false)"
+                                                class="w-full px-4 py-3 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors text-left disabled:opacity-50">
                                             <div class="font-medium">{{ __('app.schedule_whole_series', ['count' => $relatedCount]) }}</div>
                                             <div class="text-xs text-red-200 mt-0.5">{{ __('app.schedule_delete_all_related') }}</div>
                                         </button>
@@ -207,9 +209,15 @@
                                 @else
                                     <p class="mt-2 text-sm text-gray-500 dark:text-gray-400 text-center">{{ __('app.schedule_confirm_delete') }}</p>
                                     <div class="mt-6 flex justify-center space-x-3">
-                                        <button type="button" @click="showDeleteModal = false" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors">{{ __('app.schedule_cancel') }}</button>
-                                        <button type="button" @click="ajaxAction('{{ route('events.destroy', $event) }}', 'DELETE').then(() => setTimeout(() => Livewire.navigate('{{ route('schedule') }}'), 600))"
-                                                class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors">{{ __('app.schedule_delete_btn') }}</button>
+                                        <button type="button" @click="showDeleteModal = false" :disabled="deleting" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors disabled:opacity-50">{{ __('app.schedule_cancel') }}</button>
+                                        <button type="button" :disabled="deleting"
+                                                @click="if(deleting) return; deleting = true; ajaxAction('{{ route('events.destroy', $event) }}', 'DELETE').then(() => setTimeout(() => Livewire.navigate('{{ route('schedule') }}'), 600)).catch(() => deleting = false)"
+                                                class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors disabled:opacity-50">
+                                            <span x-show="!deleting">{{ __('app.schedule_delete_btn') }}</span>
+                                            <span x-show="deleting" x-cloak class="flex items-center gap-2">
+                                                <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                            </span>
+                                        </button>
                                     </div>
                                 @endif
                             </div>
@@ -2001,6 +2009,7 @@ function eventTeamManager() {
         },
 
         async removePerson(person, ministryId, roleId) {
+            if (!await confirmDialog(@js(__('messages.confirm_remove_team_member')))) return;
             if (this.busy) return;
             this.busy = true;
             try {
@@ -2161,6 +2170,7 @@ function eventTeamManager() {
         },
 
         async removeSongFromEvent(song) {
+            if (!await confirmDialog(@js(__('messages.confirm_remove_song')))) return;
             if (this.busy) return;
             this.busy = true;
             try {
