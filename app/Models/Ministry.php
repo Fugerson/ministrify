@@ -20,9 +20,11 @@ class Ministry extends Model
         // Auto-add leader as member when leader_id is set/changed
         static::saved(function (Ministry $ministry) {
             if ($ministry->leader_id && $ministry->wasChanged('leader_id')) {
-                $ministry->members()->syncWithoutDetaching([
-                    $ministry->leader_id => ['role' => 'leader'],
-                ]);
+                if ($ministry->members()->where('people.id', $ministry->leader_id)->exists()) {
+                    $ministry->members()->updateExistingPivot($ministry->leader_id, ['role' => 'leader']);
+                } else {
+                    $ministry->members()->attach($ministry->leader_id, ['role' => 'leader', 'joined_at' => now()]);
+                }
             }
         });
     }

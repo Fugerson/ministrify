@@ -4,11 +4,11 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between mb-8">
             <div>
-                <h2 class="text-3xl font-bold text-gray-900">Найближчі події</h2>
-                <p class="text-gray-600 mt-1">Приєднуйтесь до нас</p>
+                <h2 class="text-3xl font-bold text-gray-900">{{ __('app.upcoming_events_title') }}</h2>
+                <p class="text-gray-600 mt-1">{{ __('app.join_us') }}</p>
             </div>
             <a href="{{ route('public.events', $church->slug) }}" class="text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1">
-                Всі події
+                {{ __('app.all_events') }}
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                 </svg>
@@ -47,7 +47,7 @@
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                                     </svg>
-                                    Реєстрація відкрита
+                                    {{ __('app.registration_open') }}
                                 </span>
                             </div>
                         @endif
@@ -61,8 +61,8 @@
 <section class="py-16 opacity-60">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-8">
-            <h2 class="text-3xl font-bold text-gray-900">Найближчі події</h2>
-            <p class="text-sm text-amber-600 mt-2">Створіть публічні події в розділі Розклад</p>
+            <h2 class="text-3xl font-bold text-gray-900">{{ __('app.upcoming_events_title') }}</h2>
+            <p class="text-sm text-amber-600 mt-2">{{ __('app.create_public_events_hint') }}</p>
         </div>
     </div>
 </section>

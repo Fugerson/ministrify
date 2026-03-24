@@ -21,9 +21,11 @@ class Group extends Model
         // Auto-add leader as member when leader_id is set/changed
         static::saved(function (Group $group) {
             if ($group->leader_id && $group->wasChanged('leader_id')) {
-                $group->members()->syncWithoutDetaching([
-                    $group->leader_id => ['role' => 'leader'],
-                ]);
+                if ($group->members()->where('people.id', $group->leader_id)->exists()) {
+                    $group->members()->updateExistingPivot($group->leader_id, ['role' => 'leader']);
+                } else {
+                    $group->members()->attach($group->leader_id, ['role' => 'leader', 'joined_at' => now()]);
+                }
             }
         });
     }

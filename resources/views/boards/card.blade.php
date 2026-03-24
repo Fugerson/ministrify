@@ -347,7 +347,7 @@ function _cardAddComment(ctx) {
         var el = document.createElement('div');
         el.className = 'flex gap-3 group';
         el.setAttribute('data-comment', '');
-        el.innerHTML = '<div class="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center flex-shrink-0"><span class="text-primary-600 dark:text-primary-400 text-sm font-medium">{{ mb_substr(auth()->user()->name, 0, 1) }}</span></div><div class="flex-1"><div class="flex items-center gap-2"><span class="font-medium text-gray-900 dark:text-white text-sm">{{ auth()->user()->name }}</span><span class="text-xs text-gray-500 dark:text-gray-400">щойно</span></div><p class="text-gray-600 dark:text-gray-300 text-sm mt-1">' + safe + '</p></div>';
+        el.innerHTML = '<div class="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center flex-shrink-0"><span class="text-primary-600 dark:text-primary-400 text-sm font-medium">{{ mb_substr(auth()->user()->name, 0, 1) }}</span></div><div class="flex-1"><div class="flex items-center gap-2"><span class="font-medium text-gray-900 dark:text-white text-sm">{{ auth()->user()->name }}</span><span class="text-xs text-gray-500 dark:text-gray-400">{{ __('app.just_now') }}</span></div><p class="text-gray-600 dark:text-gray-300 text-sm mt-1">' + safe + '</p></div>';
         list.appendChild(el);
     }
 }

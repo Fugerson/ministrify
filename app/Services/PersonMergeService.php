@@ -351,10 +351,28 @@ class PersonMergeService
                 ->where('leader_id', $secondary->id)
                 ->update(['leader_id' => $primary->id]);
 
+            // Ensure new leader is also a member in each affected group
+            $affectedGroupIds = \App\Models\Group::where('leader_id', $primary->id)->pluck('id');
+            foreach ($affectedGroupIds as $groupId) {
+                DB::table('group_person')->updateOrInsert(
+                    ['group_id' => $groupId, 'person_id' => $primary->id],
+                    ['role' => 'leader', 'joined_at' => now()]
+                );
+            }
+
             // Ministries where secondary is leader
             DB::table('ministries')
                 ->where('leader_id', $secondary->id)
                 ->update(['leader_id' => $primary->id]);
+
+            // Ensure new leader is also a member in each affected ministry
+            $affectedMinistryIds = \App\Models\Ministry::where('leader_id', $primary->id)->pluck('id');
+            foreach ($affectedMinistryIds as $ministryId) {
+                DB::table('ministry_person')->updateOrInsert(
+                    ['ministry_id' => $ministryId, 'person_id' => $primary->id],
+                    ['role' => 'leader']
+                );
+            }
 
             // 7. Soft delete secondary
             $secondary->delete();
@@ -585,9 +603,27 @@ class PersonMergeService
                 ->where('leader_id', $personB->id)
                 ->update(['leader_id' => $personA->id]);
 
+            // Ensure new leader is also a member in each affected group
+            $affectedGroupIds = \App\Models\Group::where('leader_id', $personA->id)->pluck('id');
+            foreach ($affectedGroupIds as $groupId) {
+                DB::table('group_person')->updateOrInsert(
+                    ['group_id' => $groupId, 'person_id' => $personA->id],
+                    ['role' => 'leader', 'joined_at' => now()]
+                );
+            }
+
             DB::table('ministries')
                 ->where('leader_id', $personB->id)
                 ->update(['leader_id' => $personA->id]);
+
+            // Ensure new leader is also a member in each affected ministry
+            $affectedMinistryIds = \App\Models\Ministry::where('leader_id', $personA->id)->pluck('id');
+            foreach ($affectedMinistryIds as $ministryId) {
+                DB::table('ministry_person')->updateOrInsert(
+                    ['ministry_id' => $ministryId, 'person_id' => $personA->id],
+                    ['role' => 'leader']
+                );
+            }
 
             // 7. Soft delete secondary
             $personB->delete();
