@@ -309,11 +309,18 @@ class BoardController extends Controller
         $maxPosition = $board->columns()->max('position') ?? -1;
         $validated['position'] = $maxPosition + 1;
 
-        $board->columns()->create($validated);
+        $column = $board->columns()->create($validated);
 
         broadcast(new ChurchDataUpdated($board->church_id, 'boards', 'updated'))->toOthers();
 
-        return $this->successResponse($request, __('messages.column_added'), 'boards.show', [$board]);
+        return $this->successResponse($request, __('messages.column_added'), 'boards.show', [$board], [
+            'column' => [
+                'id' => $column->id,
+                'name' => $column->name,
+                'position' => $column->position,
+                'color' => $column->color,
+            ],
+        ]);
     }
 
     public function updateColumn(Request $request, BoardColumn $column)

@@ -311,6 +311,7 @@ async function autoAssignEvent(eventId) {
 
         if (data.success) {
             showToast('success', i18n.completeToast, data.message);
+            // SPA reload: assignment avatars, position counts, and balance scores need server data
             setTimeout(() => Livewire.navigate(window.location.href), 2000);
         } else {
             showToast('error', i18n.errorToast, i18n.assignFailed);
@@ -339,6 +340,7 @@ async function autoAssignAll() {
         if (data.success) {
             showToast('success', i18n.completeToast,
                 @json(__('app.rotation_assignments_for_events', ['assigned' => '${data.summary.assigned}', 'events' => '${data.summary.events}'])).replace('${data.summary.assigned}', data.summary.assigned).replace('${data.summary.events}', data.summary.events));
+            // SPA reload: assignment avatars, position counts, and balance scores need server data
             setTimeout(() => Livewire.navigate(window.location.href), 2000);
         } else {
             showToast('error', i18n.errorToast, i18n.assignFailed);

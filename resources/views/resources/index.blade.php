@@ -337,7 +337,7 @@ function _addResourceFolder(ctx, data) {
     ctx.showCreateFolder = false;
     var tbody = document.querySelector('table tbody');
     if (!tbody) {
-        // Empty state — need to reload to get the table
+        // SPA reload fallback: empty state has no table — need server to render it
         Livewire.navigate(window.location.href);
         return;
     }
@@ -357,6 +357,7 @@ function _addResourceFolder(ctx, data) {
 function _addResourceFile(fileName) {
     var tbody = document.querySelector('table tbody');
     if (!tbody) {
+        // SPA reload fallback: empty state has no table — need server to render it
         Livewire.navigate(window.location.href);
         return;
     }

@@ -45,7 +45,7 @@
 
             <div class="divide-y divide-gray-200 dark:divide-gray-700">
                 @foreach ($servantPending as $user)
-                    <div class="px-6 py-4" x-data="personLinker({{ $user->id }}, {{ json_encode($matchesJs[$user->id] ?? []) }})">
+                    <div class="px-6 py-4" data-approval-user="{{ $user->id }}" x-data="personLinker({{ $user->id }}, {{ json_encode($matchesJs[$user->id] ?? []) }})">
                         <div class="flex items-start justify-between mb-4">
                             <div class="flex-1">
                                 <div class="flex items-center gap-3 mb-2">
@@ -109,7 +109,7 @@
 
             <div class="divide-y divide-gray-200 dark:divide-gray-700">
                 @foreach ($churchRolePending as $user)
-                    <div class="px-6 py-4" x-data="personLinker({{ $user->id }}, {{ json_encode($matchesJs[$user->id] ?? []) }})">
+                    <div class="px-6 py-4" data-approval-user="{{ $user->id }}" x-data="personLinker({{ $user->id }}, {{ json_encode($matchesJs[$user->id] ?? []) }})">
                         <div class="flex items-start justify-between mb-4">
                             <div class="flex-1">
                                 <div class="flex items-center gap-3 mb-2">
@@ -269,7 +269,8 @@ function personLinker(userId, suggestedMatches) {
             .then(data => {
                 if (data.success) {
                     showGlobalToast(data.message, 'success');
-                    Livewire.navigate(window.location.href);
+                    const card = document.querySelector('[data-approval-user="' + this.userId + '"]');
+                    if (card) card.remove();
                 } else {
                     showGlobalToast(@js(__('app.error') ) + ': ' + data.message, 'error');
                 }
@@ -310,7 +311,9 @@ onPageReady(function() {
             .then(data => {
                 if (data.success) {
                     showGlobalToast(data.message, 'success');
-                    Livewire.navigate(window.location.href);
+                    closeRejectModal();
+                    const card = document.querySelector('[data-approval-user="' + userId + '"]');
+                    if (card) card.remove();
                 } else {
                     showGlobalToast(@js(__('app.error') ) + ': ' + data.message, 'error');
                 }

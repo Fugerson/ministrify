@@ -628,6 +628,7 @@
                              });
                              if (response.ok) {
                                  this.currentPosition = position;
+                                 // Full reload needed: menu position changes the entire page layout
                                  setTimeout(() => window.location.reload(), 200);
                              }
                          } catch (e) {
@@ -685,6 +686,7 @@
                              });
                              if (response.ok) {
                                  this.currentTheme = theme;
+                                 // Full reload needed: theme changes CSS classes on the entire page
                                  setTimeout(() => window.location.reload(), 200);
                              }
                          } catch (e) {

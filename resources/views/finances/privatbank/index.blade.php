@@ -209,7 +209,7 @@
                     </svg>
                     <p class="mt-2 text-gray-600 dark:text-gray-400">{{ __('app.no_transactions_found') }}</p>
                     @if($tab === 'new')
-                        <button type="button" @click="ajaxAction('{{ route('finances.privatbank.sync') }}', 'POST').then(() => Livewire.navigate(window.location.href))" class="mt-4 text-green-600 dark:text-green-400 hover:underline">
+                        <button type="button" @click="ajaxAction('{{ route('finances.privatbank.sync') }}', 'POST').then(() => { /* Sync fetches new transactions from bank — SPA reload to show them */ Livewire.navigate(window.location.href); })" class="mt-4 text-green-600 dark:text-green-400 hover:underline">
                             {{ __('app.sync_now') }}
                         </button>
                     @endif
@@ -247,6 +247,7 @@
                                         @if(!$tx->is_processed && !$tx->is_ignored && $tx->is_income)
                                             <!-- Import Modal Trigger -->
                                             <button type="button"
+                                                    data-import-tx="{{ $tx->id }}"
                                                     onclick="openImportModal({{ $tx->id }}, @js($tx->counterpart_display), {{ $tx->amount_uah }})"
                                                     class="text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300 text-sm">
                                                 {{ __('app.action_import') }}
@@ -345,6 +346,7 @@
 function importModal() {
     return {
         importUrl: '',
+        importTxId: null,
         sender: '',
         amount: '',
         saving: false,
@@ -374,8 +376,14 @@ function importModal() {
                     return;
                 }
                 showToast('success', data.message || @js(__('app.status_imported') ) + '!');
+                // Remove imported row from table inline (no page reload)
+                const triggerBtn = document.querySelector(`[data-import-tx="${this.importTxId}"]`);
+                if (triggerBtn) {
+                    const row = triggerBtn.closest('tr');
+                    if (row) row.remove();
+                }
                 closeImportModal();
-                setTimeout(() => Livewire.navigate(window.location.href), 200);
+                this.saving = false;
             } catch (e) {
                 showToast('error', @js( __('app.connection_error_generic') ));
                 this.saving = false;
@@ -389,6 +397,7 @@ function openImportModal(id, sender, amount) {
     modal.classList.remove('hidden');
     const alpine = Alpine.$data(modal);
     alpine.importUrl = '/finances/privatbank/' + id + '/import';
+    alpine.importTxId = id;
     alpine.sender = sender;
     alpine.amount = '+' + amount.toFixed(2) + ' UAH';
     alpine.errors = {};

@@ -150,7 +150,7 @@
                 @foreach($resources as $resource)
                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer group" data-resource-id="{{ $resource->id }}"
                     @if($resource->isFolder())
-                    @click="Livewire.navigate('{{ route('ministries.resources.folder', [$ministry, $resource]) }}')"
+                    @click="window.location.href = '{{ route('ministries.resources.folder', [$ministry, $resource]) }}'"
                     @else
                     @click="showPreview({{ json_encode([
                         'id' => $resource->id,
@@ -372,13 +372,13 @@
 function _addResourceFolder(ctx, data) {
     ctx.showCreateFolder = false;
     var tbody = document.querySelector('table tbody');
-    if (!tbody) { Livewire.navigate(window.location.href); return; }
+    if (!tbody) { window.location.reload(); return; }
     var name = ctx.$refs.createFolderForm.querySelector('[name="name"]').value;
     var safeName = name.replace(/&/g, '\x26amp;').replace(/\x3C/g, '\x26lt;').replace(/>/g, '\x26gt;');
     var tr = document.createElement('tr');
     tr.className = 'hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer group';
     tr.setAttribute('data-resource-id', data.id);
-    tr.onclick = function() { Livewire.navigate('/ministries/{{ $ministry->id }}/resources/folder/' + data.id); };
+    tr.onclick = function() { window.location.href = '/ministries/{{ $ministry->id }}/resources/folder/' + data.id; };
     var today = new Date();
     var dateStr = String(today.getDate()).padStart(2,'0') + '.' + String(today.getMonth()+1).padStart(2,'0') + '.' + today.getFullYear();
     tr.innerHTML = '\x3Ctd class="px-4 py-3">\x3Cdiv class="flex items-center gap-3">\x3Csvg class="w-5 h-5 text-yellow-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">\x3Cpath d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"/>\x3C/svg>\x3Cspan class="text-sm font-medium text-gray-900 dark:text-white resource-name">' + safeName + '\x3C/span>\x3C/div>\x3C/td>\x3Ctd class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 hidden sm:table-cell">\u2014\x3C/td>\x3Ctd class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 hidden md:table-cell">' + dateStr + '\x3C/td>\x3Ctd class="px-4 py-3 text-right">\x3C/td>';
@@ -388,7 +388,7 @@ function _addResourceFolder(ctx, data) {
 
 function _addResourceFile(fileName) {
     var tbody = document.querySelector('table tbody');
-    if (!tbody) { Livewire.navigate(window.location.href); return; }
+    if (!tbody) { window.location.reload(); return; }
     var safeName = fileName.replace(/&/g, '\x26amp;').replace(/\x3C/g, '\x26lt;').replace(/>/g, '\x26gt;');
     var tr = document.createElement('tr');
     tr.className = 'hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer group';

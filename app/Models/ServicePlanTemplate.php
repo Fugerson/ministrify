@@ -32,7 +32,7 @@ class ServicePlanTemplate extends Model
      * Apply this template to an event
      * Creates ServicePlanItem records for each template item
      */
-    public function applyToEvent(Event $event, Carbon $startTime): void
+    public function applyToEvent(Event $event, Carbon $startTime): array
     {
         $currentTime = $startTime->copy();
         $sortOrder = 0;
@@ -40,11 +40,12 @@ class ServicePlanTemplate extends Model
         // Delete existing plan items for this event
         $event->planItems()->delete();
 
+        $createdItems = [];
         foreach ($this->items as $item) {
             $duration = $item['duration_minutes'] ?? ServicePlanItem::getDefaultDuration($item['type'] ?? 'other');
             $endTime = $currentTime->copy()->addMinutes($duration);
 
-            ServicePlanItem::create([
+            $createdItems[] = ServicePlanItem::create([
                 'event_id' => $event->id,
                 'title' => $item['title'],
                 'type' => $item['type'] ?? null,
@@ -58,6 +59,8 @@ class ServicePlanTemplate extends Model
 
             $currentTime = $endTime;
         }
+
+        return $createdItems;
     }
 
     /**

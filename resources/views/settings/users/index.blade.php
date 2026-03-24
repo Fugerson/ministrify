@@ -34,7 +34,7 @@
         </div>
         <div class="divide-y divide-yellow-200 dark:divide-yellow-800">
             @foreach($pendingUsers as $user)
-            <div class="px-4 py-3 flex items-center justify-between gap-4" x-data="{ showRoleSelect: false, selectedRole: '' }">
+            <div class="px-4 py-3 flex items-center justify-between gap-4" data-pending-user="{{ $user->id }}" x-data="{ showRoleSelect: false, selectedRole: '' }">
                 <div class="flex items-center gap-3 min-w-0">
                     <div class="flex-shrink-0 h-10 w-10 rounded-full bg-yellow-200 dark:bg-yellow-800 flex items-center justify-center">
                         <span class="text-yellow-700 dark:text-yellow-300 font-medium">{{ mb_substr($user->name, 0, 1) }}</span>
@@ -59,7 +59,7 @@
                                 email: @js($user->email),
                                 church_role_id: selectedRole,
                                 person_id: {{ $user->person?->id ?? 'null' }}
-                            }).then(() => Livewire.navigate(window.location.href))"
+                            }).then(() => { $el.closest('[data-pending-user]').remove(); })"
                             :disabled="!selectedRole"
                             class="px-3 py-1.5 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed">
                             {{ __('app.save') }}
@@ -79,7 +79,7 @@
                             </svg>
                             <span class="hidden sm:inline">{{ __('app.grant_btn') }}</span>
                         </button>
-                        <button @click="ajaxDelete('{{ route('settings.users.destroy', $user) }}', @js( __('messages.confirm_reject_request_from', ['name' => addslashes($user->name)]) ), () => Livewire.navigate(window.location.href))"
+                        <button @click="ajaxDelete('{{ route('settings.users.destroy', $user) }}', @js( __('messages.confirm_reject_request_from', ['name' => addslashes($user->name)]) ), () => { document.querySelector('[data-pending-user=\'{{ $user->id }}\']').remove(); })"
                                 class="px-3 py-1.5 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 flex items-center gap-1">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -272,7 +272,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                 </svg>
                             </a>
-                            <button @click="ajaxDelete('{{ route('settings.users.destroy', $user) }}', @js( __('messages.are_you_sure') ), () => Livewire.navigate(window.location.href))"
+                            <button @click="ajaxDelete('{{ route('settings.users.destroy', $user) }}', @js( __('messages.are_you_sure') ), () => { $el.closest('tr').remove(); })"
                                     class="p-2 inline-flex text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>

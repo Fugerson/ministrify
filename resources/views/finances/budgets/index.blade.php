@@ -883,6 +883,7 @@ function budgetsPage() {
                 if (res.ok && data.success) {
                     this.showAllocateModal = false;
                     showToast('success', data.message || @js( __('app.finance_budget_allocated_toast') ));
+                    // Budget totals/percentages/progress bars depend on server calculations — SPA reload
                     setTimeout(() => Livewire.navigate(window.location.href), 200);
                 } else if (res.status === 422 && data.errors) {
                     const msgs = Object.values(data.errors).flat();
@@ -919,6 +920,7 @@ function budgetsPage() {
                 if (res.ok && data.success) {
                     this.showBudgetModal = false;
                     showToast('success', data.message || @js( __('app.finance_saved_toast') ));
+                    // Budget totals/percentages/progress bars depend on server calculations — SPA reload
                     setTimeout(() => Livewire.navigate(window.location.href), 200);
                 } else if (res.status === 422 && data.errors) {
                     const msgs = Object.values(data.errors).flat();
@@ -1028,6 +1030,7 @@ function budgetsPage() {
                 if (res.ok && data.success) {
                     this.showItemModal = false;
                     showToast('success', data.message);
+                    // Budget items affect totals/percentages — SPA reload via Livewire.navigate
                     setTimeout(() => Livewire.navigate(window.location.href), 200);
                 } else if (res.status === 422) {
                     const msgs = data.errors ? Object.values(data.errors).flat() : [data.message];
@@ -1056,6 +1059,7 @@ function budgetsPage() {
                 const data = await res.json().catch(() => ({}));
                 if (res.ok && data.success) {
                     showToast('success', data.message);
+                    // Deleting item recalculates budget totals/percentages — SPA reload
                     setTimeout(() => Livewire.navigate(window.location.href), 200);
                 } else {
                     showToast('error', data.message || @js( __('app.finance_delete_error') ));
@@ -1104,6 +1108,7 @@ function budgetsPage() {
                 const data = await res.json().catch(() => ({}));
                 if (res.ok && data.success) {
                     showToast('success', data.message);
+                    // Creating church budget adds new sections/tables — SPA reload
                     setTimeout(() => Livewire.navigate(window.location.href), 200);
                 } else {
                     showToast('error', data.message || @js( __('app.finance_error_toast') ));
@@ -1203,6 +1208,7 @@ function budgetsPage() {
                 if (res.ok && data.success) {
                     this.showChurchItemModal = false;
                     showToast('success', data.message);
+                    // Church budget items affect totals/percentages — SPA reload
                     setTimeout(() => Livewire.navigate(window.location.href), 200);
                 } else if (res.status === 422) {
                     const msgs = data.errors ? Object.values(data.errors).flat() : [data.message];
@@ -1231,6 +1237,7 @@ function budgetsPage() {
                 const data = await res.json().catch(() => ({}));
                 if (res.ok && data.success) {
                     showToast('success', data.message);
+                    // Deleting church item recalculates budget totals — SPA reload
                     setTimeout(() => Livewire.navigate(window.location.href), 200);
                 } else {
                     showToast('error', data.message || @js( __('app.finance_delete_error') ));

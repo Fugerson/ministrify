@@ -1344,13 +1344,13 @@ function eventCreateForm() {
 
                 closeCreateEventModal();
 
+                showToast('success', data.message || _calI18n.saved);
                 if (data.redirect_url) {
-                    showToast('success', data.message || _calI18n.saved);
-                    // Navigate to the new event
+                    // Navigate to the new event page
                     setTimeout(() => Livewire.navigate(data.redirect_url), 600);
                 } else {
-                    showToast('success', data.message || _calI18n.saved);
-                    setTimeout(() => Livewire.navigate(window.location.href), 600);
+                    // Fallback: reload calendar to show new event
+                    setTimeout(() => window.location.reload(), 600);
                 }
             } catch (e) {
                 showToast('error', _calI18n.connectionError);

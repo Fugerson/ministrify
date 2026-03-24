@@ -2765,8 +2765,13 @@ function planTemplatesManager() {
 
                 const data = await response.json().catch(() => ({}));
                 if (data.success) {
+                    if (data.items && data.items.length) {
+                        // Template replaces all items - clear table and insert new rows
+                        const tbody = document.querySelector('table tbody');
+                        if (tbody) tbody.innerHTML = '';
+                        data.items.forEach(item => window.insertPlanRow(item));
+                    }
                     showGlobalToast(@js( __("app.schedule_template_applied") ), 'success');
-                    setTimeout(() => Livewire.navigate(window.location.href), 200);
                 } else {
                     showGlobalToast(data.message || @js( __("app.schedule_error") ), 'error');
                 }
@@ -3418,11 +3423,16 @@ function servicePlanManager() {
                 });
 
                 if (response.ok) {
-                    Livewire.navigate(window.location.href);
+                    const data = await response.json().catch(() => ({}));
+                    if (data.items && data.items.length) {
+                        // Template appends items - insert new rows into table
+                        data.items.forEach(item => window.insertPlanRow(item));
+                    }
+                    showGlobalToast(data.message || @js(__("app.schedule_template_applied")), 'success');
                 }
             } catch (err) {
                 console.error(err);
-                alert(@js( __("app.schedule_error_alert") ));
+                showGlobalToast(@js( __("app.schedule_error_alert") ), 'error');
             }
         },
 
@@ -3449,11 +3459,15 @@ function servicePlanManager() {
                 const data = await response.json().catch(() => ({}));
                 if (data.success) {
                     this.showTextModal = false;
-                    Livewire.navigate(window.location.href);
+                    this.parseText = '';
+                    if (data.items && data.items.length) {
+                        data.items.forEach(item => window.insertPlanRow(item));
+                    }
+                    showGlobalToast(data.message || @js(__("app.schedule_items_added")), 'success');
                 }
             } catch (err) {
                 console.error(err);
-                alert(@js( __("app.schedule_error_parsing") ));
+                showGlobalToast(@js( __("app.schedule_error_parsing") ), 'error');
             }
         }
     };

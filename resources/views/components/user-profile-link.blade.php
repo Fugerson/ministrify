@@ -38,7 +38,7 @@ window.switchLocaleAccount = function(locale) {
         body: formData
     })
     .then(r => r.json())
-    .then(() => Livewire.navigate(window.location.href))
+    .then(() => { /* SPA reload needed: all UI strings change with locale switch */ Livewire.navigate(window.location.href); })
     .catch(err => console.error('Locale switch error:', err));
 };
 </script>

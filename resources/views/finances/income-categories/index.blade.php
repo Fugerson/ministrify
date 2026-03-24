@@ -113,7 +113,7 @@ function _addIncomeCategory(ctx) {
     var name = form.querySelector('[name="name"]').value;
     var color = form.querySelector('[name="color"]').value || '#3B82F6';
     var list = document.getElementById('categories-list');
-    if (!list) { Livewire.navigate(window.location.href); return; }
+    if (!list) { /* DOM element missing, SPA reload as fallback */ Livewire.navigate(window.location.href); return; }
     var empty = list.querySelector('.text-center.text-gray-500');
     if (empty) empty.remove();
     var safeName = name.replace(/&/g, '\x26amp;').replace(/</g, '\x26lt;').replace(/>/g, '\x26gt;');

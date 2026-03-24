@@ -127,6 +127,7 @@ window.expenseEditModal = function() {
                 if (response.ok && data.success) {
                     this.modalOpen = false;
                     showToast('success', data.message);
+                    // Expense edit affects budget spent/remaining calculations — SPA reload
                     setTimeout(() => Livewire.navigate(window.location.href), 200);
                 } else if (response.status === 422) {
                     const errorMsgs = Object.values(data.errors || {}).flat();

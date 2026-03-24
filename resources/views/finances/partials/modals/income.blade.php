@@ -83,12 +83,12 @@ window.incomeModal = function() {
                     }
                 } else {
                     showToast('error', data.message || @js( __('app.delete_error') ));
-                    // Reload to restore state
-                    Livewire.navigate(window.location.href);
+                    // Reload to restore consistent state after failed optimistic delete
+                    this._silentReload();
                 }
             } catch (e) {
                 showToast('error', @js( __('app.connection_error') ));
-                Livewire.navigate(window.location.href);
+                this._silentReload();
             }
         },
         async submit() {
@@ -173,6 +173,8 @@ window.incomeModal = function() {
             }
         },
         _silentReload() {
+            // SPA-like reload: re-fetch current page and swap #finance-content
+            // Falls back to Livewire.navigate which is still SPA (no full browser reload)
             fetch(window.location.href, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
                 .then(r => r.text())
                 .then(html => {
@@ -183,6 +185,7 @@ window.incomeModal = function() {
                     if (newContent && current) {
                         current.innerHTML = newContent.innerHTML;
                     } else {
+                        // Fallback: Livewire.navigate is SPA-like, avoids full page reload
                         Livewire.navigate(window.location.href);
                     }
                 })

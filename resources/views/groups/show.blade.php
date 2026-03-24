@@ -88,13 +88,13 @@
     </div>
 
     <!-- Stats Row -->
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+    <div id="stats-row" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-            <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $group->members->filter(fn($m) => $m->pivot->role !== 'guest')->count() }}</div>
+            <div id="stat-members-count" class="text-2xl font-bold text-gray-900 dark:text-white">{{ $group->members->filter(fn($m) => $m->pivot->role !== 'guest')->count() }}</div>
             <div class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.members') }}</div>
         </div>
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-            <div class="text-2xl font-bold text-orange-600 dark:text-orange-400">{{ $group->guests->count() }}</div>
+            <div id="stat-guests-count" class="text-2xl font-bold text-orange-600 dark:text-orange-400">{{ $group->guests->count() }}</div>
             <div class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.group_guests_list') }}</div>
         </div>
         @if($currentChurch->attendance_enabled)
@@ -131,7 +131,7 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Members -->
-        <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700"
+        <div id="members-section" class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700"
              x-data="{ membersView: localStorage.getItem('group_members_view') || 'grid' }"
              x-init="$watch('membersView', v => localStorage.setItem('group_members_view', v))">
             <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between gap-3">
@@ -682,7 +682,7 @@
     <div class="min-h-screen px-4 flex items-center justify-center">
         <div class="fixed inset-0 bg-black/50" onclick="document.getElementById('addMemberModal').classList.add('hidden')"></div>
         <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full p-4 sm:p-6"
-             x-data="{ role: 'member', ...ajaxForm({url: '{{ route('groups.members.add', $group) }}', method: 'POST', stayOnPage: true, onSuccess() { Livewire.navigate(window.location.href); }}) }">
+             x-data="{ role: 'member', ...ajaxForm({url: '{{ route('groups.members.add', $group) }}', method: 'POST', stayOnPage: true, onSuccess() { document.getElementById('addMemberModal').classList.add('hidden'); refreshMembersSection(); }}) }">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('app.add_member_title') }}</h3>
             <form @submit.prevent="submit($refs.addMemberForm)" x-ref="addMemberForm" enctype="multipart/form-data">
                 <div class="space-y-4">
@@ -776,7 +776,7 @@
             @endif
 
             <form @submit.prevent="submit($refs.grpAttModalForm)" x-ref="grpAttModalForm"
-                  x-data="{ ...ajaxForm({ url: '{{ route('groups.attendance.store', $group) }}', method: 'POST', onSuccess() { Livewire.navigate(window.location.href); } }) }" class="space-y-4">
+                  x-data="{ ...ajaxForm({ url: '{{ route('groups.attendance.store', $group) }}', method: 'POST', onSuccess(data) { document.getElementById('recordAttendanceModal').classList.add('hidden'); if (data.redirect_url) { setTimeout(() => Livewire.navigate(data.redirect_url), 300); } } }) }" class="space-y-4">
 
                 <div class="grid grid-cols-2 gap-3">
                     <div>
@@ -865,4 +865,43 @@
 @endcan
 
 <x-realtime-banner channel="groups" />
+
+@push('scripts')
+<script>
+async function refreshMembersSection() {
+    try {
+        const response = await fetch(window.location.href, {
+            headers: { 'Accept': 'text/html' }
+        });
+        if (!response.ok) return;
+        const html = await response.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+
+        // Replace members section
+        const newMembers = doc.getElementById('members-section');
+        const currentMembers = document.getElementById('members-section');
+        if (newMembers && currentMembers) {
+            currentMembers.outerHTML = newMembers.outerHTML;
+        }
+
+        // Update stats counters
+        const newMembersCount = doc.getElementById('stat-members-count');
+        const currentMembersCount = document.getElementById('stat-members-count');
+        if (newMembersCount && currentMembersCount) {
+            currentMembersCount.textContent = newMembersCount.textContent;
+        }
+
+        const newGuestsCount = doc.getElementById('stat-guests-count');
+        const currentGuestsCount = document.getElementById('stat-guests-count');
+        if (newGuestsCount && currentGuestsCount) {
+            currentGuestsCount.textContent = newGuestsCount.textContent;
+        }
+    } catch (e) {
+        console.error('Failed to refresh members section:', e);
+    }
+}
+</script>
+@endpush
+
 @endsection

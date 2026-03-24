@@ -509,7 +509,7 @@ function _meetingAddAgenda(ctx, data) {
             container.className = 'space-y-2';
             empty.replaceWith(container);
             list = container;
-        } else { Livewire.navigate(window.location.href); return; }
+        } else { /* SPA reload fallback: empty state container not found */ Livewire.navigate(window.location.href); return; }
     }
     var safeTitle = title.replace(/&/g, '\x26amp;').replace(/</g, '\x26lt;').replace(/>/g, '\x26gt;');
     var safeDesc = desc ? desc.replace(/&/g, '\x26amp;').replace(/</g, '\x26lt;').replace(/>/g, '\x26gt;') : '';
@@ -547,7 +547,7 @@ function _meetingAddMaterial(ctx, data) {
             container.className = 'grid gap-3';
             empty.replaceWith(container);
             list = container;
-        } else { Livewire.navigate(window.location.href); return; }
+        } else { /* SPA reload fallback: empty state container not found */ Livewire.navigate(window.location.href); return; }
     }
     var icons = { link: '\uD83D\uDD17', note: '\uD83D\uDCDD', video: '\uD83C\uDFA5', audio: '\uD83C\uDFB5', document: '\uD83D\uDCC4', file: '\uD83D\uDCC1' };
     var safeTitle = title.replace(/&/g, '\x26amp;').replace(/</g, '\x26lt;').replace(/>/g, '\x26gt;');
@@ -577,7 +577,7 @@ function _meetingAddAttendee(ctx, data) {
             container.className = 'grid gap-2';
             empty.replaceWith(container);
             list = container;
-        } else { Livewire.navigate(window.location.href); return; }
+        } else { /* SPA reload fallback: empty state container not found */ Livewire.navigate(window.location.href); return; }
     }
     var safeName = personName.replace(/&/g, '\x26amp;').replace(/</g, '\x26lt;').replace(/>/g, '\x26gt;');
     var safeInitials = initials.replace(/&/g, '\x26amp;').replace(/</g, '\x26lt;').replace(/>/g, '\x26gt;');

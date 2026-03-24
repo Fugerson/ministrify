@@ -96,20 +96,9 @@ window.exchangeModal = function() {
             }
         },
         _silentReload() {
-            fetch(window.location.href, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-                .then(r => r.text())
-                .then(html => {
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(html, 'text/html');
-                    const newContent = doc.querySelector('#finance-content');
-                    const current = document.querySelector('#finance-content');
-                    if (newContent && current) {
-                        current.innerHTML = newContent.innerHTML;
-                    } else {
-                        Livewire.navigate(window.location.href);
-                    }
-                })
-                .catch(() => Livewire.navigate(window.location.href));
+            // Exchange affects currency balances/totals across the page —
+            // use Livewire.navigate for SPA-like reload (no full browser reload)
+            Livewire.navigate(window.location.href);
         }
     };
 };

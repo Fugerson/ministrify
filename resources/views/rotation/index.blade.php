@@ -283,6 +283,7 @@ function displayResults(data) {
                 <p class="text-xs text-gray-500 dark:text-gray-400">${i18n.unfilledLabel}</p>
             </div>
         </div>
+        <!-- SPA reload: assignment counts and progress bars need fresh server data -->
         <button onclick="Livewire.navigate(window.location.href)" class="w-full px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-xl transition-colors">
             ${i18n.refreshPage}
         </button>

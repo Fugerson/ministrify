@@ -198,7 +198,11 @@ function ministryCreateForm() {
                 }
                 showToast('success', data.message || @js(__('app.created')));
                 closeCreateMinistryModal();
-                setTimeout(() => Livewire.navigate(window.location.href), 200);
+                if (data.redirect_url) {
+                    setTimeout(() => window.location.href = data.redirect_url, 400);
+                } else {
+                    setTimeout(() => window.location.reload(), 400);
+                }
             } catch (e) {
                 showToast('error', @js(__('app.server_error')));
                 this.saving = false;

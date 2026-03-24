@@ -368,10 +368,11 @@ class ServicePlanController extends Controller
         $currentTime = Carbon::parse($startTime);
         $maxOrder = $event->planItems()->max('sort_order') ?? 0;
 
+        $createdItems = [];
         foreach ($items as $index => $item) {
             $endTime = $currentTime->copy()->addMinutes($item['duration']);
 
-            $event->planItems()->create([
+            $createdItems[] = $event->planItems()->create([
                 'title' => $item['title'],
                 'type' => $item['type'],
                 'start_time' => $currentTime->format('H:i'),
@@ -387,6 +388,7 @@ class ServicePlanController extends Controller
             'success' => true,
             'message' => __('messages.plan_template_applied'),
             'count' => count($items),
+            'items' => $createdItems,
         ]);
     }
 
@@ -466,6 +468,7 @@ class ServicePlanController extends Controller
 
         $maxOrder = $event->planItems()->max('sort_order') ?? 0;
         $createdCount = 0;
+        $createdItems = [];
 
         // Get starting time
         $lastItem = $event->planItems()->orderByDesc('sort_order')->first();
@@ -531,7 +534,7 @@ class ServicePlanController extends Controller
             $defaultStartTime = $itemEndTime; // Next item starts after this one
 
             $maxOrder++;
-            $event->planItems()->create([
+            $createdItems[] = $event->planItems()->create([
                 'title' => $title,
                 'type' => $detectedType,
                 'start_time' => $itemStartTime,
@@ -548,6 +551,7 @@ class ServicePlanController extends Controller
             'success' => true,
             'message' => __('messages.plan_items_parsed', ['count' => $createdCount]),
             'count' => $createdCount,
+            'items' => $createdItems,
         ]);
     }
 

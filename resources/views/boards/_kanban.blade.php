@@ -1174,9 +1174,97 @@ function churchBoard() {
                     headers: { 'X-CSRF-TOKEN': this.csrfToken, 'Accept': 'application/json', 'Content-Type': 'application/json' },
                     body: JSON.stringify({ name: name.trim() })
                 });
-                if (response.ok) { Livewire.navigate(window.location.href); }
-                else { const data = await response.json().catch(() => ({})); if (window.showGlobalToast) showGlobalToast(data.message || @js(__('app.board_error')), 'error'); }
+                const data = await response.json().catch(() => ({}));
+                if (response.ok && data.column) {
+                    this.insertColumnDOM(data.column);
+                    if (window.showGlobalToast) showGlobalToast(data.message || @js(__('app.board_column_added')), 'success');
+                } else {
+                    if (window.showGlobalToast) showGlobalToast(data.message || @js(__('app.board_error')), 'error');
+                }
             } catch (e) { console.error(e); }
+        },
+
+        insertColumnDOM(col) {
+            const colorMap = {
+                gray: { dot: 'bg-gray-400' }, blue: { dot: 'bg-blue-500' },
+                yellow: { dot: 'bg-amber-500' }, green: { dot: 'bg-green-500' },
+                red: { dot: 'bg-red-500' }, purple: { dot: 'bg-purple-500' },
+            };
+            const colors = colorMap[col.color] || colorMap.gray;
+            const colId = col.id;
+            const colName = col.name.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+            const html = `<div class="kanban-column flex-shrink-0 w-[calc(100vw-2rem)] sm:w-72 md:w-80 bg-gray-50/80 dark:bg-gray-800/50 rounded-xl flex flex-col border border-gray-200/50 dark:border-gray-700/50"
+                 data-column-id="${colId}" x-data="{ collapsed: false }">
+                <div class="relative">
+                    <div class="absolute top-0 left-0 right-0 h-1 rounded-t-xl ${colors.dot}"></div>
+                    <div class="p-3 pt-4 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 rounded-full ${colors.dot}"></div>
+                            <h3 class="font-semibold text-gray-800 dark:text-white text-sm">${colName}</h3>
+                            <span class="column-count text-xs text-gray-400 dark:text-gray-500 bg-gray-200/50 dark:bg-gray-700/50 px-2 py-0.5 rounded-full font-medium"
+                                  data-column-id="${colId}">0</span>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            ${this.canEditCards ? `<div class="relative" x-data="{ colMenu: false }">
+                                <button type="button" @click.stop="colMenu = !colMenu"
+                                        class="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
+                                    </svg>
+                                </button>
+                                <div x-show="colMenu" @click.away="colMenu = false" x-transition
+                                     class="absolute right-0 top-8 z-50 w-40 bg-white dark:bg-gray-700 rounded-xl shadow-lg border border-gray-200 dark:border-gray-600 py-1">
+                                    <button @click="openRenameColumnModal(${colId}, '${colName.replace(/'/g, "\\'")}'); colMenu = false"
+                                            class="w-full px-3 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center gap-2">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                        ${@json(__('app.board_rename'))}
+                                    </button>
+                                    ${this.canDeleteCards ? `<button @click="deleteColumn(${colId}); colMenu = false"
+                                            class="w-full px-3 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                        ${@json(__('app.delete'))}
+                                    </button>` : ''}
+                                </div>
+                            </div>` : ''}
+                            <button type="button" @click="collapsed = !collapsed"
+                                    class="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                                <svg class="w-4 h-4 transition-transform" :class="collapsed ? '-rotate-90' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                </svg>
+                            </button>
+                            ${this.canCreateCards ? `<button type="button" @click="openAddCardModal(${colId})"
+                                    class="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                </svg>
+                            </button>` : ''}
+                        </div>
+                    </div>
+                </div>
+                <div x-show="!collapsed" x-collapse
+                     class="flex-1 p-2 space-y-2 min-h-[80px] kanban-cards overflow-y-auto max-h-[50vh] lg:max-h-[calc(100vh-300px)]"
+                     data-column-id="${colId}">
+                </div>
+            </div>`;
+
+            const container = document.getElementById('kanban-columns');
+            // Insert before the "Add Column" button wrapper (last child of container)
+            const addBtn = container.querySelector(':scope > div:last-child');
+            const temp = document.createElement('div');
+            temp.innerHTML = html;
+            const newCol = temp.firstElementChild;
+            if (addBtn) {
+                container.insertBefore(newCol, addBtn);
+            } else {
+                container.appendChild(newCol);
+            }
+            // Initialize Alpine on the new column
+            Alpine.initTree(newCol);
+            // Re-init sortable so the new column's cards container is drag-enabled
+            this.initSortable();
+            // Update addCardModal default column
+            this.addCardModal.columnId = colId;
         },
 
         openRenameColumnModal(columnId, currentName) {

@@ -478,7 +478,7 @@ function churchRolesManager() {
                 });
 
                 if (response.ok) {
-                    // Reload page as this is a complete reset
+                    // SPA reload needed: complete reset replaces all roles with server-generated defaults
                     Livewire.navigate(window.location.href);
                 } else {
                     const data = await response.json().catch(() => ({}));

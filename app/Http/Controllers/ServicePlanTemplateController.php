@@ -102,12 +102,14 @@ class ServicePlanTemplateController extends Controller
         // Get start time from event or default
         $startTime = $event->time ?? Carbon::parse('10:00');
 
-        $template->applyToEvent($event, $startTime);
+        $createdItems = $template->applyToEvent($event, $startTime);
 
         return response()->json([
             'success' => true,
             'message' => 'Шаблон застосовано',
             'count' => count($template->items),
+            'items' => $createdItems,
+            'replaced' => true,
         ]);
     }
 

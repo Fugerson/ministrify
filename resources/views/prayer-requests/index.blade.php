@@ -293,7 +293,8 @@ function prayerRequestCreateForm() {
                 }
                 showToast('success', data.message || this.i18n.added);
                 closeCreatePrayerRequestModal();
-                setTimeout(() => Livewire.navigate(window.location.href), 200);
+                // SPA reload: new prayer request card has complex server-rendered markup (badges, links, pray button)
+                setTimeout(() => Livewire.navigate(window.location.href), 400);
             } catch (e) { showToast('error', this.i18n.connectionError); this.saving = false; }
         }
     }

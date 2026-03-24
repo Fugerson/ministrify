@@ -313,7 +313,9 @@ function groupCreateForm() {
                 }
                 showToast('success', data.message || @js( __('app.saved_msg') ));
                 closeCreateGroupModal();
-                setTimeout(() => Livewire.navigate(window.location.href), 200);
+                if (data.redirect_url) {
+                    setTimeout(() => Livewire.navigate(data.redirect_url), 200);
+                }
             } catch (e) {
                 showToast('error', @js( __('app.server_error') ));
                 this.saving = false;

@@ -340,6 +340,7 @@ function dashboardBuilder() {
                         if (el) el.style.display = w.enabled ? '' : 'none';
                         else if (w.enabled) _nr = true;
                     });
+                    // SPA reload needed when newly-enabled widget has no DOM element yet (server-rendered)
                     if (_nr) { Livewire.navigate(window.location.href); return; }
                     this.originalWidgets = JSON.parse(JSON.stringify(this.widgets));
                     this.editMode = false;

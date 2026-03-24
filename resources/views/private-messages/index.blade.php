@@ -597,6 +597,7 @@ function messengerApp() {
                     if (!data.broadcast && recipient) {
                         this.selectUser(recipient.id, recipient.name, recipient.role);
                     } else {
+                        // SPA reload fallback: broadcast messages don't have a single recipient to open
                         Livewire.navigate(window.location.href);
                     }
                 }

@@ -176,10 +176,15 @@
                                    method: 'POST',
                                    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
                                    body: formData
-                               }).then(() => {
+                               }).then(r => r.json().catch(() => ({}))).then(data => {
                                    uploading = false;
                                    saved = true;
-                                   setTimeout(() => Livewire.navigate(window.location.href), 200);
+                                   // Update logo preview inline
+                                   const preview = $el.closest('.p-4, .p-6')?.querySelector('img');
+                                   if (preview && $event.target.files[0]) {
+                                       preview.src = URL.createObjectURL($event.target.files[0]);
+                                   }
+                                   if (window.showGlobalToast) showGlobalToast(data.message || @js(__('app.saved_toast')), 'success');
                                }).catch(() => uploading = false);
                            }
                        ">
@@ -854,7 +859,7 @@
                         <span class="text-sm text-gray-600 dark:text-gray-400">
                             {{ __('app.settings_connected') }} {{ \Carbon\Carbon::parse($googleCalendarSettings['connected_at'] ?? now())->diffForHumans() }}
                         </span>
-                        <button @click="confirmDialog({{ Js::from(__('messages.confirm_disconnect_google')) }}).then(ok => { if(ok) { ajaxAction('{{ route('settings.google-calendar.disconnect') }}', 'POST').then(() => Livewire.navigate(window.location.href)) } })"
+                        <button @click="confirmDialog({{ Js::from(__('messages.confirm_disconnect_google')) }}).then(ok => { if(ok) { ajaxAction('{{ route('settings.google-calendar.disconnect') }}', 'POST').then(() => { /* SPA reload needed: Google Calendar section has complex connected/disconnected states */ Livewire.navigate(window.location.href); }) } })"
                                 class="text-sm text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors">
                             {{ __('app.settings_disconnect') }}
                         </button>
@@ -1402,7 +1407,7 @@
         <!-- Add/Edit Form -->
         <div x-show="showForm" x-cloak class="p-4 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
             <form @submit.prevent="submit($refs.catCreateForm)" x-ref="catCreateForm"
-                  x-data="{ ...ajaxForm({ url: '{{ route('settings.transaction-categories.store') }}', method: 'POST', onSuccess: () => Livewire.navigate(window.location.href) }) }">
+                  x-data="{ ...ajaxForm({ url: '{{ route('settings.transaction-categories.store') }}', method: 'POST', onSuccess: () => { /* SPA reload: new category row has complex edit/delete UI */ Livewire.navigate(window.location.href); } }) }">
                 <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
                     <div>
                         <input type="text" name="name" placeholder="{{ __('app.settings_name_placeholder') }}" required
@@ -1468,7 +1473,7 @@
                             </div>
                             <!-- Edit form -->
                             <form x-show="editing" @submit.prevent="submit($refs.editCatForm{{ $category->id }})" x-ref="editCatForm{{ $category->id }}" class="flex-1 flex items-center gap-2"
-                                  x-data="{ ...ajaxForm({ url: '{{ route('settings.transaction-categories.update', $category) }}', method: 'PUT', stayOnPage: true, onSuccess: () => Livewire.navigate(window.location.href) }) }">
+                                  x-data="{ ...ajaxForm({ url: '{{ route('settings.transaction-categories.update', $category) }}', method: 'PUT', stayOnPage: true, onSuccess() { const container = this.$el.closest('.flex.items-center.justify-between.p-3'); const nameEl = container.querySelector('[x-show=\'!editing\'] span.text-gray-900, [x-show=\'!editing\'] span.dark\\:text-white'); const colorEl = container.querySelector('[x-show=\'!editing\'] .rounded-full'); const form = this.$el.closest('form'); if (nameEl) nameEl.textContent = form.querySelector('[name=name]').value; if (colorEl) colorEl.style.backgroundColor = form.querySelector('[name=color]').value; editing = false; } }) }">
                                 <input type="text" name="name" value="{{ $category->name }}" required
                                        class="flex-1 px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
                                 <input type="color" name="color" value="{{ $category->color }}"
@@ -1517,7 +1522,7 @@
                             </div>
                             <!-- Edit form -->
                             <form x-show="editing" @submit.prevent="submit($refs.editCatForm{{ $category->id }})" x-ref="editCatForm{{ $category->id }}" class="flex-1 flex items-center gap-2"
-                                  x-data="{ ...ajaxForm({ url: '{{ route('settings.transaction-categories.update', $category) }}', method: 'PUT', stayOnPage: true, onSuccess: () => Livewire.navigate(window.location.href) }) }">
+                                  x-data="{ ...ajaxForm({ url: '{{ route('settings.transaction-categories.update', $category) }}', method: 'PUT', stayOnPage: true, onSuccess() { const container = this.$el.closest('.flex.items-center.justify-between.p-3'); const nameEl = container.querySelector('[x-show=\'!editing\'] span.text-gray-900, [x-show=\'!editing\'] span.dark\\:text-white'); const colorEl = container.querySelector('[x-show=\'!editing\'] .rounded-full'); const form = this.$el.closest('form'); if (nameEl) nameEl.textContent = form.querySelector('[name=name]').value; if (colorEl) colorEl.style.backgroundColor = form.querySelector('[name=color]').value; editing = false; } }) }">
                                 <input type="text" name="name" value="{{ $category->name }}" required
                                        class="flex-1 px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
                                 <input type="color" name="color" value="{{ $category->color }}"
@@ -1659,7 +1664,7 @@
             </div>
 
             <form @submit.prevent="submit($refs.tagCreateForm)" x-ref="tagCreateForm" class="flex gap-2"
-                  x-data="{ ...ajaxForm({ url: '{{ route('tags.store') }}', method: 'POST', onSuccess: () => Livewire.navigate(window.location.href) }) }">
+                  x-data="{ ...ajaxForm({ url: '{{ route('tags.store') }}', method: 'POST', resetOnSuccess: true, onSuccess() { const form = this.$refs.tagCreateForm; const name = form.querySelector('[name=name]').value; const color = form.querySelector('[name=color]').value; const list = form.closest('.p-6').querySelector('.space-y-2'); if (list) { const div = document.createElement('div'); div.className = 'flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg'; const safeName = name.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); div.innerHTML = '<div class=\"flex items-center\"><span class=\"w-4 h-4 rounded-full mr-2\" style=\"background-color: ' + color + '\"></span><span class=\"text-gray-900 dark:text-white\">' + safeName + '</span></div>'; list.appendChild(div); } } }) }">
                 <input type="text" name="name" placeholder="{{ __('app.settings_new_tag') }}" required
                        class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                 <input type="color" name="color" value="#3b82f6"
@@ -2793,6 +2798,7 @@ function permissionsManager() {
                 });
 
                 if (response.ok) {
+                    // SPA reload needed: permission checkboxes need fresh server state after reset
                     Livewire.navigate(window.location.href);
                 }
             } catch (error) {
@@ -2877,7 +2883,6 @@ function userOverridesManager() {
                 if (res.ok) {
                     this.showModal = false;
                     if (window.showGlobalToast) showGlobalToast(@js( __('app.settings_overrides_saved') ), 'success');
-                    Livewire.navigate(window.location.href);
                 } else {
                     if (window.showGlobalToast) showGlobalToast(data.message || @js( __('app.settings_save_error') ), 'error');
                 }
