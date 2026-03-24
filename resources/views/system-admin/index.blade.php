@@ -224,7 +224,7 @@ new Chart(ctx, {
         responsive: true,
         plugins: {
             legend: {
-                labels: { color: textColor }
+                labels: { color: textColor, font: { size: 14 }, padding: 16 }
             }
         },
         scales: {

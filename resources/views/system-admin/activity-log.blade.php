@@ -56,33 +56,65 @@
         {{-- ===== VISITS TAB ===== --}}
 
         <!-- Filters -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-            <form method="GET" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                <input type="hidden" name="tab" value="visits">
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="{{ __('app.sa_search_url_name') }}"
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
+             x-data="{
+                vf: {
+                    search: '{{ request('search') }}',
+                    church_id: '{{ request('church_id') }}',
+                    from: '{{ request('from') }}',
+                    to: '{{ request('to') }}'
+                },
+                vLoading: false,
+                async vFilter() {
+                    this.vLoading = true;
+                    $root.loading = true;
+                    const params = new URLSearchParams({ tab: 'visits' });
+                    Object.entries(this.vf).forEach(([k, v]) => { if (v) params.set(k, v); });
+                    history.replaceState(null, '', '?' + params.toString());
+                    try {
+                        const response = await fetch('?' + params.toString(), {
+                            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                        });
+                        const html = await response.text();
+                        const doc = new DOMParser().parseFromString(html, 'text/html');
+                        const newResults = doc.getElementById('results-container');
+                        if (newResults) {
+                            document.getElementById('results-container').innerHTML = newResults.innerHTML;
+                        }
+                    } catch (e) { console.error('Filter error:', e); }
+                    this.vLoading = false;
+                    $root.loading = false;
+                },
+                vReset() {
+                    this.vf = { search: '', church_id: '', from: '', to: '' };
+                    this.vFilter();
+                }
+             }">
+            <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <input type="text" x-model="vf.search" @input.debounce.400ms="vFilter()" placeholder="{{ __('app.sa_search_url_name') }}"
                        class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
 
-                <select name="church_id"
+                <select x-model="vf.church_id" @change="vFilter()"
                         class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
                     <option value="">{{ __('app.sa_all_churches') }}</option>
                     @foreach($churches as $church)
-                    <option value="{{ $church->id }}" {{ request('church_id') == $church->id ? 'selected' : '' }}>
+                    <option value="{{ $church->id }}">
                         {{ $church->name }}
                     </option>
                     @endforeach
                 </select>
 
-                <input type="date" name="from" value="{{ request('from') }}"
+                <input type="date" x-model="vf.from" @change="vFilter()"
                        class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white">
 
-                <input type="date" name="to" value="{{ request('to') }}"
+                <input type="date" x-model="vf.to" @change="vFilter()"
                        class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white">
 
                 <div class="flex gap-2 md:col-span-3 lg:col-span-4">
-                    <button type="submit" class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors">{{ __('app.sa_filter') }}</button>
-                    <a href="{{ route('system.activity-log', ['tab' => 'visits']) }}" class="px-4 py-2 bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 text-gray-900 dark:text-white rounded-lg transition-colors">{{ __('app.sa_reset') }}</a>
+                    <button @click="vFilter()" class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors">{{ __('app.sa_filter') }}</button>
+                    <button @click="vReset()" class="px-4 py-2 bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 text-gray-900 dark:text-white rounded-lg transition-colors">{{ __('app.sa_reset') }}</button>
                 </div>
-            </form>
+            </div>
         </div>
 
         @if(request('user_id'))
@@ -102,6 +134,12 @@
             </div>
             @endif
         @endif
+
+        <div id="results-container" class="space-y-6 relative">
+            <!-- Loading overlay -->
+            <div x-show="loading" x-cloak class="absolute inset-0 bg-white/50 dark:bg-gray-900/50 z-10 flex items-center justify-center rounded-xl">
+                <svg class="w-8 h-8 animate-spin text-indigo-600" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+            </div>
 
         <!-- Stats -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -214,37 +252,72 @@
             </div>
             @endif
         </div>
+        </div><!-- /results-container for visits -->
 
     @else
         {{-- ===== ACTIONS TAB ===== --}}
 
         <!-- Filters -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-            <form method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <input type="hidden" name="tab" value="actions">
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="{{ __('app.search') }}..."
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
+             x-data="{
+                af: {
+                    search: '{{ request('search') }}',
+                    church_id: '{{ request('church_id') }}',
+                    action: '{{ request('action') }}',
+                    model: '{{ request('model') }}',
+                    from: '{{ request('from') }}',
+                    to: '{{ request('to') }}'
+                },
+                aLoading: false,
+                async aFilter() {
+                    this.aLoading = true;
+                    $root.loading = true;
+                    const params = new URLSearchParams({ tab: 'actions' });
+                    Object.entries(this.af).forEach(([k, v]) => { if (v) params.set(k, v); });
+                    history.replaceState(null, '', '?' + params.toString());
+                    try {
+                        const response = await fetch('?' + params.toString(), {
+                            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                        });
+                        const html = await response.text();
+                        const doc = new DOMParser().parseFromString(html, 'text/html');
+                        const newResults = doc.getElementById('results-container');
+                        if (newResults) {
+                            document.getElementById('results-container').innerHTML = newResults.innerHTML;
+                        }
+                    } catch (e) { console.error('Filter error:', e); }
+                    this.aLoading = false;
+                    $root.loading = false;
+                },
+                aReset() {
+                    this.af = { search: '', church_id: '', action: '', model: '', from: '', to: '' };
+                    this.aFilter();
+                }
+             }">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <input type="text" x-model="af.search" @input.debounce.400ms="aFilter()" placeholder="{{ __('app.search') }}..."
                        class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
 
-                <select name="church_id"
+                <select x-model="af.church_id" @change="aFilter()"
                         class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
                     <option value="">{{ __('app.sa_all_churches') }}</option>
                     @foreach($churches as $church)
-                    <option value="{{ $church->id }}" {{ request('church_id') == $church->id ? 'selected' : '' }}>
+                    <option value="{{ $church->id }}">
                         {{ $church->name }}
                     </option>
                     @endforeach
                 </select>
 
-                <select name="action" class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                <select x-model="af.action" @change="aFilter()" class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
                     <option value="">{{ __('app.sa_all_actions') }}</option>
-                    <option value="created" {{ request('action') == 'created' ? 'selected' : '' }}>{{ __('app.sa_action_created') }}</option>
-                    <option value="updated" {{ request('action') == 'updated' ? 'selected' : '' }}>{{ __('app.sa_action_updated') }}</option>
-                    <option value="deleted" {{ request('action') == 'deleted' ? 'selected' : '' }}>{{ __('app.sa_action_deleted') }}</option>
-                    <option value="restored" {{ request('action') == 'restored' ? 'selected' : '' }}>{{ __('app.sa_action_restored') }}</option>
-                    <option value="login" {{ request('action') == 'login' ? 'selected' : '' }}>{{ __('app.sa_action_login') }}</option>
-                    <option value="logout" {{ request('action') == 'logout' ? 'selected' : '' }}>{{ __('app.sa_action_logout') }}</option>
-                    <option value="registered" {{ request('action') == 'registered' ? 'selected' : '' }}>{{ __('app.sa_action_registered') }}</option>
-                    <option value="joined_church" {{ request('action') == 'joined_church' ? 'selected' : '' }}>{{ __('app.sa_action_joined_church') }}</option>
+                    <option value="created">{{ __('app.sa_action_created') }}</option>
+                    <option value="updated">{{ __('app.sa_action_updated') }}</option>
+                    <option value="deleted">{{ __('app.sa_action_deleted') }}</option>
+                    <option value="restored">{{ __('app.sa_action_restored') }}</option>
+                    <option value="login">{{ __('app.sa_action_login') }}</option>
+                    <option value="logout">{{ __('app.sa_action_logout') }}</option>
+                    <option value="registered">{{ __('app.sa_action_registered') }}</option>
+                    <option value="joined_church">{{ __('app.sa_action_joined_church') }}</option>
                 </select>
 
                 @php
@@ -262,24 +335,24 @@
                         'Church' => __('app.sa_model_church'), 'SupportTicket' => __('app.sa_model_support_ticket'),
                     ];
                 @endphp
-                <select name="model" class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                <select x-model="af.model" @change="aFilter()" class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
                     <option value="">{{ __('app.sa_all_types') }}</option>
                     @foreach($modelOptions as $key => $label)
-                        <option value="{{ $key }}" {{ request('model') == $key ? 'selected' : '' }}>{{ $label }}</option>
+                        <option value="{{ $key }}">{{ $label }}</option>
                     @endforeach
                 </select>
 
-                <input type="date" name="from" value="{{ request('from') }}"
+                <input type="date" x-model="af.from" @change="aFilter()"
                        class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white">
 
-                <input type="date" name="to" value="{{ request('to') }}"
+                <input type="date" x-model="af.to" @change="aFilter()"
                        class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white">
 
                 <div class="flex gap-2 md:col-span-2">
-                    <button type="submit" class="flex-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors">{{ __('app.sa_filter') }}</button>
-                    <a href="{{ route('system.activity-log', ['tab' => 'actions']) }}" class="px-4 py-2 bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 text-gray-900 dark:text-white rounded-lg transition-colors">{{ __('app.sa_reset') }}</a>
+                    <button @click="aFilter()" class="flex-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors">{{ __('app.sa_filter') }}</button>
+                    <button @click="aReset()" class="px-4 py-2 bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 text-gray-900 dark:text-white rounded-lg transition-colors">{{ __('app.sa_reset') }}</button>
                 </div>
-            </form>
+            </div>
         </div>
 
         @if(request('user_id'))
@@ -299,6 +372,12 @@
             </div>
             @endif
         @endif
+
+        <div id="results-container" class="space-y-6 relative">
+            <!-- Loading overlay -->
+            <div x-show="loading" x-cloak class="absolute inset-0 bg-white/50 dark:bg-gray-900/50 z-10 flex items-center justify-center rounded-xl">
+                <svg class="w-8 h-8 animate-spin text-indigo-600" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+            </div>
 
         <!-- Stats -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -525,6 +604,7 @@
             </div>
             @endif
         </div>
+        </div><!-- /results-container for actions -->
     @endif
 </div>
 
@@ -534,6 +614,7 @@ function activityLog() {
     return {
         selectedIds: [],
         selectAll: false,
+        loading: false,
 
         toggleSelectAll(ids) {
             if (this.selectAll) {

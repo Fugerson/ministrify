@@ -6785,4 +6785,10 @@ return [
     'month_october' => 'Жовтень',
     'month_november' => 'Листопад',
     'month_december' => 'Грудень',
+
+    // Real-time broadcasting
+    'new_data_available' => 'Нові дані. Натисніть для оновлення',
+    'person_added_realtime' => 'додано',
+    'person_updated_realtime' => 'оновлено',
+    'person_deleted_realtime' => 'видалено',
 ];

@@ -7,7 +7,7 @@
             </svg>
             {{ __('app.prayer_requests_title') }}
         </h2>
-        <a href="{{ route('website-builder.prayer-inbox.index') }}" class="text-sm text-primary-600 dark:text-primary-400 hover:underline flex items-center gap-1">
+        <a href="{{ route('website-builder.prayer-inbox.index') }}" class="text-sm text-primary-600 dark:text-primary-400 hover:underline flex items-center gap-1 px-2 py-2 -mr-2 min-h-[44px]">
             {{ __('app.view_all_short') }}
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>

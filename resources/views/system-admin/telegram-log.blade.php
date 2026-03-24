@@ -3,7 +3,97 @@
 @section('title', 'Telegram Log')
 
 @section('content')
-<div class="space-y-6">
+<div class="space-y-6" x-data="{
+    filters: {
+        search: '{{ request('search') }}',
+        church_id: '{{ request('church_id') }}',
+        direction: '{{ request('direction') }}',
+        from: '{{ request('from') }}',
+        to: '{{ request('to') }}'
+    },
+    loading: false,
+    debounceTimer: null,
+    applyFilters() {
+        clearTimeout(this.debounceTimer);
+        this.debounceTimer = setTimeout(() => this.doFilter(), 300);
+    },
+    applyFiltersNow() {
+        clearTimeout(this.debounceTimer);
+        this.doFilter();
+    },
+    async doFilter() {
+        this.loading = true;
+        const params = new URLSearchParams();
+        Object.entries(this.filters).forEach(([k, v]) => { if (v) params.set(k, v); });
+        history.replaceState(null, '', '?' + params.toString());
+        try {
+            const response = await fetch('?' + params.toString(), {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+            const html = await response.text();
+            const doc = new DOMParser().parseFromString(html, 'text/html');
+            const newResults = doc.getElementById('results-container');
+            if (newResults) {
+                document.getElementById('results-container').innerHTML = newResults.innerHTML;
+            }
+        } catch (e) { console.error('Filter error:', e); }
+        this.loading = false;
+    },
+    resetFilters() {
+        this.filters = { search: '', church_id: '', direction: '', from: '', to: '' };
+        this.applyFiltersNow();
+    }
+}">
+    <!-- Filters -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+        <div class="flex flex-wrap items-end gap-3">
+            <div class="flex-1 min-w-[180px]">
+                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Search</label>
+                <input type="text" x-model="filters.search" @input.debounce.400ms="applyFiltersNow()" placeholder="Message text or person name..."
+                       class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+            </div>
+            <div class="w-40">
+                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Church</label>
+                <select x-model="filters.church_id" @change="applyFiltersNow()" class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                    <option value="">All churches</option>
+                    @foreach($churches as $church)
+                        <option value="{{ $church->id }}">{{ $church->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="w-32">
+                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Direction</label>
+                <select x-model="filters.direction" @change="applyFiltersNow()" class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                    <option value="">All</option>
+                    <option value="outgoing">Outgoing</option>
+                    <option value="incoming">Incoming</option>
+                </select>
+            </div>
+            <div class="w-36">
+                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">From</label>
+                <input type="date" x-model="filters.from" @change="applyFiltersNow()"
+                       class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+            </div>
+            <div class="w-36">
+                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">To</label>
+                <input type="date" x-model="filters.to" @change="applyFiltersNow()"
+                       class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+            </div>
+            <button @click="applyFiltersNow()" class="px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+                Filter
+            </button>
+            <button @click="resetFilters()" x-show="Object.values(filters).some(v => v)" class="px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                Clear
+            </button>
+        </div>
+    </div>
+
+    <div id="results-container" class="space-y-6 relative">
+        <!-- Loading overlay -->
+        <div x-show="loading" x-cloak class="absolute inset-0 bg-white/50 dark:bg-gray-900/50 z-10 flex items-center justify-center rounded-xl">
+            <svg class="w-8 h-8 animate-spin text-indigo-600" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+        </div>
+
     <!-- Stats -->
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
@@ -22,52 +112,6 @@
             <div class="text-2xl font-bold text-purple-600 dark:text-purple-400">{{ number_format($stats['today']) }}</div>
             <div class="text-sm text-gray-500 dark:text-gray-400">Today</div>
         </div>
-    </div>
-
-    <!-- Filters -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
-        <form method="GET" class="flex flex-wrap items-end gap-3">
-            <div class="flex-1 min-w-[180px]">
-                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Search</label>
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="Message text or person name..."
-                       class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-            </div>
-            <div class="w-40">
-                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Church</label>
-                <select name="church_id" class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                    <option value="">All churches</option>
-                    @foreach($churches as $church)
-                        <option value="{{ $church->id }}" {{ request('church_id') == $church->id ? 'selected' : '' }}>{{ $church->name }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="w-32">
-                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Direction</label>
-                <select name="direction" class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                    <option value="">All</option>
-                    <option value="outgoing" {{ request('direction') === 'outgoing' ? 'selected' : '' }}>Outgoing</option>
-                    <option value="incoming" {{ request('direction') === 'incoming' ? 'selected' : '' }}>Incoming</option>
-                </select>
-            </div>
-            <div class="w-36">
-                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">From</label>
-                <input type="date" name="from" value="{{ request('from') }}"
-                       class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-            </div>
-            <div class="w-36">
-                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">To</label>
-                <input type="date" name="to" value="{{ request('to') }}"
-                       class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-            </div>
-            <button type="submit" class="px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
-                Filter
-            </button>
-            @if(request()->hasAny(['search', 'church_id', 'direction', 'from', 'to']))
-                <a href="{{ route('system.telegram-log') }}" class="px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                    Clear
-                </a>
-            @endif
-        </form>
     </div>
 
     <!-- Messages Table -->
@@ -134,5 +178,6 @@
         </div>
         @endif
     </div>
+    </div><!-- /results-container -->
 </div>
 @endsection

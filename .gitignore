@@ -41,3 +41,9 @@ yarn-error.log
 
 # Assets source (used for icon generation)
 /assets/
+
+# Screenshots / test images (generated during development)
+/*.png
+/*.jpg
+/*.jpeg
+/screenshots/

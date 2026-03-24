@@ -3,31 +3,72 @@
 @section('title', __('app.audit_log_title'))
 
 @section('content')
-<div class="space-y-6">
+<div class="space-y-6" x-data="{
+    filters: {
+        search: '{{ request('search') }}',
+        church_id: '{{ request('church_id') }}',
+        action: '{{ request('action') }}',
+        model: '{{ request('model') }}',
+        from: '{{ request('from') }}',
+        to: '{{ request('to') }}'
+    },
+    loading: false,
+    debounceTimer: null,
+    applyFilters() {
+        clearTimeout(this.debounceTimer);
+        this.debounceTimer = setTimeout(() => this.doFilter(), 300);
+    },
+    applyFiltersNow() {
+        clearTimeout(this.debounceTimer);
+        this.doFilter();
+    },
+    async doFilter() {
+        this.loading = true;
+        const params = new URLSearchParams();
+        Object.entries(this.filters).forEach(([k, v]) => { if (v) params.set(k, v); });
+        history.replaceState(null, '', '?' + params.toString());
+        try {
+            const response = await fetch('?' + params.toString(), {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+            const html = await response.text();
+            const doc = new DOMParser().parseFromString(html, 'text/html');
+            const newResults = doc.getElementById('results-container');
+            if (newResults) {
+                document.getElementById('results-container').innerHTML = newResults.innerHTML;
+            }
+        } catch (e) { console.error('Filter error:', e); }
+        this.loading = false;
+    },
+    resetFilters() {
+        this.filters = { search: '', church_id: '', action: '', model: '', from: '', to: '' };
+        this.applyFiltersNow();
+    }
+}">
     <!-- Filters -->
     <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-        <form method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <input type="text" name="search" value="{{ request('search') }}" placeholder="Пошук..."
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <input type="text" x-model="filters.search" @input.debounce.400ms="applyFiltersNow()" placeholder="Пошук..."
                    class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
 
-            <select name="church_id"
+            <select x-model="filters.church_id" @change="applyFiltersNow()"
                     class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
                 <option value="">Всі церкви</option>
                 @foreach($churches as $church)
-                <option value="{{ $church->id }}" {{ request('church_id') == $church->id ? 'selected' : '' }}>
+                <option value="{{ $church->id }}">
                     {{ $church->name }}
                 </option>
                 @endforeach
             </select>
 
-            <select name="action" class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+            <select x-model="filters.action" @change="applyFiltersNow()" class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
                 <option value="">Всі дії</option>
-                <option value="created" {{ request('action') == 'created' ? 'selected' : '' }}>Створено</option>
-                <option value="updated" {{ request('action') == 'updated' ? 'selected' : '' }}>Оновлено</option>
-                <option value="deleted" {{ request('action') == 'deleted' ? 'selected' : '' }}>Видалено</option>
-                <option value="restored" {{ request('action') == 'restored' ? 'selected' : '' }}>Відновлено</option>
-                <option value="login" {{ request('action') == 'login' ? 'selected' : '' }}>Вхід</option>
-                <option value="logout" {{ request('action') == 'logout' ? 'selected' : '' }}>Вихід</option>
+                <option value="created">Створено</option>
+                <option value="updated">Оновлено</option>
+                <option value="deleted">Видалено</option>
+                <option value="restored">Відновлено</option>
+                <option value="login">Вхід</option>
+                <option value="logout">Вихід</option>
             </select>
 
             @php
@@ -45,25 +86,31 @@
                     'Church' => 'Церква', 'SupportTicket' => 'Тікети підтримки',
                 ];
             @endphp
-            <select name="model" class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+            <select x-model="filters.model" @change="applyFiltersNow()" class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
                 <option value="">Всі типи</option>
                 @foreach($modelOptions as $key => $label)
-                    <option value="{{ $key }}" {{ request('model') == $key ? 'selected' : '' }}>{{ $label }}</option>
+                    <option value="{{ $key }}">{{ $label }}</option>
                 @endforeach
             </select>
 
-            <input type="date" name="from" value="{{ request('from') }}"
+            <input type="date" x-model="filters.from" @change="applyFiltersNow()"
                    class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white">
 
-            <input type="date" name="to" value="{{ request('to') }}"
+            <input type="date" x-model="filters.to" @change="applyFiltersNow()"
                    class="px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white">
 
             <div class="flex gap-2 md:col-span-2">
-                <button type="submit" class="flex-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg">Фільтрувати</button>
-                <a href="{{ route('system.audit-logs') }}" class="px-4 py-2 bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 text-gray-900 dark:text-white rounded-lg">Скинути</a>
+                <button @click="applyFiltersNow()" class="flex-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg">Фільтрувати</button>
+                <button @click="resetFilters()" class="px-4 py-2 bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 text-gray-900 dark:text-white rounded-lg">Скинути</button>
             </div>
-        </form>
+        </div>
     </div>
+
+    <div id="results-container" class="space-y-6 relative">
+        <!-- Loading overlay -->
+        <div x-show="loading" x-cloak class="absolute inset-0 bg-white/50 dark:bg-gray-900/50 z-10 flex items-center justify-center rounded-xl">
+            <svg class="w-8 h-8 animate-spin text-indigo-600" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+        </div>
 
     <!-- Stats -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -273,5 +320,6 @@
         </div>
         @endif
     </div>
+    </div><!-- /results-container -->
 </div>
 @endsection

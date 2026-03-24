@@ -6953,4 +6953,10 @@ return [
     'month_october' => 'October',
     'month_november' => 'November',
     'month_december' => 'December',
+
+    // Real-time broadcasting
+    'new_data_available' => 'New data available. Click to refresh',
+    'person_added_realtime' => 'added',
+    'person_updated_realtime' => 'updated',
+    'person_deleted_realtime' => 'deleted',
 ];

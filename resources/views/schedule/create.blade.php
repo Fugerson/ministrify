@@ -96,12 +96,12 @@
 
                         <!-- Custom recurrence settings -->
                         <div x-show="recurrenceType === 'custom'" x-collapse class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg space-y-3">
-                            <div class="flex items-center gap-2">
+                            <div class="flex flex-wrap items-center gap-2">
                                 <span class="text-sm text-gray-600 dark:text-gray-400">{{ __('app.every_n') }}</span>
                                 <input type="number" x-model="customInterval" @input="updatePreview()" min="1" max="99"
-                                       class="w-16 px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-center">
+                                       class="w-20 sm:w-16 px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-center">
                                 <select x-model="customFrequency" @change="updatePreview()"
-                                        class="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                        class="flex-1 sm:flex-none px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                                     <option value="day">{{ __('app.days_unit') }}</option>
                                     <option value="week">{{ __('app.weeks_unit') }}</option>
                                     <option value="month">{{ __('app.months_unit') }}</option>
@@ -114,18 +114,18 @@
                         <div x-show="recurrenceType && recurrenceType !== ''" x-collapse class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg space-y-3">
                             <label class="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">{{ __('app.ends') }}</label>
                             <div class="space-y-2">
-                                <label class="flex items-center gap-2 cursor-pointer">
+                                <label class="flex flex-wrap items-center gap-2 cursor-pointer">
                                     <input type="radio" x-model="endType" value="count" @change="updatePreview()" class="text-primary-600 focus:ring-primary-500">
                                     <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('app.after_label') }}</span>
                                     <input type="number" x-model="endCount" @input="updatePreview()" min="2" max="365" :disabled="endType !== 'count'"
-                                           class="w-16 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-center disabled:opacity-50">
+                                           class="w-20 sm:w-16 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-center disabled:opacity-50">
                                     <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('app.occurrences') }}</span>
                                 </label>
-                                <label class="flex items-center gap-2 cursor-pointer">
+                                <label class="flex flex-wrap items-center gap-2 cursor-pointer">
                                     <input type="radio" x-model="endType" value="date" @change="updatePreview()" class="text-primary-600 focus:ring-primary-500">
                                     <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('app.until_date') }}</span>
                                     <input type="date" x-model="endDate" @change="updatePreview()" :disabled="endType !== 'date'"
-                                           class="px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:opacity-50">
+                                           class="flex-1 sm:flex-none px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:opacity-50">
                                 </label>
                             </div>
                             <p class="text-xs text-gray-500 dark:text-gray-400" x-text="previewText"></p>

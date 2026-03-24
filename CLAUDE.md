@@ -1,6 +1,6 @@
 # ChurchHub (Ministrify)
 
-Laravel 10 + Blade + Alpine.js + Tailwind CSS. Multi-tenancy через church_id.
+Laravel 11 + Blade + Alpine.js + Tailwind CSS. Multi-tenancy через church_id.
 
 ## Deployment
 

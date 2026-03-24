@@ -2,7 +2,7 @@
 <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
     <div class="px-4 lg:px-5 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
         <h2 class="font-semibold text-gray-900 dark:text-white">{{ __('app.upcoming_events_title') }}</h2>
-        <a href="{{ route('schedule') }}" class="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 font-medium">{{ __('app.view_all_short') }}</a>
+        <a href="{{ route('schedule') }}" class="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 font-medium px-2 py-2 -mr-2 min-h-[44px] flex items-center">{{ __('app.view_all_short') }}</a>
     </div>
     <div class="divide-y divide-gray-50 dark:divide-gray-700">
         @forelse($upcomingEvents as $event)

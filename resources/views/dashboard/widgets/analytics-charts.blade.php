@@ -8,16 +8,16 @@
             {{ __('app.analytics_title') }}
         </h2>
         <div class="flex rounded-xl bg-gray-100 dark:bg-gray-700 p-1 overflow-x-auto">
-            <button type="button" data-chart="growth" class="chart-tab px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium rounded-lg transition-colors bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm whitespace-nowrap">
+            <button type="button" data-chart="growth" class="chart-tab px-2 sm:px-3 py-2 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg transition-colors bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm whitespace-nowrap min-h-[36px] sm:min-h-0">
                 {{ __('app.growth_tab') }}
             </button>
-            <button type="button" data-chart="financial" class="chart-tab px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium rounded-lg transition-colors text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white whitespace-nowrap">
+            <button type="button" data-chart="financial" class="chart-tab px-2 sm:px-3 py-2 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg transition-colors text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white whitespace-nowrap min-h-[36px] sm:min-h-0">
                 {{ __('app.finances_tab') }}
             </button>
-            <button type="button" data-chart="attendance" class="chart-tab px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium rounded-lg transition-colors text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white whitespace-nowrap">
+            <button type="button" data-chart="attendance" class="chart-tab px-2 sm:px-3 py-2 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg transition-colors text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white whitespace-nowrap min-h-[36px] sm:min-h-0">
                 {{ __('app.attendance_tab') }}
             </button>
-            <button type="button" data-chart="ministries" class="chart-tab px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium rounded-lg transition-colors text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white whitespace-nowrap">
+            <button type="button" data-chart="ministries" class="chart-tab px-2 sm:px-3 py-2 sm:py-1.5 text-xs sm:text-sm font-medium rounded-lg transition-colors text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white whitespace-nowrap min-h-[36px] sm:min-h-0">
                 {{ __('app.ministries_tab') }}
             </button>
         </div>

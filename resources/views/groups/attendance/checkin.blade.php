@@ -190,14 +190,70 @@ async function toggleGuestPresence(guestId, button) {
 }
 
 async function markAllPresent() {
-    const buttons = document.querySelectorAll('[data-person-id]');
-    for (const button of buttons) {
-        const indicator = button.querySelector('.check-indicator');
-        if (indicator && indicator.classList.contains('opacity-0')) {
-            await togglePresence(button.dataset.personId, button);
-            await new Promise(r => setTimeout(r, 100));
+    try {
+        const response = await fetch('{{ route("groups.attendance.markAll", [$group, $attendance]) }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ include_guests: true })
+        });
+
+        const data = await response.json().catch(() => ({}));
+
+        if (data.success) {
+            // Update all member buttons visually
+            document.querySelectorAll('[data-person-id]').forEach(button => {
+                button.classList.add('bg-green-50', 'dark:bg-green-900/20');
+                const indicator = button.querySelector('.check-indicator');
+                if (indicator) indicator.classList.remove('opacity-0');
+            });
+
+            // Update all guest buttons visually
+            document.querySelectorAll('[data-guest-id]').forEach(button => {
+                button.classList.add('bg-green-50', 'dark:bg-green-900/20');
+                const indicator = button.querySelector('.check-indicator');
+                if (indicator) indicator.classList.remove('opacity-0');
+            });
+
+            document.getElementById('presentCount').textContent = data.members_present;
         }
+    } catch (error) {
+        console.error('Error:', error);
     }
+}
+
+// Real-time attendance sync via Laravel Reverb
+if (window.Echo) {
+    window.Echo.private('church.{{ $group->church_id }}.attendance.{{ $attendance->id }}')
+        .listen('.attendance.updated', function(e) {
+            // Update present count from other user's action
+            document.getElementById('presentCount').textContent = e.present_count;
+
+            // If a specific person was toggled, update their button visually
+            if (e.person_id) {
+                var btn = document.querySelector('[data-person-id="' + e.person_id + '"]');
+                if (btn) {
+                    var indicator = btn.querySelector('.check-indicator');
+                    if (e.present) {
+                        btn.classList.add('bg-green-50', 'dark:bg-green-900/20');
+                        if (indicator) indicator.classList.remove('opacity-0');
+                    } else {
+                        btn.classList.remove('bg-green-50', 'dark:bg-green-900/20');
+                        if (indicator) indicator.classList.add('opacity-0');
+                    }
+                }
+            } else {
+                // Bulk update (markAll) — mark all visible buttons as present
+                document.querySelectorAll('[data-person-id], [data-guest-id]').forEach(function(btn) {
+                    btn.classList.add('bg-green-50', 'dark:bg-green-900/20');
+                    var indicator = btn.querySelector('.check-indicator');
+                    if (indicator) indicator.classList.remove('opacity-0');
+                });
+            }
+        });
 }
 </script>
 @endsection

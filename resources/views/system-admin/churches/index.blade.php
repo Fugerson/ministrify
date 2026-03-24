@@ -9,15 +9,47 @@
 @endsection
 
 @section('content')
-<div class="space-y-6">
+<div class="space-y-6" x-data="{
+    filters: { search: '{{ request('search') }}' },
+    loading: false,
+    debounceTimer: null,
+    applyFiltersNow() {
+        clearTimeout(this.debounceTimer);
+        this.doFilter();
+    },
+    async doFilter() {
+        this.loading = true;
+        const params = new URLSearchParams();
+        Object.entries(this.filters).forEach(([k, v]) => { if (v) params.set(k, v); });
+        history.replaceState(null, '', '?' + params.toString());
+        try {
+            const response = await fetch('?' + params.toString(), {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+            const html = await response.text();
+            const doc = new DOMParser().parseFromString(html, 'text/html');
+            const newResults = doc.getElementById('results-container');
+            if (newResults) {
+                document.getElementById('results-container').innerHTML = newResults.innerHTML;
+            }
+        } catch (e) { console.error('Filter error:', e); }
+        this.loading = false;
+    }
+}">
     <!-- Search -->
     <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-        <form method="GET" class="flex flex-col sm:flex-row gap-3 sm:gap-4">
-            <input type="text" name="search" value="{{ request('search') }}" placeholder="{{ __('app.sa_search_church') }}"
+        <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
+            <input type="text" x-model="filters.search" @input.debounce.400ms="applyFiltersNow()" @keydown.enter.prevent="applyFiltersNow()" placeholder="{{ __('app.sa_search_church') }}"
                    class="flex-1 px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
-            <button type="submit" class="px-6 py-2 bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 text-gray-900 dark:text-white rounded-lg">{{ __('app.search') }}</button>
-        </form>
+            <button @click="applyFiltersNow()" class="px-6 py-2 bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 text-gray-900 dark:text-white rounded-lg">{{ __('app.search') }}</button>
+        </div>
     </div>
+
+    <div id="results-container" class="space-y-6 relative">
+        <!-- Loading overlay -->
+        <div x-show="loading" x-cloak class="absolute inset-0 bg-white/50 dark:bg-gray-900/50 z-10 flex items-center justify-center rounded-xl">
+            <svg class="w-8 h-8 animate-spin text-indigo-600" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+        </div>
 
     <!-- Mobile Cards (visible on small screens) -->
     <div class="lg:hidden space-y-4">
@@ -184,5 +216,6 @@
         {{ $churches->links() }}
     </div>
     @endif
+    </div><!-- /results-container -->
 </div>
 @endsection

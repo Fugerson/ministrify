@@ -8,6 +8,7 @@
     'method' => 'DELETE',
     'ajax' => false,
     'redirect' => null,
+    'stayOnPage' => false,
 ])
 
 <div x-data="{
@@ -30,7 +31,11 @@
                 if (typeof showToast === 'function') {
                     showToast('success', data.message || @js( __('app.deleted') ));
                 }
-                @if($redirect)
+                // Dispatch event so parent Alpine components can react
+                this.$dispatch('deleted', data);
+                @if($stayOnPage)
+                    // stayOnPage mode: no redirect, parent handles via @deleted listener
+                @elseif($redirect)
                     setTimeout(() => {
                         if (typeof Livewire !== 'undefined' && Livewire.navigate) {
                             Livewire.navigate('{{ $redirect }}');
@@ -137,12 +142,16 @@
                                 <span x-show="loading">{{ __('app.deleting') }}</span>
                             </button>
                         @else
-                            <form method="POST" action="{{ $action }}" class="inline">
+                            <form method="POST" action="{{ $action }}" class="inline" x-data="{ deleting: false }" @submit="deleting = true">
                                 @csrf
                                 @method($method)
-                                <button type="submit"
-                                        class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors">
-                                    {{ $buttonText }}
+                                <button type="submit" :disabled="deleting"
+                                        class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors disabled:opacity-50">
+                                    <span x-show="!deleting">{{ $buttonText }}</span>
+                                    <span x-show="deleting" class="flex items-center gap-1">
+                                        <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                                        {{ __('app.deleting') }}
+                                    </span>
                                 </button>
                             </form>
                         @endif

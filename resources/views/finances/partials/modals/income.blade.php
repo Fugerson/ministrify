@@ -58,9 +58,18 @@ window.incomeModal = function() {
         },
         async deleteIncome() {
             if (!await confirmDialog(@js( __('messages.confirm_delete_income') ))) return;
-            this.loading = true;
+            const deleteId = this.editId;
+
+            // Optimistic: close modal, remove from journal, show toast
+            this.modalOpen = false;
+            this.loading = false;
+            showToast('success', @js( __('app.deleted') ));
+            if (window.journalRemoveTransaction) {
+                window.journalRemoveTransaction(deleteId);
+            }
+
             try {
-                const response = await fetch(`/finances/incomes/${this.editId}`, {
+                const response = await fetch(`/finances/incomes/${deleteId}`, {
                     method: 'DELETE',
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -69,32 +78,57 @@ window.incomeModal = function() {
                 });
                 const data = await response.json().catch(() => ({}));
                 if (response.ok && data.success) {
-                    this.modalOpen = false;
-                    showToast('success', data.message);
-                    if (window.journalRemoveTransaction) {
-                        window.journalRemoveTransaction(this.editId);
-                    } else {
-                        setTimeout(() => Livewire.navigate(window.location.href), 200);
+                    if (!window.journalRemoveTransaction) {
+                        this._silentReload();
                     }
                 } else {
                     showToast('error', data.message || @js( __('app.delete_error') ));
+                    // Reload to restore state
+                    Livewire.navigate(window.location.href);
                 }
             } catch (e) {
                 showToast('error', @js( __('app.connection_error') ));
-            } finally {
-                this.loading = false;
+                Livewire.navigate(window.location.href);
             }
         },
         async submit() {
             this.loading = true;
             this.errors = {};
             const url = this.isEdit ? `/finances/incomes/${this.editId}` : '/finances/incomes';
+            const wasEdit = this.isEdit;
+            const savedFormData = {...this.formData};
+            const savedEditId = this.editId;
+
             try {
                 const payload = {...this.formData};
                 if (payload.category_id === '__custom__') { payload.category_id = ''; }
                 else { delete payload.category_name; }
+
+                // Optimistic: close modal and show toast immediately
+                this.modalOpen = false;
+                this.loading = false;
+                showToast('success', wasEdit ? @js( __('app.saved') ) : @js( __('messages.income_added') ));
+
+                // Inject optimistic row into journal if available
+                let optimisticId = null;
+                if (!wasEdit && window.journalUpdateTransaction) {
+                    optimisticId = 'optimistic_' + Date.now();
+                    window.journalUpdateTransaction({
+                        id: optimisticId,
+                        direction: 'in',
+                        amount: parseFloat(savedFormData.amount) || 0,
+                        currency: savedFormData.currency || 'UAH',
+                        date: savedFormData.date,
+                        payment_method: savedFormData.payment_method,
+                        notes: savedFormData.notes || '',
+                        category_name: savedFormData.category_name || '',
+                        is_anonymous: savedFormData.is_anonymous,
+                        _optimistic: true
+                    }, true);
+                }
+
                 const response = await fetch(url, {
-                    method: this.isEdit ? 'PUT' : 'POST',
+                    method: wasEdit ? 'PUT' : 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -104,25 +138,55 @@ window.incomeModal = function() {
                     body: JSON.stringify(payload)
                 });
                 const data = await response.json().catch(() => ({}));
+
                 if (response.ok && data.success) {
-                    this.modalOpen = false;
-                    showToast('success', data.message);
                     if (data.transaction && window.journalUpdateTransaction) {
-                        window.journalUpdateTransaction(data.transaction, !this.isEdit);
-                    } else {
-                        setTimeout(() => Livewire.navigate(window.location.href), 200);
+                        // Replace optimistic row with real data
+                        if (optimisticId) {
+                            window.journalRemoveTransaction(optimisticId);
+                        }
+                        window.journalUpdateTransaction(data.transaction, !wasEdit);
+                    } else if (!window.journalUpdateTransaction) {
+                        // No journal — silently reload page content
+                        this._silentReload();
                     }
                 } else if (response.status === 422) {
+                    // Validation error — remove optimistic row, reopen modal
+                    if (optimisticId && window.journalRemoveTransaction) {
+                        window.journalRemoveTransaction(optimisticId);
+                    }
                     this.errors = data.errors || {};
+                    this.isEdit = wasEdit;
+                    this.editId = savedEditId;
+                    this.formData = savedFormData;
+                    this.modalOpen = true;
                     showToast('error', @js( __('app.check_form_errors') ));
                 } else {
+                    // Server error — remove optimistic row, show error
+                    if (optimisticId && window.journalRemoveTransaction) {
+                        window.journalRemoveTransaction(optimisticId);
+                    }
                     showToast('error', data.message || @js( __('app.save_error') ));
                 }
             } catch (e) {
                 showToast('error', @js( __('app.connection_error') ));
-            } finally {
-                this.loading = false;
             }
+        },
+        _silentReload() {
+            fetch(window.location.href, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                .then(r => r.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const newContent = doc.querySelector('#finance-content');
+                    const current = document.querySelector('#finance-content');
+                    if (newContent && current) {
+                        current.innerHTML = newContent.innerHTML;
+                    } else {
+                        Livewire.navigate(window.location.href);
+                    }
+                })
+                .catch(() => Livewire.navigate(window.location.href));
         }
     };
 };

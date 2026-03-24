@@ -147,7 +147,7 @@ onPageReady(function() {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: { legend: { position: 'top' } },
+            plugins: { legend: { position: 'top', labels: { font: { size: window.innerWidth < 640 ? 13 : 15 }, boxWidth: window.innerWidth < 640 ? 12 : 40, padding: 16 } } },
             scales: { y: { beginAtZero: true } }
         }
     });

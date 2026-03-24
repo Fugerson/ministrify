@@ -7,14 +7,27 @@
 <head>
     <script>
         // Global helper: works on initial load AND wire:navigate SPA navigation
-        // DOMContentLoaded doesn't re-fire on SPA navigation, this handles both cases
+        // Livewire 3 re-executes inline <script> on SPA navigation via cloneScriptTag()
+        // Use requestAnimationFrame to ensure DOM is fully painted before running init code
         window.onPageReady = function(fn) {
             if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', fn, { once: true });
+                document.addEventListener('DOMContentLoaded', function() {
+                    requestAnimationFrame(fn);
+                }, { once: true });
             } else {
-                fn();
+                requestAnimationFrame(fn);
             }
         };
+
+        // AbortController for page-scoped event listeners
+        // Automatically cleans up document-level listeners on SPA navigation
+        // Usage: document.addEventListener('keydown', handler, { signal: pageSignal() })
+        window._pageAbort = new AbortController();
+        window.pageSignal = function() { return window._pageAbort.signal; };
+        document.addEventListener('livewire:navigating', function() {
+            window._pageAbort.abort();
+            window._pageAbort = new AbortController();
+        });
 
         // Apply dark mode immediately before any rendering to prevent FOUC
         // Dark is default, only light if explicitly set
@@ -963,12 +976,18 @@
     <script>
         window.Echo = new Echo({
             broadcaster: 'reverb',
-            key: '{{ config("reverb.apps.0.key") }}',
+            key: '{{ config("reverb.apps.apps.0.key") }}',
             wsHost: window.location.hostname,
-            wsPort: {{ config("reverb.apps.0.options.port", 8080) }},
+            wsPort: {{ config("reverb.apps.apps.0.options.port", 8080) }},
             wssPort: 443,
             forceTLS: window.location.protocol === 'https:',
             enabledTransports: ['ws', 'wss'],
+            authEndpoint: '/broadcasting/auth',
+            auth: {
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                }
+            }
         });
     </script>
     @endauth

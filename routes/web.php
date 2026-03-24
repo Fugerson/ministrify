@@ -311,6 +311,7 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
 
     // People
     Route::resource('people', PersonController::class);
+    Route::get('people-search', [PersonController::class, 'search'])->name('people.search')->middleware('permission:people,view');
     Route::post('people/{person}/restore', [PersonController::class, 'restore'])->name('people.restore')->withTrashed();
     Route::post('people/{person}/update-role', [PersonController::class, 'updateRole'])->name('people.update-role')->middleware('permission:people,edit');
     Route::post('people/{person}/update-email', [PersonController::class, 'updateEmail'])->name('people.update-email')->middleware('permission:people,edit');
@@ -934,6 +935,7 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
         Route::put('{attendance}', [GroupAttendanceController::class, 'update'])->name('update');
         Route::delete('{attendance}', [GroupAttendanceController::class, 'destroy'])->name('destroy');
         Route::post('{attendance}/toggle', [GroupAttendanceController::class, 'togglePresence'])->name('toggle');
+        Route::post('{attendance}/mark-all', [GroupAttendanceController::class, 'markAllPresent'])->name('markAll');
     });
 
     // Global Search
