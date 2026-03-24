@@ -864,5 +864,5 @@
 </div>
 @endcan
 
-
+<x-realtime-banner channel="groups" />
 @endsection

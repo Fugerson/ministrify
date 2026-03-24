@@ -203,7 +203,8 @@ function exportButton() {
                 <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                     <template x-for="item in displayedTransactions" :key="item.transaction.id">
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors"
-                            @click="openDetails(item.transaction.id)">
+                            :class="item.transaction._optimistic ? 'opacity-50 animate-pulse' : ''"
+                            @click="if (!item.transaction._optimistic) openDetails(item.transaction.id)">
                             <td class="px-4 py-3 whitespace-nowrap">
                                 <div class="text-sm font-medium text-gray-900 dark:text-white" x-text="formatDate(item.transaction.date)"></div>
                                 <div class="text-xs text-gray-500 dark:text-gray-400" x-text="formatWeekday(item.transaction.date)"></div>
@@ -313,7 +314,8 @@ function exportButton() {
         <div class="divide-y divide-gray-200 dark:divide-gray-700">
             <template x-for="item in displayedTransactions" :key="'m-'+item.transaction.id">
                 <div class="px-4 py-3 active:bg-gray-50 dark:active:bg-gray-700/50 cursor-pointer transition-colors"
-                     @click="openDetails(item.transaction.id)">
+                     :class="item.transaction._optimistic ? 'opacity-50 animate-pulse' : ''"
+                     @click="if (!item.transaction._optimistic) openDetails(item.transaction.id)">
                     <div class="flex items-start justify-between gap-3">
                         <div class="min-w-0 flex-1">
                             <div class="flex items-center gap-2">
@@ -851,4 +853,6 @@ function transactionsApp() {
 @include('finances.partials.modals.income')
 @include('finances.partials.modals.expense')
 @include('finances.partials.modals.exchange')
+
+<x-realtime-banner channel="finances" />
 @endsection

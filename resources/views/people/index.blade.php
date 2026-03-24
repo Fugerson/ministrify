@@ -150,9 +150,9 @@
                 <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                 </svg>
-                <input type="text" x-model="filters.search" placeholder="{{ __('app.search') }}..."
+                <input type="text" x-model="filters.search" x-on:input.debounce.300ms="currentPage = 1; fetchPeople()" placeholder="{{ __('app.search') }}..."
                     class="w-full pl-9 pr-8 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-300">
-                <button x-show="filters.search" @click="filters.search = ''" x-cloak
+                <button x-show="filters.search" @click="filters.search = ''; currentPage = 1; fetchPeople()" x-cloak
                     class="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -166,7 +166,7 @@
             <template x-if="filters.genders.length > 0">
                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg text-sm">
                     <span x-text="filters.genders.map(g => g === 'male' ? @js(__('app.male')) : @js(__('app.female'))).join(', ')"></span>
-                    <button @click="filters.genders = []" class="hover:text-blue-900 dark:hover:text-blue-100">
+                    <button @click="filters.genders = []; currentPage = 1; fetchPeople()" class="hover:text-blue-900 dark:hover:text-blue-100">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                         </svg>
@@ -176,7 +176,7 @@
             <template x-if="filters.marital_statuses.length > 0">
                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-pink-50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 rounded-lg text-sm">
                     <span x-text="filters.marital_statuses.map(s => maritalStatusLabels[s] || s).join(', ')"></span>
-                    <button @click="filters.marital_statuses = []" class="hover:text-pink-900 dark:hover:text-pink-100">
+                    <button @click="filters.marital_statuses = []; currentPage = 1; fetchPeople()" class="hover:text-pink-900 dark:hover:text-pink-100">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                         </svg>
@@ -186,7 +186,7 @@
             <template x-if="filters.ministries.length > 0">
                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-lg text-sm">
                     <span x-text="@js(__('app.ministry')) + ': ' + filters.ministries.length"></span>
-                    <button @click="filters.ministries = []" class="hover:text-green-900 dark:hover:text-green-100">
+                    <button @click="filters.ministries = []; currentPage = 1; fetchPeople()" class="hover:text-green-900 dark:hover:text-green-100">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                         </svg>
@@ -196,7 +196,7 @@
             <template x-if="filters.roles.length > 0">
                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-lg text-sm">
                     <span x-text="@js(__('app.church_role')) + ': ' + filters.roles.length"></span>
-                    <button @click="filters.roles = []" class="hover:text-purple-900 dark:hover:text-purple-100">
+                    <button @click="filters.roles = []; currentPage = 1; fetchPeople()" class="hover:text-purple-900 dark:hover:text-purple-100">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                         </svg>
@@ -206,7 +206,7 @@
             <template x-if="filters.tags.length > 0">
                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 rounded-lg text-sm">
                     <span x-text="@js(__('app.tag')) + ': ' + filters.tags.length"></span>
-                    <button @click="filters.tags = []" class="hover:text-teal-900 dark:hover:text-teal-100">
+                    <button @click="filters.tags = []; currentPage = 1; fetchPeople()" class="hover:text-teal-900 dark:hover:text-teal-100">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                         </svg>
@@ -217,7 +217,7 @@
             <template x-if="filters.shepherds.length > 0">
                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 rounded-lg text-sm">
                     <span x-text="@js(__('app.shepherd')) + ': ' + filters.shepherds.length"></span>
-                    <button @click="filters.shepherds = []" class="hover:text-amber-900 dark:hover:text-amber-100">
+                    <button @click="filters.shepherds = []; currentPage = 1; fetchPeople()" class="hover:text-amber-900 dark:hover:text-amber-100">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                         </svg>
@@ -228,7 +228,7 @@
             <template x-if="filters.has_user">
                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 rounded-lg text-sm">
                     <span x-text="filters.has_user === 'yes' ? @js(__('app.has_account')) : @js(__('app.no_account'))"></span>
-                    <button @click="filters.has_user = ''" class="hover:text-emerald-900 dark:hover:text-emerald-100">
+                    <button @click="filters.has_user = ''; currentPage = 1; fetchPeople()" class="hover:text-emerald-900 dark:hover:text-emerald-100">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                         </svg>
@@ -238,7 +238,7 @@
             <template x-if="filters.has_telegram">
                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-sky-50 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300 rounded-lg text-sm">
                     <span x-text="filters.has_telegram === 'yes' ? @js(__('app.tg_connected')) : @js(__('app.tg_not_connected'))"></span>
-                    <button @click="filters.has_telegram = ''" class="hover:text-sky-900 dark:hover:text-sky-100">
+                    <button @click="filters.has_telegram = ''; currentPage = 1; fetchPeople()" class="hover:text-sky-900 dark:hover:text-sky-100">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                         </svg>
@@ -422,11 +422,11 @@
                     </button>
                     <div x-show="filterAccordion.account" x-collapse class="px-4 pb-3 space-y-1">
                         <label class="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer text-sm text-gray-600 dark:text-gray-300">
-                            <input type="checkbox" :checked="filters.has_user === 'yes'" @change="filters.has_user = filters.has_user === 'yes' ? '' : 'yes'" class="w-4 h-4 text-primary-600 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-primary-500">
+                            <input type="checkbox" :checked="filters.has_user === 'yes'" @change="filters.has_user = filters.has_user === 'yes' ? '' : 'yes'; currentPage = 1; fetchPeople()" class="w-4 h-4 text-primary-600 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-primary-500">
                             <span>{{ __('app.has_account') }}</span>
                         </label>
                         <label class="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer text-sm text-gray-600 dark:text-gray-300">
-                            <input type="checkbox" :checked="filters.has_user === 'no'" @change="filters.has_user = filters.has_user === 'no' ? '' : 'no'" class="w-4 h-4 text-primary-600 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-primary-500">
+                            <input type="checkbox" :checked="filters.has_user === 'no'" @change="filters.has_user = filters.has_user === 'no' ? '' : 'no'; currentPage = 1; fetchPeople()" class="w-4 h-4 text-primary-600 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-primary-500">
                             <span>{{ __('app.no_account') }}</span>
                         </label>
                     </div>
@@ -444,11 +444,11 @@
                     </button>
                     <div x-show="filterAccordion.telegram" x-collapse class="px-4 pb-3 space-y-1">
                         <label class="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer text-sm text-gray-600 dark:text-gray-300">
-                            <input type="checkbox" :checked="filters.has_telegram === 'yes'" @change="filters.has_telegram = filters.has_telegram === 'yes' ? '' : 'yes'" class="w-4 h-4 text-primary-600 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-primary-500">
+                            <input type="checkbox" :checked="filters.has_telegram === 'yes'" @change="filters.has_telegram = filters.has_telegram === 'yes' ? '' : 'yes'; currentPage = 1; fetchPeople()" class="w-4 h-4 text-primary-600 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-primary-500">
                             <span>{{ __('app.tg_connected') }}</span>
                         </label>
                         <label class="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer text-sm text-gray-600 dark:text-gray-300">
-                            <input type="checkbox" :checked="filters.has_telegram === 'no'" @change="filters.has_telegram = filters.has_telegram === 'no' ? '' : 'no'" class="w-4 h-4 text-primary-600 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-primary-500">
+                            <input type="checkbox" :checked="filters.has_telegram === 'no'" @change="filters.has_telegram = filters.has_telegram === 'no' ? '' : 'no'; currentPage = 1; fetchPeople()" class="w-4 h-4 text-primary-600 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:ring-primary-500">
                             <span>{{ __('app.tg_not_connected') }}</span>
                         </label>
                     </div>
@@ -483,19 +483,13 @@
         </aside>
 
         <!-- Main content (table) -->
-        <div class="flex-1 min-w-0 space-y-4" :class="showFilterSidebar && 'hidden lg:block'"
-
-    @if($peopleLimited)
-    <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-3 text-amber-800 dark:text-amber-200 text-sm">
-        {{ __('app.limited_notice') }}
-    </div>
-    @endif
+        <div class="flex-1 min-w-0 space-y-4" :class="showFilterSidebar && 'hidden lg:block'">
 
     <!-- Pagination -->
     <div class="flex flex-col sm:flex-row items-center justify-between gap-2 text-sm">
         <div class="flex items-center gap-2 text-gray-600 dark:text-gray-400">
             <span class="hidden sm:inline">{{ __('app.show_per_page') }}</span>
-            <select x-model.number="perPage" @change="currentPage = 1"
+            <select x-model.number="perPage" @change="currentPage = 1; fetchPeople()"
                 class="px-2 py-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-primary-500/20">
                 <option value="25">25</option>
                 <option value="50">50</option>
@@ -507,13 +501,13 @@
         </div>
 
         <div class="flex items-center gap-0.5">
-            <button @click="currentPage = 1" :disabled="currentPage === 1"
+            <button @click="goToPage(1)" :disabled="currentPage === 1"
                 class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
                 </svg>
             </button>
-            <button @click="currentPage--" :disabled="currentPage === 1"
+            <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1"
                 class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
@@ -522,13 +516,13 @@
             <span class="px-2 py-1 text-sm text-gray-700 dark:text-gray-300 min-w-[3.5rem] text-center">
                 <span x-text="currentPage"></span> / <span x-text="totalPages"></span>
             </span>
-            <button @click="currentPage++" :disabled="currentPage >= totalPages"
+            <button @click="goToPage(currentPage + 1)" :disabled="currentPage >= totalPages"
                 class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                 </svg>
             </button>
-            <button @click="currentPage = totalPages" :disabled="currentPage >= totalPages"
+            <button @click="goToPage(totalPages)" :disabled="currentPage >= totalPages"
                 class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"/>
@@ -577,213 +571,202 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                    @forelse($people as $index => $person)
-                    <tr x-show="shouldShowRow({{ $index }}, @js([
-                            'name' => $person->full_name,
-                            'phone' => $person->phone ?? '',
-                            'email' => $person->email ?? '',
-                            'birth_date' => $person->birth_date?->format('Y-m-d') ?? '',
-                            'ministry' => $person->ministries->pluck('name')->join(', '),
-                            'gender' => $person->gender ?? '',
-                            'marital_status' => $person->marital_status ?? '',
-                            'role' => $person->churchRoleRelation?->name ?? '',
-                            'tags' => $person->tags->pluck('name')->join(', '),
-                            'shepherd' => $person->shepherd?->full_name ?? '',
-                            'has_user' => (bool) $person->user_id,
-                            'has_telegram' => (bool) $person->telegram_chat_id,
-                        ]))"
-                        x-transition:enter="transition ease-out duration-100"
-                        x-transition:enter-start="opacity-0"
-                        x-transition:enter-end="opacity-100"
-                        class="hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer group"
-                        :class="{ 'bg-primary-50 dark:bg-primary-900/20': selectedIds.includes({{ $person->id }}) }"
-                        onclick="window.location='{{ route('people.show', $person) }}'">
-                        @if(auth()->user()->canEdit('people'))
-                        <!-- Checkbox -->
-                        <td class="px-4 py-3" onclick="event.stopPropagation()">
-                            <input type="checkbox"
-                                   value="{{ $person->id }}"
-                                   @change="toggleSelect({{ $person->id }})"
-                                   :checked="selectedIds.includes({{ $person->id }})"
-                                   class="w-4 h-4 text-primary-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500 cursor-pointer">
-                        </td>
-                        @endif
-                        <!-- Name -->
-                        <td class="px-4 py-3">
-                            <div class="flex items-center gap-3">
-                                @if($person->photo)
-                                <div class="flex-shrink-0" x-data="{ hover: false, r: {} }" @mouseenter="hover = true; r = $el.getBoundingClientRect()" @mouseleave="hover = false">
-                                    <img src="{{ Storage::url($person->photo) }}" alt=""
-                                         class="w-10 h-10 rounded-xl object-cover"
-                                         loading="lazy">
-                                    <div class="fixed z-[100] pointer-events-none" :style="`left:${r.left+r.width/2}px;top:${r.top-8}px;transform:translate(-50%,-100%)`">
-                                        <img src="{{ Storage::url($person->photo) }}" :class="hover ? 'opacity-100 scale-100' : 'opacity-0 scale-75'" class="w-32 h-32 rounded-xl object-cover shadow-xl ring-2 ring-white dark:ring-gray-800 transition-all duration-200 ease-out origin-bottom">
+                    <!-- Loading skeleton -->
+                    <template x-if="loading">
+                        <template x-for="i in 5" :key="'skel-'+i">
+                            <tr class="animate-pulse">
+                                @if(auth()->user()->canEdit('people'))
+                                <td class="px-4 py-3"><div class="w-4 h-4 bg-gray-200 dark:bg-gray-700 rounded"></div></td>
+                                @endif
+                                <td class="px-4 py-3"><div class="flex items-center gap-3"><div class="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-xl"></div><div class="space-y-2"><div class="h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded"></div><div class="h-3 w-20 bg-gray-200 dark:bg-gray-700 rounded"></div></div></div></td>
+                                <td class="px-4 py-3 hidden sm:table-cell"><div class="h-4 w-28 bg-gray-200 dark:bg-gray-700 rounded"></div></td>
+                                <td class="px-4 py-3 hidden lg:table-cell"><div class="h-4 w-20 bg-gray-200 dark:bg-gray-700 rounded"></div></td>
+                                <td class="px-4 py-3 hidden md:table-cell"><div class="h-5 w-24 bg-gray-200 dark:bg-gray-700 rounded"></div></td>
+                                <td class="px-4 py-3 hidden xl:table-cell"><div class="h-5 w-20 bg-gray-200 dark:bg-gray-700 rounded"></div></td>
+                                @if($church->shepherds_enabled)
+                                <td class="px-4 py-3 hidden xl:table-cell"><div class="h-4 w-24 bg-gray-200 dark:bg-gray-700 rounded"></div></td>
+                                @endif
+                                <td class="px-4 py-3"><div class="w-4 h-4 bg-gray-200 dark:bg-gray-700 rounded"></div></td>
+                            </tr>
+                        </template>
+                    </template>
+
+                    <!-- Data rows -->
+                    <template x-if="!loading">
+                        <template x-for="person in people" :key="person.id">
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer group"
+                                :class="{ 'bg-primary-50 dark:bg-primary-900/20': selectedIds.includes(person.id) }"
+                                x-on:click="window.location = person.url">
+                                @if(auth()->user()->canEdit('people'))
+                                <!-- Checkbox -->
+                                <td class="px-4 py-3" x-on:click.stop>
+                                    <input type="checkbox"
+                                           :value="person.id"
+                                           x-on:change="toggleSelect(person.id)"
+                                           :checked="selectedIds.includes(person.id)"
+                                           class="w-4 h-4 text-primary-600 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500 cursor-pointer">
+                                </td>
+                                @endif
+                                <!-- Name -->
+                                <td class="px-4 py-3">
+                                    <div class="flex items-center gap-3">
+                                        <template x-if="person.photo_url">
+                                            <div class="flex-shrink-0" x-data="{ hover: false, r: {} }" x-on:mouseenter="hover = true; r = $el.getBoundingClientRect()" x-on:mouseleave="hover = false">
+                                                <img :src="person.photo_url" alt="" class="w-10 h-10 rounded-xl object-cover" loading="lazy">
+                                                <div class="fixed z-[100] pointer-events-none" :style="`left:${r.left+r.width/2}px;top:${r.top-8}px;transform:translate(-50%,-100%)`">
+                                                    <img :src="person.photo_url" :class="hover ? 'opacity-100 scale-100' : 'opacity-0 scale-75'" class="w-32 h-32 rounded-xl object-cover shadow-xl ring-2 ring-white dark:ring-gray-800 transition-all duration-200 ease-out origin-bottom">
+                                                </div>
+                                            </div>
+                                        </template>
+                                        <template x-if="!person.photo_url">
+                                            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center flex-shrink-0">
+                                                <span class="text-sm font-semibold text-white" x-text="person.initials"></span>
+                                            </div>
+                                        </template>
+                                        <div class="min-w-0">
+                                            <div class="font-medium text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors" x-text="person.full_name || '—'"></div>
+                                            <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                                                <span x-show="person.gender_label" x-text="person.gender_label"></span>
+                                                <span x-show="person.gender_label && person.marital_status_label">&#8226;</span>
+                                                <span x-show="person.marital_status_label" x-text="person.marital_status_label"></span>
+                                                <span x-show="person.user_id || person.telegram_chat_id" class="flex items-center gap-1 ml-1">
+                                                    <template x-if="person.user_id">
+                                                        <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-emerald-100 dark:bg-emerald-900/40" title="{{ __('app.has_account') }}">
+                                                            <svg class="w-2.5 h-2.5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                                            </svg>
+                                                        </span>
+                                                    </template>
+                                                    <template x-if="person.telegram_chat_id">
+                                                        <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-sky-100 dark:bg-sky-900/40" title="{{ __('app.tg_connected') }}">
+                                                            <svg class="w-2.5 h-2.5 text-sky-600 dark:text-sky-400" viewBox="0 0 24 24" fill="currentColor">
+                                                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
+                                                            </svg>
+                                                        </span>
+                                                    </template>
+                                                </span>
+                                            </div>
+                                            <!-- Mobile: show phone under name -->
+                                            <div class="sm:hidden text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5" x-text="person.phone || person.email || ''"></div>
+                                        </div>
                                     </div>
-                                </div>
-                                @else
-                                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center flex-shrink-0">
-                                    <span class="text-sm font-semibold text-white">{{ mb_substr($person->first_name, 0, 1) }}{{ mb_substr($person->last_name, 0, 1) }}</span>
-                                </div>
-                                @endif
-                                <div class="min-w-0">
-                                    <div class="font-medium text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-                                        {{ $person->full_name ?: '—' }}
+                                </td>
+                                <!-- Contacts -->
+                                <td class="px-4 py-3 hidden sm:table-cell">
+                                    <div class="space-y-0.5">
+                                        <div x-show="person.phone" class="text-sm text-gray-900 dark:text-white" x-text="person.phone"></div>
+                                        <div x-show="person.email" class="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[200px]" x-text="person.email"></div>
+                                        <span x-show="!person.phone && !person.email" class="text-gray-400">—</span>
                                     </div>
-                                    <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                                        @if($person->gender)
-                                        <span>{{ $person->gender_label }}</span>
-                                        @endif
-                                        @if($person->gender && $person->marital_status)
-                                        <span>•</span>
-                                        @endif
-                                        @if($person->marital_status)
-                                        <span>{{ $person->marital_status_label }}</span>
-                                        @endif
-                                        @if($person->user_id || $person->telegram_chat_id)
-                                        <span class="flex items-center gap-1 ml-1">
-                                            @if($person->user_id)
-                                            <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-emerald-100 dark:bg-emerald-900/40" title="{{ __('app.has_account') }}">
-                                                <svg class="w-2.5 h-2.5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                                                </svg>
-                                            </span>
-                                            @endif
-                                            @if($person->telegram_chat_id)
-                                            <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-sky-100 dark:bg-sky-900/40" title="{{ __('app.tg_connected') }}">
-                                                <svg class="w-2.5 h-2.5 text-sky-600 dark:text-sky-400" viewBox="0 0 24 24" fill="currentColor">
-                                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
-                                                </svg>
-                                            </span>
-                                            @endif
-                                        </span>
-                                        @endif
-                                    </div>
-                                    <!-- Mobile: show phone under name -->
-                                    <div class="sm:hidden text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">
-                                        {{ $person->phone ?: $person->email ?: '' }}
-                                    </div>
-                                </div>
-                            </div>
-                        </td>
-                        <!-- Contacts -->
-                        <td class="px-4 py-3 hidden sm:table-cell">
-                            <div class="space-y-0.5">
-                                @if($person->phone)
-                                <div class="text-sm text-gray-900 dark:text-white">{{ $person->phone }}</div>
+                                </td>
+                                <!-- Birth Date -->
+                                <td class="px-4 py-3 hidden lg:table-cell">
+                                    <template x-if="person.birth_date">
+                                        <div>
+                                            <div class="text-sm text-gray-900 dark:text-white" x-text="person.birth_date"></div>
+                                            <div class="text-xs text-gray-500 dark:text-gray-400" x-text="person.age + ' ' + pluralYear(person.age)"></div>
+                                        </div>
+                                    </template>
+                                    <template x-if="!person.birth_date">
+                                        <span class="text-gray-400">—</span>
+                                    </template>
+                                </td>
+                                <!-- Ministries -->
+                                <td class="px-4 py-3 hidden md:table-cell">
+                                    <template x-if="person.ministries && person.ministries.length > 0">
+                                        <div class="flex flex-wrap gap-1">
+                                            <template x-for="(m, mi) in person.ministries.slice(0, 2)" :key="mi">
+                                                <span class="inline-flex px-2 py-0.5 text-xs font-medium rounded-md"
+                                                      :style="'background-color:' + m.color + '30; color:' + m.color"
+                                                      x-text="m.name"></span>
+                                            </template>
+                                            <span x-show="person.ministries.length > 2" class="text-xs text-gray-400" x-text="'+' + (person.ministries.length - 2)"></span>
+                                        </div>
+                                    </template>
+                                    <template x-if="!person.ministries || person.ministries.length === 0">
+                                        <span class="text-gray-400">—</span>
+                                    </template>
+                                </td>
+                                <!-- Role -->
+                                <td class="px-4 py-3 hidden xl:table-cell">
+                                    <template x-if="person.role">
+                                        <span class="inline-flex px-2 py-0.5 text-xs font-medium rounded-md"
+                                              :style="'background-color:' + person.role.color + '30; color:' + person.role.color"
+                                              x-text="person.role.name"></span>
+                                    </template>
+                                    <template x-if="!person.role">
+                                        <span class="text-gray-400">—</span>
+                                    </template>
+                                </td>
+                                @if($church->shepherds_enabled)
+                                <!-- Shepherd -->
+                                <td class="px-4 py-3 hidden xl:table-cell">
+                                    <template x-if="person.shepherd">
+                                        <div class="flex items-center gap-2">
+                                            <template x-if="person.shepherd.photo_url">
+                                                <img :src="person.shepherd.photo_url" alt="" class="w-6 h-6 rounded-full object-cover" loading="lazy">
+                                            </template>
+                                            <template x-if="!person.shepherd.photo_url">
+                                                <div class="w-6 h-6 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                                                    <span class="text-xs font-medium text-green-600 dark:text-green-400" x-text="person.shepherd.initials"></span>
+                                                </div>
+                                            </template>
+                                            <span class="text-sm text-gray-600 dark:text-gray-300" x-text="person.shepherd.full_name"></span>
+                                        </div>
+                                    </template>
+                                    <template x-if="!person.shepherd">
+                                        <span class="text-gray-400">—</span>
+                                    </template>
+                                </td>
                                 @endif
-                                @if($person->email)
-                                <div class="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[200px]">{{ $person->email }}</div>
-                                @endif
-                                @if(!$person->phone && !$person->email)
-                                <span class="text-gray-400">—</span>
-                                @endif
-                            </div>
-                        </td>
-                        <!-- Birth Date -->
-                        <td class="px-4 py-3 hidden lg:table-cell">
-                            @if($person->birth_date)
-                            <div class="text-sm text-gray-900 dark:text-white">
-                                {{ $person->birth_date->format('d.m.Y') }}
-                            </div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400">
-                                {{ $person->birth_date->age }} {{ trans_choice(__('app.plural_year'), $person->birth_date->age) }}
-                            </div>
-                            @else
-                            <span class="text-gray-400">—</span>
-                            @endif
-                        </td>
-                        <!-- Ministries -->
-                        <td class="px-4 py-3 hidden md:table-cell">
-                            @if($person->ministries->isNotEmpty())
-                            <div class="flex flex-wrap gap-1">
-                                @foreach($person->ministries->take(2) as $ministry)
-                                <span class="inline-flex px-2 py-0.5 text-xs font-medium rounded-md"
-                                      style="background-color: {{ $ministry->color ?? '#6366f1' }}30; color: {{ $ministry->color ?? '#6366f1' }}">
-                                    {{ $ministry->name }}
-                                </span>
-                                @endforeach
-                                @if($person->ministries->count() > 2)
-                                <span class="text-xs text-gray-400">+{{ $person->ministries->count() - 2 }}</span>
-                                @endif
-                            </div>
-                            @else
-                            <span class="text-gray-400">—</span>
-                            @endif
-                        </td>
-                        <!-- Role -->
-                        <td class="px-4 py-3 hidden xl:table-cell">
-                            @if($person->churchRoleRelation)
-                            <span class="inline-flex px-2 py-0.5 text-xs font-medium rounded-md"
-                                  style="background-color: {{ $person->churchRoleRelation->color }}30; color: {{ $person->churchRoleRelation->color }}">
-                                {{ $person->churchRoleRelation->name }}
-                            </span>
-                            @else
-                            <span class="text-gray-400">—</span>
-                            @endif
-                        </td>
-                        @if($church->shepherds_enabled)
-                        <!-- Shepherd -->
-                        <td class="px-4 py-3 hidden xl:table-cell">
-                            @if($person->shepherd)
-                            <div class="flex items-center gap-2">
-                                @if($person->shepherd->photo)
-                                <img src="{{ Storage::url($person->shepherd->photo) }}" alt="" class="w-6 h-6 rounded-full object-cover" loading="lazy">
-                                @else
-                                <div class="w-6 h-6 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                                    <span class="text-xs font-medium text-green-600 dark:text-green-400">{{ mb_substr($person->shepherd->first_name, 0, 1) }}</span>
-                                </div>
-                                @endif
-                                <span class="text-sm text-gray-600 dark:text-gray-300">{{ $person->shepherd->full_name }}</span>
-                            </div>
-                            @else
-                            <span class="text-gray-400">—</span>
-                            @endif
-                        </td>
-                        @endif
-                        <!-- Action -->
-                        <td class="px-4 py-3">
-                            <a href="{{ route('people.show', $person) }}"
-                               class="p-2 text-gray-400 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors inline-block"
-                               onclick="event.stopPropagation()">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                                </svg>
-                            </a>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="10" class="px-4 py-12 text-center">
-                            <div class="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-700 rounded-xl flex items-center justify-center">
-                                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197"/>
-                                </svg>
-                            </div>
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">{{ __('app.empty_people_title') }}</h3>
-                            <p class="text-gray-500 dark:text-gray-400 mb-4">{{ __('app.empty_people_desc') }}</p>
-                            <div class="flex items-center justify-center gap-3">
-                                <button onclick="document.getElementById('createPersonModal').classList.remove('hidden')" class="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition-colors">
-                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                                <!-- Action -->
+                                <td class="px-4 py-3">
+                                    <a :href="person.url"
+                                       class="p-2 text-gray-400 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors inline-block"
+                                       x-on:click.stop>
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                        </svg>
+                                    </a>
+                                </td>
+                            </tr>
+                        </template>
+                    </template>
+
+                    <!-- Empty state (no people in church at all) -->
+                    <template x-if="!loading && people.length === 0 && !hasFilters && filteredCount === 0">
+                        <tr>
+                            <td colspan="10" class="px-4 py-12 text-center">
+                                <div class="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-700 rounded-xl flex items-center justify-center">
+                                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197"/>
                                     </svg>
-                                    {{ __('app.add') }}
-                                </button>
-                                <a href="{{ route('migration.planning-center') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
-                                    </svg>
-                                    {{ __('app.import') }}
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
-                    @endforelse
+                                </div>
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">{{ __('app.empty_people_title') }}</h3>
+                                <p class="text-gray-500 dark:text-gray-400 mb-4">{{ __('app.empty_people_desc') }}</p>
+                                <div class="flex items-center justify-center gap-3">
+                                    <button onclick="document.getElementById('createPersonModal').classList.remove('hidden')" class="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition-colors">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                                        </svg>
+                                        {{ __('app.add') }}
+                                    </button>
+                                    <a href="{{ route('migration.planning-center') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                                        </svg>
+                                        {{ __('app.import') }}
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    </template>
                 </tbody>
             </table>
         </div>
 
         <!-- No results message (when filters hide all) -->
-        <div x-show="filteredCount === 0 && {{ $people->count() }} > 0" x-cloak class="px-4 py-12 text-center">
+        <div x-show="!loading && people.length === 0 && hasFilters" x-cloak class="px-4 py-12 text-center">
             <svg class="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
             </svg>
@@ -1762,8 +1745,10 @@ function personCreateForm() {
                     return;
                 }
                 showToast('success', data.message || @js( __("app.saved") ));
+                this.$refs.form.reset();
+                this.errors = {};
                 closeCreatePersonModal();
-                setTimeout(() => Livewire.navigate(window.location.href), 200);
+                document.dispatchEvent(new CustomEvent('person-created'));
             } catch (e) {
                 showToast('error', @js( __('app.connection_error') ));
                 this.saving = false;
@@ -1884,11 +1869,12 @@ function peopleTable() {
         availableMaritalStatuses: @js(\App\Models\Person::getMaritalStatuses()),
         maritalStatusLabels: @js(\App\Models\Person::getMaritalStatuses()),
         flatpickrInstance: null,
-        filteredCount: {{ $people->count() }},
+        filteredCount: {{ $stats['total'] }},
         perPage: saved.perPage,
         currentPage: 1,
-        allPeople: @js($people->map(fn($p, $i) => ['index' => $i, 'id' => $p->id, 'name' => $p->full_name, 'phone' => $p->phone ?? '', 'email' => $p->email ?? '', 'birth_date' => $p->birth_date?->format('Y-m-d') ?? '', 'ministry' => $p->ministries->pluck('name')->join(', '), 'gender' => $p->gender ?? '', 'marital_status' => $p->marital_status ?? '', 'membership_status' => $p->membership_status ?? '', 'role' => $p->churchRoleRelation?->name ?? '', 'tags' => $p->tags->pluck('name')->join(', '), 'shepherd' => $p->shepherd?->full_name ?? '', 'has_user' => (bool) $p->user_id, 'has_telegram' => (bool) $p->telegram_chat_id])->values()),
-        filteredIndices: [],
+        people: [],
+        loading: true,
+        _fetchController: null,
 
         // Bulk selection state
         selectedIds: [],
@@ -1923,16 +1909,11 @@ function peopleTable() {
         },
 
         init() {
-            document.addEventListener('open-duplicates', () => this.openDuplicates());
+            document.addEventListener('open-duplicates', () => this.openDuplicates(), { signal: pageSignal() });
+            document.addEventListener('person-created', () => this.fetchPeople(), { signal: pageSignal() });
             this.$nextTick(() => {
-                this.updateFilteredIndices();
+                this.fetchPeople();
             });
-
-            this.$watch('filters', () => {
-                this.updateFilteredIndices();
-                this.currentPage = 1;
-                this._saveFilters();
-            }, { deep: true });
 
             this.$watch('showFilterSidebar', () => this._saveFilters());
             this.$watch('perPage', () => this._saveFilters());
@@ -1962,6 +1943,80 @@ function peopleTable() {
             } else {
                 this.filters[filterKey] = arr.filter((_, i) => i !== idx);
             }
+            this.currentPage = 1;
+            this.fetchPeople();
+        },
+
+        async fetchPeople() {
+            this._saveFilters();
+
+            // Abort previous request
+            if (this._fetchController) {
+                this._fetchController.abort();
+            }
+            this._fetchController = new AbortController();
+
+            this.loading = true;
+            const params = new URLSearchParams();
+
+            if (this.filters.search) params.set('q', this.filters.search);
+            if (this.filters.genders.length) params.set('genders', this.filters.genders.join(','));
+            if (this.filters.marital_statuses.length) params.set('marital_statuses', this.filters.marital_statuses.join(','));
+            if (this.filters.ministries.length) params.set('ministries', this.filters.ministries.join(','));
+            if (this.filters.roles.length) params.set('roles', this.filters.roles.join(','));
+            if (this.filters.tags.length) params.set('tags', this.filters.tags.join(','));
+            if (this.filters.shepherds.length) params.set('shepherds', this.filters.shepherds.join(','));
+            if (this.filters.has_user) params.set('has_user', this.filters.has_user);
+            if (this.filters.has_telegram) params.set('has_telegram', this.filters.has_telegram);
+            if (this.filters.birth_from) params.set('birth_from', this.filters.birth_from);
+            if (this.filters.birth_to) params.set('birth_to', this.filters.birth_to);
+            params.set('per_page', this.perPage);
+            params.set('page', this.currentPage);
+
+            try {
+                const response = await fetch(`{{ route('people.search') }}?${params.toString()}`, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    signal: this._fetchController.signal
+                });
+
+                if (!response.ok) throw new Error('Network error');
+
+                const result = await response.json();
+                this.people = result.data;
+                this.filteredCount = result.meta.total;
+                this.currentPage = result.meta.current_page;
+            } catch (e) {
+                if (e.name === 'AbortError') return;
+                console.error('Failed to fetch people:', e);
+            } finally {
+                this.loading = false;
+                this._fetchController = null;
+            }
+        },
+
+        goToPage(page) {
+            if (page < 1 || page > this.totalPages) return;
+            this.currentPage = page;
+            this.fetchPeople();
+        },
+
+        pluralYear(age) {
+            if (!age && age !== 0) return '';
+            const pluralForms = @js(__('app.plural_year'));
+            const forms = pluralForms.split('|');
+            if (forms.length === 1) return forms[0];
+            // English: year|years
+            if (forms.length === 2) return age === 1 ? forms[0] : forms[1];
+            // Ukrainian: рік|роки|років
+            const n = Math.abs(age) % 100;
+            const n1 = n % 10;
+            if (n > 10 && n < 20) return forms[2];
+            if (n1 > 1 && n1 < 5) return forms[1];
+            if (n1 === 1) return forms[0];
+            return forms[2];
         },
 
         openDatePicker() {
@@ -1994,6 +2049,8 @@ function peopleTable() {
                             self.filters.birth_from = dates[0].toISOString().split('T')[0];
                             self.filters.birth_to = dates[1].toISOString().split('T')[0];
                             self.filters.dateRangeDisplay = dateStr;
+                            self.currentPage = 1;
+                            self.fetchPeople();
                         } else if (dates.length === 1) {
                             self.filters.birth_from = dates[0].toISOString().split('T')[0];
                             self.filters.birth_to = '';
@@ -2004,13 +2061,6 @@ function peopleTable() {
             } else {
                 this.flatpickrInstance.open();
             }
-        },
-
-        updateFilteredIndices() {
-            this.filteredIndices = this.allPeople
-                .filter(p => this.matchesFilters(p))
-                .map(p => p.index);
-            this.filteredCount = this.filteredIndices.length;
         },
 
         get activeFilterCount() {
@@ -2032,19 +2082,6 @@ function peopleTable() {
             return Math.max(1, Math.ceil(this.filteredCount / this.perPage));
         },
 
-        shouldShowRow(index, person) {
-            if (!this.matchesFilters(person)) return false;
-            if (this.perPage === 0) return true;
-
-            const positionInFiltered = this.filteredIndices.indexOf(index);
-            if (positionInFiltered === -1) return false;
-
-            const start = (this.currentPage - 1) * this.perPage;
-            const end = start + this.perPage;
-
-            return positionInFiltered >= start && positionInFiltered < end;
-        },
-
         clearDateFilter() {
             this.filters.birth_from = '';
             this.filters.birth_to = '';
@@ -2052,6 +2089,8 @@ function peopleTable() {
             if (this.flatpickrInstance) {
                 this.flatpickrInstance.clear();
             }
+            this.currentPage = 1;
+            this.fetchPeople();
         },
 
         get hasFilters() {
@@ -2060,56 +2099,6 @@ function peopleTable() {
                    this.filters.ministries.length || this.filters.roles.length ||
                    this.filters.tags.length || this.filters.shepherds.length ||
                    this.filters.has_user || this.filters.has_telegram;
-        },
-
-        matchesFilters(person) {
-            if (this.filters.search) {
-                const searchLower = this.filters.search.toLowerCase();
-                const allText = [person.name, person.phone, person.email, person.ministry, person.role, person.shepherd].join(' ').toLowerCase();
-                if (!allText.includes(searchLower)) return false;
-            }
-            if (this.filters.genders.length > 0 && !this.filters.genders.includes(person.gender)) return false;
-            if (this.filters.marital_statuses.length > 0 && !this.filters.marital_statuses.includes(person.marital_status)) return false;
-            if (this.filters.ministries.length > 0) {
-                const pm = person.ministry.split(', ').filter(Boolean);
-                if (!this.filters.ministries.some(m => pm.includes(m))) return false;
-            }
-            if (this.filters.roles.length > 0 && !this.filters.roles.includes(person.role)) return false;
-            if (this.filters.tags.length > 0) {
-                const pt = person.tags.split(', ').filter(Boolean);
-                if (!this.filters.tags.some(t => pt.includes(t))) return false;
-            }
-            if (this.filters.shepherds.length > 0) {
-                const hasNone = this.filters.shepherds.includes('none');
-                const named = this.filters.shepherds.filter(s => s !== 'none');
-                const match = (hasNone && !person.shepherd) || named.includes(person.shepherd);
-                if (!match) return false;
-            }
-            if (this.filters.has_user === 'yes' && !person.has_user) return false;
-            if (this.filters.has_user === 'no' && person.has_user) return false;
-            if (this.filters.has_telegram === 'yes' && !person.has_telegram) return false;
-            if (this.filters.has_telegram === 'no' && person.has_telegram) return false;
-            return this.matchDateRange(person.birth_date, this.filters.birth_from, this.filters.birth_to);
-        },
-
-        matchExact(value, filter) {
-            if (!filter) return true;
-            return value === filter;
-        },
-
-        matchText(value, filter) {
-            if (!filter) return true;
-            return value.toLowerCase().includes(filter.toLowerCase());
-        },
-
-        matchDateRange(dateStr, from, to) {
-            if (!from && !to) return true;
-            if (!dateStr) return false;
-
-            const date = new Date(dateStr);
-            if (from && date < new Date(from)) return false;
-            if (to && date > new Date(to)) return false;
-            return true;
         },
 
         clearFilters() {
@@ -2131,13 +2120,12 @@ function peopleTable() {
             if (this.flatpickrInstance) {
                 this.flatpickrInstance.clear();
             }
+            this.fetchPeople();
         },
 
         // Bulk selection methods
         get visibleIds() {
-            return this.allPeople
-                .filter(p => this.filteredIndices.includes(p.index))
-                .map(p => p.id);
+            return this.people.map(p => p.id);
         },
 
         get isAllSelected() {
@@ -2403,10 +2391,9 @@ function peopleTable() {
                     this.bulkValue = '';
                     this.bulkMessage = '';
 
-                    // Show success message and optionally reload
-                    if (data.reload) {
-                        Livewire.navigate(window.location.href);
-                    } else {
+                    // Refresh the people list
+                    this.fetchPeople();
+                    if (!data.reload) {
                         alert(data.message || @js(__('app.operation_success')));
                     }
                 } else {
@@ -2420,6 +2407,35 @@ function peopleTable() {
             }
         }
     };
+}
+</script>
+
+{{-- Real-time people updates via Laravel Reverb --}}
+<script>
+if (window.Echo) {
+    window.Echo.private('church.{{ auth()->user()->church_id }}.people')
+        .listen('.person.updated', function(e) {
+            var msg = '';
+            if (e.action === 'created') {
+                msg = (e.person_name || '') + ' — {{ __("app.person_added_realtime") }}';
+            } else if (e.action === 'updated') {
+                msg = (e.person_name || '') + ' — {{ __("app.person_updated_realtime") }}';
+            } else if (e.action === 'deleted') {
+                msg = (e.person_name || '') + ' — {{ __("app.person_deleted_realtime") }}';
+            }
+
+            // Show toast notification
+            var toast = document.createElement('div');
+            toast.className = 'fixed bottom-4 right-4 z-50 bg-gray-800 dark:bg-gray-200 text-white dark:text-gray-900 px-5 py-3 rounded-xl shadow-lg flex items-center gap-3 cursor-pointer hover:opacity-90 transition-opacity';
+            toast.innerHTML = '<svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>'
+                + '<span>' + msg + '</span>';
+            toast.onclick = function() { window.location.reload(); };
+            document.body.appendChild(toast);
+
+            setTimeout(function() {
+                if (toast.parentNode) toast.remove();
+            }, 8000);
+        });
 }
 </script>
 @endsection

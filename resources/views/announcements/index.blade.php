@@ -229,7 +229,7 @@ document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape' && !document.getElementById('createAnnouncementModal').classList.contains('hidden')) {
         closeCreateAnnouncementModal();
     }
-});
+}, { signal: pageSignal() });
 
 function announcementCreateForm() {
     return {
@@ -288,4 +288,6 @@ function announcementCreateForm() {
 }
 </script>
 @endif
+
+<x-realtime-banner channel="announcements" />
 @endsection

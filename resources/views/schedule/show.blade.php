@@ -43,9 +43,9 @@
                 <div class="ml-4 flex-1 min-w-0">
                     @if($canEdit)
                     <input type="text" x-model="title" @change="saveField('title', title)"
-                           class="text-2xl font-bold text-gray-900 dark:text-white bg-transparent border-0 border-b border-transparent hover:border-gray-300 dark:hover:border-gray-600 focus:border-primary-500 focus:ring-0 w-full p-0 pb-1">
+                           class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white bg-transparent border-0 border-b border-transparent hover:border-gray-300 dark:hover:border-gray-600 focus:border-primary-500 focus:ring-0 w-full p-0 pb-1 break-words">
                     @else
-                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white" x-text="title"></h1>
+                    <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white break-words" x-text="title"></h1>
                     @endif
                     <div class="mt-1 relative" x-data="{ showDropdown: false }">
                         <!-- Ministry Badge -->
@@ -471,7 +471,7 @@
 
                 <div>
                 <div class="overflow-x-auto" style="min-height: 300px;">
-                    <table class="w-full text-sm" style="table-layout: fixed;">
+                    <table class="w-full text-sm min-w-[480px] sm:min-w-0" style="table-layout: fixed;">
                         <thead class="bg-gray-50 dark:bg-gray-700/50 text-[10px] uppercase text-gray-500 dark:text-gray-400 sticky top-0 z-10">
                             <tr>
                                 <th class="px-0.5 py-2" style="width: 24px;"></th>
@@ -2200,7 +2200,7 @@ document.addEventListener('alpine:init', () => {
         isService: true,
         trackAttendance: true
     });
-});
+}, { signal: pageSignal() });
 
 // Songs data for autocomplete
 const SONGS_DATA = @json($songsForAutocomplete ?? []);
@@ -3644,11 +3644,11 @@ async function sendTelegramNotify(itemId, button) {
         } else {
             startPolling();
         }
-    });
+    }, { signal: pageSignal() });
 
     // Stop polling on page unload / Livewire navigation
-    window.addEventListener('beforeunload', stopPolling);
-    document.addEventListener('livewire:navigating', stopPolling);
+    window.addEventListener('beforeunload', stopPolling, { signal: pageSignal() });
+    document.addEventListener('livewire:navigating', stopPolling, { signal: pageSignal() });
 
     // Start polling on page load
     startPolling();
@@ -3783,7 +3783,12 @@ function initPlanSortable() {
     const tbody = document.querySelector('table tbody');
     if (!tbody || typeof Sortable === 'undefined') return;
 
-    new Sortable(tbody, {
+    // Destroy previous Sortable instance to prevent pile-up on SPA navigation
+    if (tbody._sortableInstance) {
+        tbody._sortableInstance.destroy();
+    }
+
+    tbody._sortableInstance = new Sortable(tbody, {
         animation: 200,
         handle: '.drag-handle',
         ghostClass: 'sortable-ghost',
@@ -3833,4 +3838,7 @@ function initPlanSortable() {
     .dark tr.sortable-chosen { background-color: rgb(55 65 81 / 0.5); }
 </style>
 @endpush
+
+<x-realtime-banner channel="events" />
+<x-realtime-banner channel="service-planning" />
 @endsection

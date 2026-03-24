@@ -187,4 +187,6 @@
         </div>
     </div>
 </div>
+
+<x-realtime-banner channel="service-planning" />
 @endsection

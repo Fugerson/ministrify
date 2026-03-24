@@ -169,7 +169,7 @@ document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape' && !document.getElementById('createMinistryModal').classList.contains('hidden')) {
         closeCreateMinistryModal();
     }
-});
+}, { signal: pageSignal() });
 
 function ministryCreateForm() {
     return {
@@ -208,4 +208,6 @@ function ministryCreateForm() {
 }
 </script>
 @endif
+
+<x-realtime-banner channel="ministries" />
 @endsection

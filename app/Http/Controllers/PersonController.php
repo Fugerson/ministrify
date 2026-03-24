@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\PersonUpdated;
 use App\Exports\PeopleExport;
 use App\Http\Controllers\Api\TelegramController;
 use App\Imports\PeopleImport;
@@ -45,49 +46,6 @@ class PersonController extends Controller
         }
 
         $church = $this->getCurrentChurch();
-
-        $query = Person::where('church_id', $church->id)
-            ->where('membership_status', '!=', Person::STATUS_GUEST)
-            ->with(['tags', 'ministries', 'churchRoleRelation', 'shepherd']);
-
-        // Search
-        if ($search = $request->get('search')) {
-            $query->search($search);
-        }
-
-        // Filter by tag
-        if ($tagId = $request->get('tag')) {
-            $query->withTag($tagId);
-        }
-
-        // Filter by ministry
-        if ($ministryId = $request->get('ministry')) {
-            $query->inMinistry($ministryId);
-        }
-
-        // Filter by age category
-        if ($ageCategory = $request->get('age')) {
-            $category = Person::AGE_CATEGORIES[$ageCategory] ?? null;
-            if ($category) {
-                $query->whereNotNull('birth_date')
-                    ->whereRaw('TIMESTAMPDIFF(YEAR, birth_date, CURDATE()) >= ?', [$category['min']])
-                    ->whereRaw('TIMESTAMPDIFF(YEAR, birth_date, CURDATE()) <= ?', [$category['max']]);
-            }
-        }
-
-        // Filter by church role
-        if ($role = $request->get('role')) {
-            $query->where('church_role', $role);
-        }
-
-        // Limit to prevent memory issues on large churches
-        // Client-side filtering requires all data, so we limit instead of paginate
-        $people = $query->orderBy('last_name')
-            ->orderBy('first_name')
-            ->limit(1000)
-            ->get();
-
-        $peopleLimited = $people->count() >= 1000;
 
         $tags = Tag::where('church_id', $church->id)->get();
         $ministries = $church->ministries()->with('positions')->get();
@@ -175,7 +133,186 @@ class PersonController extends Controller
                 ->get();
         }
 
-        return view('people.index', compact('people', 'peopleLimited', 'tags', 'ministries', 'churchRoles', 'stats', 'shepherds', 'church'));
+        return view('people.index', compact('tags', 'ministries', 'churchRoles', 'stats', 'shepherds', 'church'));
+    }
+
+    /**
+     * Server-side search/filter endpoint for AJAX calls.
+     * Returns paginated JSON results.
+     */
+    public function search(Request $request)
+    {
+        if (! auth()->user()->canView('people')) {
+            return response()->json(['error' => 'Forbidden'], 403);
+        }
+
+        $church = $this->getCurrentChurch();
+
+        $query = Person::where('church_id', $church->id)
+            ->where('membership_status', '!=', Person::STATUS_GUEST)
+            ->with(['tags', 'ministries', 'churchRoleRelation', 'shepherd']);
+
+        // Text search
+        if ($q = $request->get('q')) {
+            $query->search($q);
+        }
+
+        // Gender filter (comma-separated: male,female)
+        if ($genders = $request->get('genders')) {
+            $genderList = array_filter(explode(',', $genders));
+            if (! empty($genderList)) {
+                $query->whereIn('gender', $genderList);
+            }
+        }
+
+        // Marital status filter (comma-separated)
+        if ($maritalStatuses = $request->get('marital_statuses')) {
+            $statusList = array_filter(explode(',', $maritalStatuses));
+            if (! empty($statusList)) {
+                $query->whereIn('marital_status', $statusList);
+            }
+        }
+
+        // Ministry filter (comma-separated names)
+        if ($ministryNames = $request->get('ministries')) {
+            $names = array_filter(explode(',', $ministryNames));
+            if (! empty($names)) {
+                $query->whereHas('ministries', fn ($mq) => $mq->whereIn('ministries.name', $names));
+            }
+        }
+
+        // Church role filter (comma-separated names)
+        if ($roleNames = $request->get('roles')) {
+            $names = array_filter(explode(',', $roleNames));
+            if (! empty($names)) {
+                $query->whereHas('churchRoleRelation', fn ($rq) => $rq->whereIn('name', $names));
+            }
+        }
+
+        // Tag filter (comma-separated names)
+        if ($tagNames = $request->get('tags')) {
+            $names = array_filter(explode(',', $tagNames));
+            if (! empty($names)) {
+                $query->whereHas('tags', fn ($tq) => $tq->whereIn('tags.name', $names));
+            }
+        }
+
+        // Shepherd filter (comma-separated full names, 'none' for no shepherd)
+        if ($shepherdNames = $request->get('shepherds')) {
+            $names = array_filter(explode(',', $shepherdNames));
+            if (! empty($names)) {
+                $hasNone = in_array('none', $names);
+                $named = array_filter($names, fn ($n) => $n !== 'none');
+
+                $query->where(function ($q) use ($hasNone, $named) {
+                    if ($hasNone) {
+                        $q->whereNull('shepherd_id');
+                    }
+                    if (! empty($named)) {
+                        $q->orWhereHas('shepherd', function ($sq) use ($named) {
+                            $sq->where(function ($inner) use ($named) {
+                                foreach ($named as $name) {
+                                    $inner->orWhereRaw("CONCAT(first_name, ' ', last_name) = ?", [$name]);
+                                }
+                            });
+                        });
+                    }
+                });
+            }
+        }
+
+        // Has user account filter
+        if ($hasUser = $request->get('has_user')) {
+            if ($hasUser === 'yes') {
+                $query->whereNotNull('user_id');
+            } elseif ($hasUser === 'no') {
+                $query->whereNull('user_id');
+            }
+        }
+
+        // Has telegram filter
+        if ($hasTelegram = $request->get('has_telegram')) {
+            if ($hasTelegram === 'yes') {
+                $query->whereNotNull('telegram_chat_id');
+            } elseif ($hasTelegram === 'no') {
+                $query->whereNull('telegram_chat_id');
+            }
+        }
+
+        // Birth date range filter
+        if ($birthFrom = $request->get('birth_from')) {
+            $query->where('birth_date', '>=', $birthFrom);
+        }
+        if ($birthTo = $request->get('birth_to')) {
+            $query->where('birth_date', '<=', $birthTo);
+        }
+
+        // Get total count before pagination
+        $total = $query->count();
+
+        // Pagination
+        $perPage = min((int) ($request->get('per_page', 50)), 200);
+        $page = max((int) ($request->get('page', 1)), 1);
+
+        if ($perPage === 0) {
+            // "Show all" mode — cap at 2000
+            $people = $query->orderBy('last_name')
+                ->orderBy('first_name')
+                ->limit(2000)
+                ->get();
+        } else {
+            $people = $query->orderBy('last_name')
+                ->orderBy('first_name')
+                ->skip(($page - 1) * $perPage)
+                ->take($perPage)
+                ->get();
+        }
+
+        $data = $people->map(function (Person $p) {
+            return [
+                'id' => $p->id,
+                'first_name' => $p->first_name,
+                'last_name' => $p->last_name,
+                'full_name' => $p->full_name,
+                'photo_url' => $p->photo ? Storage::url($p->photo) : null,
+                'initials' => mb_substr($p->first_name, 0, 1).mb_substr($p->last_name, 0, 1),
+                'phone' => $p->phone,
+                'email' => $p->email,
+                'gender' => $p->gender,
+                'gender_label' => $p->gender_label,
+                'marital_status' => $p->marital_status,
+                'marital_status_label' => $p->marital_status_label,
+                'birth_date' => $p->birth_date?->format('d.m.Y'),
+                'age' => $p->birth_date?->age,
+                'user_id' => $p->user_id,
+                'telegram_chat_id' => $p->telegram_chat_id,
+                'url' => route('people.show', $p),
+                'ministries' => $p->ministries->map(fn ($m) => [
+                    'name' => $m->name,
+                    'color' => $m->color ?? '#6366f1',
+                ])->values(),
+                'role' => $p->churchRoleRelation ? [
+                    'name' => $p->churchRoleRelation->name,
+                    'color' => $p->churchRoleRelation->color,
+                ] : null,
+                'shepherd' => $p->shepherd ? [
+                    'full_name' => $p->shepherd->full_name,
+                    'photo_url' => $p->shepherd->photo ? Storage::url($p->shepherd->photo) : null,
+                    'initials' => mb_substr($p->shepherd->first_name, 0, 1),
+                ] : null,
+                'tags' => $p->tags->pluck('name')->values(),
+            ];
+        });
+
+        return response()->json([
+            'data' => $data,
+            'meta' => [
+                'total' => $total,
+                'per_page' => $perPage,
+                'current_page' => $page,
+                'last_page' => $perPage > 0 ? max(1, (int) ceil($total / $perPage)) : 1,
+            ],
+        ]);
     }
 
     public function create(Request $request)
@@ -331,6 +468,14 @@ class PersonController extends Controller
                 }
             }
         }
+
+        broadcast(new PersonUpdated(
+            churchId: $person->church_id,
+            personId: $person->id,
+            action: 'created',
+            personName: $person->full_name,
+        ))->toOthers();
+        broadcast(new \App\Events\ChurchDataUpdated($person->church_id, 'dashboard', 'updated'))->toOthers();
 
         return $this->successResponse($request, __('messages.person_created'), 'people.show', [$person]);
     }
@@ -620,6 +765,13 @@ class PersonController extends Controller
             }
         }
 
+        broadcast(new PersonUpdated(
+            churchId: $person->church_id,
+            personId: $person->id,
+            action: 'updated',
+            personName: $person->full_name,
+        ))->toOthers();
+
         return $this->successResponse($request, __('messages.person_updated'), 'people.show', [$person]);
     }
 
@@ -631,7 +783,19 @@ class PersonController extends Controller
             return $this->errorResponse($request, __('messages.no_permission_to_delete'));
         }
 
+        $personName = $person->full_name;
+        $churchId = $person->church_id;
+        $personId = $person->id;
+
         $person->delete();
+
+        broadcast(new PersonUpdated(
+            churchId: $churchId,
+            personId: $personId,
+            action: 'deleted',
+            personName: $personName,
+        ))->toOthers();
+        broadcast(new \App\Events\ChurchDataUpdated($churchId, 'dashboard', 'updated'))->toOthers();
 
         return $this->successResponse($request, __('messages.person_deleted'), 'people.index');
     }

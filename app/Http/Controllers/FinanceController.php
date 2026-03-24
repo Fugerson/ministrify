@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\TransactionCreated;
 use App\Helpers\CurrencyHelper;
 use App\Models\BudgetItem;
 use App\Models\Church;
@@ -598,6 +599,17 @@ class FinanceController extends Controller
             'recorded_by' => auth()->id(),
         ]);
 
+        broadcast(new TransactionCreated(
+            churchId: $church->id,
+            type: 'income',
+            amount: (float) $validated['amount'],
+            currency: $validated['currency'] ?? 'UAH',
+            category: $transaction->category?->name,
+        ))->toOthers();
+        broadcast(new \App\Events\ChurchDataUpdated($church->id, 'finances', 'created'))->toOthers();
+        broadcast(new \App\Events\ChurchDataUpdated($church->id, 'dashboard', 'updated'))->toOthers();
+        broadcast(new \App\Events\ChurchDataUpdated($church->id, 'budgets', 'updated'))->toOthers();
+
         return $this->successResponse($request, __('messages.income_added'), 'finances.transactions', ['filter' => 'income'], [
             'transaction' => $transaction->load('category'),
         ]);
@@ -693,6 +705,9 @@ class FinanceController extends Controller
 
         $transaction->update($validated);
 
+        broadcast(new \App\Events\ChurchDataUpdated($transaction->church_id, 'finances', 'updated'))->toOthers();
+        broadcast(new \App\Events\ChurchDataUpdated($transaction->church_id, 'dashboard', 'updated'))->toOthers();
+
         return $this->successResponse($request, __('messages.income_updated'), 'finances.transactions', ['filter' => 'income'], [
             'transaction' => $transaction->fresh()->load('category'),
         ]);
@@ -707,6 +722,9 @@ class FinanceController extends Controller
         }
 
         $transaction->delete();
+
+        broadcast(new \App\Events\ChurchDataUpdated($transaction->church_id, 'finances', 'deleted'))->toOthers();
+        broadcast(new \App\Events\ChurchDataUpdated($transaction->church_id, 'dashboard', 'updated'))->toOthers();
 
         return $this->successResponse($request, __('messages.income_deleted'), 'finances.transactions', ['filter' => 'income']);
     }
@@ -838,6 +856,17 @@ class FinanceController extends Controller
         if ($budgetWarning) {
             $message .= ' '.$budgetWarning;
         }
+
+        broadcast(new TransactionCreated(
+            churchId: $church->id,
+            type: 'expense',
+            amount: (float) $validated['amount'],
+            currency: $validated['currency'] ?? 'UAH',
+            category: $transaction->category?->name,
+        ))->toOthers();
+        broadcast(new \App\Events\ChurchDataUpdated($church->id, 'finances', 'created'))->toOthers();
+        broadcast(new \App\Events\ChurchDataUpdated($church->id, 'dashboard', 'updated'))->toOthers();
+        broadcast(new \App\Events\ChurchDataUpdated($church->id, 'budgets', 'updated'))->toOthers();
 
         // Determine redirect target
         $redirectToMinistry = ! empty($validated['ministry_id']) && $request->input('redirect_to') === 'ministry';
@@ -1005,6 +1034,9 @@ class FinanceController extends Controller
         $routeName = $redirectToMinistry ? 'ministries.show' : 'finances.transactions';
         $routeParams = $redirectToMinistry ? ['ministry' => $request->input('redirect_ministry_id'), 'tab' => 'expenses'] : ['filter' => 'expense'];
 
+        broadcast(new \App\Events\ChurchDataUpdated($transaction->church_id, 'finances', 'updated'))->toOthers();
+        broadcast(new \App\Events\ChurchDataUpdated($transaction->church_id, 'dashboard', 'updated'))->toOthers();
+
         return $this->successResponse($request, $message, $routeName, $routeParams, [
             'transaction' => $transaction->fresh()->load(['category', 'ministry', 'attachments']),
             'budget_warning' => $budgetWarning,
@@ -1019,7 +1051,11 @@ class FinanceController extends Controller
             return $this->errorResponse($request, __('messages.no_permission_delete'), 403);
         }
         $ministryId = $transaction->ministry_id;
+        $churchId = $transaction->church_id;
         $transaction->delete();
+
+        broadcast(new \App\Events\ChurchDataUpdated($churchId, 'finances', 'deleted'))->toOthers();
+        broadcast(new \App\Events\ChurchDataUpdated($churchId, 'dashboard', 'updated'))->toOthers();
 
         // Determine redirect target
         if ($request->input('redirect_to') === 'ministry' && $ministryId) {
@@ -1094,6 +1130,9 @@ class FinanceController extends Controller
             // Link back
             $outTransaction->update(['related_transaction_id' => $inTransaction->id]);
         });
+
+        broadcast(new \App\Events\ChurchDataUpdated($church->id, 'finances', 'exchange'))->toOthers();
+        broadcast(new \App\Events\ChurchDataUpdated($church->id, 'dashboard', 'updated'))->toOthers();
 
         return $this->successResponse($request, __('messages.exchange_registered'), 'finances.index');
     }
@@ -2229,6 +2268,8 @@ class FinanceController extends Controller
         $budget->church_id = $church->id;
         $budget->save();
 
+        broadcast(new \App\Events\ChurchDataUpdated($church->id, 'budgets', 'created'))->toOthers();
+
         return $this->successResponse($request, __('app.church_budget_created'));
     }
 
@@ -2260,6 +2301,8 @@ class FinanceController extends Controller
             $updateData['notes'] = $validated['notes']; // allow null to clear
         }
         $churchBudget->update($updateData);
+
+        broadcast(new \App\Events\ChurchDataUpdated($church->id, 'budgets', 'updated'))->toOthers();
 
         return $this->successResponse($request, __('app.church_budget_updated'));
     }
@@ -2329,6 +2372,8 @@ class FinanceController extends Controller
         $budgetItem->church_budget_id = $churchBudget->id;
         $budgetItem->save();
 
+        broadcast(new \App\Events\ChurchDataUpdated($church->id, 'budgets', 'item_added'))->toOthers();
+
         return $this->successResponse($request, __('app.budget_item_added'));
     }
 
@@ -2392,6 +2437,8 @@ class FinanceController extends Controller
             'notes' => $validated['notes'] ?? null,
         ]);
 
+        broadcast(new \App\Events\ChurchDataUpdated($church->id, 'budgets', 'item_updated'))->toOthers();
+
         return $this->successResponse($request, __('app.budget_item_updated'));
     }
 
@@ -2407,6 +2454,8 @@ class FinanceController extends Controller
         }
 
         $item->delete();
+
+        broadcast(new \App\Events\ChurchDataUpdated($church->id, 'budgets', 'item_deleted'))->toOthers();
 
         return $this->successResponse($request, __('app.budget_item_deleted'));
     }

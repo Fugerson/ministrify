@@ -161,6 +161,8 @@ class UserController extends Controller
                 'updated_at' => now(),
             ]);
 
+            broadcast(new \App\Events\ChurchDataUpdated($church->id, 'dashboard', 'updated'))->toOthers();
+
             return $this->successResponse($request, __('messages.user_added_to_church'), 'settings.users.index');
         }
 
@@ -260,6 +262,8 @@ class UserController extends Controller
         } catch (\Exception $e) {
             $message .= __('messages.setup_password_manually');
         }
+
+        broadcast(new \App\Events\ChurchDataUpdated($church->id, 'dashboard', 'updated'))->toOthers();
 
         return $this->successResponse($request, $message, 'settings.users.index');
     }
@@ -486,6 +490,8 @@ class UserController extends Controller
             }
         }
 
+        broadcast(new \App\Events\ChurchDataUpdated($church->id, 'dashboard', 'updated'))->toOthers();
+
         return $this->successResponse($request, __('messages.user_updated'), 'settings.users.index');
     }
 
@@ -541,6 +547,8 @@ class UserController extends Controller
             $user->update(['church_id' => null, 'church_role_id' => null]);
             $user->delete();
         }
+
+        broadcast(new \App\Events\ChurchDataUpdated($church->id, 'dashboard', 'updated'))->toOthers();
 
         return $this->successResponse($request, __('messages.user_deleted'), 'settings.users.index');
     }

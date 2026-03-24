@@ -36,6 +36,8 @@ class MinistryGoalController extends Controller
 
         MinistryGoal::create($validated);
 
+        broadcast(new \App\Events\ChurchDataUpdated($ministry->church_id, 'ministries', 'updated'))->toOthers();
+
         return $this->successResponse($request, 'Ціль додано');
     }
 
@@ -60,6 +62,8 @@ class MinistryGoalController extends Controller
 
         $goal->update($validated);
 
+        broadcast(new \App\Events\ChurchDataUpdated($ministry->church_id, 'ministries', 'updated'))->toOthers();
+
         return $this->successResponse($request, 'Ціль оновлено');
     }
 
@@ -69,6 +73,8 @@ class MinistryGoalController extends Controller
         abort_unless($goal->ministry_id === $ministry->id, 404);
 
         $goal->delete();
+
+        broadcast(new \App\Events\ChurchDataUpdated($ministry->church_id, 'ministries', 'updated'))->toOthers();
 
         return $this->successResponse(request(), 'Ціль видалено');
     }
@@ -93,6 +99,8 @@ class MinistryGoalController extends Controller
         $validated['sort_order'] = MinistryTask::where('ministry_id', $ministry->id)->max('sort_order') + 1;
 
         MinistryTask::create($validated);
+
+        broadcast(new \App\Events\ChurchDataUpdated($ministry->church_id, 'ministries', 'updated'))->toOthers();
 
         return $this->successResponse($request, 'Задачу додано');
     }
@@ -119,6 +127,8 @@ class MinistryGoalController extends Controller
         if (isset($validated['status']) && $validated['status'] !== $oldStatus && $task->goal) {
             $task->goal->updateProgressFromTasks();
         }
+
+        broadcast(new \App\Events\ChurchDataUpdated($ministry->church_id, 'ministries', 'updated'))->toOthers();
 
         return $this->successResponse($request, 'Задачу оновлено');
     }
@@ -155,6 +165,8 @@ class MinistryGoalController extends Controller
             }
         }
 
+        broadcast(new \App\Events\ChurchDataUpdated($ministry->church_id, 'ministries', 'updated'))->toOthers();
+
         return $this->successResponse($request, 'Статус задачі оновлено');
     }
 
@@ -171,6 +183,8 @@ class MinistryGoalController extends Controller
             $goal->updateProgressFromTasks();
         }
 
+        broadcast(new \App\Events\ChurchDataUpdated($ministry->church_id, 'ministries', 'updated'))->toOthers();
+
         return $this->successResponse(request(), 'Задачу видалено');
     }
 
@@ -183,6 +197,8 @@ class MinistryGoalController extends Controller
         ]);
 
         $ministry->update($validated);
+
+        broadcast(new \App\Events\ChurchDataUpdated($ministry->church_id, 'ministries', 'updated'))->toOthers();
 
         return $this->successResponse($request, 'Бачення оновлено');
     }

@@ -274,6 +274,9 @@
     {{-- Matrix Grid --}}
     <template x-if="!loading && allEvents.length > 0 && ministries.length > 0">
         <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div class="relative">
+                {{-- Mobile scroll hint: gradient fade on right edge --}}
+                <div class="pointer-events-none absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white dark:from-gray-800 to-transparent z-10 sm:hidden" x-data="{ showHint: true }" x-show="showHint" x-init="$nextTick(() => { const el = $el.parentElement.querySelector('.overflow-x-auto'); if (el) { el.addEventListener('scroll', () => { showHint = el.scrollLeft < 10 }, { passive: true }); showHint = el.scrollWidth > el.clientWidth; } })"></div>
             <div class="overflow-x-auto">
                 <table class="w-full border-collapse min-w-[300px]">
                     <thead>
@@ -447,6 +450,7 @@
                         </template>
                     </tbody>
                 </table>
+            </div>
             </div>
 
             {{-- Legend --}}
@@ -1620,3 +1624,5 @@ function servicePlanningMatrix() {
     };
 }
 </script>
+
+<x-realtime-banner channel="service-planning" />

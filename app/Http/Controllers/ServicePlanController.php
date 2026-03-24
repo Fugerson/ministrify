@@ -39,6 +39,8 @@ class ServicePlanController extends Controller
 
         $item = $event->planItems()->create($validated);
 
+        broadcast(new \App\Events\ChurchDataUpdated($event->church_id, 'service-planning', 'created'))->toOthers();
+
         if ($request->ajax()) {
             return response()->json([
                 'success' => true,
@@ -106,6 +108,8 @@ class ServicePlanController extends Controller
 
         $item->update($validated);
 
+        broadcast(new \App\Events\ChurchDataUpdated($event->church_id, 'service-planning', 'updated'))->toOthers();
+
         if ($request->ajax()) {
             return response()->json([
                 'success' => true,
@@ -130,6 +134,8 @@ class ServicePlanController extends Controller
         }
 
         $item->delete();
+
+        broadcast(new \App\Events\ChurchDataUpdated($event->church_id, 'service-planning', 'deleted'))->toOthers();
 
         if ($request->ajax()) {
             return response()->json([
@@ -159,6 +165,8 @@ class ServicePlanController extends Controller
                 ->where('event_id', $event->id)
                 ->update(['sort_order' => $itemData['sort_order']]);
         }
+
+        broadcast(new \App\Events\ChurchDataUpdated($event->church_id, 'service-planning', 'reordered'))->toOthers();
 
         return response()->json([
             'success' => true,

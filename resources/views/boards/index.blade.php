@@ -4,4 +4,6 @@
 
 @section('content')
     @include('boards._kanban', ['embedded' => false])
+
+<x-realtime-banner channel="boards" />
 @endsection

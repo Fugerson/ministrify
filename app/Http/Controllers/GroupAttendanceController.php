@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\AttendanceUpdated;
 use App\Models\Attendance;
 use App\Models\AttendanceRecord;
 use App\Models\Group;
@@ -365,6 +366,15 @@ class GroupAttendanceController extends Controller
 
             $this->recalculateCounts($attendance, $group);
 
+            broadcast(new AttendanceUpdated(
+                churchId: $group->church_id,
+                attendanceId: $attendance->id,
+                personId: null,
+                present: $newPresent,
+                presentCount: $attendance->members_present,
+            ))->toOthers();
+            broadcast(new \App\Events\ChurchDataUpdated($group->church_id, 'dashboard', 'updated'))->toOthers();
+
             return response()->json([
                 'success' => true,
                 'present' => $newPresent,
@@ -397,9 +407,63 @@ class GroupAttendanceController extends Controller
         // Recalculate counts
         $this->recalculateCounts($attendance, $group);
 
+        broadcast(new AttendanceUpdated(
+            churchId: $group->church_id,
+            attendanceId: $attendance->id,
+            personId: $validated['person_id'],
+            present: $record->present,
+            presentCount: $attendance->members_present,
+        ))->toOthers();
+        broadcast(new \App\Events\ChurchDataUpdated($group->church_id, 'dashboard', 'updated'))->toOthers();
+
         return response()->json([
             'success' => true,
             'present' => $record->present,
+            'members_present' => $attendance->members_present,
+            'guests_count' => $attendance->guests_count,
+            'total_count' => $attendance->total_count,
+        ]);
+    }
+
+    /**
+     * Mark all members (and optionally guests) as present in a single batch request.
+     */
+    public function markAllPresent(Request $request, Group $group, Attendance $attendance)
+    {
+        $this->checkAttendanceEnabled();
+        $this->authorize('update', $group);
+        abort_unless($attendance->attendable_id === $group->id && $attendance->attendable_type === Group::class, 404);
+
+        $includeGuests = $request->boolean('include_guests', false);
+
+        DB::transaction(function () use ($attendance, $group, $includeGuests) {
+            // Mark all member records as present
+            $attendance->records()->update([
+                'present' => true,
+                'checked_in_at' => now()->format('H:i'),
+            ]);
+
+            // Mark all group guests as present if requested
+            if ($includeGuests) {
+                DB::table('group_guest_attendance')
+                    ->where('attendance_id', $attendance->id)
+                    ->update(['present' => true, 'updated_at' => now()]);
+            }
+
+            $this->recalculateCounts($attendance, $group);
+        });
+
+        broadcast(new AttendanceUpdated(
+            churchId: $group->church_id,
+            attendanceId: $attendance->id,
+            personId: null,
+            present: true,
+            presentCount: $attendance->members_present,
+        ))->toOthers();
+        broadcast(new \App\Events\ChurchDataUpdated($group->church_id, 'dashboard', 'updated'))->toOthers();
+
+        return response()->json([
+            'success' => true,
             'members_present' => $attendance->members_present,
             'guests_count' => $attendance->guests_count,
             'total_count' => $attendance->total_count,

@@ -90,6 +90,8 @@ class RotationController extends Controller
 
         $results = $rotationService->autoAssignEvent($event);
 
+        broadcast(new \App\Events\ChurchDataUpdated($church->id, 'service-planning', 'updated'))->toOthers();
+
         if ($request->ajax()) {
             return response()->json([
                 'success' => true,
@@ -130,6 +132,8 @@ class RotationController extends Controller
             $totalAssigned += count($eventResult['results']['assigned']);
             $totalUnassigned += count($eventResult['results']['unassigned']);
         }
+
+        broadcast(new \App\Events\ChurchDataUpdated($church->id, 'service-planning', 'updated'))->toOthers();
 
         if ($request->ajax()) {
             return response()->json([
@@ -297,6 +301,8 @@ class RotationController extends Controller
             'notes' => $validated['notes'] ?? null,
         ]);
 
+        broadcast(new \App\Events\ChurchDataUpdated($church->id, 'service-planning', 'updated'))->toOthers();
+
         return response()->json(['success' => true, 'id' => $assignment->id]);
     }
 
@@ -317,6 +323,8 @@ class RotationController extends Controller
 
         $assignment->update(['notes' => $validated['notes']]);
 
+        broadcast(new \App\Events\ChurchDataUpdated($church->id, 'service-planning', 'updated'))->toOthers();
+
         return response()->json(['success' => true]);
     }
 
@@ -333,6 +341,8 @@ class RotationController extends Controller
         abort_unless($event && $event->church_id === $church->id, 404);
 
         $assignment->delete();
+
+        broadcast(new \App\Events\ChurchDataUpdated($church->id, 'service-planning', 'updated'))->toOthers();
 
         return response()->json(['success' => true]);
     }

@@ -51,7 +51,7 @@
         $ministryPct = $ministryPercentage ?? 0;
         $dotColor = fn($pct) => $pct > 100 ? 'bg-red-500' : ($pct > 80 ? 'bg-orange-400' : ($pct > 0 ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'));
     @endphp
-    <div class="flex gap-1 overflow-x-auto scrollbar-hide pb-1">
+    <div class="flex gap-1 overflow-x-auto no-scrollbar pb-1">
         <button @click="budgetTab = 'overview'"
                 :class="budgetTab === 'overview' ? 'bg-primary-600 text-white shadow-sm' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700'"
                 class="px-4 py-2 text-sm font-medium rounded-lg transition-colors whitespace-nowrap">
@@ -686,7 +686,7 @@
                 </div>
                 <div class="flex items-center gap-4">
                     <span class="font-semibold text-orange-900 dark:text-orange-100">
-                        {{ number_format($expense->amount, 0, ',', ' ') }} ₴
+                        {{ number_format($expense->amount_uah ?? $expense->amount, 0, ',', ' ') }} ₴
                     </span>
                     <button type="button" onclick="window.openExpenseEdit && window.openExpenseEdit({{ $expense->id }})"
                        class="px-3 py-1 text-sm bg-orange-600 hover:bg-orange-700 text-white rounded-lg transition-colors">
@@ -1304,4 +1304,6 @@ function budgetsPage() {
 </div><!-- /finance-content -->
 
 @include('finances.budgets.partials.modal-expense-edit')
+
+<x-realtime-banner channel="budgets" />
 @endsection

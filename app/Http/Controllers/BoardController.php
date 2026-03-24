@@ -222,6 +222,8 @@ class BoardController extends Controller
             $board->columns()->create($column);
         }
 
+        broadcast(new \App\Events\ChurchDataUpdated($church->id, 'boards', 'updated'))->toOthers();
+
         return $this->successResponse($request, __('messages.board_created'), 'boards.index');
     }
 
@@ -244,6 +246,8 @@ class BoardController extends Controller
 
         $board->update($validated);
 
+        broadcast(new \App\Events\ChurchDataUpdated($board->church_id, 'boards', 'updated'))->toOthers();
+
         return $this->successResponse($request, __('messages.board_updated'), 'boards.show', [$board]);
     }
 
@@ -251,7 +255,11 @@ class BoardController extends Controller
     {
         $this->authorizeBoard($board);
         abort_unless(auth()->user()->canDelete('boards'), 403);
+
+        $churchId = $board->church_id;
         $board->delete();
+
+        broadcast(new \App\Events\ChurchDataUpdated($churchId, 'boards', 'updated'))->toOthers();
 
         return $this->successResponse($request, __('messages.board_deleted'), 'boards.index');
     }
@@ -260,6 +268,8 @@ class BoardController extends Controller
     {
         $this->authorizeBoard($board);
         $board->update(['is_archived' => true]);
+
+        broadcast(new \App\Events\ChurchDataUpdated($board->church_id, 'boards', 'updated'))->toOthers();
 
         return $this->successResponse($request, __('messages.board_archived'), 'boards.index');
     }
@@ -278,6 +288,8 @@ class BoardController extends Controller
     {
         $this->authorizeBoard($board);
         $board->update(['is_archived' => false]);
+
+        broadcast(new \App\Events\ChurchDataUpdated($board->church_id, 'boards', 'updated'))->toOthers();
 
         return $this->successResponse($request, __('messages.board_restored'), 'boards.index');
     }
@@ -298,6 +310,8 @@ class BoardController extends Controller
 
         $board->columns()->create($validated);
 
+        broadcast(new \App\Events\ChurchDataUpdated($board->church_id, 'boards', 'updated'))->toOthers();
+
         return $this->successResponse($request, __('messages.column_added'), 'boards.show', [$board]);
     }
 
@@ -314,6 +328,8 @@ class BoardController extends Controller
 
         $column->update($validated);
 
+        broadcast(new \App\Events\ChurchDataUpdated($column->board->church_id, 'boards', 'updated'))->toOthers();
+
         return $this->successResponse($request, __('messages.column_updated'), 'boards.show', [$column->board]);
     }
 
@@ -328,6 +344,8 @@ class BoardController extends Controller
         }
 
         $column->delete();
+
+        broadcast(new \App\Events\ChurchDataUpdated($board->church_id, 'boards', 'updated'))->toOthers();
 
         return $this->successResponse($request, __('messages.column_deleted'), 'boards.show', [$board]);
     }
@@ -349,6 +367,8 @@ class BoardController extends Controller
             }
             BoardColumn::where('id', $columnId)->update(['position' => $index]);
         }
+
+        broadcast(new \App\Events\ChurchDataUpdated($board->church_id, 'boards', 'updated'))->toOthers();
 
         return response()->json(['success' => true]);
     }
@@ -390,6 +410,8 @@ class BoardController extends Controller
 
         // Log activity
         BoardCardActivity::log($card, 'created');
+
+        broadcast(new \App\Events\ChurchDataUpdated($column->board->church_id, 'boards', 'updated'))->toOthers();
 
         return $this->successResponse($request, __('messages.task_added'), 'boards.index', [], ['card' => $card]);
     }
@@ -439,6 +461,8 @@ class BoardController extends Controller
             'person_id' => $validated['entity_type'] === 'person' ? $validated['entity_id'] : null,
             'entity_type' => $validated['entity_type'],
         ]);
+
+        broadcast(new \App\Events\ChurchDataUpdated($church->id, 'boards', 'updated'))->toOthers();
 
         return $this->successResponse($request, __('messages.card_created_from_entity', ['entity' => $this->getEntityTypeLabel($validated['entity_type'])]), 'boards.show', [$board], ['card' => $card]);
     }
@@ -729,6 +753,8 @@ class BoardController extends Controller
 
         $card->update($validated);
 
+        broadcast(new \App\Events\ChurchDataUpdated($card->column->board->church_id, 'boards', 'updated'))->toOthers();
+
         return $this->successResponse($request, __('messages.card_updated'), 'boards.show', [$card->column->board]);
     }
 
@@ -738,6 +764,8 @@ class BoardController extends Controller
         abort_unless(auth()->user()->canDelete('boards'), 403);
         $board = $card->column->board;
         $card->delete();
+
+        broadcast(new \App\Events\ChurchDataUpdated($board->church_id, 'boards', 'updated'))->toOthers();
 
         return $this->successResponse($request, __('messages.card_deleted'));
     }
@@ -807,6 +835,8 @@ class BoardController extends Controller
             BoardCardActivity::log($card, 'moved', 'column_id', $oldColumnName, $targetColumn->name);
         }
 
+        broadcast(new \App\Events\ChurchDataUpdated($card->column->board->church_id, 'boards', 'updated'))->toOthers();
+
         return response()->json(['success' => true]);
     }
 
@@ -821,6 +851,8 @@ class BoardController extends Controller
             $card->markAsCompleted();
             BoardCardActivity::log($card, 'completed');
         }
+
+        broadcast(new \App\Events\ChurchDataUpdated($card->column->board->church_id, 'boards', 'updated'))->toOthers();
 
         return $this->successResponse($request, __('messages.card_status_updated'), null, [], ['is_completed' => $card->is_completed]);
     }
@@ -852,6 +884,8 @@ class BoardController extends Controller
         BoardCardActivity::log($newCard, 'created', null, null, null, [
             'duplicated_from' => $card->id,
         ]);
+
+        broadcast(new \App\Events\ChurchDataUpdated($card->column->board->church_id, 'boards', 'updated'))->toOthers();
 
         return $this->successResponse($request, __('messages.card_duplicated'), 'boards.index', [], ['card' => $newCard->load(['column', 'epic'])]);
     }
@@ -898,6 +932,8 @@ class BoardController extends Controller
             'preview' => \Str::limit($validated['content'] ?? '', 50),
         ]);
 
+        broadcast(new \App\Events\ChurchDataUpdated($card->column->board->church_id, 'boards', 'updated'))->toOthers();
+
         return $this->successResponse($request, __('messages.comment_added'), null, [], [
             'comment' => [
                 'id' => $comment->id,
@@ -931,6 +967,8 @@ class BoardController extends Controller
         // Log activity
         BoardCardActivity::log($card, 'comment_deleted', null, \Str::limit($commentContent, 50));
 
+        broadcast(new \App\Events\ChurchDataUpdated($card->column->board->church_id, 'boards', 'updated'))->toOthers();
+
         return $this->successResponse($request, __('messages.comment_deleted'));
     }
 
@@ -951,6 +989,8 @@ class BoardController extends Controller
         // Log activity
         BoardCardActivity::log($card, 'checklist_added', null, null, $validated['title']);
 
+        broadcast(new \App\Events\ChurchDataUpdated($card->column->board->church_id, 'boards', 'updated'))->toOthers();
+
         return $this->successResponse($request, __('messages.checklist_item_added'), null, [], [
             'item' => [
                 'id' => $item->id,
@@ -970,6 +1010,8 @@ class BoardController extends Controller
         $action = $item->is_completed ? 'checklist_completed' : 'checklist_uncompleted';
         BoardCardActivity::log($item->card, $action, null, null, null, ['title' => $item->title]);
 
+        broadcast(new \App\Events\ChurchDataUpdated($item->card->column->board->church_id, 'boards', 'updated'))->toOthers();
+
         return $this->successResponse($request, __('messages.checklist_item_updated'), null, [], ['is_completed' => $item->is_completed]);
     }
 
@@ -982,6 +1024,8 @@ class BoardController extends Controller
 
         // Log activity
         BoardCardActivity::log($card, 'checklist_deleted', null, $title);
+
+        broadcast(new \App\Events\ChurchDataUpdated($card->column->board->church_id, 'boards', 'updated'))->toOthers();
 
         return $this->successResponse($request, __('messages.checklist_item_deleted'));
     }
@@ -1027,6 +1071,8 @@ class BoardController extends Controller
             'comment_id' => $comment->id,
         ]);
 
+        broadcast(new \App\Events\ChurchDataUpdated($comment->card->column->board->church_id, 'boards', 'updated'))->toOthers();
+
         return $this->successResponse($request, __('messages.comment_updated'), null, [], [
             'comment' => [
                 'id' => $comment->id,
@@ -1070,6 +1116,8 @@ class BoardController extends Controller
         array_splice($attachments, $index, 1);
         $comment->update(['attachments' => ! empty($attachments) ? $attachments : null]);
 
+        broadcast(new \App\Events\ChurchDataUpdated($comment->card->column->board->church_id, 'boards', 'updated'))->toOthers();
+
         return response()->json([
             'success' => true,
             'attachments' => collect($attachments)->map(fn ($a) => [
@@ -1104,6 +1152,8 @@ class BoardController extends Controller
         // Log activity
         BoardCardActivity::log($card, 'attachment_added', null, null, $file->getClientOriginalName());
 
+        broadcast(new \App\Events\ChurchDataUpdated($card->column->board->church_id, 'boards', 'updated'))->toOthers();
+
         return $this->successResponse($request, __('messages.file_uploaded'), null, [], [
             'attachment' => [
                 'id' => $attachment->id,
@@ -1130,6 +1180,8 @@ class BoardController extends Controller
 
         // Log activity
         BoardCardActivity::log($card, 'attachment_deleted', null, $fileName);
+
+        broadcast(new \App\Events\ChurchDataUpdated($card->column->board->church_id, 'boards', 'updated'))->toOthers();
 
         return $this->successResponse($request, __('messages.file_deleted'));
     }
@@ -1165,6 +1217,8 @@ class BoardController extends Controller
             BoardCardActivity::log($card, 'related_added', null, null, $relatedCard->title);
         }
 
+        broadcast(new \App\Events\ChurchDataUpdated($card->column->board->church_id, 'boards', 'updated'))->toOthers();
+
         return $this->successResponse($request, __('messages.card_linked'), null, [], [
             'related_card' => [
                 'id' => $relatedCard->id,
@@ -1185,6 +1239,8 @@ class BoardController extends Controller
 
         // Log activity
         BoardCardActivity::log($card, 'related_removed', null, $relatedTitle);
+
+        broadcast(new \App\Events\ChurchDataUpdated($card->column->board->church_id, 'boards', 'updated'))->toOthers();
 
         return $this->successResponse($request, __('messages.link_removed'));
     }
@@ -1255,6 +1311,8 @@ class BoardController extends Controller
 
         $epic = $board->epics()->create($validated);
 
+        broadcast(new \App\Events\ChurchDataUpdated($board->church_id, 'boards', 'updated'))->toOthers();
+
         return $this->successResponse($request, __('messages.epic_created'), 'boards.index', [], ['epic' => $epic]);
     }
 
@@ -1271,6 +1329,8 @@ class BoardController extends Controller
 
         $epic->update($validated);
 
+        broadcast(new \App\Events\ChurchDataUpdated($epic->board->church_id, 'boards', 'updated'))->toOthers();
+
         return $this->successResponse($request, __('messages.epic_updated'), 'boards.index', [], ['epic' => $epic]);
     }
 
@@ -1281,7 +1341,10 @@ class BoardController extends Controller
         // Remove epic from all cards (don't delete cards)
         BoardCard::where('epic_id', $epic->id)->update(['epic_id' => null]);
 
+        $churchId = $epic->board->church_id;
         $epic->delete();
+
+        broadcast(new \App\Events\ChurchDataUpdated($churchId, 'boards', 'updated'))->toOthers();
 
         return $this->successResponse($request, __('messages.epic_deleted'), 'boards.index');
     }

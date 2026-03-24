@@ -267,6 +267,7 @@
 </div>
 @endcan
 
+<x-realtime-banner channel="groups" />
 @endsection
 
 @push('scripts')
@@ -283,7 +284,7 @@ document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape' && !document.getElementById('createGroupModal').classList.contains('hidden')) {
         closeCreateGroupModal();
     }
-});
+}, { signal: pageSignal() });
 
 function groupCreateForm() {
     return {

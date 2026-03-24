@@ -360,4 +360,6 @@ function dashboardBuilder() {
 }
 </script>
 @endpush
+
+<x-realtime-banner channel="dashboard" />
 @endsection

@@ -113,6 +113,8 @@ class AttendanceController extends Controller
 
         $attendance->recalculateCounts();
 
+        broadcast(new \App\Events\ChurchDataUpdated($church->id, 'dashboard', 'updated'))->toOthers();
+
         return $this->successResponse($request, 'Відвідуваність збережено.', 'attendance.show', ['attendance' => $attendance->id]);
     }
 
@@ -189,6 +191,8 @@ class AttendanceController extends Controller
             $attendance->recalculateCounts();
         });
 
+        broadcast(new \App\Events\ChurchDataUpdated($attendance->church_id, 'dashboard', 'updated'))->toOthers();
+
         return $this->successResponse($request, 'Відвідуваність оновлено.', 'attendance.show', ['attendance' => $attendance->id]);
     }
 
@@ -199,6 +203,8 @@ class AttendanceController extends Controller
         $this->authorize('delete', $attendance);
 
         $attendance->delete();
+
+        broadcast(new \App\Events\ChurchDataUpdated($attendance->church_id, 'dashboard', 'updated'))->toOthers();
 
         return $this->successResponse($request, 'Запис видалено.');
     }
@@ -230,7 +236,7 @@ class AttendanceController extends Controller
         // Average attendance this month
         $monthlyAttendance = Attendance::where('church_id', $church->id)
             ->forMonth($year, $month)
-            ->selectRaw('AVG(COALESCE(total_count, members_present, 0)) as avg')
+            ->selectRaw('AVG(COALESCE(members_present, total_count, 0)) as avg')
             ->value('avg');
 
         // Chart data (last 12 weeks)
@@ -241,7 +247,7 @@ class AttendanceController extends Controller
 
             $count = Attendance::where('church_id', $church->id)
                 ->whereBetween('date', [$weekStart, $weekEnd])
-                ->selectRaw('AVG(COALESCE(total_count, members_present, 0)) as avg')
+                ->selectRaw('AVG(COALESCE(members_present, total_count, 0)) as avg')
                 ->value('avg') ?? 0;
 
             $chartData[] = [

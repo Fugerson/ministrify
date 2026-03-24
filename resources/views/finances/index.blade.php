@@ -266,7 +266,7 @@
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.income_by_category') }}</h3>
-                <a href="{{ route('finances.transactions', ['filter' => 'income']) }}" class="text-sm text-primary-600 hover:text-primary-500">{{ __('app.view_all') }}</a>
+                <a href="{{ route('finances.transactions', ['filter' => 'income']) }}" class="text-sm text-primary-600 hover:text-primary-500 px-2 py-2 -mr-2 min-h-[44px] flex items-center">{{ __('app.view_all') }}</a>
             </div>
             <div class="p-6">
                 @if($incomeByCategory->count() > 0)
@@ -300,7 +300,7 @@
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.expense_by_ministry') }}</h3>
-                <a href="{{ route('finances.transactions', ['filter' => 'expense']) }}" class="text-sm text-primary-600 hover:text-primary-500">{{ __('app.view_all') }}</a>
+                <a href="{{ route('finances.transactions', ['filter' => 'expense']) }}" class="text-sm text-primary-600 hover:text-primary-500 px-2 py-2 -mr-2 min-h-[44px] flex items-center">{{ __('app.view_all') }}</a>
             </div>
             <div class="p-6">
                 @if($expenseByMinistry->count() > 0)
@@ -373,7 +373,7 @@
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('app.active_campaigns') }}</h3>
-                    <a href="{{ route('donations.index') }}" class="text-sm text-primary-600 hover:text-primary-500">{{ __('app.view_all') }}</a>
+                    <a href="{{ route('donations.index') }}" class="text-sm text-primary-600 hover:text-primary-500 px-2 py-2 -mr-2 min-h-[44px] flex items-center">{{ __('app.view_all') }}</a>
                 </div>
                 <div class="space-y-4">
                     @foreach($activeCampaigns as $campaign)
@@ -506,7 +506,7 @@ function financesDashboard() {
                     plugins: {
                         legend: {
                             position: 'bottom',
-                            labels: { color: isDark ? '#9ca3af' : '#6b7280', usePointStyle: true, padding: 20 }
+                            labels: { color: isDark ? '#9ca3af' : '#6b7280', usePointStyle: true, padding: 20, font: { size: window.innerWidth < 640 ? 13 : 15 } }
                         },
                         tooltip: {
                             callbacks: {
@@ -557,5 +557,7 @@ function financesDashboard() {
     };
 }
 </script>
+
+<x-realtime-banner channel="finances" />
 </div>
 @endsection

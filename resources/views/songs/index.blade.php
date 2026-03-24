@@ -347,4 +347,6 @@ function songsLibrary() {
     }
 }
 </script>
+
+<x-realtime-banner channel="service-planning" />
 @endsection

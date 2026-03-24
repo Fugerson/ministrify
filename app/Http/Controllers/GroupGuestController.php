@@ -40,6 +40,8 @@ class GroupGuestController extends Controller
 
         GroupGuest::create($validated);
 
+        broadcast(new \App\Events\ChurchDataUpdated($this->getCurrentChurch()->id, 'groups', 'updated'))->toOthers();
+
         return $this->successResponse($request, __('messages.guest_added'), 'groups.show', ['group' => $group->id]);
     }
 
@@ -66,6 +68,8 @@ class GroupGuestController extends Controller
 
         $guest->update($validated);
 
+        broadcast(new \App\Events\ChurchDataUpdated($this->getCurrentChurch()->id, 'groups', 'updated'))->toOthers();
+
         return $this->successResponse($request, __('messages.guest_updated'), 'groups.show', ['group' => $group->id]);
     }
 
@@ -75,6 +79,8 @@ class GroupGuestController extends Controller
         abort_unless($guest->group_id === $group->id, 404);
 
         $guest->delete();
+
+        broadcast(new \App\Events\ChurchDataUpdated($this->getCurrentChurch()->id, 'groups', 'updated'))->toOthers();
 
         return $this->successResponse($request, __('messages.guest_deleted'), 'groups.show', ['group' => $group->id]);
     }

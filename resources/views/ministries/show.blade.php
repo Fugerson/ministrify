@@ -5621,4 +5621,6 @@ function budgetPage() {
 }
 </script>
 @endpush
+
+<x-realtime-banner channel="ministries" />
 @endsection

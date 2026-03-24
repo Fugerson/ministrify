@@ -33,6 +33,8 @@ class ServiceTeamController extends Controller
 
         $event->linkedMinistries()->syncWithoutDetaching([$ministry->id]);
 
+        broadcast(new \App\Events\ChurchDataUpdated($event->church_id, 'service-planning', 'updated'))->toOthers();
+
         if ($request->wantsJson()) {
             $roles = $ministry->ministryRoles()->orderBy('name')->get(['id', 'name'])->map(fn ($r) => ['id' => $r->id, 'name' => $r->name])->values();
             $members = $ministry->members()->orderBy('last_name')->get(['people.id', 'first_name', 'last_name', 'telegram_chat_id'])->map(fn ($p) => [
@@ -75,6 +77,8 @@ class ServiceTeamController extends Controller
             ->where('ministry_id', $ministry->id)
             ->delete();
 
+        broadcast(new \App\Events\ChurchDataUpdated($event->church_id, 'service-planning', 'updated'))->toOthers();
+
         if ($request->wantsJson()) {
             return response()->json(['success' => true]);
         }
@@ -108,6 +112,8 @@ class ServiceTeamController extends Controller
             'visible_roles' => json_encode($visibleRoles),
         ]);
 
+        broadcast(new \App\Events\ChurchDataUpdated($event->church_id, 'service-planning', 'updated'))->toOthers();
+
         return response()->json(['success' => true]);
     }
 
@@ -124,6 +130,8 @@ class ServiceTeamController extends Controller
                 'sort_order' => $index,
             ]);
         }
+
+        broadcast(new \App\Events\ChurchDataUpdated($event->church_id, 'service-planning', 'updated'))->toOthers();
 
         return response()->json(['success' => true]);
     }
@@ -189,6 +197,8 @@ class ServiceTeamController extends Controller
             'notes' => $validated['notes'] ?? null,
         ]);
 
+        broadcast(new \App\Events\ChurchDataUpdated($event->church_id, 'service-planning', 'updated'))->toOthers();
+
         if ($request->wantsJson()) {
             return response()->json([
                 'success' => true,
@@ -215,6 +225,8 @@ class ServiceTeamController extends Controller
 
         $member->delete();
 
+        broadcast(new \App\Events\ChurchDataUpdated($event->church_id, 'service-planning', 'updated'))->toOthers();
+
         if ($request->wantsJson()) {
             return response()->json(['success' => true]);
         }
@@ -239,6 +251,8 @@ class ServiceTeamController extends Controller
         ]);
 
         $member->update(['notes' => $validated['notes']]);
+
+        broadcast(new \App\Events\ChurchDataUpdated($event->church_id, 'service-planning', 'updated'))->toOthers();
 
         return response()->json(['success' => true]);
     }
@@ -302,6 +316,8 @@ class ServiceTeamController extends Controller
             ]);
 
             $member->update(['status' => 'pending']);
+
+            broadcast(new \App\Events\ChurchDataUpdated($event->church_id, 'service-planning', 'updated'))->toOthers();
 
             return response()->json(['success' => true, 'message' => __('messages.telegram_request_sent')]);
         }
@@ -368,6 +384,8 @@ class ServiceTeamController extends Controller
             'status' => 'confirmed',
         ]);
 
+        broadcast(new \App\Events\ChurchDataUpdated($event->church_id, 'service-planning', 'updated'))->toOthers();
+
         return $this->successResponse($request, __('messages.signed_up_success'));
     }
 
@@ -388,6 +406,8 @@ class ServiceTeamController extends Controller
         }
 
         $member->delete();
+
+        broadcast(new \App\Events\ChurchDataUpdated($event->church_id, 'service-planning', 'updated'))->toOthers();
 
         return $this->successResponse($request, __('messages.unsubscribed_success'));
     }

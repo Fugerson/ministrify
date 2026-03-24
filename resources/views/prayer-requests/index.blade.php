@@ -299,4 +299,6 @@ function prayerRequestCreateForm() {
     }
 }
 </script>
+
+<x-realtime-banner channel="prayers" />
 @endsection

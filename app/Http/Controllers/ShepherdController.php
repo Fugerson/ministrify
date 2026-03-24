@@ -79,6 +79,8 @@ class ShepherdController extends Controller
 
         $person->update(['is_shepherd' => true]);
 
+        broadcast(new \App\Events\ChurchDataUpdated($church->id, 'dashboard', 'updated'))->toOthers();
+
         if ($request->wantsJson()) {
             $person->load('churchRoleRelation');
 
@@ -112,6 +114,8 @@ class ShepherdController extends Controller
         Person::where('shepherd_id', $person->id)->update(['shepherd_id' => null]);
 
         $person->update(['is_shepherd' => false]);
+
+        broadcast(new \App\Events\ChurchDataUpdated($person->church_id, 'dashboard', 'updated'))->toOthers();
 
         return response()->json(['success' => true]);
     }

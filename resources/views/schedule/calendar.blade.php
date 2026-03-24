@@ -4,7 +4,7 @@
 
 @section('actions')
 @if(auth()->user()->can('create', \App\Models\Event::class))
-<button onclick="document.getElementById('createEventModal').classList.remove('hidden')"
+<button onclick="openCreateEventModal()"
    class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-xl transition-colors">
     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
@@ -298,7 +298,20 @@
                             $isToday = $dayDate->isToday();
                             $isPast = $dayDate->isPast() && !$isToday;
                         @endphp
-                        <div class="border-r border-gray-200 dark:border-gray-700 last:border-r-0 p-2 {{ $isToday ? 'bg-primary-50/30 dark:bg-primary-900/10 ring-1 ring-inset ring-primary-200 dark:ring-primary-800' : '' }} {{ $isPast ? 'opacity-60' : '' }}">
+                        @php $canCreateEvent = auth()->user()->can('create', \App\Models\Event::class); @endphp
+                        <div class="group border-r border-gray-200 dark:border-gray-700 last:border-r-0 p-2 {{ $isToday ? 'bg-primary-50/30 dark:bg-primary-900/10 ring-1 ring-inset ring-primary-200 dark:ring-primary-800' : '' }} {{ $isPast ? 'opacity-60' : '' }} {{ $canCreateEvent ? 'cursor-pointer hover:bg-gray-50/50 dark:hover:bg-gray-700/20 transition-colors' : '' }}"
+                             @if($canCreateEvent) @click.self="openCreateEventModal('{{ $dateKey }}')" @endif>
+                            @can('create', \App\Models\Event::class)
+                            <div class="flex justify-end mb-1">
+                                <button type="button" onclick="event.stopPropagation(); openCreateEventModal('{{ $dateKey }}')"
+                                        class="w-5 h-5 flex items-center justify-center rounded text-gray-400 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/30 dark:hover:text-primary-400 opacity-0 group-hover:opacity-100 transition-all"
+                                        title="{{ __('app.schedule_new_event') }}">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            @endcan
                             <div class="space-y-2">
                                 @foreach($dayEvents as $item)
                                     @if($item->type === 'meeting')
@@ -441,14 +454,27 @@
                                 $isCurrentMonth = $calendarDate->month == $month;
                                 $isPast = $calendarDate->isPast() && !$isToday;
                             @endphp
-                            <div class="sm:min-h-[140px] lg:min-h-[160px] border-b border-r border-gray-200 dark:border-gray-700 p-1.5 lg:p-2 {{ !$isCurrentMonth ? 'bg-gray-100/70 dark:bg-gray-800/50' : '' }} {{ $isToday ? 'bg-primary-50/40 dark:bg-primary-900/10 ring-1 ring-inset ring-primary-300 dark:ring-primary-700' : '' }}">
+                            @php $canCreateEvent = auth()->user()->can('create', \App\Models\Event::class); @endphp
+                            <div class="group sm:min-h-[140px] lg:min-h-[160px] border-b border-r border-gray-200 dark:border-gray-700 p-1.5 lg:p-2 {{ !$isCurrentMonth ? 'bg-gray-100/70 dark:bg-gray-800/50' : '' }} {{ $isToday ? 'bg-primary-50/40 dark:bg-primary-900/10 ring-1 ring-inset ring-primary-300 dark:ring-primary-700' : '' }} {{ $canCreateEvent ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors' : '' }}"
+                                 @if($canCreateEvent) @click.self="openCreateEventModal('{{ $dateKey }}')" @endif>
                                 <div class="flex items-center justify-between mb-1">
                                     <span class="text-sm font-medium {{ $isToday ? 'w-7 h-7 flex items-center justify-center rounded-full bg-primary-600 text-white shadow-sm' : ($isCurrentMonth ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-600') }}">
                                         {{ $calendarDate->format('j') }}
                                     </span>
-                                    @if($dayEvents->count() > 5)
-                                        <span class="text-xs text-gray-500 dark:text-gray-500">+{{ $dayEvents->count() - 5 }}</span>
-                                    @endif
+                                    <div class="flex items-center gap-1">
+                                        @if($dayEvents->count() > 5)
+                                            <span class="text-xs text-gray-500 dark:text-gray-500">+{{ $dayEvents->count() - 5 }}</span>
+                                        @endif
+                                        @can('create', \App\Models\Event::class)
+                                        <button type="button" onclick="event.stopPropagation(); openCreateEventModal('{{ $dateKey }}')"
+                                                class="w-5 h-5 flex items-center justify-center rounded text-gray-400 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/30 dark:hover:text-primary-400 opacity-0 group-hover:opacity-100 transition-all"
+                                                title="{{ __('app.schedule_new_event') }}">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                            </svg>
+                                        </button>
+                                        @endcan
+                                    </div>
                                 </div>
                                 <div class="space-y-0.5">
                                     @foreach($dayEvents->take(5) as $item)
@@ -575,8 +601,17 @@
                 {{-- Selected date events --}}
                 <template x-if="selectedDate && eventsMap[selectedDate]">
                     <div class="mt-3 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                        <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+                        <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                             <h3 class="font-semibold text-gray-900 dark:text-white text-sm" x-text="new Date(selectedDate + 'T00:00:00').toLocaleDateString('{{ app()->getLocale() === 'uk' ? 'uk-UA' : 'en-US' }}', { weekday: 'long', day: 'numeric', month: 'long' })"></h3>
+                            @can('create', \App\Models\Event::class)
+                            <button type="button" @click="openCreateEventModal(selectedDate)"
+                                    class="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/30 dark:hover:text-primary-400 transition-colors"
+                                    title="{{ __('app.schedule_new_event') }}">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                </svg>
+                            </button>
+                            @endcan
                         </div>
                         <div class="divide-y divide-gray-200 dark:divide-gray-700">
                             <template x-for="(item, idx) in eventsMap[selectedDate]" :key="idx">
@@ -625,6 +660,15 @@
                 <template x-if="selectedDate && !eventsMap[selectedDate]">
                     <div class="mt-3 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 text-center">
                         <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('app.no_events_for_date') }}</p>
+                        @can('create', \App\Models\Event::class)
+                        <button type="button" @click="openCreateEventModal(selectedDate)"
+                                class="mt-3 inline-flex items-center text-primary-600 dark:text-primary-400 hover:text-primary-700 font-medium text-sm">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                            {{ __('app.schedule_new_event') }}
+                        </button>
+                        @endcan
                     </div>
                 </template>
 
@@ -742,7 +786,7 @@
                             </div>
                             <p class="text-gray-500 dark:text-gray-400">{{ __('app.no_events_this_month') }}</p>
                             @if(auth()->user()->can('create', \App\Models\Event::class))
-                            <button onclick="document.getElementById('createEventModal').classList.remove('hidden')" class="mt-3 inline-flex items-center text-primary-600 dark:text-primary-400 hover:text-primary-700 font-medium">
+                            <button onclick="openCreateEventModal()" class="mt-3 inline-flex items-center text-primary-600 dark:text-primary-400 hover:text-primary-700 font-medium">
                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                 </svg>
@@ -1241,9 +1285,19 @@ document.addEventListener('keydown', function(e) {
         hideSubscriptionModal();
         closeCreateEventModal();
     }
-});
+}, { signal: pageSignal() });
 
 // Create Event Modal
+function openCreateEventModal(date) {
+    const modal = document.getElementById('createEventModal');
+    if (!modal) return;
+    if (date) {
+        const dateInput = modal.querySelector('#modal_date');
+        if (dateInput) dateInput.value = date;
+    }
+    modal.classList.remove('hidden');
+}
+
 function closeCreateEventModal() {
     document.getElementById('createEventModal')?.classList.add('hidden');
 }
@@ -1283,10 +1337,21 @@ function eventCreateForm() {
                     this.saving = false;
                     return;
                 }
-                showToast('success', data.message || _calI18n.saved);
+                // Reset form
+                this.$refs.form.reset();
+                this.errors = {};
+                this.saving = false;
+
                 closeCreateEventModal();
-                // Reload the calendar to show the new event
-                setTimeout(() => Livewire.navigate(window.location.href), 600);
+
+                if (data.redirect_url) {
+                    showToast('success', data.message || _calI18n.saved);
+                    // Navigate to the new event
+                    setTimeout(() => Livewire.navigate(data.redirect_url), 600);
+                } else {
+                    showToast('success', data.message || _calI18n.saved);
+                    setTimeout(() => Livewire.navigate(window.location.href), 600);
+                }
             } catch (e) {
                 showToast('error', _calI18n.connectionError);
                 this.saving = false;
@@ -1563,4 +1628,6 @@ Date.prototype.getWeek = function() {
 };
 
 </script>
+
+<x-realtime-banner channel="events" />
 @endsection

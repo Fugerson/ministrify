@@ -206,7 +206,7 @@ function musicStand() {
                 if (e.key === 'Escape' && this.isFullscreen) this.toggleFullscreen();
                 if (e.key === '+' || e.key === '=') this.increaseFontSize();
                 if (e.key === '-') this.decreaseFontSize();
-            });
+            }, { signal: pageSignal() });
         },
 
         selectSong(index) {
@@ -267,4 +267,6 @@ function musicStand() {
     }
 }
 </script>
+
+<x-realtime-banner channel="service-planning" />
 @endsection

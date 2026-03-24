@@ -316,6 +316,8 @@
         </div>
     </div>
 </div>
+
+<x-realtime-banner channel="boards" />
 @endsection
 
 <script>

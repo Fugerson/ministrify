@@ -285,6 +285,8 @@ class WorshipTeamController extends Controller
             ->orderByDesc('id')
             ->value('id');
 
+        broadcast(new \App\Events\ChurchDataUpdated($event->church_id, 'service-planning', 'updated'))->toOthers();
+
         if ($request->wantsJson()) {
             return response()->json(['success' => true, 'event_song_id' => $eventSongId]);
         }
@@ -314,6 +316,8 @@ class WorshipTeamController extends Controller
 
         $event->songs()->detach($song->id);
 
+        broadcast(new \App\Events\ChurchDataUpdated($event->church_id, 'service-planning', 'updated'))->toOthers();
+
         if ($request->wantsJson()) {
             return response()->json(['success' => true]);
         }
@@ -337,6 +341,8 @@ class WorshipTeamController extends Controller
         foreach ($validated['songs'] as $order => $songId) {
             $event->songs()->updateExistingPivot($songId, ['order' => $order + 1]);
         }
+
+        broadcast(new \App\Events\ChurchDataUpdated($event->church_id, 'service-planning', 'updated'))->toOthers();
 
         return response()->json(['success' => true]);
     }
@@ -398,6 +404,8 @@ class WorshipTeamController extends Controller
             'notes' => $validated['notes'] ?? null,
         ]);
 
+        broadcast(new \App\Events\ChurchDataUpdated($event->church_id, 'service-planning', 'updated'))->toOthers();
+
         if ($request->wantsJson()) {
             return response()->json(['success' => true, 'id' => $member->id]);
         }
@@ -418,6 +426,8 @@ class WorshipTeamController extends Controller
         }
 
         $member->delete();
+
+        broadcast(new \App\Events\ChurchDataUpdated($event->church_id, 'service-planning', 'updated'))->toOthers();
 
         if ($request->wantsJson()) {
             return response()->json(['success' => true]);
@@ -453,6 +463,8 @@ class WorshipTeamController extends Controller
                 'is_primary' => $roleId == $primarySkill,
             ]);
         }
+
+        broadcast(new \App\Events\ChurchDataUpdated($person->church_id, 'service-planning', 'updated'))->toOthers();
 
         return back()->with('success', 'Навички оновлено');
     }
