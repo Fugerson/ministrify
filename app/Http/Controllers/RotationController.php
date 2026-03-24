@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\ChurchDataUpdated;
 use App\Models\Assignment;
 use App\Models\Event;
 use App\Models\Ministry;
@@ -90,7 +91,7 @@ class RotationController extends Controller
 
         $results = $rotationService->autoAssignEvent($event);
 
-        broadcast(new \App\Events\ChurchDataUpdated($church->id, 'service-planning', 'updated'))->toOthers();
+        broadcast(new ChurchDataUpdated($church->id, 'service-planning', 'updated'))->toOthers();
 
         if ($request->ajax()) {
             return response()->json([
@@ -133,7 +134,7 @@ class RotationController extends Controller
             $totalUnassigned += count($eventResult['results']['unassigned']);
         }
 
-        broadcast(new \App\Events\ChurchDataUpdated($church->id, 'service-planning', 'updated'))->toOthers();
+        broadcast(new ChurchDataUpdated($church->id, 'service-planning', 'updated'))->toOthers();
 
         if ($request->ajax()) {
             return response()->json([
@@ -301,7 +302,7 @@ class RotationController extends Controller
             'notes' => $validated['notes'] ?? null,
         ]);
 
-        broadcast(new \App\Events\ChurchDataUpdated($church->id, 'service-planning', 'updated'))->toOthers();
+        broadcast(new ChurchDataUpdated($church->id, 'service-planning', 'updated'))->toOthers();
 
         return response()->json(['success' => true, 'id' => $assignment->id]);
     }
@@ -323,7 +324,7 @@ class RotationController extends Controller
 
         $assignment->update(['notes' => $validated['notes']]);
 
-        broadcast(new \App\Events\ChurchDataUpdated($church->id, 'service-planning', 'updated'))->toOthers();
+        broadcast(new ChurchDataUpdated($church->id, 'service-planning', 'updated'))->toOthers();
 
         return response()->json(['success' => true]);
     }
@@ -342,7 +343,7 @@ class RotationController extends Controller
 
         $assignment->delete();
 
-        broadcast(new \App\Events\ChurchDataUpdated($church->id, 'service-planning', 'updated'))->toOthers();
+        broadcast(new ChurchDataUpdated($church->id, 'service-planning', 'updated'))->toOthers();
 
         return response()->json(['success' => true]);
     }

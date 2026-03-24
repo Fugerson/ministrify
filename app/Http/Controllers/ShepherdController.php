@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\ChurchDataUpdated;
 use App\Models\Person;
 use Illuminate\Http\Request;
 
@@ -79,7 +80,7 @@ class ShepherdController extends Controller
 
         $person->update(['is_shepherd' => true]);
 
-        broadcast(new \App\Events\ChurchDataUpdated($church->id, 'dashboard', 'updated'))->toOthers();
+        broadcast(new ChurchDataUpdated($church->id, 'dashboard', 'updated'))->toOthers();
 
         if ($request->wantsJson()) {
             $person->load('churchRoleRelation');
@@ -115,7 +116,7 @@ class ShepherdController extends Controller
 
         $person->update(['is_shepherd' => false]);
 
-        broadcast(new \App\Events\ChurchDataUpdated($person->church_id, 'dashboard', 'updated'))->toOthers();
+        broadcast(new ChurchDataUpdated($person->church_id, 'dashboard', 'updated'))->toOthers();
 
         return response()->json(['success' => true]);
     }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\ChurchDataUpdated;
 use App\Helpers\CurrencyHelper;
 use App\Models\Board;
 use App\Models\BoardCard;
@@ -101,7 +102,7 @@ class MinistryController extends Controller
 
         Church::clearMinistriesCache($church->id);
 
-        broadcast(new \App\Events\ChurchDataUpdated($church->id, 'ministries', 'created', $ministry->name))->toOthers();
+        broadcast(new ChurchDataUpdated($church->id, 'ministries', 'created', $ministry->name))->toOthers();
 
         return $this->successResponse($request, __('messages.ministry_created'), 'ministries.show', [$ministry]);
     }
@@ -903,8 +904,8 @@ class MinistryController extends Controller
 
         $transaction->load(['category', 'attachments']);
 
-        broadcast(new \App\Events\ChurchDataUpdated($church->id, 'finances', 'created'))->toOthers();
-        broadcast(new \App\Events\ChurchDataUpdated($church->id, 'ministries', 'updated', $ministry->name))->toOthers();
+        broadcast(new ChurchDataUpdated($church->id, 'finances', 'created'))->toOthers();
+        broadcast(new ChurchDataUpdated($church->id, 'ministries', 'updated', $ministry->name))->toOthers();
 
         return response()->json([
             'success' => true,
@@ -1094,8 +1095,8 @@ class MinistryController extends Controller
 
         $transaction->delete();
 
-        broadcast(new \App\Events\ChurchDataUpdated($church->id, 'finances', 'deleted'))->toOthers();
-        broadcast(new \App\Events\ChurchDataUpdated($church->id, 'ministries', 'updated', $ministry->name))->toOthers();
+        broadcast(new ChurchDataUpdated($church->id, 'finances', 'deleted'))->toOthers();
+        broadcast(new ChurchDataUpdated($church->id, 'ministries', 'updated', $ministry->name))->toOthers();
 
         return response()->json(['success' => true, 'message' => __('messages.expense_deleted')]);
     }
@@ -1132,8 +1133,8 @@ class MinistryController extends Controller
             'recorded_by' => auth()->id(),
         ]);
 
-        broadcast(new \App\Events\ChurchDataUpdated($church->id, 'finances', 'created'))->toOthers();
-        broadcast(new \App\Events\ChurchDataUpdated($church->id, 'ministries', 'updated', $ministry->name))->toOthers();
+        broadcast(new ChurchDataUpdated($church->id, 'finances', 'created'))->toOthers();
+        broadcast(new ChurchDataUpdated($church->id, 'ministries', 'updated', $ministry->name))->toOthers();
 
         return response()->json([
             'success' => true,
@@ -1171,8 +1172,8 @@ class MinistryController extends Controller
 
         $transaction->delete();
 
-        broadcast(new \App\Events\ChurchDataUpdated($church->id, 'finances', 'deleted'))->toOthers();
-        broadcast(new \App\Events\ChurchDataUpdated($church->id, 'ministries', 'updated', $ministry->name))->toOthers();
+        broadcast(new ChurchDataUpdated($church->id, 'finances', 'deleted'))->toOthers();
+        broadcast(new ChurchDataUpdated($church->id, 'ministries', 'updated', $ministry->name))->toOthers();
 
         return response()->json(['success' => true, 'message' => __('messages.income_deleted')]);
     }
@@ -1366,7 +1367,7 @@ class MinistryController extends Controller
 
         Church::clearMinistriesCache($ministry->church_id);
 
-        broadcast(new \App\Events\ChurchDataUpdated($ministry->church_id, 'ministries', 'updated', $ministry->name))->toOthers();
+        broadcast(new ChurchDataUpdated($ministry->church_id, 'ministries', 'updated', $ministry->name))->toOthers();
 
         return $this->successResponse($request, __('messages.ministry_updated'), 'ministries.show', [$ministry]);
     }
@@ -1381,7 +1382,7 @@ class MinistryController extends Controller
 
         Church::clearMinistriesCache($churchId);
 
-        broadcast(new \App\Events\ChurchDataUpdated($churchId, 'ministries', 'deleted'))->toOthers();
+        broadcast(new ChurchDataUpdated($churchId, 'ministries', 'deleted'))->toOthers();
 
         return $this->successResponse($request, __('messages.ministry_deleted'), 'ministries.index');
     }
@@ -1429,7 +1430,7 @@ class MinistryController extends Controller
             'position_ids' => $validated['position_ids'] ?? [],
         ]);
 
-        broadcast(new \App\Events\ChurchDataUpdated($ministry->church_id, 'ministries', 'member_added', $ministry->name))->toOthers();
+        broadcast(new ChurchDataUpdated($ministry->church_id, 'ministries', 'member_added', $ministry->name))->toOthers();
 
         return $this->successResponse($request, __('messages.member_added'));
     }
@@ -1453,7 +1454,7 @@ class MinistryController extends Controller
             'person_name' => $person->full_name,
         ]);
 
-        broadcast(new \App\Events\ChurchDataUpdated($ministry->church_id, 'ministries', 'member_removed', $ministry->name))->toOthers();
+        broadcast(new ChurchDataUpdated($ministry->church_id, 'ministries', 'member_removed', $ministry->name))->toOthers();
 
         return $this->successResponse($request, __('messages.member_removed'));
     }

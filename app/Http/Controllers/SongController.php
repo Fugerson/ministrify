@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\ChurchDataUpdated;
 use App\Models\Event;
 use App\Models\Song;
 use Illuminate\Http\Request;
@@ -126,7 +127,7 @@ class SongController extends Controller
             'created_by' => auth()->id(),
         ]);
 
-        broadcast(new \App\Events\ChurchDataUpdated($church->id, 'service-planning', 'updated'))->toOthers();
+        broadcast(new ChurchDataUpdated($church->id, 'service-planning', 'updated'))->toOthers();
 
         if ($request->wantsJson()) {
             return response()->json([
@@ -247,7 +248,7 @@ class SongController extends Controller
             'resource_links' => ! empty($resourceLinks) ? $resourceLinks : null,
         ]);
 
-        broadcast(new \App\Events\ChurchDataUpdated($song->church_id, 'service-planning', 'updated'))->toOthers();
+        broadcast(new ChurchDataUpdated($song->church_id, 'service-planning', 'updated'))->toOthers();
 
         if ($request->wantsJson()) {
             return response()->json([
@@ -319,7 +320,7 @@ class SongController extends Controller
         $churchId = $song->church_id;
         $song->delete();
 
-        broadcast(new \App\Events\ChurchDataUpdated($churchId, 'service-planning', 'updated'))->toOthers();
+        broadcast(new ChurchDataUpdated($churchId, 'service-planning', 'updated'))->toOthers();
 
         return $this->successResponse($request, 'Пісню видалено.', 'songs.index');
     }
@@ -556,7 +557,7 @@ class SongController extends Controller
 
             DB::commit();
 
-            broadcast(new \App\Events\ChurchDataUpdated($church->id, 'service-planning', 'updated'))->toOthers();
+            broadcast(new ChurchDataUpdated($church->id, 'service-planning', 'updated'))->toOthers();
 
             return response()->json([
                 'success' => true,

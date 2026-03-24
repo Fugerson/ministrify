@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\ChurchDataUpdated;
 use App\Models\ChecklistTemplate;
 use App\Models\Event;
 use App\Models\EventChecklist;
@@ -61,7 +62,7 @@ class ChecklistController extends Controller
             ]);
         }
 
-        broadcast(new \App\Events\ChurchDataUpdated($church->id, 'events', 'updated'))->toOthers();
+        broadcast(new ChurchDataUpdated($church->id, 'events', 'updated'))->toOthers();
 
         return $this->successResponse($request, 'Шаблон створено успішно.', 'checklists.templates');
     }
@@ -119,7 +120,7 @@ class ChecklistController extends Controller
             }
         }
 
-        broadcast(new \App\Events\ChurchDataUpdated($template->church_id, 'events', 'updated'))->toOthers();
+        broadcast(new ChurchDataUpdated($template->church_id, 'events', 'updated'))->toOthers();
 
         return $this->successResponse($request, 'Шаблон оновлено успішно.', 'checklists.templates');
     }
@@ -131,7 +132,7 @@ class ChecklistController extends Controller
         $churchId = $template->church_id;
         $template->delete();
 
-        broadcast(new \App\Events\ChurchDataUpdated($churchId, 'events', 'updated'))->toOthers();
+        broadcast(new ChurchDataUpdated($churchId, 'events', 'updated'))->toOthers();
 
         return $this->successResponse($request, 'Шаблон видалено.', 'checklists.templates');
     }
@@ -183,7 +184,7 @@ class ChecklistController extends Controller
             'items_count' => $checklist->items->count(),
         ]);
 
-        broadcast(new \App\Events\ChurchDataUpdated($event->church_id, 'events', 'updated'))->toOthers();
+        broadcast(new ChurchDataUpdated($event->church_id, 'events', 'updated'))->toOthers();
 
         return $this->successResponse($request, 'Чеклист додано до події.', 'events.show', [$event], [
             'checklist' => [
@@ -217,7 +218,7 @@ class ChecklistController extends Controller
             'order' => $maxOrder + 1,
         ]);
 
-        broadcast(new \App\Events\ChurchDataUpdated($checklist->event->church_id, 'events', 'updated'))->toOthers();
+        broadcast(new ChurchDataUpdated($checklist->event->church_id, 'events', 'updated'))->toOthers();
 
         return $this->successResponse($request, 'Пункт додано.', null, [], [
             'item' => [
@@ -240,7 +241,7 @@ class ChecklistController extends Controller
             'completed_at' => $newValue ? now() : null,
         ]);
 
-        broadcast(new \App\Events\ChurchDataUpdated($item->eventChecklist->event->church_id, 'events', 'updated'))->toOthers();
+        broadcast(new ChurchDataUpdated($item->eventChecklist->event->church_id, 'events', 'updated'))->toOthers();
 
         if (request()->wantsJson()) {
             $item->refresh();
@@ -267,7 +268,7 @@ class ChecklistController extends Controller
 
         $item->update($validated);
 
-        broadcast(new \App\Events\ChurchDataUpdated($item->eventChecklist->event->church_id, 'events', 'updated'))->toOthers();
+        broadcast(new ChurchDataUpdated($item->eventChecklist->event->church_id, 'events', 'updated'))->toOthers();
 
         return $this->successResponse($request, 'Пункт оновлено.');
     }
@@ -279,7 +280,7 @@ class ChecklistController extends Controller
         $churchId = $item->eventChecklist->event->church_id;
         $item->delete();
 
-        broadcast(new \App\Events\ChurchDataUpdated($churchId, 'events', 'updated'))->toOthers();
+        broadcast(new ChurchDataUpdated($churchId, 'events', 'updated'))->toOthers();
 
         return $this->successResponse($request, 'Пункт видалено.');
     }
@@ -291,7 +292,7 @@ class ChecklistController extends Controller
         $event = $checklist->event;
         $checklist->delete();
 
-        broadcast(new \App\Events\ChurchDataUpdated($event->church_id, 'events', 'updated'))->toOthers();
+        broadcast(new ChurchDataUpdated($event->church_id, 'events', 'updated'))->toOthers();
 
         return $this->successResponse($request, 'Чеклист видалено.', 'events.show', [$event]);
     }

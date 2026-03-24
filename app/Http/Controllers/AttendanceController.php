@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\ChurchDataUpdated;
 use App\Models\Attendance;
 use App\Models\AttendanceRecord;
 use App\Models\Event;
@@ -113,7 +114,7 @@ class AttendanceController extends Controller
 
         $attendance->recalculateCounts();
 
-        broadcast(new \App\Events\ChurchDataUpdated($church->id, 'dashboard', 'updated'))->toOthers();
+        broadcast(new ChurchDataUpdated($church->id, 'dashboard', 'updated'))->toOthers();
 
         return $this->successResponse($request, 'Відвідуваність збережено.', 'attendance.show', ['attendance' => $attendance->id]);
     }
@@ -191,7 +192,7 @@ class AttendanceController extends Controller
             $attendance->recalculateCounts();
         });
 
-        broadcast(new \App\Events\ChurchDataUpdated($attendance->church_id, 'dashboard', 'updated'))->toOthers();
+        broadcast(new ChurchDataUpdated($attendance->church_id, 'dashboard', 'updated'))->toOthers();
 
         return $this->successResponse($request, 'Відвідуваність оновлено.', 'attendance.show', ['attendance' => $attendance->id]);
     }
@@ -204,7 +205,7 @@ class AttendanceController extends Controller
 
         $attendance->delete();
 
-        broadcast(new \App\Events\ChurchDataUpdated($attendance->church_id, 'dashboard', 'updated'))->toOthers();
+        broadcast(new ChurchDataUpdated($attendance->church_id, 'dashboard', 'updated'))->toOthers();
 
         return $this->successResponse($request, 'Запис видалено.');
     }

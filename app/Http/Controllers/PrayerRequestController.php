@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\ChurchDataUpdated;
 use App\Models\PrayerRequest;
 use Illuminate\Http\Request;
 
@@ -70,8 +71,8 @@ class PrayerRequestController extends Controller
             'is_urgent' => $request->boolean('is_urgent'),
         ]);
 
-        broadcast(new \App\Events\ChurchDataUpdated($church->id, 'prayers', 'created'))->toOthers();
-        broadcast(new \App\Events\ChurchDataUpdated($church->id, 'dashboard', 'updated'))->toOthers();
+        broadcast(new ChurchDataUpdated($church->id, 'prayers', 'created'))->toOthers();
+        broadcast(new ChurchDataUpdated($church->id, 'dashboard', 'updated'))->toOthers();
 
         return $this->successResponse($request, 'Молитовне прохання додано.', 'prayer-requests.index');
     }
@@ -125,7 +126,7 @@ class PrayerRequestController extends Controller
             'is_urgent' => $request->boolean('is_urgent'),
         ]);
 
-        broadcast(new \App\Events\ChurchDataUpdated($prayerRequest->church_id, 'prayers', 'updated'))->toOthers();
+        broadcast(new ChurchDataUpdated($prayerRequest->church_id, 'prayers', 'updated'))->toOthers();
 
         return $this->successResponse($request, 'Прохання оновлено.', 'prayer-requests.show', [$prayerRequest]);
     }
@@ -137,8 +138,8 @@ class PrayerRequestController extends Controller
 
         $prayerRequest->delete();
 
-        broadcast(new \App\Events\ChurchDataUpdated($prayerRequest->church_id, 'prayers', 'deleted'))->toOthers();
-        broadcast(new \App\Events\ChurchDataUpdated($prayerRequest->church_id, 'dashboard', 'updated'))->toOthers();
+        broadcast(new ChurchDataUpdated($prayerRequest->church_id, 'prayers', 'deleted'))->toOthers();
+        broadcast(new ChurchDataUpdated($prayerRequest->church_id, 'dashboard', 'updated'))->toOthers();
 
         return $this->successResponse($request, 'Прохання видалено.', 'prayer-requests.index');
     }

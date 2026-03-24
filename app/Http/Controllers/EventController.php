@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\ChurchDataUpdated;
 use App\Models\Assignment;
 use App\Models\Attendance;
 use App\Models\AttendanceRecord;
@@ -336,8 +337,8 @@ class EventController extends Controller
             );
         }
 
-        broadcast(new \App\Events\ChurchDataUpdated($church->id, 'events', 'created', $event->title))->toOthers();
-        broadcast(new \App\Events\ChurchDataUpdated($church->id, 'dashboard', 'updated'))->toOthers();
+        broadcast(new ChurchDataUpdated($church->id, 'events', 'created', $event->title))->toOthers();
+        broadcast(new ChurchDataUpdated($church->id, 'dashboard', 'updated'))->toOthers();
 
         return $this->successResponse($request, 'Подію створено.', 'events.show', ['event' => $event]);
     }
@@ -593,7 +594,7 @@ class EventController extends Controller
 
         $event->update($validated);
 
-        broadcast(new \App\Events\ChurchDataUpdated($event->church_id, 'events', 'updated', $event->title))->toOthers();
+        broadcast(new ChurchDataUpdated($event->church_id, 'events', 'updated', $event->title))->toOthers();
 
         return $this->successResponse($request, 'Подію оновлено.', 'events.show', ['event' => $event], [
             'event' => [
@@ -636,8 +637,8 @@ class EventController extends Controller
                 $seriesEvent->delete();
             }
 
-            broadcast(new \App\Events\ChurchDataUpdated($event->church_id, 'events', 'deleted'))->toOthers();
-            broadcast(new \App\Events\ChurchDataUpdated($event->church_id, 'dashboard', 'updated'))->toOthers();
+            broadcast(new ChurchDataUpdated($event->church_id, 'events', 'deleted'))->toOthers();
+            broadcast(new ChurchDataUpdated($event->church_id, 'dashboard', 'updated'))->toOthers();
 
             return $this->successResponse($request, 'Серію подій видалено.', 'schedule');
         }
@@ -648,8 +649,8 @@ class EventController extends Controller
 
         $event->delete();
 
-        broadcast(new \App\Events\ChurchDataUpdated($event->church_id, 'events', 'deleted'))->toOthers();
-        broadcast(new \App\Events\ChurchDataUpdated($event->church_id, 'dashboard', 'updated'))->toOthers();
+        broadcast(new ChurchDataUpdated($event->church_id, 'events', 'deleted'))->toOthers();
+        broadcast(new ChurchDataUpdated($event->church_id, 'dashboard', 'updated'))->toOthers();
 
         return $this->successResponse($request, 'Подію видалено.', 'schedule');
     }

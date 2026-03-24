@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Events\AttendanceUpdated;
+use App\Events\ChurchDataUpdated;
 use App\Models\Attendance;
 use App\Models\AttendanceRecord;
 use App\Models\Group;
@@ -373,7 +374,7 @@ class GroupAttendanceController extends Controller
                 present: $newPresent,
                 presentCount: $attendance->members_present,
             ))->toOthers();
-            broadcast(new \App\Events\ChurchDataUpdated($group->church_id, 'dashboard', 'updated'))->toOthers();
+            broadcast(new ChurchDataUpdated($group->church_id, 'dashboard', 'updated'))->toOthers();
 
             return response()->json([
                 'success' => true,
@@ -414,7 +415,7 @@ class GroupAttendanceController extends Controller
             present: $record->present,
             presentCount: $attendance->members_present,
         ))->toOthers();
-        broadcast(new \App\Events\ChurchDataUpdated($group->church_id, 'dashboard', 'updated'))->toOthers();
+        broadcast(new ChurchDataUpdated($group->church_id, 'dashboard', 'updated'))->toOthers();
 
         return response()->json([
             'success' => true,
@@ -460,7 +461,7 @@ class GroupAttendanceController extends Controller
             present: true,
             presentCount: $attendance->members_present,
         ))->toOthers();
-        broadcast(new \App\Events\ChurchDataUpdated($group->church_id, 'dashboard', 'updated'))->toOthers();
+        broadcast(new ChurchDataUpdated($group->church_id, 'dashboard', 'updated'))->toOthers();
 
         return response()->json([
             'success' => true,

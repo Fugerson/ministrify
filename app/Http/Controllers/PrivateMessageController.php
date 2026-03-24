@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\NewPrivateMessage;
 use App\Http\Controllers\Traits\RequiresChurch;
 use App\Models\PrivateMessage;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class PrivateMessageController extends Controller
 {
@@ -130,11 +132,11 @@ class PrivateMessageController extends Controller
             'message' => $validated['message'],
         ]);
 
-        broadcast(new \App\Events\NewPrivateMessage(
+        broadcast(new NewPrivateMessage(
             recipientId: (int) $validated['recipient_id'],
             messageId: $pm->id,
             senderName: $currentUser->name,
-            contentPreview: \Illuminate\Support\Str::limit($validated['message'], 100),
+            contentPreview: Str::limit($validated['message'], 100),
             createdAt: $pm->created_at->toIso8601String(),
         ))->toOthers();
 

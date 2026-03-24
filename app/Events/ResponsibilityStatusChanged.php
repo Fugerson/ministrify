@@ -23,7 +23,7 @@ class ResponsibilityStatusChanged implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new Channel('event.' . $this->eventId),
+            new Channel('event.'.$this->eventId),
         ];
     }
 

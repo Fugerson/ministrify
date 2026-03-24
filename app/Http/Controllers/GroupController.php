@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\ChurchDataUpdated;
 use App\Models\Group;
 use App\Models\GroupGuest;
 use App\Models\Person;
@@ -69,7 +70,7 @@ class GroupController extends Controller
             ]);
         }
 
-        broadcast(new \App\Events\ChurchDataUpdated($validated['church_id'], 'groups', 'created', $group->name))->toOthers();
+        broadcast(new ChurchDataUpdated($validated['church_id'], 'groups', 'created', $group->name))->toOthers();
 
         return $this->successResponse($request, 'Групу створено!', 'groups.show', [$group]);
     }
@@ -143,7 +144,7 @@ class GroupController extends Controller
             }
         }
 
-        broadcast(new \App\Events\ChurchDataUpdated($group->church_id, 'groups', 'updated', $group->name))->toOthers();
+        broadcast(new ChurchDataUpdated($group->church_id, 'groups', 'updated', $group->name))->toOthers();
 
         return $this->successResponse($request, 'Групу оновлено!', 'groups.show', [$group]);
     }
@@ -154,7 +155,7 @@ class GroupController extends Controller
 
         $group->delete();
 
-        broadcast(new \App\Events\ChurchDataUpdated($group->church_id, 'groups', 'deleted'))->toOthers();
+        broadcast(new ChurchDataUpdated($group->church_id, 'groups', 'deleted'))->toOthers();
 
         return $this->successResponse($request, 'Групу видалено.', 'groups.index');
     }
@@ -193,7 +194,7 @@ class GroupController extends Controller
                 'role' => 'guest',
             ]);
 
-            broadcast(new \App\Events\ChurchDataUpdated($this->getCurrentChurch()->id, 'groups', 'guest_added', $group->name))->toOthers();
+            broadcast(new ChurchDataUpdated($this->getCurrentChurch()->id, 'groups', 'guest_added', $group->name))->toOthers();
 
             return $this->successResponse($request, __('messages.guest_added'));
         }
@@ -220,7 +221,7 @@ class GroupController extends Controller
             'role' => $validated['role'] ?? 'member',
         ]);
 
-        broadcast(new \App\Events\ChurchDataUpdated($this->getCurrentChurch()->id, 'groups', 'member_added', $group->name))->toOthers();
+        broadcast(new ChurchDataUpdated($this->getCurrentChurch()->id, 'groups', 'member_added', $group->name))->toOthers();
 
         return $this->successResponse($request, 'Учасника додано');
     }
@@ -243,7 +244,7 @@ class GroupController extends Controller
             'person_name' => $person->full_name,
         ]);
 
-        broadcast(new \App\Events\ChurchDataUpdated($this->getCurrentChurch()->id, 'groups', 'member_removed', $group->name))->toOthers();
+        broadcast(new ChurchDataUpdated($this->getCurrentChurch()->id, 'groups', 'member_removed', $group->name))->toOthers();
 
         return $this->successResponse($request, 'Учасника видалено');
     }

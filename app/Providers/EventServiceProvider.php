@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Listeners\SendHorizonAlertToTelegram;
 use App\Models\Event;
 use App\Models\Person;
 use App\Observers\EventObserver;
@@ -9,6 +10,7 @@ use App\Observers\PersonObserver;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
+use Laravel\Horizon\Events\LongWaitDetected;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -16,8 +18,8 @@ class EventServiceProvider extends ServiceProvider
         Registered::class => [
             SendEmailVerificationNotification::class,
         ],
-        \Laravel\Horizon\Events\LongWaitDetected::class => [
-            \App\Listeners\SendHorizonAlertToTelegram::class,
+        LongWaitDetected::class => [
+            SendHorizonAlertToTelegram::class,
         ],
     ];
 

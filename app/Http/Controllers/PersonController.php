@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\ChurchDataUpdated;
 use App\Events\PersonUpdated;
 use App\Exports\PeopleExport;
 use App\Http\Controllers\Api\TelegramController;
@@ -475,7 +476,7 @@ class PersonController extends Controller
             action: 'created',
             personName: $person->full_name,
         ))->toOthers();
-        broadcast(new \App\Events\ChurchDataUpdated($person->church_id, 'dashboard', 'updated'))->toOthers();
+        broadcast(new ChurchDataUpdated($person->church_id, 'dashboard', 'updated'))->toOthers();
 
         return $this->successResponse($request, __('messages.person_created'), 'people.show', [$person]);
     }
@@ -795,7 +796,7 @@ class PersonController extends Controller
             action: 'deleted',
             personName: $personName,
         ))->toOthers();
-        broadcast(new \App\Events\ChurchDataUpdated($churchId, 'dashboard', 'updated'))->toOthers();
+        broadcast(new ChurchDataUpdated($churchId, 'dashboard', 'updated'))->toOthers();
 
         return $this->successResponse($request, __('messages.person_deleted'), 'people.index');
     }

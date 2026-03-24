@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\ChurchDataUpdated;
 use App\Models\Group;
 use App\Models\GroupGuest;
 use App\Services\ImageService;
@@ -40,7 +41,7 @@ class GroupGuestController extends Controller
 
         GroupGuest::create($validated);
 
-        broadcast(new \App\Events\ChurchDataUpdated($this->getCurrentChurch()->id, 'groups', 'updated'))->toOthers();
+        broadcast(new ChurchDataUpdated($this->getCurrentChurch()->id, 'groups', 'updated'))->toOthers();
 
         return $this->successResponse($request, __('messages.guest_added'), 'groups.show', ['group' => $group->id]);
     }
@@ -68,7 +69,7 @@ class GroupGuestController extends Controller
 
         $guest->update($validated);
 
-        broadcast(new \App\Events\ChurchDataUpdated($this->getCurrentChurch()->id, 'groups', 'updated'))->toOthers();
+        broadcast(new ChurchDataUpdated($this->getCurrentChurch()->id, 'groups', 'updated'))->toOthers();
 
         return $this->successResponse($request, __('messages.guest_updated'), 'groups.show', ['group' => $group->id]);
     }
@@ -80,7 +81,7 @@ class GroupGuestController extends Controller
 
         $guest->delete();
 
-        broadcast(new \App\Events\ChurchDataUpdated($this->getCurrentChurch()->id, 'groups', 'updated'))->toOthers();
+        broadcast(new ChurchDataUpdated($this->getCurrentChurch()->id, 'groups', 'updated'))->toOthers();
 
         return $this->successResponse($request, __('messages.guest_deleted'), 'groups.show', ['group' => $group->id]);
     }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\ChurchDataUpdated;
 use App\Models\Event;
 use App\Models\Person;
 use App\Models\ServicePlanItem;
@@ -39,7 +40,7 @@ class ServicePlanController extends Controller
 
         $item = $event->planItems()->create($validated);
 
-        broadcast(new \App\Events\ChurchDataUpdated($event->church_id, 'service-planning', 'created'))->toOthers();
+        broadcast(new ChurchDataUpdated($event->church_id, 'service-planning', 'created'))->toOthers();
 
         if ($request->ajax()) {
             return response()->json([
@@ -108,7 +109,7 @@ class ServicePlanController extends Controller
 
         $item->update($validated);
 
-        broadcast(new \App\Events\ChurchDataUpdated($event->church_id, 'service-planning', 'updated'))->toOthers();
+        broadcast(new ChurchDataUpdated($event->church_id, 'service-planning', 'updated'))->toOthers();
 
         if ($request->ajax()) {
             return response()->json([
@@ -135,7 +136,7 @@ class ServicePlanController extends Controller
 
         $item->delete();
 
-        broadcast(new \App\Events\ChurchDataUpdated($event->church_id, 'service-planning', 'deleted'))->toOthers();
+        broadcast(new ChurchDataUpdated($event->church_id, 'service-planning', 'deleted'))->toOthers();
 
         if ($request->ajax()) {
             return response()->json([
@@ -166,7 +167,7 @@ class ServicePlanController extends Controller
                 ->update(['sort_order' => $itemData['sort_order']]);
         }
 
-        broadcast(new \App\Events\ChurchDataUpdated($event->church_id, 'service-planning', 'reordered'))->toOthers();
+        broadcast(new ChurchDataUpdated($event->church_id, 'service-planning', 'reordered'))->toOthers();
 
         return response()->json([
             'success' => true,

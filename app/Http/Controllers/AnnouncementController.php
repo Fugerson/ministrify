@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\ChurchDataUpdated;
 use App\Models\Announcement;
 use Illuminate\Http\Request;
 
@@ -89,8 +90,8 @@ class AnnouncementController extends Controller
             'expires_at' => $validated['expires_at'] ?? null,
         ]);
 
-        broadcast(new \App\Events\ChurchDataUpdated($church->id, 'announcements', 'created', $announcement->title))->toOthers();
-        broadcast(new \App\Events\ChurchDataUpdated($church->id, 'dashboard', 'updated'))->toOthers();
+        broadcast(new ChurchDataUpdated($church->id, 'announcements', 'created', $announcement->title))->toOthers();
+        broadcast(new ChurchDataUpdated($church->id, 'dashboard', 'updated'))->toOthers();
 
         return $this->successResponse($request, 'Оголошення опубліковано', 'announcements.index');
     }
@@ -128,7 +129,7 @@ class AnnouncementController extends Controller
             'expires_at' => $validated['expires_at'] ?? null,
         ]);
 
-        broadcast(new \App\Events\ChurchDataUpdated($announcement->church_id, 'announcements', 'updated', $announcement->title))->toOthers();
+        broadcast(new ChurchDataUpdated($announcement->church_id, 'announcements', 'updated', $announcement->title))->toOthers();
 
         return $this->successResponse($request, 'Оголошення оновлено', 'announcements.index');
     }
@@ -143,8 +144,8 @@ class AnnouncementController extends Controller
 
         $announcement->delete();
 
-        broadcast(new \App\Events\ChurchDataUpdated($announcement->church_id, 'announcements', 'deleted'))->toOthers();
-        broadcast(new \App\Events\ChurchDataUpdated($announcement->church_id, 'dashboard', 'updated'))->toOthers();
+        broadcast(new ChurchDataUpdated($announcement->church_id, 'announcements', 'deleted'))->toOthers();
+        broadcast(new ChurchDataUpdated($announcement->church_id, 'dashboard', 'updated'))->toOthers();
 
         return $this->successResponse($request, 'Оголошення видалено', 'announcements.index');
     }

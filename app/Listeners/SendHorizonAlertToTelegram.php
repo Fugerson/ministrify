@@ -20,7 +20,7 @@ class SendHorizonAlertToTelegram
         $message = "⚠️ *Horizon: Long Queue Wait*\n\n";
         $message .= "Connection: `{$event->connection}`\n";
         $message .= "Queue: `{$event->queue}`\n";
-        $message .= 'Time: ' . now()->format('Y-m-d H:i:s') . "\n\n";
+        $message .= 'Time: '.now()->format('Y-m-d H:i:s')."\n\n";
         $message .= 'Jobs are waiting longer than expected. Check `/horizon` dashboard.';
 
         try {
@@ -30,7 +30,7 @@ class SendHorizonAlertToTelegram
                 'parse_mode' => 'Markdown',
             ]);
         } catch (\Exception $e) {
-            Log::error('Failed to send Horizon Telegram alert: ' . $e->getMessage());
+            Log::error('Failed to send Horizon Telegram alert: '.$e->getMessage());
         }
     }
 }
