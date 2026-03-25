@@ -56,7 +56,7 @@ class SupportController extends Controller
 
         $ticket = SupportTicket::create([
             'user_id' => $user->id,
-            'church_id' => $user->church_id,
+            'church_id' => $this->getCurrentChurch()->id,
             'subject' => $validated['subject'],
             'category' => $validated['category'],
             'priority' => 'normal',

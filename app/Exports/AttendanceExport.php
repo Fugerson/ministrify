@@ -27,7 +27,9 @@ class AttendanceExport implements FromCollection, WithHeadings, WithMapping, Wit
             ->where('church_id', $this->churchId)
             ->whereYear('date', $this->year))
             ->with(['person', 'attendance.attendable'])
-            ->orderBy('created_at')
+            ->join('attendances', 'attendances.id', '=', 'attendance_records.attendance_id')
+            ->orderBy('attendances.date')
+            ->select('attendance_records.*')
             ->get();
     }
 

@@ -995,9 +995,10 @@ class EventController extends Controller
 
         $eventIds = $events->pluck('id')->toArray();
 
-        // 2. Load all ministries that have roles defined
+        // 2. Load all ministries that have roles defined (eager-load relations to avoid N+1)
         $ministries = Ministry::where('church_id', $church->id)
             ->whereHas('ministryRoles')
+            ->with(['ministryRoles' => fn ($q) => $q->orderBy('sort_order'), 'positions' => fn ($q) => $q->orderBy('sort_order'), 'members' => fn ($q) => $q->orderBy('last_name')])
             ->orderBy('name')
             ->get();
 
@@ -1008,13 +1009,10 @@ class EventController extends Controller
 
         foreach ($ministries as $ministry) {
             $roles = [];
-            $hasMinistryRoles = $ministry->ministryRoles()->exists();
 
-            if ($hasMinistryRoles) {
+            if ($ministry->ministryRoles->isNotEmpty()) {
                 // Role-based (worship/service teams)
-                $roles = $ministry->ministryRoles()
-                    ->orderBy('sort_order')
-                    ->get()
+                $roles = $ministry->ministryRoles
                     ->map(fn ($r) => [
                         'id' => $r->id,
                         'name' => $r->name,
@@ -1023,9 +1021,7 @@ class EventController extends Controller
                     ])->values()->toArray();
             } else {
                 // Position-based (rotation)
-                $roles = $ministry->positions()
-                    ->orderBy('sort_order')
-                    ->get()
+                $roles = $ministry->positions
                     ->map(fn ($p) => [
                         'id' => $p->id,
                         'name' => $p->name,
@@ -1055,10 +1051,8 @@ class EventController extends Controller
                 $grid[$mKey][$rKey] = [];
             }
 
-            // Load members for this ministry
-            $members[$mKey] = $ministry->members()
-                ->orderBy('last_name')
-                ->get()
+            // Use already eager-loaded members (no extra query)
+            $members[$mKey] = $ministry->members
                 ->map(fn ($m) => [
                     'id' => $m->id,
                     'name' => $m->full_name,
@@ -1170,6 +1164,7 @@ class EventController extends Controller
             // Songs assigned to events
             $songRows = \DB::table('event_songs')
                 ->join('songs', 'songs.id', '=', 'event_songs.song_id')
+                ->whereNull('songs.deleted_at')
                 ->whereIn('event_songs.event_id', $eventIds)
                 ->select('event_songs.id', 'event_songs.event_id', 'event_songs.song_id', 'event_songs.order', 'event_songs.key', 'songs.title', 'songs.key as default_key')
                 ->orderBy('event_songs.order')

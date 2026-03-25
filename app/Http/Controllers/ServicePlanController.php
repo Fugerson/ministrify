@@ -20,6 +20,7 @@ class ServicePlanController extends Controller
      */
     public function store(Request $request, Event $event)
     {
+        $this->authorizeChurch($event);
         $this->authorize('managePlan', $event);
 
         $validated = $request->validate([
@@ -58,6 +59,7 @@ class ServicePlanController extends Controller
      */
     public function update(Request $request, Event $event, ServicePlanItem $item)
     {
+        $this->authorizeChurch($event);
         $this->authorize('managePlan', $event);
 
         // Verify item belongs to event
@@ -127,6 +129,7 @@ class ServicePlanController extends Controller
      */
     public function destroy(Request $request, Event $event, ServicePlanItem $item)
     {
+        $this->authorizeChurch($event);
         $this->authorize('managePlan', $event);
 
         // Verify item belongs to event
@@ -153,6 +156,7 @@ class ServicePlanController extends Controller
      */
     public function reorder(Request $request, Event $event)
     {
+        $this->authorizeChurch($event);
         $this->authorize('managePlan', $event);
 
         $validated = $request->validate([
@@ -180,6 +184,7 @@ class ServicePlanController extends Controller
      */
     public function duplicate(Request $request, Event $event, Event $source)
     {
+        $this->authorizeChurch($event);
         $this->authorize('managePlan', $event);
 
         // Verify source belongs to the same church
@@ -217,6 +222,7 @@ class ServicePlanController extends Controller
      */
     public function quickAdd(Request $request, Event $event)
     {
+        $this->authorizeChurch($event);
         $this->authorize('managePlan', $event);
 
         $validated = $request->validate([
@@ -265,6 +271,7 @@ class ServicePlanController extends Controller
      */
     public function print(Event $event)
     {
+        $this->authorizeChurch($event);
         $this->authorize('managePlan', $event);
 
         $event->load(['planItems.responsible', 'ministry', 'church', 'assignments.person', 'assignments.position']);
@@ -277,6 +284,7 @@ class ServicePlanController extends Controller
      */
     public function updateStatus(Request $request, Event $event, ServicePlanItem $item)
     {
+        $this->authorizeChurch($event);
         $this->authorize('managePlan', $event);
 
         if ($item->event_id !== $event->id) {
@@ -301,6 +309,7 @@ class ServicePlanController extends Controller
      */
     public function itemData(Event $event, ServicePlanItem $item)
     {
+        $this->authorizeChurch($event);
         $this->authorize('managePlan', $event);
 
         if ($item->event_id !== $event->id) {
@@ -325,6 +334,7 @@ class ServicePlanController extends Controller
      */
     public function applyTemplate(Request $request, Event $event)
     {
+        $this->authorizeChurch($event);
         $this->authorize('managePlan', $event);
 
         $validated = $request->validate([
@@ -397,6 +407,7 @@ class ServicePlanController extends Controller
      */
     public function bulkAdd(Request $request, Event $event)
     {
+        $this->authorizeChurch($event);
         $this->authorize('managePlan', $event);
 
         $validated = $request->validate([
@@ -444,6 +455,7 @@ class ServicePlanController extends Controller
      */
     public function parseText(Request $request, Event $event)
     {
+        $this->authorizeChurch($event);
         $this->authorize('managePlan', $event);
 
         $validated = $request->validate([
@@ -560,6 +572,7 @@ class ServicePlanController extends Controller
      */
     public function sendNotification(Request $request, Event $event, ServicePlanItem $item)
     {
+        $this->authorizeChurch($event);
         $this->authorize('managePlan', $event);
 
         if ($item->event_id !== $event->id) {

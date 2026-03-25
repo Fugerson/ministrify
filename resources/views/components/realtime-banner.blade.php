@@ -3,7 +3,7 @@
 @auth
 <script>
 if (window.Echo) {
-    window.Echo.private('church.{{ auth()->user()->church_id }}.{{ $channel }}')
+    window.Echo.private('church.{{ $currentChurch->id }}.{{ $channel }}')
         .listen('.data.updated', function(e) {
             var id = 'realtime-banner-{{ $channel }}';
             if (document.getElementById(id)) return;

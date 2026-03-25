@@ -44,10 +44,11 @@ class DonationCampaign extends Model
 
     public function getRaisedAmountAttribute(): float
     {
-        return (float) $this->transactions()
+        return (float) ($this->transactions()
             ->where('status', 'completed')
             ->where('direction', 'in')
-            ->sum('amount_uah');
+            ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')
+            ->value('total') ?? 0);
     }
 
     /**
@@ -55,10 +56,11 @@ class DonationCampaign extends Model
      */
     public function updateCollectedAmount(): void
     {
-        $total = $this->transactions()
+        $total = (float) ($this->transactions()
             ->where('status', 'completed')
             ->where('direction', 'in')
-            ->sum('amount_uah');
+            ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')
+            ->value('total') ?? 0);
 
         $this->update(['collected_amount' => $total]);
     }

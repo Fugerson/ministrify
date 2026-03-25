@@ -54,12 +54,12 @@ class DashboardStatisticsService
         $volunteersCount = (clone $query)->whereHas('ministries')->count();
 
         $newThisMonth = (clone $query)
-            ->whereRaw('MONTH(COALESCE(first_visit_date, people.created_at)) = ?', [now()->month])
-            ->whereRaw('YEAR(COALESCE(first_visit_date, people.created_at)) = ?', [now()->year])
+            ->whereRaw('MONTH(COALESCE(joined_date, first_visit_date, people.created_at)) = ?', [now()->month])
+            ->whereRaw('YEAR(COALESCE(joined_date, first_visit_date, people.created_at)) = ?', [now()->year])
             ->count();
 
         $peopleTrend = Person::where('church_id', $church->id)
-            ->whereRaw('COALESCE(first_visit_date, created_at) >= ?', [$threeMonthsAgo])->count();
+            ->whereRaw('COALESCE(joined_date, first_visit_date, created_at) >= ?', [$threeMonthsAgo])->count();
 
         $newVolunteers = DB::table('ministry_person')
             ->join('people', 'ministry_person.person_id', '=', 'people.id')

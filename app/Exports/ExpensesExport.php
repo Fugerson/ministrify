@@ -28,6 +28,7 @@ class ExpensesExport implements FromCollection, WithHeadings, WithMapping, WithS
     {
         $query = Transaction::where('church_id', $this->churchId)
             ->outgoing()
+            ->completed()
             ->with(['ministry', 'category', 'recorder']);
 
         if ($this->month && $this->year) {

@@ -34,9 +34,21 @@ class AuthServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        // Admin can do everything
-        Gate::before(function (User $user, string $ability) {
+        // Admin can do everything within their own church
+        Gate::before(function (User $user, string $ability, array $arguments = []) {
+            if ($user->isSuperAdmin()) {
+                return true;
+            }
+
             if ($user->isAdmin()) {
+                // If a model with church_id is passed, verify it belongs to the user's church
+                $model = $arguments[0] ?? null;
+                if ($model instanceof \Illuminate\Database\Eloquent\Model && isset($model->church_id)) {
+                    if ($model->church_id !== $user->church_id) {
+                        return false;
+                    }
+                }
+
                 return true;
             }
         });

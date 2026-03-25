@@ -38,6 +38,7 @@ class ServicePlanTemplateController extends Controller
      */
     public function store(Request $request, Event $event)
     {
+        $this->authorizeChurch($event);
         $this->authorize('managePlan', $event);
 
         $validated = $request->validate([
@@ -85,6 +86,7 @@ class ServicePlanTemplateController extends Controller
      */
     public function apply(Request $request, Event $event, ServicePlanTemplate $template)
     {
+        $this->authorizeChurch($event);
         $this->authorize('managePlan', $event);
 
         $church = $this->getCurrentChurch();

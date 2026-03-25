@@ -114,12 +114,12 @@ class Donation extends Model
 
     public function scopeThisMonth($query)
     {
-        return $query->whereYear('created_at', now()->year)
-            ->whereMonth('created_at', now()->month);
+        return $query->whereYear('paid_at', now()->year)
+            ->whereMonth('paid_at', now()->month);
     }
 
     public function scopeThisYear($query)
     {
-        return $query->whereYear('created_at', now()->year);
+        return $query->whereYear('paid_at', now()->year);
     }
 }

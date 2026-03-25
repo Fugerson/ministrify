@@ -226,7 +226,7 @@
 
     {{-- Admin Sidebar Editor --}}
     @auth
-        @if(auth()->user()->church_id === $church->id && auth()->user()->canEdit('website'))
+        @if((auth()->user()->church_id === $church->id || (auth()->user()->is_super_admin && session('impersonate_church_id') == $church->id)) && auth()->user()->canEdit('website'))
             <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
             @include('public.partials.admin-sidebar', ['church' => $church])
         @endif

@@ -4,7 +4,7 @@
 
 @section('content')
 @php
-    $isAdmin = auth()->check() && auth()->user()->church_id === ($church->id ?? null) && auth()->user()->canEdit('website');
+    $isAdmin = auth()->check() && (auth()->user()->church_id === ($church->id ?? null) || (auth()->user()->is_super_admin && session('impersonate_church_id') == ($church->id ?? null))) && auth()->user()->canEdit('website');
     $sectionLabels = [
         'hero' => __('app.sb_section_hero'),
         'service_times' => __('app.sb_section_service_times'),

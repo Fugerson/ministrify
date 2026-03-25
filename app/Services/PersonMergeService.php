@@ -270,7 +270,7 @@ class PersonMergeService
                     ->where('related_person_id', $primary->id)
                     ->delete();
 
-                // Clean up duplicate relationships created by merge
+                // Clean up exact duplicate relationships created by merge
                 $familyDuplicates = DB::table('family_relationships')
                     ->where(function ($q) use ($primary) {
                         $q->where('person_id', $primary->id)
@@ -289,6 +289,10 @@ class PersonMergeService
                         ->where('id', '!=', $dup->keep_id)
                         ->delete();
                 }
+
+                // Clean up semantic duplicates (same relationship stored in opposite directions)
+                // e.g., A→C "parent" and C→A "child" are the same relationship
+                $this->cleanSemanticFamilyDuplicates($primary->id);
             }
 
             // kanban cards
@@ -528,7 +532,7 @@ class PersonMergeService
                     ->where('related_person_id', $personA->id)
                     ->delete();
 
-                // Clean up duplicate relationships created by merge
+                // Clean up exact duplicate relationships created by merge
                 $familyDuplicates = DB::table('family_relationships')
                     ->where(function ($q) use ($personA) {
                         $q->where('person_id', $personA->id)
@@ -547,6 +551,10 @@ class PersonMergeService
                         ->where('id', '!=', $dup->keep_id)
                         ->delete();
                 }
+
+                // Clean up semantic duplicates (same relationship stored in opposite directions)
+                // e.g., A→C "parent" and C→A "child" are the same relationship
+                $this->cleanSemanticFamilyDuplicates($personA->id);
             }
 
             if (\Schema::hasTable('kanban_cards') && \Schema::hasColumn('kanban_cards', 'person_id')) {
@@ -636,5 +644,57 @@ class PersonMergeService
                 'field_selections' => $fieldSelections,
             ]);
         });
+    }
+
+    /**
+     * Remove semantic duplicate family relationships for a person.
+     *
+     * After merge, the same relationship can exist in opposite directions:
+     * e.g., A→C "parent" and C→A "child" mean the same thing.
+     * This method detects and removes such duplicates, keeping the row with the lower ID.
+     */
+    private function cleanSemanticFamilyDuplicates(int $personId): void
+    {
+        $relationships = DB::table('family_relationships')
+            ->where(function ($q) use ($personId) {
+                $q->where('person_id', $personId)
+                    ->orWhere('related_person_id', $personId);
+            })
+            ->orderBy('id')
+            ->get();
+
+        $seen = [];
+        $toDelete = [];
+
+        foreach ($relationships as $rel) {
+            // Normalize to a canonical form: (smaller_person_id, larger_person_id, normalized_type)
+            // For asymmetric types (parent/child), normalize so the type always describes
+            // the relationship from the person with the smaller ID to the larger ID.
+            $personA = min((int) $rel->person_id, (int) $rel->related_person_id);
+            $personB = max((int) $rel->person_id, (int) $rel->related_person_id);
+
+            if ((int) $rel->person_id === $personA) {
+                // Direction is already A→B, keep type as-is
+                $normalizedType = $rel->relationship_type;
+            } else {
+                // Direction is B→A, invert the type to get A→B perspective
+                $normalizedType = \App\Models\FamilyRelationship::getInverseType($rel->relationship_type);
+            }
+
+            $canonicalKey = "{$personA}-{$personB}-{$normalizedType}";
+
+            if (isset($seen[$canonicalKey])) {
+                // This is a semantic duplicate — mark for deletion (keep the earlier one)
+                $toDelete[] = $rel->id;
+            } else {
+                $seen[$canonicalKey] = $rel->id;
+            }
+        }
+
+        if (! empty($toDelete)) {
+            DB::table('family_relationships')
+                ->whereIn('id', $toDelete)
+                ->delete();
+        }
     }
 }

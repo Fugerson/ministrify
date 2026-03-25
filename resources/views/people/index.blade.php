@@ -2415,7 +2415,7 @@ function peopleTable() {
 {{-- Real-time people updates via Laravel Reverb --}}
 <script>
 if (window.Echo) {
-    window.Echo.private('church.{{ auth()->user()->church_id }}.people')
+    window.Echo.private('church.{{ $currentChurch->id }}.people')
         .listen('.person.updated', function(e) {
             var msg = '';
             if (e.action === 'created') {

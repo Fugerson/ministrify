@@ -2037,7 +2037,7 @@
     <!-- Init Alpine store for PM count -->
     <script>
         document.addEventListener('alpine:init', function() {
-            Alpine.store('pmCount', {{ auth()->check() && auth()->user()->church_id ? \App\Models\PrivateMessage::unreadCount(auth()->user()->church_id, auth()->id()) : 0 }});
+            Alpine.store('pmCount', {{ auth()->check() && isset($currentChurch) ? \App\Models\PrivateMessage::unreadCount($currentChurch->id, auth()->id()) : 0 }});
         });
     </script>
 

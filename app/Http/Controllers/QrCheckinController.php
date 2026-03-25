@@ -199,6 +199,7 @@ class QrCheckinController extends Controller
      */
     public function generateQr(Event $event): JsonResponse
     {
+        $this->authorizeChurch($event);
         $this->authorize('update', $event);
 
         $token = $event->generateCheckinToken();
@@ -215,6 +216,7 @@ class QrCheckinController extends Controller
      */
     public function toggleQrCheckin(Event $event): JsonResponse
     {
+        $this->authorizeChurch($event);
         $this->authorize('update', $event);
 
         $event->update([

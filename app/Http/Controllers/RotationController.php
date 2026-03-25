@@ -78,6 +78,7 @@ class RotationController extends Controller
      */
     public function autoAssignEvent(Request $request, Event $event)
     {
+        $this->authorizeChurch($event);
         $this->authorize('update', $event);
 
         $church = $this->getCurrentChurch();
@@ -204,6 +205,7 @@ class RotationController extends Controller
      */
     public function previewAutoAssign(Request $request, Event $event)
     {
+        $this->authorizeChurch($event);
         $this->authorize('view', $event);
 
         $church = $this->getCurrentChurch();

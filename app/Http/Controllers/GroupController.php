@@ -77,6 +77,7 @@ class GroupController extends Controller
 
     public function show(Group $group)
     {
+        $this->authorizeChurch($group);
         $this->authorize('view', $group);
 
         $group->load(['leader', 'members', 'guests', 'attendances' => fn ($q) => $q->orderByDesc('date')->limit(10)]);
@@ -101,6 +102,7 @@ class GroupController extends Controller
 
     public function edit(Group $group)
     {
+        $this->authorizeChurch($group);
         $this->authorize('update', $group);
 
         $people = Person::where('church_id', $this->getCurrentChurch()->id)
@@ -112,6 +114,7 @@ class GroupController extends Controller
 
     public function update(Request $request, Group $group)
     {
+        $this->authorizeChurch($group);
         $this->authorize('update', $group);
 
         $validated = $request->validate([
@@ -151,6 +154,7 @@ class GroupController extends Controller
 
     public function destroy(Request $request, Group $group)
     {
+        $this->authorizeChurch($group);
         $this->authorize('delete', $group);
 
         $group->delete();
@@ -162,6 +166,7 @@ class GroupController extends Controller
 
     public function addMember(Request $request, Group $group)
     {
+        $this->authorizeChurch($group);
         $this->authorize('update', $group);
 
         $role = $request->input('role', 'member');
@@ -228,6 +233,7 @@ class GroupController extends Controller
 
     public function removeMember(Request $request, Group $group, Person $person)
     {
+        $this->authorizeChurch($group);
         $this->authorize('update', $group);
         abort_unless($person->church_id === $this->getCurrentChurch()->id, 404);
 
@@ -251,6 +257,7 @@ class GroupController extends Controller
 
     public function updateMemberRole(Request $request, Group $group, Person $person)
     {
+        $this->authorizeChurch($group);
         $this->authorize('update', $group);
         abort_unless($person->church_id === $this->getCurrentChurch()->id, 404);
 

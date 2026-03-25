@@ -114,8 +114,8 @@ class PersonController extends Controller
 
             // New this month - single query
             $newThisMonth = (clone $statsQuery)
-                ->whereRaw('MONTH(COALESCE(first_visit_date, people.created_at)) = ?', [$today->month])
-                ->whereRaw('YEAR(COALESCE(first_visit_date, people.created_at)) = ?', [$today->year])
+                ->whereRaw('MONTH(COALESCE(joined_date, first_visit_date, people.created_at)) = ?', [$today->month])
+                ->whereRaw('YEAR(COALESCE(joined_date, first_visit_date, people.created_at)) = ?', [$today->year])
                 ->count();
 
             return [

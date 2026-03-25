@@ -19,6 +19,7 @@ class GroupGuestController extends Controller
 
     public function store(Request $request, Group $group)
     {
+        $this->authorizeChurch($group);
         $this->authorize('update', $group);
 
         $validated = $request->validate([
@@ -48,6 +49,7 @@ class GroupGuestController extends Controller
 
     public function update(Request $request, Group $group, GroupGuest $guest)
     {
+        $this->authorizeChurch($group);
         $this->authorize('update', $group);
         abort_unless($guest->group_id === $group->id, 404);
 
@@ -76,6 +78,7 @@ class GroupGuestController extends Controller
 
     public function destroy(Request $request, Group $group, GroupGuest $guest)
     {
+        $this->authorizeChurch($group);
         $this->authorize('update', $group);
         abort_unless($guest->group_id === $group->id, 404);
 

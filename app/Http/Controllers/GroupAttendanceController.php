@@ -26,6 +26,7 @@ class GroupAttendanceController extends Controller
     public function index(Group $group)
     {
         $this->checkAttendanceEnabled();
+        $this->authorizeChurch($group);
         $this->authorize('view', $group);
 
         $attendances = $group->attendances()
@@ -53,6 +54,7 @@ class GroupAttendanceController extends Controller
     public function create(Group $group)
     {
         $this->checkAttendanceEnabled();
+        $this->authorizeChurch($group);
         $this->authorize('update', $group);
 
         $group->load(['members', 'guests']);
@@ -66,6 +68,7 @@ class GroupAttendanceController extends Controller
     public function store(Request $request, Group $group)
     {
         $this->checkAttendanceEnabled();
+        $this->authorizeChurch($group);
         $this->authorize('update', $group);
 
         $validated = $request->validate([
@@ -158,6 +161,7 @@ class GroupAttendanceController extends Controller
     public function show(Group $group, Attendance $attendance)
     {
         $this->checkAttendanceEnabled();
+        $this->authorizeChurch($group);
         $this->authorize('view', $group);
         abort_unless($attendance->attendable_id === $group->id && $attendance->attendable_type === Group::class, 404);
 
@@ -175,6 +179,7 @@ class GroupAttendanceController extends Controller
     public function edit(Group $group, Attendance $attendance)
     {
         $this->checkAttendanceEnabled();
+        $this->authorizeChurch($group);
         $this->authorize('update', $group);
         abort_unless($attendance->attendable_id === $group->id && $attendance->attendable_type === Group::class, 404);
 
@@ -194,6 +199,7 @@ class GroupAttendanceController extends Controller
     public function update(Request $request, Group $group, Attendance $attendance)
     {
         $this->checkAttendanceEnabled();
+        $this->authorizeChurch($group);
         $this->authorize('update', $group);
         abort_unless($attendance->attendable_id === $group->id && $attendance->attendable_type === Group::class, 404);
 
@@ -277,6 +283,7 @@ class GroupAttendanceController extends Controller
     public function destroy(Request $request, Group $group, Attendance $attendance)
     {
         $this->checkAttendanceEnabled();
+        $this->authorizeChurch($group);
         $this->authorize('update', $group);
         abort_unless($attendance->attendable_id === $group->id && $attendance->attendable_type === Group::class, 404);
 
@@ -291,6 +298,7 @@ class GroupAttendanceController extends Controller
     public function quickCheckin(Group $group)
     {
         $this->checkAttendanceEnabled();
+        $this->authorizeChurch($group);
         $this->authorize('update', $group);
 
         $group->load(['members', 'guests']);
@@ -338,6 +346,7 @@ class GroupAttendanceController extends Controller
     public function togglePresence(Request $request, Group $group, Attendance $attendance)
     {
         $this->checkAttendanceEnabled();
+        $this->authorizeChurch($group);
         $this->authorize('update', $group);
         abort_unless($attendance->attendable_id === $group->id && $attendance->attendable_type === Group::class, 404);
 
@@ -431,6 +440,7 @@ class GroupAttendanceController extends Controller
      */
     public function markAllPresent(Request $request, Group $group, Attendance $attendance)
     {
+        $this->authorizeChurch($group);
         $this->checkAttendanceEnabled();
         $this->authorize('update', $group);
         abort_unless($attendance->attendable_id === $group->id && $attendance->attendable_type === Group::class, 404);
