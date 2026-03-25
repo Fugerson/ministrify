@@ -89,13 +89,13 @@ Route::middleware('web')->group(function () {
         if (! $file) {
             return response()->json(['error' => 'No screenshot'], 422);
         }
-        $dir = public_path('screenshots');
+        $dir = storage_path('app/public/screenshots');
         if (! is_dir($dir)) {
             mkdir($dir, 0755, true);
         }
         $name = 'scr-'.date('Y-m-d_H-i-s').'-'.substr(uniqid(), -4).'.png';
         $file->move($dir, $name);
-        $publicUrl = url('/screenshots/'.$name);
+        $publicUrl = url('/storage/screenshots/'.$name);
         $thumb = 'data:image/png;base64,'.base64_encode(file_get_contents($dir.'/'.$name));
 
         return response()->json(['url' => $publicUrl, 'thumb' => $thumb, 'name' => $name]);
@@ -105,7 +105,7 @@ Route::middleware('web')->group(function () {
         if (! auth('web')->user()?->isSuperAdmin() && ! session('impersonating_from') && ! session('impersonate_church_id')) {
             abort(403);
         }
-        $dir = public_path('screenshots');
+        $dir = storage_path('app/public/screenshots');
         if (! is_dir($dir)) {
             return response()->json([]);
         }
@@ -114,7 +114,7 @@ Route::middleware('web')->group(function () {
         $result = [];
         foreach (array_slice($files, 0, 20) as $f) {
             $name = basename($f);
-            $publicUrl = url('/screenshots/'.$name);
+            $publicUrl = url('/storage/screenshots/'.$name);
             $thumb = 'data:image/png;base64,'.base64_encode(file_get_contents($f));
             $result[] = ['url' => $publicUrl, 'thumb' => $thumb, 'name' => $name];
         }
