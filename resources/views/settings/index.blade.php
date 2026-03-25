@@ -19,42 +19,42 @@
         <div class="overflow-x-auto no-scrollbar">
         <div class="flex gap-1 sm:gap-2 min-w-max">
             <button @click="setTab('general')"
-                    :class="{ 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white': activeTab === 'general' }"
+                    :class="{ 'text-gray-900 dark:text-white border-b-2 border-primary-500 dark:border-primary-400': activeTab === 'general' }"
                     class="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg transition-colors whitespace-nowrap flex-shrink-0">
                 {{ __('app.tab_general') }}
             </button>
             <button @click="setTab('public')"
-                    :class="{ 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white': activeTab === 'public' }"
+                    :class="{ 'text-gray-900 dark:text-white border-b-2 border-primary-500 dark:border-primary-400': activeTab === 'public' }"
                     class="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg transition-colors whitespace-nowrap flex-shrink-0">
                 {{ __('app.tab_public') }}
             </button>
             <button @click="setTab('integrations')"
-                    :class="{ 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white': activeTab === 'integrations' }"
+                    :class="{ 'text-gray-900 dark:text-white border-b-2 border-primary-500 dark:border-primary-400': activeTab === 'integrations' }"
                     class="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg transition-colors whitespace-nowrap flex-shrink-0">
                 {{ __('app.tab_integrations') }}
             </button>
             <button @click="setTab('data')"
-                    :class="{ 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white': activeTab === 'data' }"
+                    :class="{ 'text-gray-900 dark:text-white border-b-2 border-primary-500 dark:border-primary-400': activeTab === 'data' }"
                     class="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg transition-colors whitespace-nowrap flex-shrink-0">
                 {{ __('app.tab_data') }}
             </button>
             <button @click="setTab('finance')"
-                    :class="{ 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white': activeTab === 'finance' }"
+                    :class="{ 'text-gray-900 dark:text-white border-b-2 border-primary-500 dark:border-primary-400': activeTab === 'finance' }"
                     class="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg transition-colors whitespace-nowrap flex-shrink-0">
                 {{ __('app.finances') }}
             </button>
             <button @click="setTab('users')"
-                    :class="{ 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white': activeTab === 'users' }"
+                    :class="{ 'text-gray-900 dark:text-white border-b-2 border-primary-500 dark:border-primary-400': activeTab === 'users' }"
                     class="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg transition-colors whitespace-nowrap flex-shrink-0">
                 {{ __('app.tab_users') }}
             </button>
 <button @click="setTab('permissions')"
-                    :class="{ 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white': activeTab === 'permissions' }"
+                    :class="{ 'text-gray-900 dark:text-white border-b-2 border-primary-500 dark:border-primary-400': activeTab === 'permissions' }"
                     class="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg transition-colors whitespace-nowrap flex-shrink-0">
                 {{ __('app.tab_permissions') }}
             </button>
             <button @click="setTab('audit')"
-                    :class="{ 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white': activeTab === 'audit' }"
+                    :class="{ 'text-gray-900 dark:text-white border-b-2 border-primary-500 dark:border-primary-400': activeTab === 'audit' }"
                     class="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-lg transition-colors whitespace-nowrap flex-shrink-0">
                 {{ __('app.tab_audit') }}
             </button>
