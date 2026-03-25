@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
+// TODO: Add SoftDeletes after creating migration for deleted_at column
 class ChurchRole extends Model
 {
     use Auditable, HasFactory;

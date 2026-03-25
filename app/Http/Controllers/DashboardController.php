@@ -649,12 +649,14 @@ class DashboardController extends Controller
             ->outgoing()
             ->completed()
             ->thisMonth()
+            ->whereNotIn('source_type', [Transaction::SOURCE_EXCHANGE, Transaction::SOURCE_ALLOCATION])
             ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')->value('total') ?? 0;
 
         $data['expensesByCategory'] = Transaction::where('transactions.church_id', $church->id)
             ->outgoing()
             ->completed()
             ->thisMonth()
+            ->whereNotIn('transactions.source_type', [Transaction::SOURCE_EXCHANGE, Transaction::SOURCE_ALLOCATION])
             ->leftJoin('transaction_categories', 'transactions.category_id', '=', 'transaction_categories.id')
             ->selectRaw('transaction_categories.name as category_name, SUM(COALESCE(transactions.amount_uah, transactions.amount)) as total_amount, COUNT(*) as transaction_count')
             ->groupBy('transactions.category_id', 'transaction_categories.name')
@@ -1402,6 +1404,7 @@ class DashboardController extends Controller
         $financialRaw = Transaction::where('church_id', $church->id)
             ->completed()
             ->where('date', '>=', $twelveMonthsAgo)
+            ->whereNotIn('source_type', [Transaction::SOURCE_EXCHANGE, Transaction::SOURCE_ALLOCATION])
             ->selectRaw('YEAR(date) as year, MONTH(date) as month, direction, SUM(COALESCE(amount_uah, amount)) as total')
             ->groupBy('year', 'month', 'direction')
             ->get()

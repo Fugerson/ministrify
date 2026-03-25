@@ -54,6 +54,7 @@ class TestimonialController extends Controller
 
     public function update(Request $request, Testimonial $testimonial)
     {
+        $this->authorizeChurch($testimonial);
         $this->authorize('update', $testimonial);
         $church = $this->getChurchOrFail();
 
@@ -82,6 +83,7 @@ class TestimonialController extends Controller
 
     public function destroy(Request $request, Testimonial $testimonial)
     {
+        $this->authorizeChurch($testimonial);
         $this->authorize('delete', $testimonial);
 
         if ($testimonial->author_photo) {

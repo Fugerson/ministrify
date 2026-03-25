@@ -5,11 +5,11 @@
 @section('content')
 <div class="space-y-6" x-data="{
     filters: {
-        search: '{{ request('search') }}',
-        church_id: '{{ request('church_id') }}',
-        direction: '{{ request('direction') }}',
-        from: '{{ request('from') }}',
-        to: '{{ request('to') }}'
+        search: @js(request('search', '')),
+        church_id: @js(request('church_id', '')),
+        direction: @js(request('direction', '')),
+        from: @js(request('from', '')),
+        to: @js(request('to', ''))
     },
     loading: false,
     debounceTimer: null,

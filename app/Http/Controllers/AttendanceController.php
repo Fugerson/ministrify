@@ -84,6 +84,17 @@ class AttendanceController extends Controller
 
         $eventId = $validated['event_id'] ?? null;
 
+        // Prevent duplicate attendance for the same event on the same date
+        if ($eventId) {
+            $exists = Attendance::where('church_id', $church->id)
+                ->where('event_id', $eventId)
+                ->where('date', $validated['date'])
+                ->exists();
+            if ($exists) {
+                return $this->errorResponse($request, 'Attendance for this event on this date already exists.');
+            }
+        }
+
         $attendance = Attendance::create([
             'church_id' => $church->id,
             'event_id' => $eventId,

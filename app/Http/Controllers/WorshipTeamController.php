@@ -161,6 +161,7 @@ class WorshipTeamController extends Controller
      */
     public function eventShow(Ministry $ministry, Event $event)
     {
+        $this->authorizeChurch($ministry);
         // Redirect to worship ministry's schedule tab — detail is now a modal
         $worshipMinistry = Ministry::where('church_id', $ministry->church_id)
             ->where('is_worship_ministry', true)

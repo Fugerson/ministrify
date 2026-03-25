@@ -230,7 +230,7 @@ class Attendance extends Model
 
         $this->update([
             'members_present' => $membersPresent,
-            'total_count' => max($this->total_count ?? 0, $calculatedTotal),
+            'total_count' => $calculatedTotal,
         ]);
     }
 

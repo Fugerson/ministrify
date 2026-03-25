@@ -48,7 +48,7 @@ class BlogController extends Controller
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'slug' => 'nullable|string|max:255|unique:blog_posts,slug',
+            'slug' => ['nullable', 'string', 'max:255', Rule::unique('blog_posts', 'slug')->where('church_id', $church->id)],
             'excerpt' => 'nullable|string|max:500',
             'content' => 'required|string',
             'featured_image' => 'nullable|mimes:jpg,jpeg,png,gif,webp,heic,heif|max:2048',
@@ -95,6 +95,7 @@ class BlogController extends Controller
 
     public function edit(BlogPost $blogPost)
     {
+        $this->authorizeChurch($blogPost);
         $this->authorize('view', $blogPost);
         $church = $this->getChurchOrFail();
         $categories = $church->blogCategories()->ordered()->get();
@@ -104,12 +105,13 @@ class BlogController extends Controller
 
     public function update(Request $request, BlogPost $blogPost)
     {
+        $this->authorizeChurch($blogPost);
         $this->authorize('update', $blogPost);
         $church = $this->getChurchOrFail();
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'slug' => 'nullable|string|max:255|unique:blog_posts,slug,'.$blogPost->id,
+            'slug' => ['nullable', 'string', 'max:255', Rule::unique('blog_posts', 'slug')->where('church_id', $church->id)->ignore($blogPost->id)],
             'excerpt' => 'nullable|string|max:500',
             'content' => 'required|string',
             'featured_image' => 'nullable|mimes:jpg,jpeg,png,gif,webp,heic,heif|max:2048',
@@ -145,6 +147,7 @@ class BlogController extends Controller
 
     public function destroy(Request $request, BlogPost $blogPost)
     {
+        $this->authorizeChurch($blogPost);
         $this->authorize('delete', $blogPost);
 
         if ($blogPost->featured_image) {
@@ -158,6 +161,7 @@ class BlogController extends Controller
 
     public function publish(Request $request, BlogPost $blogPost)
     {
+        $this->authorizeChurch($blogPost);
         $this->authorize('update', $blogPost);
         $blogPost->publish();
 
@@ -194,6 +198,7 @@ class BlogController extends Controller
 
     public function categoryUpdate(Request $request, BlogCategory $category)
     {
+        $this->authorizeChurch($category);
         $this->authorize('update', $category);
 
         $validated = $request->validate([
@@ -210,6 +215,7 @@ class BlogController extends Controller
 
     public function categoryDestroy(Request $request, BlogCategory $category)
     {
+        $this->authorizeChurch($category);
         $this->authorize('delete', $category);
 
         // Move posts to uncategorized (null)

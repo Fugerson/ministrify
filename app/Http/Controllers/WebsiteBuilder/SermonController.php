@@ -80,6 +80,7 @@ class SermonController extends Controller
 
     public function edit(Sermon $sermon)
     {
+        $this->authorizeChurch($sermon);
         $this->authorize('view', $sermon);
         $church = $this->getChurchOrFail();
         $series = $church->sermonSeries()->orderBy('sort_order')->get();
@@ -90,6 +91,7 @@ class SermonController extends Controller
 
     public function update(Request $request, Sermon $sermon)
     {
+        $this->authorizeChurch($sermon);
         $this->authorize('update', $sermon);
         $church = $this->getChurchOrFail();
 
@@ -132,6 +134,7 @@ class SermonController extends Controller
 
     public function destroy(Request $request, Sermon $sermon)
     {
+        $this->authorizeChurch($sermon);
         $this->authorize('delete', $sermon);
 
         if ($sermon->audio_file) {
@@ -182,6 +185,7 @@ class SermonController extends Controller
 
     public function seriesUpdate(Request $request, SermonSeries $series)
     {
+        $this->authorizeChurch($series);
         $this->authorize('update', $series);
         $church = $this->getChurchOrFail();
 
@@ -208,6 +212,7 @@ class SermonController extends Controller
 
     public function seriesDestroy(SermonSeries $series)
     {
+        $this->authorizeChurch($series);
         $this->authorize('delete', $series);
 
         if ($series->thumbnail) {

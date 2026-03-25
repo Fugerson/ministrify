@@ -47,6 +47,7 @@ class FaqController extends Controller
 
     public function update(Request $request, Faq $faq)
     {
+        $this->authorizeChurch($faq);
         $this->authorize('update', $faq);
 
         $validated = $request->validate([
@@ -63,6 +64,7 @@ class FaqController extends Controller
 
     public function destroy(Request $request, Faq $faq)
     {
+        $this->authorizeChurch($faq);
         $this->authorize('delete', $faq);
         $faq->delete();
 

@@ -68,6 +68,7 @@ class TeamController extends Controller
 
     public function edit(StaffMember $staffMember)
     {
+        $this->authorizeChurch($staffMember);
         $this->authorize('view', $staffMember);
         $church = $this->getChurchOrFail();
         $roleCategories = StaffMember::CATEGORIES;
@@ -77,6 +78,7 @@ class TeamController extends Controller
 
     public function update(Request $request, StaffMember $staffMember)
     {
+        $this->authorizeChurch($staffMember);
         $this->authorize('update', $staffMember);
 
         $validated = $request->validate([
@@ -108,6 +110,7 @@ class TeamController extends Controller
 
     public function destroy(Request $request, StaffMember $staffMember)
     {
+        $this->authorizeChurch($staffMember);
         $this->authorize('delete', $staffMember);
 
         if ($staffMember->photo) {

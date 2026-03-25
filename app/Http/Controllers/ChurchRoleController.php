@@ -169,9 +169,9 @@ class ChurchRoleController extends Controller
     {
         $church = $this->getCurrentChurch();
 
-        // Check if any roles have people assigned
+        // Check if any roles have people or users assigned
         $usedRoles = ChurchRole::where('church_id', $church->id)
-            ->whereHas('people')
+            ->where(fn ($q) => $q->whereHas('people')->orWhereHas('users'))
             ->count();
 
         if ($usedRoles > 0) {

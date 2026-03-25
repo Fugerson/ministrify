@@ -59,10 +59,10 @@
         <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
              x-data="{
                 vf: {
-                    search: '{{ request('search') }}',
-                    church_id: '{{ request('church_id') }}',
-                    from: '{{ request('from') }}',
-                    to: '{{ request('to') }}'
+                    search: @js(request('search', '')),
+                    church_id: @js(request('church_id', '')),
+                    from: @js(request('from', '')),
+                    to: @js(request('to', ''))
                 },
                 vLoading: false,
                 async vFilter() {
@@ -261,12 +261,12 @@
         <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
              x-data="{
                 af: {
-                    search: '{{ request('search') }}',
-                    church_id: '{{ request('church_id') }}',
-                    action: '{{ request('action') }}',
-                    model: '{{ request('model') }}',
-                    from: '{{ request('from') }}',
-                    to: '{{ request('to') }}'
+                    search: @js(request('search', '')),
+                    church_id: @js(request('church_id', '')),
+                    action: @js(request('action', '')),
+                    model: @js(request('model', '')),
+                    from: @js(request('from', '')),
+                    to: @js(request('to', ''))
                 },
                 aLoading: false,
                 async aFilter() {

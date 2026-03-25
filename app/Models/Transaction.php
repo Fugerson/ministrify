@@ -165,11 +165,18 @@ class Transaction extends Model
         });
 
         // Cascade soft-delete paired exchange transaction
-        static::deleting(function (Transaction $transaction) {
+        static $deletingRelated = false;
+        static::deleting(function (Transaction $transaction) use (&$deletingRelated) {
+            if ($deletingRelated) {
+                return;
+            }
+
             if ($transaction->source_type === self::SOURCE_EXCHANGE && $transaction->related_transaction_id) {
                 $related = self::find($transaction->related_transaction_id);
                 if ($related && ! $related->trashed()) {
+                    $deletingRelated = true;
                     $related->delete();
+                    $deletingRelated = false;
                 }
             }
 

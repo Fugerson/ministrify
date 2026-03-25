@@ -25,6 +25,7 @@ use App\Services\ImageService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\Rule;
 
 class MinistryController extends Controller
 {
@@ -623,6 +624,7 @@ class MinistryController extends Controller
                 'name' => $item->name,
                 'planned_amount' => $item->planned_amount,
                 'planned_date' => $newPlannedDate,
+                'frequency' => $item->frequency,
                 'notes' => $item->notes,
                 'sort_order' => $item->sort_order,
             ]);
@@ -678,7 +680,7 @@ class MinistryController extends Controller
             'planned_amount' => 'required|numeric|min:0',
             'frequency' => 'nullable|in:one_time,weekly,monthly',
             'planned_date' => 'nullable|date',
-            'category_id' => 'nullable|integer|exists:transaction_categories,id',
+            'category_id' => ['nullable', 'integer', Rule::exists('transaction_categories', 'id')->where('church_id', $church->id)],
             'category_name' => 'nullable|string|max:100',
             'notes' => 'nullable|string|max:500',
             'person_ids' => 'nullable|array',
@@ -751,7 +753,7 @@ class MinistryController extends Controller
             'planned_amount' => 'required|numeric|min:0',
             'frequency' => 'nullable|in:one_time,weekly,monthly',
             'planned_date' => 'nullable|date',
-            'category_id' => 'nullable|integer|exists:transaction_categories,id',
+            'category_id' => ['nullable', 'integer', Rule::exists('transaction_categories', 'id')->where('church_id', $church->id)],
             'category_name' => 'nullable|string|max:100',
             'notes' => 'nullable|string|max:500',
             'person_ids' => 'nullable|array',
@@ -759,7 +761,6 @@ class MinistryController extends Controller
         ]);
 
         // Resolve category: existing ID or create from custom name
-        $church = $this->getCurrentChurch();
         $categoryId = $validated['category_id'] ?? null;
         if (! $categoryId && ! empty($validated['category_name'])) {
             $category = TransactionCategory::firstOrCreate([
@@ -834,11 +835,11 @@ class MinistryController extends Controller
             'currency' => 'nullable|in:UAH,USD,EUR',
             'date' => 'required|date',
             'description' => 'required|string|max:255',
-            'category_id' => 'nullable|integer|exists:transaction_categories,id',
+            'category_id' => ['nullable', 'integer', Rule::exists('transaction_categories', 'id')->where('church_id', $church->id)],
             'category_name' => 'nullable|string|max:100',
             'expense_type' => 'nullable|in:recurring,one_time',
             'payment_method' => 'nullable|in:cash,card',
-            'budget_item_id' => 'nullable|integer|exists:budget_items,id',
+            'budget_item_id' => ['nullable', 'integer', Rule::exists('budget_items', 'id')->where('ministry_id', $ministry->id)],
             'notes' => 'nullable|string|max:5000',
             'receipts' => 'nullable|array|max:10',
             'receipts.*' => 'file|mimes:jpg,jpeg,png,gif,webp,heic,heif,pdf|max:10240',
@@ -992,11 +993,11 @@ class MinistryController extends Controller
             'currency' => 'nullable|in:UAH,USD,EUR',
             'date' => 'required|date',
             'description' => 'required|string|max:255',
-            'category_id' => 'nullable|integer|exists:transaction_categories,id',
+            'category_id' => ['nullable', 'integer', Rule::exists('transaction_categories', 'id')->where('church_id', $church->id)],
             'category_name' => 'nullable|string|max:100',
             'expense_type' => 'nullable|in:recurring,one_time',
             'payment_method' => 'nullable|in:cash,card',
-            'budget_item_id' => 'nullable|integer|exists:budget_items,id',
+            'budget_item_id' => ['nullable', 'integer', Rule::exists('budget_items', 'id')->where('ministry_id', $ministry->id)],
             'notes' => 'nullable|string|max:5000',
             'receipts' => 'nullable|array|max:10',
             'receipts.*' => 'file|mimes:jpg,jpeg,png,gif,webp,heic,heif,pdf|max:10240',
@@ -1089,6 +1090,8 @@ class MinistryController extends Controller
         if ($transaction->church_id !== $church->id) {
             abort(404);
         }
+
+        abort_unless($transaction->direction === \App\Models\Transaction::DIRECTION_OUT, 404);
 
         $ministry = Ministry::findOrFail($transaction->ministry_id);
         Gate::authorize('contribute-ministry', $ministry);
@@ -1420,6 +1423,7 @@ class MinistryController extends Controller
 
         $ministry->members()->attach($validated['person_id'], [
             'position_ids' => json_encode(array_map('intval', $validated['position_ids'] ?? [])),
+            'joined_at' => now(),
         ]);
 
         // Log member added

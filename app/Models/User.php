@@ -26,7 +26,6 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'email',
         'password',
-        'role', // Note: only set server-side, never from user input
         'google_id',
         'church_role_id',
         'requested_church_role_id',
@@ -71,6 +70,16 @@ class User extends Authenticatable implements MustVerifyEmail
     public function person(): HasOne
     {
         return $this->hasOne(Person::class);
+    }
+
+    /**
+     * Get the Person record for a specific church (multi-church safe).
+     */
+    public function personForChurch(?int $churchId = null): ?Person
+    {
+        $cid = $churchId ?? $this->church_id;
+        if (!$cid) return null;
+        return Person::where('user_id', $this->id)->where('church_id', $cid)->first();
     }
 
     public function churchRole(): BelongsTo

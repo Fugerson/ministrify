@@ -321,8 +321,8 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
     Route::get('people-export', [PersonController::class, 'export'])->name('people.export')->middleware('permission:people,view');
     Route::post('people-import', [PersonController::class, 'import'])->name('people.import')->middleware('permission:people,create');
     Route::post('people-bulk-action', [PersonController::class, 'bulkAction'])->name('people.bulk-action')->middleware('permission:people,edit');
-    Route::get('people-duplicates', [PersonController::class, 'findDuplicates'])->name('people.duplicates');
-    Route::post('people-merge', [PersonController::class, 'mergePeople'])->name('people.merge');
+    Route::get('people-duplicates', [PersonController::class, 'findDuplicates'])->name('people.duplicates')->middleware('permission:people,edit');
+    Route::post('people-merge', [PersonController::class, 'mergePeople'])->name('people.merge')->middleware('permission:people,edit');
     Route::get('people-quick-edit', [PersonController::class, 'quickEdit'])->name('people.quick-edit')->middleware('permission:people,edit');
     Route::post('people-quick-save', [PersonController::class, 'quickSave'])->name('people.quick-save')->middleware('permission:people,edit');
     Route::post('people/{person}/upload-photo', [PersonController::class, 'uploadPhoto'])->name('people.upload-photo')->middleware('permission:people,edit');
@@ -818,11 +818,11 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
         Route::put('about', [AboutController::class, 'update'])->name('about.update');
 
         // Staff/Team management
-        Route::resource('team', TeamController::class)->parameters(['team' => 'staffMember']);
+        Route::resource('team', TeamController::class)->parameters(['team' => 'staffMember'])->except(['show']);
         Route::post('team/reorder', [TeamController::class, 'reorder'])->name('team.reorder');
 
         // Sermons management
-        Route::resource('sermons', SermonController::class);
+        Route::resource('sermons', SermonController::class)->except(['show']);
         Route::get('sermons-series', [SermonController::class, 'seriesIndex'])->name('sermons.series.index');
         Route::post('sermons-series', [SermonController::class, 'seriesStore'])->name('sermons.series.store');
         Route::put('sermons-series/{series}', [SermonController::class, 'seriesUpdate'])->name('sermons.series.update');
@@ -848,7 +848,7 @@ Route::middleware(['auth', 'verified', 'church', 'onboarding'])->group(function 
         Route::post('faq/reorder', [FaqController::class, 'reorder'])->name('faq.reorder');
 
         // Testimonials management
-        Route::resource('testimonials', TestimonialController::class);
+        Route::resource('testimonials', TestimonialController::class)->except(['show', 'create', 'edit']);
         Route::post('testimonials/reorder', [TestimonialController::class, 'reorder'])->name('testimonials.reorder');
 
         // Public prayer requests inbox

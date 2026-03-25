@@ -52,6 +52,7 @@ class Assignment extends Model
         'conflict_override',
         'decline_reason',
         'assignment_notes',
+        'assigned_by',
     ];
 
     protected $casts = [

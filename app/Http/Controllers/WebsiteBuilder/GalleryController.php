@@ -238,6 +238,7 @@ class GalleryController extends Controller
     public function setCover(Request $request, Gallery $gallery, GalleryPhoto $photo)
     {
         $this->authorize('update', $gallery);
+        abort_unless($photo->gallery_id === $gallery->id, 404);
 
         $gallery->update(['cover_image' => $photo->file_path]);
 

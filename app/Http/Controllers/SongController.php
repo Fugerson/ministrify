@@ -167,6 +167,7 @@ class SongController extends Controller
     public function edit(Song $song)
     {
         $this->authorizeChurch($song);
+        abort_unless(auth()->user()->canEdit('ministries'), 403);
         $church = $this->getCurrentChurch();
 
         // Get existing artists for autocomplete

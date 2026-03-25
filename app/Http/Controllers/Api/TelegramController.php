@@ -279,10 +279,11 @@ class TelegramController extends Controller
 
         // Auto-link by username (only if exactly one match)
         if (! $person && $username) {
-            $matchingPeople = Person::where(function ($q) use ($username) {
-                $q->where('telegram_username', '@'.$username)
-                    ->orWhere('telegram_username', $username);
-            })->get();
+            $matchingPeople = Person::whereNotNull('church_id')
+                ->where(function ($q) use ($username) {
+                    $q->where('telegram_username', '@'.$username)
+                        ->orWhere('telegram_username', $username);
+                })->get();
 
             if ($matchingPeople->count() === 1) {
                 $person = $matchingPeople->first();

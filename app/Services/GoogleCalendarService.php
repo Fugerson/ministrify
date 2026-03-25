@@ -325,6 +325,8 @@ class GoogleCalendarService
      */
     private function convertToGoogleEvent(Event $event): array
     {
+        $timezone = $event->church?->timezone ?? config('app.timezone', 'Europe/Kyiv');
+
         $googleEvent = [
             'summary' => $event->title,
             'description' => $this->buildEventDescription($event),
@@ -337,14 +339,14 @@ class GoogleCalendarService
             // All-day event - use date format
             $googleEvent['start'] = [
                 'date' => $event->date->format('Y-m-d'),
-                'timeZone' => 'Europe/Kyiv',
+                'timeZone' => $timezone,
             ];
 
             // For all-day events, Google expects end date to be the day AFTER the last day
             $endDate = $event->end_date ?? $event->date;
             $googleEvent['end'] = [
                 'date' => Carbon::parse($endDate)->addDay()->format('Y-m-d'),
-                'timeZone' => 'Europe/Kyiv',
+                'timeZone' => $timezone,
             ];
         } else {
             // Timed event - use dateTime format
@@ -353,7 +355,7 @@ class GoogleCalendarService
 
             $googleEvent['start'] = [
                 'dateTime' => $startDateTime->toRfc3339String(),
-                'timeZone' => 'Europe/Kyiv',
+                'timeZone' => $timezone,
             ];
 
             // Calculate end time
@@ -374,7 +376,7 @@ class GoogleCalendarService
 
             $googleEvent['end'] = [
                 'dateTime' => $endDateTime->toRfc3339String(),
-                'timeZone' => 'Europe/Kyiv',
+                'timeZone' => $timezone,
             ];
         }
 

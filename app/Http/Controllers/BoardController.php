@@ -436,7 +436,7 @@ class BoardController extends Controller
             'title' => 'nullable|string|max:255',
         ]);
 
-        $board = Board::find($validated['board_id']);
+        $board = Board::where('church_id', $church->id)->find($validated['board_id']);
         if (! $board) {
             return $this->errorResponse($request, __('messages.board_not_found'));
         }
@@ -787,11 +787,12 @@ class BoardController extends Controller
             'position' => 'required|integer|min:0',
         ]);
 
-        // Verify target column belongs to the same board
-        $targetColumn = BoardColumn::find($validated['column_id']);
+        // Verify target column belongs to the same board and church
+        $targetColumn = BoardColumn::with('board')->find($validated['column_id']);
         if (! $targetColumn) {
             abort(404);
         }
+        abort_unless($targetColumn->board->church_id === $this->getCurrentChurch()->id, 404);
 
         // Check card limit on target column (skip if moving within same column)
         if ($targetColumn->id !== $card->column_id && $targetColumn->isAtLimit()) {
@@ -1209,7 +1210,8 @@ class BoardController extends Controller
         }
 
         // Verify related card belongs to same board (church isolation)
-        $relatedCard = BoardCard::with('column')->findOrFail($validated['related_card_id']);
+        $relatedCard = BoardCard::with('column.board')->findOrFail($validated['related_card_id']);
+        abort_unless($relatedCard->column->board->church_id === $card->column->board->church_id, 404);
         if ($relatedCard->column->board_id !== $card->column->board_id) {
             abort(403, __('messages.card_belongs_to_other_board'));
         }

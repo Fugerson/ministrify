@@ -56,7 +56,7 @@
             @endif
         </div>
 
-        @if(auth()->user()->canEdit('announcements'))
+        @if(auth()->user()->canEdit('announcements') || $announcement->author_id === auth()->id())
         <div class="px-6 lg:px-8 py-4 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-700 flex items-center gap-4">
             <a href="{{ route('announcements.edit', $announcement) }}"
                class="inline-flex items-center px-4 py-2 bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-200 font-medium rounded-xl">
@@ -65,6 +65,7 @@
                 </svg>
                 {{ __('app.ann_edit') }}
             </a>
+            @if(auth()->user()->canEdit('announcements'))
             <button @click="ajaxAction('{{ route('announcements.pin', $announcement) }}', 'POST').then(() => { const s = $el.querySelector('span'); const t = s.textContent.trim(); s.textContent = t === _annShowI18n.unpin ? ' ' + _annShowI18n.pin : ' ' + _annShowI18n.unpin; })"
                     class="inline-flex items-center px-4 py-2 bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-200 font-medium rounded-xl">
                 <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
@@ -72,6 +73,7 @@
                 </svg>
                 <span>{{ $announcement->is_pinned ? __('app.ann_unpin') : __('app.ann_pin') }}</span>
             </button>
+            @endif
             <button @click="ajaxDelete('{{ route('announcements.destroy', $announcement) }}', _annShowI18n.confirm_delete, null, '{{ route('announcements.index') }}')"
                     class="inline-flex items-center px-4 py-2 bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50 text-red-700 dark:text-red-400 font-medium rounded-xl ml-auto">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -84,7 +86,7 @@
     </article>
 </div>
 
-@if(auth()->user()->canEdit('announcements'))
+@if(auth()->user()->canEdit('announcements') || $announcement->author_id === auth()->id())
 <script>
 var _annShowI18n = {!! json_encode([
     'pin' => __('app.ann_pin'),

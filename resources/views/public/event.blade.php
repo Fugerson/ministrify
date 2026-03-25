@@ -1,7 +1,7 @@
 @extends('public.layout')
 
 @section('title', $event->title . ' - ' . $church->name)
-@section('description', ($event->public_description ?? $event->notes ?? $event->title) . ' — ' . $event->date->translatedFormat('d M Y') . ($event->time ? ', ' . $event->time->format('H:i') : '') . ($event->location ? ' — ' . $event->location : ''))
+@section('description', ($event->public_description ?? $event->title) . ' — ' . $event->date->translatedFormat('d M Y') . ($event->time ? ', ' . $event->time->format('H:i') : '') . ($event->location ? ' — ' . $event->location : ''))
 @if($event->cover_image)
     @section('og_image', Storage::url($event->cover_image))
 @endif
@@ -85,9 +85,9 @@
             </div>
 
             <!-- Description -->
-            @if($event->public_description || $event->notes)
+            @if($event->public_description)
                 <div class="prose prose-lg max-w-none mb-8">
-                    {!! nl2br(e($event->public_description ?? $event->notes)) !!}
+                    {!! nl2br(e($event->public_description)) !!}
                 </div>
             @endif
 

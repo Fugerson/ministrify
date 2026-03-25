@@ -92,13 +92,15 @@
                     </div>
                 </a>
 
-                @if(auth()->user()->canEdit('announcements'))
+                @if(auth()->user()->canEdit('announcements') || $announcement->author_id === auth()->id())
                 <div class="px-6 py-3 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-700 flex items-center gap-2">
+                    @if(auth()->user()->canEdit('announcements'))
                     <button @click="ajaxAction('{{ route('announcements.pin', $announcement) }}', 'POST').then(() => { const t = $el.textContent.trim(); $el.textContent = t === _annI18n.unpin ? _annI18n.pin : _annI18n.unpin; })"
                             class="text-sm text-gray-500 hover:text-amber-600 dark:text-gray-400 dark:hover:text-amber-400">
                         {{ $announcement->is_pinned ? __('app.ann_unpin') : __('app.ann_pin') }}
                     </button>
                     <span class="text-gray-300 dark:text-gray-600">|</span>
+                    @endif
                     <a href="{{ route('announcements.edit', $announcement) }}" class="text-sm text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400">
                         {{ __('app.ann_edit') }}
                     </a>
@@ -130,12 +132,13 @@
     @endif
 </div>
 
-@if(auth()->user()->canEdit('announcements'))
+@if(auth()->user()->canEdit('announcements') || $announcements->contains(fn($a) => $a->author_id === auth()->id()))
 <script>
-var _annI18n = _annI18n || {};
-_annI18n.pin = {!! json_encode(__('app.ann_pin')) !!};
-_annI18n.unpin = {!! json_encode(__('app.ann_unpin')) !!};
-_annI18n.confirm_delete = {!! json_encode(__('messages.confirm_delete_announcement')) !!};
+var _annI18n = {
+    pin: {!! json_encode(__('app.ann_pin')) !!},
+    unpin: {!! json_encode(__('app.ann_unpin')) !!},
+    confirm_delete: {!! json_encode(__('messages.confirm_delete_announcement')) !!}
+};
 </script>
 @endif
 
@@ -210,12 +213,12 @@ _annI18n.confirm_delete = {!! json_encode(__('messages.confirm_delete_announceme
 </div>
 
 <script>
-var _annI18n = {!! json_encode([
+Object.assign(_annI18n, {!! json_encode([
     'check_form' => __('app.ann_check_form'),
     'save_error' => __('app.ann_save_error'),
     'published' => __('app.ann_published'),
     'connection_error' => __('app.ann_connection_error'),
-]) !!};
+]) !!});
 
 function openCreateAnnouncementModal() {
     document.getElementById('createAnnouncementModal').classList.remove('hidden');

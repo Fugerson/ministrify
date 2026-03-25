@@ -45,6 +45,7 @@ class ReportsController extends Controller
 
     public function attendance(Request $request)
     {
+        $this->checkPlanFeature('reports');
         abort_unless(auth()->user()->canView('reports'), 403);
         $church = $this->getCurrentChurch();
 
@@ -169,6 +170,7 @@ class ReportsController extends Controller
 
     public function finances(Request $request)
     {
+        $this->checkPlanFeature('reports');
         abort_unless(auth()->user()->canView('finances'), 403);
         $church = $this->getCurrentChurch();
         $year = $request->get('year', now()->year);
@@ -271,6 +273,7 @@ class ReportsController extends Controller
 
     public function volunteers(Request $request)
     {
+        $this->checkPlanFeature('reports');
         abort_unless(auth()->user()->canView('reports'), 403);
         $church = $this->getCurrentChurch();
         $year = $request->get('year', now()->year);

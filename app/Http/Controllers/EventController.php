@@ -21,6 +21,7 @@ use App\Services\CalendarService;
 use App\Services\GoogleCalendarService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
 class EventController extends Controller
@@ -328,13 +329,15 @@ class EventController extends Controller
 
         // Handle recurring events
         if (! empty($validated['recurrence_rule'])) {
-            $this->generateRecurringEvents(
-                $event,
-                $validated['recurrence_rule'],
-                $validated['recurrence_end_type'] ?? 'count',
-                $validated['recurrence_end_count'] ?? 12,
-                $validated['recurrence_end_date'] ?? null
-            );
+            DB::transaction(function () use ($event, $validated) {
+                $this->generateRecurringEvents(
+                    $event,
+                    $validated['recurrence_rule'],
+                    $validated['recurrence_end_type'] ?? 'count',
+                    $validated['recurrence_end_count'] ?? 12,
+                    $validated['recurrence_end_date'] ?? null
+                );
+            });
         }
 
         broadcast(new ChurchDataUpdated($church->id, 'events', 'created', $event->title))->toOthers();
@@ -511,7 +514,7 @@ class EventController extends Controller
             'title' => 'sometimes|string|max:255',
             'date' => 'sometimes|date',
             'time' => 'sometimes|date_format:H:i',
-            'end_date' => 'nullable|date|after_or_equal:date',
+            'end_date' => ['nullable', 'date', $request->has('date') ? 'after_or_equal:date' : 'after_or_equal:' . $event->date->format('Y-m-d')],
             'notes' => 'nullable|string|max:5000',
             'is_service' => 'nullable|boolean',
             'service_type' => 'nullable|string|in:sunday_service,youth_meeting,prayer_meeting,special_service',

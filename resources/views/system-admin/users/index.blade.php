@@ -5,12 +5,12 @@
 @section('content')
 <div class="space-y-6" x-data="{
     filters: {
-        search: '{{ request('search') }}',
-        church_id: '{{ request('church_id') }}',
-        role: '{{ request('role') }}',
-        super_admin: '{{ request('super_admin') }}',
-        per_page: '{{ $perPage }}',
-        only_deleted: '{{ request('only_deleted') }}'
+        search: @js(request('search', '')),
+        church_id: @js(request('church_id', '')),
+        role: @js(request('role', '')),
+        super_admin: @js(request('super_admin', '')),
+        per_page: @js((string) $perPage),
+        only_deleted: @js(request('only_deleted', ''))
     },
     loading: false,
     debounceTimer: null,

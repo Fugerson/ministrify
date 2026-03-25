@@ -10,6 +10,7 @@ use App\Models\Group;
 use App\Models\GroupJoinRequest;
 use App\Models\Ministry;
 use App\Models\MinistryJoinRequest;
+use App\Models\OnlineDonation;
 use App\Models\Transaction;
 use App\Rules\Honeypot;
 use App\Rules\Recaptcha;
@@ -396,22 +397,34 @@ class PublicSiteController extends Controller
             return response()->json(['status' => 'error'], 400);
         }
 
-        // Find transaction and church
-        $transaction = Transaction::where('order_id', $orderId)->first();
-        if (! $transaction) {
-            return response()->json(['status' => 'error'], 404);
+        // Find donation (primary) or legacy transaction (fallback)
+        $donation = OnlineDonation::where('provider_order_id', $orderId)->first();
+
+        if ($donation) {
+            $church = $donation->church;
+            $paymentService = new PaymentService($church);
+
+            if (! $paymentService->verifyLiqPayCallback($data, $signature)) {
+                return response()->json(['status' => 'error'], 403);
+            }
+
+            $paymentService->processLiqPayCallback($decodedData);
+        } else {
+            // Legacy fallback: old payments created as Transaction directly
+            $transaction = Transaction::where('order_id', $orderId)->first();
+            if (! $transaction) {
+                return response()->json(['status' => 'error'], 404);
+            }
+
+            $church = $transaction->church;
+            $paymentService = new PaymentService($church);
+
+            if (! $paymentService->verifyLiqPayCallback($data, $signature)) {
+                return response()->json(['status' => 'error'], 403);
+            }
+
+            $paymentService->processLiqPayCallback($decodedData);
         }
-
-        $church = $transaction->church;
-        $paymentService = new PaymentService($church);
-
-        // Verify signature
-        if (! $paymentService->verifyLiqPayCallback($data, $signature)) {
-            return response()->json(['status' => 'error'], 403);
-        }
-
-        // Process callback
-        $paymentService->processLiqPayCallback($decodedData);
 
         return response()->json(['status' => 'ok']);
     }

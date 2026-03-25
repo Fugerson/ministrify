@@ -18,6 +18,11 @@ class Group extends Model
 
     protected static function booted(): void
     {
+        // Note: When a Group is soft-deleted, its polymorphic attendances (via morphMany)
+        // are intentionally NOT deleted. Attendance records are historical data and should
+        // be preserved even when the group is archived. The attendable_type/attendable_id
+        // columns still reference the soft-deleted group, which can be restored if needed.
+
         // Auto-add leader as member when leader_id is set/changed
         static::saved(function (Group $group) {
             if ($group->leader_id && $group->wasChanged('leader_id')) {
@@ -220,7 +225,7 @@ class Group extends Model
             return $this->computedCache['average_attendance'];
         }
 
-        $attendances = $this->attendances()->take(10)->get();
+        $attendances = $this->attendances()->orderByDesc('date')->take(10)->get();
         if ($attendances->isEmpty()) {
             return $this->computedCache['average_attendance'] = 0;
         }

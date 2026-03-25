@@ -231,6 +231,17 @@ class PersonMergeService
                 ->delete();
 
             // 4. Transfer HasMany relationships (simple person_id update)
+            // Remove duplicate attendance records (same attendance_id already exists for primary)
+            if (\Schema::hasTable('attendance_records')) {
+                $existingAttendanceIds = DB::table('attendance_records')
+                    ->where('person_id', $primary->id)
+                    ->pluck('attendance_id');
+                DB::table('attendance_records')
+                    ->where('person_id', $secondary->id)
+                    ->whereIn('attendance_id', $existingAttendanceIds)
+                    ->delete();
+            }
+
             $hasManyTables = [
                 'assignments',
                 'event_responsibilities',
@@ -494,6 +505,18 @@ class PersonMergeService
                 ->delete();
 
             // 4. Transfer HasMany relationships
+
+            // Remove duplicate attendance records (same attendance_id already exists for primary)
+            if (\Schema::hasTable('attendance_records')) {
+                $existingAttendanceIds = DB::table('attendance_records')
+                    ->where('person_id', $personA->id)
+                    ->pluck('attendance_id');
+                DB::table('attendance_records')
+                    ->where('person_id', $personB->id)
+                    ->whereIn('attendance_id', $existingAttendanceIds)
+                    ->delete();
+            }
+
             $hasManyTables = [
                 'assignments',
                 'event_responsibilities',

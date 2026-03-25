@@ -6,6 +6,7 @@ use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\DB;
 
 class OnlineDonation extends Model
 {
@@ -123,14 +124,23 @@ class OnlineDonation extends Model
 
     public function markAsSuccess(array $providerResponse = []): void
     {
-        $this->update([
-            'status' => self::STATUS_SUCCESS,
-            'paid_at' => now(),
-            'provider_response' => array_merge($this->provider_response ?? [], $providerResponse),
-        ]);
+        DB::transaction(function () use ($providerResponse) {
+            $donation = self::lockForUpdate()->find($this->id);
+            if ($donation->transaction_id) {
+                return; // already processed
+            }
 
-        // Create transaction
-        $this->createTransaction();
+            $donation->update([
+                'status' => self::STATUS_SUCCESS,
+                'paid_at' => now(),
+                'provider_response' => array_merge($donation->provider_response ?? [], $providerResponse),
+            ]);
+
+            $donation->createTransaction();
+
+            // Refresh current instance
+            $this->refresh();
+        });
     }
 
     public function markAsFailed(string $errorMessage, array $providerResponse = []): void
@@ -142,7 +152,7 @@ class OnlineDonation extends Model
         ]);
     }
 
-    private function createTransaction(): void
+    protected function createTransaction(): void
     {
         if ($this->transaction_id) {
             return;

@@ -24,6 +24,7 @@ class PublicPrayerController extends Controller
 
     public function show(PrayerRequest $prayerRequest)
     {
+        $this->authorizeChurch($prayerRequest);
         $this->authorize('view', $prayerRequest);
 
         return view('website-builder.prayer-inbox.show', compact('prayerRequest'));
@@ -31,6 +32,7 @@ class PublicPrayerController extends Controller
 
     public function updateStatus(Request $request, PrayerRequest $prayerRequest)
     {
+        $this->authorizeChurch($prayerRequest);
         $this->authorize('update', $prayerRequest);
 
         $validated = $request->validate([
@@ -49,6 +51,7 @@ class PublicPrayerController extends Controller
 
     public function destroy(Request $request, PrayerRequest $prayerRequest)
     {
+        $this->authorizeChurch($prayerRequest);
         $this->authorize('delete', $prayerRequest);
 
         $prayerRequest->delete();

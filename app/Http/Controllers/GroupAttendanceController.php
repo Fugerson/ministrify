@@ -80,7 +80,7 @@ class GroupAttendanceController extends Controller
             'present' => 'nullable|array',
             'present.*' => [Rule::exists('people', 'id')->where('church_id', $this->getCurrentChurch()->id)],
             'guests_present' => 'nullable|array',
-            'guests_present.*' => 'integer|exists:group_guests,id',
+            'guests_present.*' => ['integer', Rule::exists('group_guests', 'id')->where('group_id', $group->id)],
         ]);
 
         $presentIds = $validated['present'] ?? [];
@@ -212,7 +212,7 @@ class GroupAttendanceController extends Controller
             'present' => 'nullable|array',
             'present.*' => [Rule::exists('people', 'id')->where('church_id', $this->getCurrentChurch()->id)],
             'guests_present' => 'nullable|array',
-            'guests_present.*' => 'integer|exists:group_guests,id',
+            'guests_present.*' => ['integer', Rule::exists('group_guests', 'id')->where('group_id', $group->id)],
         ]);
 
         $presentIds = $validated['present'] ?? [];
@@ -350,89 +350,93 @@ class GroupAttendanceController extends Controller
         $this->authorize('update', $group);
         abort_unless($attendance->attendable_id === $group->id && $attendance->attendable_type === Group::class, 404);
 
-        // Check if toggling a group guest or a member
-        if ($request->has('guest_id')) {
-            $guestId = $request->input('guest_id');
-            $existing = DB::table('group_guest_attendance')
-                ->where('group_guest_id', $guestId)
-                ->where('attendance_id', $attendance->id)
-                ->first();
+        return DB::transaction(function () use ($request, $group, $attendance) {
+            // Check if toggling a group guest or a member
+            if ($request->has('guest_id')) {
+                $guestId = $request->input('guest_id');
+                // Validate guest belongs to this group
+                \App\Models\GroupGuest::where('group_id', $group->id)->where('id', $guestId)->firstOrFail();
+                $existing = DB::table('group_guest_attendance')
+                    ->where('group_guest_id', $guestId)
+                    ->where('attendance_id', $attendance->id)
+                    ->first();
 
-            if ($existing) {
-                $newPresent = ! $existing->present;
-                DB::table('group_guest_attendance')
-                    ->where('id', $existing->id)
-                    ->update(['present' => $newPresent, 'updated_at' => now()]);
-            } else {
-                $newPresent = true;
-                DB::table('group_guest_attendance')->insert([
-                    'group_guest_id' => $guestId,
-                    'attendance_id' => $attendance->id,
-                    'present' => true,
-                    'created_at' => now(),
-                    'updated_at' => now(),
+                if ($existing) {
+                    $newPresent = ! $existing->present;
+                    DB::table('group_guest_attendance')
+                        ->where('id', $existing->id)
+                        ->update(['present' => $newPresent, 'updated_at' => now()]);
+                } else {
+                    $newPresent = true;
+                    DB::table('group_guest_attendance')->insert([
+                        'group_guest_id' => $guestId,
+                        'attendance_id' => $attendance->id,
+                        'present' => true,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
+
+                $this->recalculateCounts($attendance, $group);
+
+                broadcast(new AttendanceUpdated(
+                    churchId: $group->church_id,
+                    attendanceId: $attendance->id,
+                    personId: null,
+                    present: $newPresent,
+                    presentCount: $attendance->members_present,
+                ))->toOthers();
+                broadcast(new ChurchDataUpdated($group->church_id, 'dashboard', 'updated'))->toOthers();
+
+                return response()->json([
+                    'success' => true,
+                    'present' => $newPresent,
+                    'members_present' => $attendance->members_present,
+                    'guests_count' => $attendance->guests_count,
+                    'total_count' => $attendance->total_count,
                 ]);
             }
 
+            $validated = $request->validate([
+                'person_id' => ['required', new BelongsToChurch(Person::class)],
+            ]);
+
+            $record = $attendance->records()->where('person_id', $validated['person_id'])->first();
+
+            if ($record) {
+                $record->update([
+                    'present' => ! $record->present,
+                    'checked_in_at' => ! $record->present ? now()->format('H:i') : null,
+                ]);
+            } else {
+                $record = AttendanceRecord::create([
+                    'attendance_id' => $attendance->id,
+                    'person_id' => $validated['person_id'],
+                    'present' => true,
+                    'checked_in_at' => now()->format('H:i'),
+                ]);
+            }
+
+            // Recalculate counts
             $this->recalculateCounts($attendance, $group);
 
             broadcast(new AttendanceUpdated(
                 churchId: $group->church_id,
                 attendanceId: $attendance->id,
-                personId: null,
-                present: $newPresent,
+                personId: $validated['person_id'],
+                present: $record->present,
                 presentCount: $attendance->members_present,
             ))->toOthers();
             broadcast(new ChurchDataUpdated($group->church_id, 'dashboard', 'updated'))->toOthers();
 
             return response()->json([
                 'success' => true,
-                'present' => $newPresent,
+                'present' => $record->present,
                 'members_present' => $attendance->members_present,
                 'guests_count' => $attendance->guests_count,
                 'total_count' => $attendance->total_count,
             ]);
-        }
-
-        $validated = $request->validate([
-            'person_id' => ['required', new BelongsToChurch(Person::class)],
-        ]);
-
-        $record = $attendance->records()->where('person_id', $validated['person_id'])->first();
-
-        if ($record) {
-            $record->update([
-                'present' => ! $record->present,
-                'checked_in_at' => ! $record->present ? now()->format('H:i') : null,
-            ]);
-        } else {
-            $record = AttendanceRecord::create([
-                'attendance_id' => $attendance->id,
-                'person_id' => $validated['person_id'],
-                'present' => true,
-                'checked_in_at' => now()->format('H:i'),
-            ]);
-        }
-
-        // Recalculate counts
-        $this->recalculateCounts($attendance, $group);
-
-        broadcast(new AttendanceUpdated(
-            churchId: $group->church_id,
-            attendanceId: $attendance->id,
-            personId: $validated['person_id'],
-            present: $record->present,
-            presentCount: $attendance->members_present,
-        ))->toOthers();
-        broadcast(new ChurchDataUpdated($group->church_id, 'dashboard', 'updated'))->toOthers();
-
-        return response()->json([
-            'success' => true,
-            'present' => $record->present,
-            'members_present' => $attendance->members_present,
-            'guests_count' => $attendance->guests_count,
-            'total_count' => $attendance->total_count,
-        ]);
+        });
     }
 
     /**

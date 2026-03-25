@@ -107,6 +107,7 @@ class RotationService
                             'reason' => $conflict,
                         ];
 
+                        $i--; // Don't consume the slot on conflict
                         continue;
                     }
 

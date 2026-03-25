@@ -275,6 +275,11 @@ class GroupController extends Controller
             $group->update(['leader_id' => $person->id]);
         }
 
+        // If demoting the current leader, clear group leader_id
+        if ($group->leader_id === $person->id && $validated['role'] !== 'leader') {
+            $group->update(['leader_id' => null]);
+        }
+
         // Get old role before updating
         $oldRole = $group->members()->where('person_id', $person->id)->first()?->pivot?->role ?? 'member';
 

@@ -10,7 +10,7 @@
 
 @section('content')
 <div class="space-y-6" x-data="{
-    filters: { search: '{{ request('search') }}' },
+    filters: { search: @js(request('search', '')) },
     loading: false,
     debounceTimer: null,
     applyFiltersNow() {

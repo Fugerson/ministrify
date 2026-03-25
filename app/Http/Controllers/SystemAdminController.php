@@ -218,7 +218,12 @@ class SystemAdminController extends Controller
         $user->name = $validated['name'];
         $user->email = $validated['email'];
         $user->church_role_id = $validated['church_role_id'];
-        $user->is_super_admin = $request->boolean('is_super_admin');
+        // Prevent self-demotion from super admin
+        if ($user->id === auth()->id()) {
+            $user->is_super_admin = $user->is_super_admin;
+        } else {
+            $user->is_super_admin = $request->boolean('is_super_admin');
+        }
 
         // Sync church_id and legacy role field based on church_role
         if ($validated['church_role_id']) {
@@ -325,6 +330,10 @@ class SystemAdminController extends Controller
      */
     public function impersonateUser(User $user)
     {
+        if ($user->is_super_admin) {
+            return back()->with('error', 'Cannot impersonate super admin');
+        }
+
         $adminId = auth()->id();
 
         // Store original admin ID in session
@@ -332,6 +341,7 @@ class SystemAdminController extends Controller
 
         // Login as the target user
         auth()->login($user);
+        session()->regenerate();
 
         return redirect()->route('dashboard')
             ->with('success', "Ви увійшли як {$user->name}. Натисніть «Повернутись» у верхній панелі.");
@@ -349,6 +359,7 @@ class SystemAdminController extends Controller
             if ($originalUser && $originalUser->is_super_admin) {
                 auth()->login($originalUser);
                 session()->forget('impersonating_from');
+                session()->regenerate();
 
                 return redirect()->route('system.users.index')
                     ->with('success', 'Ви повернулись до свого акаунту.');
@@ -572,12 +583,20 @@ class SystemAdminController extends Controller
             'admin_password' => 'required|min:8',
         ]);
 
+        // Generate unique slug
+        $slug = Str::slug($validated['name']);
+        $originalSlug = $slug;
+        $i = 1;
+        while (Church::where('slug', $slug)->exists()) {
+            $slug = $originalSlug . '-' . $i++;
+        }
+
         // Create church
         $church = Church::create([
             'name' => $validated['name'],
             'city' => $validated['city'],
             'address' => $validated['address'],
-            'slug' => Str::slug($validated['name']),
+            'slug' => $slug,
         ]);
 
         // Restore soft-deleted user or create new admin user
@@ -700,7 +719,7 @@ class SystemAdminController extends Controller
             $church->galleries()->delete();
 
             // 2. Events related
-            foreach ($church->events as $event) {
+            foreach ($church->events()->withTrashed()->get() as $event) {
                 $event->checklist()->delete();
                 $event->planItems()->delete();
                 $event->songs()->detach();
@@ -729,7 +748,7 @@ class SystemAdminController extends Controller
             $church->groups()->delete();
 
             // 5. People related
-            foreach ($church->people as $person) {
+            foreach ($church->people()->withTrashed()->get() as $person) {
                 // Delete person relationships
                 if (Schema::hasTable('family_relationships')) {
                     DB::table('family_relationships')
