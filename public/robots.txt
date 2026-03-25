@@ -1,4 +1,5 @@
-# Ministrify - Church Management System
+# Ministrify - Free Church Management Software
+# https://ministrify.app
 User-agent: *
 Allow: /
 
@@ -19,6 +20,7 @@ Disallow: /settings
 Disallow: /system-admin
 Disallow: /api/
 Disallow: /livewire/
+Disallow: /locale/
 
 # Allow landing pages
 Allow: /features
@@ -28,6 +30,8 @@ Allow: /docs
 Allow: /terms
 Allow: /privacy
 Allow: /register-church
+Allow: /pricing
+Allow: /account-deletion
 
 # Allow public church sites
 Allow: /c/

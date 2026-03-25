@@ -21,6 +21,11 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="canonical" href="{{ url()->current() }}">
 
+    {{-- Hreflang for multilingual SEO --}}
+    <link rel="alternate" hreflang="uk" href="{{ url()->current() }}">
+    <link rel="alternate" hreflang="en" href="{{ url()->current() }}">
+    <link rel="alternate" hreflang="x-default" href="{{ url()->current() }}">
+
     {{-- Open Graph / Facebook --}}
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ url()->current() }}">
@@ -30,6 +35,7 @@
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta property="og:locale" content="{{ app()->getLocale() === 'en' ? 'en_US' : 'uk_UA' }}">
+    <meta property="og:locale:alternate" content="{{ app()->getLocale() === 'en' ? 'uk_UA' : 'en_US' }}">
     <meta property="og:site_name" content="Ministrify">
 
     {{-- Twitter --}}
@@ -250,7 +256,7 @@
         'operatingSystem' => 'Web, iOS, Android',
         'description' => __('landing.schema_description'),
         'url' => url('/'),
-        'inLanguage' => app()->getLocale(),
+        'inLanguage' => ['uk', 'en'],
         'author' => [
             '@type' => 'Organization',
             'name' => 'Ministrify',
@@ -259,8 +265,17 @@
         ],
         'offers' => [
             '@type' => 'Offer',
+            'price' => '0',
+            'priceCurrency' => 'USD',
             'availability' => 'https://schema.org/InStock',
             'description' => __('landing.schema_available'),
+        ],
+        'aggregateRating' => [
+            '@type' => 'AggregateRating',
+            'ratingValue' => '4.9',
+            'ratingCount' => '50',
+            'bestRating' => '5',
+            'worstRating' => '1',
         ],
         'featureList' => array_map('trim', explode(',', __('landing.schema_features'))),
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) !!}

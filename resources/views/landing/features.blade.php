@@ -2,6 +2,7 @@
 
 @section('title', __('landing.features_title'))
 @section('description', __('landing.features_description_meta'))
+@section('keywords', __('landing.features_keywords'))
 
 @section('content')
 {{-- Hero --}}

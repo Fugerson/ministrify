@@ -2,21 +2,21 @@
 
 return [
     // Home page meta
-    'home_title' => 'Ministrify — Church Management System | Ukrainian Church CRM',
-    'home_meta' => 'Free Ukrainian church management platform: members, events, donations, groups, teams. Integration with LiqPay, Monobank and Telegram.',
-    'home_keywords' => 'church, church management, church management system, church CRM, online donations, church member tracking, Ukrainian CRM, free',
+    'home_title' => 'Ministrify — Free Church Management Software | ChMS for Small Churches',
+    'home_meta' => 'Free church management software for small and mid-size churches. Track members, plan events, manage donations, organize volunteer teams. Includes Telegram bot, Google Calendar sync. No credit card required.',
+    'home_keywords' => 'church management software, free church management system, ChMS, church CRM, church member database, volunteer scheduling, church donations, small church software, church app, church administration, ministry management, congregation management, free ChMS',
 
     // Schema.org
-    'schema_description' => 'A modern Ukrainian platform for church management: members, events, donations, groups, teams, Telegram bot.',
-    'schema_available' => 'Available for all churches',
-    'schema_features' => 'Church member database, Event planning, Financial accounting, Telegram bot, Home groups, Ministry teams',
-    'schema_org_description' => 'A modern Ukrainian platform for church management',
+    'schema_description' => 'Free church management software (ChMS) for tracking members, planning events, managing donations, organizing volunteer teams, and communicating via Telegram bot. Works on web, iOS and Android.',
+    'schema_available' => 'Free for all churches — no credit card required',
+    'schema_features' => 'Church member database, Event planning and calendar, Volunteer scheduling, Online donations (LiqPay/Monobank), Attendance tracking, Telegram bot notifications, Home groups management, Ministry teams, Song library with chords, Kanban task board, Google Calendar sync, Financial reports, Public church website, PWA mobile app',
+    'schema_org_description' => 'Free church management software for congregations of any size',
 
     // Hero section
-    'system_church_management' => 'Church Management System',
+    'system_church_management' => 'Free Church Management Software',
     'manage_church' => 'Manage your church',
     'simple_effective' => 'simply and effectively',
-    'modern_platform' => 'A modern Ukrainian platform for church management: members, events, donations, groups, teams — everything in one place.',
+    'modern_platform' => 'Free church management software for congregations of any size. Members, events, donations, volunteer scheduling, groups — everything in one place. No credit card required.',
     'start_free' => 'Start for free',
     'watch_demo' => 'Watch demo',
     'ssl_protection' => 'SSL Protection',
@@ -120,8 +120,9 @@ return [
     'theme' => 'Theme',
 
     // Features page
-    'features_title' => 'Features — Ministrify | Church Management System Functions',
-    'features_description_meta' => 'Complete list of Ministrify features: member management, events, donations, groups, teams, Telegram bot, reports and much more.',
+    'features_title' => 'Features — Ministrify | Free Church Management Software Features',
+    'features_description_meta' => 'All Ministrify features: member database, event calendar, volunteer scheduling, online donations, attendance tracking, Telegram notifications, task boards, Google Calendar sync and more. Free for churches.',
+    'features_keywords' => 'church management features, church member database, volunteer scheduling software, church event calendar, church donation tracking, attendance tracking church, Telegram church bot, church task management, Google Calendar church sync, free church software features',
     'everything_needed' => 'Everything you need for your church',
     'powerful_tools' => 'Powerful tools, simple to use. Created specifically for the needs of Ukrainian churches.',
     'convenient_dashboard' => 'Convenient dashboard',
@@ -194,9 +195,9 @@ return [
     'try_free' => 'Try for free — no commitment and no time restrictions.',
 
     // Contact page
-    'contact_us_title' => 'Contact Us - Ministrify',
-    'contact_us_meta' => 'Have questions about Ministrify? Write to us and we\'ll respond within 24 hours. Free consultation for churches.',
-    'contact_us_keywords' => 'Ministrify contacts, support, help, consultation for churches',
+    'contact_us_title' => 'Contact Us — Ministrify | Free Church Management Software Support',
+    'contact_us_meta' => 'Need help with church management software? Contact Ministrify team — we respond within 24 hours. Free setup consultation for churches of any size.',
+    'contact_us_keywords' => 'church management support, ChMS help, church software consultation, Ministrify contact, church administration help',
     'contact_us_page' => 'Ministrify Contacts',
     'contact_team' => 'Contact the Ministrify team',
     'contact_us_heading' => 'Contact Us',
@@ -226,9 +227,9 @@ return [
     'support_label' => 'Support',
 
     // Register page
-    'register_church_title' => 'Register a Church - Ministrify',
-    'register_church_meta' => 'Register your church in Ministrify in 2 minutes. Free start, no credit card. Community management made easy!',
-    'register_church_keywords' => 'church registration, Ministrify registration, free church management',
+    'register_church_title' => 'Sign Up Free — Ministrify | Church Management Software',
+    'register_church_meta' => 'Start managing your church for free in 2 minutes. No credit card required. Member database, events, donations, volunteer scheduling — all included.',
+    'register_church_keywords' => 'free church management signup, register church software, free ChMS, start church management, church administration software free',
     'register_church_page' => 'Church Registration in Ministrify',
     'register_quick_access' => 'Quick church registration for access to all community management features',
     'register_your_church' => 'Register your church',
@@ -251,9 +252,9 @@ return [
     'two_minutes' => '2 minutes',
 
     // FAQ page
-    'faq_title' => 'FAQ — Ministrify | Frequently Asked Questions',
-    'faq_meta' => 'Frequently asked questions about Ministrify - a church management system. Learn about features, security, settings and support.',
-    'faq_keywords' => 'FAQ Ministrify, church frequently asked questions, how to register a church, church management FAQ, church management system questions',
+    'faq_title' => 'FAQ — Ministrify | Church Management Software Questions & Answers',
+    'faq_meta' => 'Answers to common questions about Ministrify — free church management software. How to get started, set up Telegram bot, manage members, track donations, and more.',
+    'faq_keywords' => 'church management FAQ, ChMS questions, free church software help, how to manage church members, church volunteer scheduling questions, church donation tracking, Ministrify help',
     'what_is_ministrify' => 'What is Ministrify?',
     'ministrify_answer' => 'Ministrify is a modern Ukrainian platform for church management. The system helps maintain a church members database with detailed profiles and family connections, plan events and service schedules, organize volunteer teams, maintain financial records, manage home groups and communicate via Telegram.',
     'how_to_start' => 'How to start using Ministrify?',
@@ -343,8 +344,8 @@ return [
     'logout' => 'Logout',
 
     // Documentation page
-    'docs_title' => 'Documentation — Ministrify',
-    'docs_meta' => 'Documentation and instructions for using Ministrify - church management system.',
+    'docs_title' => 'Documentation — Ministrify | Church Management Software Guide',
+    'docs_meta' => 'Step-by-step guide to using Ministrify church management software. Learn how to add members, plan events, set up Telegram bot, manage finances and more.',
     'documentation' => 'Documentation',
     'docs_heading' => 'How to use Ministrify',
     'docs_subheading' => 'Step-by-step instructions to get started',
