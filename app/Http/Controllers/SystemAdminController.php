@@ -588,7 +588,7 @@ class SystemAdminController extends Controller
         $originalSlug = $slug;
         $i = 1;
         while (Church::where('slug', $slug)->exists()) {
-            $slug = $originalSlug . '-' . $i++;
+            $slug = $originalSlug.'-'.$i++;
         }
 
         // Create church

@@ -7,6 +7,7 @@ use App\Events\ChurchDataUpdated;
 use App\Models\Attendance;
 use App\Models\AttendanceRecord;
 use App\Models\Group;
+use App\Models\GroupGuest;
 use App\Models\Person;
 use App\Rules\BelongsToChurch;
 use Illuminate\Http\Request;
@@ -355,7 +356,7 @@ class GroupAttendanceController extends Controller
             if ($request->has('guest_id')) {
                 $guestId = $request->input('guest_id');
                 // Validate guest belongs to this group
-                \App\Models\GroupGuest::where('group_id', $group->id)->where('id', $guestId)->firstOrFail();
+                GroupGuest::where('group_id', $group->id)->where('id', $guestId)->firstOrFail();
                 $existing = DB::table('group_guest_attendance')
                     ->where('group_guest_id', $guestId)
                     ->where('attendance_id', $attendance->id)

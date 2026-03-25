@@ -108,6 +108,7 @@ class RotationService
                         ];
 
                         $i--; // Don't consume the slot on conflict
+
                         continue;
                     }
 

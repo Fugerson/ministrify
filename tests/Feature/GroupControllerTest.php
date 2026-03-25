@@ -234,7 +234,7 @@ class GroupControllerTest extends TestCase
 
         $response = $this->actingAs($volunteer)->get("/groups/{$otherGroup->id}");
 
-        // GroupPolicy::view checks church_id match; volunteer has no Gate::before bypass
-        $response->assertStatus(403);
+        // authorizeChurch returns 404 to hide resource existence across tenants
+        $response->assertStatus(404);
     }
 }

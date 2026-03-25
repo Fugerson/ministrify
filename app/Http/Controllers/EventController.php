@@ -514,7 +514,7 @@ class EventController extends Controller
             'title' => 'sometimes|string|max:255',
             'date' => 'sometimes|date',
             'time' => 'sometimes|date_format:H:i',
-            'end_date' => ['nullable', 'date', $request->has('date') ? 'after_or_equal:date' : 'after_or_equal:' . $event->date->format('Y-m-d')],
+            'end_date' => ['nullable', 'date', $request->has('date') ? 'after_or_equal:date' : 'after_or_equal:'.$event->date->format('Y-m-d')],
             'notes' => 'nullable|string|max:5000',
             'is_service' => 'nullable|boolean',
             'service_type' => 'nullable|string|in:sunday_service,youth_meeting,prayer_meeting,special_service',
@@ -679,7 +679,7 @@ class EventController extends Controller
         $church = $this->getCurrentChurch();
         $presentIds = $validated['present'] ?? [];
 
-        \Illuminate\Support\Facades\DB::transaction(function () use ($event, $church, $validated, $presentIds) {
+        DB::transaction(function () use ($event, $church, $validated, $presentIds) {
             // Get or create attendance record with lock
             $attendance = Attendance::lockForUpdate()->firstOrCreate(
                 [

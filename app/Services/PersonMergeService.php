@@ -2,6 +2,9 @@
 
 namespace App\Services;
 
+use App\Models\FamilyRelationship;
+use App\Models\Group;
+use App\Models\Ministry;
 use App\Models\Person;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
@@ -367,7 +370,7 @@ class PersonMergeService
                 ->update(['leader_id' => $primary->id]);
 
             // Ensure new leader is also a member in each affected group
-            $affectedGroupIds = \App\Models\Group::where('leader_id', $primary->id)->pluck('id');
+            $affectedGroupIds = Group::where('leader_id', $primary->id)->pluck('id');
             foreach ($affectedGroupIds as $groupId) {
                 DB::table('group_person')->updateOrInsert(
                     ['group_id' => $groupId, 'person_id' => $primary->id],
@@ -381,7 +384,7 @@ class PersonMergeService
                 ->update(['leader_id' => $primary->id]);
 
             // Ensure new leader is also a member in each affected ministry
-            $affectedMinistryIds = \App\Models\Ministry::where('leader_id', $primary->id)->pluck('id');
+            $affectedMinistryIds = Ministry::where('leader_id', $primary->id)->pluck('id');
             foreach ($affectedMinistryIds as $ministryId) {
                 DB::table('ministry_person')->updateOrInsert(
                     ['ministry_id' => $ministryId, 'person_id' => $primary->id],
@@ -635,7 +638,7 @@ class PersonMergeService
                 ->update(['leader_id' => $personA->id]);
 
             // Ensure new leader is also a member in each affected group
-            $affectedGroupIds = \App\Models\Group::where('leader_id', $personA->id)->pluck('id');
+            $affectedGroupIds = Group::where('leader_id', $personA->id)->pluck('id');
             foreach ($affectedGroupIds as $groupId) {
                 DB::table('group_person')->updateOrInsert(
                     ['group_id' => $groupId, 'person_id' => $personA->id],
@@ -648,7 +651,7 @@ class PersonMergeService
                 ->update(['leader_id' => $personA->id]);
 
             // Ensure new leader is also a member in each affected ministry
-            $affectedMinistryIds = \App\Models\Ministry::where('leader_id', $personA->id)->pluck('id');
+            $affectedMinistryIds = Ministry::where('leader_id', $personA->id)->pluck('id');
             foreach ($affectedMinistryIds as $ministryId) {
                 DB::table('ministry_person')->updateOrInsert(
                     ['ministry_id' => $ministryId, 'person_id' => $personA->id],
@@ -701,7 +704,7 @@ class PersonMergeService
                 $normalizedType = $rel->relationship_type;
             } else {
                 // Direction is B→A, invert the type to get A→B perspective
-                $normalizedType = \App\Models\FamilyRelationship::getInverseType($rel->relationship_type);
+                $normalizedType = FamilyRelationship::getInverseType($rel->relationship_type);
             }
 
             $canonicalKey = "{$personA}-{$personB}-{$normalizedType}";

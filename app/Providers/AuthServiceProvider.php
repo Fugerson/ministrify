@@ -17,6 +17,7 @@ use App\Policies\GroupPolicy;
 use App\Policies\MinistryPolicy;
 use App\Policies\PersonPolicy;
 use App\Policies\TransactionPolicy;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 
@@ -43,7 +44,7 @@ class AuthServiceProvider extends ServiceProvider
             if ($user->isAdmin()) {
                 // If a model with church_id is passed, verify it belongs to the user's church
                 $model = $arguments[0] ?? null;
-                if ($model instanceof \Illuminate\Database\Eloquent\Model && isset($model->church_id)) {
+                if ($model instanceof Model && isset($model->church_id)) {
                     if ($model->church_id !== $user->church_id) {
                         return false;
                     }

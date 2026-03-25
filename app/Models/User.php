@@ -78,7 +78,10 @@ class User extends Authenticatable implements MustVerifyEmail
     public function personForChurch(?int $churchId = null): ?Person
     {
         $cid = $churchId ?? $this->church_id;
-        if (!$cid) return null;
+        if (! $cid) {
+            return null;
+        }
+
         return Person::where('user_id', $this->id)->where('church_id', $cid)->first();
     }
 
