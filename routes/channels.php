@@ -7,13 +7,15 @@ use Illuminate\Support\Facades\Broadcast;
  * Resolve the effective church_id for a user.
  * Handles super admin impersonation via session.
  */
-function resolveUserChurchId($user): ?int
-{
-    if ($user->is_super_admin && session('impersonate_church_id')) {
-        return (int) session('impersonate_church_id');
-    }
+if (! function_exists('resolveUserChurchId')) {
+    function resolveUserChurchId($user): ?int
+    {
+        if ($user->is_super_admin && session('impersonate_church_id')) {
+            return (int) session('impersonate_church_id');
+        }
 
-    return $user->church_id ? (int) $user->church_id : null;
+        return $user->church_id ? (int) $user->church_id : null;
+    }
 }
 
 Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
