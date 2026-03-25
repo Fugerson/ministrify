@@ -1632,7 +1632,7 @@
             </header>
 
             <!-- Desktop Header -->
-            <header class="hidden lg:flex sticky top-0 z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 items-center justify-between h-16 px-6">
+            <header class="hidden lg:flex sticky top-0 z-30 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 items-center justify-between h-16 px-6">
                 <h1 class="text-lg font-semibold text-gray-900 dark:text-white">@yield('title', __('app.home'))</h1>
                 <div class="flex items-center space-x-4">
                     <!-- Theme Toggle -->
