@@ -144,6 +144,8 @@ class ChurchRoleController extends Controller
         // Set this one as default
         $churchRole->update(['is_default' => true]);
 
+        $churchRole->logCustomAction('set_as_default', 'Set as default church role');
+
         return $this->successResponse($request, 'Роль за замовчуванням оновлено');
     }
 

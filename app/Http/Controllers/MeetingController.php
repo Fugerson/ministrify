@@ -288,6 +288,8 @@ class MeetingController extends Controller
 
         $person = Person::find($validated['person_id']);
 
+        $meeting->logCustomAction('attendee_added', 'Attendee added: '.($person->first_name ?? '').' '.($person->last_name ?? ''));
+
         return $this->successResponse($request, 'Учасника додано', null, [], [
             'id' => $attendee->id,
             'person_name' => $person?->full_name ?? '',
@@ -311,6 +313,10 @@ class MeetingController extends Controller
     public function destroyAttendee(Request $request, MeetingAttendee $attendee)
     {
         $this->authorizeAttendee($attendee);
+
+        $meeting = $attendee->meeting;
+        $meeting->logCustomAction('attendee_removed', 'Attendee removed: '.($attendee->person->first_name ?? '').' '.($attendee->person->last_name ?? ''));
+
         $attendee->delete();
 
         return $this->successResponse($request, 'Учасника видалено');
@@ -320,6 +326,8 @@ class MeetingController extends Controller
     {
         $this->authorizeMinistry($ministry);
         abort_unless($meeting->ministry_id === $ministry->id, 404);
+
+        $meeting->logCustomAction('all_marked_attended', 'All attendees marked as attended');
 
         $meeting->attendees()->where('status', '!=', 'absent')->update(['status' => 'attended']);
 

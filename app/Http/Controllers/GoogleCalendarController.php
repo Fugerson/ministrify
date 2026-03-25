@@ -537,12 +537,18 @@ class GoogleCalendarController extends Controller
 
         $count = Event::where('church_id', $church->id)
             ->whereNotNull('google_event_id')
+            ->count();
+
+        Event::where('church_id', $church->id)
+            ->whereNotNull('google_event_id')
             ->update([
                 'google_event_id' => null,
                 'google_calendar_id' => null,
                 'google_synced_at' => null,
                 'google_sync_status' => null,
             ]);
+
+        $church->logCustomAction('google_events_unlinked', 'Unlinked '.$count.' events from Google Calendar');
 
         return response()->json([
             'success' => true,
@@ -582,7 +588,10 @@ class GoogleCalendarController extends Controller
                 break;
         }
 
-        $count = $query->delete();
+        $count = $query->count();
+        $query->delete();
+
+        $church->logCustomAction('events_mass_deleted', 'Mass deleted '.$count.' events (scope: '.$validated['scope'].')');
 
         return response()->json([
             'success' => true,

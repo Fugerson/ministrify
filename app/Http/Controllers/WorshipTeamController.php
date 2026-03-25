@@ -280,6 +280,9 @@ class WorshipTeamController extends Controller
             'key' => $validated['key'] ?? null,
         ]);
 
+        $song = Song::find($validated['song_id']);
+        $event->logCustomAction('worship_song_added', 'Song added to worship: '.($song->title ?? ''));
+
         // Get the pivot ID of the just-created record (latest by order)
         $eventSongId = \DB::table('event_songs')
             ->where('event_id', $event->id)
@@ -309,6 +312,8 @@ class WorshipTeamController extends Controller
             ->where('event_id', $event->id)
             ->where('song_id', $song->id)
             ->value('id');
+
+        $event->logCustomAction('worship_song_removed', 'Song removed from worship: '.$song->title);
 
         // Remove team members assigned to this song (from both tables for backwards compat)
         if ($eventSongId) {
@@ -406,6 +411,9 @@ class WorshipTeamController extends Controller
             'notes' => $validated['notes'] ?? null,
         ]);
 
+        $person = Person::find($validated['person_id']);
+        $event->logCustomAction('worship_member_added', 'Worship member added: '.($person->first_name ?? '').' '.($person->last_name ?? ''));
+
         broadcast(new ChurchDataUpdated($event->church_id, 'service-planning', 'updated'))->toOthers();
 
         if ($request->wantsJson()) {
@@ -426,6 +434,8 @@ class WorshipTeamController extends Controller
         if ($member->event_id !== $event->id) {
             abort(404);
         }
+
+        $event->logCustomAction('worship_member_removed', 'Worship member removed: '.($member->person->first_name ?? ''));
 
         $member->delete();
 
@@ -465,6 +475,8 @@ class WorshipTeamController extends Controller
                 'is_primary' => $roleId == $primarySkill,
             ]);
         }
+
+        $person->logCustomAction('worship_skills_updated', 'Worship skills updated');
 
         broadcast(new ChurchDataUpdated($person->church_id, 'service-planning', 'updated'))->toOthers();
 

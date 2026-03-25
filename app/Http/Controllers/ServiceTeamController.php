@@ -34,6 +34,8 @@ class ServiceTeamController extends Controller
 
         $event->linkedMinistries()->syncWithoutDetaching([$ministry->id]);
 
+        $event->logCustomAction('ministry_linked', 'Ministry linked: '.$ministry->name);
+
         broadcast(new ChurchDataUpdated($event->church_id, 'service-planning', 'updated'))->toOthers();
 
         if ($request->wantsJson()) {
@@ -77,6 +79,8 @@ class ServiceTeamController extends Controller
         EventMinistryTeam::where('event_id', $event->id)
             ->where('ministry_id', $ministry->id)
             ->delete();
+
+        $event->logCustomAction('ministry_unlinked', 'Ministry unlinked: '.$ministry->name);
 
         broadcast(new ChurchDataUpdated($event->church_id, 'service-planning', 'updated'))->toOthers();
 
@@ -198,6 +202,8 @@ class ServiceTeamController extends Controller
             'notes' => $validated['notes'] ?? null,
         ]);
 
+        $event->logCustomAction('team_member_added', 'Team member added: '.($person->full_name ?? $person->first_name.' '.$person->last_name));
+
         broadcast(new ChurchDataUpdated($event->church_id, 'service-planning', 'updated'))->toOthers();
 
         if ($request->wantsJson()) {
@@ -223,6 +229,8 @@ class ServiceTeamController extends Controller
         if ($member->event_id !== $event->id) {
             abort(404);
         }
+
+        $event->logCustomAction('team_member_removed', 'Team member removed: '.($member->person->full_name ?? $member->person->first_name));
 
         $member->delete();
 
@@ -385,6 +393,8 @@ class ServiceTeamController extends Controller
             'status' => 'confirmed',
         ]);
 
+        $event->logCustomAction('team_self_signup', auth()->user()->name.' signed up for team');
+
         broadcast(new ChurchDataUpdated($event->church_id, 'service-planning', 'updated'))->toOthers();
 
         return $this->successResponse($request, __('messages.signed_up_success'));
@@ -405,6 +415,8 @@ class ServiceTeamController extends Controller
         if (! $person || $member->person_id !== $person->id) {
             return $this->errorResponse($request, __('messages.can_only_delete_own'));
         }
+
+        $event->logCustomAction('team_self_unsubscribe', auth()->user()->name.' unsubscribed from team');
 
         $member->delete();
 

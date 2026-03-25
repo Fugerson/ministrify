@@ -95,6 +95,7 @@ class RolePermissionController extends Controller
         }
 
         // Clear all permissions for this role
+        $role->logCustomAction('permissions_reset', 'Role permissions reset to defaults');
         $role->permissions()->delete();
         $role->clearPermissionCache();
 

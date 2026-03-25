@@ -345,6 +345,8 @@ class SongController extends Controller
             'key' => $validated['key'] ?? $song->key,
         ]);
 
+        $event->logCustomAction('song_added', 'Song added to event: '.$song->title);
+
         $song->incrementUsage();
 
         return $this->successResponse($request, 'Пісню додано до події.', data: ['order' => $maxOrder + 1]);
@@ -388,6 +390,8 @@ class SongController extends Controller
         abort_unless(auth()->user()->canEdit('events'), 403);
 
         $event->songs()->detach($song->id);
+
+        $event->logCustomAction('song_removed', 'Song removed from event: '.$song->title);
 
         return $this->successResponse($request, 'Пісню видалено з події.');
     }

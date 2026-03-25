@@ -80,6 +80,8 @@ class ShepherdController extends Controller
 
         $person->update(['is_shepherd' => true]);
 
+        $person->logCustomAction('shepherd_designated', 'Designated as shepherd');
+
         broadcast(new ChurchDataUpdated($church->id, 'dashboard', 'updated'))->toOthers();
 
         if ($request->wantsJson()) {
@@ -112,7 +114,10 @@ class ShepherdController extends Controller
         $this->authorizeChurch($person);
 
         // Remove all sheep assignments before removing shepherd status
+        $sheepCount = Person::where('shepherd_id', $person->id)->count();
         Person::where('shepherd_id', $person->id)->update(['shepherd_id' => null]);
+
+        $person->logCustomAction('shepherd_removed', 'Removed as shepherd, '.$sheepCount.' sheep unassigned');
 
         $person->update(['is_shepherd' => false]);
 

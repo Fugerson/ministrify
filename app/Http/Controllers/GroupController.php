@@ -68,6 +68,9 @@ class GroupController extends Controller
                 'role' => 'leader',
                 'joined_at' => now(),
             ]);
+
+            $leader = Person::find($group->leader_id);
+            $group->logCustomAction('leader_assigned', 'Leader set to: '.($leader?->full_name ?? 'Unknown'));
         }
 
         broadcast(new ChurchDataUpdated($validated['church_id'], 'groups', 'created', $group->name))->toOthers();
@@ -144,6 +147,11 @@ class GroupController extends Controller
                 ]);
             } else {
                 $group->members()->updateExistingPivot($group->leader_id, ['role' => 'leader']);
+            }
+
+            if ($oldLeaderId !== $group->leader_id) {
+                $leader = Person::find($group->leader_id);
+                $group->logCustomAction('leader_assigned', 'Leader set to: '.($leader?->full_name ?? 'Unknown'));
             }
         }
 

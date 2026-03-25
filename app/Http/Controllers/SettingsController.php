@@ -182,6 +182,9 @@ class SettingsController extends Controller
             $result = $telegram->setWebhook($webhookUrl);
 
             if ($result) {
+                $church = $this->getCurrentChurch();
+                $church->logCustomAction('telegram_webhook_configured', 'Telegram webhook configured');
+
                 return $this->successResponse(request(), "Webhook встановлено: {$webhookUrl}");
             } else {
                 return $this->errorResponse(request(), 'Не вдалося встановити webhook.');

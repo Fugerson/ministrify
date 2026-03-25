@@ -94,6 +94,10 @@ class BlockoutDateController extends Controller
             $blockout->ministries()->sync($validated['ministry_ids']);
         }
 
+        if (! ($validated['applies_to_all'] ?? true) && ! empty($validated['ministry_ids'])) {
+            $blockout->logCustomAction('ministries_linked', 'Linked to '.count($validated['ministry_ids']).' ministries');
+        }
+
         // Auto-decline pending assignments that conflict
         $this->handleConflictingAssignments($person, $blockout);
 
@@ -158,6 +162,7 @@ class BlockoutDateController extends Controller
         // Update ministries
         if (! ($validated['applies_to_all'] ?? true) && ! empty($validated['ministry_ids'])) {
             $blockout->ministries()->sync($validated['ministry_ids']);
+            $blockout->logCustomAction('ministries_linked', 'Linked to '.count($validated['ministry_ids']).' ministries');
         } else {
             $blockout->ministries()->detach();
         }

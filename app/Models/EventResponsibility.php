@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class EventResponsibility extends Model
 {
+    use Auditable;
+
     const STATUS_OPEN = 'open';
 
     const STATUS_PENDING = 'pending';

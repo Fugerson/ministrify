@@ -1225,6 +1225,8 @@ class BoardController extends Controller
 
             // Log activity
             BoardCardActivity::log($card, 'related_added', null, null, $relatedCard->title);
+
+            $card->logCustomAction('related_card_added', 'Related card linked: '.$relatedCard->title);
         }
 
         broadcast(new ChurchDataUpdated($card->column->board->church_id, 'boards', 'updated'))->toOthers();
@@ -1249,6 +1251,8 @@ class BoardController extends Controller
 
         // Log activity
         BoardCardActivity::log($card, 'related_removed', null, $relatedTitle);
+
+        $card->logCustomAction('related_card_removed', 'Related card unlinked');
 
         broadcast(new ChurchDataUpdated($card->column->board->church_id, 'boards', 'updated'))->toOthers();
 
@@ -1347,6 +1351,9 @@ class BoardController extends Controller
     public function destroyEpic(Request $request, BoardEpic $epic)
     {
         $this->authorizeBoard($epic->board);
+
+        // Log before unlinking
+        $epic->logCustomAction('epic_cards_unlinked', 'Epic removed from '.BoardCard::where('epic_id', $epic->id)->count().' cards');
 
         // Remove epic from all cards (don't delete cards)
         BoardCard::where('epic_id', $epic->id)->update(['epic_id' => null]);

@@ -189,6 +189,8 @@ class PrivatbankSyncController extends Controller
         // Save credentials
         $service->saveCredentials($church, $request->merchant_id, $request->password, $request->card_number);
 
+        $church->logCustomAction('privatbank_connected', 'PrivatBank connected');
+
         return $this->successResponse($request, "ПриватБанк підключено! Картка: {$validation['card']}", 'finances.privatbank.index');
     }
 
@@ -200,6 +202,8 @@ class PrivatbankSyncController extends Controller
         $church = $this->getCurrentChurch();
         $service = new PrivatbankService;
         $service->disconnect($church);
+
+        $church->logCustomAction('privatbank_disconnected', 'PrivatBank disconnected');
 
         return $this->successResponse($request, 'ПриватБанк відключено', 'finances.privatbank.index');
     }

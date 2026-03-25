@@ -53,6 +53,8 @@ class EventResponsibilityController extends Controller
             'status' => EventResponsibility::STATUS_PENDING,
         ]);
 
+        $responsibility->logCustomAction('assigned', 'Assigned to: '.$person->first_name.' '.$person->last_name);
+
         // Send Telegram notification
         $this->sendNotification($responsibility);
 
@@ -64,6 +66,8 @@ class EventResponsibilityController extends Controller
         abort_unless(auth()->user()->canEdit('events'), 403);
         $event = $responsibility->event;
         $this->authorizeChurch($event);
+
+        $responsibility->logCustomAction('unassigned', 'Unassigned from: '.($responsibility->person->first_name ?? 'unknown'));
 
         $responsibility->update([
             'person_id' => null,
@@ -112,6 +116,8 @@ class EventResponsibilityController extends Controller
             && $responsibility->event && $responsibility->event->church_id === $church->id) {
             $responsibility->confirm();
 
+            $responsibility->logCustomAction('confirmed', 'Confirmed by assignee');
+
             $this->broadcastStatusChange($responsibility, 'confirmed');
 
             return $this->successResponse($request, 'Ви підтвердили участь.');
@@ -120,6 +126,8 @@ class EventResponsibilityController extends Controller
         // Or admin
         $this->authorizeChurch($responsibility->event);
         $responsibility->confirm();
+
+        $responsibility->logCustomAction('confirmed', 'Confirmed by assignee');
 
         $this->broadcastStatusChange($responsibility, 'confirmed');
 
@@ -136,6 +144,8 @@ class EventResponsibilityController extends Controller
             && $responsibility->event && $responsibility->event->church_id === $church->id) {
             $responsibility->decline();
 
+            $responsibility->logCustomAction('declined', 'Declined by assignee');
+
             $this->broadcastStatusChange($responsibility, 'declined');
 
             return $this->successResponse($request, 'Ви відхилили участь.');
@@ -144,6 +154,8 @@ class EventResponsibilityController extends Controller
         // Or admin
         $this->authorizeChurch($responsibility->event);
         $responsibility->decline();
+
+        $responsibility->logCustomAction('declined', 'Declined by assignee');
 
         $this->broadcastStatusChange($responsibility, 'declined');
 

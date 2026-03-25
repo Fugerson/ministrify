@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,6 +11,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class BudgetItem extends Model
 {
+    use Auditable;
+
     public const FREQUENCY_ONE_TIME = 'one_time';
 
     public const FREQUENCY_WEEKLY = 'weekly';

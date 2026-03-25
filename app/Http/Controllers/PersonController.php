@@ -54,7 +54,7 @@ class PersonController extends Controller
         $churchRoles = ChurchRole::where('church_id', $church->id)->orderBy('sort_order')->get();
 
         // Calculate statistics using database aggregation (cached 1 hour)
-        $stats = Cache::remember('people_stats_' . $church->id, 3600, function () use ($church, $churchRoles, $ministries) {
+        $stats = Cache::remember('people_stats_'.$church->id, 3600, function () use ($church, $churchRoles, $ministries) {
             $today = now();
             $statsQuery = Person::where('church_id', $church->id)->where('membership_status', '!=', Person::STATUS_GUEST);
 
@@ -457,6 +457,10 @@ class PersonController extends Controller
                 ->pluck('id')
                 ->toArray();
             $person->tags()->sync($validTagIds);
+
+            if (! empty($validTagIds)) {
+                $person->logCustomAction('tags_assigned', 'Tags assigned on creation');
+            }
         }
 
         // Attach ministries with positions (only ministries belonging to this church)
@@ -464,16 +468,22 @@ class PersonController extends Controller
             $validMinistryIds = Ministry::where('church_id', $church->id)
                 ->pluck('id')
                 ->toArray();
+            $ministriesAttached = false;
             foreach ($request->ministries as $ministryId => $data) {
                 if (! empty($data['selected']) && in_array((int) $ministryId, $validMinistryIds)) {
                     $person->ministries()->attach($ministryId, [
                         'position_ids' => json_encode($data['positions'] ?? []),
                     ]);
+                    $ministriesAttached = true;
                 }
+            }
+
+            if ($ministriesAttached) {
+                $person->logCustomAction('ministries_assigned', 'Ministries assigned on creation');
             }
         }
 
-        Cache::forget('people_stats_' . $person->church_id);
+        Cache::forget('people_stats_'.$person->church_id);
 
         broadcast(new PersonUpdated(
             churchId: $person->church_id,
@@ -746,32 +756,46 @@ class PersonController extends Controller
         // Sync tags (users with edit permission only, validated by church_id)
         if ($canEditPeople) {
             $churchId = $this->getCurrentChurch()->id;
+            $oldTagIds = $person->tags()->pluck('tags.id')->toArray();
             $validTagIds = Tag::where('church_id', $churchId)
                 ->whereIn('id', $request->tags ?? [])
                 ->pluck('id')
                 ->toArray();
             $person->tags()->sync($validTagIds);
+
+            if ($oldTagIds !== $validTagIds) {
+                $person->logCustomAction('tags_updated', 'Tags updated');
+            }
         }
 
         // Sync ministries with positions (users with edit permission only, validated by church_id)
         if ($canEditPeople) {
             $churchId = $churchId ?? $this->getCurrentChurch()->id;
+            $oldMinistryIds = $person->ministries()->pluck('ministries.id')->toArray();
             $validMinistryIds = Ministry::where('church_id', $churchId)
                 ->pluck('id')
                 ->toArray();
             $person->ministries()->detach();
+            $newMinistryIds = [];
             if ($request->has('ministries')) {
                 foreach ($request->ministries as $ministryId => $data) {
                     if (! empty($data['selected']) && in_array((int) $ministryId, $validMinistryIds)) {
                         $person->ministries()->attach($ministryId, [
                             'position_ids' => json_encode($data['positions'] ?? []),
                         ]);
+                        $newMinistryIds[] = (int) $ministryId;
                     }
                 }
             }
+
+            sort($oldMinistryIds);
+            sort($newMinistryIds);
+            if ($oldMinistryIds !== $newMinistryIds) {
+                $person->logCustomAction('ministries_updated', 'Ministries updated');
+            }
         }
 
-        Cache::forget('people_stats_' . $person->church_id);
+        Cache::forget('people_stats_'.$person->church_id);
 
         broadcast(new PersonUpdated(
             churchId: $person->church_id,
@@ -797,7 +821,7 @@ class PersonController extends Controller
 
         $person->delete();
 
-        Cache::forget('people_stats_' . $churchId);
+        Cache::forget('people_stats_'.$churchId);
 
         broadcast(new PersonUpdated(
             churchId: $churchId,
@@ -819,6 +843,8 @@ class PersonController extends Controller
         }
 
         $person->restore();
+
+        $person->logCustomAction('restored', 'Person restored from trash');
 
         return $this->successResponse($request, __('messages.person_restored'), 'people.show', [$person]);
     }
@@ -1045,6 +1071,8 @@ class PersonController extends Controller
         }
 
         $user->update(['password' => Hash::make($request->new_password)]);
+
+        $user->logCustomAction('password_changed', 'Password changed by '.auth()->user()->name);
 
         return response()->json(['message' => __('app.password_changed')]);
     }
@@ -1316,6 +1344,8 @@ class PersonController extends Controller
                 'updated_at' => now(),
             ]
         );
+
+        $person->logCustomAction('account_created', 'User account created for person');
 
         // Send invitation email
         $token = Password::createToken($user);

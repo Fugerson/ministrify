@@ -87,6 +87,11 @@ class MinistryController extends Controller
                 'role' => 'leader',
                 'joined_at' => now(),
             ]);
+
+            $leader = Person::find($ministry->leader_id);
+            if ($leader) {
+                $ministry->logCustomAction('leader_assigned', 'Leader assigned on creation: '.($leader->first_name ?? '').' '.($leader->last_name ?? ''));
+            }
         }
 
         // Create default positions if provided
@@ -840,10 +845,10 @@ class MinistryController extends Controller
             'expense_type' => 'nullable|in:recurring,one_time',
             'payment_method' => 'nullable|in:cash,card',
             'budget_item_id' => ['nullable', 'integer', function ($attribute, $value, $fail) use ($ministry) {
-                    if (!BudgetItem::where('id', $value)->whereHas('ministryBudget', fn ($q) => $q->where('ministry_id', $ministry->id))->exists()) {
-                        $fail(__('validation.exists', ['attribute' => $attribute]));
-                    }
-                }],
+                if (! BudgetItem::where('id', $value)->whereHas('ministryBudget', fn ($q) => $q->where('ministry_id', $ministry->id))->exists()) {
+                    $fail(__('validation.exists', ['attribute' => $attribute]));
+                }
+            }],
             'notes' => 'nullable|string|max:5000',
             'receipts' => 'nullable|array|max:10',
             'receipts.*' => 'file|mimes:jpg,jpeg,png,gif,webp,heic,heif,pdf|max:10240',
@@ -1002,10 +1007,10 @@ class MinistryController extends Controller
             'expense_type' => 'nullable|in:recurring,one_time',
             'payment_method' => 'nullable|in:cash,card',
             'budget_item_id' => ['nullable', 'integer', function ($attribute, $value, $fail) use ($ministry) {
-                    if (!BudgetItem::where('id', $value)->whereHas('ministryBudget', fn ($q) => $q->where('ministry_id', $ministry->id))->exists()) {
-                        $fail(__('validation.exists', ['attribute' => $attribute]));
-                    }
-                }],
+                if (! BudgetItem::where('id', $value)->whereHas('ministryBudget', fn ($q) => $q->where('ministry_id', $ministry->id))->exists()) {
+                    $fail(__('validation.exists', ['attribute' => $attribute]));
+                }
+            }],
             'notes' => 'nullable|string|max:5000',
             'receipts' => 'nullable|array|max:10',
             'receipts.*' => 'file|mimes:jpg,jpeg,png,gif,webp,heic,heif,pdf|max:10240',
@@ -1099,7 +1104,7 @@ class MinistryController extends Controller
             abort(404);
         }
 
-        abort_unless($transaction->direction === \App\Models\Transaction::DIRECTION_OUT, 404);
+        abort_unless($transaction->direction === Transaction::DIRECTION_OUT, 404);
 
         $ministry = Ministry::findOrFail($transaction->ministry_id);
         Gate::authorize('contribute-ministry', $ministry);
@@ -1368,6 +1373,8 @@ class MinistryController extends Controller
                     ]);
                 }
             }
+
+            $ministry->logCustomAction('leader_changed', 'Leader changed');
         } elseif ($ministry->leader_id && ! $ministry->members()->where('people.id', $ministry->leader_id)->exists()) {
             // Leader unchanged but not in members yet
             $ministry->members()->attach($ministry->leader_id, [
@@ -1526,6 +1533,8 @@ class MinistryController extends Controller
         }
 
         $ministry->members()->updateExistingPivot($person->id, ['role' => $newRole]);
+
+        $ministry->logCustomAction('member_role_changed', 'Member role changed for: '.$person->first_name.' '.$person->last_name);
 
         return response()->json(['success' => true, 'role' => $newRole]);
     }

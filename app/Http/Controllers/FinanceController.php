@@ -67,7 +67,7 @@ class FinanceController extends Controller
         $periodBalance = $totalIncome - $totalExpense;
 
         // Overall balance (includes initial balance) - all in UAH (cached 5 min)
-        $allTimeTotals = Cache::remember('finance_alltime_' . $church->id, 300, function () use ($church, $excludeTypes) {
+        $allTimeTotals = Cache::remember('finance_alltime_'.$church->id, 300, function () use ($church, $excludeTypes) {
             $initialBalanceDate = $church->initial_balance_date;
             $allInitialBalances = $church->getAllInitialBalances();
             $initialBalance = 0;
@@ -132,7 +132,7 @@ class FinanceController extends Controller
 
         // Calculate balances per currency (all time, cached 5 min)
         $currencyExcludeTypes = [Transaction::SOURCE_ALLOCATION];
-        $currencyTotals = Cache::remember('finance_currency_' . $church->id, 300, function () use ($church, $currencyExcludeTypes) {
+        $currencyTotals = Cache::remember('finance_currency_'.$church->id, 300, function () use ($church, $currencyExcludeTypes) {
             $allTimeIncomeByCurrency = Transaction::where('church_id', $church->id)
                 ->incoming()->completed()
                 ->whereNotIn('source_type', $currencyExcludeTypes)
@@ -1763,6 +1763,8 @@ class FinanceController extends Controller
 
             $budget->increment('allocated_budget', $inTransaction->amount_uah);
 
+            $budget->logCustomAction('budget_allocated', 'Allocated '.$validated['amount'].' '.$validated['currency'].' to budget');
+
             // If monthly_budget is 0 and no items, auto-set it to allocated
             if ($budget->monthly_budget == 0 && $budget->items()->count() === 0) {
                 $budget->update(['monthly_budget' => $budget->allocated_budget]);
@@ -1844,6 +1846,8 @@ class FinanceController extends Controller
             $item->responsiblePeople()->attach($validated['person_ids']);
         }
 
+        $ministryBudget->logCustomAction('budget_item_created', 'Budget item created: '.$item->name);
+
         return response()->json([
             'success' => true,
             'message' => __('messages.budget_item_added'),
@@ -1910,6 +1914,11 @@ class FinanceController extends Controller
 
         $budgetItem->responsiblePeople()->sync($validated['person_ids'] ?? []);
 
+        $budget = $budgetItem->ministryBudget;
+        if ($budget) {
+            $budget->logCustomAction('budget_item_updated', 'Budget item updated: '.$budgetItem->name);
+        }
+
         return response()->json([
             'success' => true,
             'message' => __('messages.budget_item_updated'),
@@ -1926,6 +1935,11 @@ class FinanceController extends Controller
         $church = $this->getCurrentChurch();
         if ($budgetItem->church_id !== $church->id) {
             abort(404);
+        }
+
+        $budget = $budgetItem->ministryBudget;
+        if ($budget) {
+            $budget->logCustomAction('budget_item_deleted', 'Budget item deleted: '.$budgetItem->name);
         }
 
         // Unlink transactions from this budget item
@@ -2146,8 +2160,8 @@ class FinanceController extends Controller
      */
     private function clearFinanceCache(int $churchId): void
     {
-        Cache::forget('finance_alltime_' . $churchId);
-        Cache::forget('finance_currency_' . $churchId);
+        Cache::forget('finance_alltime_'.$churchId);
+        Cache::forget('finance_currency_'.$churchId);
     }
 
     private function getYearComparison(int $churchId, int $year): array

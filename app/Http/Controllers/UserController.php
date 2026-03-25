@@ -162,6 +162,8 @@ class UserController extends Controller
                 'updated_at' => now(),
             ]);
 
+            $existingUser->logCustomAction('added_to_church', 'User added to church');
+
             broadcast(new ChurchDataUpdated($church->id, 'dashboard', 'updated'))->toOthers();
 
             return $this->successResponse($request, __('messages.user_added_to_church'), 'settings.users.index');
@@ -252,6 +254,8 @@ class UserController extends Controller
                 'updated_at' => now(),
             ]
         );
+
+        $user->logCustomAction('added_to_church', 'User added to church');
 
         // Try to send password reset link
         $message = __('messages.user_created');
@@ -526,6 +530,8 @@ class UserController extends Controller
             }
         }
 
+        $user->logCustomAction('removed_from_church', 'User removed from church');
+
         // Remove from this church's pivot
         DB::table('church_user')
             ->where('user_id', $user->id)
@@ -665,6 +671,8 @@ class UserController extends Controller
                 'permission_overrides' => $cleanOverrides ? json_encode($cleanOverrides) : null,
                 'updated_at' => now(),
             ]);
+
+        $user->logCustomAction('permissions_updated', 'Permission overrides updated');
 
         return response()->json([
             'message' => __('messages.extra_permissions_saved'),

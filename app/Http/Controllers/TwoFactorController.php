@@ -84,6 +84,8 @@ class TwoFactorController extends Controller
 
         session()->forget('2fa_secret');
 
+        $user->logCustomAction('2fa_enabled', '2FA enabled');
+
         return view('auth.two-factor.recovery-codes', compact('recoveryCodes'));
     }
 
@@ -103,6 +105,8 @@ class TwoFactorController extends Controller
             'two_factor_recovery_codes' => null,
             'two_factor_confirmed_at' => null,
         ]);
+
+        $user->logCustomAction('2fa_disabled', '2FA disabled');
 
         return redirect()->route('two-factor.show')
             ->with('success', __('messages.2fa_disabled'));
@@ -128,6 +132,8 @@ class TwoFactorController extends Controller
         $user->update([
             'two_factor_recovery_codes' => encrypt(json_encode($recoveryCodes)),
         ]);
+
+        $user->logCustomAction('2fa_recovery_regenerated', '2FA recovery codes regenerated');
 
         return view('auth.two-factor.recovery-codes', compact('recoveryCodes'));
     }
