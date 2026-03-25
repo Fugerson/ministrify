@@ -220,6 +220,10 @@
         /* Capacitor native app adjustments */
         .capacitor-native body { padding-top: env(safe-area-inset-top); }
         .capacitor-native .pwa-install-banner { display: none !important; }
+        /* iOS-specific: smoother scrolling, tap highlights */
+        .capacitor-ios { -webkit-touch-callout: none; }
+        .capacitor-ios body { -webkit-overflow-scrolling: touch; }
+        .capacitor-ios a, .capacitor-ios button { -webkit-tap-highlight-color: rgba(0,0,0,0.1); }
         input:focus, select:focus, textarea:focus { outline: none; }
         @media screen and (max-width: 768px) {
             input, select, textarea { font-size: 16px !important; }

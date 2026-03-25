@@ -118,8 +118,8 @@ class DonationTest extends TestCase
 
     public function test_this_month_scope(): void
     {
-        Donation::factory()->forChurch($this->church)->create(['created_at' => now()]);
-        Donation::factory()->forChurch($this->church)->create(['created_at' => now()->subMonths(2)]);
+        Donation::factory()->forChurch($this->church)->create(['paid_at' => now()]);
+        Donation::factory()->forChurch($this->church)->create(['paid_at' => now()->subMonths(2)]);
 
         $this->assertCount(1, Donation::thisMonth()->get());
     }

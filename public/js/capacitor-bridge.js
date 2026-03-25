@@ -1,13 +1,14 @@
 /**
  * Capacitor Native Bridge
- * Handles native functionality when running inside Capacitor Android shell
+ * Handles native functionality when running inside Capacitor (iOS & Android)
  */
 (function() {
     if (!window.Capacitor || !window.Capacitor.isNativePlatform || !window.Capacitor.isNativePlatform()) {
         return;
     }
 
-    const { Capacitor, CapacitorPushNotifications, CapacitorStatusBar, CapacitorKeyboard } = window;
+    const { Capacitor } = window;
+    const platform = Capacitor.getPlatform(); // 'ios', 'android', or 'web'
 
     // ─── Status Bar ───
     function setupStatusBar() {
@@ -107,7 +108,7 @@
             },
             body: JSON.stringify({
                 token: token,
-                platform: 'android',
+                platform: platform,
                 device_name: navigator.userAgent
             })
         }).catch(() => {});
@@ -220,6 +221,66 @@
         localStorage.setItem('pwa-installed', 'true');
     }
 
+    // ─── Haptic Feedback ───
+    function setupHaptics() {
+        const Haptics = Capacitor.Plugins.Haptics;
+        if (!Haptics) return;
+
+        // Add haptic feedback to buttons and interactive elements
+        document.addEventListener('click', (e) => {
+            const target = e.target.closest('button, a, [role="button"], [x-on\\:click], [\\@click]');
+            if (target) {
+                Haptics.impact({ style: 'LIGHT' }).catch(() => {});
+            }
+        });
+
+        // Expose for custom use: window.haptic('medium')
+        window.haptic = (style = 'LIGHT') => {
+            Haptics.impact({ style: style.toUpperCase() }).catch(() => {});
+        };
+        window.hapticNotification = (type = 'SUCCESS') => {
+            Haptics.notification({ type: type.toUpperCase() }).catch(() => {});
+        };
+    }
+
+    // ─── Badge Management ───
+    function setupBadge() {
+        const PushNotifications = Capacitor.Plugins.PushNotifications;
+        if (!PushNotifications) return;
+
+        // Clear badge when app becomes active
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                PushNotifications.removeAllDeliveredNotifications().catch(() => {});
+                if (platform === 'ios') {
+                    // Reset badge count on iOS
+                    Capacitor.Plugins.Badge?.clear?.().catch(() => {});
+                }
+            }
+        });
+    }
+
+    // ─── App State (resume/pause) ───
+    function setupAppState() {
+        const App = Capacitor.Plugins.App;
+        if (!App) return;
+
+        App.addListener('appStateChange', ({ isActive }) => {
+            if (isActive) {
+                // Refresh data when app comes back to foreground
+                window.dispatchEvent(new CustomEvent('app-resumed'));
+            }
+        });
+
+        // Handle deep links
+        App.addListener('appUrlOpen', (data) => {
+            const url = new URL(data.url);
+            if (url.hostname === 'ministrify.app') {
+                window.location.href = url.pathname + url.search;
+            }
+        });
+    }
+
     // ─── Initialize ───
     document.addEventListener('DOMContentLoaded', () => {
         setupStatusBar();
@@ -228,6 +289,12 @@
         setupKeyboard();
         setupPullToRefresh();
         setupExternalLinks();
+        setupHaptics();
+        setupBadge();
+        setupAppState();
         hidePwaInstallBanner();
+
+        // Add platform class for CSS targeting
+        document.documentElement.classList.add('capacitor-' + platform);
     });
 })();

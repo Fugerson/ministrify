@@ -1,0 +1,26 @@
+{
+    "applinks": {
+        "apps": [],
+        "details": [
+            {
+                "appIDs": ["TEAMID.app.ministrify.ios"],
+                "paths": [
+                    "/dashboard",
+                    "/dashboard/*",
+                    "/events",
+                    "/events/*",
+                    "/people",
+                    "/people/*",
+                    "/ministries",
+                    "/ministries/*",
+                    "/groups",
+                    "/groups/*",
+                    "/c/*"
+                ]
+            }
+        ]
+    },
+    "webcredentials": {
+        "apps": ["TEAMID.app.ministrify.ios"]
+    }
+}
