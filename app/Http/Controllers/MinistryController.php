@@ -839,7 +839,11 @@ class MinistryController extends Controller
             'category_name' => 'nullable|string|max:100',
             'expense_type' => 'nullable|in:recurring,one_time',
             'payment_method' => 'nullable|in:cash,card',
-            'budget_item_id' => ['nullable', 'integer', Rule::exists('budget_items', 'id')->where('ministry_id', $ministry->id)],
+            'budget_item_id' => ['nullable', 'integer', function ($attribute, $value, $fail) use ($ministry) {
+                    if (!BudgetItem::where('id', $value)->whereHas('ministryBudget', fn ($q) => $q->where('ministry_id', $ministry->id))->exists()) {
+                        $fail(__('validation.exists', ['attribute' => $attribute]));
+                    }
+                }],
             'notes' => 'nullable|string|max:5000',
             'receipts' => 'nullable|array|max:10',
             'receipts.*' => 'file|mimes:jpg,jpeg,png,gif,webp,heic,heif,pdf|max:10240',
@@ -997,7 +1001,11 @@ class MinistryController extends Controller
             'category_name' => 'nullable|string|max:100',
             'expense_type' => 'nullable|in:recurring,one_time',
             'payment_method' => 'nullable|in:cash,card',
-            'budget_item_id' => ['nullable', 'integer', Rule::exists('budget_items', 'id')->where('ministry_id', $ministry->id)],
+            'budget_item_id' => ['nullable', 'integer', function ($attribute, $value, $fail) use ($ministry) {
+                    if (!BudgetItem::where('id', $value)->whereHas('ministryBudget', fn ($q) => $q->where('ministry_id', $ministry->id))->exists()) {
+                        $fail(__('validation.exists', ['attribute' => $attribute]));
+                    }
+                }],
             'notes' => 'nullable|string|max:5000',
             'receipts' => 'nullable|array|max:10',
             'receipts.*' => 'file|mimes:jpg,jpeg,png,gif,webp,heic,heif,pdf|max:10240',
