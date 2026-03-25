@@ -15,9 +15,9 @@
     }
 }">
     <!-- Tabs -->
-    <div id="settings-tabs" class="relative bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 px-3 sm:px-4">
+    <div id="settings-tabs" class="relative bg-white dark:bg-gray-800 rounded-xl shadow-sm">
         <div class="overflow-x-auto no-scrollbar">
-        <div class="flex gap-0 min-w-max border-b border-gray-200 dark:border-gray-700">
+        <div class="flex gap-0 min-w-max">
             @php
                 $tabs = [
                     'general' => __('app.tab_general'),
