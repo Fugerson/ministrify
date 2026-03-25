@@ -104,7 +104,7 @@ class SitemapController extends Controller
             $xml .= '        <changefreq>'.$url['changefreq']."</changefreq>\n";
             $xml .= '        <priority>'.$url['priority']."</priority>\n";
             // Hreflang for landing pages (bilingual uk/en)
-            if (!isset($url['lastmod']) || str_starts_with($url['loc'], url('/'))) {
+            if (! isset($url['lastmod']) || str_starts_with($url['loc'], url('/'))) {
                 $xml .= '        <xhtml:link rel="alternate" hreflang="uk" href="'.htmlspecialchars($url['loc']).'" />'."\n";
                 $xml .= '        <xhtml:link rel="alternate" hreflang="en" href="'.htmlspecialchars($url['loc']).'" />'."\n";
                 $xml .= '        <xhtml:link rel="alternate" hreflang="x-default" href="'.htmlspecialchars($url['loc']).'" />'."\n";
