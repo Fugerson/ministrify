@@ -76,9 +76,9 @@
     <!-- Church settings -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700"
          x-data="{
-             name: '{{ addslashes($church->name) }}',
-             city: '{{ addslashes($church->city) }}',
-             address: '{{ addslashes($church->address ?? '') }}',
+             name: @js($church->name),
+             city: @js($church->city ?? ''),
+             address: @js($church->address ?? ''),
              saving: false,
              saved: false,
              timeout: null,
@@ -168,9 +168,9 @@
                                saved = false;
                                const formData = new FormData();
                                formData.append('_method', 'PUT');
-                               formData.append('name', '{{ addslashes($church->name) }}');
-                               formData.append('city', '{{ addslashes($church->city) }}');
-                               formData.append('address', '{{ addslashes($church->address ?? '') }}');
+                               formData.append('name', name);
+                               formData.append('city', city);
+                               formData.append('address', address);
                                formData.append('logo', $event.target.files[0]);
                                fetch('{{ route('settings.church') }}', {
                                    method: 'POST',
@@ -1670,7 +1670,7 @@
             </div>
 
             <form @submit.prevent="submit($refs.tagCreateForm)" x-ref="tagCreateForm" class="flex gap-2"
-                  x-data="{ ...ajaxForm({ url: '{{ route('tags.store') }}', method: 'POST', resetOnSuccess: true, onSuccess() { const form = this.$refs.tagCreateForm; const name = form.querySelector('[name=name]').value; const color = form.querySelector('[name=color]').value; const list = form.closest('.p-6').querySelector('.space-y-2'); if (list) { const div = document.createElement('div'); div.className = 'flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg'; const safeName = name.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); div.innerHTML = '<div class=\"flex items-center\"><span class=\"w-4 h-4 rounded-full mr-2\" style=\"background-color: ' + color + '\"></span><span class=\"text-gray-900 dark:text-white\">' + safeName + '</span></div>'; list.appendChild(div); } } }) }">
+                  x-data="{ ...ajaxForm({ url: '{{ route('tags.store') }}', method: 'POST', resetOnSuccess: true, onSuccess() { window._appendNewTag(this.$refs.tagCreateForm); } }) }">
                 <input type="text" name="name" placeholder="{{ __('app.settings_new_tag') }}" required
                        class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
                 <input type="color" name="color" value="#3b82f6"
@@ -2900,6 +2900,27 @@ function userOverridesManager() {
         },
     };
 }
+window._appendNewTag = function(form) {
+    const name = form.querySelector('[name=name]').value;
+    const color = form.querySelector('[name=color]').value;
+    const list = form.closest('.p-6').querySelector('.space-y-2');
+    if (list) {
+        const div = document.createElement('div');
+        div.className = 'flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg';
+        const safeName = document.createElement('span');
+        safeName.textContent = name;
+        safeName.className = 'text-gray-900 dark:text-white';
+        const dot = document.createElement('span');
+        dot.className = 'w-4 h-4 rounded-full mr-2';
+        dot.style.backgroundColor = color;
+        const inner = document.createElement('div');
+        inner.className = 'flex items-center';
+        inner.appendChild(dot);
+        inner.appendChild(safeName);
+        div.appendChild(inner);
+        list.appendChild(div);
+    }
+};
 </script>
 @endpush
 @endsection
