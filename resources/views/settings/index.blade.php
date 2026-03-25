@@ -99,12 +99,13 @@
                          city: this.city,
                          address: this.address
                      })
-                 }).then(r => r.json()).then(() => {
+                 }).then(r => {
                      this.saving = false;
-                     this.saved = true;
-                     setTimeout(() => this.saved = false, 2000);
+                     if (r.ok) { this.saved = true; setTimeout(() => this.saved = false, 2000); }
+                     else { showToast('error', @js(__('app.save_error'))); }
                  }).catch(() => {
                      this.saving = false;
+                     showToast('error', @js(__('app.server_error')));
                  });
              },
              debounceSave() {
