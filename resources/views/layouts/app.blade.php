@@ -2554,54 +2554,62 @@
 
 @if(auth()->user()?->isSuperAdmin() || session('impersonating_from') || session('impersonate_church_id'))
 {{-- Admin Screenshot Tool --}}
-<div x-data="adminScreenshot()" x-cloak>
-    {{-- Toggle button - left side --}}
-    <button @click="toggle()" class="fixed bottom-4 left-4 z-[9999] w-12 h-12 bg-red-600 hover:bg-red-700 text-white rounded-xl shadow-lg flex items-center justify-center transition-colors" title="Bug Report">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 12.75c1.148 0 2.278.08 3.383.237 1.037.146 1.866.966 1.866 2.013 0 3.728-2.35 6.75-5.25 6.75S6.75 18.728 6.75 15c0-1.046.83-1.867 1.866-2.013A24.204 24.204 0 0112 12.75zm0 0c2.883 0 5.647.508 8.207 1.44a23.91 23.91 0 01-1.152-6.135 3.713 3.713 0 00-.974-2.737 3.63 3.63 0 00-.907-.735C15.874 3.89 14.01 3 12 3c-2.01 0-3.874.89-5.174 1.583a3.63 3.63 0 00-.907.735 3.713 3.713 0 00-.974 2.737 23.91 23.91 0 01-1.152 6.135A24.084 24.084 0 0112 12.75zM2.166 13.5A1.856 1.856 0 001.5 15c0 .69.377 1.293.942 1.612.564.32 1.192.5 1.858.5M21.834 13.5A1.856 1.856 0 0122.5 15c0 .69-.377 1.293-.942 1.612-.564.32-1.192.5-1.858.5M9 10.5h.008v.008H9V10.5zm6 0h.008v.008H15V10.5z"/></svg>
+<div x-data="adminScreenshot()" x-cloak @paste.window="handlePaste($event)">
+    {{-- Toggle button --}}
+    <button @click="open = !open" class="fixed bottom-4 left-4 z-[9999] w-12 h-12 bg-red-600 hover:bg-red-700 text-white rounded-xl shadow-lg flex items-center justify-center transition-colors" title="Screenshot">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"/><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z"/></svg>
     </button>
 
     {{-- Panel --}}
-    <div x-show="open" x-transition class="fixed bottom-16 left-4 z-[9999] w-80 bg-gray-900 border border-gray-700 rounded-xl shadow-2xl overflow-hidden">
+    <div x-show="open" x-transition class="fixed bottom-16 left-4 z-[9999] w-96 bg-gray-900 border border-gray-700 rounded-xl shadow-2xl overflow-hidden">
         <div class="px-3 py-2 bg-gray-800 flex items-center justify-between">
-            <span class="text-xs font-medium text-gray-300">Screenshots</span>
-            <div class="flex items-center gap-2">
-                <span class="text-[10px] text-gray-500" x-text="screenshots.length + ' saved'"></span>
-                <button @click="open = false" class="text-gray-500 hover:text-white"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+            <span class="text-xs font-medium text-gray-300">Ctrl+V — вставити скріншот</span>
+            <button @click="open = false" class="text-gray-500 hover:text-white"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+        </div>
+
+        {{-- Paste zone --}}
+        <div class="p-3 space-y-2">
+            <div class="relative border-2 border-dashed rounded-lg p-4 text-center transition-colors"
+                 :class="pendingBlob ? 'border-green-500 bg-green-900/20' : 'border-gray-600 bg-gray-800/50'">
+                <template x-if="!pendingBlob">
+                    <p class="text-sm text-gray-400">Ctrl+V — вставити скріншот</p>
+                </template>
+                <template x-if="pendingBlob">
+                    <div>
+                        <img :src="pendingPreview" class="max-h-32 mx-auto rounded">
+                        <button @click="pendingBlob = null; pendingPreview = null" class="mt-1 text-xs text-red-400 hover:text-red-300">Видалити</button>
+                    </div>
+                </template>
+            </div>
+
+            <button @click="upload()" :disabled="!pendingBlob || saving"
+                    class="w-full py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-30 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-colors">
+                <span x-text="saving ? 'Saving...' : 'Save'"></span>
+            </button>
+        </div>
+
+        {{-- Result link --}}
+        <div x-show="lastUrl" class="px-3 pb-3" x-transition>
+            <div class="flex items-center gap-2 px-3 py-2 bg-green-900/30 border border-green-700 rounded-lg">
+                <span class="text-xs text-green-400 font-mono truncate flex-1" x-text="lastUrl"></span>
+                <button @click="copyUrl()" class="shrink-0 px-2 py-1 text-xs bg-green-700 hover:bg-green-600 text-white rounded transition-colors" x-text="copied ? 'Copied!' : 'Copy'"></button>
             </div>
         </div>
-        <div class="px-2 py-2 border-b border-gray-700 space-y-1.5" @paste.window="handlePaste($event)">
-            <textarea x-model="note" rows="2" placeholder="Опиши баг..." class="w-full px-2 py-1.5 text-xs bg-gray-800 border border-gray-700 rounded text-gray-200 placeholder-gray-500 resize-none focus:outline-none focus:border-indigo-500"></textarea>
-            <div class="flex gap-1.5">
-                <div @click="zone = true" class="flex-1 px-2 py-2 text-center rounded cursor-pointer" :class="pendingBlob ? 'bg-green-900/30 border border-green-600' : (zone ? 'bg-indigo-900/30 border border-indigo-500' : 'bg-gray-800 hover:bg-gray-750 border border-gray-700')">
-                    <p class="text-xs text-gray-400" x-text="saving ? 'Saving...' : (pendingBlob ? 'Screenshot ready' : (zone ? 'Ctrl+V' : 'Click + Ctrl+V'))"></p>
-                </div>
-                <button @click="send()" :disabled="!note && !pendingBlob" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-30 disabled:cursor-not-allowed text-white text-xs font-medium rounded transition-colors">
-                    Send
-                </button>
-            </div>
-        </div>
-        <div class="max-h-[300px] overflow-y-auto">
-            <template x-if="loading">
-                <div class="px-3 py-4 text-center text-xs text-gray-500">Loading...</div>
-            </template>
-            <template x-for="(s, i) in screenshots" :key="s.name">
-                <div class="px-2 py-1.5 border-b border-gray-800 flex items-center gap-2 hover:bg-gray-800">
-                    <img :src="s.url" class="w-20 h-12 object-cover rounded cursor-pointer border border-gray-700" @click="preview = s.url">
+
+        {{-- History --}}
+        <div class="border-t border-gray-700 max-h-[250px] overflow-y-auto">
+            <template x-for="s in screenshots" :key="s.url">
+                <div class="px-3 py-2 border-b border-gray-800 flex items-center gap-2 hover:bg-gray-800/50">
+                    <img :src="s.thumb" class="w-16 h-10 object-cover rounded border border-gray-700 cursor-pointer" @click="preview = s.thumb">
                     <div class="flex-1 min-w-0">
-                        <div x-show="s.note" class="text-[11px] text-yellow-400 mb-0.5" x-text="s.note"></div>
                         <div class="text-[10px] text-gray-500" x-text="s.name"></div>
-                        <div class="flex items-center gap-1">
-                            <button @click="copyPath(s.path)" class="text-[10px] text-green-400 hover:text-green-300 font-mono truncate text-left" x-text="copied === s.path ? 'Copied!' : s.path"></button>
-                            <button @click="copyInfo(s)" class="shrink-0 px-1.5 py-0.5 text-[9px] bg-gray-700 hover:bg-gray-600 text-gray-300 rounded transition-colors" x-text="copiedInfo === s.path ? '✓' : '📋'"></button>
-                        </div>
+                        <button @click="copyText(s.url)" class="text-[11px] text-green-400 hover:text-green-300 font-mono truncate block w-full text-left" x-text="s.url"></button>
                     </div>
                 </div>
             </template>
-            <template x-if="!loading && screenshots.length === 0">
-                <div class="px-3 py-4 text-center text-xs text-gray-500">No screenshots yet</div>
-            </template>
         </div>
-        <div x-show="msg" class="px-3 py-1.5 text-xs text-center" :class="msgType === 'ok' ? 'bg-green-900/50 text-green-400' : 'bg-red-900/50 text-red-400'" x-text="msg" x-transition></div>
+
+        <div x-show="msg" class="px-3 py-1.5 text-xs text-center" :class="msgOk ? 'bg-green-900/50 text-green-400' : 'bg-red-900/50 text-red-400'" x-text="msg" x-transition></div>
     </div>
 
     {{-- Fullscreen preview --}}
@@ -2612,26 +2620,9 @@
 <script>
 function adminScreenshot() {
     return {
-        open: false, zone: false, screenshots: [], msg: '', msgType: 'ok', copied: null, copiedInfo: null, loading: false, saving: false, loaded: false, preview: null, note: '', pendingBlob: null,
-        env: '{{ app()->environment() }}',
-        async toggle() {
-            this.open = !this.open;
-            if (this.open && !this.loaded) await this.loadList();
-        },
-        async loadList() {
-            this.loading = true;
-            try {
-                const res = await fetch('/api/screenshot-list', { credentials: 'same-origin', headers: {'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''} });
-                if (!res.ok) {
-                    console.error('Screenshot list error:', res.status, res.statusText);
-                    this.screenshots = [];
-                } else {
-                    this.screenshots = await res.json();
-                }
-                this.loaded = true;
-            } catch(e) { console.error('Screenshot list fetch error:', e); }
-            this.loading = false;
-        },
+        open: false, saving: false, copied: false, preview: null, msg: '', msgOk: true,
+        pendingBlob: null, pendingPreview: null, lastUrl: '', screenshots: [], loaded: false,
+
         async handlePaste(e) {
             if (!this.open) return;
             const items = e.clipboardData?.items;
@@ -2639,45 +2630,49 @@ function adminScreenshot() {
             for (const item of items) {
                 if (item.type.startsWith('image/')) {
                     this.pendingBlob = item.getAsFile();
-                    this.zone = false;
-                    this.showMsg('Screenshot captured! Press Send', 'ok');
+                    this.pendingPreview = URL.createObjectURL(this.pendingBlob);
                 }
             }
         },
-        async send() {
-            if (!this.note && !this.pendingBlob) return;
-            const formData = new FormData();
-            if (this.pendingBlob) formData.append('screenshot', this.pendingBlob);
-            formData.append('note', this.note || '');
+
+        async upload() {
+            if (!this.pendingBlob) return;
             this.saving = true;
             try {
-                const res = await fetch('/api/screenshot-upload', { method: 'POST', body: formData, headers: {'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''} });
+                const fd = new FormData();
+                fd.append('screenshot', this.pendingBlob);
+                const res = await fetch('/api/screenshot-upload', {
+                    method: 'POST', body: fd,
+                    headers: {'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''}
+                });
                 const data = await res.json();
-                if (data.path) {
-                    this.screenshots.unshift(data);
-                    this.showMsg('Sent!', 'ok');
-                    this.note = '';
+                if (data.url) {
+                    this.lastUrl = data.url;
+                    this.screenshots.unshift({ url: data.url, thumb: data.thumb, name: data.name });
                     this.pendingBlob = null;
-                    this.zone = false;
+                    this.pendingPreview = null;
+                    this.showMsg('Saved!', true);
+                } else {
+                    this.showMsg(data.error || 'Error', false);
                 }
-            } catch(err) { this.showMsg('Error: ' + err.message, 'err'); }
+            } catch(err) { this.showMsg(err.message, false); }
             this.saving = false;
         },
-        showMsg(text, type) {
-            this.msg = text; this.msgType = type;
-            setTimeout(() => this.msg = '', 2000);
+
+        copyUrl() {
+            navigator.clipboard.writeText(this.lastUrl);
+            this.copied = true;
+            setTimeout(() => this.copied = false, 1500);
         },
-        copyPath(path) {
-            navigator.clipboard.writeText(path);
-            this.copied = path;
-            setTimeout(() => this.copied = null, 1500);
-        },
-        copyInfo(s) {
-            const label = this.env === 'production' ? 'PROD' : 'LOCAL';
-            const text = `[${label}] ${s.path}` + (s.note ? ` — ${s.note}` : '');
+
+        copyText(text) {
             navigator.clipboard.writeText(text);
-            this.copiedInfo = s.path;
-            setTimeout(() => this.copiedInfo = null, 1500);
+            this.showMsg('Copied!', true);
+        },
+
+        showMsg(text, ok) {
+            this.msg = text; this.msgOk = ok;
+            setTimeout(() => this.msg = '', 2000);
         }
     };
 }

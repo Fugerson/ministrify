@@ -86,33 +86,26 @@ Route::middleware('web')->group(function () {
             abort(403);
         }
         $file = $request->file('screenshot');
-        $note = $request->input('note', '');
-        $dir = base_path('screenshots');
+        if (! $file) {
+            return response()->json(['error' => 'No screenshot'], 422);
+        }
+        $dir = public_path('screenshots');
         if (! is_dir($dir)) {
             mkdir($dir, 0755, true);
         }
-        $name = 'scr-'.date('H-i-s').'.png';
-        $base64 = '';
-        $fullPath = $dir.'/'.$name;
-        if ($file) {
-            $file->move($dir, $name);
-            $base64 = 'data:image/png;base64,'.base64_encode(file_get_contents($fullPath));
-        } else {
-            $name = 'note-'.date('H-i-s').'.txt';
-            $fullPath = $dir.'/'.$name;
-        }
-        if ($note) {
-            file_put_contents($dir.'/'.str_replace('.png', '.txt', $name), $note);
-        }
+        $name = 'scr-'.date('Y-m-d_H-i-s').'-'.substr(uniqid(), -4).'.png';
+        $file->move($dir, $name);
+        $publicUrl = url('/screenshots/'.$name);
+        $thumb = 'data:image/png;base64,'.base64_encode(file_get_contents($dir.'/'.$name));
 
-        return response()->json(['path' => $fullPath, 'name' => $name, 'url' => $base64, 'note' => $note]);
+        return response()->json(['url' => $publicUrl, 'thumb' => $thumb, 'name' => $name]);
     });
 
     Route::get('screenshot-list', function () {
         if (! auth('web')->user()?->isSuperAdmin() && ! session('impersonating_from') && ! session('impersonate_church_id')) {
             abort(403);
         }
-        $dir = base_path('screenshots');
+        $dir = public_path('screenshots');
         if (! is_dir($dir)) {
             return response()->json([]);
         }
@@ -121,10 +114,9 @@ Route::middleware('web')->group(function () {
         $result = [];
         foreach (array_slice($files, 0, 20) as $f) {
             $name = basename($f);
-            $base64 = 'data:image/png;base64,'.base64_encode(file_get_contents($f));
-            $notePath = str_replace('.png', '.txt', $f);
-            $note = file_exists($notePath) ? file_get_contents($notePath) : '';
-            $result[] = ['path' => $f, 'name' => $name, 'url' => $base64, 'note' => $note];
+            $publicUrl = url('/screenshots/'.$name);
+            $thumb = 'data:image/png;base64,'.base64_encode(file_get_contents($f));
+            $result[] = ['url' => $publicUrl, 'thumb' => $thumb, 'name' => $name];
         }
 
         return response()->json($result);
