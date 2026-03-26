@@ -55,7 +55,7 @@ class SecurityHeaders
                     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.bunny.net https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; ".
                     "font-src 'self' https://fonts.gstatic.com https://fonts.bunny.net data:; ".
                     "img-src 'self' data: blob: https://www.googletagmanager.com https://www.google-analytics.com; ".
-                    "connect-src 'self' wss: https://www.google-analytics.com https://analytics.google.com https://region1.google-analytics.com; ".
+                    "connect-src 'self' wss: https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://www.google-analytics.com https://analytics.google.com https://region1.google-analytics.com; ".
                     'frame-src https://www.google.com; '.
                     "manifest-src 'self'; ".
                     "worker-src 'self' blob:; ".
