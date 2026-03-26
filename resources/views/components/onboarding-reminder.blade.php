@@ -55,9 +55,9 @@
         $totalSteps = count($steps);
         $percentage = round(($completedCount / $totalSteps) * 100);
 
-        // Hide if user dismissed the banner
+        // Hide if user dismissed the banner or all steps are completed
         $dismissed = $user->preferences['onboarding_banner_dismissed'] ?? false;
-        $showWelcome = !$dismissed;
+        $showWelcome = !$dismissed && $completedCount < $totalSteps;
     }
 @endphp
 
