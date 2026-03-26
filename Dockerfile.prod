@@ -69,7 +69,8 @@ RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist
 # Copy application files
 COPY . .
 
-# Copy built frontend assets from node stage
+# Copy built frontend assets from node stage (to build-source, entrypoint copies to shared volume)
+COPY --from=node-builder /var/www/html/public/build public/build-source
 COPY --from=node-builder /var/www/html/public/build public/build
 
 # Generate optimized autoloader
@@ -91,11 +92,17 @@ RUN mkdir -p storage/framework/cache/data \
     storage/framework/views \
     storage/logs \
     bootstrap/cache \
-    && chown -R www:www storage bootstrap/cache \
+    public/build \
+    && chown -R www:www storage bootstrap/cache public/build \
     && chmod -R 775 storage bootstrap/cache
+
+# Copy entrypoint script
+COPY --chown=www:www docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
 USER www
 
 EXPOSE 9000
 
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["php-fpm"]
