@@ -43,7 +43,21 @@ RUN echo "opcache.enable=1" >> /usr/local/etc/php/conf.d/opcache.ini \
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # ========================================
-# Build stage
+# Node.js build stage (frontend assets)
+FROM node:20-alpine AS node-builder
+
+WORKDIR /var/www/html
+
+COPY package.json package-lock.json ./
+RUN npm ci
+
+COPY vite.config.js tailwind.config.js postcss.config.js ./
+COPY resources/ resources/
+
+RUN npm run build
+
+# ========================================
+# PHP build stage
 FROM base AS builder
 
 # Copy composer files first for caching
@@ -54,6 +68,9 @@ RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist
 
 # Copy application files
 COPY . .
+
+# Copy built frontend assets from node stage
+COPY --from=node-builder /var/www/html/public/build public/build
 
 # Generate optimized autoloader
 RUN composer dump-autoload --optimize --no-dev

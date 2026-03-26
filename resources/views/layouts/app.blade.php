@@ -165,33 +165,24 @@
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700&display=swap" rel="stylesheet" />
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        primary: {
-                            50: '{{ $currentChurch->theme_colors["50"] ?? "#eff6ff" }}',
-                            100: '{{ $currentChurch->theme_colors["100"] ?? "#dbeafe" }}',
-                            200: '{{ $currentChurch->theme_colors["200"] ?? "#bfdbfe" }}',
-                            300: '{{ $currentChurch->theme_colors["300"] ?? "#93c5fd" }}',
-                            400: '{{ $currentChurch->theme_colors["400"] ?? "#60a5fa" }}',
-                            500: '{{ $currentChurch->theme_colors["500"] ?? "#3b82f6" }}',
-                            600: '{{ $currentChurch->theme_colors["600"] ?? "#2563eb" }}',
-                            700: '{{ $currentChurch->theme_colors["700"] ?? "#1d4ed8" }}',
-                            800: '{{ $currentChurch->theme_colors["800"] ?? "#1e40af" }}',
-                            900: '{{ $currentChurch->theme_colors["900"] ?? "#1e3a8a" }}',
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'system-ui', 'sans-serif'],
-                    }
-                }
-            }
+    @vite('resources/css/app.css')
+
+    {{-- Dynamic church theme colors via CSS custom properties --}}
+    <style>
+        :root {
+            --color-primary-50: {{ $currentChurch->theme_colors["50"] ?? "#eff6ff" }};
+            --color-primary-100: {{ $currentChurch->theme_colors["100"] ?? "#dbeafe" }};
+            --color-primary-200: {{ $currentChurch->theme_colors["200"] ?? "#bfdbfe" }};
+            --color-primary-300: {{ $currentChurch->theme_colors["300"] ?? "#93c5fd" }};
+            --color-primary-400: {{ $currentChurch->theme_colors["400"] ?? "#60a5fa" }};
+            --color-primary-500: {{ $currentChurch->theme_colors["500"] ?? "#3b82f6" }};
+            --color-primary-600: {{ $currentChurch->theme_colors["600"] ?? "#2563eb" }};
+            --color-primary-700: {{ $currentChurch->theme_colors["700"] ?? "#1d4ed8" }};
+            --color-primary-800: {{ $currentChurch->theme_colors["800"] ?? "#1e40af" }};
+            --color-primary-900: {{ $currentChurch->theme_colors["900"] ?? "#1e3a8a" }};
+            --color-primary-950: {{ $currentChurch->theme_colors["950"] ?? "#172554" }};
         }
-    </script>
+    </style>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 

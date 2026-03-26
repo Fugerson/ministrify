@@ -218,7 +218,7 @@ return [
                 'maxProcesses' => 3,
                 'balanceMaxShift' => 1,
                 'balanceCooldown' => 3,
-                'queue' => ['default', 'notifications'],
+                'queue' => ['default', 'notifications', 'telegram', 'images', 'exports'],
                 'tries' => 3,
                 'timeout' => 120,
             ],
@@ -227,7 +227,7 @@ return [
         'local' => [
             'supervisor-1' => [
                 'maxProcesses' => 2,
-                'queue' => ['default', 'notifications'],
+                'queue' => ['default', 'notifications', 'telegram', 'images', 'exports'],
                 'tries' => 3,
             ],
         ],

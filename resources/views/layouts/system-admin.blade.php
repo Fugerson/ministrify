@@ -17,21 +17,10 @@
 
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700&display=swap" rel="stylesheet" />
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'system-ui', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
 
     <script>
         window.filterStorage = {
@@ -57,48 +46,9 @@
     </script>
 
     <style>
-        [x-cloak] { display: none !important; }
-
-        /* Prevent text overflow */
-        body { overflow-wrap: break-word; word-break: break-word; }
         td, th { overflow-wrap: break-word; }
-
-        /* Custom Scrollbars */
-        * {
-            scrollbar-width: thin;
-            scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
-        }
-        .dark * {
-            scrollbar-color: rgba(75, 85, 99, 0.6) transparent;
-        }
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: transparent;
-            border-radius: 3px;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: rgba(156, 163, 175, 0.4);
-            border-radius: 3px;
-            transition: background 0.2s ease;
-        }
-        .dark ::-webkit-scrollbar-thumb {
-            background: rgba(75, 85, 99, 0.5);
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(107, 114, 128, 0.6);
-        }
-        ::-webkit-scrollbar-corner {
-            background: transparent;
-        }
-
-        @media screen and (max-width: 768px) {
-            input, select, textarea {
-                font-size: 16px !important;
-            }
-        }
+        .dark * { scrollbar-color: rgba(75, 85, 99, 0.6) transparent; }
+        .dark ::-webkit-scrollbar-thumb { background: rgba(75, 85, 99, 0.5); }
     </style>
 </head>
 <body class="font-sans antialiased bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100" x-data="{ sidebarOpen: false }">

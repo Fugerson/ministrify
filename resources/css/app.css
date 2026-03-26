@@ -1,0 +1,71 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base styles */
+[x-cloak] { display: none !important; }
+
+html { scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
+
+body {
+    overflow-wrap: break-word;
+    word-break: break-word;
+    min-height: 100vh;
+}
+
+/* Dark mode base colors */
+.dark body { background-color: #111827; }
+body { background-color: #f9fafb; }
+
+/* Touch targets */
+.touch-target { min-height: 44px; min-width: 44px; }
+
+/* No scrollbar utility */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Safe area insets */
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+.safe-top { padding-top: env(safe-area-inset-top); }
+
+/* Capacitor native app adjustments */
+.capacitor-native body { padding-top: env(safe-area-inset-top); }
+.capacitor-native .pwa-install-banner { display: none !important; }
+.capacitor-ios { -webkit-touch-callout: none; }
+.capacitor-ios body { -webkit-overflow-scrolling: touch; }
+.capacitor-ios a, .capacitor-ios button { -webkit-tap-highlight-color: rgba(0,0,0,0.1); }
+
+/* Prevent zoom on mobile inputs */
+input:focus, select:focus, textarea:focus { outline: none; }
+@media screen and (max-width: 768px) {
+    input, select, textarea { font-size: 16px !important; }
+}
+
+/* Prevent text overflow */
+.break-anywhere { overflow-wrap: anywhere; }
+
+/* Mobile table horizontal scroll */
+.overflow-x-auto > table { min-width: 640px; }
+td, th { white-space: nowrap; }
+td.wrap-cell, th.wrap-cell { white-space: normal; overflow-wrap: break-word; }
+
+/* Mobile viewport fixes */
+@supports (height: 100dvh) {
+    .h-dvh { height: 100dvh; }
+    .min-h-dvh { min-height: 100dvh; }
+}
+
+/* Ensure dropdowns/popups always appear above themed cards */
+[x-show].absolute, .absolute[class*="shadow-xl"], .absolute[class*="shadow-lg"] {
+    z-index: 50 !important;
+}
+
+/* Custom Scrollbars - Minimalistic */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+}
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: rgba(156, 163, 175, 0.4); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(107, 114, 128, 0.6); }

@@ -68,6 +68,21 @@ class Kernel extends ConsoleKernel
         $schedule->command('pulse:check')
             ->everyFiveMinutes()
             ->description('Record Pulse server metrics');
+
+        // Telescope data pruning (keep 48 hours)
+        $schedule->command('telescope:prune --hours=48')
+            ->dailyAt('04:00')
+            ->description('Prune Telescope entries older than 48 hours');
+
+        // Prune permanently soft-deleted records
+        $schedule->command('db:prune-soft-deletes')
+            ->weeklyOn(0, '04:30')
+            ->description('Permanently delete old soft-deleted records');
+
+        // Clean orphaned records
+        $schedule->command('db:clean-orphaned')
+            ->weeklyOn(0, '05:00')
+            ->description('Remove orphaned records from pivot tables');
     }
 
     protected function commands(): void
