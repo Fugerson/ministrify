@@ -39,7 +39,7 @@ class SecurityHeaders
             if ($request->is('telegram/app')) {
                 $response->headers->set('Content-Security-Policy',
                     "default-src 'self'; ".
-                    "script-src 'self' 'unsafe-inline' https://telegram.org https://cdn.jsdelivr.net; ".
+                    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://telegram.org https://cdn.jsdelivr.net; ".
                     "style-src 'self' 'unsafe-inline'; ".
                     "connect-src 'self'; ".
                     "img-src 'self' data: blob:; ".
@@ -51,7 +51,7 @@ class SecurityHeaders
             } else {
                 $response->headers->set('Content-Security-Policy',
                     "default-src 'self'; ".
-                    "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://www.google.com https://www.gstatic.com https://www.googletagmanager.com; ".
+                    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://www.google.com https://www.gstatic.com https://www.googletagmanager.com; ".
                     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.bunny.net https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; ".
                     "font-src 'self' https://fonts.gstatic.com https://fonts.bunny.net data:; ".
                     "img-src 'self' data: blob: https://www.googletagmanager.com https://www.google-analytics.com; ".
