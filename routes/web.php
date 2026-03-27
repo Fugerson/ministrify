@@ -296,6 +296,10 @@ Route::middleware(['auth', 'super_admin', 'throttle:30,1'])->prefix('system-admi
     // Telegram messages log
     Route::get('telegram-log', [SystemAdminController::class, 'telegramLog'])->name('telegram-log');
 
+    // Screenshots
+    Route::get('screenshots', [SystemAdminController::class, 'screenshots'])->name('screenshots');
+    Route::delete('screenshots/{name}', [SystemAdminController::class, 'destroyScreenshot'])->name('screenshots.destroy');
+
     // Exit church context
     Route::post('exit-church', [SystemAdminController::class, 'exitChurchContext'])->name('exit-church');
 });

@@ -451,6 +451,45 @@ class SystemAdminController extends Controller
     }
 
     /**
+     * Screenshots management
+     */
+    public function screenshots()
+    {
+        $dir = storage_path('app/public/screenshots');
+        $screenshots = [];
+
+        if (is_dir($dir)) {
+            $files = glob($dir.'/scr-*.{png,jpg,jpeg,webp}', GLOB_BRACE);
+            usort($files, fn ($a, $b) => filemtime($b) - filemtime($a));
+
+            foreach ($files as $f) {
+                $name = basename($f);
+                $screenshots[] = [
+                    'name' => $name,
+                    'url' => url('/storage/screenshots/'.$name),
+                    'size' => filesize($f),
+                    'date' => date('Y-m-d H:i:s', filemtime($f)),
+                ];
+            }
+        }
+
+        return view('system-admin.screenshots', compact('screenshots'));
+    }
+
+    public function destroyScreenshot(string $name)
+    {
+        $path = storage_path('app/public/screenshots/'.$name);
+
+        if (! str_starts_with($name, 'scr-') || ! file_exists($path)) {
+            abort(404);
+        }
+
+        unlink($path);
+
+        return back()->with('success', 'Скріншот видалено');
+    }
+
+    /**
      * Telegram messages log
      */
     public function telegramLog(Request $request)
