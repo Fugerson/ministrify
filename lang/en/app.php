@@ -305,6 +305,7 @@ return [
     // Profile Page
     'my_profile' => 'My Profile',
     'logout' => 'Log Out',
+    'logout_confirm' => 'Are you sure you want to log out?',
     'change_photo' => 'Change Photo',
     'role_admin' => 'Administrator',
     'role_leader' => 'Leader',

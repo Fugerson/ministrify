@@ -308,6 +308,7 @@ return [
     // Profile Page
     'my_profile' => 'Мій профіль',
     'logout' => 'Вийти',
+    'logout_confirm' => 'Ви дійсно хочете вийти?',
     'change_photo' => 'Змінити фото',
     'role_admin' => 'Адміністратор',
     'role_leader' => 'Лідер',

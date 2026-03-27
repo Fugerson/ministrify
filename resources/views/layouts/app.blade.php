@@ -1610,7 +1610,7 @@
                         <a wire:navigate href="{{ route('my-profile') }}" class="w-11 h-11 flex items-center justify-center">
                             <x-user-avatar size="md" />
                         </a>
-                        <form method="POST" action="{{ route('logout') }}">
+                        <form method="POST" action="{{ route('logout') }}" onsubmit="return confirm('{{ __('app.logout_confirm') }}')">
                             @csrf
                             <button type="submit" class="w-11 h-11 flex items-center justify-center -mr-2 text-gray-400 active:bg-gray-100 dark:active:bg-gray-700 rounded-xl">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -13,22 +13,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>403 | Ministrify</title>
     <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700&display=swap" rel="stylesheet" />
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        primary: { 50:'#eff6ff',100:'#dbeafe',200:'#bfdbfe',300:'#93c5fd',400:'#60a5fa',500:'#3b82f6',600:'#2563eb',700:'#1d4ed8' }
-                    },
-                    fontFamily: { sans: ['Inter','system-ui','sans-serif'] }
-                }
-            }
-        }
-    </script>
+    @vite(['resources/css/app.css'])
 </head>
 <body class="font-sans antialiased min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center px-4">
     <div class="max-w-sm w-full text-center">

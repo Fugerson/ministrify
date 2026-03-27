@@ -4031,7 +4031,7 @@
 
     .doc-editable { min-height: 400px; padding: 32px 40px; font-family: Arial, sans-serif; font-size: 15px; line-height: 1.7; color: #202124; outline: none; }
     .dark .doc-editable { color: #e2e8f0; }
-    .doc-editable:empty::before { content: attr(data-placeholder); color: #9ca3af; pointer-events: none; }
+    .doc-editable:empty:focus::before { content: attr(data-placeholder); color: #9ca3af; pointer-events: none; }
     .doc-editable h1 { font-size: 26px; margin: 20px 0 8px; font-weight: 700; }
     .doc-editable h2 { font-size: 22px; margin: 18px 0 6px; font-weight: 600; }
     .doc-editable h3 { font-size: 18px; margin: 16px 0 4px; font-weight: 600; }

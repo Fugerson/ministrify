@@ -90,6 +90,13 @@ function birthdayWidget() {
         loading: false,
         todayExcl: todayExcl,
 
+        init() {
+            // If initial data is empty (e.g. after wire:navigate re-init), load from API
+            if (this.people.length === 0) {
+                this.loadBirthdays();
+            }
+        },
+
         get sortedPeople() {
             return [...this.people].sort((a, b) => parseInt(a.day) - parseInt(b.day));
         },
@@ -119,13 +126,16 @@ function birthdayWidget() {
             this.loading = true;
             try {
                 const res = await fetch(`{{ route('dashboard.birthdays') }}?month=${this.currentMonth}`, {
-                    headers: { 'Accept': 'application/json' }
+                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
                 });
+                if (!res.ok) throw new Error('HTTP ' + res.status);
                 const data = await res.json();
-                this.people = data.people;
-                this.count = data.count;
+                this.people = Array.isArray(data.people) ? data.people : [];
+                this.count = data.count ?? this.people.length;
             } catch (e) {
                 console.error('Failed to load birthdays:', e);
+                this.people = [];
+                this.count = 0;
             } finally {
                 this.loading = false;
             }
