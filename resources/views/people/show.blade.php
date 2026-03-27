@@ -116,10 +116,10 @@
                     @if($canEdit)
                         <div class="flex flex-wrap items-center gap-1 sm:gap-2">
                             <input type="text" name="first_name" value="{{ old('first_name', $person->first_name) }}" required
-                                   class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white bg-transparent border-0 border-b-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600 focus:border-primary-500 focus:ring-0 px-0 py-0 min-w-0 w-auto max-w-[45%] sm:max-w-none"
+                                   class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white bg-transparent border-0 border-b border-dashed border-gray-300 dark:border-gray-600 hover:border-primary-400 dark:hover:border-primary-500 focus:border-primary-500 focus:border-solid focus:ring-0 px-0 py-0.5 min-w-0 w-auto max-w-[45%] sm:max-w-none"
                                    placeholder="{{ __('app.first_name') }}">
                             <input type="text" name="last_name" value="{{ old('last_name', $person->last_name) }}" required
-                                   class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white bg-transparent border-0 border-b-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600 focus:border-primary-500 focus:ring-0 px-0 py-0 min-w-0 w-auto max-w-[45%] sm:max-w-none"
+                                   class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white bg-transparent border-0 border-b border-dashed border-gray-300 dark:border-gray-600 hover:border-primary-400 dark:hover:border-primary-500 focus:border-primary-500 focus:border-solid focus:ring-0 px-0 py-0.5 min-w-0 w-auto max-w-[45%] sm:max-w-none"
                                    placeholder="{{ __('app.last_name') }}">
                         </div>
                     @else
@@ -674,7 +674,7 @@
                 @endphp
                 <div x-data="{ open: {{ $isInMinistry ? 'true' : 'false' }} }"
                      class="border border-gray-200 dark:border-gray-700 rounded-xl p-3 transition-colors"
-                     :class="open ? 'bg-primary-50 dark:bg-primary-900/20 border-primary-200 dark:border-primary-800' : ''">
+                     :class="open ? 'bg-primary-50/50 dark:bg-primary-950/30 border-primary-200 dark:border-primary-800/50' : ''">
                     <label class="flex items-center cursor-pointer">
                         <input type="checkbox" name="ministries[{{ $ministry->id }}][selected]" value="1"
                                @click="open = $event.target.checked"
