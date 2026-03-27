@@ -1250,10 +1250,6 @@ class DashboardController extends Controller
 
     public function birthdays(Request $request)
     {
-        if (! auth()->user()->canView('people')) {
-            return response()->json(['count' => 0, 'people' => []]);
-        }
-
         $church = $this->getCurrentChurch();
         $month = (int) $request->get('month', now()->month);
         $month = max(1, min(12, $month));
