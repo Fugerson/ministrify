@@ -1171,7 +1171,7 @@
 
             <!-- Toggle button on sidebar edge -->
             <button @click="collapsed = !collapsed"
-                    class="absolute top-20 z-50 w-6 h-6 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-full shadow-md flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:border-primary-400 dark:hover:border-primary-500 hover:shadow-lg transition-all cursor-pointer {{ $menuPosition === 'right' ? '-left-3' : '-right-3' }}"
+                    class="hidden lg:flex absolute top-20 z-50 w-6 h-6 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-full shadow-md items-center justify-center text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:border-primary-400 dark:hover:border-primary-500 hover:shadow-lg transition-all cursor-pointer {{ $menuPosition === 'right' ? '-left-3' : '-right-3' }}"
                     :title="collapsed ? @js( __("app.expand") ) : @js( __("app.collapse") )">
                 @if($menuPosition === 'right')
                 <svg x-show="!collapsed" class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>

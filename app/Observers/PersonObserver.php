@@ -18,11 +18,6 @@ class PersonObserver
      */
     public function created(Person $person): void
     {
-        // Create follow-up tasks for new guests
-        if ($person->membership_status === Person::STATUS_GUEST) {
-            $this->followupService->createFollowupTasks($person);
-        }
-
         $this->clearDashboardCache($person);
     }
 
