@@ -13,10 +13,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Laravel\Scout\Searchable;
 
 class Event extends Model
 {
-    use Auditable, HasFactory, SoftDeletes;
+    use Auditable, HasFactory, Searchable, SoftDeletes;
 
     protected $fillable = [
         'church_id',
@@ -67,6 +68,18 @@ class Event extends Model
         'google_synced_at' => 'datetime',
         'google_sync_status' => 'string',
     ];
+
+    public function toSearchableArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'title' => $this->title,
+            'notes' => $this->notes,
+            'location' => $this->location,
+            'date' => $this->date?->timestamp,
+            'church_id' => $this->church_id,
+        ];
+    }
 
     // Service types
     const SERVICE_SUNDAY = 'sunday_service';

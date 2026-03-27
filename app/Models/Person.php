@@ -12,10 +12,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
+use Laravel\Scout\Searchable;
 
 class Person extends Model
 {
-    use Auditable, HasFactory, SoftDeletes;
+    use Auditable, HasFactory, Searchable, SoftDeletes;
 
     /**
      * Cached computed attributes to prevent N+1 queries
@@ -170,6 +171,20 @@ class Person extends Model
     ];
 
     protected $appends = ['full_name'];
+
+    public function toSearchableArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'first_name' => $this->first_name,
+            'last_name' => $this->last_name,
+            'email' => $this->email,
+            'phone' => $this->phone,
+            'church_id' => $this->church_id,
+            'membership_status' => $this->membership_status,
+            'gender' => $this->gender,
+        ];
+    }
 
     /**
      * Normalize a phone number to a standard format for comparison.

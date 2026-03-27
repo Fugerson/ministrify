@@ -8,7 +8,7 @@ on:
       skip_tests:
         description: 'Skip tests'
         type: boolean
-        default: true
+        default: false
 
 jobs:
   tests:
@@ -18,7 +18,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: [tests]
-    if: always()
+    if: ${{ !failure() && !cancelled() }}
 
     steps:
       - name: Deploy via SSH

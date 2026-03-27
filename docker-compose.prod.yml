@@ -49,6 +49,11 @@ services:
       - RECAPTCHA_SECRET_KEY=${RECAPTCHA_SECRET_KEY:-}
       - RECAPTCHA_THRESHOLD=${RECAPTCHA_THRESHOLD:-0.5}
       - GOOGLE_ANALYTICS_ID=${GOOGLE_ANALYTICS_ID:-}
+      - SENTRY_LARAVEL_DSN=${SENTRY_LARAVEL_DSN:-}
+      - SENTRY_TRACES_SAMPLE_RATE=${SENTRY_TRACES_SAMPLE_RATE:-0.1}
+      - SCOUT_DRIVER=${SCOUT_DRIVER:-meilisearch}
+      - MEILISEARCH_HOST=http://meilisearch:7700
+      - MEILISEARCH_KEY=${MEILISEARCH_KEY:-}
     volumes:
       - app_storage:/var/www/html/storage/app/public
       - ./public/build:/var/www/html/public/build
@@ -233,6 +238,20 @@ services:
       - mysql
       - redis
 
+  meilisearch:
+    image: getmeili/meilisearch:v1.12
+    container_name: ministrify_meilisearch
+    restart: always
+    environment:
+      - MEILI_MASTER_KEY=${MEILISEARCH_KEY:-masterKey}
+      - MEILI_ENV=production
+      - MEILI_NO_ANALYTICS=true
+    volumes:
+      - meilisearch_data:/meili_data
+    networks:
+      - ministrify
+    # No external port — only accessible from app container
+
   certbot:
     image: certbot/certbot
     container_name: ministrify_certbot
@@ -265,6 +284,8 @@ volumes:
   mysql_data:
     driver: local
   redis_data:
+    driver: local
+  meilisearch_data:
     driver: local
   app_storage:
     driver: local

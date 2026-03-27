@@ -8,10 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Laravel\Scout\Searchable;
 
 class Song extends Model
 {
-    use Auditable, HasFactory, SoftDeletes;
+    use Auditable, HasFactory, Searchable, SoftDeletes;
 
     protected $fillable = [
         'church_id',
@@ -37,6 +38,18 @@ class Song extends Model
         'resource_links' => 'array',
         'last_used_at' => 'date',
     ];
+
+    public function toSearchableArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'title' => $this->title,
+            'artist' => $this->artist,
+            'lyrics' => $this->lyrics,
+            'key' => $this->key,
+            'church_id' => $this->church_id,
+        ];
+    }
 
     /**
      * Get key labels (localized)

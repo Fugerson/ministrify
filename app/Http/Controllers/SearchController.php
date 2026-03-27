@@ -22,21 +22,30 @@ class SearchController extends Controller
             return response()->json(['results' => []]);
         }
 
+        $useScout = config('scout.driver') === 'meilisearch';
         $search = addcslashes($query, '%_');
         $results = [];
 
-        // Search people
+        // Search people (Scout or LIKE fallback)
         if ($user->canView('people')) {
-            $people = Person::where('church_id', $churchId)
-                ->where('membership_status', '!=', Person::STATUS_GUEST)
-                ->where(function ($q) use ($search) {
-                    $q->where('first_name', 'like', "%{$search}%")
-                        ->orWhere('last_name', 'like', "%{$search}%")
-                        ->orWhere('phone', 'like', "%{$search}%")
-                        ->orWhere('email', 'like', "%{$search}%");
-                })
-                ->limit(5)
-                ->get();
+            if ($useScout) {
+                $people = Person::search($query)
+                    ->where('church_id', $churchId)
+                    ->take(5)
+                    ->get()
+                    ->where('membership_status', '!=', Person::STATUS_GUEST);
+            } else {
+                $people = Person::where('church_id', $churchId)
+                    ->where('membership_status', '!=', Person::STATUS_GUEST)
+                    ->where(function ($q) use ($search) {
+                        $q->where('first_name', 'like', "%{$search}%")
+                            ->orWhere('last_name', 'like', "%{$search}%")
+                            ->orWhere('phone', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%");
+                    })
+                    ->limit(5)
+                    ->get();
+            }
 
             foreach ($people as $person) {
                 $results[] = [
@@ -49,7 +58,7 @@ class SearchController extends Controller
             }
         }
 
-        // Search ministries
+        // Search ministries (LIKE — not indexed in Meilisearch)
         if ($user->canView('ministries')) {
             $ministries = Ministry::where('church_id', $churchId)
                 ->where('name', 'like', "%{$search}%")
@@ -69,7 +78,7 @@ class SearchController extends Controller
             }
         }
 
-        // Search groups
+        // Search groups (LIKE — not indexed)
         if ($user->canView('groups')) {
             $groups = Group::where('church_id', $churchId)
                 ->where('name', 'like', "%{$search}%")
@@ -87,14 +96,23 @@ class SearchController extends Controller
             }
         }
 
-        // Search events
+        // Search events (Scout or LIKE fallback)
         if ($user->canView('events')) {
-            $events = Event::where('church_id', $churchId)
-                ->where('title', 'like', "%{$search}%")
-                ->where('date', '>=', now()->subDays(7))
-                ->orderBy('date')
-                ->limit(3)
-                ->get();
+            if ($useScout) {
+                $events = Event::search($query)
+                    ->where('church_id', $churchId)
+                    ->take(3)
+                    ->get()
+                    ->where('date', '>=', now()->subDays(7))
+                    ->sortBy('date');
+            } else {
+                $events = Event::where('church_id', $churchId)
+                    ->where('title', 'like', "%{$search}%")
+                    ->where('date', '>=', now()->subDays(7))
+                    ->orderBy('date')
+                    ->limit(3)
+                    ->get();
+            }
 
             foreach ($events as $event) {
                 $results[] = [
@@ -107,7 +125,7 @@ class SearchController extends Controller
             }
         }
 
-        // Search boards
+        // Search boards (LIKE — not indexed)
         if ($user->canView('boards')) {
             $boards = Board::where('church_id', $churchId)
                 ->where('is_archived', false)
