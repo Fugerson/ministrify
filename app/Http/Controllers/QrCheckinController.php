@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Attendance;
 use App\Models\Event;
 use App\Models\Person;
+use App\Rules\BelongsToChurch;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -130,8 +131,8 @@ class QrCheckinController extends Controller
         abort_unless(auth()->user()->canEdit('attendance'), 403);
 
         $request->validate([
-            'event_id' => 'required|exists:events,id',
-            'person_id' => 'required|exists:people,id',
+            'event_id' => ['required', new BelongsToChurch(Event::class)],
+            'person_id' => ['required', new BelongsToChurch(Person::class)],
         ]);
 
         $churchId = $this->getCurrentChurch()->id;

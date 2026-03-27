@@ -8,6 +8,7 @@ use App\Models\ChurchRolePermission;
 use App\Models\Person;
 use App\Models\User;
 use App\Notifications\AccessGranted;
+use App\Rules\BelongsToChurch;
 use App\Rules\SecurePassword;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -75,7 +76,7 @@ class UserController extends Controller
             'name' => 'nullable|string|max:255',
             'email' => ['nullable', 'email'],
             'church_role_id' => ['required', Rule::exists('church_roles', 'id')->where('church_id', $church->id)],
-            'person_id' => 'nullable|exists:people,id',
+            'person_id' => ['nullable', new BelongsToChurch(Person::class)],
         ]);
 
         // Get name and email from Person if person_id provided
@@ -314,8 +315,8 @@ class UserController extends Controller
             'name' => 'nullable|string|max:255',
             'email' => ['nullable', 'email', Rule::unique('users')->ignore($user->id)],
             'church_role_id' => ['nullable', Rule::exists('church_roles', 'id')->where('church_id', $church->id)],
-            'person_id' => 'nullable|exists:people,id',
-            'link_person_id' => 'nullable|integer|exists:people,id',
+            'person_id' => ['nullable', new BelongsToChurch(Person::class)],
+            'link_person_id' => ['nullable', 'integer', new BelongsToChurch(Person::class)],
             'password' => ['nullable', 'string', 'min:10', new SecurePassword],
         ]);
 

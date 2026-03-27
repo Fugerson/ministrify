@@ -364,7 +364,7 @@ class BoardController extends Controller
 
         $positions = $request->validate([
             'positions' => 'required|array',
-            'positions.*' => 'integer|exists:board_columns,id',
+            'positions.*' => ['integer', new BelongsToChurch(BoardColumn::class)],
         ]);
 
         // Verify all columns belong to this board
@@ -432,7 +432,7 @@ class BoardController extends Controller
         $validated = $request->validate([
             'entity_type' => 'required|in:event,ministry,group,person',
             'entity_id' => 'required|integer',
-            'board_id' => 'required|exists:boards,id',
+            'board_id' => ['required', new BelongsToChurch(Board::class)],
             'title' => 'nullable|string|max:255',
         ]);
 
@@ -708,7 +708,7 @@ class BoardController extends Controller
             'due_date' => 'nullable|date',
             'assigned_to' => ['nullable', new BelongsToChurch(Person::class)],
             'epic_id' => ['nullable', Rule::exists('board_epics', 'id')->whereIn('board_id', Board::where('church_id', $this->getCurrentChurch()->id)->pluck('id'))],
-            'column_id' => 'nullable|exists:board_columns,id',
+            'column_id' => ['nullable', new BelongsToChurch(BoardColumn::class)],
             'show_in_general' => 'nullable|boolean',
         ]);
 
@@ -783,7 +783,7 @@ class BoardController extends Controller
         $this->authorizeCardAccess($card);
 
         $validated = $request->validate([
-            'column_id' => 'required|exists:board_columns,id',
+            'column_id' => ['required', new BelongsToChurch(BoardColumn::class)],
             'position' => 'required|integer|min:0',
         ]);
 

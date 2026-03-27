@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Events\ChurchDataUpdated;
 use App\Models\Event;
 use App\Models\Song;
+use App\Rules\BelongsToChurch;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -331,7 +332,7 @@ class SongController extends Controller
         abort_unless(auth()->user()->canEdit('events'), 403);
 
         $validated = $request->validate([
-            'event_id' => 'required|exists:events,id',
+            'event_id' => ['required', new BelongsToChurch(Event::class)],
             'key' => 'nullable|string|max:10',
         ]);
 

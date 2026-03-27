@@ -902,7 +902,7 @@ class EventController extends Controller
     {
         $request->validate([
             'file' => 'required|file|mimes:ics,txt|max:5120',
-            'ministry_id' => 'required|exists:ministries,id',
+            'ministry_id' => ['required', new BelongsToChurch(Ministry::class)],
         ]);
 
         $church = $this->getCurrentChurch();

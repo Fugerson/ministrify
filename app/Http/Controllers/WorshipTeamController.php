@@ -12,6 +12,7 @@ use App\Models\Person;
 use App\Models\PersonWorshipSkill;
 use App\Models\Song;
 use App\Models\WorshipRole;
+use App\Rules\BelongsToChurch;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -365,7 +366,7 @@ class WorshipTeamController extends Controller
         $validated = $request->validate([
             'person_id' => ['required', Rule::exists('people', 'id')->where('church_id', $this->getCurrentChurch()->id)],
             'ministry_role_id' => ['required', 'exists:ministry_roles,id'],
-            'ministry_id' => ['required', 'exists:ministries,id'],
+            'ministry_id' => ['required', new BelongsToChurch(Ministry::class)],
             'event_song_id' => 'nullable|exists:event_songs,id',
             'notes' => 'nullable|string|max:255',
         ]);

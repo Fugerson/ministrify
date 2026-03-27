@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Ministry;
 use App\Models\Resource;
+use App\Rules\BelongsToChurch;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
@@ -63,7 +64,7 @@ class ResourceController extends Controller
         }
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'parent_id' => 'nullable|exists:resources,id',
+            'parent_id' => ['nullable', new BelongsToChurch(Resource::class)],
             'icon' => 'nullable|string|max:10',
         ]);
 
@@ -110,7 +111,7 @@ class ResourceController extends Controller
                 'file',
                 'max:'.(Resource::MAX_FILE_SIZE / 1024), // KB
             ],
-            'parent_id' => 'nullable|exists:resources,id',
+            'parent_id' => ['nullable', new BelongsToChurch(Resource::class)],
         ]);
 
         $file = $request->file('file');
@@ -227,7 +228,7 @@ class ResourceController extends Controller
         }
 
         $validated = $request->validate([
-            'parent_id' => 'nullable|exists:resources,id',
+            'parent_id' => ['nullable', new BelongsToChurch(Resource::class)],
         ]);
 
         // Can't move folder into itself or its children
@@ -332,7 +333,7 @@ class ResourceController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'parent_id' => 'nullable|exists:resources,id',
+            'parent_id' => ['nullable', new BelongsToChurch(Resource::class)],
             'icon' => 'nullable|string|max:10',
         ]);
 
@@ -369,7 +370,7 @@ class ResourceController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'parent_id' => 'nullable|exists:resources,id',
+            'parent_id' => ['nullable', new BelongsToChurch(Resource::class)],
         ]);
 
         $churchId = $this->getCurrentChurch()->id;
@@ -447,7 +448,7 @@ class ResourceController extends Controller
                 'file',
                 'max:'.(Resource::MAX_FILE_SIZE / 1024),
             ],
-            'parent_id' => 'nullable|exists:resources,id',
+            'parent_id' => ['nullable', new BelongsToChurch(Resource::class)],
         ]);
 
         $file = $request->file('file');

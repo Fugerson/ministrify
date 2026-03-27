@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Ministry;
 use App\Models\Position;
+use App\Rules\BelongsToChurch;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
@@ -60,7 +61,7 @@ class PositionController extends Controller
     {
         $validated = $request->validate([
             'positions' => 'required|array',
-            'positions.*.id' => 'required|exists:positions,id',
+            'positions.*.id' => ['required', new BelongsToChurch(Position::class)],
             'positions.*.sort_order' => 'required|integer|min:0',
         ]);
 

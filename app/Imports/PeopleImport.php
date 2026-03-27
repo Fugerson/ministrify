@@ -133,14 +133,16 @@ class PeopleImport implements ToModel, WithEvents, WithHeadingRow, WithValidatio
             // (User can later change to spouse/child/parent in the UI)
             for ($i = 0; $i < count($personIds); $i++) {
                 for ($j = $i + 1; $j < count($personIds); $j++) {
-                    // Check if relationship already exists
+                    // Family relationships are stored one-directionally by design;
+                    // inverseFamilyRelationships() handles the reverse lookup.
+                    // Check both directions to avoid logical duplicates (A→B or B→A).
                     $exists = FamilyRelationship::where('church_id', $this->churchId)
-                        ->where(function ($query) use ($personIds, $i, $j) {
-                            $query->where(function ($q) use ($personIds, $i, $j) {
-                                $q->where('person_id', $personIds[$i])
+                        ->where(function ($q) use ($personIds, $i, $j) {
+                            $q->where(function ($q2) use ($personIds, $i, $j) {
+                                $q2->where('person_id', $personIds[$i])
                                     ->where('related_person_id', $personIds[$j]);
-                            })->orWhere(function ($q) use ($personIds, $i, $j) {
-                                $q->where('person_id', $personIds[$j])
+                            })->orWhere(function ($q2) use ($personIds, $i, $j) {
+                                $q2->where('person_id', $personIds[$j])
                                     ->where('related_person_id', $personIds[$i]);
                             });
                         })
@@ -151,7 +153,7 @@ class PeopleImport implements ToModel, WithEvents, WithHeadingRow, WithValidatio
                             'church_id' => $this->churchId,
                             'person_id' => $personIds[$i],
                             'related_person_id' => $personIds[$j],
-                            'relationship_type' => FamilyRelationship::TYPE_SIBLING, // Default to sibling
+                            'relationship_type' => FamilyRelationship::TYPE_SIBLING,
                         ]);
                     }
                 }

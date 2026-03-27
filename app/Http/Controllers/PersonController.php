@@ -1281,7 +1281,7 @@ class PersonController extends Controller
 
         $validated = $request->validate([
             'email' => ['required', 'email', Rule::unique('users')->whereNull('deleted_at')],
-            'church_role_id' => 'required|exists:church_roles,id',
+            'church_role_id' => ['required', new BelongsToChurch(ChurchRole::class)],
         ]);
 
         // Verify church role belongs to this church
@@ -1542,11 +1542,11 @@ class PersonController extends Controller
             ...collect($fieldRules)->mapWithKeys(fn ($rule, $key) => ["create.*.{$key}" => $rule])->toArray(),
 
             'update' => 'array',
-            'update.*.id' => 'required|exists:people,id',
+            'update.*.id' => ['required', new BelongsToChurch(Person::class)],
             ...collect($fieldRules)->mapWithKeys(fn ($rule, $key) => ["update.*.{$key}" => $rule])->toArray(),
 
             'delete' => 'array',
-            'delete.*' => 'exists:people,id',
+            'delete.*' => [new BelongsToChurch(Person::class)],
         ]);
 
         $stats = ['created' => 0, 'updated' => 0, 'deleted' => 0];
@@ -1768,7 +1768,7 @@ class PersonController extends Controller
             'ids.*' => 'integer',
             'value' => 'nullable|integer',
             'message' => 'nullable|string|max:1000',
-            'church_role_id' => 'nullable|integer|exists:church_roles,id',
+            'church_role_id' => ['nullable', 'integer', new BelongsToChurch(ChurchRole::class)],
         ]);
 
         $church = $this->getCurrentChurch();
@@ -2035,8 +2035,8 @@ class PersonController extends Controller
         }
 
         $validated = $request->validate([
-            'primary_id' => 'required|integer|exists:people,id',
-            'secondary_id' => 'required|integer|exists:people,id|different:primary_id',
+            'primary_id' => ['required', 'integer', new BelongsToChurch(Person::class)],
+            'secondary_id' => ['required', 'integer', new BelongsToChurch(Person::class), 'different:primary_id'],
             'field_selections' => 'nullable|array',
             'field_selections.*' => 'in:A,B',
         ]);

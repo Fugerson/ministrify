@@ -8,6 +8,7 @@ use App\Models\Person;
 use App\Models\User;
 use App\Notifications\ServantsApproved;
 use App\Notifications\ServantsRejected;
+use App\Rules\BelongsToChurch;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -128,8 +129,8 @@ class ServantApprovalController extends Controller
         }
 
         $validated = $request->validate([
-            'church_role_id' => 'nullable|exists:church_roles,id',
-            'link_person_id' => 'nullable|integer|exists:people,id',
+            'church_role_id' => ['nullable', new BelongsToChurch(ChurchRole::class)],
+            'link_person_id' => ['nullable', 'integer', new BelongsToChurch(Person::class)],
         ]);
 
         $roleId = $validated['church_role_id'] ?? $user->requested_church_role_id;

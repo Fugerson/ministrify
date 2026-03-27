@@ -10,6 +10,7 @@ use App\Models\Ministry;
 use App\Models\MinistryRole;
 use App\Models\Person;
 use App\Models\TelegramMessage;
+use App\Rules\BelongsToChurch;
 use App\Services\TelegramService;
 use Illuminate\Http\Request;
 
@@ -23,7 +24,7 @@ class ServiceTeamController extends Controller
         $this->authorizeChurch($event);
 
         $validated = $request->validate([
-            'ministry_id' => 'required|exists:ministries,id',
+            'ministry_id' => ['required', new BelongsToChurch(Ministry::class)],
         ]);
 
         $churchId = $this->getCurrentChurch()->id;
@@ -150,8 +151,8 @@ class ServiceTeamController extends Controller
         $this->authorizeChurch($event);
 
         $validated = $request->validate([
-            'ministry_id' => 'required|exists:ministries,id',
-            'person_id' => 'required|exists:people,id',
+            'ministry_id' => ['required', new BelongsToChurch(Ministry::class)],
+            'person_id' => ['required', new BelongsToChurch(Person::class)],
             'ministry_role_id' => 'required|exists:ministry_roles,id',
             'notes' => 'nullable|string|max:255',
         ]);
@@ -342,7 +343,7 @@ class ServiceTeamController extends Controller
         $this->authorizeChurch($event);
 
         $validated = $request->validate([
-            'ministry_id' => 'required|exists:ministries,id',
+            'ministry_id' => ['required', new BelongsToChurch(Ministry::class)],
             'ministry_role_id' => 'required|exists:ministry_roles,id',
         ]);
 

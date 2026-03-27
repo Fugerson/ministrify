@@ -248,25 +248,23 @@ class OnboardingController extends Controller
             'ministries.*' => 'required|string|max:255',
         ]);
 
-        $createdIds = [];
-        foreach ($validated['ministries'] as $name) {
-            $name = trim($name);
-            if (empty($name)) {
-                continue;
+        $createdIds = DB::transaction(function () use ($validated, $church) {
+            $ids = [];
+            foreach ($validated['ministries'] as $name) {
+                $name = trim($name);
+                if (empty($name)) {
+                    continue;
+                }
+                $ministry = $church->ministries()->firstOrCreate(
+                    ['name' => $name],
+                    ['slug' => Str::slug($name).'-'.Str::random(4)]
+                );
+                if ($ministry->wasRecentlyCreated) {
+                    $ids[] = $ministry->id;
+                }
             }
-
-            // Check if ministry with this name already exists
-            $exists = $church->ministries()->where('name', $name)->exists();
-            if ($exists) {
-                continue;
-            }
-
-            $ministry = $church->ministries()->create([
-                'name' => $name,
-                'slug' => Str::slug($name).'-'.Str::random(4),
-            ]);
-            $createdIds[] = $ministry->id;
-        }
+            return $ids;
+        });
 
         return ['ministry_ids' => $createdIds, 'created_count' => count($createdIds)];
     }
@@ -294,19 +292,23 @@ class OnboardingController extends Controller
                 'people.*.phone' => 'nullable|string|max:50',
             ]);
 
-            foreach ($validated['people'] as $personData) {
-                if (empty($personData['first_name'])) {
-                    continue;
-                }
+            $added = DB::transaction(function () use ($validated, $church) {
+                $ids = [];
+                foreach ($validated['people'] as $personData) {
+                    if (empty($personData['first_name'])) {
+                        continue;
+                    }
 
-                $person = $church->people()->create([
-                    'first_name' => $personData['first_name'],
-                    'last_name' => $personData['last_name'] ?? null,
-                    'email' => $personData['email'] ?? null,
-                    'phone' => $personData['phone'] ?? null,
-                ]);
-                $added[] = $person->id;
-            }
+                    $person = $church->people()->create([
+                        'first_name' => $personData['first_name'],
+                        'last_name' => $personData['last_name'] ?? null,
+                        'email' => $personData['email'] ?? null,
+                        'phone' => $personData['phone'] ?? null,
+                    ]);
+                    $ids[] = $person->id;
+                }
+                return $ids;
+            });
         } elseif ($mode === 'csv') {
             // Check if CSV file is provided
             if (! $request->hasFile('csv_file')) {

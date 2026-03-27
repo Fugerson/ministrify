@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ChurchRole;
 use App\Models\ChurchRolePermission;
+use App\Rules\BelongsToChurch;
 use Illuminate\Http\Request;
 
 class RolePermissionController extends Controller
@@ -43,7 +44,7 @@ class RolePermissionController extends Controller
         $church = $this->getCurrentChurch();
 
         $validated = $request->validate([
-            'role_id' => 'required|integer|exists:church_roles,id',
+            'role_id' => ['required', 'integer', new BelongsToChurch(ChurchRole::class)],
             'permissions' => 'required|array',
             'permissions.*' => 'array',
             'permissions.*.*' => 'string',
@@ -79,7 +80,7 @@ class RolePermissionController extends Controller
         $church = $this->getCurrentChurch();
 
         $validated = $request->validate([
-            'role_id' => 'required|integer|exists:church_roles,id',
+            'role_id' => ['required', 'integer', new BelongsToChurch(ChurchRole::class)],
         ]);
 
         $role = ChurchRole::where('id', $validated['role_id'])

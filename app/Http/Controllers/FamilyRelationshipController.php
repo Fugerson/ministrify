@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\FamilyRelationship;
 use App\Models\Person;
+use App\Rules\BelongsToChurch;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -23,7 +24,7 @@ class FamilyRelationshipController extends Controller
         }
 
         $validated = $request->validate([
-            'related_person_id' => 'required|exists:people,id',
+            'related_person_id' => ['required', new BelongsToChurch(Person::class)],
             'relationship_type' => 'required|in:spouse,child,parent,sibling',
         ]);
 

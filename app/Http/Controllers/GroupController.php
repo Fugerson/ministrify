@@ -7,6 +7,7 @@ use App\Models\Group;
 use App\Models\GroupGuest;
 use App\Models\Person;
 use App\Rules\BelongsToChurch;
+use App\Services\DashboardCacheService;
 use App\Services\ImageService;
 use Illuminate\Http\Request;
 
@@ -73,6 +74,7 @@ class GroupController extends Controller
             $group->logCustomAction('leader_assigned', 'Leader set to: '.($leader?->full_name ?? 'Unknown'));
         }
 
+        app(DashboardCacheService::class)->forgetGroupRelated($validated['church_id']);
         broadcast(new ChurchDataUpdated($validated['church_id'], 'groups', 'created', $group->name))->toOthers();
 
         return $this->successResponse($request, 'Групу створено!', 'groups.show', [$group]);
@@ -140,14 +142,10 @@ class GroupController extends Controller
 
         // Ensure new leader is a member with leader role
         if ($group->leader_id) {
-            if (! $group->members()->where('people.id', $group->leader_id)->exists()) {
-                $group->members()->attach($group->leader_id, [
-                    'role' => 'leader',
-                    'joined_at' => now(),
-                ]);
-            } else {
-                $group->members()->updateExistingPivot($group->leader_id, ['role' => 'leader']);
-            }
+            $group->members()->syncWithoutDetaching([
+                $group->leader_id => ['role' => 'leader', 'joined_at' => now()],
+            ]);
+            $group->members()->updateExistingPivot($group->leader_id, ['role' => 'leader']);
 
             if ($oldLeaderId !== $group->leader_id) {
                 $leader = Person::find($group->leader_id);
@@ -155,6 +153,7 @@ class GroupController extends Controller
             }
         }
 
+        app(DashboardCacheService::class)->forgetGroupRelated($group->church_id);
         broadcast(new ChurchDataUpdated($group->church_id, 'groups', 'updated', $group->name))->toOthers();
 
         return $this->successResponse($request, 'Групу оновлено!', 'groups.show', [$group]);
@@ -167,6 +166,7 @@ class GroupController extends Controller
 
         $group->delete();
 
+        app(DashboardCacheService::class)->forgetGroupRelated($group->church_id);
         broadcast(new ChurchDataUpdated($group->church_id, 'groups', 'deleted'))->toOthers();
 
         return $this->successResponse($request, 'Групу видалено.', 'groups.index');
@@ -218,14 +218,18 @@ class GroupController extends Controller
             'role' => 'nullable|in:leader,assistant,member',
         ]);
 
-        if ($group->members()->where('people.id', $validated['person_id'])->exists()) {
-            return $this->errorResponse($request, 'Ця людина вже є учасником групи.');
+        try {
+            $group->members()->attach($validated['person_id'], [
+                'role' => $validated['role'] ?? 'member',
+                'joined_at' => now(),
+            ]);
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Unique constraint violation — person is already a member
+            if ($e->errorInfo[1] === 1062 || str_contains($e->getMessage(), 'Duplicate entry')) {
+                return $this->errorResponse($request, 'Ця людина вже є учасником групи.');
+            }
+            throw $e;
         }
-
-        $group->members()->attach($validated['person_id'], [
-            'role' => $validated['role'] ?? 'member',
-            'joined_at' => now(),
-        ]);
 
         $person = Person::find($validated['person_id']);
         $this->logAuditAction('member_added', 'Group', $group->id, $group->name, [

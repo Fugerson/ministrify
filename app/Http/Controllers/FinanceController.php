@@ -598,7 +598,7 @@ class FinanceController extends Controller
         $validated['category_id'] = $categoryId;
 
         // Determine source type based on category
-        $category = TransactionCategory::find($validated['category_id']);
+        $category = TransactionCategory::where('church_id', $church->id)->findOrFail($validated['category_id']);
         $sourceType = 'income';
         if ($category->is_tithe) {
             $sourceType = Transaction::SOURCE_TITHE;
@@ -714,7 +714,7 @@ class FinanceController extends Controller
         $validated['category_id'] = $categoryId;
 
         // Recalculate source_type based on new category
-        $category = TransactionCategory::find($categoryId);
+        $category = TransactionCategory::where('church_id', $church->id)->findOrFail($categoryId);
         $sourceType = 'income';
         if ($category->is_tithe) {
             $sourceType = Transaction::SOURCE_TITHE;
@@ -1796,11 +1796,11 @@ class FinanceController extends Controller
             'name' => 'required|string|max:255',
             'planned_amount' => 'required|numeric|min:0',
             'frequency' => 'nullable|string|in:one_time,weekly,monthly',
-            'category_id' => 'nullable|integer|exists:transaction_categories,id',
+            'category_id' => ['nullable', 'integer', new BelongsToChurch(TransactionCategory::class)],
             'category_name' => 'nullable|string|max:100',
             'notes' => 'nullable|string|max:500',
             'person_ids' => 'nullable|array',
-            'person_ids.*' => 'integer|exists:people,id',
+            'person_ids.*' => ['integer', new BelongsToChurch(Person::class)],
         ]);
 
         // Resolve category: existing ID or create from custom name
@@ -1870,11 +1870,11 @@ class FinanceController extends Controller
             'name' => 'required|string|max:255',
             'planned_amount' => 'required|numeric|min:0',
             'frequency' => 'nullable|string|in:one_time,weekly,monthly',
-            'category_id' => 'nullable|integer|exists:transaction_categories,id',
+            'category_id' => ['nullable', 'integer', new BelongsToChurch(TransactionCategory::class)],
             'category_name' => 'nullable|string|max:100',
             'notes' => 'nullable|string|max:500',
             'person_ids' => 'nullable|array',
-            'person_ids.*' => 'integer|exists:people,id',
+            'person_ids.*' => ['integer', new BelongsToChurch(Person::class)],
         ]);
 
         // Resolve category: existing ID or create from custom name
@@ -2383,7 +2383,7 @@ class FinanceController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'category_id' => 'nullable|exists:transaction_categories,id',
+            'category_id' => ['nullable', new BelongsToChurch(TransactionCategory::class)],
             'is_recurring' => 'required|boolean',
             'amount' => 'required_if:is_recurring,true|nullable|numeric|min:0',
             'one_time_month' => 'required_if:is_recurring,false|nullable|integer|min:1|max:12',
@@ -2453,7 +2453,7 @@ class FinanceController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'category_id' => 'nullable|exists:transaction_categories,id',
+            'category_id' => ['nullable', new BelongsToChurch(TransactionCategory::class)],
             'is_recurring' => 'required|boolean',
             'amount' => 'required_if:is_recurring,true|nullable|numeric|min:0',
             'one_time_month' => 'required_if:is_recurring,false|nullable|integer|min:1|max:12',

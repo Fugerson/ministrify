@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ChurchRole;
+use App\Rules\BelongsToChurch;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -153,7 +154,7 @@ class ChurchRoleController extends Controller
     {
         $validated = $request->validate([
             'order' => 'required|array',
-            'order.*' => 'integer|exists:church_roles,id',
+            'order.*' => ['integer', new BelongsToChurch(ChurchRole::class)],
         ]);
 
         $church = $this->getCurrentChurch();

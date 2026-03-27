@@ -7,6 +7,7 @@ use App\Models\Attendance;
 use App\Models\AttendanceRecord;
 use App\Models\Event;
 use App\Models\Person;
+use App\Rules\BelongsToChurch;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -69,7 +70,7 @@ class AttendanceController extends Controller
         $this->authorize('create', Attendance::class);
         $validated = $request->validate([
             'date' => 'required|date',
-            'event_id' => 'nullable|exists:events,id',
+            'event_id' => ['nullable', new BelongsToChurch(Event::class)],
             'total_count' => 'required|integer|min:0',
             'notes' => 'nullable|string|max:2000',
             'present' => 'nullable|array',

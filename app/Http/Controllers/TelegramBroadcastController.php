@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Traits\RequiresChurch;
 use App\Models\Person;
 use App\Models\TelegramMessage;
+use App\Rules\BelongsToChurch;
 use App\Services\TelegramService;
 use Illuminate\Http\Request;
 
@@ -34,7 +35,7 @@ class TelegramBroadcastController extends Controller
         $validated = $request->validate([
             'message' => 'required|string|max:4000',
             'recipients' => 'required|array|min:1',
-            'recipients.*' => 'exists:people,id',
+            'recipients.*' => [new BelongsToChurch(Person::class)],
         ]);
 
         $church = $this->getChurchOrFail();

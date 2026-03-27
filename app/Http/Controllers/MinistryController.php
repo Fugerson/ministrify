@@ -40,7 +40,8 @@ class MinistryController extends Controller
 
         // Show ALL ministries — locked ones display with a lock icon in the view
         $ministries = Ministry::where('church_id', $church->id)
-            ->with(['leader', 'members', 'positions'])
+            ->with(['leader', 'positions'])
+            ->withCount('members')
             ->orderBy('name')
             ->get();
 
@@ -689,7 +690,7 @@ class MinistryController extends Controller
             'category_name' => 'nullable|string|max:100',
             'notes' => 'nullable|string|max:500',
             'person_ids' => 'nullable|array',
-            'person_ids.*' => 'integer|exists:people,id',
+            'person_ids.*' => ['integer', new BelongsToChurch(Person::class)],
         ]);
 
         $ministryBudget = MinistryBudget::where('id', $validated['budget_id'])
@@ -762,7 +763,7 @@ class MinistryController extends Controller
             'category_name' => 'nullable|string|max:100',
             'notes' => 'nullable|string|max:500',
             'person_ids' => 'nullable|array',
-            'person_ids.*' => 'integer|exists:people,id',
+            'person_ids.*' => ['integer', new BelongsToChurch(Person::class)],
         ]);
 
         // Resolve category: existing ID or create from custom name
@@ -1570,7 +1571,7 @@ class MinistryController extends Controller
         $validated = $request->validate([
             'visibility' => 'required|in:public,members,leaders,specific',
             'allowed_person_ids' => 'nullable|array',
-            'allowed_person_ids.*' => 'integer|exists:people,id',
+            'allowed_person_ids.*' => ['integer', new BelongsToChurch(Person::class)],
         ]);
 
         $oldVisibility = $ministry->visibility;

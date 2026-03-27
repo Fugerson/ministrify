@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Events\ChurchDataUpdated;
 use App\Models\Person;
+use App\Rules\BelongsToChurch;
 use Illuminate\Http\Request;
 
 class ShepherdController extends Controller
@@ -67,7 +68,7 @@ class ShepherdController extends Controller
         abort_unless(auth()->user()->hasPermission('settings', 'edit'), 403);
 
         $validated = $request->validate([
-            'person_id' => 'required|exists:people,id',
+            'person_id' => ['required', new BelongsToChurch(Person::class)],
         ]);
 
         $church = $this->getCurrentChurch();

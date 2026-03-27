@@ -56,7 +56,7 @@
 
                 <div class="mt-4">
                     <p class="text-sm {{ $isLocked ? 'text-gray-400 dark:text-gray-500' : 'text-gray-600 dark:text-gray-400' }}">
-                        {{ __('app.members') }}: {{ $ministry->members->count() }}
+                        {{ __('app.members') }}: {{ $ministry->members_count }}
                     </p>
                 </div>
             </div>

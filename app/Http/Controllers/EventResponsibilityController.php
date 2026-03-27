@@ -6,6 +6,7 @@ use App\Events\ResponsibilityStatusChanged;
 use App\Models\Event;
 use App\Models\EventResponsibility;
 use App\Models\Person;
+use App\Rules\BelongsToChurch;
 use App\Services\TelegramService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -40,7 +41,7 @@ class EventResponsibilityController extends Controller
         $church = $this->getCurrentChurch();
 
         $validated = $request->validate([
-            'person_id' => 'required|exists:people,id',
+            'person_id' => ['required', new BelongsToChurch(Person::class)],
         ]);
 
         // Ensure person belongs to this church

@@ -8,6 +8,7 @@ use App\Models\Event;
 use App\Models\Ministry;
 use App\Models\Person;
 use App\Models\Position;
+use App\Rules\BelongsToChurch;
 use App\Services\RotationService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -277,8 +278,8 @@ class RotationController extends Controller
         $this->authorizeChurch($event);
 
         $validated = $request->validate([
-            'position_id' => 'required|exists:positions,id',
-            'person_id' => 'required|exists:people,id',
+            'position_id' => ['required', new BelongsToChurch(Position::class)],
+            'person_id' => ['required', new BelongsToChurch(Person::class)],
             'notes' => 'nullable|string|max:255',
         ]);
 

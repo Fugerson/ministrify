@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Ministry;
 use App\Models\MinistryType;
+use App\Rules\BelongsToChurch;
 use Illuminate\Http\Request;
 
 class MinistryTypeController extends Controller
@@ -67,7 +68,7 @@ class MinistryTypeController extends Controller
         }
 
         $validated = $request->validate([
-            'type_id' => 'nullable|exists:ministry_types,id',
+            'type_id' => ['nullable', new BelongsToChurch(MinistryType::class)],
         ]);
 
         // Ensure type belongs to same church if specified
