@@ -118,7 +118,8 @@ class Church extends Model
 
     public function hasFeature(string $feature): bool
     {
-        return in_array($feature, $this->getPlanConfig()['features'] ?? []);
+        // Plans are disabled for now — all features are free
+        return true;
     }
 
     public function getTelegramBotTokenAttribute($value): ?string
