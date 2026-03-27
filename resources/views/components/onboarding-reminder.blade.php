@@ -15,7 +15,7 @@
 
         $steps = [
             'profile' => [
-                'done' => $hasLogo && !empty($church->city),
+                'done' => !empty($church->city),
                 'label' => __('app.onboarding_step_profile'),
                 'desc' => __('app.onboarding_step_profile_desc'),
                 'url' => route('settings.index'),
@@ -75,7 +75,7 @@
             }).then(() => this.$el.remove());
         }
     }"
-    class="bg-gradient-to-r from-primary-50 via-blue-50 to-indigo-50 dark:from-primary-900/20 dark:via-blue-900/20 dark:to-indigo-900/20 rounded-2xl shadow-sm border border-primary-200 dark:border-primary-800 overflow-hidden mb-6"
+    class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden mb-6"
 >
     {{-- Header --}}
     <div class="p-5 pb-0">
