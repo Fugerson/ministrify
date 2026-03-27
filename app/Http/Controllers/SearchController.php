@@ -27,14 +27,28 @@ class SearchController extends Controller
         $results = [];
 
         // Search people (Scout or LIKE fallback)
-        if ($user->canView('people')) {
-            if ($useScout) {
-                $people = Person::search($query)
-                    ->where('church_id', $churchId)
-                    ->take(5)
-                    ->get()
-                    ->notGuest();
-            } else {
+        {
+            try {
+                if ($useScout) {
+                    $people = Person::search($query)
+                        ->where('church_id', $churchId)
+                        ->take(5)
+                        ->get()
+                        ->reject(fn ($p) => $p->membership_status === Person::STATUS_GUEST);
+                } else {
+                    $people = Person::where('church_id', $churchId)
+                        ->notGuest()
+                        ->where(function ($q) use ($search) {
+                            $q->where('first_name', 'like', "%{$search}%")
+                                ->orWhere('last_name', 'like', "%{$search}%")
+                                ->orWhere('phone', 'like', "%{$search}%")
+                                ->orWhere('email', 'like', "%{$search}%");
+                        })
+                        ->limit(5)
+                        ->get();
+                }
+            } catch (\Exception $e) {
+                // Meilisearch unavailable — fallback to LIKE
                 $people = Person::where('church_id', $churchId)
                     ->notGuest()
                     ->where(function ($q) use ($search) {
