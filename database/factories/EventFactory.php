@@ -15,6 +15,7 @@ class EventFactory extends Factory
     {
         return [
             'church_id' => Church::factory(),
+            'ministry_id' => Ministry::factory(),
             'title' => fake()->sentence(3),
             'date' => fake()->dateTimeBetween('now', '+3 months'),
             'time' => fake()->time('H:i'),
@@ -25,6 +26,7 @@ class EventFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'church_id' => $church->id,
+            'ministry_id' => Ministry::factory()->forChurch($church),
         ]);
     }
 

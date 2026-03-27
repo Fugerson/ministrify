@@ -167,7 +167,7 @@ class RotationController extends Controller
 
         $stats = $rotationService->getVolunteerStats($person, $fromDate);
 
-        if ($request->ajax()) {
+        if ($request->ajax() || $request->wantsJson()) {
             return response()->json($stats);
         }
 
@@ -194,7 +194,7 @@ class RotationController extends Controller
 
         $report = $rotationService->generateReport($ministry, $startDate, $endDate);
 
-        if ($request->ajax()) {
+        if ($request->ajax() || $request->wantsJson()) {
             return response()->json($report);
         }
 
@@ -278,7 +278,7 @@ class RotationController extends Controller
         $this->authorizeChurch($event);
 
         $validated = $request->validate([
-            'position_id' => ['required', new BelongsToChurch(Position::class)],
+            'position_id' => ['required', 'exists:positions,id'],
             'person_id' => ['required', new BelongsToChurch(Person::class)],
             'notes' => 'nullable|string|max:255',
         ]);

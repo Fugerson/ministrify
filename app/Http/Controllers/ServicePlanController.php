@@ -43,7 +43,7 @@ class ServicePlanController extends Controller
 
         broadcast(new ChurchDataUpdated($event->church_id, 'service-planning', 'created'))->toOthers();
 
-        if ($request->ajax()) {
+        if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
                 'success' => true,
                 'item' => $item->load(['responsible', 'song']),
@@ -113,7 +113,7 @@ class ServicePlanController extends Controller
 
         broadcast(new ChurchDataUpdated($event->church_id, 'service-planning', 'updated'))->toOthers();
 
-        if ($request->ajax()) {
+        if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
                 'success' => true,
                 'item' => $item->fresh()->load('responsible'),
@@ -141,7 +141,7 @@ class ServicePlanController extends Controller
 
         broadcast(new ChurchDataUpdated($event->church_id, 'service-planning', 'deleted'))->toOthers();
 
-        if ($request->ajax()) {
+        if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
                 'success' => true,
                 'message' => __('messages.plan_item_deleted'),
@@ -205,7 +205,7 @@ class ServicePlanController extends Controller
         // Copy items
         $event->duplicatePlanFrom($source);
 
-        if ($request->ajax()) {
+        if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
                 'success' => true,
                 'message' => __('messages.plan_copied'),
@@ -255,7 +255,7 @@ class ServicePlanController extends Controller
             'status' => 'planned',
         ]);
 
-        if ($request->ajax()) {
+        if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
                 'success' => true,
                 'item' => $item->load('responsible'),
