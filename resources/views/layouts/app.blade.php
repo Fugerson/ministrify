@@ -1389,7 +1389,7 @@
         </aside>
 
         <!-- Mobile Sidebar (overlay) -->
-        <div x-show="sidebarOpen" x-cloak class="lg:hidden fixed inset-0 z-40 bg-black/50" @click="sidebarOpen = false"></div>
+        <div x-show="sidebarOpen" x-cloak class="lg:hidden fixed inset-0 z-[9990] bg-black/50" @click="sidebarOpen = false"></div>
         <aside x-show="sidebarOpen" x-cloak
                x-transition:enter="transform transition ease-out duration-300"
                x-transition:enter-start="{{ $menuPosition === 'right' ? 'translate-x-full' : '-translate-x-full' }}"
@@ -1397,7 +1397,7 @@
                x-transition:leave="transform transition ease-in duration-200"
                x-transition:leave-start="translate-x-0"
                x-transition:leave-end="{{ $menuPosition === 'right' ? 'translate-x-full' : '-translate-x-full' }}"
-               class="lg:hidden fixed inset-y-0 {{ $menuPosition === 'right' ? 'right-0' : 'left-0' }} z-50 w-[calc(100vw-3rem)] max-w-72 bg-white/90 dark:bg-gray-800/90 backdrop-blur-2xl shadow-xl flex flex-col">
+               class="lg:hidden fixed inset-y-0 {{ $menuPosition === 'right' ? 'right-0' : 'left-0' }} z-[9995] w-[calc(100vw-3rem)] max-w-72 bg-white/90 dark:bg-gray-800/90 backdrop-blur-2xl shadow-xl flex flex-col">
             <div class="flex items-center justify-between h-16 px-6 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
                 <a wire:navigate href="{{ route('dashboard') }}" class="flex items-center space-x-2">
                     @if($currentChurch->logo)
