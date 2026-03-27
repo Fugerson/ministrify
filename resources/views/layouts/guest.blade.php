@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html lang="{{ app()->getLocale() }}" x-data="{ darkMode: localStorage.getItem('theme') === 'dark' || (localStorage.getItem('theme') === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches) }" x-bind:class="{ 'dark': darkMode }">
+<html lang="{{ app()->getLocale() }}" x-data="{ darkMode: localStorage.getItem('theme') !== 'light' }" x-bind:class="{ 'dark': darkMode }">
 <head>
+    <script>if(localStorage.getItem('theme')!=='light')document.documentElement.classList.add('dark');</script>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <meta name="csrf-token" content="{{ csrf_token() }}">
