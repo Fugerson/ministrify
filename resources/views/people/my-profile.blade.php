@@ -491,7 +491,7 @@
                 </template>
             </div>
 
-            <!-- PWA Install -->
+            <!-- PWA Install — hidden on desktop when not installable -->
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6"
                  x-data="{
                      installable: !!window.pwaInstallPrompt,
@@ -499,6 +499,7 @@
                      isIos: /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream,
                      isStandalone: window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true,
                      showIosGuide: false,
+                     get visible() { return this.isStandalone || this.installed || this.installable || this.isIos; },
                      init() {
                          window.addEventListener('pwa-installable', () => { this.installable = true; });
                          window.addEventListener('appinstalled', () => { this.installed = true; this.installable = false; });
@@ -511,7 +512,8 @@
                          window.pwaInstallPrompt = null;
                          this.installable = false;
                      }
-                 }">
+                 }"
+                 x-show="visible" x-cloak>
                 <div class="flex items-center gap-3 mb-4">
                     <div class="w-10 h-10 rounded-xl bg-green-100 dark:bg-green-900/50 flex items-center justify-center">
                         <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -545,18 +547,11 @@
                     </button>
                 </template>
 
-                <!-- iOS instructions -->
+                <!-- iOS instructions — shown inline, no misleading button -->
                 <template x-if="!isStandalone && !installed && !installable && isIos">
                     <div>
-                        <button @click="showIosGuide = !showIosGuide" type="button"
-                                class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-xl transition-colors">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                            </svg>
-                            {{ __('app.install_app_btn') }}
-                        </button>
-                        <div x-show="showIosGuide" x-cloak x-transition class="mt-4 space-y-4">
-                            <p class="text-sm text-gray-600 dark:text-gray-400 text-center">{{ __('app.ios_guide_title') }}</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">{{ __('app.ios_guide_title') }}</p>
+                        <div class="space-y-4">
 
                             <!-- Step 1 -->
                             <div class="flex items-start gap-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4">

@@ -1,7 +1,7 @@
 @php
     // User theme: null = not set (use church default), '' = explicitly chose Класична
     $userTheme = auth()->check() ? (auth()->user()->settings['design_theme'] ?? null) : null;
-    $designTheme = $userTheme !== null ? $userTheme : ($currentChurch->design_theme ?? 'modern');
+    $designTheme = $userTheme !== null ? $userTheme : ($currentChurch->design_theme ?? 'classic');
     $userMenuPosition = auth()->check() ? (auth()->user()->settings['menu_position'] ?? '') : '';
     $menuPosition = $userMenuPosition ?: ($currentChurch->menu_position ?? 'left');
 @endphp

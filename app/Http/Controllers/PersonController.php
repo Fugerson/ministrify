@@ -1563,7 +1563,7 @@ class PersonController extends Controller
 
             // Set default value for required field
             if (empty($data['membership_status'])) {
-                $data['membership_status'] = 'guest';
+                $data['membership_status'] = 'member';
             }
 
             $isDuplicate = false;
