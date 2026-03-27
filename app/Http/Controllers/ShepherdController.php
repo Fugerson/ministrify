@@ -31,7 +31,7 @@ class ShepherdController extends Controller
             ->get();
 
         $availablePeople = Person::where('church_id', $church->id)
-            ->where('membership_status', '!=', Person::STATUS_GUEST)
+            ->notGuest()
             ->where('is_shepherd', false)
             ->with('churchRoleRelation')
             ->orderBy('last_name')

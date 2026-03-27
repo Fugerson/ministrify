@@ -29,7 +29,7 @@ class ReportsController extends Controller
 
         // Quick stats
         $stats = [
-            'total_members' => Person::where('church_id', $church->id)->where('membership_status', '!=', Person::STATUS_GUEST)->count(),
+            'total_members' => Person::where('church_id', $church->id)->notGuest()->count(),
             'active_members' => Person::where('church_id', $church->id)
                 ->whereHas('attendanceRecords', fn ($q) => $q->where('present', true)
                     ->whereHas('attendance', fn ($aq) => $aq->where('date', '>=', now()->subMonths(3))))

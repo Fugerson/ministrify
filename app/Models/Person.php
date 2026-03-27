@@ -718,6 +718,11 @@ class Person extends Model
     /**
      * Scopes for membership status
      */
+    public function scopeNotGuest($query)
+    {
+        return $query->where(fn ($q) => $q->where('membership_status', '!=', self::STATUS_GUEST)->orWhereNull('membership_status'));
+    }
+
     public function scopeGuests($query)
     {
         return $query->where('membership_status', self::STATUS_GUEST);

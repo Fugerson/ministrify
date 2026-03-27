@@ -18,7 +18,7 @@ class TelegramBroadcastController extends Controller
         $church = $this->getChurchOrFail();
 
         $recipients = Person::where('church_id', $church->id)
-            ->where('membership_status', '!=', Person::STATUS_GUEST)
+            ->notGuest()
             ->whereNotNull('telegram_chat_id')
             ->orderBy('first_name')
             ->get();
@@ -46,7 +46,7 @@ class TelegramBroadcastController extends Controller
         $telegram = TelegramService::make();
 
         $recipients = Person::where('church_id', $church->id)
-            ->where('membership_status', '!=', Person::STATUS_GUEST)
+            ->notGuest()
             ->whereIn('id', $validated['recipients'])
             ->whereNotNull('telegram_chat_id')
             ->get();

@@ -55,7 +55,7 @@ class AttendanceController extends Controller
         }
 
         $people = Person::where('church_id', $church->id)
-            ->where('membership_status', '!=', Person::STATUS_GUEST)
+            ->notGuest()
             ->orderBy('last_name')
             ->orderBy('first_name')
             ->get();
@@ -150,7 +150,7 @@ class AttendanceController extends Controller
         $church = $this->getCurrentChurch();
 
         $people = Person::where('church_id', $church->id)
-            ->where('membership_status', '!=', Person::STATUS_GUEST)
+            ->notGuest()
             ->orderBy('last_name')
             ->orderBy('first_name')
             ->get();

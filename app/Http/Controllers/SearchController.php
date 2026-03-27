@@ -33,10 +33,10 @@ class SearchController extends Controller
                     ->where('church_id', $churchId)
                     ->take(5)
                     ->get()
-                    ->where('membership_status', '!=', Person::STATUS_GUEST);
+                    ->notGuest();
             } else {
                 $people = Person::where('church_id', $churchId)
-                    ->where('membership_status', '!=', Person::STATUS_GUEST)
+                    ->notGuest()
                     ->where(function ($q) use ($search) {
                         $q->where('first_name', 'like', "%{$search}%")
                             ->orWhere('last_name', 'like', "%{$search}%")

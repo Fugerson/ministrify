@@ -161,7 +161,7 @@ class VisitorFollowupService
                 ->where('membership_status', Person::STATUS_GUEST)
                 ->count(),
             'converted_this_month' => Person::where('church_id', $churchId)
-                ->where('membership_status', '!=', Person::STATUS_GUEST)
+                ->notGuest()
                 ->whereNotNull('first_visit_date')
                 ->where('updated_at', '>=', $thisMonth)
                 ->count(),

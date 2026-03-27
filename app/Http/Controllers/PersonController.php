@@ -56,7 +56,7 @@ class PersonController extends Controller
         // Calculate statistics using database aggregation (cached 1 hour)
         $stats = Cache::remember('people_stats_'.$church->id, 3600, function () use ($church, $churchRoles, $ministries) {
             $today = now();
-            $statsQuery = Person::where('church_id', $church->id)->where('membership_status', '!=', Person::STATUS_GUEST);
+            $statsQuery = Person::where('church_id', $church->id)->notGuest();
 
             // Total count (excludes guests — they belong to groups, not church members list)
             $totalCount = (clone $statsQuery)->count();
@@ -153,7 +153,7 @@ class PersonController extends Controller
         $church = $this->getCurrentChurch();
 
         $query = Person::where('church_id', $church->id)
-            ->where('membership_status', '!=', Person::STATUS_GUEST)
+            ->notGuest()
             ->with(['tags', 'ministries', 'churchRoleRelation', 'shepherd']);
 
         // Text search
@@ -1463,7 +1463,7 @@ class PersonController extends Controller
         $church = $this->getCurrentChurch();
 
         $people = Person::where('church_id', $church->id)
-            ->where('membership_status', '!=', Person::STATUS_GUEST)
+            ->notGuest()
             ->with('ministries')
             ->orderBy('last_name')
             ->orderBy('first_name')

@@ -329,7 +329,7 @@ class DashboardController extends Controller
         $cacheKey = "dashboard_stats_{$church->id}";
 
         return Cache::remember($cacheKey, 1800, function () use ($church) {
-            $peopleQuery = Person::where('church_id', $church->id)->where('membership_status', '!=', Person::STATUS_GUEST);
+            $peopleQuery = Person::where('church_id', $church->id)->notGuest();
             $today = now();
             $threeMonthsAgo = now()->subMonths(3);
             $ministryIds = $church->ministries()->pluck('id');
@@ -349,7 +349,7 @@ class DashboardController extends Controller
             $ageStatsRaw = DB::table('people')
                 ->where('church_id', $church->id)
                 ->whereNull('deleted_at')
-                ->where('membership_status', '!=', Person::STATUS_GUEST)
+                ->notGuest()
                 ->whereNotNull('birth_date')
                 ->selectRaw('
                     SUM(CASE WHEN TIMESTAMPDIFF(YEAR, birth_date, ?) <= 12 THEN 1 ELSE 0 END) as children,
@@ -369,7 +369,7 @@ class DashboardController extends Controller
             ];
 
             $peopleTrend = Person::where('church_id', $church->id)
-                ->where('membership_status', '!=', Person::STATUS_GUEST)
+                ->notGuest()
                 ->whereRaw('COALESCE(joined_date, first_visit_date, created_at) >= ?', [$threeMonthsAgo])->count();
             $volunteersThreeMonthsAgo = DB::table('ministry_person')
                 ->join('people', 'ministry_person.person_id', '=', 'people.id')
@@ -456,7 +456,7 @@ class DashboardController extends Controller
     private function loadBirthdaysThisMonth($church)
     {
         return Person::where('church_id', $church->id)
-            ->where('membership_status', '!=', Person::STATUS_GUEST)
+            ->notGuest()
             ->whereNotNull('birth_date')
             ->whereMonth('birth_date', now()->month)
             ->get()
@@ -674,7 +674,7 @@ class DashboardController extends Controller
         return $this->cacheService->remember('growth', $church, function () use ($church) {
             $sixMonthsAgo = now()->subMonths(5)->startOfMonth();
             $growthRaw = Person::where('church_id', $church->id)
-                ->where('membership_status', '!=', Person::STATUS_GUEST)
+                ->notGuest()
                 ->whereRaw('COALESCE(joined_date, first_visit_date, created_at) >= ?', [$sixMonthsAgo])
                 ->selectRaw('YEAR(COALESCE(joined_date, first_visit_date, created_at)) as year, MONTH(COALESCE(joined_date, first_visit_date, created_at)) as month, COUNT(*) as count')
                 ->groupBy('year', 'month')
@@ -806,7 +806,7 @@ class DashboardController extends Controller
         $startOfMonth = now()->startOfMonth()->toDateString();
 
         return Person::where('church_id', $church->id)
-            ->where('membership_status', '!=', Person::STATUS_GUEST)
+            ->notGuest()
             ->whereRaw('COALESCE(joined_date, first_visit_date, created_at) >= ?', [$startOfMonth])
             ->orderByDesc(DB::raw('COALESCE(joined_date, first_visit_date, created_at)'))
             ->limit(8)
@@ -1038,7 +1038,7 @@ class DashboardController extends Controller
 
     private function loadFamilyStats($church): array
     {
-        $totalPeople = Person::where('church_id', $church->id)->where('membership_status', '!=', Person::STATUS_GUEST)->count();
+        $totalPeople = Person::where('church_id', $church->id)->notGuest()->count();
 
         $totalRelationships = FamilyRelationship::whereHas('person', fn ($q) => $q->where('church_id', $church->id))
             ->count();
@@ -1260,7 +1260,7 @@ class DashboardController extends Controller
 
         $today = now();
         $people = Person::where('church_id', $church->id)
-            ->where('membership_status', '!=', Person::STATUS_GUEST)
+            ->notGuest()
             ->whereNotNull('birth_date')
             ->whereMonth('birth_date', $month)
             ->get()
@@ -1367,12 +1367,12 @@ class DashboardController extends Controller
         $twelveMonthsAgo = now()->subMonths(11)->startOfMonth();
 
         $cumulative = Person::where('church_id', $church->id)
-            ->where('membership_status', '!=', Person::STATUS_GUEST)
+            ->notGuest()
             ->whereRaw('COALESCE(joined_date, first_visit_date, created_at) < ?', [$twelveMonthsAgo])
             ->count();
 
         $growthRaw = Person::where('church_id', $church->id)
-            ->where('membership_status', '!=', Person::STATUS_GUEST)
+            ->notGuest()
             ->whereRaw('COALESCE(joined_date, first_visit_date, created_at) >= ?', [$twelveMonthsAgo])
             ->selectRaw('YEAR(COALESCE(joined_date, first_visit_date, created_at)) as year, MONTH(COALESCE(joined_date, first_visit_date, created_at)) as month, COUNT(*) as count')
             ->groupBy('year', 'month')
