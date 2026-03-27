@@ -1290,21 +1290,12 @@ class DashboardController extends Controller
                 $data = $this->getAttendanceChartData($church);
                 break;
             case 'growth':
-                if (! $user->canView('people')) {
-                    abort(403, 'Немає доступу до даних росту');
-                }
                 $data = $this->getGrowthChartData($church);
                 break;
             case 'financial':
-                if (! $user->canView('finances')) {
-                    abort(403, 'Немає доступу до фінансових даних');
-                }
-                $data = $this->getFinancialChartData($church);
+                $data = $user->canView('finances') ? $this->getFinancialChartData($church) : [];
                 break;
             case 'ministries':
-                if (! $user->canView('ministries')) {
-                    abort(403, 'Немає доступу до даних служінь');
-                }
                 $data = $this->getMinistriesChartData($church);
                 break;
             default:
@@ -1316,8 +1307,6 @@ class DashboardController extends Controller
 
     public function calendarEventsApi(Request $request)
     {
-        abort_unless(auth()->user()->canView('events'), 403);
-
         $church = $this->getCurrentChurch();
         $month = (int) $request->get('month', now()->month);
         $year = (int) $request->get('year', now()->year);
