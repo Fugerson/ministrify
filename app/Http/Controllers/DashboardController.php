@@ -349,7 +349,7 @@ class DashboardController extends Controller
             $ageStatsRaw = DB::table('people')
                 ->where('church_id', $church->id)
                 ->whereNull('deleted_at')
-                ->notGuest()
+                ->where(fn ($q) => $q->where('membership_status', '!=', Person::STATUS_GUEST)->orWhereNull('membership_status'))
                 ->whereNotNull('birth_date')
                 ->selectRaw('
                     SUM(CASE WHEN TIMESTAMPDIFF(YEAR, birth_date, ?) <= 12 THEN 1 ELSE 0 END) as children,
