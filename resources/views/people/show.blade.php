@@ -61,7 +61,7 @@
         <div class="px-6 pb-6 -mt-12">
             <div class="flex flex-col sm:flex-row sm:items-end gap-4">
                 <!-- Avatar -->
-                <div class="flex-shrink-0 relative" x-data="avatarUpload()">
+                <div class="flex-shrink-0 relative overflow-hidden rounded-2xl" x-data="avatarUpload()">
                     @if($canEdit)
                         <template x-if="preview">
                             <img :src="preview" class="w-24 h-24 rounded-2xl object-cover border-4 border-white dark:border-gray-800 shadow-lg">
@@ -83,14 +83,14 @@
                             </svg>
                         </label>
                         <button type="button" x-show="preview || existingPhoto" @click="removePhoto()"
-                                class="absolute -top-1 -right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors">
+                                class="absolute top-0 right-0 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors shadow-sm">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                             </svg>
                         </button>
                         @if($person->photo_full || $person->photo)
                         <button type="button" x-show="!preview && existingPhoto" @click.prevent="window.dispatchEvent(new CustomEvent('open-full-photo'))"
-                                class="absolute -bottom-1 -right-1 w-6 h-6 bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors shadow-sm border border-gray-200 dark:border-gray-600">
+                                class="absolute bottom-0 right-0 w-6 h-6 bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors shadow-sm border border-gray-200 dark:border-gray-600">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
                             </svg>
