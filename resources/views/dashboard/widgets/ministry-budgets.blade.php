@@ -9,7 +9,10 @@
         @foreach($ministryBudgets as $budget)
         <div>
             <div class="flex items-center justify-between mb-2">
-                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $budget['icon'] }} {{ $budget['name'] }}</span>
+                <span class="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
+                    <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background-color: {{ $budget['color'] ?? '#3b82f6' }}"></span>
+                    {{ $budget['name'] }}
+                </span>
                 <span class="text-sm text-gray-500 dark:text-gray-400">
                     {{ number_format($budget['spent'], 0, ',', ' ') }} / {{ number_format($budget['budget'], 0, ',', ' ') }} ₴
                 </span>
