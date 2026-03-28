@@ -8,6 +8,7 @@ use App\Models\Person;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class ChurchRoleControllerTest extends TestCase
@@ -259,7 +260,7 @@ class ChurchRoleControllerTest extends TestCase
 
         // Move admin user to the last role before deleting others
         $this->admin->update(['church_role_id' => $lastRole->id]);
-        \Illuminate\Support\Facades\DB::table('church_user')
+        DB::table('church_user')
             ->where('user_id', $this->admin->id)
             ->where('church_id', $this->church->id)
             ->update(['church_role_id' => $lastRole->id]);

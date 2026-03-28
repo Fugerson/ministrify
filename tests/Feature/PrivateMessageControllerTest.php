@@ -6,6 +6,7 @@ use App\Models\Church;
 use App\Models\PrivateMessage;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Tests\TestCase;
 
@@ -80,7 +81,7 @@ class PrivateMessageControllerTest extends TestCase
 
     public function test_user_can_view_pm_index(): void
     {
-        if (\Illuminate\Support\Facades\DB::getDriverName() === 'sqlite') {
+        if (DB::getDriverName() === 'sqlite') {
             $this->markTestSkipped('PM index uses MySQL-specific LEAST/GREATEST functions.');
         }
 
@@ -91,7 +92,7 @@ class PrivateMessageControllerTest extends TestCase
 
     public function test_index_shows_conversations(): void
     {
-        if (\Illuminate\Support\Facades\DB::getDriverName() === 'sqlite') {
+        if (DB::getDriverName() === 'sqlite') {
             $this->markTestSkipped('PM index uses MySQL-specific LEAST/GREATEST functions.');
         }
 
@@ -439,7 +440,7 @@ class PrivateMessageControllerTest extends TestCase
 
     public function test_index_only_shows_conversations_from_own_church(): void
     {
-        if (\Illuminate\Support\Facades\DB::getDriverName() === 'sqlite') {
+        if (DB::getDriverName() === 'sqlite') {
             $this->markTestSkipped('PM index uses MySQL-specific LEAST/GREATEST functions.');
         }
 

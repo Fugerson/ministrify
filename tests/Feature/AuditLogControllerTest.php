@@ -7,6 +7,7 @@ use App\Models\Church;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class AuditLogControllerTest extends TestCase
@@ -119,7 +120,7 @@ class AuditLogControllerTest extends TestCase
     {
         $oldLog = $this->createAuditLog(['model_name' => 'Old Entry']);
         // Use DB::table to bypass model events/timestamps and set created_at directly
-        \Illuminate\Support\Facades\DB::table('audit_logs')
+        DB::table('audit_logs')
             ->where('id', $oldLog->id)
             ->update(['created_at' => now()->subDays(30)]);
 

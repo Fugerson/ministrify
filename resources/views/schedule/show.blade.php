@@ -367,7 +367,7 @@
             <div x-show="isSectionVisible('plan') || isSectionVisible('team')" x-collapse.duration.300ms
                  x-data="{ blockCollapsed: localStorage.getItem('plan_team_collapsed') === 'true' }"
                  x-init="$watch('blockCollapsed', val => localStorage.setItem('plan_team_collapsed', val))"
-                 class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
+                 class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
                 {{-- Collapsible header --}}
                 <button type="button" @click="blockCollapsed = !blockCollapsed"
                         class="w-full px-3 sm:px-5 py-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors"
@@ -479,7 +479,7 @@
 
                 <div>
                 <div class="overflow-x-auto" style="min-height: 300px;">
-                    <table class="w-full text-sm min-w-[480px] sm:min-w-0" style="table-layout: fixed;">
+                    <table class="w-full text-sm" style="table-layout: fixed;">
                         <thead class="bg-gray-50 dark:bg-gray-700/50 text-[10px] uppercase text-gray-500 dark:text-gray-400 sticky top-0 z-10">
                             <tr>
                                 <th class="px-0.5 py-2" style="width: 24px;"></th>

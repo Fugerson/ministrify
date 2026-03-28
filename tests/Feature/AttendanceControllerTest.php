@@ -6,6 +6,7 @@ use App\Models\Attendance;
 use App\Models\AttendanceRecord;
 use App\Models\Church;
 use App\Models\Event;
+use App\Models\Ministry;
 use App\Models\Person;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -87,12 +88,12 @@ class AttendanceControllerTest extends TestCase
 
     public function test_create_with_event_preselects_event(): void
     {
-        $ministry = \App\Models\Ministry::factory()->forChurch($this->church)->create();
+        $ministry = Ministry::factory()->forChurch($this->church)->create();
         $event = Event::factory()->forMinistry($ministry)->create([
             'date' => now()->format('Y-m-d'),
         ]);
 
-        $response = $this->actingAs($this->admin)->get('/attendance/create?event=' . $event->id);
+        $response = $this->actingAs($this->admin)->get('/attendance/create?event='.$event->id);
 
         $response->assertStatus(200);
     }
@@ -100,10 +101,10 @@ class AttendanceControllerTest extends TestCase
     public function test_create_with_other_church_event_returns_404(): void
     {
         $otherChurch = Church::factory()->create();
-        $otherMinistry = \App\Models\Ministry::factory()->forChurch($otherChurch)->create();
+        $otherMinistry = Ministry::factory()->forChurch($otherChurch)->create();
         $event = Event::factory()->forMinistry($otherMinistry)->create();
 
-        $response = $this->actingAs($this->admin)->get('/attendance/create?event=' . $event->id);
+        $response = $this->actingAs($this->admin)->get('/attendance/create?event='.$event->id);
 
         $response->assertStatus(404);
     }
@@ -149,7 +150,7 @@ class AttendanceControllerTest extends TestCase
 
     public function test_store_attendance_with_event(): void
     {
-        $ministry = \App\Models\Ministry::factory()->forChurch($this->church)->create();
+        $ministry = Ministry::factory()->forChurch($this->church)->create();
         $event = Event::factory()->forMinistry($ministry)->create([
             'date' => now()->format('Y-m-d'),
         ]);
@@ -174,7 +175,7 @@ class AttendanceControllerTest extends TestCase
             $this->markTestSkipped('SQLite stores dates with time component, breaking date-only comparison in duplicate check');
         }
 
-        $ministry = \App\Models\Ministry::factory()->forChurch($this->church)->create();
+        $ministry = Ministry::factory()->forChurch($this->church)->create();
         $event = Event::factory()->forMinistry($ministry)->create([
             'date' => now()->format('Y-m-d'),
         ]);
@@ -237,7 +238,7 @@ class AttendanceControllerTest extends TestCase
     public function test_store_with_event_from_other_church_fails_validation(): void
     {
         $otherChurch = Church::factory()->create();
-        $otherMinistry = \App\Models\Ministry::factory()->forChurch($otherChurch)->create();
+        $otherMinistry = Ministry::factory()->forChurch($otherChurch)->create();
         $otherEvent = Event::factory()->forMinistry($otherMinistry)->create();
 
         $response = $this->actingAs($this->admin)->post('/attendance', [
@@ -284,7 +285,7 @@ class AttendanceControllerTest extends TestCase
     {
         $attendance = Attendance::factory()->forChurch($this->church)->create();
 
-        $response = $this->actingAs($this->admin)->get('/attendance/' . $attendance->id);
+        $response = $this->actingAs($this->admin)->get('/attendance/'.$attendance->id);
 
         $response->assertStatus(200);
     }
@@ -294,7 +295,7 @@ class AttendanceControllerTest extends TestCase
         $otherChurch = Church::factory()->create();
         $attendance = Attendance::factory()->forChurch($otherChurch)->create();
 
-        $response = $this->actingAs($this->admin)->get('/attendance/' . $attendance->id);
+        $response = $this->actingAs($this->admin)->get('/attendance/'.$attendance->id);
 
         $response->assertStatus(404);
     }
@@ -307,7 +308,7 @@ class AttendanceControllerTest extends TestCase
     {
         $attendance = Attendance::factory()->forChurch($this->church)->create();
 
-        $response = $this->actingAs($this->admin)->get('/attendance/' . $attendance->id . '/edit');
+        $response = $this->actingAs($this->admin)->get('/attendance/'.$attendance->id.'/edit');
 
         $response->assertStatus(200);
     }
@@ -317,7 +318,7 @@ class AttendanceControllerTest extends TestCase
         $otherChurch = Church::factory()->create();
         $attendance = Attendance::factory()->forChurch($otherChurch)->create();
 
-        $response = $this->actingAs($this->admin)->get('/attendance/' . $attendance->id . '/edit');
+        $response = $this->actingAs($this->admin)->get('/attendance/'.$attendance->id.'/edit');
 
         $response->assertStatus(404);
     }
@@ -335,7 +336,7 @@ class AttendanceControllerTest extends TestCase
         $attendance = Attendance::factory()->forChurch($this->church)->create();
         $person = Person::factory()->create(['church_id' => $this->church->id]);
 
-        $response = $this->actingAs($this->admin)->put('/attendance/' . $attendance->id, [
+        $response = $this->actingAs($this->admin)->put('/attendance/'.$attendance->id, [
             'total_count' => 75,
             'notes' => 'Updated notes',
             'present' => [$person->id],
@@ -365,7 +366,7 @@ class AttendanceControllerTest extends TestCase
         ]);
 
         // Update with different person
-        $response = $this->actingAs($this->admin)->put('/attendance/' . $attendance->id, [
+        $response = $this->actingAs($this->admin)->put('/attendance/'.$attendance->id, [
             'total_count' => 50,
             'present' => [$person2->id],
         ]);
@@ -380,7 +381,7 @@ class AttendanceControllerTest extends TestCase
         $otherChurch = Church::factory()->create();
         $attendance = Attendance::factory()->forChurch($otherChurch)->create();
 
-        $response = $this->actingAs($this->admin)->put('/attendance/' . $attendance->id, [
+        $response = $this->actingAs($this->admin)->put('/attendance/'.$attendance->id, [
             'total_count' => 99,
         ]);
 
@@ -398,7 +399,7 @@ class AttendanceControllerTest extends TestCase
         $otherPerson = Person::factory()->create(['church_id' => $otherChurch->id]);
         $ownPerson = Person::factory()->create(['church_id' => $this->church->id]);
 
-        $response = $this->actingAs($this->admin)->put('/attendance/' . $attendance->id, [
+        $response = $this->actingAs($this->admin)->put('/attendance/'.$attendance->id, [
             'total_count' => 50,
             'present' => [$ownPerson->id, $otherPerson->id],
         ]);
@@ -416,7 +417,7 @@ class AttendanceControllerTest extends TestCase
     {
         $attendance = Attendance::factory()->forChurch($this->church)->create();
 
-        $response = $this->actingAs($this->admin)->delete('/attendance/' . $attendance->id);
+        $response = $this->actingAs($this->admin)->delete('/attendance/'.$attendance->id);
 
         $response->assertRedirect();
         // Attendance model does not use SoftDeletes trait, check it's gone
@@ -428,7 +429,7 @@ class AttendanceControllerTest extends TestCase
         $otherChurch = Church::factory()->create();
         $attendance = Attendance::factory()->forChurch($otherChurch)->create();
 
-        $response = $this->actingAs($this->admin)->delete('/attendance/' . $attendance->id);
+        $response = $this->actingAs($this->admin)->delete('/attendance/'.$attendance->id);
 
         $response->assertStatus(404);
     }
@@ -440,7 +441,7 @@ class AttendanceControllerTest extends TestCase
 
         $attendance = Attendance::factory()->forChurch($this->church)->create();
 
-        $response = $this->actingAs($volunteer)->delete('/attendance/' . $attendance->id);
+        $response = $this->actingAs($volunteer)->delete('/attendance/'.$attendance->id);
 
         $response->assertStatus(403);
     }
@@ -551,7 +552,7 @@ class AttendanceControllerTest extends TestCase
         $otherChurch = Church::factory()->create(['attendance_enabled' => true]);
         $otherAttendance = Attendance::factory()->forChurch($otherChurch)->create();
 
-        $response = $this->actingAs($this->admin)->get('/attendance/' . $otherAttendance->id);
+        $response = $this->actingAs($this->admin)->get('/attendance/'.$otherAttendance->id);
 
         $response->assertStatus(404);
     }
@@ -561,7 +562,7 @@ class AttendanceControllerTest extends TestCase
         $otherChurch = Church::factory()->create();
         $otherAttendance = Attendance::factory()->forChurch($otherChurch)->create();
 
-        $response = $this->actingAs($this->admin)->put('/attendance/' . $otherAttendance->id, [
+        $response = $this->actingAs($this->admin)->put('/attendance/'.$otherAttendance->id, [
             'total_count' => 99,
         ]);
 
@@ -573,7 +574,7 @@ class AttendanceControllerTest extends TestCase
         $otherChurch = Church::factory()->create();
         $otherAttendance = Attendance::factory()->forChurch($otherChurch)->create();
 
-        $response = $this->actingAs($this->admin)->delete('/attendance/' . $otherAttendance->id);
+        $response = $this->actingAs($this->admin)->delete('/attendance/'.$otherAttendance->id);
 
         $response->assertStatus(404);
     }

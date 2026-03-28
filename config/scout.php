@@ -1,5 +1,9 @@
 <?php
 
+use App\Models\Event;
+use App\Models\Person;
+use App\Models\Song;
+
 return [
 
     /*
@@ -140,17 +144,17 @@ return [
         'host' => env('MEILISEARCH_HOST', 'http://localhost:7700'),
         'key' => env('MEILISEARCH_KEY'),
         'index-settings' => [
-            App\Models\Person::class => [
+            Person::class => [
                 'filterableAttributes' => ['church_id', 'membership_status', 'gender'],
                 'sortableAttributes' => ['first_name', 'last_name'],
                 'searchableAttributes' => ['first_name', 'last_name', 'email', 'phone'],
             ],
-            App\Models\Song::class => [
+            Song::class => [
                 'filterableAttributes' => ['church_id'],
                 'sortableAttributes' => ['title'],
                 'searchableAttributes' => ['title', 'artist', 'lyrics'],
             ],
-            App\Models\Event::class => [
+            Event::class => [
                 'filterableAttributes' => ['church_id'],
                 'sortableAttributes' => ['date'],
                 'searchableAttributes' => ['title', 'notes', 'location'],

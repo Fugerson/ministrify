@@ -12,10 +12,15 @@ use Livewire\Component;
 class AttendanceCheckin extends Component
 {
     public Attendance $attendance;
+
     public array $presentIds = [];
+
     public string $search = '';
+
     public int $totalCount = 0;
+
     public int $guestsCount = 0;
+
     public string $notes = '';
 
     public function mount(Attendance $attendance): void

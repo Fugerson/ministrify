@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
+use Sentry\Event;
 use Sentry\State\Scope;
 
 class AppServiceProvider extends ServiceProvider
@@ -32,7 +33,7 @@ class AppServiceProvider extends ServiceProvider
         // Sentry: add multi-tenant context (church_id) to all error reports
         if (app()->bound('sentry')) {
             \Sentry\configureScope(function (Scope $scope): void {
-                $scope->addEventProcessor(function (\Sentry\Event $event) {
+                $scope->addEventProcessor(function (Event $event) {
                     if ($user = auth()->user()) {
                         $event->setUser([
                             'id' => $user->id,

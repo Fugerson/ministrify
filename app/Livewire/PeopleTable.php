@@ -46,6 +46,7 @@ class PeopleTable extends Component
     public int $perPage = 25;
 
     public array $selectedIds = [];
+
     public bool $selectAll = false;
 
     protected int $churchId;

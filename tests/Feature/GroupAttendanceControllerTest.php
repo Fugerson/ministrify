@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Models\Attendance;
-use App\Models\AttendanceRecord;
 use App\Models\Church;
 use App\Models\Group;
 use App\Models\Person;

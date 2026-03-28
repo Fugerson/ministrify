@@ -9,6 +9,7 @@ use App\Models\Person;
 use App\Rules\BelongsToChurch;
 use App\Services\DashboardCacheService;
 use App\Services\ImageService;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 
 class GroupController extends Controller
@@ -223,7 +224,7 @@ class GroupController extends Controller
                 'role' => $validated['role'] ?? 'member',
                 'joined_at' => now(),
             ]);
-        } catch (\Illuminate\Database\QueryException $e) {
+        } catch (QueryException $e) {
             // Unique constraint violation — person is already a member
             if ($e->errorInfo[1] === 1062 || str_contains($e->getMessage(), 'Duplicate entry')) {
                 return $this->errorResponse($request, 'Ця людина вже є учасником групи.');

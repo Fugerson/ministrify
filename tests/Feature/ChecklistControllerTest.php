@@ -3,13 +3,11 @@
 namespace Tests\Feature;
 
 use App\Models\ChecklistTemplate;
-use App\Models\ChecklistTemplateItem;
 use App\Models\Church;
 use App\Models\Event;
 use App\Models\EventChecklist;
 use App\Models\EventChecklistItem;
 use App\Models\Ministry;
-use App\Models\Person;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
@@ -51,7 +49,7 @@ class ChecklistControllerTest extends TestCase
 
         for ($i = 0; $i < $itemCount; $i++) {
             $template->items()->create([
-                'title' => "Item ".($i + 1),
+                'title' => 'Item '.($i + 1),
                 'order' => $i,
             ]);
         }

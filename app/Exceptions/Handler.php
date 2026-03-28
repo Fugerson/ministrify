@@ -53,7 +53,7 @@ class Handler extends ExceptionHandler
     protected function saveErrorToDatabase(Throwable $e): void
     {
         try {
-            $hash = md5($e->getFile() . $e->getLine() . $e->getMessage());
+            $hash = md5($e->getFile().$e->getLine().$e->getMessage());
 
             $existing = ErrorLog::where('hash', $hash)
                 ->where('status', '!=', 'resolved')
@@ -100,7 +100,7 @@ class Handler extends ExceptionHandler
         }
 
         // Throttle: max 1 message per same error per 5 minutes
-        $cacheKey = 'error_tg_' . md5($e->getFile() . $e->getLine() . $e->getMessage());
+        $cacheKey = 'error_tg_'.md5($e->getFile().$e->getLine().$e->getMessage());
         if (cache()->has($cacheKey)) {
             return;
         }
@@ -111,11 +111,11 @@ class Handler extends ExceptionHandler
         $userId = $user ? "#{$user->id} {$user->name}" : 'guest';
 
         $message = "🔴 *500 Error*\n\n";
-        $message .= "📝 `" . mb_substr($e->getMessage(), 0, 200) . "`\n";
-        $message .= "📁 `" . basename($e->getFile()) . ":" . $e->getLine() . "`\n";
-        $message .= "🔗 `" . mb_substr($url, 0, 150) . "`\n";
+        $message .= '📝 `'.mb_substr($e->getMessage(), 0, 200)."`\n";
+        $message .= '📁 `'.basename($e->getFile()).':'.$e->getLine()."`\n";
+        $message .= '🔗 `'.mb_substr($url, 0, 150)."`\n";
         $message .= "👤 {$userId}\n";
-        $message .= "⏰ " . now()->format('H:i:s d.m.Y');
+        $message .= '⏰ '.now()->format('H:i:s d.m.Y');
 
         try {
             Http::timeout(5)->post("https://api.telegram.org/bot{$botToken}/sendMessage", [
@@ -124,7 +124,7 @@ class Handler extends ExceptionHandler
                 'parse_mode' => 'Markdown',
             ]);
         } catch (\Exception $ex) {
-            Log::warning('Failed to send error to Telegram: ' . $ex->getMessage());
+            Log::warning('Failed to send error to Telegram: '.$ex->getMessage());
         }
     }
 }

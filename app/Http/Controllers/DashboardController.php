@@ -545,41 +545,41 @@ class DashboardController extends Controller
     private function loadMinistryBudgets($church)
     {
         return $this->cacheService->remember('budgets', $church, function () use ($church) {
-        $ministries = $church->ministries()
-            ->whereNotNull('monthly_budget')
-            ->where('monthly_budget', '>', 0)
-            ->get();
+            $ministries = $church->ministries()
+                ->whereNotNull('monthly_budget')
+                ->where('monthly_budget', '>', 0)
+                ->get();
 
-        if ($ministries->isEmpty()) {
-            return collect();
-        }
+            if ($ministries->isEmpty()) {
+                return collect();
+            }
 
-        // Batch query spending for all ministries at once (avoids N+1 from spent_this_month accessor)
-        $spentByMinistry = Transaction::where('church_id', $church->id)
-            ->where('direction', Transaction::DIRECTION_OUT)
-            ->where('source_type', '!=', Transaction::SOURCE_ALLOCATION)
-            ->completed()
-            ->forMonth(now()->year, now()->month)
-            ->whereIn('ministry_id', $ministries->pluck('id'))
-            ->selectRaw('ministry_id, SUM(COALESCE(amount_uah, amount)) as total')
-            ->groupBy('ministry_id')
-            ->pluck('total', 'ministry_id');
+            // Batch query spending for all ministries at once (avoids N+1 from spent_this_month accessor)
+            $spentByMinistry = Transaction::where('church_id', $church->id)
+                ->where('direction', Transaction::DIRECTION_OUT)
+                ->where('source_type', '!=', Transaction::SOURCE_ALLOCATION)
+                ->completed()
+                ->forMonth(now()->year, now()->month)
+                ->whereIn('ministry_id', $ministries->pluck('id'))
+                ->selectRaw('ministry_id, SUM(COALESCE(amount_uah, amount)) as total')
+                ->groupBy('ministry_id')
+                ->pluck('total', 'ministry_id');
 
-        return $ministries->map(function ($m) use ($spentByMinistry) {
-            $spent = (float) ($spentByMinistry[$m->id] ?? 0);
-            $percentage = $m->monthly_budget > 0
-                ? min(100, round(($spent / $m->monthly_budget) * 100, 1))
-                : 0;
+            return $ministries->map(function ($m) use ($spentByMinistry) {
+                $spent = (float) ($spentByMinistry[$m->id] ?? 0);
+                $percentage = $m->monthly_budget > 0
+                    ? min(100, round(($spent / $m->monthly_budget) * 100, 1))
+                    : 0;
 
-            return [
-                'name' => $m->name,
-                'icon' => $m->icon ?? '⛪',
-                'color' => $m->color,
-                'budget' => $m->monthly_budget,
-                'spent' => $spent,
-                'percentage' => $percentage,
-            ];
-        });
+                return [
+                    'name' => $m->name,
+                    'icon' => $m->icon ?? '⛪',
+                    'color' => $m->color,
+                    'budget' => $m->monthly_budget,
+                    'spent' => $spent,
+                    'percentage' => $percentage,
+                ];
+            });
         });
     }
 

@@ -9,7 +9,6 @@ use App\Models\Person;
 use App\Models\ServicePlanItem;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class ServicePlanControllerTest extends TestCase

@@ -62,7 +62,7 @@ class ErrorLog extends Model
     public function getShortMessageAttribute(): string
     {
         return mb_strlen($this->message) > 120
-            ? mb_substr($this->message, 0, 120) . '…'
+            ? mb_substr($this->message, 0, 120).'…'
             : $this->message;
     }
 }

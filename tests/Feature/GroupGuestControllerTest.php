@@ -66,7 +66,7 @@ class GroupGuestControllerTest extends TestCase
             'birth_date' => '1990-05-15',
         ]);
 
-        $guest = \App\Models\GroupGuest::where('group_id', $this->group->id)
+        $guest = GroupGuest::where('group_id', $this->group->id)
             ->where('first_name', 'Anna')
             ->first();
         $this->assertNotNull($guest);

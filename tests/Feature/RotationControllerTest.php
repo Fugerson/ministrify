@@ -10,7 +10,6 @@ use App\Models\Person;
 use App\Models\Position;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class RotationControllerTest extends TestCase

@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Church;
+use App\Models\ChurchRolePermission;
 use App\Models\FamilyRelationship;
 use App\Models\Person;
 use App\Models\User;
@@ -460,7 +461,7 @@ class FamilyRelationshipControllerTest extends TestCase
     {
         $volunteer = $this->createUserWithRole($this->church, 'volunteer');
         // setPermissions([]) is a no-op — must delete existing permissions to truly clear them
-        \App\Models\ChurchRolePermission::where('church_role_id', $volunteer->church_role_id)->delete();
+        ChurchRolePermission::where('church_role_id', $volunteer->church_role_id)->delete();
 
         $person = Person::factory()->forChurch($this->church)->create();
 

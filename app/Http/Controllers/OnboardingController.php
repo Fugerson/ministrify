@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\ChurchRole;
-use App\Models\Ministry;
 use App\Models\Person;
 use App\Models\User;
 use App\Services\ImageService;
@@ -263,6 +262,7 @@ class OnboardingController extends Controller
                     $ids[] = $ministry->id;
                 }
             }
+
             return $ids;
         });
 
@@ -307,6 +307,7 @@ class OnboardingController extends Controller
                     ]);
                     $ids[] = $person->id;
                 }
+
                 return $ids;
             });
         } elseif ($mode === 'csv') {

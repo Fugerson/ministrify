@@ -6,8 +6,8 @@ use App\Mail\SupportTicketReply;
 use App\Models\AdminTask;
 use App\Models\AuditLog;
 use App\Models\Church;
-use App\Models\ErrorLog;
 use App\Models\ChurchRole;
+use App\Models\ErrorLog;
 use App\Models\Event;
 use App\Models\PageVisit;
 use App\Models\Person;
@@ -1392,10 +1392,10 @@ class SystemAdminController extends Controller
 
         // Chart data — errors per day for last 30 days
         $chartData = ErrorLog::select(
-                DB::raw('DATE(last_seen_at) as date'),
-                DB::raw('COUNT(*) as unique_errors'),
-                DB::raw('SUM(occurrences) as total_occurrences')
-            )
+            DB::raw('DATE(last_seen_at) as date'),
+            DB::raw('COUNT(*) as unique_errors'),
+            DB::raw('SUM(occurrences) as total_occurrences')
+        )
             ->where('last_seen_at', '>=', now()->subDays(30))
             ->groupBy('date')
             ->orderBy('date')

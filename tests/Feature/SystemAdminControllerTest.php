@@ -104,7 +104,7 @@ class SystemAdminControllerTest extends TestCase
             'city' => 'Kyiv',
             'address' => 'Test Address 123',
             'admin_name' => 'New Admin',
-            'admin_email' => 'newadmin-' . uniqid() . '@example.com',
+            'admin_email' => 'newadmin-'.uniqid().'@example.com',
             'admin_password' => 'password123',
         ]);
 
@@ -195,7 +195,7 @@ class SystemAdminControllerTest extends TestCase
 
     public function test_users_list_supports_search(): void
     {
-        $response = $this->actingAs($this->superAdmin)->get('/system-admin/users?search=' . urlencode($this->superAdmin->email));
+        $response = $this->actingAs($this->superAdmin)->get('/system-admin/users?search='.urlencode($this->superAdmin->email));
 
         $response->assertStatus(200);
     }

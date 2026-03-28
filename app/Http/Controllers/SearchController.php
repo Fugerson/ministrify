@@ -27,28 +27,15 @@ class SearchController extends Controller
         $results = [];
 
         // Search people (Scout or LIKE fallback)
-        {
-            try {
-                if ($useScout) {
-                    $people = Person::search($query)
-                        ->where('church_id', $churchId)
-                        ->take(5)
-                        ->get()
-                        ->reject(fn ($p) => $p->membership_status === Person::STATUS_GUEST);
-                } else {
-                    $people = Person::where('church_id', $churchId)
-                        ->notGuest()
-                        ->where(function ($q) use ($search) {
-                            $q->where('first_name', 'like', "%{$search}%")
-                                ->orWhere('last_name', 'like', "%{$search}%")
-                                ->orWhere('phone', 'like', "%{$search}%")
-                                ->orWhere('email', 'like', "%{$search}%");
-                        })
-                        ->limit(5)
-                        ->get();
-                }
-            } catch (\Exception $e) {
-                // Meilisearch unavailable — fallback to LIKE
+
+        try {
+            if ($useScout) {
+                $people = Person::search($query)
+                    ->where('church_id', $churchId)
+                    ->take(5)
+                    ->get()
+                    ->reject(fn ($p) => $p->membership_status === Person::STATUS_GUEST);
+            } else {
                 $people = Person::where('church_id', $churchId)
                     ->notGuest()
                     ->where(function ($q) use ($search) {
@@ -60,16 +47,28 @@ class SearchController extends Controller
                     ->limit(5)
                     ->get();
             }
+        } catch (\Exception $e) {
+            // Meilisearch unavailable — fallback to LIKE
+            $people = Person::where('church_id', $churchId)
+                ->notGuest()
+                ->where(function ($q) use ($search) {
+                    $q->where('first_name', 'like', "%{$search}%")
+                        ->orWhere('last_name', 'like', "%{$search}%")
+                        ->orWhere('phone', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                })
+                ->limit(5)
+                ->get();
+        }
 
-            foreach ($people as $person) {
-                $results[] = [
-                    'type' => 'person',
-                    'icon' => 'user',
-                    'title' => $person->full_name,
-                    'subtitle' => $this->maskContact($person->phone, $person->email),
-                    'url' => route('people.show', $person),
-                ];
-            }
+        foreach ($people as $person) {
+            $results[] = [
+                'type' => 'person',
+                'icon' => 'user',
+                'title' => $person->full_name,
+                'subtitle' => $this->maskContact($person->phone, $person->email),
+                'url' => route('people.show', $person),
+            ];
         }
 
         // Search ministries (LIKE — not indexed in Meilisearch)
