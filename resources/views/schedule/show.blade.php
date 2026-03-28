@@ -482,19 +482,19 @@
                     <table class="w-full text-sm">
                         <thead class="bg-gray-50 dark:bg-gray-700/50 text-[10px] uppercase text-gray-500 dark:text-gray-400 sticky top-0 z-10">
                             <tr>
-                                <th class="px-0.5 py-2 w-6"></th>
+                                <th class="px-0.5 py-2 w-6 hidden sm:table-cell"></th>
                                 <th class="px-1 sm:px-2 py-2 text-left whitespace-nowrap">{{ __('app.schedule_time_col') }}</th>
                                 <th class="px-1 sm:px-2 py-2 text-left">{{ __('app.schedule_what_happens') }}</th>
-                                <th class="px-1 sm:px-2 py-2 text-left whitespace-nowrap hidden sm:table-cell">{{ __('app.schedule_responsible') }}</th>
-                                <th class="px-1 sm:px-2 py-2 text-left hidden sm:table-cell">{{ __('app.schedule_comments') }}</th>
-                                <th class="px-1 py-2 w-8"></th>
+                                <th class="px-1 sm:px-2 py-2 text-left whitespace-nowrap">{{ __('app.schedule_responsible') }}</th>
+                                <th class="px-1 sm:px-2 py-2 text-left">{{ __('app.schedule_comments') }}</th>
+                                <th class="px-1 py-2 w-8 hidden sm:table-cell"></th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                             @forelse($event->planItems->sortBy('sort_order') as $item)
                                 <tr class="hover:bg-blue-50/50 dark:hover:bg-gray-700/50 group" data-id="{{ $item->id }}">
                                     {{-- Drag handle --}}
-                                    <td class="px-0.5 py-1.5 cursor-grab active:cursor-grabbing drag-handle">
+                                    <td class="px-0.5 py-1.5 cursor-grab active:cursor-grabbing drag-handle hidden sm:table-cell">
                                         <svg class="w-4 h-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" fill="currentColor" viewBox="0 0 24 24">
                                             <circle cx="9" cy="5" r="1.5"/><circle cx="15" cy="5" r="1.5"/>
                                             <circle cx="9" cy="10" r="1.5"/><circle cx="15" cy="10" r="1.5"/>
@@ -507,7 +507,7 @@
                                         <input type="time"
                                                value="{{ $item->start_time ? \Carbon\Carbon::parse($item->start_time)->format('H:i') : '' }}"
                                                @change="updateField({{ $item->id }}, 'start_time', $event.target.value)"
-                                               class="min-w-[3.5rem] sm:min-w-[4.5rem] px-1 py-1 text-xs font-bold text-primary-800 dark:text-white bg-primary-50 dark:bg-primary-800/50 border border-primary-200 dark:border-primary-600 rounded focus:ring-1 focus:ring-primary-500 focus:border-primary-500 cursor-pointer">
+                                               class="w-[3rem] sm:min-w-[4.5rem] px-0.5 sm:px-1 py-0.5 sm:py-1 text-[10px] sm:text-xs font-bold text-primary-800 dark:text-white bg-primary-50 dark:bg-primary-800/50 border border-primary-200 dark:border-primary-600 rounded focus:ring-1 focus:ring-primary-500 focus:border-primary-500 cursor-pointer">
                                     </td>
                                     {{-- Що відбувається - єдиний підхід з інлайн посиланнями на пісні --}}
                                     @php
@@ -601,7 +601,7 @@
                                         $declinedCount = count(array_filter($existingPeople, fn($p) => ($p['status'] ?? null) === 'declined'));
                                         $notAskedCount = count(array_filter($existingPeople, fn($p) => ($p['status'] ?? null) === null && $p['hasTelegram']));
                                     @endphp
-                                    <td class="px-1 sm:px-1.5 py-1.5 border-r border-gray-200 dark:border-gray-700 align-top transition-colors overflow-hidden hidden sm:table-cell"
+                                    <td class="px-1 sm:px-1.5 py-1.5 border-r border-gray-200 dark:border-gray-700 align-top transition-colors overflow-hidden"
                                         data-plan-item-id="{{ $item->id }}"
                                         x-data="responsibleEditor({{ $item->id }}, {{ json_encode($existingPeople) }})"
                                         @dragover.prevent
@@ -714,7 +714,7 @@
                                         </div>
                                     </td>
                                     {{-- Коментарі --}}
-                                    <td class="px-1 sm:px-1.5 py-1.5 border-r border-gray-200 dark:border-gray-700 align-top hidden sm:table-cell">
+                                    <td class="px-1 sm:px-1.5 py-1.5 border-r border-gray-200 dark:border-gray-700 align-top">
                                         <textarea placeholder="{{ __('app.schedule_notes_placeholder') }}"
                                                   @change="updateField({{ $item->id }}, 'notes', $event.target.value)"
                                                   rows="1"
@@ -724,7 +724,7 @@
                                                   oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px'">{{ $item->notes }}</textarea>
                                     </td>
                                     {{-- Actions --}}
-                                    <td class="px-1 py-1.5 text-center">
+                                    <td class="px-1 py-1.5 text-center hidden sm:table-cell">
                                         <button type="button"
                                                 @click="deleteItem({{ $item->id }})"
                                                 class="p-1 text-gray-400 hover:text-red-500 transition-colors"
