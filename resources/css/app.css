@@ -72,10 +72,9 @@ input:focus, select:focus, textarea:focus { outline: none; }
 /* Prevent text overflow */
 .break-anywhere { overflow-wrap: anywhere; }
 
-/* Mobile table horizontal scroll */
-.overflow-x-auto > table { min-width: 640px; }
-td, th { white-space: nowrap; }
-td.wrap-cell, th.wrap-cell { white-space: normal; overflow-wrap: break-word; }
+/* Table utilities */
+table.nowrap-table td, table.nowrap-table th { white-space: nowrap; }
+table.nowrap-table td.wrap-cell, table.nowrap-table th.wrap-cell { white-space: normal; overflow-wrap: break-word; }
 
 /* Mobile viewport fixes */
 @supports (height: 100dvh) {
