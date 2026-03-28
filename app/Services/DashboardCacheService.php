@@ -39,6 +39,7 @@ class DashboardCacheService
         'calendar' => 7200,        // 2 hours - calendar events
         'online_donations' => 7200, // 2 hours - online donations
         'group_compare' => 7200,   // 2 hours - group attendance compare
+        'expenses' => 21600,       // 6 hours - expenses breakdown
     ];
 
     /**
@@ -94,7 +95,7 @@ class DashboardCacheService
      */
     public function forgetFinancialRelated(int $churchId): void
     {
-        $types = ['stats', 'financial', 'budgets', 'giving_trends', 'online_donations'];
+        $types = ['stats', 'financial', 'budgets', 'giving_trends', 'online_donations', 'expenses'];
         foreach ($types as $type) {
             $this->forget($type, $churchId);
         }

@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Models\Event;
 use App\Models\User;
+use App\Services\DashboardCacheService;
 use App\Services\GoogleCalendarService;
 use Illuminate\Support\Facades\Log;
 
@@ -15,6 +16,7 @@ class EventObserver
      */
     public function created(Event $event): void
     {
+        $this->clearDashboardCache($event);
         $this->pushToGoogle($event);
     }
 
@@ -24,6 +26,7 @@ class EventObserver
      */
     public function updated(Event $event): void
     {
+        $this->clearDashboardCache($event);
         // Skip if only google_* fields were updated (avoid infinite loop)
         $changedFields = array_keys($event->getChanges());
         $ignoredFields = ['google_event_id', 'google_calendar_id', 'google_synced_at', 'google_sync_status', 'updated_at'];
@@ -40,6 +43,7 @@ class EventObserver
      */
     public function deleted(Event $event): void
     {
+        $this->clearDashboardCache($event);
         if (! $event->google_event_id || ! $event->google_calendar_id) {
             return;
         }
@@ -61,6 +65,13 @@ class EventObserver
                 'event_id' => $event->id,
                 'error' => $e->getMessage(),
             ]);
+        }
+    }
+
+    private function clearDashboardCache(Event $event): void
+    {
+        if ($event->church_id) {
+            app(DashboardCacheService::class)->forgetEventRelated($event->church_id);
         }
     }
 

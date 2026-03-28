@@ -22,7 +22,6 @@ use App\Models\Transaction;
 use App\Services\DashboardCacheService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
@@ -326,9 +325,7 @@ class DashboardController extends Controller
 
     private function loadCachedStats($church): array
     {
-        $cacheKey = "dashboard_stats_{$church->id}";
-
-        return Cache::remember($cacheKey, 1800, function () use ($church) {
+        return $this->cacheService->remember('stats', $church, function () use ($church) {
             $peopleQuery = Person::where('church_id', $church->id)->notGuest();
             $today = now();
             $threeMonthsAgo = now()->subMonths(3);
@@ -455,48 +452,54 @@ class DashboardController extends Controller
 
     private function loadBirthdaysThisMonth($church)
     {
-        return Person::where('church_id', $church->id)
-            ->notGuest()
-            ->whereNotNull('birth_date')
-            ->whereMonth('birth_date', now()->month)
-            ->get()
-            ->sortBy(fn ($p) => $p->birth_date->day);
+        return $this->cacheService->remember('birthdays', $church, function () use ($church) {
+            return Person::where('church_id', $church->id)
+                ->notGuest()
+                ->whereNotNull('birth_date')
+                ->whereMonth('birth_date', now()->month)
+                ->get()
+                ->sortBy(fn ($p) => $p->birth_date->day);
+        });
     }
 
     private function loadUpcomingEvents($church)
     {
-        return Event::where('church_id', $church->id)
-            ->where('date', '>=', now()->startOfDay())
-            ->where('date', '<=', now()->addDays(7))
-            ->with(['ministry.positions', 'assignments.person', 'assignments.position'])
-            ->orderBy('date')
-            ->orderBy('time')
-            ->limit(5)
-            ->get();
+        return $this->cacheService->remember('events', $church, function () use ($church) {
+            return Event::where('church_id', $church->id)
+                ->where('date', '>=', now()->startOfDay())
+                ->where('date', '<=', now()->addDays(7))
+                ->with(['ministry.positions', 'assignments.person', 'assignments.position'])
+                ->orderBy('date')
+                ->orderBy('time')
+                ->limit(5)
+                ->get();
+        });
     }
 
     private function loadAttendanceData($church): array
     {
-        $fourWeeksAgo = now()->subWeeks(3)->startOfWeek(Carbon::MONDAY);
-        $attendanceRaw = Attendance::where('church_id', $church->id)
-            ->where('date', '>=', $fourWeeksAgo)
-            ->selectRaw('DATE_FORMAT(date, "%x%v") as week_key, MIN(date) as week_start, SUM(COALESCE(members_present, total_count, 0)) as total')
-            ->groupBy('week_key')
-            ->orderBy('week_key')
-            ->get()
-            ->keyBy('week_key');
+        return $this->cacheService->remember('attendance', $church, function () use ($church) {
+            $fourWeeksAgo = now()->subWeeks(3)->startOfWeek(Carbon::MONDAY);
+            $attendanceRaw = Attendance::where('church_id', $church->id)
+                ->where('date', '>=', $fourWeeksAgo)
+                ->selectRaw('DATE_FORMAT(date, "%x%v") as week_key, MIN(date) as week_start, SUM(COALESCE(members_present, total_count, 0)) as total')
+                ->groupBy('week_key')
+                ->orderBy('week_key')
+                ->get()
+                ->keyBy('week_key');
 
-        $attendanceData = [];
-        for ($i = 3; $i >= 0; $i--) {
-            $date = now()->subWeeks($i)->startOfWeek(Carbon::MONDAY);
-            $weekKey = $date->format('o').str_pad($date->format('W'), 2, '0', STR_PAD_LEFT);
-            $attendanceData[] = [
-                'date' => $date->format('d.m'),
-                'count' => $attendanceRaw[$weekKey]->total ?? 0,
-            ];
-        }
+            $attendanceData = [];
+            for ($i = 3; $i >= 0; $i--) {
+                $date = now()->subWeeks($i)->startOfWeek(Carbon::MONDAY);
+                $weekKey = $date->format('o').str_pad($date->format('W'), 2, '0', STR_PAD_LEFT);
+                $attendanceData[] = [
+                    'date' => $date->format('d.m'),
+                    'count' => $attendanceRaw[$weekKey]->total ?? 0,
+                ];
+            }
 
-        return $attendanceData;
+            return $attendanceData;
+        });
     }
 
     private function loadPendingAssignments($user)
@@ -541,6 +544,7 @@ class DashboardController extends Controller
 
     private function loadMinistryBudgets($church)
     {
+        return $this->cacheService->remember('budgets', $church, function () use ($church) {
         $ministries = $church->ministries()
             ->whereNotNull('monthly_budget')
             ->where('monthly_budget', '>', 0)
@@ -576,97 +580,114 @@ class DashboardController extends Controller
                 'percentage' => $percentage,
             ];
         });
+        });
     }
 
     private function loadUrgentTasks($church)
     {
-        $taskTracker = Board::where('church_id', $church->id)
-            ->whereNull('ministry_id')
-            ->where('is_archived', false)
-            ->first();
+        return $this->cacheService->remember('tasks', $church, function () use ($church) {
+            $taskTracker = Board::where('church_id', $church->id)
+                ->whereNull('ministry_id')
+                ->where('is_archived', false)
+                ->first();
 
-        if (! $taskTracker) {
-            return collect();
-        }
+            if (! $taskTracker) {
+                return collect();
+            }
 
-        return BoardCard::whereHas('column', function ($q) use ($taskTracker) {
-            $q->where('board_id', $taskTracker->id);
-        })
-            ->where('is_completed', false)
-            ->where(function ($q) {
-                $q->where('priority', 'urgent')
-                    ->orWhere('priority', 'high')
-                    ->orWhere(function ($dq) {
-                        $dq->whereNotNull('due_date')
-                            ->where('due_date', '<=', now()->addDays(2));
-                    });
+            return BoardCard::whereHas('column', function ($q) use ($taskTracker) {
+                $q->where('board_id', $taskTracker->id);
             })
-            ->with(['column', 'assignee'])
-            ->orderByRaw("CASE WHEN priority = 'urgent' THEN 0 WHEN priority = 'high' THEN 1 ELSE 2 END")
-            ->orderBy('due_date')
-            ->limit(5)
-            ->get();
+                ->where('is_completed', false)
+                ->where(function ($q) {
+                    $q->where('priority', 'urgent')
+                        ->orWhere('priority', 'high')
+                        ->orWhere(function ($dq) {
+                            $dq->whereNotNull('due_date')
+                                ->where('due_date', '<=', now()->addDays(2));
+                        });
+                })
+                ->with(['column', 'assignee'])
+                ->orderByRaw("CASE WHEN priority = 'urgent' THEN 0 WHEN priority = 'high' THEN 1 ELSE 2 END")
+                ->orderBy('due_date')
+                ->limit(5)
+                ->get();
+        });
     }
 
     private function loadFinancialData($church, array &$data): void
     {
-        $sixMonthsAgo = now()->subMonths(5)->startOfMonth();
-        $financialRaw = Transaction::where('church_id', $church->id)
-            ->completed()
-            ->whereNotIn('source_type', [Transaction::SOURCE_EXCHANGE, Transaction::SOURCE_ALLOCATION])
-            ->where('date', '>=', $sixMonthsAgo)
-            ->selectRaw('YEAR(date) as year, MONTH(date) as month, direction, SUM(COALESCE(amount_uah, amount)) as total')
-            ->groupBy('year', 'month', 'direction')
-            ->orderBy('year')
-            ->orderBy('month')
-            ->get();
+        $cached = $this->cacheService->remember('financial', $church, function () use ($church) {
+            $sixMonthsAgo = now()->subMonths(5)->startOfMonth();
+            $financialRaw = Transaction::where('church_id', $church->id)
+                ->completed()
+                ->whereNotIn('source_type', [Transaction::SOURCE_EXCHANGE, Transaction::SOURCE_ALLOCATION])
+                ->where('date', '>=', $sixMonthsAgo)
+                ->selectRaw('YEAR(date) as year, MONTH(date) as month, direction, SUM(COALESCE(amount_uah, amount)) as total')
+                ->groupBy('year', 'month', 'direction')
+                ->orderBy('year')
+                ->orderBy('month')
+                ->get();
 
-        $financialGrouped = $financialRaw->groupBy(fn ($item) => $item->year.'-'.$item->month);
+            $financialGrouped = $financialRaw->groupBy(fn ($item) => $item->year.'-'.$item->month);
 
-        $financialData = [];
-        for ($i = 5; $i >= 0; $i--) {
-            $month = now()->subMonths($i);
-            $key = $month->year.'-'.$month->month;
-            $monthData = $financialGrouped[$key] ?? collect();
+            $financialData = [];
+            for ($i = 5; $i >= 0; $i--) {
+                $month = now()->subMonths($i);
+                $key = $month->year.'-'.$month->month;
+                $monthData = $financialGrouped[$key] ?? collect();
 
-            $financialData[] = [
-                'month' => $month->translatedFormat('M'),
-                'income' => $monthData->where('direction', 'in')->sum('total'),
-                'expenses' => $monthData->where('direction', 'out')->sum('total'),
+                $financialData[] = [
+                    'month' => $month->translatedFormat('M'),
+                    'income' => $monthData->where('direction', 'in')->sum('total'),
+                    'expenses' => $monthData->where('direction', 'out')->sum('total'),
+                ];
+            }
+
+            $currentKey = now()->year.'-'.now()->month;
+            $currentMonthData = $financialGrouped[$currentKey] ?? collect();
+
+            return [
+                'financialData' => $financialData,
+                'income_this_month' => $currentMonthData->where('direction', 'in')->sum('total'),
             ];
-        }
+        });
 
-        $data['financialData'] = $financialData;
-
-        $currentKey = now()->year.'-'.now()->month;
-        $currentMonthData = $financialGrouped[$currentKey] ?? collect();
-        $data['stats']['income_this_month'] = $currentMonthData->where('direction', 'in')->sum('total');
+        $data['financialData'] = $cached['financialData'];
+        $data['stats']['income_this_month'] = $cached['income_this_month'];
     }
 
     private function loadExpensesBreakdown($church, array &$data): void
     {
-        $data['stats']['expenses_this_month'] = Transaction::where('church_id', $church->id)
-            ->outgoing()
-            ->completed()
-            ->thisMonth()
-            ->whereNotIn('source_type', [Transaction::SOURCE_EXCHANGE, Transaction::SOURCE_ALLOCATION])
-            ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')->value('total') ?? 0;
+        $cached = $this->cacheService->remember('expenses', $church, function () use ($church) {
+            $expensesThisMonth = Transaction::where('church_id', $church->id)
+                ->outgoing()
+                ->completed()
+                ->thisMonth()
+                ->whereNotIn('source_type', [Transaction::SOURCE_EXCHANGE, Transaction::SOURCE_ALLOCATION])
+                ->selectRaw('SUM(COALESCE(amount_uah, amount)) as total')->value('total') ?? 0;
 
-        $data['expensesByCategory'] = Transaction::where('transactions.church_id', $church->id)
-            ->outgoing()
-            ->completed()
-            ->thisMonth()
-            ->whereNotIn('transactions.source_type', [Transaction::SOURCE_EXCHANGE, Transaction::SOURCE_ALLOCATION])
-            ->leftJoin('transaction_categories', 'transactions.category_id', '=', 'transaction_categories.id')
-            ->selectRaw('transaction_categories.name as category_name, SUM(COALESCE(transactions.amount_uah, transactions.amount)) as total_amount, COUNT(*) as transaction_count')
-            ->groupBy('transactions.category_id', 'transaction_categories.name')
-            ->orderByDesc('total_amount')
-            ->get()
-            ->map(fn ($row) => [
-                'name' => $row->category_name ?? 'Без категорії',
-                'amount' => $row->total_amount,
-                'count' => $row->transaction_count,
-            ]);
+            $byCategory = Transaction::where('transactions.church_id', $church->id)
+                ->outgoing()
+                ->completed()
+                ->thisMonth()
+                ->whereNotIn('transactions.source_type', [Transaction::SOURCE_EXCHANGE, Transaction::SOURCE_ALLOCATION])
+                ->leftJoin('transaction_categories', 'transactions.category_id', '=', 'transaction_categories.id')
+                ->selectRaw('transaction_categories.name as category_name, SUM(COALESCE(transactions.amount_uah, transactions.amount)) as total_amount, COUNT(*) as transaction_count')
+                ->groupBy('transactions.category_id', 'transaction_categories.name')
+                ->orderByDesc('total_amount')
+                ->get()
+                ->map(fn ($row) => [
+                    'name' => $row->category_name ?? 'Без категорії',
+                    'amount' => $row->total_amount,
+                    'count' => $row->transaction_count,
+                ]);
+
+            return ['expenses_this_month' => $expensesThisMonth, 'by_category' => $byCategory];
+        });
+
+        $data['stats']['expenses_this_month'] = $cached['expenses_this_month'];
+        $data['expensesByCategory'] = $cached['by_category'];
     }
 
     private function loadGrowthData($church): array
@@ -701,56 +722,66 @@ class DashboardController extends Controller
 
     private function loadPrayerRequests($church)
     {
-        return PrayerRequest::where('church_id', $church->id)
-            ->where('status', 'active')
-            ->with('person')
-            ->orderByDesc('is_urgent')
-            ->orderByDesc('created_at')
-            ->limit(5)
-            ->get();
+        return $this->cacheService->remember('prayer', $church, function () use ($church) {
+            return PrayerRequest::where('church_id', $church->id)
+                ->where('status', 'active')
+                ->with('person')
+                ->orderByDesc('is_urgent')
+                ->orderByDesc('created_at')
+                ->limit(5)
+                ->get();
+        });
     }
 
     private function loadAnnouncements($church)
     {
-        return Announcement::where('church_id', $church->id)
-            ->where('is_published', true)
-            ->where(function ($q) {
-                $q->whereNull('expires_at')
-                    ->orWhere('expires_at', '>', now());
-            })
-            ->with('author')
-            ->orderByDesc('is_pinned')
-            ->orderByDesc('published_at')
-            ->limit(5)
-            ->get();
+        return $this->cacheService->remember('announcements', $church, function () use ($church) {
+            return Announcement::where('church_id', $church->id)
+                ->where('is_published', true)
+                ->where(function ($q) {
+                    $q->whereNull('expires_at')
+                        ->orWhere('expires_at', '>', now());
+                })
+                ->with('author')
+                ->orderByDesc('is_pinned')
+                ->orderByDesc('published_at')
+                ->limit(5)
+                ->get();
+        });
     }
 
     private function loadDonationCampaigns($church)
     {
-        return DonationCampaign::where('church_id', $church->id)
-            ->where('is_active', true)
-            ->orderByDesc('created_at')
-            ->get();
+        return $this->cacheService->remember('campaigns', $church, function () use ($church) {
+            return DonationCampaign::where('church_id', $church->id)
+                ->where('is_active', true)
+                ->orderByDesc('created_at')
+                ->get();
+        });
     }
 
     private function loadMinistryGoals($church)
     {
-        return MinistryGoal::where('church_id', $church->id)
-            ->whereIn('status', ['active', 'in_progress'])
-            ->with('ministry')
-            ->orderByDesc('priority')
-            ->orderBy('due_date')
-            ->limit(8)
-            ->get();
+        return $this->cacheService->remember('goals', $church, function () use ($church) {
+            return MinistryGoal::where('church_id', $church->id)
+                ->whereIn('status', ['active', 'in_progress'])
+                ->with('ministry')
+                ->orderByDesc('priority')
+                ->orderBy('due_date')
+                ->limit(8)
+                ->get();
+        });
     }
 
     private function loadRecentSermons($church)
     {
-        return Sermon::where('church_id', $church->id)
-            ->with('speaker')
-            ->orderByDesc('sermon_date')
-            ->limit(4)
-            ->get();
+        return $this->cacheService->remember('sermons', $church, function () use ($church) {
+            return Sermon::where('church_id', $church->id)
+                ->with('speaker')
+                ->orderByDesc('sermon_date')
+                ->limit(4)
+                ->get();
+        });
     }
 
     private function loadDemographics($church): array
@@ -803,14 +834,16 @@ class DashboardController extends Controller
 
     private function loadNewMembers($church)
     {
-        $startOfMonth = now()->startOfMonth()->toDateString();
+        return $this->cacheService->remember('new_members', $church, function () use ($church) {
+            $startOfMonth = now()->startOfMonth()->toDateString();
 
-        return Person::where('church_id', $church->id)
-            ->notGuest()
-            ->whereRaw('COALESCE(joined_date, first_visit_date, created_at) >= ?', [$startOfMonth])
-            ->orderByDesc(DB::raw('COALESCE(joined_date, first_visit_date, created_at)'))
-            ->limit(8)
-            ->get();
+            return Person::where('church_id', $church->id)
+                ->notGuest()
+                ->whereRaw('COALESCE(joined_date, first_visit_date, created_at) >= ?', [$startOfMonth])
+                ->orderByDesc(DB::raw('COALESCE(joined_date, first_visit_date, created_at)'))
+                ->limit(8)
+                ->get();
+        });
     }
 
     private function loadGroupHealth($church)
@@ -912,295 +945,309 @@ class DashboardController extends Controller
 
     private function loadShepherdOverview($church): array
     {
-        // Count sheep per shepherd in a single query
-        $sheepCounts = DB::table('people')
-            ->where('church_id', $church->id)
-            ->whereNull('deleted_at')
-            ->whereNotNull('shepherd_id')
-            ->selectRaw('shepherd_id, COUNT(*) as sheep_count')
-            ->groupBy('shepherd_id')
-            ->pluck('sheep_count', 'shepherd_id');
+        return $this->cacheService->remember('shepherd', $church, function () use ($church) {
+            $sheepCounts = DB::table('people')
+                ->where('church_id', $church->id)
+                ->whereNull('deleted_at')
+                ->whereNotNull('shepherd_id')
+                ->selectRaw('shepherd_id, COUNT(*) as sheep_count')
+                ->groupBy('shepherd_id')
+                ->pluck('sheep_count', 'shepherd_id');
 
-        $shepherdList = Person::where('church_id', $church->id)
-            ->where('is_shepherd', true)
-            ->get()
-            ->map(fn ($shepherd) => [
-                'id' => $shepherd->id,
-                'full_name' => $shepherd->full_name,
-                'first_name' => $shepherd->first_name,
-                'sheep_count' => $sheepCounts[$shepherd->id] ?? 0,
-            ])
-            ->sortByDesc('sheep_count')
-            ->values();
+            $shepherdList = Person::where('church_id', $church->id)
+                ->where('is_shepherd', true)
+                ->get()
+                ->map(fn ($shepherd) => [
+                    'id' => $shepherd->id,
+                    'full_name' => $shepherd->full_name,
+                    'first_name' => $shepherd->first_name,
+                    'sheep_count' => $sheepCounts[$shepherd->id] ?? 0,
+                ])
+                ->sortByDesc('sheep_count')
+                ->values();
 
-        $totalSheep = $sheepCounts->sum();
+            $totalSheep = $sheepCounts->sum();
 
-        $unassigned = Person::where('church_id', $church->id)
-            ->whereNull('shepherd_id')
-            ->where('is_shepherd', false)
-            ->count();
+            $unassigned = Person::where('church_id', $church->id)
+                ->whereNull('shepherd_id')
+                ->where('is_shepherd', false)
+                ->count();
 
-        return [
-            'total_shepherds' => $shepherdList->count(),
-            'total_sheep' => $totalSheep,
-            'unassigned_count' => $unassigned,
-            'shepherds' => $shepherdList->take(10),
-        ];
+            return [
+                'total_shepherds' => $shepherdList->count(),
+                'total_sheep' => $totalSheep,
+                'unassigned_count' => $unassigned,
+                'shepherds' => $shepherdList->take(10),
+            ];
+        });
     }
 
     private function loadEventRegistrations($church)
     {
-        return Event::where('church_id', $church->id)
-            ->where('date', '>=', now())
-            ->where('allow_registration', true)
-            ->with('ministry')
-            ->withCount(['registrations as confirmed_registrations_count' => function ($q) {
-                $q->where('status', 'confirmed');
-            }])
-            ->orderBy('date')
-            ->limit(5)
-            ->get();
+        return $this->cacheService->remember('registrations', $church, function () use ($church) {
+            return Event::where('church_id', $church->id)
+                ->where('date', '>=', now())
+                ->where('allow_registration', true)
+                ->with('ministry')
+                ->withCount(['registrations as confirmed_registrations_count' => function ($q) {
+                    $q->where('status', 'confirmed');
+                }])
+                ->orderBy('date')
+                ->limit(5)
+                ->get();
+        });
     }
 
     private function loadVolunteerSchedule($church, $user)
     {
-        return Assignment::whereHas('event', function ($q) use ($church) {
-            $q->where('church_id', $church->id)
-                ->where('date', '>=', now())
-                ->where('date', '<=', now()->addDays(7));
-        })
-            ->whereIn('status', ['confirmed', 'pending'])
-            ->with(['event.ministry', 'position', 'person'])
-            ->get()
-            ->sortBy('event.date');
+        return $this->cacheService->remember('volunteer', $church, function () use ($church) {
+            return Assignment::whereHas('event', function ($q) use ($church) {
+                $q->where('church_id', $church->id)
+                    ->where('date', '>=', now())
+                    ->where('date', '<=', now()->addDays(7));
+            })
+                ->whereIn('status', ['confirmed', 'pending'])
+                ->with(['event.ministry', 'position', 'person'])
+                ->get()
+                ->sortBy('event.date');
+        });
     }
 
     private function loadRecentActivity($church)
     {
-        return AuditLog::where('church_id', $church->id)
-            ->with('user')
-            ->orderByDesc('created_at')
-            ->limit(10)
-            ->get()
-            ->map(fn ($log) => [
-                'type' => $log->action ?? 'updated',
-                'model_type' => class_basename($log->auditable_type ?? ''),
-                'description' => $log->description ?? ($log->action.' '.class_basename($log->auditable_type ?? '')),
-                'user_name' => $log->user?->name ?? 'Система',
-                'created_at' => $log->created_at,
-            ]);
+        return $this->cacheService->remember('activity', $church, function () use ($church) {
+            return AuditLog::where('church_id', $church->id)
+                ->with('user')
+                ->orderByDesc('created_at')
+                ->limit(10)
+                ->get()
+                ->map(fn ($log) => [
+                    'type' => $log->action ?? 'updated',
+                    'model_type' => class_basename($log->auditable_type ?? ''),
+                    'description' => $log->description ?? ($log->action.' '.class_basename($log->auditable_type ?? '')),
+                    'user_name' => $log->user?->name ?? 'Система',
+                    'created_at' => $log->created_at,
+                ]);
+        });
     }
 
     private function loadMembershipFunnel($church): array
     {
-        $stats = DB::table('people')
-            ->where('church_id', $church->id)
-            ->whereNull('deleted_at')
-            ->selectRaw("
-                COUNT(*) as total,
-                SUM(CASE WHEN membership_status = 'guest' THEN 1 ELSE 0 END) as guest,
-                SUM(CASE WHEN membership_status = 'newcomer' THEN 1 ELSE 0 END) as newcomer,
-                SUM(CASE WHEN membership_status = 'member' THEN 1 ELSE 0 END) as member,
-                SUM(CASE WHEN membership_status = 'servant' THEN 1 ELSE 0 END) as servant,
-                SUM(CASE WHEN membership_status = 'leader' THEN 1 ELSE 0 END) as leader,
-                SUM(CASE WHEN membership_status = 'leadership' THEN 1 ELSE 0 END) as leadership,
-                SUM(CASE WHEN membership_status IS NULL OR membership_status = '' THEN 1 ELSE 0 END) as unset
-            ")
-            ->first();
+        return $this->cacheService->remember('funnel', $church, function () use ($church) {
+            $stats = DB::table('people')
+                ->where('church_id', $church->id)
+                ->whereNull('deleted_at')
+                ->selectRaw("
+                    COUNT(*) as total,
+                    SUM(CASE WHEN membership_status = 'guest' THEN 1 ELSE 0 END) as guest,
+                    SUM(CASE WHEN membership_status = 'newcomer' THEN 1 ELSE 0 END) as newcomer,
+                    SUM(CASE WHEN membership_status = 'member' THEN 1 ELSE 0 END) as member,
+                    SUM(CASE WHEN membership_status = 'servant' THEN 1 ELSE 0 END) as servant,
+                    SUM(CASE WHEN membership_status = 'leader' THEN 1 ELSE 0 END) as leader,
+                    SUM(CASE WHEN membership_status = 'leadership' THEN 1 ELSE 0 END) as leadership,
+                    SUM(CASE WHEN membership_status IS NULL OR membership_status = '' THEN 1 ELSE 0 END) as unset
+                ")
+                ->first();
 
-        $guest = (int) ($stats->guest ?? 0);
-        $newcomer = (int) ($stats->newcomer ?? 0);
-        $member = (int) ($stats->member ?? 0);
-        $servant = (int) ($stats->servant ?? 0);
-        $leader = (int) ($stats->leader ?? 0);
-        $leadership = (int) ($stats->leadership ?? 0);
-        $unset = (int) ($stats->unset ?? 0);
+            $guest = (int) ($stats->guest ?? 0);
+            $newcomer = (int) ($stats->newcomer ?? 0);
+            $member = (int) ($stats->member ?? 0);
+            $servant = (int) ($stats->servant ?? 0);
+            $leader = (int) ($stats->leader ?? 0);
+            $leadership = (int) ($stats->leadership ?? 0);
+            $unset = (int) ($stats->unset ?? 0);
 
-        return [
-            'total' => $guest + $newcomer + $member + $servant + $leader + $leadership + $unset,
-            'guest' => $guest,
-            'newcomer' => $newcomer,
-            'member' => $member,
-            'servant' => $servant,
-            'leader' => $leader,
-            'leadership' => $leadership,
-        ];
+            return [
+                'total' => $guest + $newcomer + $member + $servant + $leader + $leadership + $unset,
+                'guest' => $guest,
+                'newcomer' => $newcomer,
+                'member' => $member,
+                'servant' => $servant,
+                'leader' => $leader,
+                'leadership' => $leadership,
+            ];
+        });
     }
 
     private function loadPopularSongs($church)
     {
-        return Song::where('church_id', $church->id)
-            ->where('times_used', '>', 0)
-            ->orderByDesc('times_used')
-            ->limit(8)
-            ->get();
+        return $this->cacheService->remember('songs', $church, function () use ($church) {
+            return Song::where('church_id', $church->id)
+                ->where('times_used', '>', 0)
+                ->orderByDesc('times_used')
+                ->limit(8)
+                ->get();
+        });
     }
 
     private function loadFamilyStats($church): array
     {
-        $totalPeople = Person::where('church_id', $church->id)->notGuest()->count();
+        return $this->cacheService->remember('family', $church, function () use ($church) {
+            $totalPeople = Person::where('church_id', $church->id)->notGuest()->count();
 
-        $totalRelationships = FamilyRelationship::whereHas('person', fn ($q) => $q->where('church_id', $church->id))
-            ->count();
+            $totalRelationships = FamilyRelationship::whereHas('person', fn ($q) => $q->where('church_id', $church->id))
+                ->count();
 
-        $peopleWithFamily = DB::table('family_relationships')
-            ->join('people', 'family_relationships.person_id', '=', 'people.id')
-            ->where('people.church_id', $church->id)
-            ->whereNull('people.deleted_at')
-            ->distinct('family_relationships.person_id')
-            ->count('family_relationships.person_id');
+            $peopleWithFamily = DB::table('family_relationships')
+                ->join('people', 'family_relationships.person_id', '=', 'people.id')
+                ->where('people.church_id', $church->id)
+                ->whereNull('people.deleted_at')
+                ->distinct('family_relationships.person_id')
+                ->count('family_relationships.person_id');
 
-        // Spouse relationships are stored one-way (A→B only, no reverse B→A)
-        $marriedCouples = FamilyRelationship::where('relationship_type', 'spouse')
-            ->whereHas('person', fn ($q) => $q->where('church_id', $church->id))
-            ->whereHas('relatedPerson', fn ($q) => $q->where('church_id', $church->id))
-            ->count();
+            $marriedCouples = FamilyRelationship::where('relationship_type', 'spouse')
+                ->whereHas('person', fn ($q) => $q->where('church_id', $church->id))
+                ->whereHas('relatedPerson', fn ($q) => $q->where('church_id', $church->id))
+                ->count();
 
-        $childrenCount = FamilyRelationship::where('relationship_type', 'child')
-            ->whereHas('person', fn ($q) => $q->where('church_id', $church->id))
-            ->distinct('person_id')
-            ->count('person_id');
+            $childrenCount = FamilyRelationship::where('relationship_type', 'child')
+                ->whereHas('person', fn ($q) => $q->where('church_id', $church->id))
+                ->distinct('person_id')
+                ->count('person_id');
 
-        // Count unique parents (people who have children in the church)
-        $uniqueParents = FamilyRelationship::where('relationship_type', 'parent')
-            ->whereHas('person', fn ($q) => $q->where('church_id', $church->id))
-            ->distinct('person_id')
-            ->count('person_id');
+            $uniqueParents = FamilyRelationship::where('relationship_type', 'parent')
+                ->whereHas('person', fn ($q) => $q->where('church_id', $church->id))
+                ->distinct('person_id')
+                ->count('person_id');
 
-        // Single parents = parents who are not in a spouse relationship (check both directions)
-        $parentsWithSpouse = FamilyRelationship::where('relationship_type', 'parent')
-            ->whereHas('person', fn ($q) => $q->where('church_id', $church->id)
-                ->where(fn ($q2) => $q2
-                    ->whereHas('familyRelationships', fn ($r) => $r->where('relationship_type', 'spouse'))
-                    ->orWhereHas('inverseFamilyRelationships', fn ($r) => $r->where('relationship_type', 'spouse'))
-                ))
-            ->distinct('person_id')
-            ->count('person_id');
-        $singleParents = $uniqueParents - $parentsWithSpouse;
+            $parentsWithSpouse = FamilyRelationship::where('relationship_type', 'parent')
+                ->whereHas('person', fn ($q) => $q->where('church_id', $church->id)
+                    ->where(fn ($q2) => $q2
+                        ->whereHas('familyRelationships', fn ($r) => $r->where('relationship_type', 'spouse'))
+                        ->orWhereHas('inverseFamilyRelationships', fn ($r) => $r->where('relationship_type', 'spouse'))
+                    ))
+                ->distinct('person_id')
+                ->count('person_id');
+            $singleParents = $uniqueParents - $parentsWithSpouse;
 
-        // Total families = married couples + single parents
-        $totalFamilies = $marriedCouples + max(0, $singleParents);
-        $avgChildren = $totalFamilies > 0 ? round($childrenCount / $totalFamilies, 1) : 0;
+            $totalFamilies = $marriedCouples + max(0, $singleParents);
+            $avgChildren = $totalFamilies > 0 ? round($childrenCount / $totalFamilies, 1) : 0;
 
-        return [
-            'total_families' => $totalFamilies,
-            'total_with_family' => $peopleWithFamily,
-            'total_without_family' => $totalPeople - $peopleWithFamily,
-            'married_couples' => $marriedCouples,
-            'children_count' => $childrenCount,
-            'avg_children' => $avgChildren,
-        ];
+            return [
+                'total_families' => $totalFamilies,
+                'total_with_family' => $peopleWithFamily,
+                'total_without_family' => $totalPeople - $peopleWithFamily,
+                'married_couples' => $marriedCouples,
+                'children_count' => $childrenCount,
+                'avg_children' => $avgChildren,
+            ];
+        });
     }
 
     private function loadCalendarEvents($church): array
     {
-        $start = now()->startOfMonth();
-        $end = now()->endOfMonth();
+        return $this->cacheService->remember('calendar', $church, function () use ($church) {
+            $start = now()->startOfMonth();
+            $end = now()->endOfMonth();
 
-        return Event::where('church_id', $church->id)
-            ->whereBetween('date', [$start, $end])
-            ->pluck('date')
-            ->map(fn ($d) => Carbon::parse($d)->format('Y-m-d'))
-            ->unique()
-            ->values()
-            ->toArray();
+            return Event::where('church_id', $church->id)
+                ->whereBetween('date', [$start, $end])
+                ->pluck('date')
+                ->map(fn ($d) => Carbon::parse($d)->format('Y-m-d'))
+                ->unique()
+                ->values()
+                ->toArray();
+        });
     }
 
     private function loadOnlineDonations($church): array
     {
-        $thisMonth = OnlineDonation::where('church_id', $church->id)
-            ->where('status', 'success')
-            ->whereMonth('paid_at', now()->month)
-            ->whereYear('paid_at', now()->year);
+        return $this->cacheService->remember('online_donations', $church, function () use ($church) {
+            $thisMonth = OnlineDonation::where('church_id', $church->id)
+                ->where('status', 'success')
+                ->whereMonth('paid_at', now()->month)
+                ->whereYear('paid_at', now()->year);
 
-        $lastMonth = OnlineDonation::where('church_id', $church->id)
-            ->where('status', 'success')
-            ->whereMonth('paid_at', now()->subMonth()->month)
-            ->whereYear('paid_at', now()->subMonth()->year);
+            $lastMonth = OnlineDonation::where('church_id', $church->id)
+                ->where('status', 'success')
+                ->whereMonth('paid_at', now()->subMonth()->month)
+                ->whereYear('paid_at', now()->subMonth()->year);
 
-        $totalThisMonth = (clone $thisMonth)->sum('amount');
-        $totalLastMonth = (clone $lastMonth)->sum('amount');
-        $countThisMonth = (clone $thisMonth)->count();
+            $totalThisMonth = (clone $thisMonth)->sum('amount');
+            $totalLastMonth = (clone $lastMonth)->sum('amount');
+            $countThisMonth = (clone $thisMonth)->count();
 
-        $changePercent = $totalLastMonth > 0
-            ? round(($totalThisMonth - $totalLastMonth) / $totalLastMonth * 100, 1)
-            : 0;
+            $changePercent = $totalLastMonth > 0
+                ? round(($totalThisMonth - $totalLastMonth) / $totalLastMonth * 100, 1)
+                : 0;
 
-        $recurringThisMonth = OnlineDonation::where('church_id', $church->id)
-            ->where('status', 'success')
-            ->where('is_recurring', true)
-            ->whereMonth('paid_at', now()->month)
-            ->whereYear('paid_at', now()->year);
+            $recurringThisMonth = OnlineDonation::where('church_id', $church->id)
+                ->where('status', 'success')
+                ->where('is_recurring', true)
+                ->whereMonth('paid_at', now()->month)
+                ->whereYear('paid_at', now()->year);
 
-        $recent = OnlineDonation::where('church_id', $church->id)
-            ->where('status', 'success')
-            ->orderByDesc('paid_at')
-            ->limit(5)
-            ->get();
+            $recent = OnlineDonation::where('church_id', $church->id)
+                ->where('status', 'success')
+                ->orderByDesc('paid_at')
+                ->limit(5)
+                ->get();
 
-        $recurringCount = (clone $recurringThisMonth)->distinct('person_id')->count('person_id')
-            ?: (clone $recurringThisMonth)->count();
+            $recurringCount = (clone $recurringThisMonth)->distinct('person_id')->count('person_id')
+                ?: (clone $recurringThisMonth)->count();
 
-        return [
-            'total_this_month' => $totalThisMonth,
-            'total_last_month' => $totalLastMonth,
-            'count_this_month' => $countThisMonth,
-            'avg_donation' => $countThisMonth > 0 ? round($totalThisMonth / $countThisMonth, 2) : 0,
-            'recurring_count' => $recurringCount,
-            'recurring_amount' => (clone $recurringThisMonth)->sum('amount'),
-            'change_percent' => $changePercent,
-            'recent' => $recent,
-        ];
+            return [
+                'total_this_month' => $totalThisMonth,
+                'total_last_month' => $totalLastMonth,
+                'count_this_month' => $countThisMonth,
+                'avg_donation' => $countThisMonth > 0 ? round($totalThisMonth / $countThisMonth, 2) : 0,
+                'recurring_count' => $recurringCount,
+                'recurring_amount' => (clone $recurringThisMonth)->sum('amount'),
+                'change_percent' => $changePercent,
+                'recent' => $recent,
+            ];
+        });
     }
 
     private function loadGroupAttendanceCompare($church)
     {
-        $groups = Group::where('church_id', $church->id)
-            ->where('status', 'active')
-            ->withCount('members')
-            ->get();
+        return $this->cacheService->remember('group_compare', $church, function () use ($church) {
+            $groups = Group::where('church_id', $church->id)
+                ->where('status', 'active')
+                ->withCount('members')
+                ->get();
 
-        if ($groups->isEmpty()) {
-            return collect();
-        }
-
-        $groupIds = $groups->pluck('id');
-        $fourWeeksAgo = now()->subWeeks(4);
-
-        // Batch query: get all attendance data for all groups at once
-        $attendanceData = Attendance::where('attendable_type', Group::class)
-            ->whereIn('attendable_id', $groupIds)
-            ->where('date', '>=', $fourWeeksAgo)
-            ->select('attendable_id', 'date', 'members_present', 'total_members', 'total_count')
-            ->orderBy('date')
-            ->get()
-            ->groupBy('attendable_id');
-
-        return $groups->map(function ($group) use ($attendanceData) {
-            $groupAttendance = $attendanceData->get($group->id, collect());
-
-            $avgAttendance = $groupAttendance->avg(fn ($a) => $a->members_present ?? $a->total_count ?? 0) ?? 0;
-            $attendanceRate = $group->members_count > 0
-                ? round($avgAttendance / $group->members_count * 100)
-                : 0;
-
-            $last4 = $groupAttendance->sortBy('date')->take(-4)->map(fn ($a) => $a->members_present ?? $a->total_count ?? 0)->toArray();
-            while (count($last4) < 4) {
-                array_unshift($last4, 0);
+            if ($groups->isEmpty()) {
+                return collect();
             }
 
-            return [
-                'name' => $group->name,
-                'color' => $group->color ?? '#3b82f6',
-                'avg_attendance' => round($avgAttendance),
-                'members_count' => $group->members_count,
-                'attendance_rate' => min($attendanceRate, 100),
-                'last_4_weeks' => $last4,
-            ];
-        })
-            ->filter(fn ($g) => $g['members_count'] > 0)
-            ->sortByDesc('attendance_rate')
-            ->values();
+            $groupIds = $groups->pluck('id');
+            $fourWeeksAgo = now()->subWeeks(4);
+
+            $attendanceData = Attendance::where('attendable_type', Group::class)
+                ->whereIn('attendable_id', $groupIds)
+                ->where('date', '>=', $fourWeeksAgo)
+                ->select('attendable_id', 'date', 'members_present', 'total_members', 'total_count')
+                ->orderBy('date')
+                ->get()
+                ->groupBy('attendable_id');
+
+            return $groups->map(function ($group) use ($attendanceData) {
+                $groupAttendance = $attendanceData->get($group->id, collect());
+
+                $avgAttendance = $groupAttendance->avg(fn ($a) => $a->members_present ?? $a->total_count ?? 0) ?? 0;
+                $attendanceRate = $group->members_count > 0
+                    ? round($avgAttendance / $group->members_count * 100)
+                    : 0;
+
+                $last4 = $groupAttendance->sortBy('date')->take(-4)->map(fn ($a) => $a->members_present ?? $a->total_count ?? 0)->toArray();
+                while (count($last4) < 4) {
+                    array_unshift($last4, 0);
+                }
+
+                return [
+                    'name' => $group->name,
+                    'color' => $group->color ?? '#3b82f6',
+                    'avg_attendance' => round($avgAttendance),
+                    'members_count' => $group->members_count,
+                    'attendance_rate' => min($attendanceRate, 100),
+                    'last_4_weeks' => $last4,
+                ];
+            })
+                ->filter(fn ($g) => $g['members_count'] > 0)
+                ->sortByDesc('attendance_rate')
+                ->values();
+        });
     }
 
     // ── API endpoints ──
@@ -1243,7 +1290,7 @@ class DashboardController extends Controller
 
         $church->setSetting('dashboard_layout', $layout);
 
-        Cache::forget("dashboard_stats_{$church->id}");
+        $this->cacheService->forgetAll($church->id);
 
         return response()->json(['success' => true]);
     }
