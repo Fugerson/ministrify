@@ -1058,19 +1058,26 @@ class PersonController extends Controller
     public function updatePassword(Request $request)
     {
         $user = auth()->user();
+        $hasPassword = $user->password_set_at !== null;
 
-        $request->validate([
-            'current_password' => 'required|string',
-            'new_password' => 'required|string|min:8|confirmed',
-        ]);
+        $rules = ['new_password' => 'required|string|min:8|confirmed'];
 
-        if (! Hash::check($request->current_password, $user->password)) {
+        if ($hasPassword) {
+            $rules['current_password'] = 'required|string';
+        }
+
+        $request->validate($rules);
+
+        if ($hasPassword && ! Hash::check($request->current_password, $user->password)) {
             return response()->json([
                 'errors' => ['current_password' => [__('app.current_password_incorrect')]],
             ], 422);
         }
 
-        $user->update(['password' => Hash::make($request->new_password)]);
+        $user->update([
+            'password' => Hash::make($request->new_password),
+            'password_set_at' => now(),
+        ]);
 
         $user->logCustomAction('password_changed', 'Password changed by '.auth()->user()->name);
 
@@ -1161,12 +1168,12 @@ class PersonController extends Controller
     public function updateTheme(Request $request)
     {
         $validated = $request->validate([
-            'design_theme' => 'nullable|string|in:,modern,glass,corporate,ocean,sunset',
+            'design_theme' => 'required|string|in:classic,modern,glass,corporate,ocean,sunset',
         ]);
 
         $user = auth()->user();
         $settings = $user->settings ?? [];
-        $settings['design_theme'] = $validated['design_theme'] ?? '';
+        $settings['design_theme'] = $validated['design_theme'];
         $user->update(['settings' => $settings]);
 
         return response()->json(['success' => true]);

@@ -38,6 +38,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'onboarding_state',
         'onboarding_started_at',
         'onboarding_completed_at',
+        'password_set_at',
     ];
 
     protected $hidden = [

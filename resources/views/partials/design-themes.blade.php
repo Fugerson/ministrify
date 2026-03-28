@@ -1,7 +1,8 @@
 @php
-    // User theme: null = not set (use church default), '' = explicitly chose Класична
+    // User theme: null = not set (use church default), 'classic' = default theme
     $userTheme = auth()->check() ? (auth()->user()->settings['design_theme'] ?? null) : null;
     $designTheme = $userTheme !== null ? $userTheme : ($currentChurch->design_theme ?? 'classic');
+    if ($designTheme === '' || $designTheme === null) $designTheme = 'classic';
     $userMenuPosition = auth()->check() ? (auth()->user()->settings['menu_position'] ?? '') : '';
     $menuPosition = $userMenuPosition ?: ($currentChurch->menu_position ?? 'left');
 @endphp
@@ -110,7 +111,7 @@
    Clean, professional look with blue accent
    Glass effects + gradient blobs in dark mode
    ======================================== */
-@if($designTheme === '' || $designTheme === 'classic' || $designTheme === null)
+@if($designTheme === 'classic')
     /* --- Light mode --- */
     body {
         background-color: #f8fafc;

@@ -397,7 +397,7 @@ class SettingsController extends Controller
     public function updateDesignTheme(Request $request)
     {
         $validated = $request->validate([
-            'design_theme' => 'required|string|in:modern,minimal,brutalist,glass,neumorphism,corporate,playful,ocean,sunset',
+            'design_theme' => 'required|string|in:classic,modern,glass,corporate,ocean,sunset',
         ]);
 
         $church = $this->getCurrentChurch();

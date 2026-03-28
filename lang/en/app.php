@@ -6345,6 +6345,9 @@ return [
     'confirm_new_password' => 'Confirm new password',
     'password_changed' => 'Password changed successfully',
     'current_password_incorrect' => 'Current password is incorrect',
+    'set_password' => 'Set password',
+    'set_password_desc' => 'You signed in via Google. Set a password to also be able to log in with email and password.',
+    'forgot_password_link' => 'Forgot password?',
 
     'show_list' => 'Show list',
     'show_more' => 'Show more',

@@ -6177,6 +6177,9 @@ return [
     'confirm_new_password' => 'Підтвердіть новий пароль',
     'password_changed' => 'Пароль успішно змінено',
     'current_password_incorrect' => 'Поточний пароль невірний',
+    'set_password' => 'Встановити пароль',
+    'set_password_desc' => 'Ви увійшли через Google. Встановіть пароль, щоб також мати можливість входити за email та паролем.',
+    'forgot_password_link' => 'Забули пароль?',
 
     'show_list' => 'Показати список',
     'show_more' => 'Показати більше',

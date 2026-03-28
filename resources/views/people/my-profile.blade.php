@@ -663,9 +663,13 @@
             </div>
 
             <!-- Theme Settings -->
+            @php
+                $effectiveTheme = auth()->user()->settings['design_theme'] ?? ($currentChurch->design_theme ?? 'classic');
+                if ($effectiveTheme === '' || $effectiveTheme === null) $effectiveTheme = 'classic';
+            @endphp
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700"
                  x-data="{
-                     currentTheme: '{{ auth()->user()->settings['design_theme'] ?? '' }}',
+                     currentTheme: '{{ $effectiveTheme }}',
                      saving: false,
                      async setTheme(theme) {
                          this.saving = true;
@@ -698,7 +702,7 @@
                 <div class="p-6">
                     @php
                         $themes = [
-                            ['id' => '', 'name' => __('app.theme_classic'), 'desc' => __('app.theme_classic_desc'), 'colors' => ['#f8fafc', '#dbeafe', '#3b82f6']],
+                            ['id' => 'classic', 'name' => __('app.theme_classic'), 'desc' => __('app.theme_classic_desc'), 'colors' => ['#f8fafc', '#dbeafe', '#3b82f6']],
                             ['id' => 'modern', 'name' => __('app.theme_morning'), 'desc' => __('app.theme_morning_desc'), 'colors' => ['#fce7f3', '#fed7aa', '#fef3c7']],
                             ['id' => 'glass', 'name' => __('app.theme_evening'), 'desc' => __('app.theme_evening_desc'), 'colors' => ['#1e1b4b', '#172554', '#fbbf24']],
                             ['id' => 'corporate', 'name' => __('app.theme_nature'), 'desc' => __('app.theme_nature_desc'), 'colors' => ['#ecfdf5', '#d1fae5', '#10b981']],
@@ -778,17 +782,24 @@
             </div>
 
             <!-- Change Password -->
+            @php $hasPassword = auth()->user()->password_set_at !== null; @endphp
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden"
                  x-data="{
                      current_password: '',
                      new_password: '',
                      new_password_confirmation: '',
                      saving: false,
+                     hasPassword: {{ $hasPassword ? 'true' : 'false' }},
                      showCurrent: false,
                      showNew: false,
                      async changePassword() {
                          this.saving = true;
                          try {
+                             const body = {
+                                 new_password: this.new_password,
+                                 new_password_confirmation: this.new_password_confirmation
+                             };
+                             if (this.hasPassword) body.current_password = this.current_password;
                              const response = await fetch('{{ route('my-profile.password') }}', {
                                  method: 'PUT',
                                  headers: {
@@ -796,11 +807,7 @@
                                      'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
                                      'Accept': 'application/json'
                                  },
-                                 body: JSON.stringify({
-                                     current_password: this.current_password,
-                                     new_password: this.new_password,
-                                     new_password_confirmation: this.new_password_confirmation
-                                 })
+                                 body: JSON.stringify(body)
                              });
                              const data = await response.json();
                              if (response.ok) {
@@ -808,6 +815,7 @@
                                  this.current_password = '';
                                  this.new_password = '';
                                  this.new_password_confirmation = '';
+                                 this.hasPassword = true;
                              } else {
                                  const errors = data.errors ? Object.values(data.errors).flat().join(', ') : (data.message || '{{ __('app.error_occurred') }}');
                                  showToast('error', errors);
@@ -823,21 +831,27 @@
                         <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                         </svg>
-                        {{ __('app.change_password') }}
+                        <span x-text="hasPassword ? '{{ __('app.change_password') }}' : '{{ __('app.set_password') }}'"></span>
                     </h2>
+                    <template x-if="!hasPassword">
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('app.set_password_desc') }}</p>
+                    </template>
                 </div>
                 <div class="p-6 space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.current_password') }}</label>
-                        <div class="relative">
-                            <input :type="showCurrent ? 'text' : 'password'" x-model="current_password"
-                                   class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white pr-10">
-                            <button type="button" @click="showCurrent = !showCurrent" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                                <svg x-show="!showCurrent" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                <svg x-show="showCurrent" x-cloak class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/></svg>
-                            </button>
+                    <template x-if="hasPassword">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.current_password') }}</label>
+                            <div class="relative">
+                                <input :type="showCurrent ? 'text' : 'password'" x-model="current_password"
+                                       class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white pr-10">
+                                <button type="button" @click="showCurrent = !showCurrent" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                                    <svg x-show="!showCurrent" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                    <svg x-show="showCurrent" x-cloak class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/></svg>
+                                </button>
+                            </div>
+                            <a href="{{ route('password.request') }}" class="mt-1 inline-block text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300">{{ __('app.forgot_password_link') }}</a>
                         </div>
-                    </div>
+                    </template>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('app.new_password') }}</label>
                         <div class="relative">
@@ -854,10 +868,10 @@
                         <input type="password" x-model="new_password_confirmation"
                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
                     </div>
-                    <button @click="changePassword()" :disabled="saving || !current_password || !new_password || !new_password_confirmation"
+                    <button @click="changePassword()" :disabled="saving || (hasPassword && !current_password) || !new_password || !new_password_confirmation"
                             class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                         <svg x-show="saving" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/></svg>
-                        <span x-text="saving ? '{{ __('app.saving') }}' : '{{ __('app.change_password') }}'"></span>
+                        <span x-text="saving ? '{{ __('app.saving') }}' : (hasPassword ? '{{ __('app.change_password') }}' : '{{ __('app.set_password') }}')"></span>
                     </button>
                 </div>
             </div>
