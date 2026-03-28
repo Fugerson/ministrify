@@ -27,8 +27,14 @@ class Recaptcha implements ValidationRule
             return;
         }
 
-        // Skip if no token provided (recaptcha script might not have loaded)
+        // Reject if no token provided in production (bot likely skipped JS)
         if (empty($value)) {
+            Log::channel('security')->info('reCAPTCHA token missing', [
+                'action' => $this->action,
+                'ip' => request()->ip(),
+            ]);
+            $fail('Перевірку безпеки не пройдено. Увімкніть JavaScript та спробуйте ще раз.');
+
             return;
         }
 
