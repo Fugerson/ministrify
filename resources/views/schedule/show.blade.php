@@ -478,14 +478,14 @@
                 </div>
 
                 <div>
-                <div class="overflow-x-auto" style="min-height: 300px;">
+                <div style="min-height: 300px;">
                     <table class="w-full text-sm">
                         <thead class="bg-gray-50 dark:bg-gray-700/50 text-[10px] uppercase text-gray-500 dark:text-gray-400 sticky top-0 z-10">
                             <tr>
                                 <th class="px-0.5 py-2 w-6"></th>
                                 <th class="px-1 sm:px-2 py-2 text-left whitespace-nowrap">{{ __('app.schedule_time_col') }}</th>
                                 <th class="px-1 sm:px-2 py-2 text-left">{{ __('app.schedule_what_happens') }}</th>
-                                <th class="px-1 sm:px-2 py-2 text-left whitespace-nowrap">{{ __('app.schedule_responsible') }}</th>
+                                <th class="px-1 sm:px-2 py-2 text-left whitespace-nowrap hidden sm:table-cell">{{ __('app.schedule_responsible') }}</th>
                                 <th class="px-1 sm:px-2 py-2 text-left hidden sm:table-cell">{{ __('app.schedule_comments') }}</th>
                                 <th class="px-1 py-2 w-8"></th>
                             </tr>
@@ -601,7 +601,7 @@
                                         $declinedCount = count(array_filter($existingPeople, fn($p) => ($p['status'] ?? null) === 'declined'));
                                         $notAskedCount = count(array_filter($existingPeople, fn($p) => ($p['status'] ?? null) === null && $p['hasTelegram']));
                                     @endphp
-                                    <td class="px-1 sm:px-1.5 py-1.5 border-r border-gray-200 dark:border-gray-700 align-top transition-colors overflow-hidden"
+                                    <td class="px-1 sm:px-1.5 py-1.5 border-r border-gray-200 dark:border-gray-700 align-top transition-colors overflow-hidden hidden sm:table-cell"
                                         data-plan-item-id="{{ $item->id }}"
                                         x-data="responsibleEditor({{ $item->id }}, {{ json_encode($existingPeople) }})"
                                         @dragover.prevent
