@@ -293,6 +293,13 @@ Route::middleware(['auth', 'super_admin', 'throttle:30,1'])->prefix('system-admi
     Route::patch('tasks/{task}/status', [SystemAdminController::class, 'updateTaskStatus'])->name('tasks.update-status');
     Route::delete('tasks/{task}', [SystemAdminController::class, 'destroyTask'])->name('tasks.destroy');
 
+    // Error Tracker
+    Route::get('errors', [SystemAdminController::class, 'errorTracker'])->name('errors.index');
+    Route::get('errors/{errorLog}', [SystemAdminController::class, 'errorTrackerShow'])->name('errors.show');
+    Route::patch('errors/{errorLog}/status', [SystemAdminController::class, 'errorTrackerUpdateStatus'])->name('errors.update-status');
+    Route::delete('errors/{errorLog}', [SystemAdminController::class, 'errorTrackerDestroy'])->name('errors.destroy');
+    Route::post('errors/clear', [SystemAdminController::class, 'errorTrackerClear'])->name('errors.clear');
+
     // Telegram messages log
     Route::get('telegram-log', [SystemAdminController::class, 'telegramLog'])->name('telegram-log');
 

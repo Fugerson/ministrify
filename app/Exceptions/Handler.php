@@ -2,6 +2,7 @@
 
 namespace App\Exceptions;
 
+use App\Models\ErrorLog;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Routing\Exceptions\InvalidSignatureException;
 use Illuminate\Session\TokenMismatchException;
@@ -21,6 +22,7 @@ class Handler extends ExceptionHandler
     {
         $this->reportable(function (Throwable $e) {
             if (app()->environment('production')) {
+                $this->saveErrorToDatabase($e);
                 $this->sendErrorToTelegram($e);
             }
         });
@@ -46,6 +48,46 @@ class Handler extends ExceptionHandler
                 'message' => __('messages.link_invalid_or_expired'),
             ], 403);
         });
+    }
+
+    protected function saveErrorToDatabase(Throwable $e): void
+    {
+        try {
+            $hash = md5($e->getFile() . $e->getLine() . $e->getMessage());
+
+            $existing = ErrorLog::where('hash', $hash)
+                ->where('status', '!=', 'resolved')
+                ->first();
+
+            if ($existing) {
+                $existing->update([
+                    'occurrences' => $existing->occurrences + 1,
+                    'last_seen_at' => now(),
+                    'url' => mb_substr(request()?->fullUrl() ?? 'console', 0, 2048),
+                    'user_id' => auth()->id(),
+                    'ip' => request()?->ip(),
+                ]);
+            } else {
+                ErrorLog::create([
+                    'hash' => $hash,
+                    'message' => mb_substr($e->getMessage(), 0, 5000),
+                    'exception_class' => get_class($e),
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine(),
+                    'trace' => mb_substr($e->getTraceAsString(), 0, 10000),
+                    'url' => mb_substr(request()?->fullUrl() ?? 'console', 0, 2048),
+                    'method' => request()?->method(),
+                    'user_id' => auth()->id(),
+                    'ip' => request()?->ip(),
+                    'user_agent' => mb_substr(request()?->userAgent() ?? '', 0, 512),
+                    'status' => 'unresolved',
+                    'first_seen_at' => now(),
+                    'last_seen_at' => now(),
+                ]);
+            }
+        } catch (\Exception $ex) {
+            // Don't let error tracking cause more errors
+        }
     }
 
     protected function sendErrorToTelegram(Throwable $e): void

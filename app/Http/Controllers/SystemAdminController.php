@@ -6,6 +6,7 @@ use App\Mail\SupportTicketReply;
 use App\Models\AdminTask;
 use App\Models\AuditLog;
 use App\Models\Church;
+use App\Models\ErrorLog;
 use App\Models\ChurchRole;
 use App\Models\Event;
 use App\Models\PageVisit;
@@ -1359,5 +1360,100 @@ class SystemAdminController extends Controller
 
         return redirect()->route('system.tasks.index')
             ->with('success', 'Задачу видалено.');
+    }
+
+    // ==================== Error Tracker ====================
+
+    public function errorTracker(Request $request)
+    {
+        $query = ErrorLog::query();
+
+        if ($status = $request->get('status')) {
+            $query->where('status', $status);
+        } else {
+            $query->where('status', 'unresolved');
+        }
+
+        if ($search = $request->get('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('message', 'like', "%{$search}%")
+                    ->orWhere('file', 'like', "%{$search}%")
+                    ->orWhere('url', 'like', "%{$search}%")
+                    ->orWhere('exception_class', 'like', "%{$search}%");
+            });
+        }
+
+        $errors = $query->orderByDesc('last_seen_at')->paginate(25)->withQueryString();
+
+        // Stats
+        $totalUnresolved = ErrorLog::unresolved()->count();
+        $totalToday = ErrorLog::where('last_seen_at', '>=', today())->count();
+        $totalOccurrencesToday = ErrorLog::where('last_seen_at', '>=', today())->sum('occurrences');
+
+        // Chart data — errors per day for last 30 days
+        $chartData = ErrorLog::select(
+                DB::raw('DATE(last_seen_at) as date'),
+                DB::raw('COUNT(*) as unique_errors'),
+                DB::raw('SUM(occurrences) as total_occurrences')
+            )
+            ->where('last_seen_at', '>=', now()->subDays(30))
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get();
+
+        $days = collect();
+        for ($i = 29; $i >= 0; $i--) {
+            $day = now()->subDays($i)->format('Y-m-d');
+            $found = $chartData->firstWhere('date', $day);
+            $days->push([
+                'date' => now()->subDays($i)->format('d.m'),
+                'unique' => $found ? $found->unique_errors : 0,
+                'total' => $found ? $found->total_occurrences : 0,
+            ]);
+        }
+
+        // Top errors
+        $topErrors = ErrorLog::unresolved()
+            ->orderByDesc('occurrences')
+            ->limit(5)
+            ->get();
+
+        return view('system-admin.error-tracker.index', compact(
+            'errors', 'totalUnresolved', 'totalToday', 'totalOccurrencesToday',
+            'days', 'topErrors', 'status', 'search'
+        ));
+    }
+
+    public function errorTrackerShow(ErrorLog $errorLog)
+    {
+        return view('system-admin.error-tracker.show', compact('errorLog'));
+    }
+
+    public function errorTrackerUpdateStatus(Request $request, ErrorLog $errorLog)
+    {
+        $request->validate(['status' => 'required|in:unresolved,resolved,ignored']);
+        $errorLog->update(['status' => $request->status]);
+
+        return back()->with('success', 'Статус оновлено.');
+    }
+
+    public function errorTrackerDestroy(ErrorLog $errorLog)
+    {
+        $errorLog->delete();
+
+        return redirect()->route('system.errors.index')->with('success', 'Помилку видалено.');
+    }
+
+    public function errorTrackerClear(Request $request)
+    {
+        $request->validate(['action' => 'required|in:resolved,all']);
+
+        if ($request->action === 'resolved') {
+            ErrorLog::resolved()->delete();
+        } else {
+            ErrorLog::truncate();
+        }
+
+        return redirect()->route('system.errors.index')->with('success', 'Очищено.');
     }
 }
