@@ -68,7 +68,7 @@ class EventController extends Controller
         $view = $request->get('view', 'month');
         $year = (int) $request->get('year', now()->year);
         $month = (int) $request->get('month', now()->month);
-        $week = $request->get('week');
+        $week = $request->get('week') ? (int) $request->get('week') : null;
 
         $gridStart = null;
         $gridEnd = null;
