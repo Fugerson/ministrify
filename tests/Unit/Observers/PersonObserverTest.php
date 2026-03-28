@@ -19,52 +19,28 @@ class PersonObserverTest extends TestCase
 
     private $cacheMock;
 
+    private $followupMock;
+
     protected function setUp(): void
     {
         parent::setUp();
         $this->church = Church::factory()->create();
         $this->cacheMock = Mockery::mock(DashboardCacheService::class);
         $this->cacheMock->shouldReceive('forgetPeopleRelated')->zeroOrMoreTimes();
+        $this->followupMock = Mockery::mock(VisitorFollowupService::class);
     }
 
-    public function test_created_triggers_followup_for_guest(): void
+    public function test_created_clears_dashboard_cache(): void
     {
-        $mock = Mockery::mock(VisitorFollowupService::class);
-        $mock->shouldReceive('createFollowupTasks')
+        $cacheMock = Mockery::mock(DashboardCacheService::class);
+        $cacheMock->shouldReceive('forgetPeopleRelated')
             ->once()
-            ->with(Mockery::on(fn ($person) => $person->membership_status === Person::STATUS_GUEST));
+            ->with($this->church->id);
 
-        $observer = new PersonObserver($mock, $this->cacheMock);
-
-        $person = Person::factory()->forChurch($this->church)->make([
-            'membership_status' => Person::STATUS_GUEST,
-        ]);
-        $person->save();
-
-        // Call observer manually since we want to test with our mock
-        Person::withoutEvents(function () {
-            // Re-create to test observer logic
-        });
-
-        // Alternative: test via observer directly
-        $person2 = Person::factory()->forChurch($this->church)->make([
-            'membership_status' => Person::STATUS_GUEST,
-        ]);
-        $person2->save();
-        $observer->created($person2);
-
-        $this->assertTrue(true);
-    }
-
-    public function test_created_skips_followup_for_non_guest(): void
-    {
-        $mock = Mockery::mock(VisitorFollowupService::class);
-        $mock->shouldNotReceive('createFollowupTasks');
-
-        $observer = new PersonObserver($mock, $this->cacheMock);
+        $observer = new PersonObserver($this->followupMock, $cacheMock);
 
         $person = Person::factory()->forChurch($this->church)->create([
-            'membership_status' => 'member',
+            'membership_status' => Person::STATUS_GUEST,
         ]);
 
         $observer->created($person);
@@ -72,11 +48,28 @@ class PersonObserverTest extends TestCase
         $this->assertTrue(true);
     }
 
-    public function test_updated_detects_membership_status_change(): void
+    public function test_created_skips_cache_clear_without_church(): void
     {
-        $mock = Mockery::mock(VisitorFollowupService::class);
-        $mock->shouldReceive('createFollowupTasks')->zeroOrMoreTimes();
-        $observer = new PersonObserver($mock, $this->cacheMock);
+        $cacheMock = Mockery::mock(DashboardCacheService::class);
+        $cacheMock->shouldNotReceive('forgetPeopleRelated');
+
+        $observer = new PersonObserver($this->followupMock, $cacheMock);
+
+        $person = new Person(['church_id' => null]);
+
+        $observer->created($person);
+
+        $this->assertTrue(true);
+    }
+
+    public function test_updated_clears_dashboard_cache(): void
+    {
+        $cacheMock = Mockery::mock(DashboardCacheService::class);
+        $cacheMock->shouldReceive('forgetPeopleRelated')
+            ->once()
+            ->with($this->church->id);
+
+        $observer = new PersonObserver($this->followupMock, $cacheMock);
 
         $person = Person::factory()->forChurch($this->church)->create([
             'membership_status' => Person::STATUS_GUEST,
@@ -85,22 +78,22 @@ class PersonObserverTest extends TestCase
         $person->membership_status = 'member';
         $person->save();
 
-        // The observer doesn't do anything specific on status change yet,
-        // just verify it handles it without error
         $observer->updated($person);
 
-        $this->assertTrue($person->isDirty('membership_status') || $person->wasChanged('membership_status'));
+        $this->assertTrue(true);
     }
 
-    public function test_deleted_handles_cleanup(): void
+    public function test_deleted_clears_dashboard_cache(): void
     {
-        $mock = Mockery::mock(VisitorFollowupService::class);
-        $mock->shouldReceive('createFollowupTasks')->zeroOrMoreTimes();
-        $observer = new PersonObserver($mock, $this->cacheMock);
+        $cacheMock = Mockery::mock(DashboardCacheService::class);
+        $cacheMock->shouldReceive('forgetPeopleRelated')
+            ->once()
+            ->with($this->church->id);
+
+        $observer = new PersonObserver($this->followupMock, $cacheMock);
 
         $person = Person::factory()->forChurch($this->church)->create();
 
-        // Should not throw any exception
         $observer->deleted($person);
 
         $this->assertTrue(true);

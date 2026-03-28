@@ -81,10 +81,8 @@ class VisitorFollowupServiceTest extends TestCase
 
         $this->service->createFollowupTasks($person);
 
-        // Should create follow-up task + call task = 2 per person
-        // But the guest() factory may trigger createFollowupTasks via observer,
-        // so we may get double. Count all cards created.
-        $this->assertEquals(4, BoardCard::where('column_id', $column->id)->count());
+        // Should create follow-up task + call task = 2
+        $this->assertEquals(2, BoardCard::where('column_id', $column->id)->count());
     }
 
     public function test_no_call_task_without_phone(): void
@@ -96,7 +94,7 @@ class VisitorFollowupServiceTest extends TestCase
 
         $this->service->createFollowupTasks($person);
 
-        $this->assertEquals(2, BoardCard::where('column_id', $column->id)->count());
+        $this->assertEquals(1, BoardCard::where('column_id', $column->id)->count());
     }
 
     public function test_does_nothing_without_board(): void
