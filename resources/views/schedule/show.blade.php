@@ -479,7 +479,7 @@
 
                 <div>
                 <div style="min-height: 300px;">
-                    <table class="w-full text-sm">
+                    <table class="w-full text-[11px] sm:text-sm">
                         <thead class="bg-gray-50 dark:bg-gray-700/50 text-[10px] uppercase text-gray-500 dark:text-gray-400 sticky top-0 z-10">
                             <tr>
                                 <th class="px-0.5 py-2 w-6 hidden sm:table-cell"></th>
@@ -503,11 +503,11 @@
                                         </svg>
                                     </td>
                                     {{-- Час --}}
-                                    <td class="px-1 sm:px-1.5 py-1.5 border-r border-gray-200 dark:border-gray-700">
-                                        <input type="time"
+                                    <td class="px-0.5 sm:px-1.5 py-1 sm:py-1.5 border-r border-gray-200 dark:border-gray-700 whitespace-nowrap">
+                                        <input type="text" pattern="[0-9]{2}:[0-9]{2}" inputmode="numeric" maxlength="5"
                                                value="{{ $item->start_time ? \Carbon\Carbon::parse($item->start_time)->format('H:i') : '' }}"
                                                @change="updateField({{ $item->id }}, 'start_time', $event.target.value)"
-                                               class="w-[3rem] sm:min-w-[4.5rem] px-0.5 sm:px-1 py-0.5 sm:py-1 text-[10px] sm:text-xs font-bold text-primary-800 dark:text-white bg-primary-50 dark:bg-primary-800/50 border border-primary-200 dark:border-primary-600 rounded focus:ring-1 focus:ring-primary-500 focus:border-primary-500 cursor-pointer">
+                                               class="w-10 sm:w-16 px-0.5 sm:px-1 py-0.5 sm:py-1 text-[10px] sm:text-xs font-bold text-center text-primary-800 dark:text-white bg-primary-50 dark:bg-primary-800/50 border border-primary-200 dark:border-primary-600 rounded focus:ring-1 focus:ring-primary-500 focus:border-primary-500 cursor-pointer">
                                     </td>
                                     {{-- Що відбувається - єдиний підхід з інлайн посиланнями на пісні --}}
                                     @php
