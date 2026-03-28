@@ -479,15 +479,15 @@
 
                 <div>
                 <div class="overflow-x-auto" style="min-height: 300px;">
-                    <table class="w-full text-sm" style="table-layout: fixed;">
+                    <table class="w-full text-sm">
                         <thead class="bg-gray-50 dark:bg-gray-700/50 text-[10px] uppercase text-gray-500 dark:text-gray-400 sticky top-0 z-10">
                             <tr>
-                                <th class="px-0.5 py-2" style="width: 24px;"></th>
-                                <th class="px-1 sm:px-2 py-2 text-left" style="width: 60px;">{{ __('app.schedule_time_col') }}</th>
-                                <th class="px-1 sm:px-2 py-2 text-left" style="width: 20%;">{{ __('app.schedule_what_happens') }}</th>
-                                <th class="px-1 sm:px-2 py-2 text-left" style="width: 15%;">{{ __('app.schedule_responsible') }}</th>
-                                <th class="px-1 sm:px-2 py-2 text-left hidden sm:table-cell" style="width: 40%;">{{ __('app.schedule_comments') }}</th>
-                                <th class="px-1 py-2" style="width: 32px;"></th>
+                                <th class="px-0.5 py-2 w-6"></th>
+                                <th class="px-1 sm:px-2 py-2 text-left whitespace-nowrap">{{ __('app.schedule_time_col') }}</th>
+                                <th class="px-1 sm:px-2 py-2 text-left">{{ __('app.schedule_what_happens') }}</th>
+                                <th class="px-1 sm:px-2 py-2 text-left whitespace-nowrap">{{ __('app.schedule_responsible') }}</th>
+                                <th class="px-1 sm:px-2 py-2 text-left hidden sm:table-cell">{{ __('app.schedule_comments') }}</th>
+                                <th class="px-1 py-2 w-8"></th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -601,7 +601,7 @@
                                         $declinedCount = count(array_filter($existingPeople, fn($p) => ($p['status'] ?? null) === 'declined'));
                                         $notAskedCount = count(array_filter($existingPeople, fn($p) => ($p['status'] ?? null) === null && $p['hasTelegram']));
                                     @endphp
-                                    <td class="px-1 sm:px-1.5 py-1.5 border-r border-gray-200 dark:border-gray-700 align-top transition-colors"
+                                    <td class="px-1 sm:px-1.5 py-1.5 border-r border-gray-200 dark:border-gray-700 align-top transition-colors overflow-hidden"
                                         data-plan-item-id="{{ $item->id }}"
                                         x-data="responsibleEditor({{ $item->id }}, {{ json_encode($existingPeople) }})"
                                         @dragover.prevent
@@ -611,7 +611,7 @@
                                         <div class="flex flex-col gap-1">
                                             {{-- Selected people as tags --}}
                                             <template x-for="(person, index) in people" :key="index">
-                                                <span class="group/tag inline-flex items-center gap-0.5 text-[11px] leading-tight px-1.5 py-0.5 rounded" :class="getTagClass(person.status)">
+                                                <span class="group/tag inline-flex items-center gap-0.5 text-[11px] leading-tight px-1.5 py-0.5 rounded max-w-full" :class="getTagClass(person.status)">
                                                     {{-- Status icon --}}
                                                     <template x-if="person.status === 'confirmed'">
                                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -629,7 +629,7 @@
                                                         </svg>
                                                     </template>
 
-                                                    <span x-text="person.name"></span>
+                                                    <span x-text="person.name" class="truncate"></span>
 
                                                     {{-- Запитати button (show if not asked or declined) --}}
                                                     <button type="button"
